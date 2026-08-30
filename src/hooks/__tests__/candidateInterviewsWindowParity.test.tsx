@@ -106,7 +106,7 @@ describe('background preload of candidate interviews uses the canonical fetcher'
     vi.clearAllMocks();
   });
 
-  it('anropar fetchCandidateInterviewsForUser och fyller ["candidate-interviews", userId]', async () => {
+  it('gör ingen egen intervjuhämtning — useCandidateInterviews äger datan', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     render(
@@ -117,8 +117,10 @@ describe('background preload of candidate interviews uses the canonical fetcher'
 
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(fetchCandidateInterviewsForUser).toHaveBeenCalledWith(USER_ID);
-    expect(queryClient.getQueryData(['candidate-interviews', USER_ID])).toEqual(canonicalInterviews);
+    // Ägarskap: useCandidateInterviews är enda ägaren av intervjudatan.
+    // BackgroundSync varken hämtar eller skriver den kanoniska cachen.
+    expect(fetchCandidateInterviewsForUser).not.toHaveBeenCalled();
+    expect(queryClient.getQueryData(['candidate-interviews', USER_ID])).toBeUndefined();
 
     // Ingen egen interviews-query — annars kan tidsfönstret divergera.
     const interviewQueries = fromSpy.mock.calls.filter(([table]) => table === 'interviews');

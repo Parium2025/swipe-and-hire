@@ -1,53 +1,51 @@
 /**
- * Regression: AuthProvider realtime role gating.
+ * RED → GREEN: AuthProvider är enda globala ägaren av jobbsökarens
+ * användarfiltrerade saved_jobs/job_applications-realtime.
  *
- * Employer-only realtime channels (auth-job-count, auth-employer-applications,
- * auth-reviews, auth-my-candidates) must only be registered for users whose
- * resolved role is "employer". Jobseekers must only get their user-scoped
- * channels (auth-saved-jobs, auth-applications).
+ * Krav:
+ *  - job_seeker: exakt EN filtrerad saved-lyssnare och EN filtrerad apps-lyssnare
+ *  - en burst från båda koalesceras till EN invalidering av exakt
+ *    ['jobseeker-dashboard-stats', user.id] — aldrig den breda nyckeln
+ *  - gamla konto-A-callbacks är inerta efter kontobyte
+ *  - inga sådana jobbsökarlyssnare för annan roll
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, waitFor, cleanup } from '@testing-library/react';
+import { render, waitFor, cleanup, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// ---------------------------------------------------------------------------
-// Mutable per-test state (hoisted so module mocks can read it)
-// ---------------------------------------------------------------------------
+type Cb = (payload: unknown) => void;
+
 const h = vi.hoisted(() => ({
   currentRole: 'job_seeker' as 'job_seeker' | 'employer',
-  userId: 'user-under-test',
+  userId: 'jobseeker-1',
   channelNames: [] as string[],
   registrations: [] as Array<{
     channel: string;
-    event: string;
-    schema?: string;
     table?: string;
     filter?: string;
+    cb?: (payload: unknown) => void;
   }>,
 }));
 
-// ---------------------------------------------------------------------------
-// Narrow dependency mocks — record realtime, stub everything else
-// ---------------------------------------------------------------------------
 interface MockChannel {
   on: (
     event: string,
-    opts?: { schema?: string; table?: string; filter?: string }
+    opts?: { schema?: string; table?: string; filter?: string },
+    cb?: Cb,
   ) => MockChannel;
-  subscribe: () => MockChannel;
+  subscribe: (cb?: (status: string) => void) => MockChannel;
 }
 
 vi.mock('@/lib/realtimeChannel', () => ({
   createRealtimeChannel: (name: string) => {
     h.channelNames.push(name);
     const channel: MockChannel = {
-      on: (event, opts) => {
+      on: (_event, opts, cb) => {
         h.registrations.push({
           channel: name,
-          event,
-          schema: opts?.schema,
           table: opts?.table,
           filter: opts?.filter,
+          cb,
         });
         return channel;
       },
@@ -74,7 +72,7 @@ vi.mock('@/integrations/supabase/client', () => {
       single: () => Promise.resolve({ data: null, error: null }),
       then: (
         onF?: ((value: ListResult) => unknown) | null,
-        onR?: ((reason: unknown) => unknown) | null
+        onR?: ((reason: unknown) => unknown) | null,
       ) => Promise.resolve(listResult).then(onF ?? undefined, onR ?? undefined),
     };
     return q;
@@ -92,9 +90,7 @@ vi.mock('@/integrations/supabase/client', () => {
           },
           error: null,
         }),
-      onAuthStateChange: () => ({
-        data: { subscription: { unsubscribe: () => {} } },
-      }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
       signOut: () => Promise.resolve({ error: null }),
     },
     rpc: (name: string) => {
@@ -205,108 +201,122 @@ vi.mock('@/lib/companyLogoUrl', () => ({
   resolveCompanyLogoUrl: vi.fn(() => null),
 }));
 
-// Import AFTER mocks
 import { AuthProvider } from '@/hooks/useAuth';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-const renderAuthProvider = async () => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+const renderAuthProvider = async (client: QueryClient) => {
   render(
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <AuthProvider>
         <div />
       </AuthProvider>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
-  // Wait until the realtime effect for the signed-in user has run
-  await waitFor(
-    () => {
-      // Jobbsökare får saved/apps-kanaler; arbetsgivare får sina egna.
-      expect(h.channelNames).toContain(
-        h.currentRole === 'employer'
-          ? `auth-reviews-${h.userId}`
-          : `auth-saved-jobs-${h.userId}`
-      );
-    },
-    { timeout: 5000 }
-  );
+  if (h.currentRole === 'job_seeker') {
+    await waitFor(() => expect(h.channelNames).toContain(`auth-saved-jobs-${h.userId}`), {
+      timeout: 5000,
+    });
+  } else {
+    await waitFor(() => expect(h.channelNames).toContain(`auth-reviews-${h.userId}`), {
+      timeout: 5000,
+    });
+  }
 };
 
-describe('AuthProvider realtime role gating', () => {
+const newClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+const jobseekerRegs = (userId: string) =>
+  h.registrations.filter(
+    (r) =>
+      (r.table === 'saved_jobs' && r.filter === `user_id=eq.${userId}`) ||
+      (r.table === 'job_applications' && r.filter === `applicant_id=eq.${userId}`),
+  );
+
+describe('AuthProvider — jobbsökarens saved/app-lyssnarägarskap', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
     h.channelNames.length = 0;
     h.registrations.length = 0;
-  });
-
-  afterEach(() => {
-    cleanup();
-  });
-
-  it('jobseeker: employer-only channels are NOT created, user-scoped channels are', async () => {
     h.currentRole = 'job_seeker';
     h.userId = 'jobseeker-1';
-    await renderAuthProvider();
-
-    // Employer-only channels must not exist for a jobseeker
-    expect(h.channelNames).not.toContain(`auth-job-count-${h.userId}`);
-    expect(h.channelNames).not.toContain(`auth-employer-applications-${h.userId}`);
-    expect(h.channelNames).not.toContain(`auth-reviews-${h.userId}`);
-    expect(h.channelNames).not.toContain(`auth-my-candidates-${h.userId}`);
-
-    // User-scoped jobseeker channels must exist
-    expect(h.channelNames).toContain(`auth-saved-jobs-${h.userId}`);
-    expect(h.channelNames).toContain(`auth-applications-${h.userId}`);
-
-    const savedReg = h.registrations.find(
-      (r) => r.channel === `auth-saved-jobs-${h.userId}` && r.table === 'saved_jobs'
-    );
-    expect(savedReg?.filter).toBe(`user_id=eq.${h.userId}`);
-
-    const appsReg = h.registrations.find(
-      (r) => r.channel === `auth-applications-${h.userId}` && r.table === 'job_applications'
-    );
-    expect(appsReg?.filter).toBe(`applicant_id=eq.${h.userId}`);
   });
 
-  it('employer: all four employer-only channels ARE created', async () => {
+  afterEach(() => cleanup());
+
+  it('job_seeker: exakt en filtrerad saved-lyssnare och en filtrerad apps-lyssnare', async () => {
+    await renderAuthProvider(newClient());
+
+    const saved = h.registrations.filter((r) => r.table === 'saved_jobs');
+    const apps = h.registrations.filter((r) => r.table === 'job_applications');
+    expect(saved).toHaveLength(1);
+    expect(saved[0].filter).toBe('user_id=eq.jobseeker-1');
+    expect(apps).toHaveLength(1);
+    expect(apps[0].filter).toBe('applicant_id=eq.jobseeker-1');
+  });
+
+  it('burst från båda lyssnarna koalesceras till EN user-scopad invalidering', async () => {
+    const client = newClient();
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    await renderAuthProvider(client);
+    spy.mockClear();
+
+    const regs = jobseekerRegs('jobseeker-1');
+    expect(regs).toHaveLength(2);
+
+    await act(async () => {
+      regs.forEach((r) => r.cb?.({}));
+      regs.forEach((r) => r.cb?.({}));
+      await new Promise((res) => setTimeout(res, 2500));
+    });
+
+    const statsCalls = spy.mock.calls.filter((c) => {
+      const key = (c[0] as { queryKey?: unknown[] })?.queryKey;
+      return Array.isArray(key) && key[0] === 'jobseeker-dashboard-stats';
+    });
+    expect(statsCalls).toHaveLength(1);
+    expect((statsCalls[0][0] as { queryKey: unknown[] }).queryKey).toEqual([
+      'jobseeker-dashboard-stats',
+      'jobseeker-1',
+    ]);
+  });
+
+  it('gamla konto-A-callbacks invaliderar inte efter kontobyte till B', async () => {
+    await renderAuthProvider(newClient());
+    const staleCallbacks = jobseekerRegs('jobseeker-1').map((r) => r.cb);
+    expect(staleCallbacks).toHaveLength(2);
+
+    cleanup();
+    h.channelNames.length = 0;
+    h.registrations.length = 0;
+    h.userId = 'jobseeker-2';
+
+    const clientB = newClient();
+    await renderAuthProvider(clientB);
+    const spyB = vi.spyOn(clientB, 'invalidateQueries');
+
+    await act(async () => {
+      staleCallbacks.forEach((cb) => cb?.({}));
+      await new Promise((res) => setTimeout(res, 2500));
+    });
+
+    const statsCalls = spyB.mock.calls.filter((c) => {
+      const key = (c[0] as { queryKey?: unknown[] })?.queryKey;
+      return Array.isArray(key) && key[0] === 'jobseeker-dashboard-stats';
+    });
+    expect(statsCalls).toHaveLength(0);
+  });
+
+  it('employer: inga jobbsökarlyssnare för saved_jobs/job_applications-filter', async () => {
     h.currentRole = 'employer';
     h.userId = 'employer-1';
-    await renderAuthProvider();
+    await renderAuthProvider(newClient());
 
-    expect(h.channelNames).toContain(`auth-job-count-${h.userId}`);
-    expect(h.channelNames).toContain(`auth-employer-applications-${h.userId}`);
-    expect(h.channelNames).toContain(`auth-reviews-${h.userId}`);
-    expect(h.channelNames).toContain(`auth-my-candidates-${h.userId}`);
-
-    // Jobbsökarens saved/app-kanaler ägs bara av job_seeker-rollen.
-    expect(h.channelNames).not.toContain(`auth-saved-jobs-${h.userId}`);
-    expect(h.channelNames).not.toContain(`auth-applications-${h.userId}`);
-  });
-
-  it('jobseeker: auth-applications has exactly one job_applications registration, user-filtered', async () => {
-    // job_applications is REPLICA IDENTITY FULL, so the single applicant-filtered
-    // registration already covers DELETE payloads. A second unfiltered global
-    // DELETE registration is redundant 250k-user fanout and must not exist.
-    h.currentRole = 'job_seeker';
-    h.userId = 'jobseeker-1';
-    await renderAuthProvider();
-
-    const appRegs = h.registrations.filter(
-      (r) => r.channel === `auth-applications-${h.userId}` && r.table === 'job_applications'
-    );
-
-    // Exactly one registration total on the channel for job_applications
-    expect(appRegs).toHaveLength(1);
-
-    // Every registration must carry the applicant filter — no unfiltered global fanout
-    for (const reg of appRegs) {
-      expect(reg.filter).toBe(`applicant_id=eq.${h.userId}`);
-    }
+    expect(h.channelNames).not.toContain('auth-saved-jobs-employer-1');
+    expect(h.registrations.filter((r) => r.table === 'saved_jobs')).toHaveLength(0);
+    expect(
+      h.registrations.filter(
+        (r) => r.table === 'job_applications' && r.filter === 'applicant_id=eq.employer-1',
+      ),
+    ).toHaveLength(0);
   });
 });
