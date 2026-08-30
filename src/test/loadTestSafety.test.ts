@@ -67,3 +67,42 @@ describe('load test safety validator', () => {
     expect(() => normalizeOrigin('')).toThrow(/invalid/i);
   });
 });
+
+describe('resolveLoadTestConnection', () => {
+  it('prefers explicit SUPABASE_URL over VITE_ fallback values', () => {
+    const result = resolveLoadTestConnection({
+      SUPABASE_URL: STAGING,
+      VITE_SUPABASE_URL: PROD,
+      SUPABASE_ANON_KEY: 'staging-anon',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'prod-anon',
+      VITE_SUPABASE_ANON_KEY: 'prod-anon-legacy',
+    });
+    expect(result.url).toBe(STAGING);
+    expect(result.anonKey).toBe('staging-anon');
+  });
+
+  it('falls back to VITE_ values only when explicit vars are missing', () => {
+    const result = resolveLoadTestConnection({
+      VITE_SUPABASE_URL: STAGING,
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'anon',
+    });
+    expect(result.url).toBe(STAGING);
+    expect(result.anonKey).toBe('anon');
+    const legacy = resolveLoadTestConnection({
+      VITE_SUPABASE_URL: STAGING,
+      VITE_SUPABASE_ANON_KEY: 'legacy-anon',
+    });
+    expect(legacy.anonKey).toBe('legacy-anon');
+  });
+
+  it('treats blank explicit vars as missing so fallbacks apply', () => {
+    const result = resolveLoadTestConnection({
+      SUPABASE_URL: '   ',
+      VITE_SUPABASE_URL: STAGING,
+      SUPABASE_ANON_KEY: '',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'anon',
+    });
+    expect(result.url).toBe(STAGING);
+    expect(result.anonKey).toBe('anon');
+  });
+});
