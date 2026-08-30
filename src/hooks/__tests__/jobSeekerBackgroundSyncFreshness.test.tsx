@@ -68,6 +68,12 @@ import {
 
 const CACHE_KEY = 'job_seeker_available_jobs_';
 
+
+// Modulglobal 2s-dedupe i hooken delas mellan tester i samma fil. Vi flyttar
+// klockan framåt mellan tester så varje test startar med ren dedupe.
+const realDateNow = Date.now.bind(Date);
+let nowOffset = 0;
+
 function Probe() {
   useJobSeekerBackgroundSync();
   return null;
@@ -102,6 +108,8 @@ describe('useJobSeekerBackgroundSync — ägarskap och cache-färskhet', () => {
   beforeEach(() => {
     localStorage.clear();
     h.reads.length = 0;
+    nowOffset += 60_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => realDateNow() + nowOffset);
     h.role = { role: 'job_seeker', user_id: 'js-1' };
     Object.defineProperty(window, 'requestIdleCallback', {
       value: (cb: IdleRequestCallback) => {
@@ -113,7 +121,10 @@ describe('useJobSeekerBackgroundSync — ägarskap och cache-färskhet', () => {
     });
   });
 
-  afterEach(() => cleanup());
+  afterEach(() => {
+    vi.mocked(Date.now).mockRestore?.();
+    cleanup();
+  });
 
   it('fail-closed: kvarhängande roll från annat konto ger noll reads', async () => {
     h.role = { role: 'job_seeker', user_id: 'js-OTHER' };

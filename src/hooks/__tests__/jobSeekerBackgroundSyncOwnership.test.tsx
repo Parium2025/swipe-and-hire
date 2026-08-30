@@ -92,6 +92,12 @@ vi.mock('@/hooks/useInterviews', () => ({
 
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 
+
+// Modulglobal 2s-dedupe i hooken delas mellan tester i samma fil. Vi flyttar
+// klockan framåt mellan tester så varje test startar med ren dedupe.
+const realDateNow = Date.now.bind(Date);
+let nowOffset = 0;
+
 function Probe() {
   useJobSeekerBackgroundSync();
   return null;
@@ -118,6 +124,8 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
   beforeEach(() => {
     localStorage.clear();
     h.registrations.length = 0;
+    nowOffset += 60_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => realDateNow() + nowOffset);
     h.readTables.length = 0;
     cachedWeather = null;
     preloadWeatherLocation.mockClear();
@@ -135,6 +143,7 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
   });
 
   afterEach(() => {
+    vi.mocked(Date.now).mockRestore?.();
     cleanup();
   });
 
