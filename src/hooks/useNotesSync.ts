@@ -126,6 +126,24 @@ function peekScoped(cachePrefix: string, userId: string): string {
   return storageGet(`${cachePrefix}_${userId}`) ?? '';
 }
 
+/** Immutable config for one committed (owner + cache scope + epoch) session. */
+function makeSaveConfig(owner: string | null, cachePrefix: string, epoch: number): SaveConfig | null {
+  return owner
+    ? {
+        owner,
+        epoch,
+        cacheKey: `${cachePrefix}_${owner}`,
+        pendingKey: `${cachePrefix}_${owner}__pending`,
+      }
+    : null;
+}
+
+/** Scope identity: owner AND cache scope. A change in either is a transition. */
+function scopeIdentity(cachePrefix: string, userId: string | null): string {
+  return `${cachePrefix}\u0000${userId ?? ''}`;
+}
+
+
 
 export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseNotesSyncOptions): NotesSyncResult {
   const { user } = useAuth();
@@ -140,22 +158,24 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const cacheKey = userId ? `${cachePrefix}_${userId}` : null;
   const pendingKey = userId ? `${cachePrefix}_${userId}__pending` : null;
 
-  // Content state is bound to the account that produced it, so a transition
-  // render can never expose the previous account's value.
-  const [contentState, setContentState] = useState<{ owner: string | null; value: string }>(() => {
-    if (!userId) return { owner: null, value: '' };
+  // Content state is bound to the session (owner + cache scope) that produced
+  // it, so a transition render can never expose the previous session's value.
+  const [contentState, setContentState] = useState<{ owner: string | null; scope: string; value: string }>(() => {
+    const scope = scopeIdentity(cachePrefix, userId);
+    if (!userId) return { owner: null, scope, value: '' };
     const pending = readPending(`${cachePrefix}_${userId}__pending`, userId);
     if (pending !== null) {
       hasLocalEditsRef.current = true;
       contentRef.current = pending;
-      return { owner: userId, value: pending };
+      return { owner: userId, scope, value: pending };
     }
     const clean = storageGet(`${cachePrefix}_${userId}`) ?? '';
     contentRef.current = clean;
     serverContentRef.current = clean;
-    return { owner: userId, value: clean };
+    return { owner: userId, scope, value: clean };
   });
   const content = contentState.value;
+
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -176,28 +196,34 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const ackSeqRef = useRef(0);
 
   /**
-   * Immutable, account-bound save configuration. It is installed ONLY in the
-   * commit phase (layout effect), never during render, and every scheduled
-   * operation carries the exact object it was created with. A timer or wake
-   * created under A therefore stays A-scoped and can never execute with B's
-   * owner/keys.
+   * Immutable session configuration (owner + cache scope + epoch). It is
+   * installed ONLY in the commit phase (layout effect), never during render,
+   * and every scheduled operation and exposed callback carries the exact
+   * object it was created with. A timer, wake or handle created in one session
+   * therefore stays bound to that session and can never execute with another
+   * owner/scope/epoch.
    */
-  const saveConfigRef = useRef<SaveConfig | null>(null);
+  const saveConfigRef = useRef<SaveConfig | null>(makeSaveConfig(userId, cachePrefix, 0));
+  const [committedConfig, setCommittedConfig] = useState<SaveConfig | null>(() => saveConfigRef.current);
 
-  /** True only when `cfg` still describes the committed identity and epoch. */
+  /** True only when `cfg` still describes the committed session. */
   const isCurrentConfig = useCallback(
     (cfg: SaveConfig | null): cfg is SaveConfig =>
       !!cfg && cfg.owner === committedUserRef.current && cfg.epoch === epochRef.current,
     []
   );
 
+  /** The committed scope identity — mutated only in the layout transition. */
+  const committedScopeRef = useRef<string>(scopeIdentity(cachePrefix, userId));
+
   /** Commit a content value only when its source still owns the committed
    *  identity AND epoch. Every caller passes the owner/epoch it captured. */
   const commitContent = useCallback((owner: string | null, epoch: number, next: string) => {
     if (owner !== committedUserRef.current) return;
     if (epoch !== epochRef.current) return;
-    setContentState({ owner, value: next });
+    setContentState({ owner, scope: committedScopeRef.current, value: next });
   }, []);
+
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
@@ -211,35 +237,23 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     };
   }, []);
 
-  // Account transition (null->uid, A->B, uid->null): reset all account-local
-  // state and hydrate ONLY the new user's pending/clean caches.
-  const previousUserIdRef = useRef<string | null | undefined>(undefined);
-  /** Builds the immutable config for the identity/epoch that is now committed. */
-  const installSaveConfig = useCallback(
-    (owner: string | null) => {
-      saveConfigRef.current = owner
-        ? {
-            owner,
-            epoch: epochRef.current,
-            cacheKey: `${cachePrefix}_${owner}`,
-            pendingKey: `${cachePrefix}_${owner}__pending`,
-          }
-        : null;
-    },
-    [cachePrefix]
-  );
+  // Session transition (null->uid, A->B, uid->null, A->logout->A, or the SAME
+  // user under a new cache scope): reset all session-local state and hydrate
+  // ONLY the new scope's pending/clean caches.
+  const previousScopeRef = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
-    if (previousUserIdRef.current === userId) return;
-    const isFirst = previousUserIdRef.current === undefined;
-    previousUserIdRef.current = userId;
-    if (isFirst) {
-      installSaveConfig(userId); // lazy initializer already hydrated the content
-      return;
-    }
+    const scope = scopeIdentity(cachePrefix, userId);
+    if (previousScopeRef.current === scope) return;
+    const isFirst = previousScopeRef.current === undefined;
+    previousScopeRef.current = scope;
+    if (isFirst) return; // lazy initializers already hydrated content + config
 
     epochRef.current += 1;
     committedUserRef.current = userId;
-    installSaveConfig(userId);
+    committedScopeRef.current = scope;
+    const cfg = makeSaveConfig(userId, cachePrefix, epochRef.current);
+    saveConfigRef.current = cfg;
+    setCommittedConfig(cfg);
     localRevRef.current += 1;
     ackSeqRef.current += 1;
     accessTokenRef.current = null;
@@ -263,17 +277,17 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     }
     contentRef.current = next;
-    setContentState({ owner: userId, value: next });
-  }, [userId, cachePrefix, installSaveConfig]);
+    setContentState({ owner: userId, scope, value: next });
+
+  }, [userId, cachePrefix]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
   useEffect(() => {
-    if (!userId) return;
-    const cfg = saveConfigRef.current;
-    if (!isCurrentConfig(cfg)) return;
-    if (hasLocalEditsRef.current) scheduleSaveRef.current(cfg);
-  }, [userId, isCurrentConfig]);
+    if (!isCurrentConfig(committedConfig)) return;
+    if (hasLocalEditsRef.current) scheduleSaveRef.current(committedConfig);
+  }, [committedConfig, isCurrentConfig]);
+
 
   // Cross-tab sync via localStorage events (clean snapshot only, never while dirty)
   useEffect(() => {
@@ -482,10 +496,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   const handleChange = useCallback(
     (next: string) => {
-      // Ownership is verified BEFORE any shared ref, status, storage or timer
-      // is touched: a handle retained from another account is fully inert.
-      const cfg = saveConfigRef.current;
-      if (!userId || !isCurrentConfig(cfg) || cfg.owner !== userId) return;
+      // The handle is BOUND to the session config it was created with — it can
+      // never pick up a newer one. A handle retained from a previous session
+      // (other account, other cache scope, or the same account after a
+      // logout/login) is therefore fully inert: no ref, status, storage,
+      // timer or DB write is touched.
+      const cfg = committedConfig;
+      if (!isCurrentConfig(cfg)) return;
       hasLocalEditsRef.current = true;
       localRevRef.current += 1; // same text re-typed is still a newer revision
       contentRef.current = next; // synchronous latest-content authority
@@ -494,15 +511,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setSaveFailed(!journaled);
       scheduleSave(cfg);
     },
-    [userId, isCurrentConfig, scheduleSave, commitContent]
+    [committedConfig, isCurrentConfig, scheduleSave, commitContent]
   );
 
   // Retry queued save when coming back online. The wake is bound to the config
   // committed at subscription time and becomes inert after a transition.
   useEffect(() => {
-    if (!userId) return;
-    const cfg = saveConfigRef.current;
-    if (!cfg || cfg.owner !== userId) return;
+    const cfg = committedConfig;
+    if (!isCurrentConfig(cfg)) return;
     const unsub = onConnectivityChange((online) => {
       if (!isCurrentConfig(cfg)) return;
       if (online && hasLocalEditsRef.current) {
@@ -510,7 +526,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     });
     return unsub;
-  }, [userId, isCurrentConfig]);
+  }, [committedConfig, isCurrentConfig]);
+
 
   // Keep a ref to the latest access token for beforeunload
   const accessTokenRef = useRef<string | null>(null);
@@ -573,9 +590,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   }, [userId, table, ownerColumn]);
 
   // Identity guard: until the reset/hydration has bound state to the current
-  // account, the public snapshot must never expose the previous account.
-  const identityMatched = contentState.owner === userId;
+  // session (owner + cache scope), the public snapshot must never expose the
+  // previous session.
+  const identityMatched =
+    contentState.owner === userId && contentState.scope === scopeIdentity(cachePrefix, userId);
   const visibleContent = identityMatched ? content : userId ? peekScoped(cachePrefix, userId) : '';
+
 
   return {
     content: visibleContent,
