@@ -2,7 +2,6 @@ import { memo, useMemo, useEffect } from 'react';
 import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
@@ -50,7 +49,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
       writeCachedStat(user!.id, 'messages', stats.unread_messages);
       return stats;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && isActive,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
