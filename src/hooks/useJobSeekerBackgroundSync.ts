@@ -38,7 +38,6 @@ const AVAILABLE_JOBS_CACHE_MAX_AGE = 5 * 60 * 1000;
 
 // Global state för att kunna trigga från useAuth vid login
 let globalJobSeekerPreloadFunction: (() => Promise<void>) | null = null;
-let lastJobSeekerPreloadTimestamp = 0;
 
 /**
  * Trigga bakgrundssynk för jobbsökare
@@ -54,6 +53,21 @@ export const useJobSeekerBackgroundSync = () => {
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
+  // 🔒 Dedupe är ägarbunden OCH provider-lokal: A:s warmup får aldrig kväva
+  // B:s första warmup vid ett kontobyte inom 2 sekunder.
+  const lastPreloadRef = useRef<{ ownerId: string | null; ts: number }>({ ownerId: null, ts: 0 });
+  // En explicit forcerad preload som kommer medan en körning pågår tappas inte —
+  // den koalesceras till EN uppföljning efter den pågående körningen.
+  const pendingForcedRef = useRef(false);
+  const mountedRef = useRef(true);
+  const preloadAllDataRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      pendingForcedRef.current = false;
+    };
+  }, []);
 
   // Endast för jobbsökare — och endast när rollen bevisligen tillhör exakt den
   // inloggade användaren (en kvarhängande roll från konto A får inte köra
@@ -67,7 +81,8 @@ export const useJobSeekerBackgroundSync = () => {
       if (!cached) return false;
 
       const age = Date.now() - cached.timestamp;
-      return age < WEATHER_CACHE_MAX_AGE;
+      // En framtida tidsstämpel (klockskev/manipulerad cache) är INTE färsk.
+      return age >= 0 && age < WEATHER_CACHE_MAX_AGE;
     } catch {
       return false;
     }
@@ -86,29 +101,38 @@ export const useJobSeekerBackgroundSync = () => {
     }
   }, [isWeatherCacheValid]);
 
-  // 🏢 Är den cachade annonslistan färsk nog att hoppa över hämtningen?
-  // Exception-safe: trasig/blockerad storage betyder "inte färsk".
-  const isAvailableJobsCacheFresh = useCallback((): boolean => {
+  // 🏢 Läs den cachade annonslistan om den är färsk nog att hoppa över hämtningen.
+  // Exception-safe och fail-closed: trasig/blockerad storage eller data som
+  // tillhör ett annat konto betyder "inte färsk".
+  const readFreshAvailableJobs = useCallback((ownerId: string | null): unknown[] | null => {
     try {
       const raw = localStorage.getItem(AVAILABLE_JOBS_CACHE_KEY);
-      if (!raw) return false;
-      const parsed = JSON.parse(raw) as { items?: unknown; timestamp?: unknown };
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { items?: unknown; timestamp?: unknown; ownerId?: unknown };
       if (!parsed || !Array.isArray(parsed.items) || typeof parsed.timestamp !== 'number') {
-        return false;
+        return null;
       }
+      if (typeof parsed.ownerId === 'string' && parsed.ownerId !== ownerId) return null;
       const age = Date.now() - parsed.timestamp;
-      return age >= 0 && age < AVAILABLE_JOBS_CACHE_MAX_AGE;
+      if (age < 0 || age >= AVAILABLE_JOBS_CACHE_MAX_AGE) return null;
+      return parsed.items;
     } catch {
-      return false;
+      return null;
     }
   }, []);
 
   // 🏢 Preload lediga jobb (enda datalistan denna hook äger)
-  const preloadAvailableJobs = useCallback(async (force = false) => {
+  const preloadAvailableJobs = useCallback(async (force = false, ownerId: string | null = null) => {
     const cacheKey = AVAILABLE_JOBS_CACHE_KEY;
 
-    if (!force && isAvailableJobsCacheFresh()) {
-      return; // Färsk cache — ingen onödig read.
+    if (!force) {
+      const cachedItems = readFreshAvailableJobs(ownerId);
+      if (cachedItems) {
+        // Färsk cache — ingen onödig read, men React Query MÅSTE hydreras,
+        // annars visar Home tom lista trots giltig cache.
+        queryClient.setQueryData(['available-jobs'], cachedItems);
+        return;
+      }
     }
 
     const { data, error } = await supabase
@@ -141,32 +165,39 @@ export const useJobSeekerBackgroundSync = () => {
       safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
+        ownerId,
       }));
 
       // Uppdatera React Query cache
       queryClient.setQueryData(['available-jobs'], data);
     }
-  }, [queryClient, isAvailableJobsCacheFresh]);
+  }, [queryClient, readFreshAvailableJobs]);
 
   // 🚀 HUVUDFUNKTION: warmup av lediga jobb + väder
   // Uses requestIdleCallback to avoid blocking CSS transitions (sidebar, navigation)
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isJobSeeker) return;
+    const ownerId = user.id;
 
-    // Undvik dubbla preloads (inom 2 sekunder)
+    // Undvik dubbla preloads (inom 2 sekunder) — men endast för samma ägare.
     const now = Date.now();
-    if (!force && now - lastJobSeekerPreloadTimestamp < 2000) {
+    const last = lastPreloadRef.current;
+    if (!force && last.ownerId === ownerId && now - last.ts >= 0 && now - last.ts < 2000) {
       return;
     }
 
-    if (isPreloadingRef.current) return;
+    if (isPreloadingRef.current) {
+      // Single-flight: forcerade triggers koalesceras till en uppföljning.
+      if (force) pendingForcedRef.current = true;
+      return;
+    }
 
     isPreloadingRef.current = true;
-    lastJobSeekerPreloadTimestamp = now;
+    lastPreloadRef.current = { ownerId, ts: now };
 
     try {
       await Promise.all([
-        preloadAvailableJobs(force),
+        preloadAvailableJobs(force, ownerId),
         preloadWeatherIfStale(),
       ]);
 
@@ -179,8 +210,16 @@ export const useJobSeekerBackgroundSync = () => {
       console.warn('[JobSeekerSync] Preload failed:', error);
     } finally {
       isPreloadingRef.current = false;
+      if (pendingForcedRef.current) {
+        pendingForcedRef.current = false;
+        if (mountedRef.current) {
+          await preloadAllDataRef.current?.(true);
+        }
+      }
     }
   }, [user, isJobSeeker, preloadAvailableJobs, preloadWeatherIfStale]);
+
+  preloadAllDataRef.current = preloadAllData;
 
   // 🕐 Schemalägg preload via requestIdleCallback så den ALDRIG blockerar animationer
   const schedulePreload = useCallback((force = false) => {
