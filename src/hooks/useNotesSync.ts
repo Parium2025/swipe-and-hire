@@ -132,19 +132,28 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const cacheKey = userId ? `${cachePrefix}_${userId}` : null;
   const pendingKey = userId ? `${cachePrefix}_${userId}__pending` : null;
 
-  const [content, setContent] = useState(() => {
-    if (!userId) return '';
+  // Content state is bound to the account that produced it, so a transition
+  // render can never expose the previous account's value.
+  const userIdRef = useRef<string | null>(userId);
+  userIdRef.current = userId;
+  const [contentState, setContentState] = useState<{ owner: string | null; value: string }>(() => {
+    if (!userId) return { owner: null, value: '' };
     const pending = readPending(`${cachePrefix}_${userId}__pending`, userId);
     if (pending !== null) {
       hasLocalEditsRef.current = true;
       contentRef.current = pending;
-      return pending;
+      return { owner: userId, value: pending };
     }
     const clean = storageGet(`${cachePrefix}_${userId}`) ?? '';
     contentRef.current = clean;
     serverContentRef.current = clean;
-    return clean;
+    return { owner: userId, value: clean };
   });
+  const setContent = useCallback((next: string) => {
+    setContentState({ owner: userIdRef.current, value: next });
+  }, []);
+  const content = contentState.value;
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
