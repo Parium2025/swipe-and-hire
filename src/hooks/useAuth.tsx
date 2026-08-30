@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useLayoutEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
+import { createAccountAuthority } from '@/lib/accountAuthority';
 import { User, Session, RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -230,15 +231,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
 
-  // 🔒 KONTOAUKTORITET: sätts synkront före övriga effekter i samma commit, så
-  // att refreshar som startades av ett tidigare konto kan känna igen att de
-  // inte längre äger vyn.
-  useLayoutEffect(() => {
-    activeAccountAuthority = user?.id ?? null;
-    return () => {
-      if (activeAccountAuthority === (user?.id ?? null)) activeAccountAuthority = null;
-    };
-  }, [user?.id]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
@@ -2043,7 +2035,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // detta konto fortfarande äger vyn. Ett svar som landar efter A→B eller
     // efter utloggning skulle annars skriva A:s siffror i B:s gränssnitt.
     const startUserId = user?.id ?? null;
-    const stillOwner = () => activeAccountAuthority === startUserId;
+    // Exakt token-identitet (ägare + generation), inte bara user-id-likhet.
+    const authority = accountAuthorityRef.current;
+    const token = authority.current;
+    const stillOwner = () => authority.isCurrent(token, startUserId);
     try {
       // 🔒 SKALA: tidigare laddades ALLA aktiva annonser ner till webbläsaren och
       // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
