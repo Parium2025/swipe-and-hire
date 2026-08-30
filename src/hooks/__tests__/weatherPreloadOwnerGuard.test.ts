@@ -31,6 +31,7 @@ const h = vi.hoisted(() => ({
   setLocation: vi.fn(),
   setWeather: vi.fn(),
   ipFallbackCalled: vi.fn(() => Promise.resolve(null as { lat: number; lon: number } | null)),
+  weatherThrows: false,
 }));
 
 vi.mock('@/hooks/useBackgroundLocation', () => ({ useBackgroundLocation: () => ({}) }));
@@ -52,6 +53,7 @@ vi.mock('@/lib/weatherApi', async () => {
     getLocationByIP: () => h.ipFallbackCalled(),
     fetchCurrentWeather: async () => {
       if (h.weather) await h.weather.promise;
+      if (h.weatherThrows) throw new Error('network down');
       return {
         temperature: 5,
         feelsLike: 4,
@@ -79,6 +81,7 @@ describe('preloadWeatherLocation — kontovakt före cache-skrivningar', () => {
     h.setLocation.mockClear();
     h.setWeather.mockClear();
     h.ipFallbackCalled.mockClear();
+    h.weatherThrows = false;
   });
 
   it('A:s plats/väder skrivs inte när ägaren bytts innan GPS-svaret landar', async () => {
@@ -183,5 +186,36 @@ describe('preloadWeatherLocation — kontovakt före cache-skrivningar', () => {
     expect(h.ipFallbackCalled).not.toHaveBeenCalled();
     expect(h.setLocation).not.toHaveBeenCalled();
     expect(h.setWeather).not.toHaveBeenCalled();
+  });
+
+  it('RED: misslyckad väderhämtning efter ägarbyte returnerar null, inte den gamla ägarens plats', async () => {
+    let current = 'A';
+    h.gps = makeDeferred<{ lat: number; lon: number } | null>();
+    h.weather = makeDeferred<unknown>();
+    h.weatherThrows = true;
+
+    const run = preloadWeatherLocation({ isCurrent: () => current === 'A' });
+    await tick();
+    h.gps.resolve({ lat: 59.33, lon: 18.07 });
+    await tick();
+
+    current = 'B';
+    h.weather.resolve(null);
+    const result = await run;
+    await tick();
+
+    expect(result).toBeNull();
+    expect(h.setWeather).not.toHaveBeenCalled();
+  });
+
+  it('misslyckad väderhämtning för aktuell ägare returnerar fortfarande platsen', async () => {
+    h.gps = makeDeferred<{ lat: number; lon: number } | null>();
+    h.weatherThrows = true;
+
+    const run = preloadWeatherLocation({ isCurrent: () => true });
+    h.gps.resolve({ lat: 59.33, lon: 18.07 });
+    const result = await run;
+
+    expect(result?.lat).toBe(59.33);
   });
 });

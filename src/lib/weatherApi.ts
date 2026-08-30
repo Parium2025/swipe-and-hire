@@ -93,7 +93,13 @@ export const getCachedLocation = (): CachedLocation | null => {
       try { localStorage.removeItem(key); } catch { /* ignore */ }
       return null;
     }
-    if (Date.now() - data.timestamp > LOCATION_CACHE_MAX_AGE) {
+    const age = Date.now() - data.timestamp;
+    if (age < 0) {
+      // Framtida (korrupt) tidsstämpel — får aldrig användas eller överleva.
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    if (age > LOCATION_CACHE_MAX_AGE) {
       console.log('Location cache expired, will refresh');
       return null;
     }
@@ -131,7 +137,13 @@ const readCachedWeather = (maxAgeMs: number, removeExpired: boolean): CachedWeat
       try { localStorage.removeItem(key); } catch { /* ignore */ }
       return null;
     }
-    if (Date.now() - data.timestamp > maxAgeMs) {
+    const age = Date.now() - data.timestamp;
+    if (age < 0) {
+      // Framtida (korrupt) tidsstämpel — varken färsk eller offline-användbar.
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      return null;
+    }
+    if (age > maxAgeMs) {
       // The fresh read must NOT destroy a still-usable stale entry — the
       // offline fallback (getStaleCachedWeather) depends on it. Only the
       // stale read removes entries past the 24h hard limit.

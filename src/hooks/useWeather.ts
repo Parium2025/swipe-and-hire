@@ -608,6 +608,7 @@ export const preloadWeatherLocation = async (
         source: location.source,
       });
     } catch (err) {
+      if (!isCurrent()) return null;
       console.warn('Weather preload fetch failed:', err);
     }
   }
