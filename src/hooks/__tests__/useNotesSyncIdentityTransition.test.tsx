@@ -4,12 +4,14 @@
  * On A -> B and A -> logout, NO render visible to the new identity may expose
  * A's content, noteData, isSaving, saveFailed or lastSaved.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const PREFIX = 'jobseeker_notes_cache';
+/** Mirrors the hook's internal debounce window. */
+const SAVE_DEBOUNCE_MS = 1200;
 
 let mockUser: { id: string } | null = null;
 
