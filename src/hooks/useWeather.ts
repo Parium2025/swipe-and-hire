@@ -545,7 +545,11 @@ export const preloadWeatherLocation = async (
   if (existingWeather && existingLocation) {
     const weatherAge = Date.now() - existingWeather.timestamp;
     const locationAge = Date.now() - existingLocation.timestamp;
-    if (weatherAge < 5 * 60 * 1000 && locationAge < 30 * 60 * 1000 && existingLocation.source === 'gps') {
+    if (
+      weatherAge >= 0 && weatherAge < 5 * 60 * 1000 &&
+      locationAge >= 0 && locationAge < 30 * 60 * 1000 &&
+      existingLocation.source === 'gps'
+    ) {
       return existingLocation;
     }
   }
@@ -566,8 +570,9 @@ export const preloadWeatherLocation = async (
   }
 
   if (!location) {
-    const ipLocation = (await getServerSideIPLocation().catch(() => null))
-      ?? (await getLocationByIP().catch(() => null));
+    let ipLocation = await getServerSideIPLocation().catch(() => null);
+    if (!isCurrent()) return null;
+    ipLocation ??= await getLocationByIP().catch(() => null);
     if (!isCurrent()) return null;
     if (ipLocation) {
       location = { ...ipLocation, source: 'ip', timestamp: Date.now() };
