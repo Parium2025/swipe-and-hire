@@ -35,6 +35,10 @@ interface JobSeekerInterviewsCardProps {
   /** Redan live-filtrerade intervjuer (isInterviewOver applicerad av grid:et). */
   interviews: DashboardInterview[];
   isLoading: boolean;
+  /** Källan misslyckades — får aldrig visas som ett lyckat tomt resultat. */
+  isError?: boolean;
+  /** Kör om queryns hämtning. */
+  onRetry?: () => void;
 }
 
 const getLocationIcon = (type: LocationType) => {
