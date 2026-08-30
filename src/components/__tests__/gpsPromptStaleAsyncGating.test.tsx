@@ -23,6 +23,20 @@ vi.mock('@/components/GpsHelpModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="gps-help" /> : null),
 }));
 
+// AnimatePresence mode="wait" inväntar exit-animationer som aldrig slutförs
+// under fake timers — rendera barnen direkt i stället.
+vi.mock('framer-motion', () => ({
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  motion: {
+    button: ({ children, onClick, className, 'aria-label': ariaLabel }: Record<string, unknown>) => (
+      <button onClick={onClick as () => void} className={className as string} aria-label={ariaLabel as string}>{children as React.ReactNode}</button>
+    ),
+    div: ({ children, className }: Record<string, unknown>) => (
+      <div className={className as string}>{children as React.ReactNode}</div>
+    ),
+  },
+}));
+
 let GpsPrompt: typeof import('@/components/GpsPrompt').default;
 
 async function renderVisiblePrompt(active = true, onEnableGps?: () => void) {
