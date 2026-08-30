@@ -92,10 +92,9 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     rerender(<GpsPrompt active={true} onEnableGps={onEnableGps} />);
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     expect(checkGpsPermission).toHaveBeenCalledTimes(1);
+    // Stale state-mutation hade visat miniknappen direkt (visible=true kvar).
+    expect(screen.queryByRole('button', { name: 'Visa platsinformation' })).toBeNull();
     await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
-    const miniAgain = screen.queryByRole('button', { name: 'Visa platsinformation' });
-    if (miniAgain) fireEvent.click(miniAgain);
-    expect(document.body.textContent).toContain('Aktivera plats');
   });
 
   it('web success-callback efter active=false anropar inte onEnableGps och muterar inte state', async () => {
@@ -120,10 +119,9 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     rerender(<GpsPrompt active={true} onEnableGps={onEnableGps} />);
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     expect(checkGpsPermission).toHaveBeenCalledTimes(1);
+    // Stale state-mutation hade visat miniknappen direkt (visible=true kvar).
+    expect(screen.queryByRole('button', { name: 'Visa platsinformation' })).toBeNull();
     await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
-    const miniAgain = screen.queryByRole('button', { name: 'Visa platsinformation' });
-    if (miniAgain) fireEvent.click(miniAgain);
-    expect(document.body.textContent).toContain('Aktivera plats');
   });
 
   it('web error-callback efter active=false visar inte UI vid återaktivering utan färsk koll', async () => {
@@ -150,9 +148,8 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
     expect(screen.queryByTestId('gps-help')).toBeNull();
-    const miniAgain = screen.queryByRole('button', { name: 'Visa platsinformation' });
-    if (miniAgain) fireEvent.click(miniAgain);
-    expect(document.body.textContent).toContain('Aktivera plats');
     expect(document.body.textContent).not.toContain('Plats är blockerad');
+    // Stale error-callback hade satt visible=true → miniknapp direkt synlig.
+    expect(screen.queryByRole('button', { name: 'Visa platsinformation' })).toBeNull();
   });
 });
