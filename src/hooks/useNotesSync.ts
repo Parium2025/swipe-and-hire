@@ -320,12 +320,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         },
         (payload) => {
           // Late callback from a previous account/session must be discarded.
-          if (epochRef.current !== subEpoch || subUser !== userId) return;
+          if (epochRef.current !== subEpoch || subUser !== committedUserRef.current) return;
           if (!hasLocalEditsRef.current) {
             const newContent = (payload.new as any)?.content ?? '';
             serverContentRef.current = newContent;
             contentRef.current = newContent;
-            setContent(newContent);
+            commitContent(subUser, subEpoch, newContent);
             if (cacheKey) storageSet(cacheKey, newContent);
           }
           queryClient.invalidateQueries({ queryKey: [queryKey, userId] });
