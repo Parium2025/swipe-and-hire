@@ -28,7 +28,9 @@ The report and console log show the normalized **actual** origin, never a label.
 
 ## Staging test
 
-Staging requires the actual staging Supabase URL and key plus the exact expected origin:
+Staging requires the actual staging Supabase URL and key plus the exact expected origin.
+`SUPABASE_URL`/`SUPABASE_ANON_KEY` always take priority over any `VITE_*` values in `.env`,
+so an explicit staging target cannot silently fall back to a production fallback:
 
 ```bash
 SUPABASE_URL=https://<staging-ref>.supabase.co \
