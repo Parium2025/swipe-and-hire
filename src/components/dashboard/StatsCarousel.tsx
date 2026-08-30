@@ -16,6 +16,8 @@ export type StatData = {
   description: string;
   link?: string;
   emptyHint?: string;
+  /** True när just denna siffras källa har lyckats (styr tomt tillstånd). */
+  ready?: boolean;
 };
 
 interface StatsCarouselProps {
@@ -55,7 +57,10 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
   const currentStat = stats[currentIndex];
   if (!currentStat) return null;
   const Icon = currentStat.icon;
-  const showEmptyHint = currentStat.value === 0 && currentStat.emptyHint && (dataReady || hasCachedData);
+  const showEmptyHint =
+    currentStat.value === 0 &&
+    currentStat.emptyHint &&
+    (currentStat.ready ?? (dataReady || hasCachedData));
 
   return (
     <Card

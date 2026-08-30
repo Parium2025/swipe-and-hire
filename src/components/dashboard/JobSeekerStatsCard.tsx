@@ -25,7 +25,11 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
   const queryClient = useQueryClient();
   const cachedStats = useMemo(() => readCachedStats(user?.id), [user?.id]);
   const { stats: viewStats, isSuccess: viewStatsLoaded } = useProfileViewStats();
-  const profileViewsCount = viewStats.unique_viewers_30d;
+  // Visa cachat värde tills profilvisningskällan faktiskt lyckats — hookens
+  // fallback-nolla får aldrig visas under laddning eller efter fel.
+  const profileViewsCount = viewStatsLoaded
+    ? viewStats.unique_viewers_30d
+    : cachedStats['profile_views'] ?? viewStats.unique_viewers_30d;
   // Skriv bara till cachen efter ett lyckat profilvisningssvar — aldrig
   // fallback-nollan vid initial laddning eller efter ett RPC-fel. En äkta
   // lyckad nolla skrivs fortfarande.
@@ -54,7 +58,10 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
   const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
   // Intervjuräknaren kommer från den delade live-listan (samma källa som
   // intervjukortet), med cachat värde som fallback före första laddningen.
-  const interviewsCount = liveInterviewsCount ?? cachedStats['interviews'] ?? 0;
+  const interviewsCount =
+    interviewsLoaded && liveInterviewsCount !== undefined
+      ? liveInterviewsCount
+      : cachedStats['interviews'] ?? liveInterviewsCount ?? 0;
   // Cacha det kanoniska live-antalet först när datan faktiskt laddats.
   useEffect(() => {
     if (interviewsLoaded && liveInterviewsCount !== undefined) {
@@ -108,11 +115,11 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
 
   const statsArray: StatData[] = useMemo(() => [
     { icon: Send, label: 'Skickade ansökningar', value: applicationsCount, description: 'Dina jobbansökningar', link: '/my-applications', emptyHint: 'Börja söka jobb!' },
-    { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer', emptyHint: 'Inga bokade än' },
-    { icon: Eye, label: 'Profilvisningar', value: profileViewsCount, description: 'Arbetsgivare senaste 30 dagarna', emptyHint: 'Ingen har sett din profil än' },
+    { icon: Calendar, label: 'Bokade intervjuer', value: interviewsCount, description: 'Kommande intervjuer', emptyHint: 'Inga bokade än', ready: !!interviewsLoaded },
+    { icon: Eye, label: 'Profilvisningar', value: profileViewsCount, description: 'Arbetsgivare senaste 30 dagarna', emptyHint: 'Ingen har sett din profil än', ready: viewStatsLoaded },
     { icon: Heart, label: 'Sparade jobb', value: savedJobsCount, description: 'Jobb du sparat', link: '/saved-jobs', emptyHint: 'Spara jobb du gillar' },
     { icon: MessageSquare, label: 'Meddelanden', value: unreadMessagesCount, description: 'Olästa meddelanden', link: '/messages', emptyHint: 'Inga olästa' },
-  ], [applicationsCount, interviewsCount, profileViewsCount, savedJobsCount, unreadMessagesCount]);
+  ], [applicationsCount, interviewsCount, interviewsLoaded, profileViewsCount, savedJobsCount, unreadMessagesCount, viewStatsLoaded]);
 
   return (
     <StatsCarousel
