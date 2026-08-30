@@ -197,6 +197,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (isFirst) return; // lazy initializer already hydrated
 
     epochRef.current += 1;
+    committedUserRef.current = userId;
     localRevRef.current += 1;
     ackSeqRef.current += 1;
     accessTokenRef.current = null;
