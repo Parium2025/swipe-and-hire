@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 const h = vi.hoisted(() => ({
   resolveNext: null as ((url: string | null) => void) | null,
   mode: 'immediate' as 'immediate' | 'deferred',
+  imageCacheClear: vi.fn(),
 }));
 
 vi.mock('@/lib/mediaManager', () => ({
@@ -25,14 +26,16 @@ vi.mock('@/lib/mediaManager', () => ({
   clearMissingMedia: vi.fn(),
 }));
 
-const imageCacheClear = vi.fn();
 vi.mock('@/lib/imageCache', () => ({
   imageCache: {
     getCachedUrl: () => null,
     loadImage: () => Promise.resolve(null),
-    clear: imageCacheClear,
+    clear: h.imageCacheClear,
   },
 }));
+
+const imageCacheClear = h.imageCacheClear;
+
 
 import { prefetchMediaUrl, clearPrivateMediaCache } from '@/hooks/useMediaUrl';
 
