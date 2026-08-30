@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -183,7 +183,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Account transition (null->uid, A->B, uid->null): reset all account-local
   // state and hydrate ONLY the new user's pending/clean caches.
   const previousUserIdRef = useRef<string | null | undefined>(undefined);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (previousUserIdRef.current === userId) return;
     const isFirst = previousUserIdRef.current === undefined;
     previousUserIdRef.current = userId;
@@ -495,5 +495,18 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [userId, table, ownerColumn]);
 
-  return { content, isSaving, saveFailed, lastSaved, handleChange, noteData: noteData ?? null, isFetched };
+  // Identity guard: until the reset/hydration has bound state to the current
+  // account, the public snapshot must never expose the previous account.
+  const identityMatched = contentState.owner === userId;
+  const visibleContent = identityMatched ? content : userId ? peekScoped(cachePrefix, userId) : '';
+
+  return {
+    content: visibleContent,
+    isSaving: identityMatched ? isSaving : false,
+    saveFailed: identityMatched ? saveFailed : false,
+    lastSaved: identityMatched ? lastSaved : null,
+    handleChange,
+    noteData: identityMatched ? noteData ?? null : null,
+    isFetched: identityMatched ? isFetched : false,
+  };
 }
