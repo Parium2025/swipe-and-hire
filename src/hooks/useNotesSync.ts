@@ -298,9 +298,9 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (!hasLocalEditsRef.current) {
       storageSet(cacheKey, serverContent);
       contentRef.current = serverContent;
-      setContent(serverContent);
+      commitContent(meta.user, meta.epoch, serverContent);
     }
-  }, [serverValueDep, cacheKey, userId, setContent]);
+  }, [serverValueDep, cacheKey, userId, commitContent]);
 
 
 
