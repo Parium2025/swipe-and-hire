@@ -134,8 +134,6 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Content state is bound to the account that produced it, so a transition
   // render can never expose the previous account's value.
-  const userIdRef = useRef<string | null>(userId);
-  userIdRef.current = userId;
   const [contentState, setContentState] = useState<{ owner: string | null; value: string }>(() => {
     if (!userId) return { owner: null, value: '' };
     const pending = readPending(`${cachePrefix}_${userId}__pending`, userId);
@@ -149,9 +147,6 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     serverContentRef.current = clean;
     return { owner: userId, value: clean };
   });
-  const setContent = useCallback((next: string) => {
-    setContentState({ owner: userIdRef.current, value: next });
-  }, []);
   const content = contentState.value;
 
   const [isSaving, setIsSaving] = useState(false);
@@ -160,6 +155,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   // Every async completion is scoped to this epoch. Account change bumps it.
   const epochRef = useRef(0);
+  /** Committed identity authority. NEVER mutated during render — only in the
+   *  committed layout transition effect below. A value produced under another
+   *  account can therefore never be relabelled as the current one. */
+  const committedUserRef = useRef<string | null>(userId);
   /** Epoch that currently owns an in-flight save (null = idle). Per-epoch so a
    *  stale account's save can never block or acknowledge the next account's. */
   const inFlightEpochRef = useRef<number | null>(null);
@@ -167,6 +166,14 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const localRevRef = useRef(0);
   /** Monotonic count of acknowledged saves — used to reject stale query results. */
   const ackSeqRef = useRef(0);
+
+  /** Commit a content value only when its source still owns the committed
+   *  identity AND epoch. Every caller passes the owner/epoch it captured. */
+  const commitContent = useCallback((owner: string | null, epoch: number, next: string) => {
+    if (owner !== committedUserRef.current) return;
+    if (epoch !== epochRef.current) return;
+    setContentState({ owner, value: next });
+  }, []);
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
@@ -190,6 +197,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (isFirst) return; // lazy initializer already hydrated
 
     epochRef.current += 1;
+    committedUserRef.current = userId;
     localRevRef.current += 1;
     ackSeqRef.current += 1;
     accessTokenRef.current = null;
@@ -213,8 +221,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     }
     contentRef.current = next;
-    setContent(next);
-  }, [userId, cachePrefix, setContent]);
+    setContentState({ owner: userId, value: next });
+  }, [userId, cachePrefix]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
   // never wait for another edit or a connectivity event.
@@ -226,18 +234,23 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   // Cross-tab sync via localStorage events (clean snapshot only, never while dirty)
   useEffect(() => {
     if (typeof window === 'undefined' || !userId || !cacheKey) return;
+    // The owner/epoch this listener belongs to. A late event delivered after an
+    // account transition is rejected instead of relabelled.
+    const subUser = userId;
+    const subEpoch = epochRef.current;
     const onStorage = (e: StorageEvent) => {
+      if (subUser !== committedUserRef.current || subEpoch !== epochRef.current) return;
       if (e.key === cacheKey && typeof e.newValue === 'string') {
         if (!hasLocalEditsRef.current) {
           contentRef.current = e.newValue;
           serverContentRef.current = e.newValue;
-          setContent(e.newValue);
+          commitContent(subUser, subEpoch, e.newValue);
         }
       }
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [cacheKey, userId, setContent]);
+  }, [cacheKey, userId, commitContent]);
 
   // Fetch existing note. The metadata is bound to THIS request's result, so a
   // late result from another account/request can never describe another one.
@@ -285,9 +298,9 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (!hasLocalEditsRef.current) {
       storageSet(cacheKey, serverContent);
       contentRef.current = serverContent;
-      setContent(serverContent);
+      commitContent(meta.user, meta.epoch, serverContent);
     }
-  }, [serverValueDep, cacheKey, userId, setContent]);
+  }, [serverValueDep, cacheKey, userId, commitContent]);
 
 
 
@@ -307,12 +320,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         },
         (payload) => {
           // Late callback from a previous account/session must be discarded.
-          if (epochRef.current !== subEpoch || subUser !== userId) return;
+          if (epochRef.current !== subEpoch || subUser !== committedUserRef.current) return;
           if (!hasLocalEditsRef.current) {
             const newContent = (payload.new as any)?.content ?? '';
             serverContentRef.current = newContent;
             contentRef.current = newContent;
-            setContent(newContent);
+            commitContent(subUser, subEpoch, newContent);
             if (cacheKey) storageSet(cacheKey, newContent);
           }
           queryClient.invalidateQueries({ queryKey: [queryKey, userId] });
@@ -323,7 +336,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, setContent]);
+  }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, commitContent]);
 
   // Save function — always upserts to avoid duplicates
   const saveToDb = useCallback(async (contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
@@ -416,12 +429,12 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       hasLocalEditsRef.current = true;
       localRevRef.current += 1; // same text re-typed is still a newer revision
       contentRef.current = next; // synchronous latest-content authority
-      setContent(next);
+      commitContent(userId, epochRef.current, next);
       const journaled = writePending(pendingKey, userId, next);
       setSaveFailed(!journaled);
       scheduleSave();
     },
-    [cacheKey, pendingKey, userId, scheduleSave, setContent]
+    [cacheKey, pendingKey, userId, scheduleSave, commitContent]
   );
 
   // Retry queued save when coming back online
