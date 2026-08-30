@@ -307,7 +307,12 @@ describe('useNotesSync — race hardening', () => {
   it('never uses the previous account access token after an account change', async () => {
     mockUser = { id: 'a' };
     const s = deferred<{ data: { session: { access_token: string } | null } }>();
-    sessionImpl = () => s.promise;
+    let sessionCall = 0;
+    sessionImpl = () => {
+      sessionCall++;
+      // only the first (account A) call is deferred; B has no session yet
+      return sessionCall === 1 ? s.promise : Promise.resolve({ data: { session: null } });
+    };
     const fetchSpy = vi.fn((..._args: unknown[]) => Promise.resolve(new Response(null)));
     vi.stubGlobal('fetch', fetchSpy);
 
