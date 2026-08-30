@@ -382,14 +382,15 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     };
   }, [userId, cacheKey, queryClient, table, ownerColumn, queryKey, commitContent]);
 
-  // Save function — always upserts to avoid duplicates
-  const saveToDb = useCallback(async (contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
-    if (!userId || !getIsOnline()) return 'skipped';
+  // Save function — always upserts to avoid duplicates. The owner is passed in
+  // explicitly by the caller's immutable config; it is never read from render.
+  const saveToDb = useCallback(async (owner: string, contentToSave: string): Promise<'saved' | 'skipped' | 'failed'> => {
+    if (!getIsOnline()) return 'skipped';
     try {
       const { error } = await (supabase
         .from(table) as any)
         .upsert(
-          { [ownerColumn]: userId, content: contentToSave },
+          { [ownerColumn]: owner, content: contentToSave },
           { onConflict: ownerColumn }
         );
       if (error) {
@@ -401,18 +402,22 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       console.error(`Failed to save ${table}:`, err);
       return 'failed';
     }
-  }, [userId, table, ownerColumn]);
+  }, [table, ownerColumn]);
 
   /**
    * Single-flight, lost-wakeup-safe save drain. Debounce and reconnect both
    * funnel through here, so intermediate edits coalesce to the latest value
    * and there is never a concurrent duplicate save or a retry spin.
+   *
+   * The account configuration arrives as an immutable argument captured when
+   * the wake was created, and is re-validated against the committed identity
+   * and epoch before and after every await. A wake created under A can never
+   * run with B's owner or keys.
    */
-  const drainRef = useRef<() => Promise<void>>(async () => {});
-  drainRef.current = async () => {
-    const myEpoch = epochRef.current;
+  const runDrain = useCallback(async (cfg: SaveConfig) => {
+    if (!isCurrentConfig(cfg)) return;
+    const myEpoch = cfg.epoch;
     if (inFlightEpochRef.current === myEpoch) { wantedRef.current = true; return; }
-    if (!userId || !cacheKey || !pendingKey) return;
     if (!hasLocalEditsRef.current || !getIsOnline()) return;
 
     inFlightEpochRef.current = myEpoch;
@@ -420,21 +425,22 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     try {
       for (;;) {
         wantedRef.current = false;
-        if (epochRef.current !== myEpoch) return;
+        if (!isCurrentConfig(cfg)) return;
         if (!hasLocalEditsRef.current || !getIsOnline()) break;
         const latest = contentRef.current;
         const revAtSave = localRevRef.current;
-        const result = await saveToDb(latest);
-        if (epochRef.current !== myEpoch || !mountedRef.current) return; // account switched / unmounted
+        const result = await saveToDb(cfg.owner, latest);
+        // account switched / unmounted
+        if (!isCurrentConfig(cfg) || !mountedRef.current) return;
         if (result === 'saved') {
           // Clean snapshot first; journal removed only on exact revision match.
-          const cleanOk = storageSet(cacheKey, latest);
+          const cleanOk = storageSet(cfg.cacheKey, latest);
           if (!cleanOk) { setSaveFailed(true); break; } // retain pending + dirty, no retry spin
           serverContentRef.current = latest;
           ackSeqRef.current += 1;
-          queryClient.invalidateQueries({ queryKey: [queryKey, userId] });
+          queryClient.invalidateQueries({ queryKey: [queryKey, cfg.owner] });
           if (localRevRef.current === revAtSave) {
-            const removed = storageRemove(pendingKey);
+            const removed = storageRemove(cfg.pendingKey);
             if (!removed) { setSaveFailed(true); break; }
             hasLocalEditsRef.current = false;
             setSaveFailed(false);
@@ -452,33 +458,43 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     } finally {
       if (inFlightEpochRef.current === myEpoch) inFlightEpochRef.current = null;
-      if (epochRef.current === myEpoch && mountedRef.current) setIsSaving(false);
+      if (isCurrentConfig(cfg) && mountedRef.current) setIsSaving(false);
     }
-  };
+  }, [isCurrentConfig, saveToDb, queryClient, queryKey]);
 
-  const scheduleSaveRef = useRef<() => void>(() => {});
-  const scheduleSave = useCallback(() => {
+  // The drain reference is installed in the COMMIT phase only — never during
+  // render — so no abandoned render can swap the function a pending wake calls.
+  const runDrainRef = useRef<(cfg: SaveConfig) => Promise<void>>(async () => {});
+  useLayoutEffect(() => {
+    runDrainRef.current = runDrain;
+  }, [runDrain]);
+
+  const scheduleSaveRef = useRef<(cfg: SaveConfig) => void>(() => {});
+  const scheduleSave = useCallback((cfg: SaveConfig) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       debounceRef.current = null;
-      void drainRef.current();
+      // The timer carries A's config; after a transition it is a no-op.
+      void runDrainRef.current(cfg);
     }, SAVE_DEBOUNCE_MS);
   }, []);
   scheduleSaveRef.current = scheduleSave;
 
   const handleChange = useCallback(
     (next: string) => {
-      // No authenticated user → no cache key → ignore edits entirely.
-      if (!cacheKey || !pendingKey || !userId) return;
+      // Ownership is verified BEFORE any shared ref, status, storage or timer
+      // is touched: a handle retained from another account is fully inert.
+      const cfg = saveConfigRef.current;
+      if (!userId || !isCurrentConfig(cfg) || cfg.owner !== userId) return;
       hasLocalEditsRef.current = true;
       localRevRef.current += 1; // same text re-typed is still a newer revision
       contentRef.current = next; // synchronous latest-content authority
-      commitContent(userId, epochRef.current, next);
-      const journaled = writePending(pendingKey, userId, next);
+      commitContent(cfg.owner, cfg.epoch, next);
+      const journaled = writePending(cfg.pendingKey, cfg.owner, next);
       setSaveFailed(!journaled);
-      scheduleSave();
+      scheduleSave(cfg);
     },
-    [cacheKey, pendingKey, userId, scheduleSave, commitContent]
+    [userId, isCurrentConfig, scheduleSave, commitContent]
   );
 
   // Retry queued save when coming back online
