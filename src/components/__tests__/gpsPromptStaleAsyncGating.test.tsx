@@ -23,17 +23,22 @@ vi.mock('@/components/GpsHelpModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="gps-help" /> : null),
 }));
 
-import GpsPrompt from '@/components/GpsPrompt';
+let GpsPrompt: typeof import('@/components/GpsPrompt').default;
 
 async function renderVisiblePrompt(active = true, onEnableGps?: () => void) {
   const utils = render(<GpsPrompt active={active} onEnableGps={onEnableGps} />);
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   await act(async () => { vi.advanceTimersByTime(11_000); await Promise.resolve(); await Promise.resolve(); });
+  // Prompten renderas minimerad — expandera för att nå Aktivera-knappen.
+  const mini = screen.queryByRole('button', { name: 'Visa platsinformation' });
+  if (mini) fireEvent.click(mini);
   return utils;
 }
 
 describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    vi.resetModules();
+    GpsPrompt = (await import('@/components/GpsPrompt')).default;
     vi.useFakeTimers();
     native = false;
     checkGpsPermission.mockReset();
