@@ -236,6 +236,8 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
     expect(preloadWeatherLocation).not.toHaveBeenCalled();
 
     cleanup();
+    // Flytta klockan förbi 2s-dedupen inför andra fasen.
+    nowOffset += 60_000;
     cachedWeather = { timestamp: Date.now() - 60 * 60 * 1000 };
     renderProbe();
     await settle();
