@@ -134,14 +134,18 @@ describe('useNotesSync — notes data cache isolation', () => {
     act(() => {
       result.current.handleChange('A PENDING EDIT');
     });
-    expect(localStorage.getItem(`${LEGACY_KEY}_user-a`)).toBe('A PENDING EDIT');
+    // Dirty edits live in the versioned pending journal; the raw key stays clean.
+    expect(JSON.parse(localStorage.getItem(`${LEGACY_KEY}_user-a__pending`)!).c).toBe('A PENDING EDIT');
+    expect(localStorage.getItem(`${LEGACY_KEY}_user-a`)).toBe('A CONTENT');
 
     mockUser = { id: 'user-b' };
     rerender();
 
     // B has no cache of its own → must be empty, never A's content
     await waitFor(() => expect(result.current.content).toBe(''));
-    expect(localStorage.getItem(`${LEGACY_KEY}_user-b`)).toBeNull();
+    // B may only ever hold its own clean server snapshot (empty), never A's edit.
+    expect(localStorage.getItem(`${LEGACY_KEY}_user-b`) ?? '').toBe('');
+    expect(localStorage.getItem(`${LEGACY_KEY}_user-b__pending`)).toBeNull();
   });
 
   it('positive control: authenticated user hydrates own scoped cache instantly on first render', () => {
@@ -174,7 +178,7 @@ describe('useNotesSync — notes data cache isolation', () => {
     });
 
     expect(result.current.content).toBe('A EDIT');
-    expect(localStorage.getItem(`${LEGACY_KEY}_user-a`)).toBe('A EDIT');
+    expect(JSON.parse(localStorage.getItem(`${LEGACY_KEY}_user-a__pending`)!).c).toBe('A EDIT');
     expect(localStorage.getItem(LEGACY_KEY)).toBeNull();
   });
 });
