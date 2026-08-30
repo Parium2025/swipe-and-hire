@@ -250,6 +250,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
     epochRef.current += 1;
     committedUserRef.current = userId;
+    committedScopeRef.current = scope;
     const cfg = makeSaveConfig(userId, cachePrefix, epochRef.current);
     saveConfigRef.current = cfg;
     setCommittedConfig(cfg);
@@ -276,7 +277,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       }
     }
     contentRef.current = next;
-    setContentState({ owner: userId, value: next });
+    setContentState({ owner: userId, scope, value: next });
+
   }, [userId, cachePrefix]);
 
   // Hydrated pending must enter the normal debounced drain on its own — it may
