@@ -182,13 +182,6 @@ describe('useNotesSync — race hardening', () => {
   it('writes clean cache before removing pending', async () => {
     mockUser = { id: 'u1' };
     const order: string[] = [];
-    const setSpy = vi.spyOn(Storage.prototype, 'setItem');
-    const remSpy = vi.spyOn(Storage.prototype, 'removeItem');
-    setSpy.mockImplementation(function (this: Storage, k: string, v: string) {
-      if (k === cleanKey('u1')) order.push('clean');
-      return Storage.prototype.setItem.wrappedMethod?.call(this, k, v);
-    } as any);
-    setSpy.mockRestore();
     const realSet = localStorage.setItem.bind(localStorage);
     const realRem = localStorage.removeItem.bind(localStorage);
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation((k: string, v: string) => {
