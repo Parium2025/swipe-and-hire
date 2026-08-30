@@ -12,7 +12,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
 
 const navigateSpy = vi.fn();
 
@@ -32,9 +32,26 @@ vi.mock('@/hooks/useCareerTips', () => ({
 // Intervjukortet får sin delade live-lista via props från DashboardGrid —
 // ingen hook-mock behövs längre.
 
+vi.mock('@/hooks/useNotesSync', () => ({
+  useNotesSync: () => ({
+    content: '<p>Anteckning</p>',
+    isSaving: false,
+    saveFailed: false,
+    lastSaved: null,
+    handleChange: vi.fn(),
+  }),
+}));
+
+vi.mock('@/components/RichNotesEditor', () => ({
+  RichNotesEditor: () => <div data-testid="rich-notes-editor" />,
+  NotesToolbar: () => <div data-testid="notes-toolbar" />,
+}));
+
 import { MemoryRouter } from 'react-router-dom';
 import { CareerTipsCard } from '../CareerTipsCard';
 import { JobSeekerInterviewsCard } from '../JobSeekerInterviewsCard';
+import { StatsCarousel, type StatData } from '../StatsCarousel';
+import { JobSeekerNotesCard } from '../JobSeekerNotesCard';
 
 const openSpy = vi.fn();
 
@@ -220,6 +237,86 @@ describe('Home-kort tangentbordsåtkomst', () => {
       ]);
 
       expect(screen.getByText('Telefon')).toBeInTheDocument();
+    });
+  });
+
+  describe('StatsCarousel', () => {
+    const statsWithLink: StatData[] = [
+      { icon: () => null, label: 'Skickade ansökningar', value: 3, description: 'Dina jobbansökningar', link: '/my-applications' },
+      { icon: () => null, label: 'Sparade jobb', value: 2, description: 'Jobb du sparat', link: '/saved-jobs' },
+    ];
+
+    const renderStats = (stats: StatData[], setIsPaused = () => {}) =>
+      render(
+        <MemoryRouter initialEntries={['/home']}>
+          <StatsCarousel stats={stats} isPaused={false} setIsPaused={setIsPaused} />
+        </MemoryRouter>,
+      );
+
+    it('länkad statistikruta exponerar native länksemantik med korrekt href', () => {
+      renderStats(statsWithLink);
+
+      const link = screen.getByRole('link', { name: /Skickade ansökningar/i });
+      // Native <a href> ger Enter-aktivering av webbläsaren utan egen kod.
+      expect(link.tagName).toBe('A');
+      expect(link).toHaveAttribute('href', '/my-applications');
+
+      // Klick navigerar (MemoryRouter hanterar den riktiga navigeringen).
+      fireEvent.click(link, { button: 0 });
+      expect(link).toBeInTheDocument();
+    });
+
+    it('olänkad statistikruta har ingen länk- eller knappsemantik', () => {
+      renderStats([
+        { icon: () => null, label: 'Profilvisningar', value: 0, description: 'Arbetsgivare senaste 30 dagarna' },
+      ]);
+
+      expect(screen.queryByRole('link')).toBeNull();
+      expect(screen.queryByRole('button', { name: /Profilvisningar/i })).toBeNull();
+    });
+
+    it('fokus i kortet pausar rotationen; fokus ut ur kortet återupptar den', () => {
+      vi.useFakeTimers();
+      try {
+        renderStats(statsWithLink);
+        const link = screen.getByRole('link', { name: /Skickade ansökningar/i });
+
+        fireEvent.focusIn(link);
+        act(() => { vi.advanceTimersByTime(30_000); });
+        // Rotationen står stilla medan fokus ligger kvar i kortet
+        expect(screen.getByRole('link', { name: /Skickade ansökningar/i })).toBeInTheDocument();
+
+        const outside = document.createElement('button');
+        document.body.appendChild(outside);
+        fireEvent.focusOut(link, { relatedTarget: outside });
+        act(() => { vi.advanceTimersByTime(30_000); });
+
+        expect(screen.getByRole('link', { name: /Sparade jobb/i })).toBeInTheDocument();
+        outside.remove();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  describe('Anteckningar: expandera och stäng', () => {
+    it('expandknappen har type=button och tillgängligt namn, och öppnar dialogen med en namngiven stängknapp', () => {
+      render(
+        <MemoryRouter initialEntries={['/home']}>
+          <JobSeekerNotesCard />
+        </MemoryRouter>,
+      );
+
+      const expand = screen.getByRole('button', { name: 'Expandera anteckningar' });
+      expect(expand).toHaveAttribute('type', 'button');
+
+      fireEvent.click(expand);
+
+      const close = screen.getByRole('button', { name: 'Stäng anteckningar' });
+      expect(close).toHaveAttribute('type', 'button');
+
+      fireEvent.click(close);
+      expect(screen.queryByRole('button', { name: 'Stäng anteckningar' })).toBeNull();
     });
   });
 });

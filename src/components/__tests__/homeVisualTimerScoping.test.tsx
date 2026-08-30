@@ -13,13 +13,15 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ profile: { first_name: 'Alice', location: 'Stockholm' }, user: { id: 'u1' } }),
 }));
 
+const weatherState = { weatherCode: 61 };
+
 vi.mock('@/hooks/useWeather', () => ({
   useWeather: () => ({
     city: 'Stockholm',
     temperature: 5,
     feelsLike: 5,
     description: 'Regn',
-    weatherCode: 61,
+    weatherCode: weatherState.weatherCode,
     isLoading: false,
     error: null,
     temperatureAvailable: true,
@@ -104,5 +106,66 @@ describe('Home visuella timers är route-scopade', () => {
     });
 
     expect(minuteIntervals(intervalSpy).length).toBeGreaterThan(0);
+  });
+
+  it('sätter body-markören endast när Home är aktiv och tar bort den vid unmount', async () => {
+    const inactive = render(
+      <MemoryRouter initialEntries={['/index']}>
+        <JobSeekerHome />
+      </MemoryRouter>,
+    );
+    await act(async () => { vi.advanceTimersByTime(200); });
+    expect(document.body.getAttribute('data-jobseeker-home-active')).toBeNull();
+    inactive.unmount();
+
+    const activeRender = render(
+      <MemoryRouter initialEntries={['/home']}>
+        <JobSeekerHome />
+      </MemoryRouter>,
+    );
+    await act(async () => { vi.advanceTimersByTime(200); });
+    expect(document.body.getAttribute('data-jobseeker-home-active')).toBe('true');
+
+    activeRender.unmount();
+    expect(document.body.getAttribute('data-jobseeker-home-active')).toBeNull();
+  });
+
+  it('WMO 56/57/66/67 (underkyld duggregn/regn) renderar regn-emoji', async () => {
+    for (const code of [56, 57, 66, 67]) {
+      weatherState.weatherCode = code;
+      const utils = render(
+        <MemoryRouter initialEntries={['/home']}>
+          <JobSeekerHome />
+        </MemoryRouter>,
+      );
+      await act(async () => { vi.advanceTimersByTime(200); });
+      expect(screen.getByText('🌧️')).toBeInTheDocument();
+      utils.unmount();
+    }
+    weatherState.weatherCode = 61;
+  });
+
+  it('hälsning och väderrad bryter långa strängar istället för att spilla ut', async () => {
+    render(
+      <MemoryRouter initialEntries={['/home']}>
+        <JobSeekerHome />
+      </MemoryRouter>,
+    );
+    await act(async () => { vi.advanceTimersByTime(200); });
+
+    const heading = screen.getByRole('heading', { level: 1 });
+    for (const cls of ['min-w-0', 'max-w-full', 'break-words']) {
+      expect(heading.className).toContain(cls);
+    }
+    expect(heading.className).toContain('[overflow-wrap:anywhere]');
+
+    const row = heading.parentElement as HTMLElement;
+    expect(row.className).toContain('w-full');
+    expect(row.className).toContain('min-w-0');
+
+    const weatherParagraph = screen.getByText(/Stockholm/).closest('p') as HTMLElement;
+    for (const cls of ['min-w-0', 'max-w-full', 'break-words', '[overflow-wrap:anywhere]']) {
+      expect(weatherParagraph.className).toContain(cls);
+    }
   });
 });
