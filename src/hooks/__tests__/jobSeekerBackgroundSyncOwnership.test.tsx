@@ -68,7 +68,7 @@ vi.mock('@/integrations/supabase/client', () => {
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     user: { id: 'js-1' },
-    userRole: { role: 'job_seeker' },
+    userRole: { role: 'job_seeker', user_id: 'js-1' },
   }),
 }));
 
@@ -91,6 +91,12 @@ vi.mock('@/hooks/useInterviews', () => ({
 }));
 
 import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
+
+
+// Modulglobal 2s-dedupe i hooken delas mellan tester i samma fil. Vi flyttar
+// klockan framåt mellan tester så varje test startar med ren dedupe.
+const realDateNow = Date.now.bind(Date);
+let nowOffset = 0;
 
 function Probe() {
   useJobSeekerBackgroundSync();
@@ -118,6 +124,8 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
   beforeEach(() => {
     localStorage.clear();
     h.registrations.length = 0;
+    nowOffset += 60_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => realDateNow() + nowOffset);
     h.readTables.length = 0;
     cachedWeather = null;
     preloadWeatherLocation.mockClear();
@@ -135,6 +143,7 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
   });
 
   afterEach(() => {
+    vi.mocked(Date.now).mockRestore?.();
     cleanup();
   });
 
@@ -227,6 +236,8 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
     expect(preloadWeatherLocation).not.toHaveBeenCalled();
 
     cleanup();
+    // Flytta klockan förbi 2s-dedupen inför andra fasen.
+    nowOffset += 60_000;
     cachedWeather = { timestamp: Date.now() - 60 * 60 * 1000 };
     renderProbe();
     await settle();

@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useLayoutEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
+import { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 import { User, Session, RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -39,15 +40,16 @@ interface UserRoleData {
  * Kräver inloggad användare, en roll som tillhör exakt samma användare och
  * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
  */
-export const canRefreshEmployerStats = (
-  currentUser: { id: string } | null | undefined,
-  role: { user_id?: string; role?: UserRole | string } | null | undefined
-): boolean => {
-  if (!currentUser?.id) return false;
-  if (!role) return false;
-  if (role.user_id !== currentUser.id) return false;
-  return role.role === 'employer';
-};
+/**
+ * Modulglobal kontoauktoritet: vilket konto som just nu äger AuthProvider.
+ * Används för att stoppa redan startade async-refreshar från ett tidigare
+ * konto innan de hinner skriva kontobundna siffror i ett nytt konto.
+ */
+let activeAccountAuthority: string | null = null;
+
+// Kontobundna rollkontroller bor i @/lib/roleOwnership och re-exporteras här
+// för bakåtkompatibilitet med befintliga konsumenter/tester.
+export { canRefreshEmployerStats } from '@/lib/roleOwnership';
 
 interface Organization {
   id: string;
@@ -208,6 +210,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
+
+  // 🔒 KONTOAUKTORITET: sätts synkront före övriga effekter i samma commit, så
+  // att refreshar som startades av ett tidigare konto kan känna igen att de
+  // inte längre äger vyn.
+  useLayoutEffect(() => {
+    activeAccountAuthority = user?.id ?? null;
+    return () => {
+      if (activeAccountAuthority === (user?.id ?? null)) activeAccountAuthority = null;
+    };
+  }, [user?.id]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
@@ -2008,6 +2020,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
+    // 🔒 KONTOBUNDEN AUKTORITET: allt kontospecifikt nedan får bara skrivas om
+    // detta konto fortfarande äger vyn. Ett svar som landar efter A→B eller
+    // efter utloggning skulle annars skriva A:s siffror i B:s gränssnitt.
+    const startUserId = user?.id ?? null;
+    const stillOwner = () => activeAccountAuthority === startUserId;
     try {
       // 🔒 SKALA: tidigare laddades ALLA aktiva annonser ner till webbläsaren och
       // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
@@ -2034,12 +2051,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
       // Hämta antal sparade jobb för användaren (alla, inklusive utgångna)
-      if (user) {
+      if (user && stillOwner()) {
         const { count: savedJobsCount } = await supabase
           .from('saved_jobs')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id);
-        
+        if (!stillOwner()) return;
+
         const newSavedJobs = savedJobsCount || 0;
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
@@ -2060,6 +2078,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           // Tyst fel — behåller tidigare värde
         }
+        if (!stillOwner()) return;
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
 
@@ -2068,7 +2087,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
           .eq('applicant_id', user.id);
-        
+        if (!stillOwner()) return;
+
         const appCount = myApplications || 0;
         setPreloadedMyApplications(appCount);
         try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
@@ -2284,6 +2304,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [user, userRole?.role, loading]);
 
+  // Kontobunden jobbsökarroll — beräknas i render så lyssnareffekten bara
+  // behöver ett stabilt booleskt beroende.
+  const hasOwnedJobSeekerRole = isOwnedJobSeekerRole(user, userRole);
+
   // Realtime-prenumerationer för räknare med tyst felhantering
   useEffect(() => {
     if (!user) return;
@@ -2394,7 +2418,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // REPLICA IDENTITY FULL, så filtret gäller även DELETE. Varken
     // useJobSeekerBackgroundSync eller JobSeekerStatsCard får duplicera dem.
     // En burst från båda lyssnarna koalesceras till EN uppdatering.
-    const isJobSeeker = userRole?.role === 'job_seeker';
+    // Fail-closed: rollen måste ägas av exakt den inloggade användaren, annars
+    // kan A:s kvarhängande roll kortvarigt skapa lyssnare för B.
+    const isJobSeeker = hasOwnedJobSeekerRole;
     const listenerUserId = user.id;
     let jobSeekerCountsTimer: ReturnType<typeof setTimeout> | null = null;
     let jobSeekerListenersActive = isJobSeeker;
@@ -2408,6 +2434,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshSidebarCounts();
         queryClient.invalidateQueries({
           queryKey: ['jobseeker-dashboard-stats', listenerUserId],
+          exact: true,
         });
       }, 1200);
     };
@@ -2544,7 +2571,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (reviewsChannel) supabase.removeChannel(reviewsChannel);
       if (myCandidatesChannel) supabase.removeChannel(myCandidatesChannel);
     };
-  }, [user, userRole?.role, refreshSidebarCounts, refreshEmployerStats, queryClient]);
+  }, [user, userRole?.role, hasOwnedJobSeekerRole, refreshSidebarCounts, refreshEmployerStats, queryClient]);
 
 
   const value: AuthContextType = {

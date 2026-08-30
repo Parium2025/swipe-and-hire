@@ -1,4 +1,4 @@
-import { memo, useMemo, useEffect } from 'react';
+import { memo, useMemo, useEffect, useRef } from 'react';
 import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,6 +83,21 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
   // AuthProvider äger de användarfiltrerade lyssnarna globalt och invaliderar
   // exakt ['jobseeker-dashboard-stats', user.id]. Kortet reagerar bara på
   // tabbfokus när Home faktiskt är aktivt.
+  // 🔄 REAKTIVERING: queryn har staleTime Infinity, så en varm cache skulle
+  // annars aldrig uppdateras när Home göms och visas igen (och ett realtime-
+  // event missats under tiden). Endast en äkta false → true triggar — ref-
+  // guarden hindrar dubbelhämtning vid initial mount med isActive=true.
+  const wasActiveRef = useRef(isActive);
+  useEffect(() => {
+    const wasActive = wasActiveRef.current;
+    wasActiveRef.current = isActive;
+    if (!user?.id || !isActive || wasActive) return;
+    queryClient.invalidateQueries({
+      queryKey: ['jobseeker-dashboard-stats', user.id],
+      exact: true,
+    });
+  }, [isActive, user?.id, queryClient]);
+
   useEffect(() => {
     if (!user?.id || !isActive) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -90,7 +105,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused, liveInterviewsC
       if (timer) return;
       timer = setTimeout(() => {
         timer = null;
-        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', user.id], exact: true });
       }, 1200);
     };
     const handleVisibility = () => {
