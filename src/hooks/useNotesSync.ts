@@ -37,6 +37,12 @@ interface PendingEnvelope {
 
 const SAVE_DEBOUNCE_MS = 1200;
 
+/** Query result plus the metadata of the exact request that produced it. */
+interface NoteQueryPayload {
+  meta: { epoch: number; user: string | null; ack: number };
+  row: { id: string; content: string | null } | null;
+}
+
 // ---- exception-safe storage primitives (private/incognito browsers) ----
 function storageGet(key: string): string | null {
   try {
@@ -137,7 +143,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
   const ackSeqRef = useRef(0);
   const wantedRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const queryMetaRef = useRef<{ epoch: number; user: string | null; ack: number } | null>(null);
+  
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
@@ -207,10 +213,11 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     return () => window.removeEventListener('storage', onStorage);
   }, [cacheKey, userId]);
 
-  // Fetch existing note
-  const { data: noteData, isFetched, isSuccess } = useQuery({
+  // Fetch existing note. The metadata is bound to THIS request's result, so a
+  // late result from another account/request can never describe another one.
+  const { data: queryPayload, isFetched, isSuccess } = useQuery({
     queryKey: [queryKey, userId],
-    queryFn: async () => {
+    queryFn: async (): Promise<NoteQueryPayload> => {
       const capturedEpoch = epochRef.current;
       const capturedUser = userId;
       const capturedAck = ackSeqRef.current;
@@ -220,29 +227,43 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         .eq(ownerColumn, userId!)
         .maybeSingle();
       if (error) throw error;
-      queryMetaRef.current = { epoch: capturedEpoch, user: capturedUser, ack: capturedAck };
-      return data as { id: string; content: string | null } | null;
+      return {
+        meta: { epoch: capturedEpoch, user: capturedUser, ack: capturedAck },
+        row: (data as { id: string; content: string | null } | null) ?? null,
+      };
     },
     enabled: !!userId,
     staleTime: 30000,
     refetchOnMount: true,
   });
 
+  const noteData = queryPayload?.row ?? null;
+
+  // The payload that produced the current render (metadata bound to its own request).
+  const payloadRef = useRef<NoteQueryPayload | null>(null);
+  payloadRef.current = queryPayload ?? null;
+  // Value-based dependency: an identical server snapshot is not re-applied.
+  const serverValueDep = isSuccess && queryPayload ? (queryPayload.row?.content ?? '') : null;
+
   // Sync server value into clean cache — ONLY on a successful query.
   useEffect(() => {
     if (!userId || !cacheKey) return;
-    if (!isSuccess) return; // query errors are never a "successful empty note"
-    const meta = queryMetaRef.current;
+    if (serverValueDep === null) return; // query errors are never a "successful empty note"
+    const payload = payloadRef.current;
+    if (!payload) return;
+    const meta = payload.meta;
     // A read that started before the last acknowledged local save is stale.
-    if (!meta || meta.epoch !== epochRef.current || meta.user !== userId || meta.ack !== ackSeqRef.current) return;
-    const serverContent = noteData?.content ?? '';
+    if (meta.epoch !== epochRef.current || meta.user !== userId || meta.ack !== ackSeqRef.current) return;
+    const serverContent = payload.row?.content ?? '';
     serverContentRef.current = serverContent;
     if (!hasLocalEditsRef.current) {
       storageSet(cacheKey, serverContent);
       contentRef.current = serverContent;
       setContent(serverContent);
     }
-  }, [noteData, isSuccess, cacheKey, userId]);
+  }, [serverValueDep, cacheKey, userId]);
+
+
 
   // Realtime sync — listen for changes from other devices
   useEffect(() => {

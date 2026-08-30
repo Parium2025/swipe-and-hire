@@ -369,4 +369,74 @@ describe('useNotesSync — race hardening', () => {
     await waitFor(() => expect(upsertCalls.length).toBe(1));
     expect(channels.length).toBe(1);
   });
+
+  // ── 7. query metadata must be bound to its own request ──────────────
+  it("a late account A query result cannot suppress account B's server row", async () => {
+    mockUser = { id: 'a' };
+    const qA = deferred<QueryResult>();
+    const qB = deferred<QueryResult>();
+    let call = 0;
+    queryImpl = () => { call += 1; return call === 1 ? qA.promise : qB.promise; };
+
+    const { result, rerender } = renderNotes();
+    await waitFor(() => expect(call).toBe(1));
+
+    localStorage.setItem(cleanKey('b'), 'B CACHE');
+    mockUser = { id: 'b' };
+    rerender();
+    await waitFor(() => expect(call).toBe(2));
+    expect(result.current.content).toBe('B CACHE');
+
+    // B resolves first, A's stale request completes before effects flush.
+    await act(async () => {
+      qB.resolve({ data: { id: '2', content: 'B SERVER' }, error: null });
+      await Promise.resolve();
+      qA.resolve({ data: { id: '1', content: 'A SERVER' }, error: null });
+      await Promise.resolve();
+    });
+    await act(async () => { vi.advanceTimersByTime(50); });
+
+    await waitFor(() => expect(result.current.content).toBe('B SERVER'));
+    expect(localStorage.getItem(cleanKey('b'))).toBe('B SERVER');
+  });
+
+  it("applies B's first server row exactly once after a normal A→B switch", async () => {
+    mockUser = { id: 'a' };
+    let call = 0;
+    queryImpl = async () => {
+      call += 1;
+      return call === 1
+        ? { data: { id: '1', content: 'A SERVER' }, error: null }
+        : { data: { id: '2', content: 'B SERVER' }, error: null };
+    };
+
+    const { result, rerender } = renderNotes();
+    await waitFor(() => expect(result.current.content).toBe('A SERVER'));
+
+    localStorage.setItem(cleanKey('b'), 'B CACHE');
+    mockUser = { id: 'b' };
+    rerender();
+
+    await waitFor(() => expect(result.current.content).toBe('B SERVER'));
+    expect(localStorage.getItem(cleanKey('b'))).toBe('B SERVER');
+    expect(localStorage.getItem(cleanKey('a'))).toBe('A SERVER');
+  });
+
+  it('a same-user query started before a local save is still rejected', async () => {
+    mockUser = { id: 'u1' };
+    const q = deferred<QueryResult>();
+    queryImpl = () => q.promise;
+
+    const { result } = renderNotes();
+    act(() => { result.current.handleChange('LOCAL B'); });
+    await act(async () => { vi.advanceTimersByTime(1500); });
+    await waitFor(() => expect(localStorage.getItem(cleanKey('u1'))).toBe('LOCAL B'));
+
+    await act(async () => { q.resolve({ data: { id: '1', content: 'STALE A' }, error: null }); await Promise.resolve(); });
+    await act(async () => { vi.advanceTimersByTime(50); });
+
+    expect(result.current.content).toBe('LOCAL B');
+    expect(localStorage.getItem(cleanKey('u1'))).toBe('LOCAL B');
+  });
 });
+
