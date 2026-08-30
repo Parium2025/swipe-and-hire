@@ -239,21 +239,30 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   const noteData = queryPayload?.row ?? null;
 
+  // The payload that produced the current render (metadata bound to its own request).
+  const payloadRef = useRef<NoteQueryPayload | null>(null);
+  payloadRef.current = queryPayload ?? null;
+  // Value-based dependency: an identical server snapshot is not re-applied.
+  const serverValueDep = isSuccess && queryPayload ? (queryPayload.row?.content ?? '') : null;
+
   // Sync server value into clean cache — ONLY on a successful query.
   useEffect(() => {
     if (!userId || !cacheKey) return;
-    if (!isSuccess || !queryPayload) return; // query errors are never a "successful empty note"
-    const meta = queryPayload.meta;
+    if (serverValueDep === null) return; // query errors are never a "successful empty note"
+    const payload = payloadRef.current;
+    if (!payload) return;
+    const meta = payload.meta;
     // A read that started before the last acknowledged local save is stale.
     if (meta.epoch !== epochRef.current || meta.user !== userId || meta.ack !== ackSeqRef.current) return;
-    const serverContent = queryPayload.row?.content ?? '';
+    const serverContent = payload.row?.content ?? '';
     serverContentRef.current = serverContent;
     if (!hasLocalEditsRef.current) {
       storageSet(cacheKey, serverContent);
       contentRef.current = serverContent;
       setContent(serverContent);
     }
-  }, [queryPayload, isSuccess, cacheKey, userId]);
+  }, [serverValueDep, cacheKey, userId]);
+
 
 
   // Realtime sync — listen for changes from other devices
