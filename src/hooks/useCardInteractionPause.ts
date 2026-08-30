@@ -17,6 +17,8 @@ export function useCardInteractionPause({
 }: UseCardInteractionPauseOptions) {
   const resumeTimeoutRef = useRef<number | null>(null);
   const safetyTimeoutRef = useRef<number | null>(null);
+  const activeRef = useRef(active);
+  activeRef.current = active;
 
   const clearResumeTimeout = useCallback(() => {
     if (resumeTimeoutRef.current !== null) {
@@ -33,26 +35,31 @@ export function useCardInteractionPause({
   }, []);
 
   const pauseNow = useCallback(() => {
+    if (!activeRef.current) return;
     clearResumeTimeout();
     clearSafetyTimeout();
     setIsPaused(true);
     // Failsafe: if nothing resumes within maxPauseMs, auto-resume
     safetyTimeoutRef.current = window.setTimeout(() => {
+      if (!activeRef.current) return;
       setIsPaused(false);
       safetyTimeoutRef.current = null;
     }, maxPauseMs);
   }, [clearResumeTimeout, clearSafetyTimeout, setIsPaused, maxPauseMs]);
 
   const resumeNow = useCallback(() => {
+    if (!activeRef.current) return;
     clearResumeTimeout();
     clearSafetyTimeout();
     setIsPaused(false);
   }, [clearResumeTimeout, clearSafetyTimeout, setIsPaused]);
 
   const resumeWithDelay = useCallback(() => {
+    if (!activeRef.current) return;
     clearResumeTimeout();
     clearSafetyTimeout();
     resumeTimeoutRef.current = window.setTimeout(() => {
+      if (!activeRef.current) return;
       setIsPaused(false);
       resumeTimeoutRef.current = null;
     }, touchResumeDelayMs);
@@ -60,10 +67,13 @@ export function useCardInteractionPause({
 
   useEffect(() => {
     if (!active) {
+      // Inaktivering: rensa timers OCH normalisera pausläget direkt —
+      // annars kan rotationen vara avstängd för alltid vid återaktivering.
       clearResumeTimeout();
       clearSafetyTimeout();
+      setIsPaused(false);
     }
-  }, [active, clearResumeTimeout, clearSafetyTimeout]);
+  }, [active, clearResumeTimeout, clearSafetyTimeout, setIsPaused]);
 
   useEffect(() => {
     return () => { clearResumeTimeout(); clearSafetyTimeout(); };
