@@ -153,7 +153,39 @@ export async function notifyAppFailure(failure: AppFailure, ownerUserId: string)
   storeStatusAlert(alert);
 }
 
+// Skyddsnät mot rapporteringsstormar: max antal RPC-anrop per fönster samt
+// en circuit breaker som pausar rapportering efter upprepade fel.
+const EXCEPTION_WINDOW_MS = 60 * 1000;
+const EXCEPTION_MAX_PER_WINDOW = 5;
+const EXCEPTION_BREAKER_FAILURES = 3;
+const EXCEPTION_BREAKER_COOLDOWN_MS = 5 * 60 * 1000;
+
+let exceptionWindowStart = 0;
+let exceptionWindowCount = 0;
+let exceptionConsecutiveFailures = 0;
+let exceptionBreakerUntil = 0;
+
+export function __resetAppExceptionThrottleForTests() {
+  exceptionWindowStart = 0;
+  exceptionWindowCount = 0;
+  exceptionConsecutiveFailures = 0;
+  exceptionBreakerUntil = 0;
+}
+
+function canReportException(now: number): boolean {
+  if (now < exceptionBreakerUntil) return false;
+  if (now - exceptionWindowStart >= EXCEPTION_WINDOW_MS) {
+    exceptionWindowStart = now;
+    exceptionWindowCount = 0;
+  }
+  if (exceptionWindowCount >= EXCEPTION_MAX_PER_WINDOW) return false;
+  exceptionWindowCount += 1;
+  return true;
+}
+
 export async function reportAppException(failure: AppFailure, ownerUserId: string): Promise<void> {
+  if (!canReportException(Date.now())) return;
+
   const payload = {
     owner_user_id: ownerUserId,
     environment: import.meta.env.MODE || 'production',
