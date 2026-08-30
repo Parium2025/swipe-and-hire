@@ -39,6 +39,11 @@ interface JobSeekerInterviewsCardProps {
   isError?: boolean;
   /** Kör om queryns hämtning. */
   onRetry?: () => void;
+  /**
+   * Delad klocka från grid:et. Skickas den in skapar kortet INGET eget
+   * minutintervall — en klocka per Home-vy i stället för flera.
+   */
+  now?: number;
 }
 
 const getLocationIcon = (type: LocationType) => {
@@ -59,9 +64,11 @@ const getLocationLabel = (type: LocationType) => {
   }
 };
 
-export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = false, onRetry }: JobSeekerInterviewsCardProps) => {
+export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = false, onRetry, now }: JobSeekerInterviewsCardProps) => {
   const navigate = useNavigate();
-  const now = useMinuteTick();
+  // Egen tick endast som fallback när ingen delad klocka skickats in.
+  const fallbackTick = useMinuteTick(now === undefined);
+  const currentNow = now ?? fallbackTick;
 
   const liveInterviews = interviews;
   const upcomingInterviews = liveInterviews.slice(0, 5);
@@ -133,8 +140,8 @@ export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = 
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
               {upcomingInterviews.map((interview: any) => {
                 const LocationIcon = getLocationIcon(interview.location_type);
-                const timeUntil = getTimeUntil(interview.scheduled_at, now);
-                const isUrgent = isInterviewUrgent(interview.scheduled_at, now);
+                const timeUntil = getTimeUntil(interview.scheduled_at, currentNow);
+                const isUrgent = isInterviewUrgent(interview.scheduled_at, currentNow);
                 const meetingUrl = getMeetingUrl(interview.location_details);
 
                 const companyName = interview.job_postings?.workplace_name?.trim() || 'Okänt företag';
