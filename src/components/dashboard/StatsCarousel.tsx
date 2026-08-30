@@ -1,5 +1,6 @@
 import { memo, useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
