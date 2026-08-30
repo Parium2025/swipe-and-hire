@@ -138,7 +138,7 @@ describe('useJobSeekerBackgroundSync — ägarskap och cache-färskhet', () => {
   it('färsk cache: flera visibility-events ger noll job_postings-reads', async () => {
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify({ items: [{ id: 'cached' }], timestamp: Date.now() }),
+      JSON.stringify({ items: [{ id: 'cached' }], timestamp: Date.now(), ownerId: 'js-1' }),
     );
     renderProbe();
     await settle();
@@ -156,7 +156,7 @@ describe('useJobSeekerBackgroundSync — ägarskap och cache-färskhet', () => {
   it('gammal cache: exakt en read som uppdaterar localStorage och querydata', async () => {
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify({ items: [{ id: 'old' }], timestamp: Date.now() - 10 * 60 * 1000 }),
+      JSON.stringify({ items: [{ id: 'old' }], timestamp: Date.now() - 10 * 60 * 1000, ownerId: 'js-1' }),
     );
     renderProbe();
     await settle();
@@ -181,7 +181,7 @@ describe('useJobSeekerBackgroundSync — ägarskap och cache-färskhet', () => {
   it('explicit global trigger forcerar hämtning även med färsk cache', async () => {
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify({ items: [{ id: 'cached' }], timestamp: Date.now() }),
+      JSON.stringify({ items: [{ id: 'cached' }], timestamp: Date.now(), ownerId: 'js-1' }),
     );
     renderProbe();
     await settle();
