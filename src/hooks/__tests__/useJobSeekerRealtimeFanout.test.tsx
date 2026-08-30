@@ -15,6 +15,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 interface Registration {
   table?: string;
   filter?: string;
+  event?: string;
 }
 
 interface MockChannel {
