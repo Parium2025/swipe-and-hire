@@ -198,9 +198,23 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
     expect(queryClient.getQueryData(['candidate-interviews', 'js-1'])).toBeUndefined();
   });
 
+  // Modulglobal 2s-throttle i hooken: tvingad focus-preload (force=true) kringgår
+  // den så positiva kontroller blir deterministiska oavsett testordning.
+  const forceFocusPreload = async () => {
+    await act(async () => {
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+      await new Promise((r) => setTimeout(r, 80));
+    });
+  };
+
   it('positiv kontroll: available-jobs-warmup körs fortfarande', async () => {
     renderProbe();
     await settle();
+    await forceFocusPreload();
 
     expect(h.readTables.filter((t) => t === 'job_postings').length).toBeGreaterThan(0);
   });
@@ -209,12 +223,14 @@ describe('useJobSeekerBackgroundSync — dataägarskap', () => {
     cachedWeather = { timestamp: Date.now() };
     renderProbe();
     await settle();
+    await forceFocusPreload();
     expect(preloadWeatherLocation).not.toHaveBeenCalled();
 
     cleanup();
     cachedWeather = { timestamp: Date.now() - 60 * 60 * 1000 };
     renderProbe();
     await settle();
+    await forceFocusPreload();
     expect(preloadWeatherLocation).toHaveBeenCalled();
   });
 });
