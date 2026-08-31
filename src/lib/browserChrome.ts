@@ -104,12 +104,18 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   // iOS Safari kan ignorera första dynamiska theme-color-uppdateringen under
   // SPA-nav. Re-applicera efter att målsidan har landat visuellt.
-  [80, 260, 640].forEach((delay) => {
-    window.setTimeout(() => {
-      setChromeCssColor(color);
-      setThemeColor(color);
-      notifyChromeStrips(pathname, color);
-    }, delay);
+  // Gamla timers avbryts först — annars kan en tidigare rutts färg skrivas
+  // tillbaka efter en snabb back-navigation (blå färg kvar på landningssidan).
+  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
+  pendingSyncTimers = [];
+  [80, 260, 640, 1200].forEach((delay) => {
+    pendingSyncTimers.push(
+      window.setTimeout(() => {
+        setChromeCssColor(color);
+        setThemeColor(color);
+        notifyChromeStrips(pathname, color);
+      }, delay)
+    );
   });
 
 };
@@ -124,7 +130,14 @@ export const mountChromePopstateGuard = () => {
   const resync = () => syncBrowserChrome(window.location.pathname);
   window.addEventListener('pageshow', resync);
   window.addEventListener('popstate', resync);
+  // Tillbaka från en extern sida/app-växling: Safari kan ha kvar den gamla
+  // sampladefärgen. Re-synka så snart sidan blir synlig igen.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') resync();
+  });
+  window.addEventListener('focus', resync);
 };
+
 
 export const noteChromePath = (_pathname: string) => {
   /* noop */
