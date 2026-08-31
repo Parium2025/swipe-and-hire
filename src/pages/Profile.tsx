@@ -1915,25 +1915,25 @@ const Profile = () => {
           </div>
           <div className="p-4 flex flex-col items-center space-y-4">
             <div className="relative">
-              {(isProfileVideo && !!videoUrl) ? (
+              {displayIsVideo ? (
                 <ProfileVideo
-                  videoUrl={signedVideoUrl}
+                  videoUrl={displayVideoUrl}
                   coverImageUrl={signedCoverUrl}
-                  posterUrl={videoPosterUrl}
+                  posterUrl={displayVideoPoster}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
                   countdownVariant="circle"
                 />
               ) : (
-                <div 
-                  className="cursor-pointer" 
-                  onClick={() => document.getElementById('profile-image')?.click()}
+                <div
+                  className={activeCandidateProfile ? '' : 'cursor-pointer'}
+                  onClick={activeCandidateProfile ? undefined : () => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
-                    {(cachedProfileImageUrl || signedProfileImageUrl) ? (
-                      <AvatarImage 
-                        src={cachedProfileImageUrl || signedProfileImageUrl || undefined} 
+                    {displayImageUrl ? (
+                      <AvatarImage
+                        src={displayImageUrl || undefined}
                         alt="Profilbild"
                         className="object-cover"
                         decoding="sync"
@@ -1942,7 +1942,7 @@ const Profile = () => {
                         draggable={false}
                       />
                     ) : null}
-                    {!(cachedProfileImageUrl || signedProfileImageUrl) && (
+                    {!displayImageUrl && (
                       <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
