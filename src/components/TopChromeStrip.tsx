@@ -20,7 +20,6 @@ const TopChromeStrip = () => {
   const [isTouch, setIsTouch] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -35,18 +34,6 @@ const TopChromeStrip = () => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(display-mode: standalone)');
     const apply = () => setIsStandalone(mq.matches);
-    apply();
-    mq.addEventListener?.('change', apply);
-    return () => mq.removeEventListener?.('change', apply);
-  }, []);
-
-  // iPad / tablet detection — coarse pointer + 768–1366px width.
-  // iPad Safari låter inte webbsidan måla över den native URL-raden pålitligt.
-  // Därför ska vi INTE lägga en tjock overlay här — den hamnar bara över UI:t.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(pointer: coarse) and (min-width: 768px) and (max-width: 1366px)');
-    const apply = () => setIsTablet(mq.matches);
     apply();
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
@@ -73,8 +60,12 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
-  const shouldShowStrip = isTouch && !(isTablet && !isStandalone);
-  const stripInset = isStandalone ? '8px' : '18px';
+  // I vanlig iOS Safari börjar viewporten nedanför den native statusraden.
+  // En fixed remsa här målar därför 18 px INNE i sidan och blir exakt den
+  // horisontella rand som syns efter logout. Native chrome färgas i stället
+  // via theme-color. Endast installerat app-läge behöver en egen safe-area-yta.
+  const shouldShowStrip = isTouch && isStandalone;
+  const stripInset = '8px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
