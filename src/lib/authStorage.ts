@@ -45,6 +45,38 @@ const extractUserId = (value: string): string | null => {
   }
 };
 
+/**
+ * Skyddsnät mot trasiga sessionsvärden (avbruten skrivning, korsad kopiering,
+ * full lagring). Ett halvskrivet värde skickas annars vidare till GoTrue som
+ * en token utan tre JWT-segment → 403 bad_jwt och användaren ser sig utloggad.
+ * Vi kastar bara värden som bevisligen är trasiga.
+ */
+const isUsableSessionValue = (value: string | null | undefined): value is string => {
+  if (!value) return false;
+  const raw = value.startsWith('base64-') ? value.slice(7) : value;
+  let text = raw;
+  if (value.startsWith('base64-')) {
+    try {
+      text = atob(raw);
+    } catch {
+      return false;
+    }
+  }
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return false;
+  }
+  if (!parsed || typeof parsed !== 'object') return false;
+  const token = parsed.access_token ?? parsed.currentSession?.access_token;
+  // Saknas access_token helt låter vi GoTrue avgöra; finns den måste den vara en JWT.
+  if (token === undefined || token === null) return true;
+  return typeof token === 'string' && token.split('.').length === 3;
+};
+
+
+
 
 /**
  * Module-level flag shared with useInactivityTimeout.
@@ -297,17 +329,24 @@ export class AuthStorageAdapter implements Storage {
       // 1. Primary: per-tab sessionStorage
       let value: string | null = null;
       try { value = sessionStorage.getItem(key); } catch {}
-      if (value) return value;
+      if (value) {
+        if (isUsableSessionValue(value)) return value;
+        // Trasigt värde: släng det i stället för att skicka en ogiltig token.
+        try { sessionStorage.removeItem(key); } catch {}
+      }
 
       // 2. Fallback: Remember Me snapshot in localStorage (renamed key —
       //    Supabase does NOT watch this key, so it won't trigger cross-tab sync).
       if (shouldRememberUser()) {
         const snap = readLocal(snapshotKey(key));
         if (snap) {
-          // Hydrate sessionStorage so subsequent reads are fast and
-          // Supabase's normal flow continues from sessionStorage only.
-          try { sessionStorage.setItem(key, snap); } catch {}
-          return snap;
+          if (isUsableSessionValue(snap)) {
+            // Hydrate sessionStorage so subsequent reads are fast and
+            // Supabase's normal flow continues from sessionStorage only.
+            try { sessionStorage.setItem(key, snap); } catch {}
+            return snap;
+          }
+          removeLocal(snapshotKey(key));
         }
       }
 
@@ -318,6 +357,10 @@ export class AuthStorageAdapter implements Storage {
       try {
         const legacy = localStorage.getItem(key);
         if (legacy) {
+          if (!isUsableSessionValue(legacy)) {
+            try { localStorage.removeItem(key); } catch {}
+            return null;
+          }
           try { sessionStorage.setItem(key, legacy); } catch {}
           if (shouldRememberUser()) {
             writeLocal(snapshotKey(key), legacy);
@@ -326,6 +369,7 @@ export class AuthStorageAdapter implements Storage {
           return legacy;
         }
       } catch {}
+
 
       return null;
     }
@@ -346,7 +390,7 @@ export class AuthStorageAdapter implements Storage {
       // Snapshot in localStorage under renamed key — only if Remember Me is on
       // AND denna session äger snapshoten. En gammal flik med ett annat konto
       // får aldrig skriva över det senast inloggade kontots snapshot.
-      if (shouldRememberUser()) {
+      if (shouldRememberUser() && isUsableSessionValue(value)) {
         const owner = readLocal(SNAPSHOT_OWNER_KEY);
         const sessionUserId = extractUserId(value);
         if (!owner || !sessionUserId || owner === sessionUserId) {
