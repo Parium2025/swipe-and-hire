@@ -115,7 +115,10 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Prop
       toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
       return;
     }
-    if (!editing && 'data' in res && res.data) setActiveId(res.data.id);
+    if (!editing && 'data' in res) {
+      const created = (res as { data?: CandidateProfile }).data;
+      if (created) setActiveId(created.id);
+    }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
   };
