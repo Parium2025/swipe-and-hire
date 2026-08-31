@@ -35,6 +35,22 @@ const Auth = () => {
     sessionStorage.removeItem('parium-skip-splash');
   }, []);
 
+  // Måla html/body med samma auth-gradient så att inget avvikande mörkt fält
+  // syns om iOS Safari skjuter upp sidan (tangentbord / verktygsfält).
+  useEffect(() => {
+    const roots = [document.documentElement, document.body];
+    const previous = roots.map((el) => el.style.backgroundImage);
+    roots.forEach((el) => {
+      el.style.setProperty('background-image', AUTH_BACKDROP_STYLE.backgroundImage, 'important');
+    });
+    return () => {
+      roots.forEach((el, i) => {
+        el.style.removeProperty('background-image');
+        if (previous[i]) el.style.backgroundImage = previous[i];
+      });
+    };
+  }, []);
+
   // AnimatedIntro removed - index.html splash handles the loading screen now
   const [isPasswordReset, setIsPasswordReset] = useState(() => {
     try {
