@@ -189,34 +189,28 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
           </button>
         )}
       </div>
-
-      <div className="flex items-center justify-center gap-2">
-        {activeProfile ? (
-          <>
-            <button
-              type="button"
-              onClick={() => openEdit(activeProfile)}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors touch-manipulation inline-flex items-center gap-1.5"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Redigera profil
-            </button>
-            <button
-              type="button"
-              onClick={() => setPendingDelete(activeProfile)}
-              aria-label="Ta bort profil"
-              className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30 touch-manipulation"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </>
-        ) : (
-          <p className="text-center text-xs text-white">
-            Svep för att byta profil. Stjärnan visar vilken som används som standard vid ansökan
-            (max {MAX_CANDIDATE_PROFILES} profiler).
-          </p>
-        )}
       </div>
+
+      {activeProfile && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => openEdit(activeProfile)}
+            className="bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors touch-manipulation inline-flex items-center gap-1.5"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Redigera profil
+          </button>
+          <button
+            type="button"
+            onClick={() => setPendingDelete(activeProfile)}
+            aria-label="Ta bort profil"
+            className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30 touch-manipulation"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <CandidateProfileEditor
         open={editorOpen}
