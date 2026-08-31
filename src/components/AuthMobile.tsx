@@ -724,7 +724,7 @@ const AuthMobile = ({
                 */}
                 <button
                   type="button"
-                  onClick={() => navigate('/')}
+                  onClick={() => window.location.assign('/')}
                   aria-label="Gå till startsidan"
                   className="relative rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.98] transition-transform"
                 >
