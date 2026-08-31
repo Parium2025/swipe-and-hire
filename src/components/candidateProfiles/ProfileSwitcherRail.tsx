@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -8,7 +8,7 @@ import { Plus, Star, Pencil, Trash2, Video as VideoIcon, User, AlertTriangle } f
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import {
-  useCandidateProfiles, MAX_CANDIDATE_PROFILES,
+  useCandidateProfiles,
   type CandidateProfile, type CandidateProfileInput,
 } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
@@ -19,6 +19,8 @@ interface Props {
   baseImageUrl?: string | null;
   /** Om grundprofilen har en video istället för bild. */
   baseHasVideo?: boolean;
+  /** Anropas när valet ändras – null betyder att grundprofilen ("Min profil") är vald. */
+  onActiveProfileChange?: (profile: CandidateProfile | null) => void;
 }
 
 interface ChipProps {
