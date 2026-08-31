@@ -378,14 +378,15 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                 profile_image_url: imageUrl,
                 cover_image_url: coverUrl,
               })}
-              className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/10 border border-white/20 active:scale-[0.97] transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50 disabled:active:scale-100"
+              className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm font-medium text-white rounded-full bg-green-600/80 md:hover:bg-green-600 border border-transparent transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:bg-green-600/60 disabled:opacity-70"
             >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
               {saving ? 'Sparar…' : 'Spara profil'}
             </button>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/5 border border-white/10 active:scale-[0.97] transition-all duration-200 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
+              className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/10 transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt
             </button>
