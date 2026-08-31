@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import logoRings from '@/assets/parium-logo-rings.png?inline';
+import logoRings from '@/assets/parium-logo-rings.png';
 
 /**
  * Global laddningsindikator för route-/lazy-laddning.
