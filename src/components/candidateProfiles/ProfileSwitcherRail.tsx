@@ -87,7 +87,7 @@ function ProfileChip({
  * Profilväljare överst i "Profilbild/Profilvideo".
  * Svep mellan profiler på touch, sätt standard med stjärnan och skapa nya med plus-rutan.
  */
-export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Props) {
+export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props) {
   const { toast } = useToast();
   const {
     profiles, canCreateMore,
@@ -102,6 +102,12 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Prop
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
+
+  // Meddela föräldern (Profile.tsx) vilken profil som är vald så att
+  // huvudytan kan visa just den profilens bild/video.
+  useEffect(() => {
+    onActiveProfileChange?.(activeProfile);
+  }, [activeProfile, onActiveProfileChange]);
 
   const openNew = () => { setEditing(null); setEditorOpen(true); };
   const openEdit = (p: CandidateProfile) => { setEditing(p); setEditorOpen(true); };
