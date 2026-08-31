@@ -77,7 +77,7 @@ const LANDSCAPE_TOP_BIAS_MAX = 50;
 // den faktiska viewporten kortare (t.ex. 820×1120 = 0,73). Då kapar
 // object-cover några procent i SIDLED — och med `center` fördelas det lika
 // mellan vänster och höger. Lagerscenen är komponerad något till höger i
-// 3:4-mastern, så vi glider mjukt från 50 % mot 58 % i sidled ju smalare
+// 3:4-mastern, så vi glider mjukt från 50 % mot 68 % i sidled ju smalare
 // viewporten blir, vilket håller paret centrerat utan att påverka andra
 // scener märkbart. I höjd lägger 20 % merparten av bortfallet i botten
 // (golv/mark) så huvudena alltid får rum.
