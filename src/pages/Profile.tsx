@@ -46,6 +46,7 @@ import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificatio
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
 import ProfileSwitcherRail from '@/components/candidateProfiles/ProfileSwitcherRail';
+import type { CandidateProfile } from '@/hooks/useCandidateProfiles';
 
 
 import { fetchPriority } from '@/lib/fetchPriority';
@@ -1875,6 +1876,7 @@ const Profile = () => {
                 userId={user?.id}
                 baseImageUrl={signedProfileImageUrl}
                 baseHasVideo={isProfileVideo && !!videoUrl}
+                onActiveProfileChange={setActiveCandidateProfile}
               />
             )}
             
