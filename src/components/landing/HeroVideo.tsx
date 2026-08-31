@@ -187,6 +187,7 @@ const HeroVideo = () => {
     let settleTimer: number | null = null;
     const handle = () => {
       setLandscapePosition(landscapeObjectPosition());
+      setTabletPosition(tabletObjectPosition());
       const nextTier = getTier();
       if (nextTier !== tierRef.current) {
         if (settleTimer !== null) {
