@@ -16,8 +16,8 @@ export const JobSeekerNotificationSettings = () => {
   const { isEnabled, toggle, isLoading } = useNotificationPreferences();
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
-      <div className="space-y-5 md:space-y-3">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 md:p-6">
+      <div className="space-y-4 md:space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Bell className="h-4 w-4 text-white" />
           <h3 className="text-sm font-medium text-white">Aviseringar</h3>
@@ -33,29 +33,29 @@ export const JobSeekerNotificationSettings = () => {
 
 
         {/* Column headers */}
-        <div className="flex items-center justify-end gap-4 pb-1 border-b border-white/10">
-          <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
+        <div className="flex items-center justify-end gap-2 md:gap-4 pb-1 border-b border-white/10">
+          <div className="flex w-11 md:w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
             <Bell className="h-3 w-3 shrink-0" />
             <span>I appen</span>
           </div>
-          <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
+          <div className="flex w-11 md:w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
             <Smartphone className="h-3 w-3 shrink-0" />
             <span>Push</span>
           </div>
-          <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
+          <div className="flex w-11 md:w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
             <Mail className="h-3 w-3 shrink-0" />
             <span>Mejl</span>
           </div>
         </div>
 
         {JOBSEEKER_NOTIFICATION_TYPES.map(({ type, label, description, hasEmail }) => (
-          <div key={type} className="flex items-center justify-between gap-3">
+          <div key={type} className="flex items-center justify-between gap-2 md:gap-3">
             <div className="flex-1 min-w-0">
-              <Label className="text-sm text-white">{label}</Label>
-              <p className="text-sm text-white">{description}</p>
+              <Label className="text-sm font-medium leading-snug text-white">{label}</Label>
+              <p className="text-[13px] md:text-sm leading-snug text-white">{description}</p>
             </div>
-            <div className="flex items-center gap-4 shrink-0">
-              <div className="flex w-14 justify-center">
+            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+              <div className="flex w-11 md:w-14 justify-center">
                 <Switch
                   checked={isEnabled(type, 'in_app')}
                   onCheckedChange={(checked) => toggle(type, checked, 'in_app')}
@@ -63,7 +63,7 @@ export const JobSeekerNotificationSettings = () => {
                   aria-label={`I appen: ${label}`}
                 />
               </div>
-              <div className="flex w-14 justify-center">
+              <div className="flex w-11 md:w-14 justify-center">
                 <Switch
                   checked={isEnabled(type, 'push')}
                   onCheckedChange={(checked) => toggle(type, checked, 'push')}
@@ -71,7 +71,7 @@ export const JobSeekerNotificationSettings = () => {
                   aria-label={`Push: ${label}`}
                 />
               </div>
-              <div className="flex w-14 justify-center">
+              <div className="flex w-11 md:w-14 justify-center">
                 {hasEmail && (
                   <Switch
                     checked={isEnabled(type, 'email')}
