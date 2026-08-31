@@ -1,12 +1,15 @@
 const LANDING_CHROME_COLOR = '#2a2a2a';
 const PARIUM_CHROME_COLOR = '#001935';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
+// Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.
+const AUTH_CHROME_COLOR = '#062B5E';
 const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
+const isAuthPath = (pathname: string) => pathname === '/auth';
 
 const removeLegacySentinels = () => {
   ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
@@ -80,11 +83,14 @@ let pendingSyncTimers: number[] = [];
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const isAudienceLanding = isAudienceLandingPath(pathname);
+  const isAuth = isAuthPath(pathname);
   const color = isLandingVideo
     ? LANDING_CHROME_COLOR
     : isAudienceLanding
       ? AUDIENCE_LANDING_CHROME_COLOR
-      : PARIUM_CHROME_COLOR;
+      : isAuth
+        ? AUTH_CHROME_COLOR
+        : PARIUM_CHROME_COLOR;
 
   removeLegacySentinels();
 

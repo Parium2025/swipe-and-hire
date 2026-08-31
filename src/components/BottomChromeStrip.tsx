@@ -5,6 +5,7 @@ import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
 const AUDIENCE_LANDING_COLOR = '#001F3D';
+const AUTH_COLOR = '#062B5E';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
@@ -49,7 +50,9 @@ const BottomChromeStrip = () => {
     ? LANDING_COLOR
     : isAudienceLandingPath(location.pathname)
       ? AUDIENCE_LANDING_COLOR
-      : PARIUM_COLOR;
+      : isAuthPath(location.pathname)
+        ? AUTH_COLOR
+        : PARIUM_COLOR;
 
   useEffect(() => {
     setForcedColor(null);
@@ -91,7 +94,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isTabletLandscape, location.pathname]);
 
-  if (!isTouch || isAuthPath(location.pathname)) return null;
+  if (!isTouch) return null;
 
   return (
     <div
