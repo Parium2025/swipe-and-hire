@@ -650,64 +650,65 @@ export function useConversations() {
     if (!user) return;
 
     const idList = conversationIdsKey ? conversationIdsKey.split(',') : [];
+    const knownIds = new Set(idList);
+    // Postgres-filter har en längdgräns; över 100 id:n faller vi tillbaka på
+    // ofiltrerad kanal + klientfiltrering (extremfall).
+    const messageFilter =
+      idList.length > 0 && idList.length <= 100
+        ? `conversation_id=in.(${idList.join(',')})`
+        : undefined;
 
-    const handleIncomingMessage = (payload: { new: unknown }) => {
-      const msg = payload.new as IncomingRealtimeMessage;
-      if (!msg?.conversation_id) return;
-
-      // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
-      //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
-      //    istället för en full omhämtning.
-      const patched = applyIncomingMessageToConversations(queryClient, user.id, msg, {
-        incrementUnread: msg.conversation_id !== activeConversationId,
-      });
-
-      if (patched) return;
-
-      // 2) Okänd konversation (ny chatt/inbjudan) → coalescad omhämtning.
-      //    Debounce 400 ms, men aldrig längre än 2 s även vid konstant flöde.
-      if (!maxWaitRef.current) {
-        maxWaitRef.current = setTimeout(() => {
-          maxWaitRef.current = null;
-          if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-            debounceRef.current = null;
-          }
-          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
-        }, 2000);
-      }
-
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        debounceRef.current = null;
-        if (maxWaitRef.current) {
-          clearTimeout(maxWaitRef.current);
-          maxWaitRef.current = null;
-        }
-        queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
-      }, 400);
-    };
-
-    let channel = createRealtimeChannel('conversations-realtime');
-
-    // Ett server-side filter per chunk om ≤100 id:n. Inga id:n ⇒ ingen
-    // meddelandebindning alls (aldrig en ofiltrerad global kanal).
-    for (const idChunk of chunk(idList, ID_CHUNK)) {
-      if (idChunk.length === 0) continue;
-      channel = channel.on(
+    const channel = createRealtimeChannel('conversations-realtime')
+      .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'conversation_messages',
-          filter: `conversation_id=in.(${idChunk.join(',')})`,
+          ...(messageFilter ? { filter: messageFilter } : {}),
         },
-        handleIncomingMessage
-      );
-    }
 
-    channel = channel
+        (payload) => {
+          const msg = payload.new as IncomingRealtimeMessage;
+          if (!msg?.conversation_id) return;
+          // Klientspärr när kanalen gick ofiltrerad (>100 konversationer).
+          if (!messageFilter && knownIds.size > 0 && !knownIds.has(msg.conversation_id)) return;
 
+
+
+          // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
+          //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
+          //    istället för en full omhämtning.
+          const patched = applyIncomingMessageToConversations(queryClient, user.id, msg, {
+            incrementUnread: msg.conversation_id !== activeConversationId,
+          });
+
+          if (patched) return;
+
+          // 2) Okänd konversation (ny chatt/inbjudan) → coalescad omhämtning.
+          //    Debounce 400 ms, men aldrig längre än 2 s även vid konstant flöde.
+          if (!maxWaitRef.current) {
+            maxWaitRef.current = setTimeout(() => {
+              maxWaitRef.current = null;
+              if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+                debounceRef.current = null;
+              }
+              queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+            }, 2000);
+          }
+
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => {
+            debounceRef.current = null;
+            if (maxWaitRef.current) {
+              clearTimeout(maxWaitRef.current);
+              maxWaitRef.current = null;
+            }
+            queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          }, 400);
+        }
+      )
       // 🔄 Multi-device-synk: läsmarkering, tystning och borttagning av
       //    egna medlemsrader speglas direkt på alla inloggade enheter.
       .on(

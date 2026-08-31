@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText, Maximize2 } from 'lucide-react';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
@@ -14,12 +14,7 @@ function countWordsAndChars(html: string) {
   return { words, chars };
 }
 
-interface JobSeekerNotesCardProps {
-  /** Home synlig? Dold Home stänger endast det expanderade fönstret. */
-  isActive?: boolean;
-}
-
-export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardProps) => {
+export const JobSeekerNotesCard = memo(() => {
   const { content, isSaving, saveFailed, lastSaved, handleChange } = useNotesSync({
     table: 'jobseeker_notes',
     ownerColumn: 'user_id',
@@ -29,31 +24,6 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
 
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  // ♿ Fokus ska tillbaka till exakt den knapp som öppnade fönstret — annars
-  // hamnar tangentbordsanvändaren på BODY när dialogen stängs.
-  const expandButtonRef = useRef<HTMLButtonElement>(null);
-  const isActiveRef = useRef(isActive);
-  isActiveRef.current = isActive;
-
-  const restoreFocusToOpener = useCallback(() => {
-    setTimeout(() => {
-      const opener = expandButtonRef.current;
-      if (!isActiveRef.current || !opener || !opener.isConnected) return;
-      if (opener.hidden || opener.getAttribute('aria-hidden') === 'true') return;
-      opener.focus();
-    }, 0);
-  }, []);
-
-  const handleExpandedOpenChange = useCallback((open: boolean) => {
-    setIsExpanded(open);
-    if (!open) restoreFocusToOpener();
-  }, [restoreFocusToOpener]);
-
-  // Dold Home får inte lämna kvar en body-portal ovanpå en annan route.
-  // Anteckningarnas innehåll, editor och sparande förblir monterade.
-  useEffect(() => {
-    if (!isActive) setIsExpanded(false);
-  }, [isActive]);
 
   const handleEditorReady = useCallback((editor: Editor) => { setNotesEditor(editor); }, []);
 
@@ -73,9 +43,6 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
             </div>
             <div className="flex-1 flex items-center justify-center gap-1 min-w-0">
               <button
-                type="button"
-                ref={expandButtonRef}
-                aria-label="Expandera anteckningar"
                 onClick={() => setIsExpanded(true)}
                 className="p-1 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               >
@@ -135,7 +102,7 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
 
       <ExpandedNotesDialog
         open={isExpanded}
-        onOpenChange={handleExpandedOpenChange}
+        onOpenChange={setIsExpanded}
         content={content}
         onChange={handleChange}
         placeholder="Skriv karriärmål, påminnelser..."

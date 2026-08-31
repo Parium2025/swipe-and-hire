@@ -35,7 +35,7 @@ export function useProfileViewStats() {
       const { data, error } = await supabase.rpc('get_profile_view_stats' as any, {
         p_user_id: userId,
       });
-      if (error) throw error;
+      if (error) return DEFAULT;
       return (data as ProfileViewStats) ?? DEFAULT;
     },
   });
@@ -56,7 +56,5 @@ export function useProfileViewStats() {
   return {
     stats: query.data ?? DEFAULT,
     isLoading: query.isLoading,
-    // Skiljer en äkta lyckad nolla från fallback-nollan vid laddning/fel.
-    isSuccess: query.isSuccess,
   };
 }

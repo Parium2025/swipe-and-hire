@@ -1,5 +1,5 @@
 import { memo, useMemo, useState, useCallback, useEffect } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { FileText, X } from 'lucide-react';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
@@ -75,9 +75,6 @@ export const ExpandedNotesDialog = memo(({
       >
         <VisuallyHidden>
           <DialogTitle>Anteckningar</DialogTitle>
-          <DialogDescription>
-            Denna dialog redigerar dina privata anteckningar.
-          </DialogDescription>
         </VisuallyHidden>
         <div className="absolute inset-0 bg-white/5 pointer-events-none" />
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
@@ -94,8 +91,6 @@ export const ExpandedNotesDialog = memo(({
             <div className="flex items-center gap-3">
               {saveIndicator}
               <button
-                type="button"
-                aria-label="Stäng anteckningar"
                 onClick={handleClose}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               >

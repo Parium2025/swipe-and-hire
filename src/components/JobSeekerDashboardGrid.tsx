@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -6,93 +6,39 @@ import { CareerTipsCard } from '@/components/dashboard/CareerTipsCard';
 import { JobSeekerStatsCard } from '@/components/dashboard/JobSeekerStatsCard';
 import { JobSeekerNotesCard } from '@/components/dashboard/JobSeekerNotesCard';
 import { JobSeekerInterviewsCard } from '@/components/dashboard/JobSeekerInterviewsCard';
-import type { DashboardInterview } from '@/components/dashboard/JobSeekerInterviewsCard';
-import { useCandidateInterviews } from '@/hooks/useInterviews';
-import { useMinuteTick } from '@/hooks/useMinuteTick';
-import { isInterviewOver } from '@/lib/interviewTime';
 
 /** Wraps carousel cards so their pause-state doesn't re-render siblings */
-const TipsCardWrapper = memo(({ isActive = true }: { isActive?: boolean }) => {
+const TipsCardWrapper = memo(() => {
   const [isPaused, setIsPaused] = useState(false);
-  return <CareerTipsCard isPaused={isPaused} setIsPaused={setIsPaused} isActive={isActive} />;
+  return <CareerTipsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
 });
 TipsCardWrapper.displayName = 'TipsCardWrapper';
 
-interface SharedInterviewStatsProps {
-  liveInterviewsCount: number;
-  interviewsLoaded: boolean;
-}
-
-const StatsCardWrapper = memo(({ liveInterviewsCount, interviewsLoaded, isActive = true }: SharedInterviewStatsProps & { isActive?: boolean }) => {
+const StatsCardWrapper = memo(() => {
   const [isPaused, setIsPaused] = useState(false);
-  return (
-    <JobSeekerStatsCard
-      isPaused={isPaused}
-      setIsPaused={setIsPaused}
-      liveInterviewsCount={liveInterviewsCount}
-      interviewsLoaded={interviewsLoaded}
-      isActive={isActive}
-    />
-  );
+  return <JobSeekerStatsCard isPaused={isPaused} setIsPaused={setIsPaused} />;
 });
 StatsCardWrapper.displayName = 'StatsCardWrapper';
 
 // Main Dashboard Grid for Job Seekers
-interface JobSeekerDashboardGridProps {
-  /** Home är dold (KeepAlive) → pausa visuella klockor. Data lämnas orörd. */
-  isActive?: boolean;
-}
-
-export const JobSeekerDashboardGrid = memo(({ isActive = true }: JobSeekerDashboardGridProps) => {
+export const JobSeekerDashboardGrid = memo(() => {
   const isMobile = useIsMobile();
-
-  // EN delad datakälla för kandidatens intervjuer — statistikkortet och
-  // intervjukortet räknar exakt samma live-lista, så en pågående intervju
-  // syns lika i båda.
-  const {
-    interviews,
-    isLoading: interviewsLoading,
-    isError: interviewsFailed,
-    isSuccess: interviewsQuerySuccess,
-    isPlaceholderData: interviewsArePlaceholder,
-    refetch: refetchInterviews,
-  } = useCandidateInterviews();
-  // Placeholder-data ger status success — bara ett verkligt nätverkssvar får
-  // auktorisera intervjustatistiken.
-  const interviewsSucceeded = Boolean(interviewsQuerySuccess) && !interviewsArePlaceholder;
-  const now = useMinuteTick(isActive);
-  const liveInterviews = useMemo(
-    () => (interviews as DashboardInterview[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
-    [interviews, now],
-  );
 
   const mobileOrder = (
     <>
-      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} isActive={isActive} />
-      <JobSeekerInterviewsCard
-        interviews={liveInterviews}
-        isLoading={interviewsLoading}
-        isError={interviewsFailed}
-        onRetry={() => { void refetchInterviews(); }}
-        now={now}
-      />
-      <TipsCardWrapper isActive={isActive} />
-      <JobSeekerNotesCard isActive={isActive} />
+      <StatsCardWrapper />
+      <JobSeekerInterviewsCard />
+      <TipsCardWrapper />
+      <JobSeekerNotesCard />
     </>
   );
 
   const desktopOrder = (
     <>
-      <TipsCardWrapper isActive={isActive} />
-      <StatsCardWrapper liveInterviewsCount={liveInterviews.length} interviewsLoaded={interviewsSucceeded} isActive={isActive} />
-      <JobSeekerNotesCard isActive={isActive} />
-      <JobSeekerInterviewsCard
-        interviews={liveInterviews}
-        isLoading={interviewsLoading}
-        isError={interviewsFailed}
-        onRetry={() => { void refetchInterviews(); }}
-        now={now}
-      />
+      <TipsCardWrapper />
+      <StatsCardWrapper />
+      <JobSeekerNotesCard />
+      <JobSeekerInterviewsCard />
     </>
   );
 

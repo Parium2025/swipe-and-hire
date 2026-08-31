@@ -45,138 +45,83 @@ export const hasConfirmedWeather = (
 
 // ─── Cache keys & TTLs ──────────────────────────────────
 
-/**
- * Location is user-bound: a shared device must never let the next account read
- * the previous account's position. The legacy global key is deleted (never
- * migrated) the first time we touch the cache.
- */
-export const LOCATION_CACHE_PREFIX = 'parium_weather_location:v2:';
-export const LEGACY_LOCATION_CACHE_KEY = 'parium_weather_location';
-export const WEATHER_CACHE_PREFIX = 'parium_weather_data:v2:';
-export const LEGACY_WEATHER_CACHE_KEY = 'parium_weather_data';
+const LOCATION_CACHE_KEY = 'parium_weather_location';
+const WEATHER_CACHE_KEY = 'parium_weather_data';
 const LOCATION_CACHE_MAX_AGE = 3 * 60 * 1000; // 3 minutes
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000;  // 5 minutes
 
 // ─── Cache helpers ───────────────────────────────────────
 
-let currentWeatherCacheUserId: string | null = null;
-
-/** Binds the weather/location cache to the signed-in user (null when signed out). */
-export const setWeatherCacheUser = (userId: string | null | undefined) => {
-  currentWeatherCacheUserId = userId || null;
-};
-
-export const getWeatherCacheUser = (): string | null => currentWeatherCacheUserId;
-
-const locationKeyFor = (userId: string) => `${LOCATION_CACHE_PREFIX}${userId}`;
-const weatherKeyFor = (userId: string) => `${WEATHER_CACHE_PREFIX}${userId}`;
-
-const dropLegacyLocationKey = () => {
-  try { localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY); } catch { /* ignore */ }
-};
-
-const dropLegacyWeatherKey = () => {
-  try { localStorage.removeItem(LEGACY_WEATHER_CACHE_KEY); } catch { /* ignore */ }
-};
-
 export const getCachedLocation = (): CachedLocation | null => {
-  // Never migrate the old global value — just remove it.
-  dropLegacyLocationKey();
-  const userId = currentWeatherCacheUserId;
-  if (!userId) return null;
-  const key = locationKeyFor(userId);
   try {
-    const cached = localStorage.getItem(key);
+    const cached = localStorage.getItem(LOCATION_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
     if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      try { localStorage.removeItem(LOCATION_CACHE_KEY); } catch { /* ignore */ }
       return null;
     }
-    const age = Date.now() - data.timestamp;
-    if (age < 0) {
-      // Framtida (korrupt) tidsstämpel — får aldrig användas eller överleva.
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return null;
-    }
-    if (age > LOCATION_CACHE_MAX_AGE) {
+    if (Date.now() - data.timestamp > LOCATION_CACHE_MAX_AGE) {
       console.log('Location cache expired, will refresh');
       return null;
     }
     return data;
   } catch {
-    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    try { localStorage.removeItem(LOCATION_CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 };
 
 export const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) => {
-  dropLegacyLocationKey();
-  const userId = currentWeatherCacheUserId;
-  if (!userId) return;
   try {
     const data: CachedLocation = { ...location, timestamp: Date.now() };
-    localStorage.setItem(locationKeyFor(userId), JSON.stringify(data));
+    localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(data));
   } catch { /* Silent fail */ }
 };
 
-/** Entries older than this are useless even offline and are deleted on read. */
-const STALE_WEATHER_CACHE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
-
-const readCachedWeather = (maxAgeMs: number, removeExpired: boolean): CachedWeather | null => {
-  // Never migrate the old global value — just remove it.
-  dropLegacyWeatherKey();
-  const userId = currentWeatherCacheUserId;
-  if (!userId) return null;
-  const key = weatherKeyFor(userId);
+export const getCachedWeather = (): CachedWeather | null => {
   try {
-    const cached = localStorage.getItem(key);
+    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
     if (!cached) return null;
     const data = JSON.parse(cached);
     if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
+      try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
       return null;
     }
-    const age = Date.now() - data.timestamp;
-    if (age < 0) {
-      // Framtida (korrupt) tidsstämpel — varken färsk eller offline-användbar.
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
-      return null;
-    }
-    if (age > maxAgeMs) {
-      // The fresh read must NOT destroy a still-usable stale entry — the
-      // offline fallback (getStaleCachedWeather) depends on it. Only the
-      // stale read removes entries past the 24h hard limit.
-      if (removeExpired) {
-        try { localStorage.removeItem(key); } catch { /* ignore */ }
-      }
-      return null;
-    }
+    if (Date.now() - data.timestamp > WEATHER_CACHE_MAX_AGE) return null;
     return data;
   } catch {
-    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
     return null;
   }
 };
 
-export const getCachedWeather = (): CachedWeather | null =>
-  readCachedWeather(WEATHER_CACHE_MAX_AGE, false);
-
 /**
  * Same as getCachedWeather but accepts entries up to 24 hours old.
  * Used when the device is offline: a slightly stale reading is better than
- * removing the weather row entirely. Entries beyond 24h are deleted here.
+ * removing the weather row entirely.
  */
-export const getStaleCachedWeather = (): CachedWeather | null =>
-  readCachedWeather(STALE_WEATHER_CACHE_MAX_AGE, true);
+export const getStaleCachedWeather = (): CachedWeather | null => {
+  try {
+    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    if (!cached) return null;
+    const data = JSON.parse(cached);
+    if (!data || typeof data !== 'object' || typeof data.timestamp !== 'number') {
+      try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+      return null;
+    }
+    if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) return null;
+    return data;
+  } catch {
+    try { localStorage.removeItem(WEATHER_CACHE_KEY); } catch { /* ignore */ }
+    return null;
+  }
+};
 
 export const setCachedWeather = (weather: Omit<CachedWeather, 'timestamp'>) => {
-  dropLegacyWeatherKey();
-  const userId = currentWeatherCacheUserId;
-  if (!userId) return;
   try {
     const data: CachedWeather = { ...weather, timestamp: Date.now() };
-    localStorage.setItem(weatherKeyFor(userId), JSON.stringify(data));
+    localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(data));
   } catch { /* Silent fail */ }
 };
 
@@ -187,11 +132,8 @@ try { localStorage.removeItem('parium_weather_manual_location'); } catch { /* ig
 
 export const clearWeatherCache = () => {
   try {
-    localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY);
-    localStorage.removeItem(LEGACY_WEATHER_CACHE_KEY);
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith(LOCATION_CACHE_PREFIX) || key.startsWith(WEATHER_CACHE_PREFIX))
-      .forEach((key) => localStorage.removeItem(key));
+    localStorage.removeItem(LOCATION_CACHE_KEY);
+    localStorage.removeItem(WEATHER_CACHE_KEY);
     console.log('Weather cache cleared');
   } catch { /* Silent fail */ }
 };

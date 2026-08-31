@@ -88,50 +88,12 @@ function releaseSignedUrlSlot() {
   if (next) next();
 }
 
-// Generationsräknare: varje kontobyte/utloggning bumpar den. Ett svar från en
-// request som startade FÖRE rensningen får aldrig skriva tillbaka en signerad
-// URL som tillhör föregående konto.
-let mediaCacheGeneration = 0;
-
-export const getMediaCacheGeneration = () => mediaCacheGeneration;
-
-/**
- * 🔒 Rensa ALL privat mediacache (signerade URL:er + blob-cache).
- * Synkron och säker att anropa vid utloggning/kontobyte.
- */
-export function clearPrivateMediaCache() {
-  mediaCacheGeneration++;
-  signedUrlMemoryCache.clear();
-  ongoingLoads.clear();
-  failedLoads.clear();
-
-  try {
-    if (typeof localStorage !== 'undefined') {
-      Object.keys(localStorage)
-        .filter((key) => key.startsWith('media_url_'))
-        .forEach((key) => localStorage.removeItem(key));
-    }
-  } catch {
-    // Ignore localStorage errors
-  }
-
-  try {
-    imageCache.clear();
-  } catch {
-    // Blob-rensning är best-effort
-  }
-}
-
 function storeSignedUrlCache(
   cacheKey: string,
   signedUrl: string,
   expiresInSeconds: number,
-  now: number,
-  generation: number
+  now: number
 ) {
-  // Cachen rensades medan requesten var i luften → skriv inte tillbaka.
-  if (generation !== mediaCacheGeneration) return;
-
   const expiresAt = now + (expiresInSeconds * 1000 * 0.8);
   const cacheData = { url: signedUrl, expiresAt };
 
@@ -145,7 +107,6 @@ function storeSignedUrlCache(
     // Ignore localStorage errors
   }
 }
-
 
 // Negativ cache: en path som just misslyckats (rättighetsfel, nätglapp) ska
 // inte hamras om och om igen av hundratals kort. Efter kylperioden får den
@@ -200,7 +161,6 @@ function getOrCreateSignedUrlLoad(
   // Upp till 3 försök med kort backoff — täcker tillfälliga nätglapp och
   // token-refresh precis efter inloggning, vilket annars gav en tom avatar.
   const attempts = priority === 'high' ? 3 : 1;
-  const startGeneration = mediaCacheGeneration;
 
   const promise = acquireSignedUrlSlot(priority)
     .then(async () => {
@@ -212,20 +172,14 @@ function getOrCreateSignedUrlLoad(
         } catch {
           signedUrl = null;
         }
-        // Kontobyte/utloggning skedde medan requesten var i luften → svaret
-        // tillhör föregående konto och får aldrig nå någon caller.
-        if (startGeneration !== mediaCacheGeneration) return null;
         if (signedUrl) {
-          storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now, startGeneration);
+          storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
           failedLoads.delete(cacheKey);
           return signedUrl;
         }
-
         if (isKnownMissingMedia(storagePath, mediaType)) break;
         if (attempt < attempts - 1) await sleep(250 * (attempt + 1));
       }
-      // Skriv inte negativ cache för en generation som redan rensats.
-      if (startGeneration !== mediaCacheGeneration) return null;
       failedLoads.set(cacheKey, Date.now());
       return null;
     })

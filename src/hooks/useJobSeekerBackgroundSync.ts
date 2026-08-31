@@ -1,43 +1,43 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
+import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from './useAuth';
-import { isOwnedJobSeekerRole } from '@/lib/roleOwnership';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
-import { getCachedWeather } from '@/lib/weatherApi';
+import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
+import { fetchAllPages } from '@/lib/fetchAllPages';
 
+
+const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
+const MY_APPLICATIONS_CACHE_KEY = 'job_seeker_applications_';
+const MESSAGES_CACHE_KEY = 'job_seeker_messages_';
 const AVAILABLE_JOBS_CACHE_KEY = 'job_seeker_available_jobs_';
+const CANDIDATE_INTERVIEWS_CACHE_KEY = 'job_seeker_interviews_';
+const WEATHER_CACHE_KEY = 'parium_weather_data';
 const WEATHER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 min (optimal for weather)
-// 🔒 SKALA: warmup av annonslistan får inte köras vid varje tabbfokus. Med
-// 250 000 klienter blir varje fokusvåg en herd mot job_postings. Cachen anses
-// färsk i 5 minuter; endast en explicit trigger (login/manuell) forcerar.
-const AVAILABLE_JOBS_CACHE_MAX_AGE = 5 * 60 * 1000;
+// Ingen CACHE_MAX_AGE - vi förlitar oss på realtime subscriptions istället för TTL
 
 /**
- * 🚀 JOB SEEKER BACKGROUND SYNC ENGINE (warmup only)
- *
- * Denna hook äger ENDAST två saker:
- *  1. Warmup av listan med lediga jobb (`available-jobs`)
- *  2. Väderhämtning när väder-cachen är gammal
- *
- * 🔒 DATAÄGARSKAP (får INTE dupliceras här):
- *  - saved_jobs / job_applications → AuthProvider äger de användarfiltrerade
- *    realtime-lyssnarna; listorna hämtas av sina egna sidhookar.
- *  - konversationer/meddelanden → ConversationsProvider/useConversations äger
- *    både realtime och `parium_conversations_cache`.
- *  - intervjuer → useCandidateInterviews äger realtime och den kanoniska
- *    ['candidate-interviews', userId]-cachen.
- *
- * Tidigare läste och cachade denna hook samma data en gång till vid cold start,
- * första interaktion och varje tabbfokus. Det gav dubbla reads, trunkerade
- * cachar (max 50 ansökningar) och ofullständiga conversation-shapes som kunde
- * klobba den kanoniska cachen.
+ * 🚀 JOB SEEKER BACKGROUND SYNC ENGINE
+ * 
+ * Premium preloading för jobbsökare som triggas DIREKT vid:
+ * 1. Login
+ * 2. Första användarinteraktion
+ * 3. Tab-focus efter inaktivitet
+ * 
+ * Håller ALL jobbsökardata färsk genom:
+ * - Periodisk refresh var 5:e minut
+ * - Omedelbar preload vid aktivitet
+ * - Smart cache-validering
+ * 
+ * Synkar: Sparade jobb, Mina ansökningar, Meddelanden, Lediga jobb, Intervjuer
  */
 
 // Global state för att kunna trigga från useAuth vid login
 let globalJobSeekerPreloadFunction: (() => Promise<void>) | null = null;
+let lastJobSeekerPreloadTimestamp = 0;
 
 /**
  * Trigga bakgrundssynk för jobbsökare
@@ -53,124 +53,150 @@ export const useJobSeekerBackgroundSync = () => {
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
-  // 🔒 Dedupe är ägarbunden OCH provider-lokal: A:s warmup får aldrig kväva
-  // B:s första warmup vid ett kontobyte inom 2 sekunder.
-  const lastPreloadRef = useRef<{ ownerId: string | null; ts: number }>({ ownerId: null, ts: 0 });
-  // En preload som kommer medan en körning pågår tappas inte — den koalesceras
-  // till EN uppföljning (senaste ägaren vinner) efter den pågående körningen.
-  const pendingPreloadRef = useRef<{ ownerId: string; force: boolean } | null>(null);
-  const inFlightOwnerRef = useRef<string | null>(null);
-  const latestOwnerRef = useRef<string | null>(null);
-  const mountedRef = useRef(true);
-  const preloadAllDataRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
-  // 🔒 Varje schemalagd idle-/timeout-callback ägs och avbryts vid unmount.
-  // Annars kan en köad callback göra nätverks-reads för en avmonterad hook.
-  const idleHandlesRef = useRef<Set<number>>(new Set());
-  const timeoutHandlesRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
-  useEffect(() => {
-    mountedRef.current = true;
-    const idleHandles = idleHandlesRef.current;
-    const timeoutHandles = timeoutHandlesRef.current;
-    return () => {
-      mountedRef.current = false;
-      pendingPreloadRef.current = null;
-      if (typeof cancelIdleCallback !== 'undefined') {
-        idleHandles.forEach((handle) => cancelIdleCallback(handle));
-      }
-      idleHandles.clear();
-      timeoutHandles.forEach((handle) => clearTimeout(handle));
-      timeoutHandles.clear();
-    };
-  }, []);
+  
 
-  // Endast för jobbsökare — och endast när rollen bevisligen tillhör exakt den
-  // inloggade användaren (en kvarhängande roll från konto A får inte köra
-  // warmup för konto B).
-  const isJobSeeker = isOwnedJobSeekerRole(user, userRole);
-
-  // 🔒 Ägaren måste vara synlig SYNKRONT vid render — inte först i en passiv
-  // effekt. Annars finns ett render → effekt-fönster där A:s callback ännu
-  // räknas som ägare efter att B redan renderats.
-  latestOwnerRef.current = user?.id ?? null;
+  // Endast för jobbsökare
+  const isJobSeeker = userRole?.role === 'job_seeker';
 
   // 🌤️ Validera väder-cache
   const isWeatherCacheValid = useCallback((): boolean => {
     try {
-      const cached = getCachedWeather();
+      const cached = localStorage.getItem(WEATHER_CACHE_KEY);
       if (!cached) return false;
-
-      const age = Date.now() - cached.timestamp;
-      // En framtida tidsstämpel (klockskev/manipulerad cache) är INTE färsk.
-      return age >= 0 && age < WEATHER_CACHE_MAX_AGE;
+      
+      const parsed = JSON.parse(cached);
+      const age = Date.now() - parsed.timestamp;
+      return age < WEATHER_CACHE_MAX_AGE;
     } catch {
       return false;
     }
   }, []);
 
   // 🌤️ Preload väder om cache är gammal
-  const preloadWeatherIfStale = useCallback(async (
-    isStillOwner: () => boolean = () => true,
-  ) => {
+  const preloadWeatherIfStale = useCallback(async () => {
     if (isWeatherCacheValid()) {
       return; // Cache är färsk
     }
-
+    
     try {
-      // Kontovakten hindrar att A:s plats/väder skrivs i B:s skopade cache.
-      await preloadWeatherLocation({ isCurrent: isStillOwner });
+      await preloadWeatherLocation();
     } catch (error) {
       console.warn('[JobSeekerSync] Weather preload failed:', error);
     }
   }, [isWeatherCacheValid]);
 
-  // 🏢 Läs den cachade annonslistan om den är färsk nog att hoppa över hämtningen.
-  // Exception-safe och fail-closed: trasig/blockerad storage eller data som
-  // tillhör ett annat konto betyder "inte färsk".
-  const readFreshAvailableJobs = useCallback((
-    ownerId: string | null,
-  ): { items: unknown[]; timestamp: number } | null => {
-    try {
-      const raw = localStorage.getItem(AVAILABLE_JOBS_CACHE_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as { items?: unknown; timestamp?: unknown; ownerId?: unknown };
-      if (!parsed || !Array.isArray(parsed.items) || typeof parsed.timestamp !== 'number') {
-        return null;
+  // 💾 Preload sparade jobb (alltid hämta färsk data - realtime synkar)
+  const preloadSavedJobs = useCallback(async (userId: string) => {
+    const cacheKey = SAVED_JOBS_CACHE_KEY + userId;
+
+    // Paginerat — sparade jobb kan passera 1000 utan att raderna får försvinna.
+    const { data, error } = await fetchAllPages<{ job_id: string; created_at: string }>((from, to) =>
+      supabase
+        .from('saved_jobs')
+        .select('job_id, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .order('job_id', { ascending: false })
+        .range(from, to),
+    )
+      .then((rows) => ({ data: rows, error: null as any }))
+      .catch((err) => ({ data: null as any, error: err }));
+
+    if (!error && data) {
+      const jobIds = new Set(data.map(item => item.job_id));
+      
+      safeSetItem(cacheKey, JSON.stringify({
+        jobIds: Array.from(jobIds),
+        timestamp: Date.now(),
+      }));
+    }
+  }, [queryClient]);
+
+  // 📋 Preload mina ansökningar (alltid hämta färsk data - realtime synkar)
+  const preloadMyApplications = useCallback(async (userId: string) => {
+    const cacheKey = MY_APPLICATIONS_CACHE_KEY + userId;
+
+    const { data, error } = await supabase
+      .from('job_applications')
+      .select(MY_APPLICATIONS_SELECT)
+      .eq('applicant_id', userId)
+      .order('applied_at', { ascending: false })
+      .limit(50);
+
+    if (!error && data) {
+      safeSetItem(cacheKey, JSON.stringify({
+        items: data,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache
+      queryClient.setQueryData(['my-applications', userId], data);
+      
+      // Bygg även applied-job-ids cache
+      const appliedJobIds = new Set(data.map(app => app.job_id));
+      queryClient.setQueryData(['applied-job-ids', userId], appliedJobIds);
+    }
+  }, [queryClient]);
+
+  // 💬 Preload konversationer/meddelanden (alltid hämta färsk data - realtime synkar)
+  const preloadMessages = useCallback(async (userId: string) => {
+    const cacheKey = MESSAGES_CACHE_KEY + userId;
+
+    // Hämta konversationer där användaren är medlem
+    const { data: memberData } = await supabase
+      .from('conversation_members')
+      .select('conversation_id, last_read_at')
+      .eq('user_id', userId);
+
+    if (!memberData || memberData.length === 0) {
+      safeSetItem(cacheKey, JSON.stringify({
+        items: [],
+        timestamp: Date.now(),
+      }));
+      return;
+    }
+
+    const conversationIds = memberData.map(m => m.conversation_id);
+    
+    const { data: conversations, error } = await supabase
+      .from('conversations')
+      .select(`
+        id,
+        name,
+        is_group,
+        job_id,
+        last_message_at,
+        created_at
+      `)
+      .in('id', conversationIds)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(50);
+
+    if (!error && conversations) {
+      safeSetItem(cacheKey, JSON.stringify({
+        items: conversations,
+        timestamp: Date.now(),
+      }));
+
+      // ⚠️ Skriv INTE till queryClient här — denna data saknar `unread_count`
+      // som useConversations beräknar via separat query. Att klobba cachen
+      // får chatt-badgen i JobSeekerTopNav att flimra till 0 vid tab-refocus.
+      // useConversations refetchar själv (refetchOnWindowFocus + realtime).
+      try {
+        safeSetItem('parium_conversations_cache', JSON.stringify({
+          userId,
+          conversations,
+          timestamp: Date.now(),
+        }));
+      } catch {
+        // Ignorera storage-fel
       }
-      // Fail-closed: cachen måste vara ägar-taggad med exakt den inloggade
-      // användaren. Ägarlösa (legacy), null eller felaktiga poster hydrerar inte
-      // — de leder till EN säker nätverkshämtning som skriver om posten ägar-taggad.
-      if (typeof parsed.ownerId !== 'string' || parsed.ownerId !== ownerId) return null;
-      const age = Date.now() - parsed.timestamp;
-      if (age < 0 || age >= AVAILABLE_JOBS_CACHE_MAX_AGE) return null;
-      return { items: parsed.items, timestamp: parsed.timestamp };
-    } catch {
-      return null;
     }
   }, []);
 
-  // 🏢 Preload lediga jobb (enda datalistan denna hook äger)
-  const preloadAvailableJobs = useCallback(async (
-    force = false,
-    ownerId: string | null = null,
-    isStillOwner: () => boolean = () => true,
-  ) => {
+  // 🏢 Preload lediga jobb (alltid hämta färsk data - realtime synkar)
+  const preloadAvailableJobs = useCallback(async () => {
     const cacheKey = AVAILABLE_JOBS_CACHE_KEY;
-
-    if (!force) {
-      const cached = readFreshAvailableJobs(ownerId);
-      if (cached) {
-        // Färsk cache — ingen onödig read, men React Query MÅSTE hydreras,
-        // annars visar Home tom lista trots giltig cache. Redan befintlig,
-        // nyare data i minnet får dock ALDRIG skrivas över av äldre storage.
-        const state = queryClient.getQueryState(['available-jobs']);
-        const hasInMemory = state?.data !== undefined;
-        const storageIsNewer = hasInMemory && cached.timestamp > (state?.dataUpdatedAt ?? 0);
-        if (!hasInMemory || storageIsNewer) {
-          queryClient.setQueryData(['available-jobs'], cached.items);
-        }
-        return;
-      }
-    }
 
     const { data, error } = await supabase
       .from('job_postings')
@@ -198,96 +224,108 @@ export const useJobSeekerBackgroundSync = () => {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    // 🔒 Ett svar som startades av föregående konto får aldrig skriva i det nya.
-    if (!isStillOwner()) return;
-
     if (!error && data) {
       safeSetItem(cacheKey, JSON.stringify({
         items: data,
         timestamp: Date.now(),
-        ownerId,
       }));
-
+      
       // Uppdatera React Query cache
       queryClient.setQueryData(['available-jobs'], data);
     }
-  }, [queryClient, readFreshAvailableJobs]);
+  }, [queryClient]);
 
-  // 🚀 HUVUDFUNKTION: warmup av lediga jobb + väder
+  // 📅 Preload kandidat-intervjuer (instant-load + background fetch)
+  const preloadCandidateInterviews = useCallback(async (userId: string) => {
+    const cacheKey = CANDIDATE_INTERVIEWS_CACHE_KEY + userId;
+    const existingCache = localStorage.getItem(cacheKey);
+    
+    // STEG 1: Sätt React Query cache DIREKT från localStorage för instant rendering
+    if (existingCache) {
+      try {
+        const parsed = JSON.parse(existingCache);
+        // Populera React Query cache omedelbart (ingen TTL-kontroll - realtime synkar)
+        if (parsed.items?.length >= 0) {
+          queryClient.setQueryData(['candidate-interviews', userId], parsed.items);
+        }
+      } catch {
+        // Korrupt cache - fortsätt till fetch
+      }
+    }
+
+    // STEG 2: Hämta färsk data från servern (i bakgrunden)
+    const { data, error } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        job_postings(
+          title,
+          employer_id,
+          workplace_name
+        )
+      `)
+      .eq('applicant_id', userId)
+      .gte('scheduled_at', new Date().toISOString())
+      .in('status', ['pending', 'confirmed'])
+      .order('scheduled_at', { ascending: true });
+
+    if (!error && data) {
+      // Spara till localStorage
+      safeSetItem(cacheKey, JSON.stringify({
+        items: data,
+        timestamp: Date.now(),
+      }));
+      
+      // Uppdatera React Query cache med färsk data
+      queryClient.setQueryData(['candidate-interviews', userId], data);
+    }
+  }, [queryClient]);
+
+  // 🚀 HUVUDFUNKTION: Förladda ALL jobbsökardata parallellt
   // Uses requestIdleCallback to avoid blocking CSS transitions (sidebar, navigation)
+  // This is how Spotify/TikTok/Airbnb handle background data: never compete with animations
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isJobSeeker) return;
-    const ownerId = user.id;
-    // Fail-closed vid entry: en schemalagd callback som körs efter unmount
-    // eller efter ett kontobyte får inte starta några reads.
-    if (!mountedRef.current || latestOwnerRef.current !== ownerId) return;
-
-    // Undvik dubbla preloads (inom 2 sekunder) — men endast för samma ägare.
+    
+    // Undvik dubbla preloads (inom 2 sekunder)
     const now = Date.now();
-    const last = lastPreloadRef.current;
-    if (!force && last.ownerId === ownerId && now - last.ts >= 0 && now - last.ts < 2000) {
+    if (!force && now - lastJobSeekerPreloadTimestamp < 2000) {
       return;
     }
-
-    if (isPreloadingRef.current) {
-      // Single-flight: forcerade triggers OCH en ny ägares första warmup
-      // koalesceras till EN uppföljning (senaste ägaren vinner).
-      if (force || inFlightOwnerRef.current !== ownerId) {
-        pendingPreloadRef.current = { ownerId, force };
-      }
-      return;
-    }
-
+    
+    if (isPreloadingRef.current) return;
+    
     isPreloadingRef.current = true;
-    inFlightOwnerRef.current = ownerId;
-    lastPreloadRef.current = { ownerId, ts: now };
-    const isStillOwner = () => mountedRef.current && latestOwnerRef.current === ownerId;
+    lastJobSeekerPreloadTimestamp = now;
+    const userId = user.id;
 
     try {
+      // Run ALL data in parallel — immediate, no delays
       await Promise.all([
-        preloadAvailableJobs(force, ownerId, isStillOwner),
-        preloadWeatherIfStale(isStillOwner),
+        preloadSavedJobs(userId),
+        preloadMyApplications(userId),
+        preloadMessages(userId),
+        preloadAvailableJobs(),
+        preloadCandidateInterviews(userId),
+        preloadWeatherIfStale(),
       ]);
 
-      // 🔒 Inaktuell körning (unmount/kontobyte under nätverket) får varken
-      // markera warmup som klar eller flytta fram senaste synk-tidsstämpeln.
-      if (!isStillOwner()) return;
-
       hasPreloadedRef.current = true;
-      // Tidsstämpel för senaste warmup-försöket (annonslista + väder).
-      // Det är INTE en full datasynk — saved/apps/meddelanden/intervjuer ägs
-      // av sina egna hookar.
       updateLastSyncTime();
     } catch (error) {
       console.warn('[JobSeekerSync] Preload failed:', error);
     } finally {
       isPreloadingRef.current = false;
-      inFlightOwnerRef.current = null;
-      const pending = pendingPreloadRef.current;
-      pendingPreloadRef.current = null;
-      if (pending && mountedRef.current && latestOwnerRef.current === pending.ownerId) {
-        await preloadAllDataRef.current?.(pending.force);
-      }
     }
-  }, [user, isJobSeeker, preloadAvailableJobs, preloadWeatherIfStale]);
-
-  preloadAllDataRef.current = preloadAllData;
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadMessages, preloadAvailableJobs, preloadCandidateInterviews, preloadWeatherIfStale]);
 
   // 🕐 Schemalägg preload via requestIdleCallback så den ALDRIG blockerar animationer
   const schedulePreload = useCallback((force = false) => {
     if (typeof requestIdleCallback !== 'undefined') {
-      const handle = requestIdleCallback(() => {
-        idleHandlesRef.current.delete(handle);
-        void preloadAllData(force);
-      }, { timeout: 2000 });
-      idleHandlesRef.current.add(handle);
+      requestIdleCallback(() => preloadAllData(force), { timeout: 2000 });
     } else {
       // Fallback för Safari: kör efter nuvarande frame + micro-tasks
-      const handle = setTimeout(() => {
-        timeoutHandlesRef.current.delete(handle);
-        void preloadAllData(force);
-      }, 50);
-      timeoutHandlesRef.current.add(handle);
+      setTimeout(() => preloadAllData(force), 50);
     }
   }, [preloadAllData]);
 
@@ -298,13 +336,19 @@ export const useJobSeekerBackgroundSync = () => {
     } else {
       globalJobSeekerPreloadFunction = null;
     }
-
+    
     return () => {
       globalJobSeekerPreloadFunction = null;
     };
   }, [user, isJobSeeker, preloadAllData]);
 
+  // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
+
+  // 📡 Realtime ersätter periodisk refresh - ingen polling behövs
+
   // 🖱️ AKTIVITETS-TRIGGERS (OPTIMERAD FÖR TOUCH/SVAGT INTERNET)
+  // All triggers use schedulePreload (requestIdleCallback) so data fetching
+  // NEVER blocks CSS transitions like sidebar open/close
   useEffect(() => {
     if (!user || !isJobSeeker) return;
 
@@ -312,11 +356,10 @@ export const useJobSeekerBackgroundSync = () => {
     schedulePreload();
 
     // Tab-focus: sync when user returns, but deferred
-    // Tabbfokus forcerar INTE längre: cache-färskheten avgör om en read behövs.
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         hasPreloadedRef.current = false;
-        schedulePreload();
+        schedulePreload(true);
       }
     };
 
@@ -344,12 +387,157 @@ export const useJobSeekerBackgroundSync = () => {
     };
   }, [user, isJobSeeker, schedulePreload]);
 
-  // 📡 INGEN realtime här. Se ägarskapskommentaren överst: AuthProvider,
-  // ConversationsProvider och useCandidateInterviews är kanoniska ägare.
-  //
-  // 📝 Känt, medvetet ej löst här: andra besökta KeepAlive-sidor med
-  // display:none behåller sina egna sidlyssnare och refetchOnReconnect. Det
-  // kräver per-sida-gating och ligger utanför denna Home-körning.
+  // 📡 REALTIME SUBSCRIPTIONS
+  useEffect(() => {
+    if (!user || !isJobSeeker) return;
+
+    // Realtime för sparade jobb
+    const savedJobsChannel = createRealtimeChannel(`job-seeker-saved-jobs-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'saved_jobs',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          preloadSavedJobs(user.id);
+        }
+      )
+      .subscribe();
+
+    // Realtime för ansökningar
+    const applicationsChannel = createRealtimeChannel(`job-seeker-applications-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_applications',
+          filter: `applicant_id=eq.${user.id}`
+        },
+        () => {
+          preloadMyApplications(user.id);
+        }
+      )
+      .subscribe();
+
+    // Realtime för meddelanden
+    const messagesChannel = createRealtimeChannel(`job-seeker-messages-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversation_messages',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+        }
+      )
+      .subscribe();
+
+    // Realtime för jobb - 🔥 SCALED: Lyssnar BARA på INSERT (nya jobb).
+    // Tidigare lyssnade vi på * (alla events) globalt, vilket gjorde att VARJE
+    // jobbsökare fick events när VARJE jobb i hela databasen ändrades — och triggade
+    // 6+ cache-invalidations + 2 preloads per event. Vid 500 sökare online och 50
+    // jobb-uppdateringar/h = ~150 000 onödiga refetches/dag.
+    //
+    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras nu via:
+    //  1. employerProfilesChannel nedan (lyssnar på profiles UPDATE → branding)
+    //  2. naturlig refetch via React Query staleTime
+    //
+    // Debounce: max 1 invalidation per 5s vid burst (när många nya jobb postas samtidigt).
+    let newJobsTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleNewJobsRefresh = () => {
+      if (newJobsTimer) return;
+      newJobsTimer = setTimeout(() => {
+        newJobsTimer = null;
+        localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
+        preloadAvailableJobs();
+        preloadMyApplications(user.id);
+        queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
+        queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+        queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
+        queryClient.invalidateQueries({ queryKey: ['job-details'] });
+      }, 5000);
+    };
+
+    const newJobsChannel = createRealtimeChannel('job-seeker-new-jobs')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'job_postings',
+        },
+        () => {
+          scheduleNewJobsRefresh();
+        }
+      )
+      .subscribe();
+
+    // Realtime för profiles - om arbetsgivaren ändrar namn/logo i sin profil
+    // triggas DB-funktionen sync_company_name_to_jobs som uppdaterar job_postings,
+    // men vi lyssnar även här direkt för att vara dubbelt säkra.
+    const employerProfilesChannel = createRealtimeChannel('job-seeker-employer-profiles')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+        },
+        (payload: any) => {
+          const newRow = payload?.new ?? {};
+          const oldRow = payload?.old ?? {};
+          const brandingChanged =
+            newRow.company_name !== oldRow.company_name ||
+            newRow.company_logo_url !== oldRow.company_logo_url;
+          if (!brandingChanged) return;
+
+          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
+          preloadAvailableJobs();
+          preloadMyApplications(user.id);
+          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['jobs'] });
+          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
+          queryClient.invalidateQueries({ queryKey: ['job-details'] });
+        }
+      )
+      .subscribe();
+
+    // Realtime för intervjuer (bokade intervjuer för kandidaten)
+    const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'interviews',
+          filter: `applicant_id=eq.${user.id}`
+        },
+        () => {
+          preloadCandidateInterviews(user.id);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (newJobsTimer) clearTimeout(newJobsTimer);
+      supabase.removeChannel(savedJobsChannel);
+      supabase.removeChannel(applicationsChannel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(newJobsChannel);
+      supabase.removeChannel(employerProfilesChannel);
+      supabase.removeChannel(interviewsChannel);
+    };
+  }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
 };
 
 export default useJobSeekerBackgroundSync;

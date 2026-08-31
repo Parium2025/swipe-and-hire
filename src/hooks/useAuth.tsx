@@ -1,8 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
-import { canRefreshEmployerStats, isOwnedJobSeekerRole } from '@/lib/roleOwnership';
-import { createAccountAuthority } from '@/lib/accountAuthority';
-import { User, Session, RealtimeChannel } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { toast } from '@/hooks/use-toast';
@@ -14,7 +12,6 @@ import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
 import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
-import { setWeatherCacheUser } from '@/lib/weatherApi';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, normalizeAuthSplashRole } from '@/lib/authSplashEvents';
@@ -24,7 +21,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
-import { resetAccountScopedCaches, getAccountCacheOwner } from '@/lib/accountCacheReset';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -35,23 +31,6 @@ interface UserRoleData {
   organization_id?: string;
   is_active: boolean;
 }
-
-/**
- * Fail-closed behörighetskontroll för employer-only RPC:er.
- * Kräver inloggad användare, en roll som tillhör exakt samma användare och
- * att rollen är exakt det kanoniska employer-värdet. Okänd/ooupplöst nekas.
- */
-/**
- * Kontoauktoriteten är provider-lokal och generationsbaserad
- * (@/lib/accountAuthority). En modulglobal user-id-sträng kunde inte skilja på
- * A → utloggning → samma A eller på en avmonterad provider vars svar landar
- * efter att en ny provider med samma id monterats.
- */
-
-
-// Kontobundna rollkontroller bor i @/lib/roleOwnership och re-exporteras här
-// för bakåtkompatibilitet med befintliga konsumenter/tester.
-export { canRefreshEmployerStats } from '@/lib/roleOwnership';
 
 interface Organization {
   id: string;
@@ -188,32 +167,8 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
  
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [user, setUserState] = useState<User | null>(null);
-  // 🔒 KONTOAUKTORITET (provider-lokal, generationsbaserad): byts SYNKRONT vid
-  // varje accepterad kontoövergång — före React committar — så att ett svar som
-  // startades av föregående konto/session aldrig kan skriva i det nya. Ogiltig-
-  // förklaras vid unmount, vilket också stoppar svar från en avmonterad provider
-  // när en ny provider med samma id monterats.
-  const accountAuthorityRef = useRef(createAccountAuthority(null));
-  const setUser = useCallback((nextUser: User | null) => {
-    const nextOwnerId = nextUser?.id ?? null;
-    // VARJE accepterad övergång ger en ny generation — även när samma konto får
-    // en ny session/auth-händelse utan mellanliggande utloggning. Annars förblir
-    // ett svar från den föregående sessionen "aktuellt" och kan skriva.
-    accountAuthorityRef.current.advance(nextOwnerId);
-    setUserState(nextUser);
-  }, []);
-  useEffect(() => {
-    const authority = accountAuthorityRef.current;
-    return () => authority.invalidate();
-  }, []);
-
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  // Location/weather cache is user-bound: never let the next account on a
-  // shared device read the previous account's position. Bound synchronously
-  // during render (module state only, no storage or React mutation) so child
-  // state initializers never read another account's cache.
-  setWeatherCacheUser(user?.id ?? null);
   const CACHED_PROFILE_KEY = 'parium_cached_profile';
   const [profile, setProfile] = useState<Profile | null>(() => {
     try {
@@ -231,7 +186,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
-
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
@@ -348,38 +302,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
-  // 🔒 EN synkron väg för kontobunden cache-återställning. Används av manuell
-  // utloggning OCH av varje ägarbyte i auth, så att inget preloadat värde från
-  // föregående konto kan renderas för nästa konto.
-  const resetAccountScopedState = useCallback((nextOwnerId: string | null) => {
-    resetAccountScopedCaches(nextOwnerId);
-    setPreloadedAvatarUrl(null);
-    setPreloadedCoverUrl(null);
-    setPreloadedVideoUrl(null);
-    setPreloadedCompanyLogoUrl(null);
-    setPreloadedTotalJobs(0);
-    setPreloadedSavedJobs(0);
-    setPreloadedUniqueCompanies(0);
-    setPreloadedNewThisWeek(0);
-    setPreloadedEmployerMyJobs(0);
-    setPreloadedEmployerActiveJobs(0);
-    setPreloadedEmployerDashboardJobs(0);
-    setPreloadedEmployerTotalViews(0);
-    setPreloadedEmployerTotalApplications(0);
-    setPreloadedEmployerCandidates(0);
-    setPreloadedUnreadMessages(0);
-    setPreloadedJobSeekerUnreadMessages(0);
-    setPreloadedCompanyReviewsCount(0);
-    setPreloadedMyApplications(0);
-    setPreloadedMyCandidates(0);
-  }, []);
-
-  const claimAccountCacheOwnership = useCallback((userId: string | null | undefined) => {
-    if (!userId) return;
-    if (getAccountCacheOwner() === userId) return;
-    resetAccountScopedState(userId);
-  }, [resetAccountScopedState]);
-
   const isManualSignOutRef = useRef(false);
   const isSessionKickRef = useRef(false); // Suppress duplicate toast on session kick
   const isInitializingRef = useRef(true);
@@ -647,9 +569,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // 🔒 Ägarbyte: rensa föregående kontos cache INNAN nästa konto renderas.
-        claimAccountCacheOwnership(newUserId);
-
         currentUserIdRef.current = newUserId;
         setSession(session);
         setUser(session?.user ?? null);
@@ -730,8 +649,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted || sessionInitialized) return;
       sessionInitialized = true;
       finishInitialization();
-
-      claimAccountCacheOwnership(session?.user?.id ?? null);
 
       currentUserIdRef.current = session?.user?.id ?? null;
       setSession(session);
@@ -1523,7 +1440,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     beginSignOutTracking();
 
     const clearLocalState = () => {
-      resetAccountScopedState(null);
       currentUserIdRef.current = null;
       setUser(null);
       setSession(null);
@@ -2032,14 +1948,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
-    // 🔒 KONTOBUNDEN AUKTORITET: allt kontospecifikt nedan får bara skrivas om
-    // detta konto fortfarande äger vyn. Ett svar som landar efter A→B eller
-    // efter utloggning skulle annars skriva A:s siffror i B:s gränssnitt.
-    const startUserId = user?.id ?? null;
-    // Exakt token-identitet (ägare + generation), inte bara user-id-likhet.
-    const authority = accountAuthorityRef.current;
-    const token = authority.current;
-    const stillOwner = () => authority.isCurrent(token, startUserId);
     try {
       // 🔒 SKALA: tidigare laddades ALLA aktiva annonser ner till webbläsaren och
       // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
@@ -2066,13 +1974,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
       // Hämta antal sparade jobb för användaren (alla, inklusive utgångna)
-      if (user && stillOwner()) {
+      if (user) {
         const { count: savedJobsCount } = await supabase
           .from('saved_jobs')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id);
-        if (!stillOwner()) return;
-
+        
         const newSavedJobs = savedJobsCount || 0;
         setPreloadedSavedJobs(newSavedJobs);
         try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
@@ -2093,7 +2000,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           // Tyst fel — behåller tidigare värde
         }
-        if (!stillOwner()) return;
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
 
@@ -2102,8 +2008,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
           .eq('applicant_id', user.id);
-        if (!stillOwner()) return;
-
+        
         const appCount = myApplications || 0;
         setPreloadedMyApplications(appCount);
         try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
@@ -2131,10 +2036,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Funktion för att uppdatera employer stats (används av realtime + initial load)
   // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
-    // 🔒 FAIL-CLOSED: employer-only RPC:er får aldrig köras för jobbsökare,
-    // ooupplöst/okänd roll eller en kvarhängande roll från ett annat konto.
-    if (!canRefreshEmployerStats(user, userRole)) return;
-    
+    if (!user) return;
     
     try {
       // 🔒 SKALA + SANNING: tidigare laddades hela organisationens annonslista ner
@@ -2222,7 +2124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
-  }, [user, userRole?.user_id, userRole?.role]);
+  }, [user]);
 
   // Ladda räknare vid inloggning
   useEffect(() => {
@@ -2319,10 +2221,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [user, userRole?.role, loading]);
 
-  // Kontobunden jobbsökarroll — beräknas i render så lyssnareffekten bara
-  // behöver ett stabilt booleskt beroende.
-  const hasOwnedJobSeekerRole = isOwnedJobSeekerRole(user, userRole);
-
   // Realtime-prenumerationer för räknare med tyst felhantering
   useEffect(() => {
     if (!user) return;
@@ -2396,15 +2294,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const isEmployer = userRole?.role === 'employer';
-
     // 🔥 SCALED: Filtrera per användare istället för att lyssna globalt på job_postings.
     // Tidigare fick varje inloggad användare events för ALLA jobb i hela databasen,
     // vilket triggade refresh för 1000 användare vid varje jobbändring (kvadratisk skalning).
     // Nu lyssnar varje användare endast på sina egna jobb (employer_id=eq.user.id).
     // Counts/stats visar ändå bara egna data, så ingen UI-skillnad.
     // Debounce: max 1 refresh per 3s vid burst.
-    // Employer-only: jobbsökare har inga egna jobbannonser att räkna.
     let jobRefreshTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleJobRefresh = () => {
       if (jobRefreshTimer) return;
@@ -2415,70 +2310,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 3000);
     };
 
-    let jobChannel: RealtimeChannel | null = null;
-    if (isEmployer) {
-      jobChannel = createRealtimeChannel(`auth-job-count-${user.id}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${user.id}` },
-          () => {
-            scheduleJobRefresh();
-          }
-        )
-        .subscribe((status) => handleChannelStatus('job', status));
-    }
+    const jobChannel = createRealtimeChannel(`auth-job-count-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${user.id}` },
+        () => {
+          scheduleJobRefresh();
+        }
+      )
+      .subscribe((status) => handleChannelStatus('job', status));
 
-    // 🔒 ÄGARSKAP: AuthProvider är ENDA globala ägaren av jobbsökarens
-    // användarfiltrerade saved_jobs/job_applications-realtime. Tabellerna har
-    // REPLICA IDENTITY FULL, så filtret gäller även DELETE. Varken
-    // useJobSeekerBackgroundSync eller JobSeekerStatsCard får duplicera dem.
-    // En burst från båda lyssnarna koalesceras till EN uppdatering.
-    // Fail-closed: rollen måste ägas av exakt den inloggade användaren, annars
-    // kan A:s kvarhängande roll kortvarigt skapa lyssnare för B.
-    const isJobSeeker = hasOwnedJobSeekerRole;
-    const listenerUserId = user.id;
-    let jobSeekerCountsTimer: ReturnType<typeof setTimeout> | null = null;
-    let jobSeekerListenersActive = isJobSeeker;
-    const scheduleJobSeekerRefresh = () => {
-      // Konto-/rollbunden: en callback från ett tidigare konto är inert.
-      if (!jobSeekerListenersActive) return;
-      if (jobSeekerCountsTimer) return;
-      jobSeekerCountsTimer = setTimeout(() => {
-        jobSeekerCountsTimer = null;
-        if (!jobSeekerListenersActive) return;
-        refreshSidebarCounts();
-        queryClient.invalidateQueries({
-          queryKey: ['jobseeker-dashboard-stats', listenerUserId],
-          exact: true,
-        });
-      }, 1200);
-    };
+    const savedChannel = createRealtimeChannel(`auth-saved-jobs-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
+        () => {
+          refreshSidebarCounts();
+        }
+      )
+      .subscribe((status) => handleChannelStatus('saved', status));
 
-    let savedChannel: RealtimeChannel | null = null;
-    let applicationsChannel: RealtimeChannel | null = null;
-    if (isJobSeeker) {
-      savedChannel = createRealtimeChannel(`auth-saved-jobs-${user.id}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'saved_jobs', filter: `user_id=eq.${user.id}` },
-          () => {
-            scheduleJobSeekerRefresh();
-          }
-        )
-        .subscribe((status) => handleChannelStatus('saved', status));
-
-      // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
-      applicationsChannel = createRealtimeChannel(`auth-applications-${user.id}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
-          () => {
-            scheduleJobSeekerRefresh();
-          }
-        )
-        .subscribe((status) => handleChannelStatus('applications', status));
-    }
-
+    // Real-time för ansökningar (uppdaterar jobbsökarens räknare)
+    const applicationsChannel = createRealtimeChannel(`auth-applications-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_applications', filter: `applicant_id=eq.${user.id}` },
+        () => {
+          refreshSidebarCounts();
+        }
+      )
+      // DELETE skickar endast id (REPLICA IDENTITY DEFAULT) → matchar inte filtret ovan.
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'job_applications' },
+        () => {
+          refreshSidebarCounts();
+        }
+      )
+      .subscribe((status) => handleChannelStatus('applications', status));
 
 
     // Real-time för alla job_applications (uppdaterar employer kandidat-badge)
@@ -2489,7 +2358,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // utan att veta vilka jobb som tillhör user → realtime-RLS hindrar ej tomma payloads,
     // men `refreshEmployerStats` läser via RPC som ändå filtrerar på user. Debounce
     // skär 95% av onödiga RPC-anrop vid hög aktivitet på plattformen.
-    // Employer-only: används för arbetsgivarens kandidatbadge.
     let employerAppsTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleEmployerAppsRefresh = () => {
       if (employerAppsTimer) return;
@@ -2499,18 +2367,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 5000);
     };
 
-    let employerApplicationsChannel: RealtimeChannel | null = null;
-    if (isEmployer) {
-      employerApplicationsChannel = createRealtimeChannel(`auth-employer-applications-${user.id}`)
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'job_applications' },
-          () => {
-            scheduleEmployerAppsRefresh();
-          }
-        )
-        .subscribe((status) => handleChannelStatus('employerApps', status));
-    }
+    const employerApplicationsChannel = createRealtimeChannel(`auth-employer-applications-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'job_applications' },
+        () => {
+          scheduleEmployerAppsRefresh();
+        }
+      )
+      .subscribe((status) => handleChannelStatus('employerApps', status));
 
     // 🔥 SCALED: Den globala message-realtimen är BORTTAGEN.
     // Tidigare lyssnade varje inloggad användare på ALLA conversation_messages-INSERTs
@@ -2529,65 +2394,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //  Det räcker för att hålla badge-fallback-värdet i sessionStorage färskt.
 
     // Real-time för company reviews (uppdaterar recensionsräknare för arbetsgivare)
-    // Employer-only: recensionsräknare visas i arbetsgivargränssnittet.
-    let reviewsChannel: RealtimeChannel | null = null;
-    if (isEmployer) {
-      reviewsChannel = createRealtimeChannel(`auth-reviews-${user.id}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
-          () => {
-            refreshEmployerStats();
-          }
-        )
-        .subscribe((status) => handleChannelStatus('reviews', status));
-    }
+    const reviewsChannel = createRealtimeChannel(`auth-reviews-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
+        () => {
+          refreshEmployerStats();
+        }
+      )
+      .subscribe((status) => handleChannelStatus('reviews', status));
 
     // Real-time för my_candidates (uppdaterar "Mina kandidater" räknare i sidebaren)
-    // Employer-only: "Mina kandidater" finns endast för arbetsgivare.
-    let myCandidatesChannel: RealtimeChannel | null = null;
-    if (isEmployer) {
-      myCandidatesChannel = createRealtimeChannel(`auth-my-candidates-${user.id}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },
-          () => {
-            refreshEmployerStats();
-          }
-        )
-        .subscribe((status) => handleChannelStatus('myCandidates', status));
-    }
+    const myCandidatesChannel = createRealtimeChannel(`auth-my-candidates-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },
+        () => {
+          refreshEmployerStats();
+        }
+      )
+      .subscribe((status) => handleChannelStatus('myCandidates', status));
 
     return () => {
       // Clear all pending timeouts
       connectionTimeouts.forEach((timeout) => clearTimeout(timeout));
       connectionTimeouts.clear();
-
+      
       // Stop reconnection polling
       if (reconnectionPollInterval) {
         clearInterval(reconnectionPollInterval);
         reconnectionPollInterval = null;
       }
 
-      // Clear debounce timers (only created when employer)
+      // Clear debounce timers
       if (jobRefreshTimer) clearTimeout(jobRefreshTimer);
       if (employerAppsTimer) clearTimeout(employerAppsTimer);
-
-      // Jobbsökarlyssnare: gör kvarvarande callbacks inerta och stoppa timern
-      jobSeekerListenersActive = false;
-      if (jobSeekerCountsTimer) clearTimeout(jobSeekerCountsTimer);
-
-      // Remove only channels that were actually created
-      if (jobChannel) supabase.removeChannel(jobChannel);
-      if (savedChannel) supabase.removeChannel(savedChannel);
-      if (applicationsChannel) supabase.removeChannel(applicationsChannel);
-      if (employerApplicationsChannel) supabase.removeChannel(employerApplicationsChannel);
+      
+      supabase.removeChannel(jobChannel);
+      supabase.removeChannel(savedChannel);
+      supabase.removeChannel(applicationsChannel);
+      supabase.removeChannel(employerApplicationsChannel);
       // (messagesChannel borttagen — se kommentar ovan om skalningsoptimering)
-      if (reviewsChannel) supabase.removeChannel(reviewsChannel);
-      if (myCandidatesChannel) supabase.removeChannel(myCandidatesChannel);
+      supabase.removeChannel(reviewsChannel);
+      supabase.removeChannel(myCandidatesChannel);
     };
-  }, [user, userRole?.role, hasOwnedJobSeekerRole, refreshSidebarCounts, refreshEmployerStats, queryClient]);
-
+  }, [user, refreshSidebarCounts, refreshEmployerStats]);
 
   const value: AuthContextType = {
     user,

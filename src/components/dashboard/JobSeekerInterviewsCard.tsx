@@ -1,56 +1,29 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Video, Building2, Phone } from 'lucide-react';
+import { Calendar, Video, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { useCandidateInterviews } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import {
   formatInterviewDate,
   formatInterviewTimeWithZone,
   getTimeUntil,
   isInterviewUrgent,
+  isInterviewOver,
   getMeetingUrl,
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 
-type LocationType = 'video' | 'office' | 'phone';
-
-/** Minsta formen kortet behöver — den delade live-listan ägs av DashboardGrid. */
-export interface DashboardInterview {
-  id: string;
-  scheduled_at: string;
-  duration_minutes: number | null;
-  location_type: LocationType;
-  location_details: string | null;
-  job_postings?: {
-    title?: string | null;
-    workplace_name?: string | null;
-  } | null;
-}
-
-interface JobSeekerInterviewsCardProps {
-  /** Redan live-filtrerade intervjuer (isInterviewOver applicerad av grid:et). */
-  interviews: DashboardInterview[];
-  isLoading: boolean;
-  /** Källan misslyckades — får aldrig visas som ett lyckat tomt resultat. */
-  isError?: boolean;
-  /** Kör om queryns hämtning. */
-  onRetry?: () => void;
-  /**
-   * Delad klocka från grid:et. Skickas den in skapar kortet INGET eget
-   * minutintervall — en klocka per Home-vy i stället för flera.
-   */
-  now?: number;
-}
+type LocationType = 'video' | 'office';
 
 const getLocationIcon = (type: LocationType) => {
   switch (type) {
     case 'video': return Video;
     case 'office': return Building2;
-    case 'phone': return Phone;
     default: return Calendar;
   }
 };
@@ -59,18 +32,19 @@ const getLocationLabel = (type: LocationType) => {
   switch (type) {
     case 'video': return 'Video';
     case 'office': return 'Kontor';
-    case 'phone': return 'Telefon';
     default: return '';
   }
 };
 
-export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = false, onRetry, now }: JobSeekerInterviewsCardProps) => {
+export const JobSeekerInterviewsCard = memo(() => {
+  const { interviews, isLoading } = useCandidateInterviews();
   const navigate = useNavigate();
-  // Egen tick endast som fallback när ingen delad klocka skickats in.
-  const fallbackTick = useMinuteTick(now === undefined);
-  const currentNow = now ?? fallbackTick;
+  const now = useMinuteTick();
 
-  const liveInterviews = interviews;
+  const liveInterviews = useMemo(
+    () => (interviews as any[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
+    [interviews, now],
+  );
   const upcomingInterviews = liveInterviews.slice(0, 5);
   const hasMore = liveInterviews.length > 5;
 
@@ -111,23 +85,7 @@ export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = 
         
         {/* Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {upcomingInterviews.length === 0 && isError ? (
-            <div
-              role="alert"
-              className="flex-1 flex flex-col items-center justify-center text-center transform-gpu"
-              style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased' }}
-            >
-              <Calendar className="h-8 w-8 text-white mb-2" />
-              <p className="text-sm font-medium text-white">Kunde inte hämta intervjuer</p>
-              <button
-                type="button"
-                onClick={onRetry}
-                className="text-xs text-white underline underline-offset-2 mt-1"
-              >
-                Försök igen
-              </button>
-            </div>
-          ) : upcomingInterviews.length === 0 ? (
+          {upcomingInterviews.length === 0 ? (
             <div
               className="flex-1 flex flex-col items-center justify-center text-center transform-gpu"
               style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased' }}
@@ -140,38 +98,25 @@ export const JobSeekerInterviewsCard = memo(({ interviews, isLoading, isError = 
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
               {upcomingInterviews.map((interview: any) => {
                 const LocationIcon = getLocationIcon(interview.location_type);
-                const timeUntil = getTimeUntil(interview.scheduled_at, currentNow);
-                const isUrgent = isInterviewUrgent(interview.scheduled_at, currentNow);
+                const timeUntil = getTimeUntil(interview.scheduled_at, now);
+                const isUrgent = isInterviewUrgent(interview.scheduled_at, now);
                 const meetingUrl = getMeetingUrl(interview.location_details);
-
+                
                 const companyName = interview.job_postings?.workplace_name?.trim() || 'Okänt företag';
-                const jobTitle = interview.job_postings?.title || 'Intervju';
-
-                // En och samma aktiveringsfunktion för klick och Enter/Space
-                const activateInterview = () => {
-                  if (interview.location_type === 'video' && meetingUrl) {
-                    window.open(meetingUrl, '_blank', 'noopener,noreferrer');
-                  } else {
-                    navigate('/my-applications');
-                  }
-                };
-
+                
                 return (
                   <motion.div
                     key={interview.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Öppna intervju för ${jobTitle} hos ${companyName}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        if (e.key === ' ') e.preventDefault();
-                        activateInterview();
+                    onClick={() => {
+                      if (interview.location_type === 'video' && meetingUrl) {
+                        window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+                      } else {
+                        navigate('/my-applications');
                       }
                     }}
-                    onClick={activateInterview}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">

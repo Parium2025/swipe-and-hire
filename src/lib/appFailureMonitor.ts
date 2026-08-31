@@ -83,21 +83,8 @@ function fingerprint(kind: AppFailure['kind'], message: string, source?: string,
   return `${kind}-${Math.abs(hash)}`;
 }
 
-// Rapporteringskanalerna får ALDRIG övervakas: annars rapporterar ett misslyckat
-// felrapportanrop sig självt och skapar en självförstärkande anropsstorm.
-const REPORTING_ENDPOINTS = [
-  'record_app_exception',
-  'create_system_performance_alert',
-  'send-push-notification',
-];
-
-export function isReportingUrl(value: string): boolean {
-  return REPORTING_ENDPOINTS.some((endpoint) => value.includes(endpoint));
-}
-
-export function shouldTrackUrl(input: RequestInfo | URL): boolean {
+function shouldTrackUrl(input: RequestInfo | URL): boolean {
   const value = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-  if (isReportingUrl(value)) return false;
   return /\/rest\/v1\//.test(value) || /\/functions\/v1\//.test(value) || /supabase\.co/.test(value) || /lovable/.test(value);
 }
 

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, AlertCircle } from 'lucide-react';
 import { checkGpsPermission, requestGpsPermission, isNativeApp } from '@/lib/gpsUtils';
 import GpsHelpModal from '@/components/GpsHelpModal';
-import { notePermissionGranted } from '@/lib/gpsCoordinator';
 
 // Vänta 10s innan GPS-ikonen visas — så att vädret (som oftast kommer inom
 // 2–3s) hinner landa först. När vädret finns tillgängligt returnerar
@@ -23,11 +22,9 @@ let gpsPromptHasBeenShown = false;
 interface GpsPromptProps {
   onEnableGps?: () => void;
   weatherAvailable?: boolean;
-  /** Home synlig? Dold Home (KeepAlive) stänger av all GPS-logik och UI. */
-  active?: boolean;
 }
 
-const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }: GpsPromptProps) => {
+const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProps) => {
 
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -46,21 +43,12 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
 
 
   useEffect(() => {
-    if (!active) {
-      setVisible(false);
-      setExpanded(false);
-      setShowHelpModal(false);
-      return;
-    }
-
-    let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let permissionStatus: PermissionStatus | null = null;
     let handleChange: (() => void) | null = null;
     
     const checkPermission = async () => {
       const status = await checkGpsPermission();
-      if (cancelled) return;
       setGpsStatus(status);
       
       if (status === 'granted') {
@@ -75,7 +63,6 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
           // Vädret hann landa under väntetiden → ingen varning behövs.
           if (weatherAvailableRef.current) return;
           checkGpsPermission().then(currentStatus => {
-            if (cancelled) return;
             if (currentStatus === 'granted') {
               setGpsStatus('granted');
               setVisible(false);
@@ -94,15 +81,11 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     const setupPermissionListener = async () => {
       if ('permissions' in navigator && !isNativeApp()) {
         try {
-          const queried = await navigator.permissions.query({ name: 'geolocation' });
-          if (cancelled) return;
-          permissionStatus = queried;
+          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
           
           handleChange = () => {
-            if (cancelled) return;
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
-              notePermissionGranted();
               gpsPromptDismissedUntilReload = false;
               setGpsStatus('granted');
               setVisible(false);
@@ -125,22 +108,12 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     setupPermissionListener();
     
     return () => {
-      cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
       if (permissionStatus && handleChange) {
         permissionStatus.removeEventListener('change', handleChange);
       }
     };
-  }, [active]);
-
-  // Generation-guard: asynkrona fortsättningar (native-dialog, geolocation-
-  // callbacks) får inte mutera state efter att Home dolts (KeepAlive).
-  const activeRef = useRef(active);
-  activeRef.current = active;
-  const generationRef = useRef(0);
-  useEffect(() => {
-    if (!active) generationRef.current += 1;
-  }, [active]);
+  }, []);
 
   const handleDismiss = () => {
     gpsPromptDismissedUntilReload = true;
@@ -152,17 +125,13 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
       setShowHelpModal(true);
       return;
     }
-
+    
     handleDismiss();
-    const generation = generationRef.current;
-    const isStale = () => generationRef.current !== generation || !activeRef.current;
-
+    
     if (isNativeApp()) {
       const granted = await requestGpsPermission();
-      if (isStale()) return;
       if (granted) {
         console.log('Native GPS enabled successfully');
-        notePermissionGranted();
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
@@ -177,15 +146,12 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     
     navigator.geolocation.getCurrentPosition(
       () => {
-        if (isStale()) return;
         console.log('GPS enabled successfully');
-        notePermissionGranted();
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
       },
       (error) => {
-        if (isStale()) return;
         console.log('GPS permission denied:', error.message);
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('denied');
@@ -195,7 +161,6 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     );
   };
 
-  if (!active) return null;
   if (gpsStatus === 'granted') return null;
   if (weatherAvailable) return null;
 

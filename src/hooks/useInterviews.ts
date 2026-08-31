@@ -14,7 +14,7 @@ export interface Interview {
   employer_id: string;
   scheduled_at: string;
   duration_minutes: number;
-  location_type: 'video' | 'office' | 'phone';
+  location_type: 'video' | 'office';
   location_details: string | null;
   subject: string | null;
   message: string | null;
@@ -276,7 +276,7 @@ export const useCandidateInterviews = () => {
       return undefined;
   }, [user?.id]);
 
-  const { data: interviews = [], isLoading, isSuccess, isError, isPlaceholderData, refetch } = useQuery({
+  const { data: interviews = [], isLoading } = useQuery({
     queryKey: ['candidate-interviews', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -344,14 +344,6 @@ export const useCandidateInterviews = () => {
   return {
     interviews,
     isLoading,
-    // Skiljer ett misslyckat anrop från ett lyckat tomt svar.
-    // isSuccess kan vara sant enbart tack vare placeholderData — därför
-    // exponeras även isPlaceholderData och en verklig nätverks-readiness.
-    isSuccess,
-    isError,
-    isPlaceholderData,
-    isFetchedSuccessfully: isSuccess && !isPlaceholderData,
-    refetch,
     respondToInterview,
   };
 };

@@ -9,33 +9,12 @@ This project includes a controlled load-test harness for finding bottlenecks in:
 The test is intentionally safe by default:
 
 - it runs in read-only mode unless writes are explicitly enabled
-- it is fail-closed on targeting: the **actual** Supabase URL used by the client is validated against a
-  mandatory `PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL` before any client is created
-- there is **no** low-virtual-user or "smoke is safe" exception; every production run requires explicit opt-in
+- it refuses high-load tests against `parium.se` unless production testing is explicitly allowed
 - it writes a JSON report with p50/p95/p99 latency, errors and bottleneck findings
 
-## Targeting rules (read first)
-
-| Situation | Result |
-| --- | --- |
-| Missing `PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL` | refuses to run |
-| Actual Supabase origin != expected origin | refuses to run, even with `ALLOW_PRODUCTION=true` |
-| Malformed/non-http(s) URL | refuses to run |
-| Production origin without `PARIUM_LOAD_TEST_ALLOW_PRODUCTION=true` | refuses to run at any user count |
-
-Origins are compared normalized (scheme + lowercased host, trailing slash and path ignored).
-The report and console log show the normalized **actual** origin, never a label.
-
-## Staging test
-
-Staging requires the actual staging Supabase URL and key plus the exact expected origin.
-`SUPABASE_URL`/`SUPABASE_ANON_KEY` always take priority over any `VITE_*` values in `.env`,
-so an explicit staging target cannot silently fall back to a production fallback:
+## Quick smoke test
 
 ```bash
-SUPABASE_URL=https://<staging-ref>.supabase.co \
-SUPABASE_ANON_KEY=<staging-anon-key> \
-PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL=https://<staging-ref>.supabase.co \
 PARIUM_LOAD_TEST_USERS_COUNT=10 \
 PARIUM_LOAD_TEST_DURATION_SECONDS=30 \
 bun run load:test
@@ -43,11 +22,9 @@ bun run load:test
 
 ## Production load test
 
-Only run this when you intentionally want to test the live backend. Both the expected origin and the
-opt-in flag are mandatory, regardless of user count.
+Only run this when you intentionally want to test the live backend.
 
 ```bash
-PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL=https://<prod-ref>.supabase.co \
 PARIUM_LOAD_TEST_ALLOW_PRODUCTION=true \
 PARIUM_LOAD_TEST_USERS_COUNT=200 \
 PARIUM_LOAD_TEST_DURATION_SECONDS=180 \
@@ -64,7 +41,6 @@ PARIUM_LOAD_TEST_AUTH_USERS='[
   {"email":"test1@example.com","password":"password"},
   {"email":"test2@example.com","password":"password"}
 ]' \
-PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL=https://<target-ref>.supabase.co \
 PARIUM_LOAD_TEST_ALLOW_PRODUCTION=true \
 PARIUM_LOAD_TEST_USERS_COUNT=100 \
 bun run load:test
@@ -75,7 +51,6 @@ bun run load:test
 Write mode can create `job_views` and chat messages, so only use seeded test accounts/data.
 
 ```bash
-PARIUM_LOAD_TEST_EXPECTED_SUPABASE_URL=https://<staging-ref>.supabase.co \
 PARIUM_LOAD_TEST_ENABLE_WRITES=true \
 PARIUM_LOAD_TEST_AUTH_USERS='[{"email":"test1@example.com","password":"password"}]' \
 bun run load:test

@@ -14,14 +14,12 @@ import { DashboardCarouselDots } from './DashboardCarouselDots';
 interface CareerTipsCardProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
-  /** Home synlig? Dold Home pausar rotationen utan att ändra visat kort. */
-  isActive?: boolean;
 }
 
-export const CareerTipsCard = memo(({ isPaused, setIsPaused, isActive = true }: CareerTipsCardProps) => {
+export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardProps) => {
   const { data: tips, isLoading, error } = useCareerTips();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused, active: isActive });
+  const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
   
   const tipsItems = tips?.slice(0, 4) || [];
 
@@ -45,7 +43,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused, isActive = true }: 
   }, [tipsItems.length]);
 
   useSynchronizedRotation({
-    enabled: isActive && tipsItems.length > 1 && !isPaused,
+    enabled: tipsItems.length > 1 && !isPaused,
     intervalMs: 10000,
     offsetMs: 0,
     onTick: goNext,
@@ -55,11 +53,6 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused, isActive = true }: 
     onSwipeLeft: goNext,
     onSwipeRight: goPrev,
   });
-
-  const openTipSource = () => {
-    const url = tipsItems[currentIndex]?.source_url;
-    if (url) window.open(url, '_blank', 'noopener,noreferrer');
-  };
 
   if (isLoading) {
     return (
@@ -126,18 +119,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused, isActive = true }: 
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                {...(currentTip.source_url ? {
-                  role: 'link',
-                  tabIndex: 0,
-                  'aria-label': `Öppna nyheten "${currentTip.title}" i en ny flik`,
-                  onKeyDown: (e: React.KeyboardEvent) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      if (e.key === ' ') e.preventDefault();
-                      openTipSource();
-                    }
-                  },
-                } : {})}
-                onClick={() => currentTip.source_url && openTipSource()}
+                onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={`w-full flex flex-col overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
                 <TruncatedText

@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
-import { isNativeApp, isMobileWeb, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
-import { resolvePosition } from '@/lib/gpsCoordinator';
-import { setPositionResolutionActive } from '@/lib/gpsActivity';
+import { isNativeApp, isMobileWeb, getAccuratePosition, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { isSlowConnection } from '@/hooks/useNetworkAwareFetch';
 import {
@@ -51,26 +49,12 @@ interface UseWeatherOptions {
   enabled?: boolean;
   /** Whether to enable background location updates (native only), default false */
   backgroundLocationEnabled?: boolean;
-  /**
-   * Whether the consuming page is currently visible. When false the GPS watcher,
-   * the periodic interval and the retry loop are all paused — the last known
-   * weather is still returned so the UI never changes.
-   */
-  active?: boolean;
 }
 
 export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   const fallbackCity = options.fallbackCity?.trim();
   const enabled = options.enabled ?? true;
   const backgroundLocationEnabled = options.backgroundLocationEnabled ?? false;
-  const active = options.active ?? true;
-
-  // Register page-awareness in the coordinator before anything else runs, so
-  // global preloads stay silent while this consumer is hidden.
-  useEffect(() => {
-    setPositionResolutionActive(active);
-    return () => { setPositionResolutionActive(true); };
-  }, [active]);
 
   const locationRef = useRef<CachedLocation | null>(null);
   const initializedRef = useRef(false);
@@ -249,7 +233,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     try {
       // Fast first fix, automatically refined when the browser hands us an
       // IP-derived (city-wrong) position. Works the same in every country.
-      const gpsResult = await resolvePosition({
+      const gpsResult = await getAccuratePosition({
         timeout: isNativeApp() ? 8000 : 6000,
         // Accept a fix up to 2 minutes old — avoids waking the radio on every
         // periodic/visibility check when we don't need a fresh lock.
@@ -350,7 +334,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   useEffect(() => {
     mountedRef.current = true;
     let watchId: number | null = null;
-    if (!enabled || !active) {
+    if (!enabled) {
       return () => { mountedRef.current = false; };
     }
 
@@ -398,13 +382,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           // name can still be shown if the consumer wants it.
           updateWeather(safeFallback(fallbackCity || '', 'fallback'));
         }
-      }
-    } else if (!isOffline) {
-      // Re-activated (user came back to this page): only refresh when the
-      // cached reading is older than the visibility threshold.
-      const cachedOnResume = getCachedWeather();
-      if (!cachedOnResume || Date.now() - cachedOnResume.timestamp > 3 * 60 * 1000) {
-        checkForLocationChange(true);
       }
     }
 
@@ -488,12 +465,12 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       unsubscribeConnectivity();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, active, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
+  }, [enabled, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
 
   // Retry watcher — isolated from the init effect so a transient failure never
   // tears down and restarts the GPS watcher.
   useEffect(() => {
-    if (!enabled || !active || !weather.error) {
+    if (!enabled || !weather.error) {
       retryAttemptRef.current = 0;
       return;
     }
@@ -517,7 +494,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, active, weather.error, retryTick, checkForLocationChange]);
+  }, [enabled, weather.error, retryTick, checkForLocationChange]);
 
   return weather;
 };
@@ -526,42 +503,24 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
  * Preload location AND weather data for instant display.
  * Call this during login to have everything ready before user reaches home page.
  */
-export interface PreloadWeatherOptions {
-  /**
-   * Valfri kontovakt. Returnerar false så snart anropande ägare/montering inte
-   * längre är aktuell — då skrivs INGEN plats/väder i den kontoskopade cachen.
-   * Anropare utan vakt behåller nuvarande beteende.
-   */
-  isCurrent?: () => boolean;
-}
-
-export const preloadWeatherLocation = async (
-  options?: PreloadWeatherOptions,
-): Promise<CachedLocation | null> => {
-  const isCurrent = options?.isCurrent ?? (() => true);
+export const preloadWeatherLocation = async (): Promise<CachedLocation | null> => {
   const existingWeather = getCachedWeather();
   const existingLocation = getCachedLocation();
   
   if (existingWeather && existingLocation) {
     const weatherAge = Date.now() - existingWeather.timestamp;
     const locationAge = Date.now() - existingLocation.timestamp;
-    if (
-      weatherAge >= 0 && weatherAge < 5 * 60 * 1000 &&
-      locationAge >= 0 && locationAge < 30 * 60 * 1000 &&
-      existingLocation.source === 'gps'
-    ) {
+    if (weatherAge < 5 * 60 * 1000 && locationAge < 30 * 60 * 1000 && existingLocation.source === 'gps') {
       return existingLocation;
     }
   }
 
   let location: CachedLocation | null = null;
 
-  const gpsResult = await resolvePosition({
+  const gpsResult = await getAccuratePosition({
     timeout: 5000,
     maximumAge: 30 * 60 * 1000,
   });
-
-  if (!isCurrent()) return null;
 
   if (gpsResult) {
     // City will be resolved server-side when we fetch weather below
@@ -570,10 +529,8 @@ export const preloadWeatherLocation = async (
   }
 
   if (!location) {
-    let ipLocation = await getServerSideIPLocation().catch(() => null);
-    if (!isCurrent()) return null;
-    ipLocation ??= await getLocationByIP().catch(() => null);
-    if (!isCurrent()) return null;
+    const ipLocation = (await getServerSideIPLocation().catch(() => null))
+      ?? (await getLocationByIP().catch(() => null));
     if (ipLocation) {
       location = { ...ipLocation, source: 'ip', timestamp: Date.now() };
       setCachedLocation(location);
@@ -587,7 +544,6 @@ export const preloadWeatherLocation = async (
   if (location) {
     try {
       const result = await fetchCurrentWeather(location.lat, location.lon);
-      if (!isCurrent()) return null;
       const { temperature, feelsLike, temperatureAvailable, weatherCode, isNight, cachedCity } = result;
       // Use server-provided city, update location cache with resolved city
       const resolvedCity = cachedCity || location.city || '';
@@ -608,7 +564,6 @@ export const preloadWeatherLocation = async (
         source: location.source,
       });
     } catch (err) {
-      if (!isCurrent()) return null;
       console.warn('Weather preload fetch failed:', err);
     }
   }
