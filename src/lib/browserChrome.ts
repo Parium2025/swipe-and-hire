@@ -3,7 +3,6 @@ const PARIUM_CHROME_COLOR = '#001935';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 // Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.
 const AUTH_CHROME_COLOR = '#062B5E';
-const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
@@ -28,20 +27,28 @@ const nudgeColor = (color: string) => {
   return `#${hex.slice(0, 4)}${nb}`;
 };
 
-const writeThemeColor = (color: string) => {
-  // Ta bort ALLA befintliga theme-color-meta-tags. Safari cache:ar värdet
-  // aggressivt och uppdaterar inte URL-baren när man bara ändrar `content`
-  // (särskilt vid back-navigation via bfcache). Att fysiskt remova + återskapa
-  // noden tvingar Safari att re-sampla färgen.
-  Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach((el) => el.remove());
+const THEME_META_ID = 'parium-theme-color';
 
-  THEME_COLOR_MEDIA.forEach((media) => {
-    const meta = document.createElement('meta');
-    meta.setAttribute('name', 'theme-color');
-    if (media) meta.setAttribute('media', media);
-    meta.setAttribute('content', color);
-    document.head.insertBefore(meta, document.head.firstChild);
+const writeThemeColor = (color: string) => {
+  // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
+  // gjorde tidigare) gör att iOS Safari tappar bort värdet under SPA-navigering
+  // och behåller den föregående ruttens färg — därför uppdaterar vi bara
+  // `content` på samma nod. Media-varianter tas bort: en omedia-tagg vinner
+  // konsekvent i Safari och slipper konflikt med light/dark-varianterna.
+  Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach((el) => {
+    if (el.id !== THEME_META_ID) el.remove();
   });
+
+  let meta = document.getElementById(THEME_META_ID) as HTMLMetaElement | null;
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.id = THEME_META_ID;
+    meta.setAttribute('name', 'theme-color');
+    document.head.insertBefore(meta, document.head.firstChild);
+  }
+  if (meta.getAttribute('content') !== color) {
+    meta.setAttribute('content', color);
+  }
 };
 
 const setThemeColor = (color: string) => {
@@ -55,6 +62,7 @@ const setThemeColor = (color: string) => {
     writeThemeColor(color);
   }
 };
+
 
 
 const notifyChromeStrips = (pathname: string, color: string) => {
@@ -116,7 +124,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   // tillbaka efter en snabb back-navigation (blå färg kvar på landningssidan).
   pendingSyncTimers.forEach((id) => window.clearTimeout(id));
   pendingSyncTimers = [];
-  [80, 260, 640, 1200].forEach((delay) => {
+  [80, 260, 640, 1200, 2000].forEach((delay) => {
     pendingSyncTimers.push(
       window.setTimeout(() => {
         setChromeCssColor(color);
