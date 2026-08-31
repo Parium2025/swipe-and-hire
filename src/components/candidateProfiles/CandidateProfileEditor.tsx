@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
-import { FileText, Camera, Video, Play, Trash2 } from 'lucide-react';
+import { FileText, Camera, Video, Play, Trash2, Loader2, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
