@@ -6,7 +6,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Users, Plus, Star, Pencil, Trash2, FileText, Video, Image as ImageIcon, AlertTriangle } from 'lucide-react';
+import { Users, Star, Pencil, Trash2, FileText, Video, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCandidateProfiles, MAX_CANDIDATE_PROFILES, type CandidateProfile, type CandidateProfileInput } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
