@@ -2,10 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import desktopAsset from '@/assets/hero10-desktop.mp4.asset.json';
 import landscapeLiteAsset from '@/assets/hero10-landscape-lite.mp4.asset.json';
-import tabletAsset from '@/assets/hero11-tablet.mp4.asset.json';
 import portraitAsset from '@/assets/hero12-portrait.mp4.asset.json';
 import posterAsset from '@/assets/hero10-poster.jpg.asset.json';
-import posterTabletAsset from '@/assets/hero11-poster-tablet.jpg.asset.json';
 import posterPortraitAsset from '@/assets/hero12-poster-portrait.jpg.asset.json';
 import { prefersLightweightVideo, prefersReducedData } from '@/lib/videoPlatform';
 
@@ -29,8 +27,8 @@ const shouldSkipVideo = () => {
 // så att object-cover aldrig behöver kapa mer än några få procent — och så att
 // svarta ränder aldrig kan uppstå oavsett skärm:
 //   ratio < 0.66            → telefon        → 9:16-master (1080×1920)
-//   0.66 ≤ ratio < 1.25     → surfplatta/    → 3:4-master  (1200×1600)
-//                              delad fönstervy
+//   0.66 ≤ ratio < 1.25     → surfplatta/    → centrerad 16:9-master
+//                              delad fönstervy  (beskärs symmetriskt)
 //   ratio ≥ 1.25            → laptop/TV      → 16:9-master (1920×1080 / 1280×720)
 const PORTRAIT_MAX_RATIO = 0.66;
 const TABLET_MAX_RATIO = 1.25;
@@ -40,7 +38,7 @@ const TABLET_MAX_RATIO = 1.25;
 // 820×1120 = 0,73) hamnade då i mobilspåret och fick 720×1280-mastern, som
 // både är mjuk och betydligt hårdare beskuren. Telefonundantaget kräver nu
 // BÅDE smal bredd och telefonliknande proportion, så surfplattor i porträtt
-// alltid får 3:4-mastern (1200×1600).
+// får desktopmastern med samma centrerade motiv som mobil och större skärmar.
 const PHONE_MAX_WIDTH = 700;
 const PHONE_MAX_RATIO = 0.72;
 
@@ -72,17 +70,6 @@ const SOURCE_RATIO = 16 / 9;
 const LANDSCAPE_TOP_BIAS_MIN = 12;
 const LANDSCAPE_TOP_BIAS_MAX = 50;
 
-// Surfplatta stående: mastern är exakt 3:4 (1200×1600 = 0,75). En iPad i
-// porträtt är 0,75 på pappret men webbläsarens adressfält/verktygsfält gör
-// den faktiska viewporten kortare (t.ex. 820×1120 = 0,73). Då kapar
-// object-cover några procent i SIDLED — och med `center` fördelas det lika
-// mellan vänster och höger. Lagerscenen är komponerad något till höger i
-// 3:4-mastern, så vi glider mjukt från 50 % mot 68 % i sidled ju smalare
-// viewporten blir, vilket håller paret centrerat utan att påverka andra
-// scener märkbart. I höjd lägger 20 % merparten av bortfallet i botten
-// (golv/mark) så huvudena alltid får rum.
-const TABLET_TOP_BIAS = '20%';
-
 const landscapeObjectPosition = () => {
   if (typeof window === 'undefined') return 'center center';
   const w = window.innerWidth;
@@ -98,24 +85,6 @@ const landscapeObjectPosition = () => {
   return `center ${bias.toFixed(1)}%`;
 };
 
-const tabletObjectPosition = () => {
-  if (typeof window === 'undefined') return `center ${TABLET_TOP_BIAS}`;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  if (!w || !h) return `center ${TABLET_TOP_BIAS}`;
-  const ratio = w / h;
-  const SOURCE_TABLET_RATIO = 3 / 4; // 0.75
-  // Bredare än källan → beskärningen sker i höjdled, horisontellt är allt redan synligt.
-  if (ratio >= SOURCE_TABLET_RATIO) return `center ${TABLET_TOP_BIAS}`;
-  // Ju smalare viewport, desto mer beskärning i sidled → glid mjukt från
-  // 50 % (ingen sidbeskärning) mot 68 % vid porträttgränsen, vilket visar
-  // mer av källans högra sida och centrerar lagerscenen.
-  const t = Math.min(1, (SOURCE_TABLET_RATIO - ratio) / (SOURCE_TABLET_RATIO - PORTRAIT_MAX_RATIO));
-  const x = 50 + t * 18;
-  return `${x.toFixed(1)}% ${TABLET_TOP_BIAS}`;
-};
-
-
 // Har vi en gång hämtat 1080p-mastern ligger den i cachen. Att nedgradera till
 // lite-spåret när fönstret dras smalare vore då bara en extra nedladdning och en
 // omstart av klippet — vi behåller den bättre filen resten av sessionen.
@@ -125,7 +94,11 @@ const pickHeroSrc = () => {
   if (typeof window === 'undefined') return landscapeLiteAsset.url;
   const tier = getTier();
   if (tier === 'portrait') return portraitAsset.url;
-  if (tier === 'tablet') return tabletAsset.url;
+  // 3:4-mastern har lagerscenen permanent komponerad åt höger. Vid iPadens
+  // proportion syns hela filbredden, så object-position kan inte flytta motivet.
+  // Desktopmastern har samma centrerade komposition som telefonmastern och
+  // object-cover gör en ren, symmetrisk sidobeskärning i stående surfplatteläge.
+  if (tier === 'tablet') return desktopAsset.url;
   if (landscapeHighResLatched) return desktopAsset.url;
   // Landskap: skala efter faktisk renderad bredd (CSS-px × DPR, tak 2×) så att
   // stora skärmar och TV får 1080p-mastern och små/svaga enheter den lätta.
@@ -151,7 +124,6 @@ const HeroVideo = () => {
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [tier, setTier] = useState<HeroTier>(getTier);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
-  const [tabletPosition, setTabletPosition] = useState<string>(tabletObjectPosition);
   // iOS Lågeffektläge blockerar autoplay. Safari ritar då sin egen play-knapp
   // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
   // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
@@ -187,7 +159,6 @@ const HeroVideo = () => {
     let settleTimer: number | null = null;
     const handle = () => {
       setLandscapePosition(landscapeObjectPosition());
-      setTabletPosition(tabletObjectPosition());
       const nextTier = getTier();
       if (nextTier !== tierRef.current) {
         if (settleTimer !== null) {
@@ -514,7 +485,7 @@ const HeroVideo = () => {
               fort 53 kB laddats, och videon tonas in ovanpå när den faktiskt
               målat sin första bildruta. */}
           <img
-            src={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
+            src={tier === 'portrait' ? posterPortraitAsset.url : posterAsset.url}
             alt=""
             aria-hidden="true"
             draggable={false}
@@ -522,7 +493,7 @@ const HeroVideo = () => {
             className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${
               autoplayBlocked || skipVideo ? 'z-10' : 'z-0'
             }`}
-            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? tabletPosition : 'center center' }}
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : 'center center' }}
           />
 
           <video
@@ -540,13 +511,13 @@ const HeroVideo = () => {
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
-            poster={tier === 'portrait' ? posterPortraitAsset.url : tier === 'tablet' ? posterTabletAsset.url : posterAsset.url}
+            poster={tier === 'portrait' ? posterPortraitAsset.url : posterAsset.url}
             onContextMenu={(e) => e.preventDefault()}
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             // Varje nivå har en master med nästan samma proportion som viewporten,
             // så object-cover kapar bara några procent — aldrig svarta ränder.
             style={{
-              objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? tabletPosition : 'center center',
+              objectPosition: tier === 'landscape' ? landscapePosition : 'center center',
               // Tona in först när en riktig bildruta finns — annars kan Safaris
               // tomma (svarta) videoyta lägga sig över posterlagret.
               opacity: videoPainted && !autoplayBlocked && !skipVideo ? 1 : 0,
