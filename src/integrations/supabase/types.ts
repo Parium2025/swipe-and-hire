@@ -1311,6 +1311,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_confirmation_tokens: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          token_digest: string
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          token_digest: string
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_digest?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_confirmations: {
         Row: {
           confirmed_at: string | null
@@ -1318,6 +1345,7 @@ export type Database = {
           expires_at: string
           id: string
           token: string
+          token_digest: string | null
           user_id: string
         }
         Insert: {
@@ -1326,6 +1354,7 @@ export type Database = {
           expires_at: string
           id?: string
           token: string
+          token_digest?: string | null
           user_id: string
         }
         Update: {
@@ -1334,6 +1363,7 @@ export type Database = {
           expires_at?: string
           id?: string
           token?: string
+          token_digest?: string | null
           user_id?: string
         }
         Relationships: []
@@ -3843,6 +3873,13 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      cleanup_expired_email_confirmation_capabilities: {
+        Args: { _batch_size?: number }
+        Returns: {
+          legacy_deleted: number
+          token_deleted: number
+        }[]
+      }
       cleanup_stale_sessions: { Args: never; Returns: number }
       complete_cv_analysis: {
         Args: {
@@ -3940,6 +3977,14 @@ export type Database = {
         Args: { p_owner_id: string }
         Returns: string
       }
+      finalize_email_confirmation_token: {
+        Args: {
+          _confirmation_id: string
+          _raw_token: string
+          _token_digest: string
+        }
+        Returns: boolean
+      }
       finish_criteria_eval_item: {
         Args: { p_error?: string; p_item_id: string; p_ok: boolean }
         Returns: undefined
@@ -4000,14 +4045,6 @@ export type Database = {
           profile_image_url: string
           video_updated_at: string
           video_url: string
-        }[]
-      }
-      get_admin_profile_media_counts: {
-        Args: never
-        Returns: {
-          cv_count: number
-          image_count: number
-          video_count: number
         }[]
       }
       get_application_quota: { Args: { p_user_id: string }; Returns: Json }
@@ -4164,19 +4201,6 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
-      get_my_organization_member_profiles: {
-        Args: never
-        Returns: {
-          email: string | null
-          first_name: string | null
-          is_active: boolean
-          last_name: string | null
-          organization_id: string
-          profile_image_url: string | null
-          role: string
-          user_id: string
-        }[]
-      }
       get_my_profile: {
         Args: never
         Returns: {
@@ -4323,10 +4347,27 @@ export type Database = {
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_service_role: { Args: never; Returns: boolean }
       is_session_valid: { Args: { p_session_token: string }; Returns: boolean }
+      issue_email_confirmation_token: {
+        Args: {
+          _email: string
+          _expires_at: string
+          _raw_token: string
+          _token_digest: string
+          _user_id: string
+        }
+        Returns: string
+      }
       kick_session: { Args: { p_session_id: string }; Returns: boolean }
       log_profile_view: {
         Args: { p_application_id: string }
         Returns: undefined
+      }
+      lookup_email_confirmation_token: {
+        Args: { _raw_token: string; _token_digest: string }
+        Returns: {
+          confirmation_id: string
+          user_id: string
+        }[]
       }
       match_criterion_prompt: {
         Args: {
@@ -4451,11 +4492,11 @@ export type Database = {
           p_expected_user_id: string
         }
         Returns: {
-          note_id: string | null
+          note_id: string
           save_status: string
-          server_content: string | null
+          server_content: string
           server_revision: number
-          server_updated_at: string | null
+          server_updated_at: string
         }[]
       }
       save_owned_job_with_questions: {
