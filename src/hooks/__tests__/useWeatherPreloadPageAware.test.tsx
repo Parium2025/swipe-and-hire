@@ -35,7 +35,7 @@ vi.mock('@/lib/weatherApi', async () => {
 });
 
 import { useWeather, preloadWeatherLocation } from '@/hooks/useWeather';
-import { resetGpsCoordinator } from '@/lib/gpsCoordinator';
+import { notePermissionGranted, resetGpsCoordinator } from '@/lib/gpsCoordinator';
 import { setWeatherCacheUser } from '@/lib/weatherApi';
 
 const accurateFix = {
@@ -54,6 +54,9 @@ describe('preloadWeatherLocation page awareness', () => {
   beforeEach(() => {
     localStorage.clear();
     resetGpsCoordinator();
+    // This lifecycle spec isolates page visibility. Precise location was already
+    // approved in a previous user gesture.
+    notePermissionGranted();
     setWeatherCacheUser('user-a');
     getCurrentPosition.mockClear();
     watchPosition.mockClear();

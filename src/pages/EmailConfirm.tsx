@@ -1,69 +1,50 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { consumeAuthBootstrapCredentials } from '@/lib/authBootstrapCredentials';
 
 const EmailConfirm = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'already-confirmed' | 'error'>('loading');
   const [message, setMessage] = useState('');
+  const [credential] = useState(consumeAuthBootstrapCredentials);
   const { confirmEmail } = useAuth();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const attemptedRef = useRef(false);
 
-  useEffect(() => {
-    const confirmToken = searchParams.get('confirm');
-    const statusParam = searchParams.get('status');
-
-    console.log('EmailConfirm - All URL params:', Object.fromEntries(searchParams.entries()));
-    console.log('EmailConfirm - token:', confirmToken, 'Full URL:', window.location.href);
-    console.log('EmailConfirm - User agent:', navigator.userAgent);
-
-    // 1) Nytt autokonfirmerat läge (ingen token, men status=success)
-    if (!confirmToken && statusParam === 'success') {
-      console.log('Auto-confirm success mode detected');
-      setStatus('success');
-      setMessage('Fantastiskt! Ditt konto har skapats och är redan aktiverat. Du kan logga in direkt.');
-      return;
-    }
-    
-    // 2) Klassiskt token-baserat flöde
-    if (!confirmToken) {
-      console.log('No confirmation token found');
+  const handleEmailConfirmation = useCallback(async () => {
+    if (credential?.family !== 'custom_confirm') {
       setStatus('error');
       setMessage('Ingen bekräftelsetoken hittades i länken.');
       return;
     }
 
-    console.log('Found confirmation token, starting confirmation process');
-    handleEmailConfirmation(confirmToken);
-  }, [searchParams]);
-
-  const handleEmailConfirmation = async (token: string) => {
+    setStatus('loading');
     try {
-      console.log('Starting email confirmation with token:', token);
-      const result = await confirmEmail(token);
-      console.log('Email confirmation successful:', result);
+      const result = await confirmEmail(credential.confirmToken);
+      if (result.processed !== true) throw new Error('Confirmation not processed');
+      const resultMessage = result.message || '';
+      const lowerMessage = resultMessage.toLowerCase();
 
-      const msg = result.message || '';
-      const lowerMsg = msg.toLowerCase();
-
-      if (lowerMsg.includes('redan') && (lowerMsg.includes('aktiverat') || lowerMsg.includes('bekräftad'))) {
+      if (lowerMessage.includes('redan') &&
+          (lowerMessage.includes('aktiverat') || lowerMessage.includes('bekräftad'))) {
         setStatus('already-confirmed');
       } else {
         setStatus('success');
       }
+      setMessage(resultMessage);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Ett fel inträffade vid bekräftelse av e-post';
+      const normalizedError = errorMessage.toLowerCase();
 
-      setMessage(msg);
-    } catch (error: any) {
-      console.log('Email confirmation error:', error);
-      const errorMessage = error.message || 'Ett fel inträffade vid bekräftelse av e-post';
-      
-      if (errorMessage.toLowerCase().includes('redan bekräftad') || errorMessage.toLowerCase().includes('already')) {
+      if (normalizedError.includes('redan bekräftad') || normalizedError.includes('already')) {
         setStatus('already-confirmed');
         setMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
-      } else if (errorMessage.toLowerCase().includes('utgången') || errorMessage.toLowerCase().includes('expired')) {
+      } else if (normalizedError.includes('utgången') || normalizedError.includes('expired')) {
         setStatus('error');
         setMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
       } else {
@@ -71,10 +52,16 @@ const EmailConfirm = () => {
         setMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
       }
     }
-  };
+  }, [confirmEmail, credential]);
+
+  useEffect(() => {
+    if (attemptedRef.current) return;
+    attemptedRef.current = true;
+    void handleEmailConfirmation();
+  }, [handleEmailConfirmation]);
 
   const handleGoToLogin = () => {
-    navigate('/auth');
+    navigate('/auth', { replace: true });
   };
 
   return (
@@ -82,26 +69,33 @@ const EmailConfirm = () => {
       <Card className="w-full max-w-md bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 shadow-2xl rounded-3xl">
         <CardContent className="p-8 text-center">
           {status === 'loading' && (
-            <>
-              <Loader2 className="h-16 w-16 text-white mx-auto mb-4 animate-spin" />
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-busy="true"
+            >
+              <Loader2 aria-hidden="true" className="h-16 w-16 text-white mx-auto mb-4 animate-spin" />
               <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
                 Bekräftar ditt konto...
               </h2>
               <p className="text-sm text-white mb-6">
                 Vänta ett ögonblick medan vi aktiverar ditt konto.
               </p>
-            </>
+            </div>
           )}
           
           {status === 'success' && (
             <>
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
-                Nu är kontot bekräftat! 🎉
-              </h2>
-              <p className="text-sm text-white mb-6">
-                Ditt konto är nu aktiverat och redo att användas. Du kan logga in och börja använda Parium!
-              </p>
+              <div role="status" aria-live="polite" aria-atomic="true">
+                <CheckCircle aria-hidden="true" className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
+                  Nu är kontot bekräftat! 🎉
+                </h2>
+                <p className="text-sm text-white mb-6">
+                  Ditt konto är nu aktiverat och redo att användas. Du kan logga in och börja använda Parium!
+                </p>
+              </div>
               <Button 
                 onClick={handleGoToLogin}
                 variant="glass"
@@ -114,12 +108,14 @@ const EmailConfirm = () => {
           
           {status === 'already-confirmed' && (
             <>
-              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
-                Redan aktiverat 🎉
-              </h2>
-              <p className="text-sm text-white mb-6">
-                Ditt konto är redan aktiverat och redo att användas.
-              </p>
+              <div role="status" aria-live="polite" aria-atomic="true">
+                <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
+                  Redan aktiverat 🎉
+                </h2>
+                <p className="text-sm text-white mb-6">
+                  Ditt konto är redan aktiverat och redo att användas.
+                </p>
+              </div>
               <Button 
                 onClick={handleGoToLogin}
                 variant="glass"
@@ -132,20 +128,34 @@ const EmailConfirm = () => {
           
           {status === 'error' && (
             <>
-              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
-                Ett fel inträffade
-              </h2>
-              <p className="text-sm text-white mb-6">
-                {message}
-              </p>
-              <Button 
-                onClick={handleGoToLogin}
-                variant="glass"
-                className="w-full"
-              >
-                Tillbaka till inloggning
-              </Button>
+              <div role="alert" aria-live="assertive" aria-atomic="true">
+                <AlertCircle aria-hidden="true" className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-4">
+                  Ett fel inträffade
+                </h2>
+                <p className="text-sm text-white mb-6">
+                  {message}
+                </p>
+              </div>
+              <div className="space-y-3">
+                {credential?.family === 'custom_confirm' && (
+                  <Button
+                    type="button"
+                    onClick={() => void handleEmailConfirmation()}
+                    variant="glass"
+                    className="w-full"
+                  >
+                    Försök igen
+                  </Button>
+                )}
+                <Button
+                  onClick={handleGoToLogin}
+                  variant="glass"
+                  className="w-full"
+                >
+                  Tillbaka till inloggning
+                </Button>
+              </div>
             </>
           )}
         </CardContent>

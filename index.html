@@ -2,6 +2,155 @@
 <html lang="sv-SE">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="no-referrer" />
+    <script id="parium-auth-url-gate">
+      (function () {
+        try {
+          var current = new URL(window.location.href);
+          var pathname = current.pathname.length > 1
+            ? current.pathname.replace(/\/+$/, '')
+            : current.pathname;
+          var sourceHostname = current.hostname;
+          var isLovableSource = sourceHostname.endsWith('.lovable.app') &&
+            sourceHostname.indexOf('id-preview') === -1;
+          var isStagingVerificationRoot = sourceHostname === 'parium-ab.lovable.app' &&
+            (pathname === '/' || pathname === '/index.html');
+          var requiresCanonicalRedirect = isLovableSource && !isStagingVerificationRoot;
+          var search = current.searchParams;
+          var hash = new URLSearchParams(current.hash.charAt(0) === '#' ? current.hash.slice(1) : current.hash);
+          var ownTokenPath = pathname === '/unsubscribe' || pathname === '/team-invite';
+          var legacyToken = search.get('token') || '';
+          var hasLegacyBlocker = search.has('type') || search.has('token_hash') ||
+            search.has('reset') || search.has('access_token') || search.has('refresh_token') ||
+            hash.has('type') || hash.has('token_hash') || hash.has('token') ||
+            hash.has('access_token') || hash.has('refresh_token');
+
+          if ((pathname === '/' || pathname === '/auth') &&
+              !hasLegacyBlocker && /^[a-f0-9]{64}$/i.test(legacyToken)) {
+            current.pathname = '/unsubscribe';
+            current.search = '';
+            current.hash = '';
+            window.history.replaceState(window.history.state, '', current.pathname);
+            return;
+          }
+
+          var authKeys = [
+            'access_token', 'refresh_token', 'token_hash', 'token', 'confirm', 'code',
+            'expires_in', 'expires_at', 'token_type', 'provider_token',
+            'provider_refresh_token', 'type', 'reset', 'expired', 'used',
+            'token_used', 'issued', 'error', 'error_code', 'error_description',
+            'error_message'
+          ];
+          var has = function (params, key) { return params.has(key); };
+          var authSignal =
+            has(search, 'access_token') || has(hash, 'access_token') ||
+            has(search, 'refresh_token') || has(hash, 'refresh_token') ||
+            has(search, 'token_hash') || has(hash, 'token_hash') ||
+            has(search, 'provider_token') || has(hash, 'provider_token') ||
+            has(search, 'provider_refresh_token') || has(hash, 'provider_refresh_token') ||
+            has(search, 'confirm') || has(hash, 'confirm') ||
+            has(search, 'code') || has(hash, 'code') ||
+            (!ownTokenPath && (has(search, 'token') || has(hash, 'token'))) ||
+            (pathname === '/auth' && (
+              has(search, 'reset') || has(hash, 'reset') ||
+              has(search, 'type') || has(hash, 'type') ||
+              has(search, 'error') || has(hash, 'error') ||
+              has(search, 'error_code') || has(hash, 'error_code') ||
+              has(search, 'error_description') || has(hash, 'error_description')
+            ));
+
+          if (!authSignal) return;
+
+          var query = {};
+          var fragment = {};
+          var capture = function (source, destination, key) {
+            if (!source.has(key)) return;
+            destination[key] = source.getAll(key);
+            source.delete(key);
+          };
+          for (var index = 0; index < authKeys.length; index += 1) {
+            var key = authKeys[index];
+            capture(search, query, key);
+            capture(hash, fragment, key);
+          }
+
+          var confirmOnlyPath = pathname === '/confirm' ||
+            pathname === '/email-confirm' || pathname === '/email-redirect';
+          var hasNonConfirmCredential =
+            Object.prototype.hasOwnProperty.call(query, 'access_token') ||
+            Object.prototype.hasOwnProperty.call(fragment, 'access_token') ||
+            Object.prototype.hasOwnProperty.call(query, 'refresh_token') ||
+            Object.prototype.hasOwnProperty.call(fragment, 'refresh_token') ||
+            Object.prototype.hasOwnProperty.call(query, 'token_hash') ||
+            Object.prototype.hasOwnProperty.call(fragment, 'token_hash') ||
+            Object.prototype.hasOwnProperty.call(query, 'token') ||
+            Object.prototype.hasOwnProperty.call(fragment, 'token') ||
+            Object.prototype.hasOwnProperty.call(query, 'code') ||
+            Object.prototype.hasOwnProperty.call(fragment, 'code');
+          if (!confirmOnlyPath || hasNonConfirmCredential) current.pathname = '/auth';
+
+          var serializedHash = hash.toString();
+          current.hash = serializedHash ? '#' + serializedHash : '';
+
+          if (requiresCanonicalRedirect) {
+            // A document redirect cannot carry the one-time in-memory payload.
+            // Move every captured credential to the fragment instead: the
+            // target server never receives it, and the target head gate removes
+            // it again before any application module loads.
+            var transferHash = new URLSearchParams(hash);
+            for (var transferIndex = 0; transferIndex < authKeys.length; transferIndex += 1) {
+              var transferKey = authKeys[transferIndex];
+              var queryValues = query[transferKey] || [];
+              var fragmentValues = fragment[transferKey] || [];
+              for (var queryIndex = 0; queryIndex < queryValues.length; queryIndex += 1) {
+                transferHash.append(transferKey, queryValues[queryIndex]);
+              }
+              for (var fragmentIndex = 0; fragmentIndex < fragmentValues.length; fragmentIndex += 1) {
+                transferHash.append(transferKey, fragmentValues[fragmentIndex]);
+              }
+            }
+            current.protocol = 'https:';
+            current.hostname = 'www.parium.se';
+            current.port = '';
+            var transferredHash = transferHash.toString();
+            current.hash = transferredHash ? '#' + transferredHash : '';
+            Object.defineProperty(window, '__PARIUM_AUTH_REDIRECTING__', {
+              configurable: true,
+              enumerable: false,
+              value: true
+            });
+            window.location.replace(current.toString());
+            return;
+          }
+
+          window.history.replaceState(
+            window.history.state,
+            '',
+            current.pathname + current.search + current.hash
+          );
+
+          var payload = {
+            version: 1,
+            pathname: pathname,
+            query: query,
+            fragment: fragment
+          };
+          Object.defineProperty(window, '__PARIUM_TAKE_AUTH_BOOTSTRAP__', {
+            configurable: true,
+            enumerable: false,
+            value: function () {
+              var value = payload;
+              payload = null;
+              try { delete window.__PARIUM_TAKE_AUTH_BOOTSTRAP__; } catch (ignore) {}
+              return value;
+            }
+          });
+        } catch (error) {
+          // A malformed URL must never block the document. The client-side
+          // classifier will fail closed if no valid one-time payload exists.
+        }
+      })();
+    </script>
     <script>
       // Konsolidera SEO till www.parium.se: redirecta alla besök på lovable.app-domänen
       // till motsvarande URL på parium.se. Säkerställer att Google bara indexerar
@@ -10,6 +159,7 @@
       // Search Console-verifiering, så Google kan läsa google-site-verification-taggen.
       (function() {
         try {
+          if (window.__PARIUM_AUTH_REDIRECTING__ === true) return;
           var h = window.location.hostname;
           var p = window.location.pathname;
           if (h.endsWith('.lovable.app') && h.indexOf('id-preview') === -1) {
@@ -49,6 +199,7 @@
       (function() {
         try {
           var path = window.location.pathname;
+          document.documentElement.classList.toggle('parium-home-route', path === '/home');
           var isLandingVideoRoute = path === '/' || path === '';
           var isAudienceLandingRoute = path === '/jobbsokare' || path === '/arbetsgivare';
           var chromeColor = isLandingVideoRoute
@@ -147,6 +298,7 @@
       // under Search Console-verifiering, så Google kan läsa meta-taggen.
       (function() {
         try {
+          if (window.__PARIUM_AUTH_REDIRECTING__ === true) return;
           var h = window.location.hostname;
           var p = window.location.pathname;
           var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
@@ -165,70 +317,6 @@
 
 
 
-
-      // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
-      // Runs before React on every public route. It does NOT trust old
-      // localStorage/sessionStorage markers: if any Service Worker/controller or
-      // Cache Storage bucket exists, it unregisters/deletes everything and
-      // reloads once with a unique cache-bust URL.
-      (function() {
-        try {
-          var host = window.location.hostname;
-          var isPublicHost = host === 'parium.se' || host === 'www.parium.se' || host === 'parium-ab.lovable.app';
-          if (!isPublicHost) return;
-
-          var resetVersion = 'domain-hard-load-2026-04-26-v9-no-sw-no-cache';
-          var resetParam = '_hard_reload';
-          var attemptKey = 'parium_domain_hard_reload_attempt_' + resetVersion;
-          var maxAttempts = 3;
-          var url = new URL(window.location.href);
-          var attempts = 0;
-          try { attempts = parseInt(sessionStorage.getItem(attemptKey) || '0', 10) || 0; } catch (e) {}
-
-          var cleanupTasks = [];
-          var hadBlockingCache = false;
-
-          try {
-            if (window.caches && caches.keys) {
-              cleanupTasks.push(caches.keys().then(function(keys) {
-                if (keys && keys.length) hadBlockingCache = true;
-                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
-              }).catch(function() {}));
-            }
-          } catch (e) {}
-
-          try {
-            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-              if (navigator.serviceWorker.controller) hadBlockingCache = true;
-              cleanupTasks.push(navigator.serviceWorker.getRegistrations().then(function(regs) {
-                if (regs && regs.length) hadBlockingCache = true;
-                return Promise.all(regs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
-              }).catch(function() {}));
-            }
-          } catch (e) {}
-
-          if (!cleanupTasks.length) return;
-
-          Promise.all(cleanupTasks).finally(function() {
-            try {
-              if (hadBlockingCache && attempts < maxAttempts) {
-                sessionStorage.setItem(attemptKey, String(attempts + 1));
-                var next = new URL(window.location.href);
-                next.searchParams.set(resetParam, resetVersion + '-' + Date.now());
-                window.location.replace(next.toString());
-                return;
-              }
-
-              if (url.searchParams.has(resetParam)) {
-                url.searchParams.delete(resetParam);
-                window.history.replaceState({}, document.title, url.toString());
-              }
-            } catch (e) {
-              try { window.location.reload(); } catch (e2) {}
-            }
-          });
-        } catch (e) { /* noop */ }
-      })();
 
       // 🚨 FIRST-PAINT VERSION CHECK
       // Körs FÖRE allt annat. Om Safari har cachat en gammal index.html men servern
@@ -252,32 +340,17 @@
               if (!data || !data.version) return;
               if (data.version === clientVersion) return; // matchar — allt bra
 
-              // Mismatch → Safari serverar gammal index.html. Töm SW/Cache först,
-              // vänta tills det är klart och navigera sedan. Annars kan iOS Safari
-              // hinna låta den gamla service workern svara på reloaden igen.
+              // Mismatch → Safari serverar gammal index.html. Navigera med en
+              // versionsbunden URL. Den aktiva workern använder network-first för
+              // navigationer och dess cache får inte förstöras automatiskt.
               sessionStorage.setItem(loopKey, String(Date.now()));
-              var cleanupTasks = [];
               try {
-                if (window.caches && caches.keys) {
-                  cleanupTasks.push(caches.keys().then(function(keys) {
-                    return Promise.all(keys.map(function(k) { return caches.delete(k); }));
-                  }).catch(function() {}));
-                }
-              } catch (e) {}
-              try {
-                if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-                  cleanupTasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
-                    return Promise.all(rs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
-                  }).catch(function() {}));
-                }
-              } catch (e) {}
-              Promise.all(cleanupTasks).finally(function() { try {
                 var url = new URL(window.location.href);
                 url.searchParams.set('_v', data.version.slice(0, 10));
                 window.location.replace(url.toString());
               } catch (e) {
                 try { window.location.reload(); } catch (e2) {}
-              }});
+              }
             })
             .catch(function() { /* offline — strunta */ });
         } catch (e) { /* noop */ }
@@ -313,7 +386,6 @@
     
     <!-- Preload Parium logos for instant rendering (logo-rings preloadas via main.tsx med hashad asset-URL) -->
     <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
-    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
     <!-- 🎯 Route-scoped preloads: undviker att slösa bandbredd genom att ladda
          landing-videon på /jobbsokare eller Spline-scenen på /. Detta gör att
          varje rutt får just ihjäl-snabb LCP utan att betala för andras assets. -->
@@ -327,6 +399,9 @@
             for (var k in attrs) l.setAttribute(k, attrs[k]);
             head.appendChild(l);
           };
+          if (path !== '/auth' && path !== '/auth/') {
+            add({ rel: 'preload', as: 'image', href: '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png', fetchpriority: 'high' });
+          }
           if (path === '/' || path === '') {
             var _r = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) : 1.78;
             // Tre geometriska nivåer — matchar pickHeroSrc() i HeroVideo.tsx exakt.
@@ -458,7 +533,7 @@
     <meta name="twitter:description" content="Upptäck lediga jobb eller kandidater som passar just dig. Med hjälp av vårt verktyg tar vi arbetsmarknaden framåt!">
 
     <!-- Organization/WebSite-schema definieras en gång högre upp i <head>. Dubblett borttagen för att undvika motstridiga beskrivningar. -->
-  <link rel="manifest" href="/manifest.json?v=20260721-1">
+  <link rel="manifest" href="/manifest.json">
   <!-- Favicon: transparent bakgrund så att ikonen matchar webbläsarens flik.
        Google kommer också att använda denna version i sökresultatet. -->
   <link rel="shortcut icon" href="/parium-favicon-v3.ico?v=20260824-2" sizes="any">
@@ -515,13 +590,23 @@
     }
 
     /* Only show on touch devices (phones/tablets), not desktop with mouse */
-    @media (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
+     @media (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
       #portrait-warning {
         display: flex;
       }
-      #root {
-        visibility: hidden;
-      }
+       #root {
+         visibility: hidden;
+       }
+       /* Home is responsive in both orientations. Keep the legacy rotation
+          prompt for routes not yet verified, but never hide verified Home. */
+       html.parium-home-route #portrait-warning,
+       body[data-jobseeker-home-active="true"] #portrait-warning {
+         display: none;
+       }
+       html.parium-home-route #root,
+       body[data-jobseeker-home-active="true"] #root {
+         visibility: visible;
+       }
     }
     /* ===== AUTH SPLASH SCREEN (hard refresh only on /auth) ===== */
     #auth-splash {
@@ -745,11 +830,7 @@
         } catch (e) { /* noop */ }
       })();
     </script>
-    <!-- Service Worker endast i produktion för att undvika störande reloads i utveckling -->
-    <script>
-      // SW disabled in preview - handled by main.tsx in production only
-      // This prevents SW from interfering with HMR and causing slow reloads on touch devices
-    </script>
+    <!-- Jobseeker Home registrerar sin offline-worker i produktion. -->
     <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
   </body>
 </html>

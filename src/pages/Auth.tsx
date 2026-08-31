@@ -6,7 +6,6 @@ import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
 // AnimatedIntro removed - using index.html splash instead
 import AuthMobile from '@/components/AuthMobile';
-import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +13,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
-import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
+import { applyIntentToSearchFilters, type SavedSearchIntent } from '@/lib/savedSearchIntent';
+import { sanitizeAuthNext, sanitizeAuthReturnTo } from '@/lib/authLinkRouting';
+import {
+  consumeAuthBootstrapCredentials,
+  type AuthBootstrapCredential,
+  type SupportedAuthOtpType,
+} from '@/lib/authBootstrapCredentials';
 
 // Delad bakgrund för hela /auth (inklusive status- och felsidor)
 const AUTH_BACKDROP_STYLE = {
@@ -23,11 +28,13 @@ const AUTH_BACKDROP_STYLE = {
     'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
 };
 
-
-
-// Debug logging on /auth is surprisingly expensive (it runs during first paint and can cause visible jank).
-// Keep it OFF by default; enable locally only when you explicitly need to debug auth flows.
-const AUTH_DEBUG = false;
+type AuthNavigationState = {
+  mode?: string;
+  role?: string;
+  plan?: unknown;
+  savedSearchIntent?: SavedSearchIntent;
+  returnTo?: unknown;
+};
 
 const Auth = () => {
   // Clear skip-splash flag on mount (used when navigating from landing)
@@ -36,45 +43,56 @@ const Auth = () => {
   }, []);
 
   // AnimatedIntro removed - index.html splash handles the loading screen now
-  const [isPasswordReset, setIsPasswordReset] = useState(() => {
-    try {
-      const loc = typeof window !== 'undefined' ? window.location : null;
-      if (!loc) return false;
-      const sp = new URLSearchParams(loc.search);
-      const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
-      const hp = new URLSearchParams(hashStr);
-      const hasAccessPair = !!(hp.get('access_token') || sp.get('access_token')) && !!(hp.get('refresh_token') || sp.get('refresh_token'));
-      const hasTokenHash = !!(hp.get('token_hash') || sp.get('token_hash'));
-      const hasToken = !!(hp.get('token') || sp.get('token'));
-      const type = hp.get('type') || sp.get('type');
-      return hasAccessPair || hasTokenHash || hasToken || type === 'recovery' || sp.get('reset') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [capturedAuthLink] = useState<AuthBootstrapCredential | null>(
+    consumeAuthBootstrapCredentials,
+  );
+  const [authLinkHandled, setAuthLinkHandled] = useState(() => !capturedAuthLink);
+  const [isPasswordReset, setIsPasswordReset] = useState(
+    () => capturedAuthLink?.type === 'recovery' || capturedAuthLink?.reset === true,
+  );
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [confirmationStatus, setConfirmationStatus] = useState<'none' | 'success' | 'already-confirmed' | 'error'>('none');
+  const [confirmationStatus, setConfirmationStatus] = useState<'none' | 'pending' | 'success' | 'already-confirmed' | 'error'>('none');
   const [confirmationMessage, setConfirmationMessage] = useState('');
+  const [authLinkBusy, setAuthLinkBusy] = useState(false);
   const [recoveryStatus, setRecoveryStatus] = useState<'none' | 'expired' | 'consumed' | 'invalid' | 'used'>('none');
   const [emailForReset, setEmailForReset] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [resendAnnouncement, setResendAnnouncement] = useState<'none' | 'success' | 'error'>('none');
   const [isLoginMode, setIsLoginMode] = useState(true); // Track if user is on login or register
 
-  const { user, profile, loading, authAction, updatePassword, confirmEmail } = useAuth();
+  const {
+    user,
+    profile,
+    loading,
+    authAction,
+    updatePassword,
+    confirmEmail,
+    runAuthLinkSessionTransition,
+  } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const device = useDevice();
   const { toast } = useToast();
+  const pkceVerificationStartedRef = useRef(false);
+  const confirmationStartedRef = useRef(false);
+  const recoveryGrantRef = useRef<{
+    userId: string;
+    sessionToken: string;
+    verifiedAt: number;
+  } | null>(null);
 
   // Read initial state from navigation (from Landing page)
-  const initialMode = (location.state as any)?.mode;
-  const initialRole = (location.state as any)?.role;
-  const initialPlan = (location.state as any)?.plan;
-  const initialSavedSearchIntent = (location.state as any)?.savedSearchIntent;
-  const initialReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
+  const navigationState = location.state && typeof location.state === 'object'
+    ? location.state as AuthNavigationState
+    : null;
+  const initialMode = navigationState?.mode;
+  const initialRole = navigationState?.role;
+  const initialPlan = navigationState?.plan;
+  const initialSavedSearchIntent = navigationState?.savedSearchIntent;
+  const initialReturnTo = navigationState?.returnTo;
 
   // Persistera "Bevaka denna sökning"-intent från SEO-sidor så den överlever
   // signup/login/email-confirm-roundtrips.
@@ -90,9 +108,9 @@ const Auth = () => {
   // redirect to /checkout once a session is established.
   useEffect(() => {
     if (initialPlan && typeof window !== 'undefined') {
-      try { sessionStorage.setItem('parium-pending-plan', String(initialPlan)); } catch {}
+      try { sessionStorage.setItem('parium-pending-plan', String(initialPlan)); } catch { /* storage unavailable */ }
       // Markera att checkout nås via signup-flöde (back ska gå till /home, inte /subscription)
-      try { sessionStorage.setItem('parium-checkout-origin', 'signup'); } catch {}
+      try { sessionStorage.setItem('parium-checkout-origin', 'signup'); } catch { /* storage unavailable */ }
     }
   }, [initialPlan]);
 
@@ -111,283 +129,207 @@ const Auth = () => {
 
   useEffect(() => {
     const handleAuthFlow = async () => {
-      const isReset = searchParams.get('reset') === 'true';
-      const confirmed = searchParams.get('confirmed');
-      
-      // Parsa hash tidigt så vi kan använda det för token-verifiering
-      const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
-      const hashParams = new URLSearchParams(hash);
+      if (!capturedAuthLink) return;
+      const recoveryRequested = capturedAuthLink.reset || capturedAuthLink.type === 'recovery';
 
-      // Avprenumerationslänkar pekar (av historiska skäl) på /auth?token=<64 hex>.
-      // Det är inte en återställningstoken — slussa vidare till rätt sida.
-      const rawToken = searchParams.get('token') || '';
-      if (
-        !isReset &&
-        !searchParams.get('type') &&
-        !searchParams.get('token_hash') &&
-        /^[a-f0-9]{64}$/i.test(rawToken)
-      ) {
-        window.location.replace(`/unsubscribe?token=${encodeURIComponent(rawToken)}`);
-        return;
-      }
-      
-      if (AUTH_DEBUG) {
-        console.log('🔍 AUTH FLOW DEBUG:', {
-          isReset,
-          url: window.location.href,
-          searchParams: Array.from(searchParams.entries()),
-          hasToken: !!searchParams.get('token'),
-          hasTokenHash: !!searchParams.get('token_hash'),
-          hasIssued: !!searchParams.get('issued'),
-          issuedValue: searchParams.get('issued')
-        });
-      }
-      
-      // FÖRSTA KONTROLLEN: Är det en reset-länk?
-      if (isReset) {
-        console.log('✅ Reset-länk detekterad');
-        
-        // ANDRA KONTROLLEN: Kontrollera expired/used parameter från redirect-funktionen
-        const isExpired = searchParams.get('expired') === 'true';
-        const isUsed = searchParams.get('used') === 'true';
-        const isTokenUsed = searchParams.get('token_used') === 'true';
-        
-        if (isExpired) {
-          console.log('❌ EXPIRED parameter - Visar expired sida');
+      if (recoveryRequested) {
+        if (capturedAuthLink.expired) {
           setRecoveryStatus('expired');
           return;
         }
-        if (isUsed) {
-          console.log('❌ USED parameter - Visar used sida');
+        if (capturedAuthLink.used) {
           setRecoveryStatus('used');
           return;
         }
-        if (isTokenUsed) {
-          console.log('❌ TOKEN_USED parameter - Token redan använd');
+        if (capturedAuthLink.tokenUsed) {
           setRecoveryStatus('consumed');
           return;
         }
-        
-        // TREDJE KONTROLLEN: Visa formuläret direkt - verifiera token först vid password submission
-        const tokenHashParam = searchParams.get('token_hash') || hashParams.get('token_hash');
-        const tokenParam = searchParams.get('token') || hashParams.get('token');
-        
-        if (tokenHashParam || tokenParam) {
-          console.log('✅ Reset-token detekterad - visar formulär (verifiering sker vid password submission)');
-          setIsPasswordReset(true);
+      }
+
+      if (capturedAuthLink.errorCode || capturedAuthLink.errorDescription) {
+        const desc = (capturedAuthLink.errorCode || capturedAuthLink.errorDescription || '').toLowerCase();
+        if (recoveryRequested) {
+          if (desc.includes('expire')) setRecoveryStatus('expired');
+          else if (desc.includes('used') || desc.includes('consumed') || desc.includes('already')) {
+            setRecoveryStatus('used');
+          } else {
+            setRecoveryStatus('invalid');
+          }
         } else {
-          console.log('✅ Reset utan token - visar formulär');
-          setIsPasswordReset(true);
+          setConfirmationStatus('error');
+          setConfirmationMessage('Denna autentiseringslänk är inte längre giltig. Begär en ny länk och försök igen.');
         }
-      }
-      
-      // Hantera recovery tokens från Supabase auth (olika format)
-      const accessTokenQP = searchParams.get('access_token');
-      const refreshTokenQP = searchParams.get('refresh_token');
-      const tokenTypeQP = searchParams.get('type');
-      const tokenParamQP = searchParams.get('token');
-      const tokenHashParamQP = searchParams.get('token_hash');
-      const errorCodeQP = searchParams.get('error_code') || searchParams.get('error');
-      const errorDescQP = searchParams.get('error_description') || searchParams.get('error_message');
-      const issuedQP = searchParams.get('issued');
-
-      // hashParams redan skapad tidigare för token-verifiering
-      const accessTokenHash = hashParams.get('access_token');
-      const refreshTokenHash = hashParams.get('refresh_token');
-      const tokenTypeHash = hashParams.get('type');
-      const tokenParamHash = hashParams.get('token');
-      const tokenHashParamHash = hashParams.get('token_hash');
-      const errorCodeHash = hashParams.get('error_code') || hashParams.get('error');
-      const errorDescHash = hashParams.get('error_description') || hashParams.get('error_message');
-      const issuedHash = hashParams.get('issued');
-
-      // Slutliga värden (hash vinner över query)
-      const accessToken = accessTokenHash || accessTokenQP || undefined;
-      const refreshToken = refreshTokenHash || refreshTokenQP || undefined;
-      const tokenType = tokenTypeHash || tokenTypeQP || undefined;
-      const tokenParam = tokenParamHash || tokenParamQP || undefined;
-      const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
-      const issued = issuedHash || issuedQP || undefined;
-      const issuedMs = issued ? parseInt(issued, 10) : undefined;
-      
-      if (AUTH_DEBUG) {
-        console.log('🔍 DETALJERAD TOKEN-DEBUG:', {
-          issuedQP,
-          issuedHash,
-          issued,
-          issuedMs,
-          currentTime: Date.now(),
-          url: window.location.href
-        });
-      }
-      
-      if (AUTH_DEBUG) {
-        console.log('Auth useEffect - URL params:', { 
-          isReset, 
-          confirmed, 
-          currentUrl: window.location.href,
-          hasTokens: !!accessToken && !!refreshToken,
-          hasSupabaseToken: !!(tokenParam || tokenHashParam),
-          tokenType,
-          issuedMs
-        });
-      }
-
-      // Fånga fel från Supabase verify endpoint och fall utan tokens
-      const errorCode = errorCodeHash || errorCodeQP || undefined;
-      const errorDescription = errorDescHash || errorDescQP || undefined;
-      const hasError = !!(errorCode || errorDescription);
-      const noAnyRecoveryTokens = !(accessToken || refreshToken || tokenParam || tokenHashParam);
-
-      // Om Supabase redan har etablerat sessionen via redirect (type=recovery i URL)
-      // men tokens inte ligger i URL/hash, betyder det att sessionen finns i storage.
-      // Visa då reset-formuläret istället för att anta att länken är förbrukad.
-      if (tokenType === 'recovery' && noAnyRecoveryTokens && user) {
-        if (AUTH_DEBUG) console.log('✅ Recovery session active in storage - showing reset form');
-        setRecoveryStatus('none');
-        setIsPasswordReset(true);
         return;
       }
 
-      if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
-        const desc = (errorCode || errorDescription || '').toLowerCase();
-        if (AUTH_DEBUG) console.log('🔍 AUTH ERROR DETECTED:', { errorCode, errorDescription, desc });
-        
-        // Om tiden är OK men vi har fel = token redan använd
-        if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session') || 
-            desc.includes('used') || desc.includes('consumed') || desc.includes('already') ||
-            desc.includes('not found') || desc.includes('token')) {
-          if (AUTH_DEBUG) console.log('❌ Token already used');
-          setRecoveryStatus('used');
-        } else {
-          if (AUTH_DEBUG) console.log('❌ Setting recovery status to invalid due to unknown error');
-          setRecoveryStatus('invalid');
+      if (capturedAuthLink.family === 'invalid') {
+        if (recoveryRequested) setRecoveryStatus('invalid');
+        else {
+          setConfirmationStatus('error');
+          setConfirmationMessage('Denna autentiseringslänk är ogiltig. Begär en ny länk och försök igen.');
         }
-        // showIntro removed - index.html handles splash
         return;
       }
-      
-      // Om vi har recovery tokens, verifiera först om de är giltiga
-      const hasAccessPair = !!(accessToken && refreshToken);
-      const hasTokenHash = !!tokenHashParam;
-      const hasToken = !!tokenParam;
-      
-      if (hasAccessPair || hasTokenHash || hasToken) {
-        if (AUTH_DEBUG) console.log('🔍 Recovery token detekterad:', {
-          hasAccessPair,
-          hasTokenHash,
-          hasToken,
-          tokenHashParam,
-          tokenParam,
-          accessToken: accessToken ? 'exists' : 'missing',
-          refreshToken: refreshToken ? 'exists' : 'missing'
-        });
-        
-        if (AUTH_DEBUG) console.log('✅ Token är giltig - visar reset-formulär');
-        // showIntro removed - index.html handles splash
+
+      if (recoveryRequested) {
         setIsPasswordReset(true);
+        if (
+          capturedAuthLink.family === 'otp' ||
+          capturedAuthLink.family === 'bearer' ||
+          capturedAuthLink.family === 'pkce'
+        ) {
+          setRecoveryStatus('none');
+          return;
+        }
+        // A generic existing session is never a password-recovery grant.
+        setRecoveryStatus('used');
         return;
       }
-      
-      // Hantera bekräftelsestatusmeddelanden från redirect
-      if (confirmed === 'success') {
-        setConfirmationStatus('success');
-        setConfirmationMessage('Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
-        if (AUTH_DEBUG) console.log('Showing success confirmation message');
-      } else if (confirmed === 'already') {
-        setConfirmationStatus('already-confirmed');
-        setConfirmationMessage('Ditt konto är redan aktiverat och redo att användas.');
-        if (AUTH_DEBUG) console.log('Showing already confirmed message');
+
+      setIsPasswordReset(false);
+      if (capturedAuthLink.family === 'otp' || capturedAuthLink.family === 'bearer') {
+        setConfirmationStatus('pending');
+        setConfirmationMessage(
+          'Länken kan logga in eller byta konto. Fortsätt endast om du själv begärde länken.',
+        );
+        return;
       }
-      
-      setIsPasswordReset(isReset);
-      
-      // Notera: Själva redirecten vid lyckad inloggning hanteras nu deklarativt
-      // längre ner i render-funktionen via <Navigate>, för att undvika en
-      // extra frame där formuläret blinkar till innan routing hinner ske.
+
+      if (capturedAuthLink.family === 'pkce') {
+        if (pkceVerificationStartedRef.current) return;
+        pkceVerificationStartedRef.current = true;
+        setConfirmationStatus('pending');
+        setConfirmationMessage('Slutför säker inloggning…');
+        setAuthLinkBusy(true);
+        try {
+          // exchangeCodeForSession succeeds only when this tab owns the matching
+          // PKCE verifier. A shared code therefore cannot replace a session.
+          const { data, error } = await runAuthLinkSessionTransition(() =>
+            supabase.auth.exchangeCodeForSession(capturedAuthLink.code)
+          );
+          if (error || !data.session?.user?.id) throw error || new Error('Missing PKCE session');
+          setAuthLinkHandled(true);
+          setConfirmationStatus('none');
+        } catch {
+          setConfirmationStatus('error');
+          setConfirmationMessage('Denna autentiseringslänk är inte längre giltig. Begär en ny länk och försök igen.');
+        } finally {
+          setAuthLinkBusy(false);
+        }
+        return;
+      }
+
+      if (capturedAuthLink.family === 'public_state') {
+        setConfirmationStatus('error');
+        setConfirmationMessage('Denna autentiseringslänk saknar giltiga uppgifter. Begär en ny länk och försök igen.');
+      }
     };
 
-    handleAuthFlow();
-  }, [user, profile, loading, navigate, searchParams, confirmationStatus, recoveryStatus]);
+    void handleAuthFlow();
+  }, [capturedAuthLink, runAuthLinkSessionTransition]);
 
-  // NYTT: Hantera email-confirm-länkar med ?confirm=TOKEN direkt på /auth
-  useEffect(() => {
-    const confirmToken = searchParams.get('confirm');
-
-    if (confirmToken && confirmationStatus === 'none') {
-      console.log('🔐 Auth: confirm token detected in URL, starting confirmation flow', confirmToken);
-      handleEmailConfirmation(confirmToken);
+  const handleExplicitAuthLink = async () => {
+    if (!capturedAuthLink ||
+        (capturedAuthLink.family !== 'otp' && capturedAuthLink.family !== 'bearer')) {
+      return;
     }
-  }, [searchParams, confirmationStatus]);
-
-  const handleEmailConfirmation = async (token: string) => {
-    console.log('Starting email confirmation with token:', token);
-    
+    setAuthLinkBusy(true);
     try {
-      const result = await confirmEmail(token);
-      console.log('Email confirmation successful:', result);
-      setConfirmationStatus('success');
-      setConfirmationMessage(result.message);
-    } catch (error: any) {
-      console.log('Email confirmation error:', error);
-      const errorMessage = error.message || 'Ett fel inträffade vid bekräftelse av e-post';
-      
-      // Kolla om det är "redan bekräftad" felet
-      if (errorMessage.includes('redan bekräftad') || errorMessage.includes('already')) {
-        console.log('Account already confirmed');
-        setConfirmationStatus('already-confirmed');
-        setConfirmationMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
-      } else if (errorMessage.includes('utgången') || errorMessage.includes('expired')) {
-        console.log('Confirmation link expired');
-        setConfirmationStatus('error');
-        setConfirmationMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
+      if (capturedAuthLink.family === 'bearer') {
+        const { data, error } = await runAuthLinkSessionTransition(() =>
+          supabase.auth.setSession({
+            access_token: capturedAuthLink.accessToken,
+            refresh_token: capturedAuthLink.refreshToken,
+          })
+        );
+        if (error || !data.session?.user?.id) throw error || new Error('Missing session');
       } else {
-        console.log('Other confirmation error');
-        setConfirmationStatus('error');
-        setConfirmationMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
+        const { data, error } = await runAuthLinkSessionTransition(() =>
+          supabase.auth.verifyOtp({
+            token_hash: capturedAuthLink.tokenHash,
+            type: capturedAuthLink.type as SupportedAuthOtpType,
+          })
+        );
+        if (error || !data.session?.user?.id) throw error || new Error('Missing session');
       }
+      setAuthLinkHandled(true);
+      setConfirmationStatus('none');
+    } catch {
+      setConfirmationStatus('error');
+      setConfirmationMessage('Denna autentiseringslänk är inte längre giltig. Begär en ny länk och försök igen.');
+    } finally {
+      setAuthLinkBusy(false);
     }
-    
-    // Ta bort confirm parametern från URL
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete('confirm');
-    const newUrl = `/auth?${newSearchParams.toString()}`;
-    console.log('Navigating to:', newUrl);
-    navigate(newUrl, { replace: true });
   };
+
+  useEffect(() => {
+    if (capturedAuthLink?.family !== 'custom_confirm' || confirmationStartedRef.current) return;
+    confirmationStartedRef.current = true;
+
+    const handleEmailConfirmation = async () => {
+      try {
+        const result = await confirmEmail(capturedAuthLink.confirmToken);
+        if (result.processed !== true) throw new Error('Confirmation not processed');
+        setConfirmationStatus('success');
+        setConfirmationMessage(result.message);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error
+          ? error.message
+          : 'Ett fel inträffade vid bekräftelse av e-post';
+        const normalizedError = errorMessage.toLowerCase();
+
+        if (normalizedError.includes('redan bekräftad') || normalizedError.includes('already')) {
+          setConfirmationStatus('already-confirmed');
+          setConfirmationMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
+        } else if (normalizedError.includes('utgången') || normalizedError.includes('expired')) {
+          setConfirmationStatus('error');
+          setConfirmationMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
+        } else {
+          setConfirmationStatus('error');
+          setConfirmationMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
+        }
+      }
+    };
+
+    void handleEmailConfirmation();
+  }, [capturedAuthLink, confirmEmail]);
 
   const handleResendReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setResendMessage('');
+    setResendAnnouncement('none');
     setResending(true);
     try {
       if (!emailForReset) return;
-      console.log('🔄 AUTH.TSX - SENDING RESET från Auth.tsx för:', emailForReset);
       const { error } = await supabase.functions.invoke('send-reset-password', {
-        body: { email: emailForReset, origin: window.location.origin }
+        body: { email: emailForReset }
       });
-      console.log('📩 AUTH.TSX - RESET RESPONSE:', { error });
       if (error) throw error;
       setResendMessage('Ny återställningslänk skickad! Kolla din e‑post.\nHittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.');
-    } catch (err: any) {
-      console.error('Resend reset error:', err);
+      setResendAnnouncement('success');
+    } catch {
       setResendMessage('Kunde inte skicka länk. Kontrollera e‑postadressen och försök igen.');
+      setResendAnnouncement('error');
     } finally {
       setResending(false);
     }
   };
 
-  const handleBackToLogin = () => {
+  const dismissCapturedAuthLink = () => {
+    setAuthLinkHandled(true);
+    setConfirmationStatus('none');
     setRecoveryStatus('none');
     setIsPasswordReset(false);
-    // Navigera till ren auth-sida utan query/hash
+    // Navigera till ren auth-sida utan query/hash. The in-memory credential is
+    // never restored, but the normal post-login redirect may resume.
     navigate('/auth', { replace: true });
   };
 
+  const handleBackToLogin = dismissCapturedAuthLink;
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    console.log('🔄 Starting handlePasswordReset');
     
     if (newPassword !== confirmPassword) {
       toast({
@@ -398,85 +340,99 @@ const Auth = () => {
       return;
     }
     
-    if (newPassword.length < 7) {
+    if (newPassword.length < 8 || newPassword.length > 128) {
       toast({
-        title: "Lösenordet är för kort",
-        description: "Lösenordet måste vara minst 7 tecken.",
+        title: "Ogiltig lösenordslängd",
+        description: "Lösenordet måste vara mellan 8 och 128 tecken.",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      console.log('🔍 Attempting to update password...');
-      
-      // Säkerställ session (om tokens finns i URL)
-      const { data: sessionData } = await supabase.auth.getSession();
-      let hasSession = !!sessionData.session;
-      console.log('📊 Has active session:', hasSession);
+      const recoveryCredential = capturedAuthLink;
+      const isRecoveryCredential = Boolean(
+        recoveryCredential &&
+        (recoveryCredential.type === 'recovery' || recoveryCredential.reset),
+      );
+      if (!recoveryCredential || !isRecoveryCredential || !(
+        recoveryCredential.family === 'otp' ||
+        recoveryCredential.family === 'bearer' ||
+        recoveryCredential.family === 'pkce'
+      )) {
+        throw new Error('Invalid recovery credential');
+      }
 
-      if (!hasSession) {
-        console.log('🗂️ No active session, attempting to establish session from URL tokens...');
-        
-        const accessTokenQP = searchParams.get('access_token');
-        const refreshTokenQP = searchParams.get('refresh_token');
-        const tokenParamQP = searchParams.get('token');
-        const tokenHashParamQP = searchParams.get('token_hash');
-        
-        const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
-        const hashParams = new URLSearchParams(hash);
-        const accessTokenHash = hashParams.get('access_token');
-        const refreshTokenHash = hashParams.get('refresh_token');
-        const tokenParamHash = hashParams.get('token');
-        const tokenHashParamHash = hashParams.get('token_hash');
-        
-        const urlAccessToken = accessTokenHash || accessTokenQP;
-        const urlRefreshToken = refreshTokenHash || refreshTokenQP;
-        const urlTokenParam = tokenParamHash || tokenParamQP;
-        const urlTokenHashParam = tokenHashParamHash || tokenHashParamQP;
-        
-        if (urlAccessToken && urlRefreshToken) {
-          console.log('✅ Using access/refresh tokens from URL');
-          const { error } = await supabase.auth.setSession({
-            access_token: urlAccessToken,
-            refresh_token: urlRefreshToken,
-          });
+      let grant = recoveryGrantRef.current;
+      if (grant && Date.now() - grant.verifiedAt > 10 * 60 * 1000) {
+        recoveryGrantRef.current = null;
+        grant = null;
+      }
+
+      if (!grant) {
+        let verifiedUserId: string | undefined;
+        let verifiedSessionToken: string | undefined;
+        if (recoveryCredential.family === 'bearer') {
+          const { data, error } = await runAuthLinkSessionTransition(() =>
+            supabase.auth.setSession({
+              access_token: recoveryCredential.accessToken,
+              refresh_token: recoveryCredential.refreshToken,
+            })
+          );
           if (error) throw error;
-          hasSession = true;
-        } else if (urlTokenHashParam || urlTokenParam) {
-          console.log('✅ Using token/token_hash from URL');
-          // VIKTIGT: Använd ANTINGEN token_hash ELLER token, aldrig båda samtidigt
-          const verifyOptions: any = { type: 'recovery' };
-          if (urlTokenHashParam) {
-            verifyOptions.token_hash = urlTokenHashParam;
-          } else if (urlTokenParam) {
-            verifyOptions.token = urlTokenParam;
-          }
-          
-          const { error } = await supabase.auth.verifyOtp(verifyOptions);
+          verifiedUserId = data.session?.user?.id;
+          verifiedSessionToken = data.session?.access_token;
+        } else if (recoveryCredential.family === 'otp') {
+          if (recoveryCredential.type !== 'recovery') throw new Error('Invalid recovery type');
+          const { data, error } = await runAuthLinkSessionTransition(() =>
+            supabase.auth.verifyOtp({
+              token_hash: recoveryCredential.tokenHash,
+              type: 'recovery',
+            })
+          );
           if (error) throw error;
-          hasSession = true;
+          verifiedUserId = data.session?.user?.id;
+          verifiedSessionToken = data.session?.access_token;
         } else {
-          console.log('⚠️ No tokens found - cannot establish session');
-          setRecoveryStatus('consumed');
-          return;
+          const { data, error } = await runAuthLinkSessionTransition(() =>
+            supabase.auth.exchangeCodeForSession(recoveryCredential.code)
+          );
+          if (error) throw error;
+          verifiedUserId = data.session?.user?.id;
+          verifiedSessionToken = data.session?.access_token;
         }
+
+        if (!verifiedUserId || !verifiedSessionToken) {
+          throw new Error('Recovery session was not verified');
+        }
+        // Preserve only the proof returned by the successful verification so
+        // a transient getSession failure can retry without consuming the
+        // one-time recovery credential again.
+        grant = {
+          userId: verifiedUserId,
+          sessionToken: verifiedSessionToken,
+          verifiedAt: Date.now(),
+        };
+        recoveryGrantRef.current = grant;
+      }
+
+      // Bind every retry to the exact session established by this page's
+      // recovery credential. A concurrent account switch invalidates the grant.
+      const { data: currentSessionData, error: currentSessionError } = await supabase.auth.getSession();
+      if (currentSessionError) throw currentSessionError;
+      const currentSession = currentSessionData.session;
+      if (!currentSession || currentSession.user.id !== grant.userId ||
+          currentSession.access_token !== grant.sessionToken) {
+        recoveryGrantRef.current = null;
+        throw new Error('Recovery session changed');
       }
 
       const result = await updatePassword(newPassword);
       if (result.error) throw result.error;
+      recoveryGrantRef.current = null;
 
-      // Städa URL:en efter lyckad lösenordsändring
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('token');
-      newUrl.searchParams.delete('token_hash');
-      newUrl.searchParams.delete('access_token');
-      newUrl.searchParams.delete('refresh_token');
-      newUrl.searchParams.delete('type');
-      newUrl.searchParams.delete('reset');
-      newUrl.searchParams.delete('issued');
-      newUrl.hash = '';
-      window.history.replaceState({}, '', newUrl.toString());
+      // The pre-bootstrap gate already removed all recovery state from the
+      // address bar before this module loaded; no credential is restored here.
       
       toast({
         title: "Lösenord uppdaterat",
@@ -488,9 +444,9 @@ const Auth = () => {
       setTimeout(() => {
         window.location.href = '/';
       }, 1500);
-    } catch (err: any) {
-      console.error('Återställning misslyckades:', err);
-      const msg = (err?.message || '').toLowerCase();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      const msg = errorMessage.toLowerCase();
       
       // Kolla om det är specifika lösenordsfel som användaren kan fixa
       if (msg.includes('different from') || msg.includes('same as') || msg.includes('should be different')) {
@@ -505,13 +461,12 @@ const Auth = () => {
       // För fel som kommer när länken redan är använd (one-time-use)
       // Detta händer när någon klickar länken ANDRA gången efter att ha använt den
       if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
-        console.log('❌ Token already used or expired');
         setRecoveryStatus('consumed');
       } else {
         // Andra fel - visa generiskt felmeddelande men stanna på formuläret
         toast({
           title: "Fel vid lösenordsuppdatering",
-          description: err?.message || 'Okänt fel. Försök igen.',
+          description: errorMessage || 'Okänt fel. Försök igen.',
           variant: "destructive"
         });
       }
@@ -551,8 +506,14 @@ const Auth = () => {
             <h2 className="text-2xl font-bold text-primary-foreground">{title}</h2>
             <p className="text-white">{description}</p>
             <form onSubmit={handleResendReset} className="space-y-3">
+              <label htmlFor="recovery-reset-email" className="sr-only">
+                E-postadress
+              </label>
               <Input
+                id="recovery-reset-email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="din@epost.se"
                 value={emailForReset}
                 onChange={(e) => setEmailForReset(e.target.value)}
@@ -565,7 +526,12 @@ const Auth = () => {
               </Button>
             </form>
             {resendMessage && (
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-4">
+              <div
+                role={resendAnnouncement === 'error' ? 'alert' : 'status'}
+                aria-live={resendAnnouncement === 'error' ? 'assertive' : 'polite'}
+                aria-atomic="true"
+                className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-4"
+              >
                 <p className="text-sm text-white whitespace-pre-line">{resendMessage}</p>
               </div>
             )}
@@ -592,6 +558,30 @@ const Auth = () => {
         </div>
         <Card className="relative z-10 w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
+            {confirmationStatus === 'pending' && (
+              <>
+                {authLinkBusy ? (
+                  <Loader2 className="h-16 w-16 animate-spin text-secondary mx-auto mb-4" />
+                ) : (
+                  <AlertCircle className="h-16 w-16 text-secondary mx-auto mb-4" />
+                )}
+                <h2 className="text-2xl font-bold text-primary-foreground mb-4">
+                  Säker inloggningslänk
+                </h2>
+                <p className="text-primary-foreground/80 mb-6">
+                  {confirmationMessage}
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => void handleExplicitAuthLink()}
+                  variant="glass"
+                  className="w-full"
+                  disabled={authLinkBusy || capturedAuthLink?.family === 'pkce'}
+                >
+                  {authLinkBusy ? 'Kontrollerar…' : 'Fortsätt säkert'}
+                </Button>
+              </>
+            )}
             {confirmationStatus === 'success' && (
               <>
                 <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -602,10 +592,7 @@ const Auth = () => {
                   {confirmationMessage}
                 </p>
                 <Button 
-                  onClick={() => {
-                    setConfirmationStatus('none');
-                    navigate('/auth', { replace: true });
-                  }}
+                  onClick={dismissCapturedAuthLink}
                   variant="glass"
                   className="w-full"
                 >
@@ -624,10 +611,7 @@ const Auth = () => {
                   {confirmationMessage}
                 </p>
                 <Button 
-                  onClick={() => {
-                    setConfirmationStatus('none');
-                    navigate('/auth', { replace: true });
-                  }}
+                  onClick={dismissCapturedAuthLink}
                   variant="glass"
                   className="w-full"
                 >
@@ -646,10 +630,7 @@ const Auth = () => {
                   {confirmationMessage}
                 </p>
                 <Button 
-                  onClick={() => {
-                    setConfirmationStatus('none');
-                    navigate('/auth', { replace: true });
-                  }}
+                  onClick={dismissCapturedAuthLink}
                   variant="glass"
                   className="w-full"
                 >
@@ -670,14 +651,15 @@ const Auth = () => {
   }
 
   // 🔁 Direkt redirect efter lyckad inloggning utan extra frame
-  if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
-    const role = (profile as any)?.role;
+  if (user && profile && !loading && authLinkHandled && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
+    const role = profile?.role;
     if (role) {
       // Samtyckesflödet för agentanslutningar (MCP) skickar hit med ?next=
-      // Endast relativa, samma-origin-sökvägar tillåts.
+      // Endast den exakta lokala consent-routen tillåts.
       const nextParam = searchParams.get('next');
-      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) {
-        return <Navigate to={nextParam} replace />;
+      const safeNext = sanitizeAuthNext(nextParam);
+      if (safeNext) {
+        return <Navigate to={safeNext} replace />;
       }
       // Om användaren kom hit via en prisknapp ("Bli Premium") — skicka vidare till checkout
       const pendingPlan = typeof window !== 'undefined' ? sessionStorage.getItem('parium-pending-plan') : null;
@@ -692,11 +674,16 @@ const Auth = () => {
           ? sessionStorage.getItem('parium-auth-return-to')
           : null;
         const requestedReturnTo = typeof initialReturnTo === 'string' ? initialReturnTo : storedReturnTo;
-        const allowedReturnTo = requestedReturnTo === '/profile#notifications' || requestedReturnTo === '/settings#notifications';
+        const allowedReturnTo = sanitizeAuthReturnTo(requestedReturnTo);
         if (allowedReturnTo) {
           sessionStorage.removeItem('parium-auth-return-to');
-          const roleDestination = role === 'employer' ? '/settings#notifications' : '/profile#notifications';
-          return <Navigate to={roleDestination} replace />;
+          const isNotificationDestination =
+            allowedReturnTo === '/profile#notifications' ||
+            allowedReturnTo === '/settings#notifications';
+          const destination = isNotificationDestination
+            ? (role === 'employer' ? '/settings#notifications' : '/profile#notifications')
+            : allowedReturnTo;
+          return <Navigate to={destination} replace />;
         }
       } catch { /* fortsätt till standarddestination */ }
       // Om användaren kom hit via "Bevaka denna sökning" på en SEO-sida:
@@ -710,7 +697,7 @@ const Auth = () => {
         if (raw) {
           const parsed = JSON.parse(raw);
           const returnTo = parsed?.returnTo;
-          const onboardingDone = (profile as any)?.onboarding_completed === true;
+          const onboardingDone = profile?.onboarding_completed === true;
           const isJobSeeker = role === 'job_seeker';
           if (!isJobSeeker || onboardingDone) {
             // Applicera filter SYNKRONT så /search-jobs har dem redan vid mount.
@@ -718,8 +705,9 @@ const Auth = () => {
             import('@/lib/savedSearchIntent').then(({ consumeIntent }) => {
               consumeIntent(user.id).catch(() => {});
             });
-            if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
-              return <Navigate to={returnTo} replace />;
+            const safeReturnTo = sanitizeAuthReturnTo(returnTo);
+            if (safeReturnTo) {
+              return <Navigate to={safeReturnTo} replace />;
             }
           }
           // Annars: lämna intent kvar — WelcomeTunnel.onComplete i Index.tsx
@@ -733,7 +721,7 @@ const Auth = () => {
       // redan är klar. Är den inte klar låter vi tunneln konsumera intent
       // i sin onComplete (se Index.tsx) så hela onboardingen körs först.
       try {
-        const onboardingDone = (profile as any)?.onboarding_completed === true;
+        const onboardingDone = profile?.onboarding_completed === true;
         if (role === 'job_seeker' && onboardingDone) {
           const path = consumePendingJobPath();
           if (path) return <Navigate to={path} replace />;

@@ -23,7 +23,7 @@ const NEW_PREFIX = 'jobseeker_notes_cache_new';
 const SAVE_DEBOUNCE_MS = 1200;
 
 let mockUser: { id: string } | null = null;
-const upserts: Array<{ owner: string | null; content: string }> = [];
+const rpcCalls: Array<{ owner: string | null; content: string; expectedRevision: number }> = [];
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: mockUser }),
@@ -58,17 +58,38 @@ vi.mock('@/integrations/supabase/client', () => {
     select: () => builder,
     eq: () => builder,
     maybeSingle: async () => ({
-      data: mockUser ? { id: `row-${mockUser.id}`, content: `${mockUser.id.toUpperCase()} SERVER` } : null,
+      data: mockUser ? {
+        id: `row-${mockUser.id}`,
+        content: `${mockUser.id.toUpperCase()} SERVER`,
+        revision: 0,
+        updated_at: '2026-08-30T00:00:00.000Z',
+      } : null,
       error: null as null,
     }),
-    upsert: async (row: Record<string, string>) => {
-      upserts.push({ owner: row.user_id ?? null, content: row.content ?? '' });
-      return { error: null as null };
-    },
   };
   return {
     supabase: {
       from: () => builder,
+      rpc: async (
+        fn: string,
+        args: { p_content: string; p_expected_revision: number; p_expected_user_id: string }
+      ) => {
+        if (fn !== 'save_jobseeker_note') throw new Error(`Unexpected RPC: ${fn}`);
+        rpcCalls.push({
+          owner: mockUser?.id ?? null,
+          content: args.p_content,
+          expectedRevision: args.p_expected_revision,
+        });
+        return {
+          data: [{
+            save_status: 'saved',
+            server_content: args.p_content,
+            server_revision: args.p_expected_revision + 1,
+            server_updated_at: '2026-08-30T00:00:00.000Z',
+          }],
+          error: null as null,
+        };
+      },
       removeChannel: () => {},
       auth: {
         getSession: async () => ({ data: { session: null } }),
@@ -111,7 +132,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
     localStorage.clear();
     mockUser = null;
     online = true;
-    upserts.length = 0;
+    rpcCalls.length = 0;
     connectivityListeners.length = 0;
     vi.clearAllMocks();
   });
@@ -135,7 +156,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
     mockUser = { id: 'a' };
     rerender({ prefix: OLD_PREFIX });
     await waitFor(() => expect(result.current.content).toBe('A SERVER'));
-    upserts.length = 0;
+    rpcCalls.length = 0;
 
     act(() => {
       session1Handle('SESSION 1 STALE TEXT');
@@ -147,7 +168,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
 
     await flushDebounce();
 
-    expect(upserts).toEqual([]);
+    expect(rpcCalls).toEqual([]);
     expect(result.current.isSaving).toBe(false);
 
     // The current session's own handle still works and saves as owner A.
@@ -155,7 +176,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
       result.current.handleChange('SESSION 2 EDIT');
     });
     await flushDebounce();
-    expect(upserts).toContainEqual({ owner: 'a', content: 'SESSION 2 EDIT' });
+    expect(rpcCalls).toContainEqual({ owner: 'a', content: 'SESSION 2 EDIT', expectedRevision: 0 });
   });
 
   it('P1-2: changing cachePrefix for the same user is a real scope transition', async () => {
@@ -176,7 +197,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
 
     // Hydration comes from the NEW keys only.
     await waitFor(() => expect(result.current.content).toBe('NEW SCOPE CLEAN'));
-    upserts.length = 0;
+    rpcCalls.length = 0;
 
     // The retained old-scope handle is inert.
     act(() => {
@@ -191,7 +212,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
     expect(localStorage.getItem(`${OLD_PREFIX}_a__pending`)).not.toContain('OLD SCOPE INJECTED');
     expect(localStorage.getItem(`${NEW_PREFIX}_a__pending`)).toBeNull();
 
-    // A current edit uses ONLY the new keys and upserts the same user.
+    // A current edit uses ONLY the new keys and invokes the revision RPC as the same user.
     online = true;
     act(() => {
       result.current.handleChange('NEW SCOPE EDIT');
@@ -199,8 +220,8 @@ describe('useNotesSync — session epoch and cache scope', () => {
     expect(localStorage.getItem(`${NEW_PREFIX}_a__pending`)).toContain('NEW SCOPE EDIT');
     await flushDebounce();
 
-    expect(upserts).toContainEqual({ owner: 'a', content: 'NEW SCOPE EDIT' });
-    expect(upserts.some((u) => u.content.includes('OLD SCOPE'))).toBe(false);
+    expect(rpcCalls).toContainEqual({ owner: 'a', content: 'NEW SCOPE EDIT', expectedRevision: 0 });
+    expect(rpcCalls.some((u) => u.content.includes('OLD SCOPE'))).toBe(false);
     expect(localStorage.getItem(`${NEW_PREFIX}_a`)).toBe('NEW SCOPE EDIT');
   });
 
@@ -219,7 +240,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
 
     rerender({ prefix: NEW_PREFIX });
     await waitFor(() => expect(result.current.content).not.toBe('OLD SCOPE JOURNAL'));
-    upserts.length = 0;
+    rpcCalls.length = 0;
 
     online = true;
     await act(async () => {
@@ -229,7 +250,7 @@ describe('useNotesSync — session epoch and cache scope', () => {
     });
     await flushDebounce();
 
-    expect(upserts.some((u) => u.content.includes('OLD SCOPE JOURNAL'))).toBe(false);
+    expect(rpcCalls.some((u) => u.content.includes('OLD SCOPE JOURNAL'))).toBe(false);
     expect(localStorage.getItem(`${OLD_PREFIX}_a__pending`)).toContain('OLD SCOPE JOURNAL');
   });
 });

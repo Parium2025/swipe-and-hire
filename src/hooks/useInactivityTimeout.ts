@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { updateLastActivity, hasSessionExpiredDueToInactivity, clearActivityTracking } from '@/lib/authStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { clearSessionToken } from '@/hooks/useSessionManager';
@@ -16,18 +16,83 @@ export const clearInactivityLogoutFlag = () => { _inactivityLogoutInProgress = f
  * Also refreshes the session sentinel so the tab is recognized as alive
  */
 export const useInactivityTimeout = (isAuthenticated: boolean) => {
-  // Update activity on user interactions
+  const logoutPromiseRef = useRef<Promise<boolean> | null>(null);
+
+  const expireSession = useCallback((): Promise<boolean> => {
+    if (logoutPromiseRef.current) return logoutPromiseRef.current;
+
+    _inactivityLogoutInProgress = true;
+    const logout = (async () => {
+      try {
+        // Clean up session tracking BEFORE signing out to prevent
+        // "logged in on another device" false positives on next login.
+        const token = localStorage.getItem('parium_session_token');
+        if (token) {
+          // After 24h of inactivity the access token is usually expired —
+          // without a refresh the RPC runs as anon and is denied.
+          const { data } = await supabase.auth.getSession();
+          let hasSession = !!data.session;
+          const expiresAt = data.session?.expires_at ?? 0;
+          if (hasSession && expiresAt - Math.floor(Date.now() / 1000) < 60) {
+            const { error: refreshErr } = await supabase.auth.refreshSession();
+            hasSession = !refreshErr;
+          }
+          if (hasSession) {
+            await supabase.rpc('remove_session', { p_session_token: token });
+          }
+        }
+      } catch (err) {
+        console.warn('Session cleanup on inactivity timeout failed:', err);
+      }
+
+      clearSessionToken();
+
+      try {
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+        if (error) {
+          console.warn('Credential logout on inactivity timeout failed:', error.message);
+          _inactivityLogoutInProgress = false;
+          return false;
+        }
+
+        // Keep the expired marker until credential removal has succeeded. A
+        // failed logout must remain expired so the next interaction retries
+        // instead of silently extending the session.
+        clearActivityTracking();
+        return true;
+      } catch (err) {
+        console.warn('Credential logout on inactivity timeout failed:', err);
+        _inactivityLogoutInProgress = false;
+        return false;
+      }
+    })();
+
+    logoutPromiseRef.current = logout;
+    void logout.finally(() => {
+      if (logoutPromiseRef.current === logout) {
+        logoutPromiseRef.current = null;
+      }
+    });
+    return logout;
+  }, []);
+
+  // Every activity path checks expiry synchronously before it may advance the
+  // clock. While an expiry logout is in flight, activity stays inert.
   const handleActivity = useCallback(() => {
-    if (isAuthenticated) {
-      updateLastActivity();
+    if (!isAuthenticated || _inactivityLogoutInProgress || logoutPromiseRef.current) return;
+    if (hasSessionExpiredDueToInactivity()) {
+      console.log('⏰ Session expired due to 24h inactivity - logging out');
+      void expireSession();
+      return;
     }
-  }, [isAuthenticated]);
+    updateLastActivity();
+  }, [expireSession, isAuthenticated]);
 
   // Check for expired session on mount and periodically
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const checkExpiration = async () => {
+    const checkExpiration = () => {
       // Log current activity status for debugging
       const localActivity = localStorage.getItem('parium-last-activity');
       const sessionActivity = sessionStorage.getItem('parium-last-activity');
@@ -42,35 +107,7 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
       
       if (hasSessionExpiredDueToInactivity()) {
         console.log('⏰ Session expired due to 24h inactivity - logging out');
-        
-        // Set flag BEFORE signOut so onAuthStateChange shows correct message
-        _inactivityLogoutInProgress = true;
-        clearActivityTracking();
-        
-        // Clean up session tracking BEFORE signing out to prevent
-        // "logged in on another device" false positives on next login
-        try {
-          const token = localStorage.getItem('parium_session_token');
-          if (token) {
-            // After 24h of inactivity the access token is usually expired —
-            // without a refresh the RPC runs as anon and is denied.
-            const { data } = await supabase.auth.getSession();
-            let hasSession = !!data.session;
-            const expiresAt = data.session?.expires_at ?? 0;
-            if (hasSession && expiresAt - Math.floor(Date.now() / 1000) < 60) {
-              const { error: refreshErr } = await supabase.auth.refreshSession();
-              hasSession = !refreshErr;
-            }
-            if (hasSession) {
-              await supabase.rpc('remove_session', { p_session_token: token });
-            }
-          }
-        } catch (err) {
-          console.warn('Session cleanup on inactivity timeout failed:', err);
-        }
-        clearSessionToken();
-        
-        await supabase.auth.signOut({ scope: 'local' });
+        void expireSession();
       }
     };
 
@@ -81,14 +118,11 @@ export const useInactivityTimeout = (isAuthenticated: boolean) => {
     const interval = setInterval(checkExpiration, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [expireSession, isAuthenticated]);
 
   // Track activity on user interactions
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    // Update activity immediately when hook mounts (user is active)
-    updateLastActivity();
 
     // Events to track
     const events = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove'];

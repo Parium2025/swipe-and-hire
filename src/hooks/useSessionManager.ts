@@ -377,6 +377,19 @@ export function useSessionManager(
     sessionTokenRef.current = null;
   }, [ensureFreshToken]);
 
+  // If credential logout fails after `removeSession`, the authenticated user
+  // remains in this tab but its device row no longer exists. Restore that row
+  // only after the removal attempt has settled; `registerSession` already
+  // serializes concurrent registration triggers and preserves the browser's
+  // stable device token.
+  const restoreSessionRegistration = useCallback(async () => {
+    if (!userId || isPreviewEnv) return;
+    alreadyKickedRef.current = false;
+    registeredRef.current = false;
+    consecutiveNetworkFailsRef.current = 0;
+    await registerSession(true);
+  }, [userId, isPreviewEnv, registerSession]);
+
   // Fast validity check — polls every 15s to detect if our session was kicked
   // If session is gone, try to re-register first (it may have been cleaned by cron).
   // Only kick if re-registration shows we replaced someone (meaning 2 others exist).
@@ -548,7 +561,7 @@ export function useSessionManager(
     };
   }, [userId, registerSession, sendHeartbeat, checkSessionValidity]);
 
-  return { removeSession };
+  return { removeSession, restoreSessionRegistration };
 }
 
 /**

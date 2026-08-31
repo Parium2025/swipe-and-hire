@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Smartphone, AlertTriangle, Copy, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  consumeAuthBootstrapCredentials,
+  forwardCustomConfirmationCredential,
+} from '@/lib/authBootstrapCredentials';
+import { buildExternalConfirmationUrl } from '@/lib/authLinkRouting';
 
 const PUBLIC_APP_URL = 'https://www.parium.se';
 
@@ -11,7 +16,10 @@ const EmailRedirect = () => {
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [searchParams] = useSearchParams();
+  const [credential] = useState(consumeAuthBootstrapCredentials);
+  const confirmToken = credential?.family === 'custom_confirm'
+    ? credential.confirmToken
+    : null;
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -35,25 +43,19 @@ const EmailRedirect = () => {
     setIsInAppBrowser(inApp);
     setIsMobile(mobile);
     
-    console.log('EmailRedirect - User Agent:', userAgent);
-    console.log('EmailRedirect - Is In-App Browser:', inApp);
-    console.log('EmailRedirect - Is Mobile:', mobile);
-    
-    // Om inte in-app browser, redirecta direkt till confirm-sidan
-    if (!inApp) {
-      const confirmToken = searchParams.get('confirm');
-      if (confirmToken) {
-        console.log('Not in-app browser, redirecting to confirm page');
-        navigate(`/confirm?confirm=${confirmToken}`, { replace: true });
-      }
+    // In the same document the token is handed to /confirm only through the
+    // one-time memory channel. It is never serialized back into the URL.
+    if (!inApp && confirmToken && forwardCustomConfirmationCredential(credential)) {
+      navigate('/confirm', { replace: true });
     }
-  }, [searchParams, navigate]);
+  }, [confirmToken, credential, navigate]);
 
   const copyUrlToClipboard = async () => {
-    const confirmToken = searchParams.get('confirm');
-    const url = `${PUBLIC_APP_URL}/confirm?confirm=${confirmToken}`;
+    if (!confirmToken) return;
+    const url = buildExternalConfirmationUrl(PUBLIC_APP_URL, confirmToken);
     
     try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
       await navigator.clipboard.writeText(url);
       setCopySuccess(true);
       toast({
@@ -61,27 +63,47 @@ const EmailRedirect = () => {
         description: "Öppna nu Safari och klistra in länken.",
       });
       setTimeout(() => setCopySuccess(false), 3000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
+    } catch {
       toast({
         title: "Kunde inte kopiera",
-        description: "Kopiera länken manuellt från adressfältet.",
+        description: "Tryck i stället på ”Försök öppna i Safari”. Om det blockeras, öppna mejlet direkt i Safari och tryck på länken igen.",
         variant: "destructive"
       });
     }
   };
 
   const openInSafari = () => {
-    const confirmToken = searchParams.get('confirm');
-    const url = `${PUBLIC_APP_URL}/confirm?confirm=${confirmToken}`;
+    if (!confirmToken) return;
+    const url = buildExternalConfirmationUrl(PUBLIC_APP_URL, confirmToken);
     
     // Försök öppna i Safari
     if (isMobile) {
       window.location.href = url;
     } else {
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
+
+  if (!confirmToken) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+          <CardContent className="p-8 text-center">
+            <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-primary-foreground mb-4">
+              Ogiltig bekräftelselänk
+            </h2>
+            <p className="text-primary-foreground/80 mb-6">
+              Länken saknar giltiga bekräftelseuppgifter. Begär en ny länk och försök igen.
+            </p>
+            <Button onClick={() => navigate('/auth', { replace: true })} className="w-full">
+              Tillbaka till inloggning
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!isInAppBrowser) {
     return (

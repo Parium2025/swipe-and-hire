@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, lazy, Suspense } from "react";
+import { useLayoutEffect, lazy, Suspense } from "react";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,8 +30,6 @@ import Auth from "./pages/Auth";
 import Checkout from "./pages/Checkout";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
-import ResetRedirect from "./pages/ResetRedirect";
-import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import ValjPlan from "./pages/ValjPlan";
 import Unsubscribe from "./pages/Unsubscribe";
@@ -40,7 +38,7 @@ import OAuthConsent from "./pages/OAuthConsent";
 
 // 🔄 Auto-retry wrapper for lazy imports — prevents "Failed to fetch dynamically
 // imported module" errors from freezing the app on a dark Suspense fallback.
-function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
+function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType }>) {
   return lazy(() => {
     let timeout: ReturnType<typeof setTimeout> | undefined;
     const importWithTransientRetry = async () => {
@@ -120,7 +118,6 @@ import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { OnlineStatusProvider } from "@/components/OnlineStatusProvider";
-import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
 import { ScrollRestoration } from "@/components/ScrollRestoration";
@@ -140,7 +137,7 @@ import { CriteriaEvalProgress } from "@/components/CriteriaEvalProgress";
 if (typeof window !== 'undefined') {
   const runCleanup = () => cleanupOldDrafts(24 * 60 * 60 * 1000);
   if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(runCleanup, { timeout: 3000 });
+    window.requestIdleCallback(runCleanup, { timeout: 3000 });
   } else {
     setTimeout(runCleanup, 1000);
   }
@@ -233,7 +230,6 @@ const AnimatedRoutes = () => {
           <Route path="/valj-plan" element={<ValjPlan />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
-          <Route path="/verify" element={<EmailVerification />} />
           <Route path="/email-redirect" element={<EmailRedirect />} />
           <Route path="/confirm" element={<EmailConfirm />} />
           <Route path="/email-confirm" element={<EmailConfirm />} />
@@ -266,7 +262,6 @@ const AnimatedRoutes = () => {
           <Route path="/reviews" element={<Index />} />
           <Route path="/templates" element={<Index />} />
           <Route path="/job-application/:jobId" element={<JobApplication />} />
-          <Route path="/reset-redirect" element={<ResetRedirect />} />
           <Route path="/migrate-media" element={<MediaMigration />} />
           <Route path="/cv-tunnel" element={<CvTunnel />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
@@ -292,7 +287,6 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
       <TopChromeStrip />
       <BottomChromeStrip />
       <OfflineIndicator />
-      {!isLightweightRoute && <SystemHealthPanel />}
       <UnsavedChangesProvider>
         {!isLightweightRoute && <PushNotificationProvider />}
         {!isLightweightRoute && <RealtimeKeepAlive />}
@@ -302,8 +296,9 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
           <div className="relative z-10">
             {showHeader && <Header />}
             <main className={showHeader ? "pt-16" : ""}>
-              <AuthTokenBridge />
-              <AnimatedRoutes />
+              <AuthTokenBridge>
+                <AnimatedRoutes />
+              </AuthTokenBridge>
             </main>
           </div>
         </div>
@@ -324,14 +319,6 @@ const App = () => {
     ? !isPublicLightweightPath(window.location.pathname)
     : true;
   useGlobalImagePreloader(preloadEnabled);
-
-  const [animReady, setAnimReady] = useState(false);
-  useEffect(() => {
-    const start = () => requestAnimationFrame(() => requestAnimationFrame(() => setAnimReady(true)));
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true } as any);
-    return () => window.removeEventListener('load', start as any);
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

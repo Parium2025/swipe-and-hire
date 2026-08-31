@@ -2,7 +2,7 @@
  * Parium auth logo with **0 network requests**.
  *
  * IMPORTANT:
- * - We import the ORIGINAL PNG as a data URI via `?inline`.
+ * - We reuse the ORIGINAL public PNG already preloaded by `index.html`.
  * - We render it as a background-image (same structure as the home logo)
  *   because browsers tend to cache/compose decoded bitmaps more reliably for
  *   <img>/CSS backgrounds than for <svg><image/>.
@@ -11,7 +11,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import authLogoDataUri from "./parium-auth-logo.png?inline";
+import { AUTH_LOGO_URL } from "./authLogo";
 
 interface AuthLogoProps {
   className?: string;
@@ -29,7 +29,7 @@ export function AuthLogoInline({ className }: AuthLogoProps) {
       )}
       style={{
         aspectRatio: String(AUTH_LOGO_ASPECT),
-        backgroundImage: `url(${authLogoDataUri})`,
+        backgroundImage: `url(${AUTH_LOGO_URL})`,
         willChange: "transform",
       }}
       data-auth-logo="true"

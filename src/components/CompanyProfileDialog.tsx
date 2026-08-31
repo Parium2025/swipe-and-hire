@@ -128,15 +128,15 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'profiles',
-          filter: `user_id=eq.${companyId}`
+          table: 'profile_change_signals',
+          filter: `profile_user_id=eq.${companyId}`
         },
-        (payload) => {
-          console.log('Profile updated in dialog:', payload);
-          // Update the query cache directly with new data
-          queryClient.setQueryData(['company-profile', companyId], payload.new as CompanyProfile);
+        () => {
+          // Never cache a raw profiles replication row. The restricted public
+          // RPC remains the only source for company data.
+          queryClient.invalidateQueries({ queryKey: ['company-profile', companyId] });
         }
       )
       .subscribe();

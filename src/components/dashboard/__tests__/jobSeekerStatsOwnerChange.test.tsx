@@ -41,7 +41,7 @@ const renderCard = () => {
   const tree = () => (
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <JobSeekerStatsCard isPaused={false} setIsPaused={() => {}} isActive />
+        <JobSeekerStatsCard isPaused setIsPaused={() => {}} isActive />
       </MemoryRouter>
     </QueryClientProvider>
   );

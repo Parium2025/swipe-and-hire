@@ -1,6 +1,6 @@
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 import landingNavLogo from "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png";
-import authLogoDataUri from "@/assets/parium-auth-logo.png?inline";
+import { AUTH_LOGO_URL } from "@/assets/authLogo";
 import { fetchPriority } from '@/lib/fetchPriority';
 
 /**
@@ -57,7 +57,7 @@ export function CriticalAssetPreloads() {
 
       {/* Hidden img to keep auth logo (data-URI) decoded for AuthSplashScreen */}
       <img
-        src={authLogoDataUri}
+        src={AUTH_LOGO_URL}
         alt=""
         aria-hidden="true"
         loading="eager"
@@ -106,7 +106,7 @@ export function CriticalAssetPreloads() {
           opacity: 0.001,
           pointerEvents: "none",
           zIndex: -1,
-          backgroundImage: `url(${authLogoDataUri})`,
+          backgroundImage: `url(${AUTH_LOGO_URL})`,
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
           willChange: "transform",

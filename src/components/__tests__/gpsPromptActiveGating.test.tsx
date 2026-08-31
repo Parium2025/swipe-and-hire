@@ -13,7 +13,11 @@ vi.mock('@/lib/gpsUtils', () => ({
   isNativeApp: () => false,
 }));
 
-vi.mock('@/lib/gpsCoordinator', () => ({ notePermissionGranted: vi.fn() }));
+vi.mock('@/lib/gpsCoordinator', () => ({
+  canUsePreciseLocation: vi.fn(async () => false),
+  notePermissionGranted: vi.fn(),
+  notePermissionRevoked: vi.fn(),
+}));
 
 vi.mock('@/components/GpsHelpModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="gps-help" /> : null),

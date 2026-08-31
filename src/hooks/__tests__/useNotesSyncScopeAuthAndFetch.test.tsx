@@ -58,13 +58,29 @@ vi.mock('@/integrations/supabase/client', () => {
       const spec = responses[Math.min(queryCalls, responses.length - 1)] ?? { content: '' };
       queryCalls += 1;
       if (spec.delayMs) await new Promise<void>((r) => setTimeout(r, spec.delayMs));
-      return { data: { id: 'row-a', content: spec.content }, error: null as null };
+      return {
+        data: {
+          id: 'row-a',
+          content: spec.content,
+          revision: queryCalls - 1,
+          updated_at: '2026-08-30T00:00:00.000Z',
+        },
+        error: null as null,
+      };
     },
-    upsert: async () => ({ error: null as null }),
   };
   return {
     supabase: {
       from: () => builder,
+      rpc: async (_fn: string, args: { p_content: string; p_expected_revision: number; p_expected_user_id: string }) => ({
+        data: [{
+          save_status: 'saved',
+          server_content: args.p_content,
+          server_revision: args.p_expected_revision + 1,
+          server_updated_at: '2026-08-30T00:00:00.000Z',
+        }],
+        error: null as null,
+      }),
       removeChannel: () => {},
       auth: {
         getSession: async () => ({
@@ -160,9 +176,15 @@ describe('useNotesSync — scope-bound auth token and server reconciliation', ()
     const headers = init.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer TOKEN-1');
     expect(init.keepalive).toBe(true);
-    const body = JSON.parse(init.body as string) as { user_id: string; content: string };
-    expect(body.user_id).toBe('a');
-    expect(body.content).toBe('NEW SCOPE UNSAVED');
+    expect(String(fetchSpy.mock.calls[0][0])).toBe(
+      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/rpc/save_jobseeker_note`
+    );
+    const body = JSON.parse(init.body as string) as {
+      p_content: string;
+      p_expected_revision: number;
+      p_expected_user_id: string;
+    };
+    expect(body).toEqual({ p_content: 'NEW SCOPE UNSAVED', p_expected_revision: 1, p_expected_user_id: 'a' });
   });
 
   it('B: a same-user scope change starts its own server request bound to the new scope', async () => {

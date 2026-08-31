@@ -60,6 +60,7 @@ import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter
 import { useDevice } from '@/hooks/use-device';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { EmployerCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { sanitizeAuthReturnTo } from '@/lib/authLinkRouting';
 
 // 🔥 Persistent-mount routes — these pages stay alive across navigation so that
 // data + DOM is loaded once per session and re-visiting feels instant.
@@ -601,11 +602,12 @@ const Index = () => {
       try {
         const { readIntent, consumeIntent, applyIntentToSearchFilters } = await import('@/lib/savedSearchIntent');
         const intent = readIntent();
-        if (intent?.returnTo && intent.returnTo.startsWith('/')) {
+        const safeReturnTo = sanitizeAuthReturnTo(intent?.returnTo);
+        if (safeReturnTo) {
           // Applicera filter SYNKRONT så /search-jobs ser dem direkt.
           applyIntentToSearchFilters(intent);
           consumeIntent(user.id).catch(() => {});
-          navigate(intent.returnTo);
+          navigate(safeReturnTo);
           return;
         }
       } catch { /* fortsätt */ }

@@ -13,7 +13,7 @@ vi.mock('@/lib/weatherApi', async () => {
 });
 
 import { preloadWeatherLocation } from '@/hooks/useWeather';
-import { resetGpsCoordinator, resolvePosition } from '@/lib/gpsCoordinator';
+import { notePermissionGranted, resetGpsCoordinator, resolvePosition } from '@/lib/gpsCoordinator';
 import { setWeatherCacheUser } from '@/lib/weatherApi';
 
 const getCurrentPosition = vi.fn();
@@ -22,6 +22,8 @@ describe('GPS single-flight across preload + hook path', () => {
   beforeEach(() => {
     localStorage.clear();
     resetGpsCoordinator();
+    // These tests cover single-flight/denial after the user has opted in.
+    notePermissionGranted();
     setWeatherCacheUser('user-single-flight');
     getCurrentPosition.mockReset();
     Object.defineProperty(navigator, 'geolocation', {
@@ -52,5 +54,22 @@ describe('GPS single-flight across preload + hook path', () => {
 
     expect(fix).toBeNull();
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps login preload off exact GPS after reload even when OS permission is granted', async () => {
+    resetGpsCoordinator();
+    Object.defineProperty(navigator, 'permissions', {
+      configurable: true,
+      value: {
+        query: vi.fn().mockResolvedValue({ state: 'granted' }),
+      },
+    });
+    getCurrentPosition.mockImplementation((success: PositionCallback) => {
+      success({ coords: { latitude: 59.33, longitude: 18.06, accuracy: 25 } } as GeolocationPosition);
+    });
+
+    await preloadWeatherLocation();
+
+    expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 });

@@ -39,26 +39,43 @@ vi.mock('@/lib/realtimeChannel', () => ({
   },
 }));
 
-let upsertResolve: (() => void) | null = null;
+let rpcResolve: (() => void) | null = null;
 
 vi.mock('@/integrations/supabase/client', () => {
   const builder = {
     select: () => builder,
     eq: () => builder,
     maybeSingle: async () => ({
-      data: mockUser ? { id: `row-${mockUser.id}`, content: `${mockUser.id.toUpperCase()} SERVER` } : null,
+      data: mockUser ? {
+        id: `row-${mockUser.id}`,
+        content: `${mockUser.id.toUpperCase()} SERVER`,
+        revision: 0,
+        updated_at: '2026-08-30T00:00:00.000Z',
+      } : null,
       error: null as null,
     }),
-    upsert: async () => {
-      await new Promise<void>((res) => {
-        upsertResolve = res;
-      });
-      return { error: null as null };
-    },
   };
   return {
     supabase: {
       from: () => builder,
+      rpc: async (
+        fn: string,
+        args: { p_content: string; p_expected_revision: number; p_expected_user_id: string }
+      ) => {
+        if (fn !== 'save_jobseeker_note') throw new Error(`Unexpected RPC: ${fn}`);
+        await new Promise<void>((res) => {
+          rpcResolve = res;
+        });
+        return {
+          data: [{
+            save_status: 'saved',
+            server_content: args.p_content,
+            server_revision: args.p_expected_revision + 1,
+            server_updated_at: '2026-08-30T00:00:00.000Z',
+          }],
+          error: null as null,
+        };
+      },
       removeChannel: () => {},
       auth: {
         getSession: async () => ({ data: { session: null } }),
@@ -112,10 +129,10 @@ function renderWithHistory() {
 }
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-/** Releases any save still parked inside the mocked upsert so no test can hang. */
+/** Releases any save still parked inside the mocked RPC so no test can hang. */
 function releaseInFlightSave() {
-  const resolve = upsertResolve;
-  upsertResolve = null;
+  const resolve = rpcResolve;
+  rpcResolve = null;
   resolve?.();
 }
 
@@ -123,7 +140,7 @@ describe('useNotesSync — identity transition leakage', () => {
   beforeEach(() => {
     localStorage.clear();
     mockUser = null;
-    upsertResolve = null;
+    rpcResolve = null;
     vi.clearAllMocks();
   });
 
@@ -145,7 +162,7 @@ describe('useNotesSync — identity transition leakage', () => {
     await act(async () => {
       await sleep(SAVE_DEBOUNCE_MS + 200);
     });
-    await waitFor(() => expect(upsertResolve).not.toBeNull());
+    await waitFor(() => expect(rpcResolve).not.toBeNull());
     await act(async () => {
       releaseInFlightSave();
       await sleep(0);

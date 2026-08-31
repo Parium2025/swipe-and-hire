@@ -1,10 +1,47 @@
 import React from 'react';
+import { getAuthRedirectTarget } from '@/lib/authLinkRouting';
 
 interface State {
   hasError: boolean;
   error?: Error;
   info?: React.ErrorInfo;
+  errorId?: string;
   isStuck: boolean;
+}
+
+export function safeErrorTelemetry(error: Error, errorId: string) {
+  return {
+    errorId,
+    errorName: error.name || 'Error',
+  };
+}
+
+export function shouldFlagPotentialAuthStall(href: string): boolean {
+  let current: URL;
+  try {
+    current = new URL(href);
+  } catch {
+    return false;
+  }
+
+  const hash = new URLSearchParams(current.hash.startsWith('#') ? current.hash.slice(1) : current.hash);
+  const hasAuthCredential = [
+    'access_token',
+    'refresh_token',
+    'token_hash',
+    'token',
+    'provider_token',
+    'provider_refresh_token',
+  ].some((key) => current.searchParams.has(key) || hash.has(key));
+
+  return hasAuthCredential && getAuthRedirectTarget(current.toString()) !== null;
+}
+
+function createErrorReference(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `error-${Date.now().toString(36)}`;
 }
 
 export default class GlobalErrorBoundary extends React.Component<React.PropsWithChildren, State> {
@@ -49,16 +86,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
     this.stuckTimer = setTimeout(() => {
       // If component is still mounted after 5 seconds without user interaction,
       // check if we're on a problematic URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const hasAuthTokens = urlParams.has('access_token') || 
-                           urlParams.has('token') || 
-                           urlParams.has('token_hash');
-      
-      const ownsTokenParameter =
-        window.location.pathname === '/unsubscribe' ||
-        window.location.pathname === '/unsubscribe/';
-
-      if (hasAuthTokens && window.location.pathname !== '/auth' && !ownsTokenParameter) {
+      if (shouldFlagPotentialAuthStall(window.location.href)) {
         console.warn('[GlobalErrorBoundary] Detected potential stuck state');
         this.setState({ isStuck: true });
       }
@@ -74,29 +102,22 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // Log details for debugging
-    console.error('[GlobalErrorBoundary] Caught error:', error);
-    console.error('[GlobalErrorBoundary] Info:', info);
+    const errorId = createErrorReference();
+    this.setState({ info, errorId });
+
+    if (import.meta.env.DEV) {
+      console.error('[GlobalErrorBoundary] Caught error:', error);
+      console.error('[GlobalErrorBoundary] Info:', info);
+    } else {
+      // Never put messages, stacks, URLs or user data into production logs.
+      console.error('[GlobalErrorBoundary] Caught error', safeErrorTelemetry(error, errorId));
+    }
   }
 
   handleReload = () => {
     // Clear any stuck state and reload
     if (typeof window !== 'undefined') {
       this.clearCorruptLocalCaches();
-      try {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-          navigator.serviceWorker.getRegistrations()
-            .then((regs) => Promise.all(regs.map((r) => r.unregister())))
-            .catch(() => {});
-        }
-        if (typeof caches !== 'undefined' && caches.keys) {
-          caches.keys()
-            .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-            .catch(() => {});
-        }
-      } catch {
-        // ignore
-      }
 
       // Clear URL parameters that might cause loops and force a fresh app shell
       const cleanUrl = `${window.location.origin}${window.location.pathname}?_recover=${Date.now()}`;
@@ -109,6 +130,8 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
       const message = this.state.isStuck 
         ? "Appen verkar ha fastnat. Klicka för att ladda om."
         : "Appen stötte på ett fel. Försök ladda om sidan.";
+
+      const showTechnicalDetails = import.meta.env.DEV;
 
       const errorDetails = this.state.error
         ? `${this.state.error.name}: ${this.state.error.message}`
@@ -132,7 +155,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
             <p className="text-sm text-white mb-5">
               {message}
             </p>
-            {errorDetails && (
+            {showTechnicalDetails && errorDetails && (
               <details className="text-left mb-4">
                 <summary className="text-xs text-white/70 cursor-pointer mb-1">Visa teknisk info</summary>
                 <pre className="text-[10px] leading-tight text-white/80 bg-white/10 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
@@ -141,6 +164,11 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
                   {componentStack && `\n\nComponent:\n${componentStack}`}
                 </pre>
               </details>
+            )}
+            {!showTechnicalDetails && this.state.errorId && (
+              <p className="mb-4 text-xs text-white/60">
+                Referens: {this.state.errorId}
+              </p>
             )}
             <button
               onClick={this.handleReload}

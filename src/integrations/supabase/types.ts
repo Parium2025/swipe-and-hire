@@ -2207,6 +2207,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          revision: number
           updated_at: string
           user_id: string
         }
@@ -2214,6 +2215,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          revision?: number
           updated_at?: string
           user_id: string
         }
@@ -2221,6 +2223,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          revision?: number
           updated_at?: string
           user_id?: string
         }
@@ -3999,6 +4002,14 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_admin_profile_media_counts: {
+        Args: never
+        Returns: {
+          cv_count: number
+          image_count: number
+          video_count: number
+        }[]
+      }
       get_application_quota: { Args: { p_user_id: string }; Returns: Json }
       get_chat_member_profiles: {
         Args: { _user_ids: string[] }
@@ -4152,6 +4163,19 @@ export type Database = {
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      get_my_organization_member_profiles: {
+        Args: never
+        Returns: {
+          email: string | null
+          first_name: string | null
+          is_active: boolean
+          last_name: string | null
+          organization_id: string
+          profile_image_url: string | null
+          role: string
+          user_id: string
+        }[]
       }
       get_my_profile: {
         Args: never
@@ -4419,6 +4443,20 @@ export type Database = {
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
+      }
+      save_jobseeker_note: {
+        Args: {
+          p_content: string
+          p_expected_revision: number
+          p_expected_user_id: string
+        }
+        Returns: {
+          note_id: string | null
+          save_status: string
+          server_content: string | null
+          server_revision: number
+          server_updated_at: string | null
+        }[]
       }
       save_owned_job_with_questions: {
         Args: {

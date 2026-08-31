@@ -297,16 +297,16 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
 
       if (funcError || !storageData) {
         console.error('Edge function error:', funcError);
-        // Fallback to estimates
-        const [profilesWithVideoRes, profilesWithCvRes, profilesWithImageRes] = await Promise.all([
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('video_url', 'is', null),
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('cv_url', 'is', null),
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('profile_image_url', 'is', null),
-        ]);
+        // Fallback to admin-only aggregate counts. The browser never receives
+        // profile rows or needs SELECT on sensitive media columns.
+        const { data: mediaCounts, error: mediaCountsError } = await supabase
+          .rpc('get_admin_profile_media_counts');
+        if (mediaCountsError) throw mediaCountsError;
 
-        const videoCount = profilesWithVideoRes.count || 0;
-        const cvCount = profilesWithCvRes.count || 0;
-        const imageCount = profilesWithImageRes.count || 0;
+        const counts = mediaCounts?.[0];
+        const videoCount = Number(counts?.video_count ?? 0);
+        const cvCount = Number(counts?.cv_count ?? 0);
+        const imageCount = Number(counts?.image_count ?? 0);
 
         // Estimate bandwidth: videos are the killer
         // Each video view = ~15MB, CV download = ~0.5MB, image load = ~0.3MB
@@ -440,7 +440,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, () => {
         fetchStats();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_change_signals' }, () => {
         fetchStats();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews' }, () => {

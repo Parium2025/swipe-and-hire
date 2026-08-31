@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBackgroundLocation } from './useBackgroundLocation';
 import { isNativeApp, isMobileWeb, getDistanceKm, COARSE_FIX_ACCURACY_M } from '@/lib/gpsUtils';
-import { resolvePosition } from '@/lib/gpsCoordinator';
+import {
+  canUsePreciseLocation,
+  notePermissionRevoked,
+  resolvePosition,
+  subscribeToPreciseLocationPermission,
+} from '@/lib/gpsCoordinator';
 import { setPositionResolutionActive } from '@/lib/gpsActivity';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { isSlowConnection } from '@/hooks/useNetworkAwareFetch';
@@ -84,6 +89,20 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   // overwrite a newer one (otherwise you can see another city's temperature).
   const requestSeqRef = useRef(0);
   const [retryTick, setRetryTick] = useState(0);
+  const [precisePermissionTick, setPrecisePermissionTick] = useState(0);
+
+  useEffect(
+    () => subscribeToPreciseLocationPermission((allowed) => {
+      if (!allowed) {
+        // Revoke invalidates both the raw in-memory fix and any exact weather
+        // response that was already in flight. The next run must use IP/profile.
+        if (locationRef.current?.source === 'gps') locationRef.current = null;
+        requestSeqRef.current += 1;
+      }
+      setPrecisePermissionTick((tick) => tick + 1);
+    }),
+    [],
+  );
 
   const safeFallback = useCallback((city = '', source?: 'gps' | 'ip' | 'fallback'): WeatherData => ({
     temperature: 0,
@@ -207,6 +226,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   }, [safeFallback, updateWeather]);
 
   const updateLocation = useCallback(async (newLat: number, newLon: number, knownCity: string | null, source: 'gps' | 'ip' | 'fallback' | 'background') => {
+    if ((source === 'gps' || source === 'background') && !(await canUsePreciseLocation())) {
+      return;
+    }
     // City is resolved server-side by the edge function (fetchCurrentWeather returns cachedCity).
     // We pass knownCity as a hint; fetchWeatherOnly will use the server-cached city if knownCity is empty.
     const normalizedSource = source === 'background' ? 'gps' : source;
@@ -246,15 +268,20 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   });
 
   const runLocationCheck = useCallback(async (silent = true) => {
+    let preciseLocationAllowed = false;
     try {
+      preciseLocationAllowed = await canUsePreciseLocation();
       // Fast first fix, automatically refined when the browser hands us an
-      // IP-derived (city-wrong) position. Works the same in every country.
-      const gpsResult = await resolvePosition({
-        timeout: isNativeApp() ? 8000 : 6000,
-        // Accept a fix up to 2 minutes old — avoids waking the radio on every
-        // periodic/visibility check when we don't need a fresh lock.
-        maximumAge: 2 * 60 * 1000,
-      });
+      // IP-derived (city-wrong) position. This path is never entered while the
+      // browser/OS still reports prompt or denied.
+      const gpsResult = preciseLocationAllowed
+        ? await resolvePosition({
+            timeout: isNativeApp() ? 8000 : 6000,
+            // Accept a fix up to 2 minutes old — avoids waking the radio on every
+            // periodic/visibility check when we don't need a fresh lock.
+            maximumAge: 2 * 60 * 1000,
+          })
+        : null;
 
       if (gpsResult && mountedRef.current) {
         console.log(
@@ -286,7 +313,13 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       console.warn('GPS lookup failed, continuing with fallbacks:', error);
     }
 
-    const cached = locationRef.current || getCachedLocation();
+    const rawCached = locationRef.current || getCachedLocation();
+    const cached = !preciseLocationAllowed && rawCached?.source === 'gps'
+      ? null
+      : rawCached;
+    if (!preciseLocationAllowed && locationRef.current?.source === 'gps') {
+      locationRef.current = null;
+    }
     
     if (cached && cached.source === 'gps' && mountedRef.current) {
       const cacheAge = Date.now() - cached.timestamp;
@@ -350,6 +383,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
   useEffect(() => {
     mountedRef.current = true;
     let watchId: number | null = null;
+    let cancelled = false;
     if (!enabled || !active) {
       return () => { mountedRef.current = false; };
     }
@@ -399,6 +433,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           updateWeather(safeFallback(fallbackCity || '', 'fallback'));
         }
       }
+    } else if (!isOffline && precisePermissionTick > 0) {
+      // The user just pressed Activate. Refresh even when IP weather was cached
+      // moments ago so the UI moves to the explicitly approved GPS source.
+      checkForLocationChange(false);
     } else if (!isOffline) {
       // Re-activated (user came back to this page): only refresh when the
       // cached reading is older than the visibility threshold.
@@ -410,9 +448,21 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     // Real-time GPS via watchPosition (browser only). GPS itself works offline,
     // but we only push updates to the server when we are online.
-    if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
+    const startPreciseWatcher = async () => {
+      if (
+        !('geolocation' in navigator) ||
+        isNativeApp() ||
+        isOffline ||
+        !(await canUsePreciseLocation()) ||
+        cancelled ||
+        watchId !== null
+      ) {
+        return;
+      }
+
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
+          if (cancelled || !(await canUsePreciseLocation())) return;
           const newLat = position.coords.latitude;
           const newLon = position.coords.longitude;
           const accuracy = position.coords.accuracy ?? Number.POSITIVE_INFINITY;
@@ -432,6 +482,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
           await updateLocation(newLat, newLon, cityHint || null, 'gps');
         },
         (error) => {
+          if (error.code === 1) notePermissionRevoked();
           console.warn('GPS watchPosition error:', error.message);
         },
         {
@@ -443,7 +494,8 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         }
       );
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
-    }
+    };
+    void startPreciseWatcher();
 
     // Fallback: Check periodically. On slow connections we back off to avoid
     // stacking requests on an already strained link.
@@ -479,6 +531,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      cancelled = true;
       mountedRef.current = false;
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
@@ -488,7 +541,7 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       unsubscribeConnectivity();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, active, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback]);
+  }, [enabled, active, fallbackCity, fetchWeatherOnly, checkForLocationChange, updateWeather, updateLocation, safeFallback, precisePermissionTick]);
 
   // Retry watcher — isolated from the init effect so a transient failure never
   // tears down and restarts the GPS watcher.
@@ -516,7 +569,6 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
     }, delay);
 
     return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, active, weather.error, retryTick, checkForLocationChange]);
 
   return weather;
@@ -539,6 +591,8 @@ export const preloadWeatherLocation = async (
   options?: PreloadWeatherOptions,
 ): Promise<CachedLocation | null> => {
   const isCurrent = options?.isCurrent ?? (() => true);
+  const preciseLocationAllowed = await canUsePreciseLocation();
+  if (!isCurrent()) return null;
   const existingWeather = getCachedWeather();
   const existingLocation = getCachedLocation();
   
@@ -548,7 +602,8 @@ export const preloadWeatherLocation = async (
     if (
       weatherAge >= 0 && weatherAge < 5 * 60 * 1000 &&
       locationAge >= 0 && locationAge < 30 * 60 * 1000 &&
-      existingLocation.source === 'gps'
+      existingLocation.source === 'gps' &&
+      preciseLocationAllowed
     ) {
       return existingLocation;
     }
@@ -556,10 +611,12 @@ export const preloadWeatherLocation = async (
 
   let location: CachedLocation | null = null;
 
-  const gpsResult = await resolvePosition({
-    timeout: 5000,
-    maximumAge: 30 * 60 * 1000,
-  });
+  const gpsResult = preciseLocationAllowed
+    ? await resolvePosition({
+        timeout: 5000,
+        maximumAge: 30 * 60 * 1000,
+      })
+    : null;
 
   if (!isCurrent()) return null;
 
@@ -580,7 +637,11 @@ export const preloadWeatherLocation = async (
     }
   }
 
-  if (!location && existingLocation) {
+  if (
+    !location &&
+    existingLocation &&
+    (existingLocation.source !== 'gps' || preciseLocationAllowed)
+  ) {
     location = existingLocation;
   }
 

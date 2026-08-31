@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
-import { purgeUserData } from "../_shared/user-purge.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -14,61 +13,62 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const CLEANUP_BATCH_SIZE = 1_000;
+const MAX_CLEANUP_BATCHES = 5;
+const CLEANUP_TIME_BUDGET_MS = 8_000;
+
+interface CleanupBatchResult {
+  legacy_deleted: number;
+  token_deleted: number;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-  // Endast bakgrundsjobb (service role / cron) får massradera obekräftade konton.
+  // Endast bakgrundsjobb (service role / cron) får städa bearer-capabilities.
   const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders);
   if (authResp) return authResp;
 
-
-
   try {
-    // Hämta utgångna bekräftelser
-    const { data: expiredConfirmations, error: fetchError } = await supabase
-      .from('email_confirmations')
-      .select('user_id')
-      .lt('expires_at', new Date().toISOString())
-      .is('confirmed_at', null);
+    const startedAt = Date.now();
+    let batches = 0;
+    let legacyDeleted = 0;
+    let tokenDeleted = 0;
 
-    if (fetchError) {
-      console.error('Error fetching expired confirmations:', fetchError);
-      throw fetchError;
-    }
+    while (
+      batches < MAX_CLEANUP_BATCHES &&
+      Date.now() - startedAt < CLEANUP_TIME_BUDGET_MS
+    ) {
+      const { data, error } = await supabase
+        .rpc('cleanup_expired_email_confirmation_capabilities', {
+          _batch_size: CLEANUP_BATCH_SIZE,
+        });
 
-    if (expiredConfirmations && expiredConfirmations.length > 0) {
-      console.log(`Found ${expiredConfirmations.length} expired confirmations to clean up`);
-
-      // Ta bort obekräftade användare
-      for (const confirmation of expiredConfirmations) {
-        try {
-          // Full städning (profil, media, relationer) — inte bara auth-raden.
-          await purgeUserData(supabase, confirmation.user_id, null);
-          console.log(`Deleted user: ${confirmation.user_id}`);
-        } catch (error) {
-          console.error(`Error deleting user ${confirmation.user_id}:`, error);
-        }
+      if (error) {
+        console.error('Error deleting expired confirmation capabilities:', {
+          code: error.code ?? 'unknown',
+        });
+        throw error;
       }
 
-      // Ta bort utgångna bekräftelser
-      const { error: deleteError } = await supabase
-        .from('email_confirmations')
-        .delete()
-        .lt('expires_at', new Date().toISOString())
-        .is('confirmed_at', null);
+      const row = (Array.isArray(data) ? data[0] : null) as CleanupBatchResult | null;
+      const legacyBatch = Number(row?.legacy_deleted ?? 0);
+      const tokenBatch = Number(row?.token_deleted ?? 0);
+      legacyDeleted += Number.isFinite(legacyBatch) ? legacyBatch : 0;
+      tokenDeleted += Number.isFinite(tokenBatch) ? tokenBatch : 0;
+      batches += 1;
 
-      if (deleteError) {
-        console.error('Error deleting expired confirmations:', deleteError);
-        throw deleteError;
+      if (legacyBatch < CLEANUP_BATCH_SIZE && tokenBatch < CLEANUP_BATCH_SIZE) {
+        break;
       }
-
-      console.log('Cleanup completed successfully');
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: `Cleaned up ${expiredConfirmations?.length || 0} expired confirmations`
+    return new Response(JSON.stringify({
+      success: true,
+      legacy_deleted: legacyDeleted,
+      token_deleted: tokenDeleted,
+      batches,
     }), {
       status: 200,
       headers: {
@@ -77,10 +77,13 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-  } catch (error: any) {
-    console.error("Error in cleanup function:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown cleanup error";
+    console.error("Error in cleanup function:", {
+      name: error instanceof Error ? error.name : "UnknownError",
+    });
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

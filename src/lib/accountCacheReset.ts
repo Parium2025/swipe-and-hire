@@ -19,6 +19,7 @@ const SESSION_PREFIXES = ['parium_'];
 
 /** localStorage-prefix med privat, kontobunden data. */
 const LOCAL_PREFIXES = ['job_seeker_interviews_', 'media_url_'];
+const LOCAL_EXACT_KEYS = ['parium_cached_profile'];
 
 export function getAccountCacheOwner(): string | null {
   try {
@@ -46,7 +47,10 @@ export function resetAccountScopedCaches(nextOwnerId: string | null = null): voi
   try {
     if (typeof localStorage !== 'undefined') {
       Object.keys(localStorage)
-        .filter((key) => LOCAL_PREFIXES.some((prefix) => key.startsWith(prefix)))
+        .filter((key) =>
+          LOCAL_EXACT_KEYS.includes(key) ||
+          LOCAL_PREFIXES.some((prefix) => key.startsWith(prefix))
+        )
         .forEach((key) => localStorage.removeItem(key));
     }
   } catch {

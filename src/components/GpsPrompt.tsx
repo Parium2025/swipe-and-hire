@@ -3,17 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, X, AlertCircle } from 'lucide-react';
 import { checkGpsPermission, requestGpsPermission, isNativeApp } from '@/lib/gpsUtils';
 import GpsHelpModal from '@/components/GpsHelpModal';
-import { notePermissionGranted } from '@/lib/gpsCoordinator';
+import {
+  canUsePreciseLocation,
+  notePermissionGranted,
+  notePermissionRevoked,
+} from '@/lib/gpsCoordinator';
 
-// Vänta 10s innan GPS-ikonen visas — så att vädret (som oftast kommer inom
-// 2–3s) hinner landa först. När vädret finns tillgängligt returnerar
-// komponenten null via `weatherAvailable`, så ikonen visas aldrig alls i
-// normalfallet. Endast om vädret verkligen misslyckas dyker den upp.
-//
-// Gäller ALLA lägen — även `denied`. Tidigare poppade den upp direkt när
-// platsåtkomst var blockerad, trots att vädret ofta landar ändå via
-// IP-uppslag. Det gav en stressig varning på hemskärmen som försvann
-// någon sekund senare. Nu får systemet alltid boota klart först.
+// Vänta 10s innan GPS-ikonen visas — så att grovt IP-/profilväder hinner
+// landa och Home får boota ostört. Ikonen måste därefter finnas kvar som den
+// uttryckliga opt-in-vägen till exakt plats; ett lyckat IP-väder får inte göra
+// GPS-medgivandet oåtkomligt.
 const GPS_PROMPT_DELAY_MS = 10000;
 
 // Dismissed state that survives SPA navigation but resets on full page reload
@@ -23,20 +22,29 @@ let gpsPromptHasBeenShown = false;
 interface GpsPromptProps {
   onEnableGps?: () => void;
   weatherAvailable?: boolean;
+  /** Jobseeker keeps the explicit precise-location opt-in reachable after IP weather loads. */
+  keepOptInReachableWhenWeatherAvailable?: boolean;
   /** Home synlig? Dold Home (KeepAlive) stänger av all GPS-logik och UI. */
   active?: boolean;
 }
 
-const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }: GpsPromptProps) => {
+const GpsPrompt = memo(({
+  onEnableGps,
+  weatherAvailable = false,
+  keepOptInReachableWhenWeatherAvailable = false,
+  active = true,
+}: GpsPromptProps) => {
 
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
+  const [preciseEnabled, setPreciseEnabled] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
 
-  // Läses vid timerns utlösning — vädret kan ha landat under väntetiden.
   const weatherAvailableRef = useRef(weatherAvailable);
   weatherAvailableRef.current = weatherAvailable;
+  const keepOptInReachableRef = useRef(keepOptInReachableWhenWeatherAvailable);
+  keepOptInReachableRef.current = keepOptInReachableWhenWeatherAvailable;
 
   useEffect(() => {
     if (gpsPromptHasBeenShown && !gpsPromptDismissedUntilReload) {
@@ -59,35 +67,33 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
     let handleChange: (() => void) | null = null;
     
     const checkPermission = async () => {
+      const preciseAllowed = await canUsePreciseLocation();
       const status = await checkGpsPermission();
       if (cancelled) return;
+      setPreciseEnabled(preciseAllowed);
       setGpsStatus(status);
       
-      if (status === 'granted') {
+      if (preciseAllowed) {
         setVisible(false);
         return;
       }
       
       if (gpsPromptDismissedUntilReload) return;
 
-      if (status === 'denied' || status === 'prompt') {
-        timeoutId = setTimeout(() => {
-          // Vädret hann landa under väntetiden → ingen varning behövs.
-          if (weatherAvailableRef.current) return;
-          checkGpsPermission().then(currentStatus => {
-            if (cancelled) return;
-            if (currentStatus === 'granted') {
-              setGpsStatus('granted');
-              setVisible(false);
-              gpsPromptDismissedUntilReload = false;
-              return;
-            }
-            setGpsStatus(currentStatus);
-            setVisible(true);
-            gpsPromptHasBeenShown = true;
-          });
-        }, GPS_PROMPT_DELAY_MS);
-      }
+      timeoutId = setTimeout(() => {
+        Promise.all([canUsePreciseLocation(), checkGpsPermission()]).then(([allowed, currentStatus]) => {
+          if (cancelled) return;
+          setPreciseEnabled(allowed);
+          setGpsStatus(currentStatus);
+          if (allowed) {
+            setVisible(false);
+            return;
+          }
+          if (weatherAvailableRef.current && !keepOptInReachableRef.current) return;
+          setVisible(true);
+          gpsPromptHasBeenShown = true;
+        });
+      }, GPS_PROMPT_DELAY_MS);
 
     };
     
@@ -102,17 +108,23 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
             if (cancelled) return;
             const newState = permissionStatus?.state;
             if (newState === 'granted') {
-              notePermissionGranted();
-              gpsPromptDismissedUntilReload = false;
               setGpsStatus('granted');
-              setVisible(false);
-              if (timeoutId) {
-                clearTimeout(timeoutId);
-                timeoutId = null;
-              }
             } else if (newState === 'denied') {
+              notePermissionRevoked();
+              setPreciseEnabled(false);
               setGpsStatus('denied');
-              setVisible(!gpsPromptDismissedUntilReload);
+              setVisible(
+                !gpsPromptDismissedUntilReload &&
+                (!weatherAvailableRef.current || keepOptInReachableRef.current),
+              );
+            } else if (newState === 'prompt') {
+              notePermissionRevoked();
+              setPreciseEnabled(false);
+              setGpsStatus('prompt');
+              setVisible(
+                !gpsPromptDismissedUntilReload &&
+                (!weatherAvailableRef.current || keepOptInReachableRef.current),
+              );
             }
           };
           
@@ -141,6 +153,19 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
   useEffect(() => {
     if (!active) generationRef.current += 1;
   }, [active]);
+  useEffect(() => {
+    // A component can disappear without first rendering `active=false`
+    // (account switch, route teardown). Invalidate every outstanding native/
+    // browser permission callback before React discards this instance.
+    activeRef.current = active;
+    return () => {
+      activeRef.current = false;
+      generationRef.current += 1;
+    };
+    // This guard owns the component lifetime; active changes are handled by
+    // the dedicated effect above and the render-time ref assignment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDismiss = () => {
     gpsPromptDismissedUntilReload = true;
@@ -163,13 +188,17 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
       if (granted) {
         console.log('Native GPS enabled successfully');
         notePermissionGranted();
+        setPreciseEnabled(true);
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
       } else {
         console.log('Native GPS permission denied');
+        const currentStatus = await checkGpsPermission();
+        if (isStale()) return;
+        if (currentStatus === 'denied') notePermissionRevoked();
         gpsPromptDismissedUntilReload = false;
-        setGpsStatus('denied');
+        setGpsStatus(currentStatus);
         setVisible(true);
       }
       return;
@@ -180,15 +209,19 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
         if (isStale()) return;
         console.log('GPS enabled successfully');
         notePermissionGranted();
+        setPreciseEnabled(true);
         gpsPromptDismissedUntilReload = false;
         setGpsStatus('granted');
         onEnableGps?.();
       },
       (error) => {
         if (isStale()) return;
-        console.log('GPS permission denied:', error.message);
+        console.log('GPS activation failed:', error.message);
         gpsPromptDismissedUntilReload = false;
-        setGpsStatus('denied');
+        if (error.code === 1) {
+          notePermissionRevoked();
+          setGpsStatus('denied');
+        }
         setVisible(true);
       },
       { timeout: 10000, enableHighAccuracy: false }
@@ -196,8 +229,8 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false, active = true }
   };
 
   if (!active) return null;
-  if (gpsStatus === 'granted') return null;
-  if (weatherAvailable) return null;
+  if (preciseEnabled) return null;
+  if (weatherAvailable && !keepOptInReachableWhenWeatherAvailable) return null;
 
 
   const isDenied = gpsStatus === 'denied';

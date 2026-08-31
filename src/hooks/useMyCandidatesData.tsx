@@ -420,6 +420,10 @@ export function useMyCandidatesData(
     }
     return Array.from(seen.values());
   }, [data]);
+  const profileSignalIdsKey = useMemo(
+    () => [...new Set(candidates.map((candidate) => candidate.applicant_id))].sort().join('|'),
+    [candidates],
+  );
 
   // Signera avatar-/videomedia direkt för de rader som faktiskt visas.
   // Nätverkssvaret gör redan detta, men när listan kommer från localStorage
@@ -532,44 +536,34 @@ export function useMyCandidatesData(
     applicantIdsRef.current = new Set(candidates.map(c => c.applicant_id));
   }, [candidates]);
 
-  // Real-time subscription for activity updates (profiles.last_active_at and job_applications)
-  // Dependencies are intentionally limited to user/queryClient to keep the channel stable.
+  // Real-time subscription for activity updates. Profile changes arrive through
+  // a narrow non-PII signal table; the actual data is rehydrated via restricted RPC.
   useEffect(() => {
     if (!user) return;
 
-    const profilesChannel = createRealtimeChannel(`candidate-activity-profiles:${instanceId}`)
-      .on(
+    const signalIds = profileSignalIdsKey.split('|').filter(Boolean);
+    const profilesChannel = signalIds.length > 0
+      ? createRealtimeChannel(`candidate-activity-profile-signals:${instanceId}`)
+      : null;
+
+    for (let offset = 0; profilesChannel && offset < signalIds.length; offset += 50) {
+      const chunk = signalIds.slice(offset, offset + 50);
+      profilesChannel.on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'profiles',
+          table: 'profile_change_signals',
+          filter: chunk.length === 1
+            ? `profile_user_id=eq.${chunk[0]}`
+            : `profile_user_id=in.(${chunk.join(',')})`,
         },
-        (payload: any) => {
-          const updatedUserId = payload.new?.user_id;
-          if (updatedUserId && applicantIdsRef.current.has(updatedUserId)) {
-            const newLastActiveAt = payload.new?.last_active_at;
-            queryClient.setQueryData(
-              queryKeyRef.current,
-              (old: any) => {
-                if (!old?.pages) return old;
-                return {
-                  ...old,
-                  pages: old.pages.map((page: any) => ({
-                    ...page,
-                    items: page.items.map((c: MyCandidateData) =>
-                      c.applicant_id === updatedUserId
-                        ? { ...c, last_active_at: newLastActiveAt }
-                        : c
-                    ),
-                  })),
-                };
-              }
-            );
-          }
+        () => {
+          queryClient.invalidateQueries({ queryKey: queryKeyRef.current });
         }
-      )
-      .subscribe();
+      );
+    }
+    profilesChannel?.subscribe();
 
     const applicationsChannel = createRealtimeChannel(`candidate-activity-applications:${instanceId}`)
       .on(
@@ -606,10 +600,10 @@ export function useMyCandidatesData(
       .subscribe();
 
     return () => {
-      supabase.removeChannel(profilesChannel);
+      if (profilesChannel) supabase.removeChannel(profilesChannel);
       supabase.removeChannel(applicationsChannel);
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, profileSignalIdsKey]);
 
   // Real-time subscription for persistent ratings AND notes
   // Combined into a single effect to reduce channel overhead.

@@ -775,29 +775,29 @@ export const useApplicationsData = (
 
     const channelName = `applications-profiles-rt-${user.id}`;
     const applicantIds = applicantIdsKey.split('|').filter(Boolean);
-
-    const filterConfig: any = {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'profiles',
+    const channel = createRealtimeChannel(channelName);
+    const invalidateApplications = () => {
+      if (profilesInvalidateTimerRef.current) {
+        window.clearTimeout(profilesInvalidateTimerRef.current);
+      }
+      profilesInvalidateTimerRef.current = window.setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+      }, 400);
     };
-    // Cap filter length — fall back till bred subscription om för många IDs (RLS skyddar).
-    if (applicantIds.length === 1) {
-      filterConfig.filter = `id=eq.${applicantIds[0]}`;
-    } else if (applicantIds.length <= MAX_REALTIME_FILTER_IDS) {
-      filterConfig.filter = `id=in.(${applicantIds.join(',')})`;
-    }
 
-    const channel = createRealtimeChannel(channelName)
-      .on('postgres_changes', filterConfig, () => {
-        if (profilesInvalidateTimerRef.current) {
-          window.clearTimeout(profilesInvalidateTimerRef.current);
-        }
-        profilesInvalidateTimerRef.current = window.setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-        }, 400);
-      })
-      .subscribe();
+    // Keep every subscription user-filtered even for large candidate sets.
+    for (let offset = 0; offset < applicantIds.length; offset += MAX_REALTIME_FILTER_IDS) {
+      const chunk = applicantIds.slice(offset, offset + MAX_REALTIME_FILTER_IDS);
+      channel.on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'profile_change_signals',
+        filter: chunk.length === 1
+          ? `profile_user_id=eq.${chunk[0]}`
+          : `profile_user_id=in.(${chunk.join(',')})`,
+      }, invalidateApplications);
+    }
+    channel.subscribe();
 
     return () => {
       if (profilesInvalidateTimerRef.current) {

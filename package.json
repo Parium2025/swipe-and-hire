@@ -3,25 +3,30 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "npm@11.12.1",
+  "engines": {
+    "node": ">=22.18.0 <25"
+  },
   "scripts": {
-    "predev": "bun scripts/sync-preload-urls.ts && bun scripts/generate-job-sitemap.ts",
-    "prebuild": "bun scripts/sync-preload-urls.ts && bun scripts/generate-job-sitemap.ts",
+    "predev": "node scripts/sync-preload-urls.ts && node scripts/generate-job-sitemap.ts",
+    "prebuild": "node scripts/sync-preload-urls.ts && node scripts/generate-job-sitemap.ts",
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node scripts/verify-offline-precache.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "load:test": "bun scripts/load-test.ts"
+    "load:test": "node scripts/load-test.ts"
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "^1.2.26",
     "@capacitor/android": "^7.4.2",
     "@capacitor/cli": "^7.4.2",
     "@capacitor/core": "^7.4.2",
-    "@capacitor/geolocation": "^8.0.0",
-    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/geolocation": "^7.1.8",
+    "@capacitor/haptics": "^7.0.5",
     "@capacitor/ios": "^7.4.2",
-    "@capacitor/push-notifications": "^8.0.0",
+    "@capacitor/push-notifications": "^7.0.7",
     "@capacitor/status-bar": "^7.0.2",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
@@ -79,6 +84,7 @@
     "cmdk": "^1.0.0",
     "cobe": "^2.0.1",
     "date-fns": "^3.6.0",
+    "dompurify": "3.4.14",
     "embla-carousel-react": "^8.3.0",
     "framer-motion": "^12.23.22",
     "gsap": "^3.15.0",
@@ -104,7 +110,7 @@
     "react-hook-form": "^7.53.0",
     "react-pdf": "^10.2.0",
     "react-resizable-panels": "^2.1.3",
-    "react-router-dom": "^6.26.2",
+    "react-router-dom": "6.30.6",
     "recharts": "^2.12.7",
     "resend": "^6.12.2",
     "sonner": "^1.5.0",
@@ -112,7 +118,6 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.160.0",
     "vaul": "^0.9.3",
-    "vitest": "2.1.9",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -132,11 +137,15 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "lovable-tagger": "^1.1.7",
-    "postcss": "^8.4.47",
+    "postcss": "8.5.26",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "5.4.21",
+    "vite-plugin-pwa": "1.3.0",
+    "vitest": "3.2.6",
+    "workbox-core": "7.4.1",
+    "workbox-precaching": "7.4.1"
   },
   "overrides": {
     "tar": "^7.5.22"
