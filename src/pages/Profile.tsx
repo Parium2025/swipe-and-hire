@@ -45,7 +45,7 @@ import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
-import CandidateProfilesManager from '@/components/candidateProfiles/CandidateProfilesManager';
+import ProfileSwitcherRail from '@/components/candidateProfiles/ProfileSwitcherRail';
 
 
 import { fetchPriority } from '@/lib/fetchPriority';
@@ -1853,6 +1853,15 @@ const Profile = () => {
             <p className="text-white text-center text-sm">
               Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt.
             </p>
+
+            {!isEmployer && (
+              <ProfileSwitcherRail
+                userId={user?.id}
+                baseImageUrl={signedProfileImageUrl}
+                baseHasVideo={isProfileVideo && !!videoUrl}
+              />
+            )}
+            
             
             {/* Video and Camera Icons */}
             <div className="flex items-center justify-center space-x-4">
@@ -2504,8 +2513,8 @@ const Profile = () => {
                   {/* CV Summary Section */}
                   <CvSummarySection userId={user?.id} cvUrl={cvUrl || (profile as any)?.cv_url} refreshKey={cvSummaryRefreshKey} />
 
-                  {/* Flera kandidatprofiler (max 3) */}
-                  <CandidateProfilesManager userId={user?.id} />
+
+
 
                 </>
               )}
