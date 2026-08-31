@@ -46,6 +46,7 @@ import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificatio
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
 import ProfileSwitcherRail from '@/components/candidateProfiles/ProfileSwitcherRail';
+import type { CandidateProfile } from '@/hooks/useCandidateProfiles';
 
 
 import { fetchPriority } from '@/lib/fetchPriority';
@@ -552,6 +553,22 @@ const Profile = () => {
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
   const { cachedUrl: cachedCoverUrl } = useCachedImage(signedCoverUrl);
+
+  // Vald profil i profilväljaren – null = grundprofilen ("Min profil").
+  // När en extraprofil är vald visas dess bild/video på huvudytan istället.
+  const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
+  const activeExtraImageUrl = useMediaUrl(activeCandidateProfile?.profile_image_url || undefined, 'profile-image');
+  const activeExtraVideoUrl = useMediaUrl(activeCandidateProfile?.video_url || undefined, 'profile-video');
+  const activeExtraVideoPoster = useVideoPoster(activeCandidateProfile?.video_url || undefined);
+
+  const displayIsVideo = activeCandidateProfile
+    ? !!activeCandidateProfile.video_url
+    : (isProfileVideo && !!videoUrl);
+  const displayVideoUrl = activeCandidateProfile ? activeExtraVideoUrl : signedVideoUrl;
+  const displayVideoPoster = activeCandidateProfile ? activeExtraVideoPoster : videoPosterUrl;
+  const displayImageUrl = activeCandidateProfile
+    ? activeExtraImageUrl
+    : (cachedProfileImageUrl || signedProfileImageUrl);
   
   // Extended profile fields - using correct database field names
   const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
@@ -1859,6 +1876,7 @@ const Profile = () => {
                 userId={user?.id}
                 baseImageUrl={signedProfileImageUrl}
                 baseHasVideo={isProfileVideo && !!videoUrl}
+                onActiveProfileChange={setActiveCandidateProfile}
               />
             )}
             
@@ -1897,25 +1915,25 @@ const Profile = () => {
           </div>
           <div className="p-4 flex flex-col items-center space-y-4">
             <div className="relative">
-              {(isProfileVideo && !!videoUrl) ? (
+              {displayIsVideo ? (
                 <ProfileVideo
-                  videoUrl={signedVideoUrl}
-                  coverImageUrl={signedCoverUrl}
-                  posterUrl={videoPosterUrl}
+                  videoUrl={displayVideoUrl}
+                  coverImageUrl={activeCandidateProfile ? undefined : signedCoverUrl}
+                  posterUrl={displayVideoPoster}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
                   countdownVariant="circle"
                 />
               ) : (
-                <div 
-                  className="cursor-pointer" 
-                  onClick={() => document.getElementById('profile-image')?.click()}
+                <div
+                  className={activeCandidateProfile ? '' : 'cursor-pointer'}
+                  onClick={activeCandidateProfile ? undefined : () => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
-                    {(cachedProfileImageUrl || signedProfileImageUrl) ? (
-                      <AvatarImage 
-                        src={cachedProfileImageUrl || signedProfileImageUrl || undefined} 
+                    {displayImageUrl ? (
+                      <AvatarImage
+                        src={displayImageUrl || undefined}
                         alt="Profilbild"
                         className="object-cover"
                         decoding="sync"
@@ -1924,7 +1942,7 @@ const Profile = () => {
                         draggable={false}
                       />
                     ) : null}
-                    {!(cachedProfileImageUrl || signedProfileImageUrl) && (
+                    {!displayImageUrl && (
                       <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
@@ -1935,7 +1953,8 @@ const Profile = () => {
 
               {/* Delete/Restore icon for profile media */}
               {/* Om video just raderats (deletedProfileMedia finns), visa restore istället för soptunna */}
-              {deletedProfileMedia && !videoUrl ? (
+              {/* Dolt när en extraprofil visas – den redigeras via "Redigera profil" */}
+              {!activeCandidateProfile && (deletedProfileMedia && !videoUrl ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1956,7 +1975,7 @@ const Profile = () => {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              ) : null}
+              ) : null)}
 
               <input
                 id="profile-image"
@@ -1969,12 +1988,14 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2 text-center">
-              <Label 
-                htmlFor="profile-image" 
-                className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
-              >
-                Klicka här för att välja en bild eller video (max 60 sekunder)
-              </Label>
+              {!activeCandidateProfile && (
+                <Label
+                  htmlFor="profile-image"
+                  className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+                >
+                  Klicka här för att välja en bild eller video (max 60 sekunder)
+                </Label>
+              )}
               
               {isUploadingMedia && (
                 <div className="mx-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2 text-left">

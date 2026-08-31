@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -8,7 +8,7 @@ import { Plus, Star, Pencil, Trash2, Video as VideoIcon, User, AlertTriangle } f
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import {
-  useCandidateProfiles, MAX_CANDIDATE_PROFILES,
+  useCandidateProfiles,
   type CandidateProfile, type CandidateProfileInput,
 } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
@@ -19,6 +19,8 @@ interface Props {
   baseImageUrl?: string | null;
   /** Om grundprofilen har en video istället för bild. */
   baseHasVideo?: boolean;
+  /** Anropas när valet ändras – null betyder att grundprofilen ("Min profil") är vald. */
+  onActiveProfileChange?: (profile: CandidateProfile | null) => void;
 }
 
 interface ChipProps {
@@ -85,7 +87,7 @@ function ProfileChip({
  * Profilväljare överst i "Profilbild/Profilvideo".
  * Svep mellan profiler på touch, sätt standard med stjärnan och skapa nya med plus-rutan.
  */
-export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Props) {
+export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props) {
   const { toast } = useToast();
   const {
     profiles, canCreateMore,
@@ -100,6 +102,12 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Prop
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
+
+  // Meddela föräldern (Profile.tsx) vilken profil som är vald så att
+  // huvudytan kan visa just den profilens bild/video.
+  useEffect(() => {
+    onActiveProfileChange?.(activeProfile);
+  }, [activeProfile, onActiveProfileChange]);
 
   const openNew = () => { setEditing(null); setEditorOpen(true); };
   const openEdit = (p: CandidateProfile) => { setEditing(p); setEditorOpen(true); };
@@ -138,8 +146,10 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Prop
 
   return (
     <div className="space-y-2">
+      {/* Yttre flex centrerar raden när den får plats; inre div scrollar när den inte gör det. */}
+      <div className="flex justify-center">
       <div
-        className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <ProfileChip
@@ -179,34 +189,28 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo }: Prop
           </button>
         )}
       </div>
-
-      <div className="flex items-center justify-center gap-2">
-        {activeProfile ? (
-          <>
-            <button
-              type="button"
-              onClick={() => openEdit(activeProfile)}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors touch-manipulation inline-flex items-center gap-1.5"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Redigera profil
-            </button>
-            <button
-              type="button"
-              onClick={() => setPendingDelete(activeProfile)}
-              aria-label="Ta bort profil"
-              className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30 touch-manipulation"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </>
-        ) : (
-          <p className="text-center text-xs text-white">
-            Svep för att byta profil. Stjärnan visar vilken som används som standard vid ansökan
-            (max {MAX_CANDIDATE_PROFILES} profiler).
-          </p>
-        )}
       </div>
+
+      {activeProfile && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => openEdit(activeProfile)}
+            className="bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors touch-manipulation inline-flex items-center gap-1.5"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Redigera profil
+          </button>
+          <button
+            type="button"
+            onClick={() => setPendingDelete(activeProfile)}
+            aria-label="Ta bort profil"
+            className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30 touch-manipulation"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <CandidateProfileEditor
         open={editorOpen}
