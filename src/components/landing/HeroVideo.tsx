@@ -108,10 +108,10 @@ const tabletObjectPosition = () => {
   // Bredare än källan → beskärningen sker i höjdled, horisontellt är allt redan synligt.
   if (ratio >= SOURCE_TABLET_RATIO) return `center ${TABLET_TOP_BIAS}`;
   // Ju smalare viewport, desto mer beskärning i sidled → glid mjukt från
-  // 50 % (ingen sidbeskärning) mot 58 % vid porträttgränsen, vilket visar
+  // 50 % (ingen sidbeskärning) mot 68 % vid porträttgränsen, vilket visar
   // mer av källans högra sida och centrerar lagerscenen.
   const t = Math.min(1, (SOURCE_TABLET_RATIO - ratio) / (SOURCE_TABLET_RATIO - PORTRAIT_MAX_RATIO));
-  const x = 50 + t * 8;
+  const x = 50 + t * 18;
   return `${x.toFixed(1)}% ${TABLET_TOP_BIAS}`;
 };
 
