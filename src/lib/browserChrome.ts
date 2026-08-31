@@ -75,6 +75,8 @@ const setChromeCssColor = (color: string) => {
  * och body-färgen byts dock korrekt. Hard reloads tas bort eftersom de orsakade
  * vit/trasig sida i kombination med cache-killswitchen i index.html.
  */
+let pendingSyncTimers: number[] = [];
+
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const isAudienceLanding = isAudienceLandingPath(pathname);
