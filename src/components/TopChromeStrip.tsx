@@ -5,10 +5,12 @@ import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 const LANDING_COLOR = '#2a2a2a';
 const PARIUM_COLOR = '#001935';
 const AUDIENCE_LANDING_COLOR = '#001F3D';
+const AUTH_COLOR = '#062B5E';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
 const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
+const isAuthPath = (pathname: string) => pathname === '/auth';
 
 /**
  * Tunn färgremsa längst upp — speglar BottomChromeStrip för iOS safe-area.
@@ -20,6 +22,7 @@ const TopChromeStrip = () => {
   const [isTouch, setIsTouch] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -39,11 +42,22 @@ const TopChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(pointer: coarse) and (min-width: 768px) and (max-width: 1366px)');
+    const apply = () => setIsTablet(mq.matches);
+    apply();
+    mq.addEventListener?.('change', apply);
+    return () => mq.removeEventListener?.('change', apply);
+  }, []);
+
   const color = isLandingVideoPath(location.pathname)
     ? LANDING_COLOR
     : isAudienceLandingPath(location.pathname)
       ? AUDIENCE_LANDING_COLOR
-      : PARIUM_COLOR;
+      : isAuthPath(location.pathname)
+        ? AUTH_COLOR
+        : PARIUM_COLOR;
 
   useEffect(() => {
     setForcedColor(null);
@@ -60,12 +74,11 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
-  // I vanlig iOS Safari börjar viewporten nedanför den native statusraden.
-  // En fixed remsa här målar därför 18 px INNE i sidan och blir exakt den
-  // horisontella rand som syns efter logout. Native chrome färgas i stället
-  // via theme-color. Endast installerat app-läge behöver en egen safe-area-yta.
-  const shouldShowStrip = isTouch && isStandalone;
-  const stripInset = '8px';
+  // Telefoner behåller den grå/blå toppytan som före senaste ändringen.
+  // Vanlig iPad-Safari undantas eftersom dess native browserrad redan ligger
+  // utanför viewporten; installerat app-läge behöver däremot safe-area-ytan.
+  const shouldShowStrip = isTouch && !(isTablet && !isStandalone);
+  const stripInset = isStandalone ? '8px' : '18px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
