@@ -146,8 +146,10 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
 
   return (
     <div className="space-y-2">
+      {/* Yttre flex centrerar raden när den får plats; inre div scrollar när den inte gör det. */}
+      <div className="flex justify-center">
       <div
-        className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <ProfileChip
