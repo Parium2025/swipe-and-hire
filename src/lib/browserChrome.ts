@@ -3,7 +3,6 @@ const PARIUM_CHROME_COLOR = '#001935';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 // Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.
 const AUTH_CHROME_COLOR = '#062B5E';
-const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
@@ -125,7 +124,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   // tillbaka efter en snabb back-navigation (blå färg kvar på landningssidan).
   pendingSyncTimers.forEach((id) => window.clearTimeout(id));
   pendingSyncTimers = [];
-  [80, 260, 640, 1200].forEach((delay) => {
+  [80, 260, 640, 1200, 2000].forEach((delay) => {
     pendingSyncTimers.push(
       window.setTimeout(() => {
         setChromeCssColor(color);
