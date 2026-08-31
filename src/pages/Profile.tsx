@@ -2561,17 +2561,17 @@ const Profile = () => {
       </div>
 
       {/* Notification Settings */}
-      <div id="notifications" ref={notificationSettingsRef} className="responsive-container mt-8 scroll-mt-6">
+      <div id="notifications" ref={notificationSettingsRef} className="mt-8 scroll-mt-6">
         <JobSeekerNotificationSettings />
       </div>
 
       {/* Active Sessions */}
-      <div className="responsive-container mt-8">
+      <div className="mt-8">
         <ActiveSessionsSettings />
       </div>
 
       {/* GDPR: dataportabilitet */}
-      <div className="responsive-container mt-8">
+      <div className="mt-8">
         <PrivacyDataPanel />
       </div>
 
