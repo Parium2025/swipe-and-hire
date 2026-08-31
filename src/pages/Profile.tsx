@@ -1953,7 +1953,8 @@ const Profile = () => {
 
               {/* Delete/Restore icon for profile media */}
               {/* Om video just raderats (deletedProfileMedia finns), visa restore istället för soptunna */}
-              {deletedProfileMedia && !videoUrl ? (
+              {/* Dolt när en extraprofil visas – den redigeras via "Redigera profil" */}
+              {!activeCandidateProfile && (deletedProfileMedia && !videoUrl ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
