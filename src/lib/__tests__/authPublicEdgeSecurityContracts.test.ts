@@ -242,16 +242,16 @@ describe('public auth edge-function security contracts', () => {
     expect(code).not.toContain('requestIp');
   });
 
-  it('uses an indexed service-role-only lookup instead of paging all auth users', () => {
+  it('uses the managed auth email index through a service-role-only lookup instead of paging all auth users', () => {
     expect(existsSync(resendLookupMigration)).toBe(true);
     const migration = readFileSync(resendLookupMigration, 'utf8');
     const resend = source('supabase/functions/resend-confirmation/index.ts');
 
-    expect(migration).toContain('CREATE INDEX IF NOT EXISTS auth_users_email_normalized_lookup_idx');
-    expect(migration).toContain('ON auth.users (lower(email))');
     expect(migration).toContain('CREATE OR REPLACE FUNCTION public.lookup_auth_email_for_resend');
     expect(migration).toContain('SECURITY DEFINER');
-    expect(migration).toMatch(/lower\(u\.email\)\s*=\s*lower\(btrim\(_email\)\)/);
+    expect(migration).toContain('u.is_sso_user = false');
+    expect(migration).toContain('u.email = lower(btrim(_email))');
+    expect(migration).not.toContain('CREATE INDEX IF NOT EXISTS auth_users_email_normalized_lookup_idx');
     expect(migration).toContain('REVOKE ALL ON FUNCTION public.lookup_auth_email_for_resend(text) FROM PUBLIC, anon, authenticated');
     expect(migration).toContain('GRANT EXECUTE ON FUNCTION public.lookup_auth_email_for_resend(text) TO service_role');
     expect(resend).not.toContain('findUserByEmail');

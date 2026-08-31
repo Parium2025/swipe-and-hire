@@ -41,12 +41,19 @@ REVOKE ALL ON FUNCTION public.validate_confirmation_token(uuid) FROM PUBLIC, ano
 GRANT EXECUTE ON FUNCTION public.validate_confirmation_token(uuid) TO service_role;
 
 -- Historical versions stored both valid bearer tokens and arbitrary guesses
--- in the JSON audit metadata. Remove only that sensitive field while keeping
--- the action, actor and timestamps for operational traceability.
-UPDATE public.security_audit_log
-SET metadata = COALESCE(metadata, '{}'::jsonb) - 'token'
-WHERE action IN ('token_validation_success', 'token_validation_failed')
-  AND COALESCE(metadata, '{}'::jsonb) ? 'token';
+-- in the JSON audit metadata. Some installations do not have the legacy log,
+-- so clean it only when it exists while keeping the action, actor and
+-- timestamps for operational traceability where it does.
+DO $cleanup$
+BEGIN
+  IF to_regclass('public.security_audit_log') IS NOT NULL THEN
+    UPDATE public.security_audit_log
+    SET metadata = COALESCE(metadata, '{}'::jsonb) - 'token'
+    WHERE action IN ('token_validation_success', 'token_validation_failed')
+      AND COALESCE(metadata, '{}'::jsonb) ? 'token';
+  END IF;
+END
+$cleanup$;
 
 COMMENT ON FUNCTION public.validate_confirmation_token(uuid) IS
   'Legacy service-role-only confirmation lookup retained for rolling deploy compatibility; never logs raw capabilities.';

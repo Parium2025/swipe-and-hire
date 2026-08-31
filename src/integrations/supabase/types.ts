@@ -2817,6 +2817,32 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_change_signals: {
+        Row: {
+          changed_at: string
+          profile_user_id: string
+          revision: number
+        }
+        Insert: {
+          changed_at?: string
+          profile_user_id: string
+          revision?: number
+        }
+        Update: {
+          changed_at?: string
+          profile_user_id?: string
+          revision?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_change_signals_profile_user_id_fkey"
+            columns: ["profile_user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profile_cv_summaries: {
         Row: {
           analyzed_at: string
@@ -3798,6 +3824,10 @@ export type Database = {
         Args: { p_run_id: string }
         Returns: undefined
       }
+      can_receive_profile_change_signal: {
+        Args: { p_profile_user_id: string }
+        Returns: boolean
+      }
       claim_account_deletions: {
         Args: { _limit?: number }
         Returns: {
@@ -4047,6 +4077,14 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_admin_profile_media_counts: {
+        Args: never
+        Returns: {
+          cv_count: number
+          image_count: number
+          video_count: number
+        }[]
+      }
       get_application_quota: { Args: { p_user_id: string }; Returns: Json }
       get_chat_member_profiles: {
         Args: { _user_ids: string[] }
@@ -4200,6 +4238,19 @@ export type Database = {
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      get_my_organization_member_profiles: {
+        Args: never
+        Returns: {
+          email: string | null
+          first_name: string | null
+          is_active: boolean
+          last_name: string | null
+          organization_id: string
+          profile_image_url: string | null
+          role: string
+          user_id: string
+        }[]
       }
       get_my_profile: {
         Args: never
@@ -4492,11 +4543,11 @@ export type Database = {
           p_expected_user_id: string
         }
         Returns: {
-          note_id: string
+          note_id: string | null
           save_status: string
-          server_content: string
+          server_content: string | null
           server_revision: number
-          server_updated_at: string
+          server_updated_at: string | null
         }[]
       }
       save_owned_job_with_questions: {

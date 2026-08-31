@@ -1,8 +1,7 @@
--- Additive lookup used only by service-role Edge Functions. This removes the
--- O(number of auth users) admin.listUsers scan from confirmation resends.
-CREATE INDEX IF NOT EXISTS auth_users_email_normalized_lookup_idx
-  ON auth.users (lower(email))
-  WHERE email IS NOT NULL;
+-- Service-role lookup used by the resend Edge Function. auth.users is managed
+-- by Supabase, so application migrations must not create indexes there. The
+-- managed unique partial index users_email_partial_key already covers the
+-- normalized non-SSO lookup below because project emails are stored lowercase.
 
 CREATE OR REPLACE FUNCTION public.lookup_auth_email_for_resend(_email text)
 RETURNS TABLE (
@@ -28,7 +27,8 @@ AS $$
     NULLIF(btrim(u.raw_user_meta_data ->> 'company_name'), '')
   FROM auth.users AS u
   WHERE NULLIF(btrim(_email), '') IS NOT NULL
-    AND lower(u.email) = lower(btrim(_email))
+    AND u.is_sso_user = false
+    AND u.email = lower(btrim(_email))
   LIMIT 1
 $$;
 
