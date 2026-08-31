@@ -16,7 +16,7 @@ export const JobSeekerNotificationSettings = () => {
   const { isEnabled, toggle, isLoading } = useNotificationPreferences();
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 md:p-6">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
       <div className="space-y-4 md:space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Bell className="h-4 w-4 text-white" />

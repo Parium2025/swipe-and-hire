@@ -135,7 +135,7 @@ export function ActiveSessionsSettings() {
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
       <div className="space-y-5 md:space-y-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
