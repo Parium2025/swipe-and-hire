@@ -754,8 +754,14 @@ const Auth = () => {
   const AuthBackdrop = () => (
     <div
       aria-hidden
-      className="fixed inset-x-0 top-0 z-0 h-[calc(100dvh+var(--chrome-strip-pad,0px))] overflow-hidden pointer-events-none"
-      style={authBackdropStyle}
+      className="fixed inset-x-0 top-0 z-0 overflow-hidden pointer-events-none"
+      style={{
+        ...authBackdropStyle,
+        // Extra höjd under viewporten: när iOS-tangentbordet öppnas skjuts
+        // sidan upp och en remsa av html-bakgrunden syns annars i botten.
+        height: 'calc(100dvh + var(--chrome-strip-pad, 0px) + 45vh)',
+        backgroundAttachment: 'scroll',
+      }}
     />
   );
 
