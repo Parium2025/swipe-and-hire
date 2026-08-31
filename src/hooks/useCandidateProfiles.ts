@@ -149,11 +149,19 @@ export function useCandidateProfiles(userId?: string) {
     return {} as const;
   }, [clearDefaults, load]);
 
+  /** Nollställer standard – används när grundprofilen ska vara standard igen. */
+  const clearDefaultProfile = useCallback(async () => {
+    await clearDefaults();
+    await load();
+    return {} as const;
+  }, [clearDefaults, load]);
+
   return {
     profiles,
     loading,
     error,
     reload: load,
+    clearDefaultProfile,
     createProfile,
     updateProfile,
     deleteProfile,
