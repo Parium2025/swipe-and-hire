@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, act, waitFor } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface Registration {
@@ -224,32 +224,19 @@ describe('useConversations realtime-filtrering', () => {
 
   it('ändrad id-mängd byter kanal en gång; unmount städar kanal och timers', async () => {
     const { unmount } = renderWith(1);
-
-    // Hooken har refetchOnMount="always". En enda event-loop-tick räcker inte
-    // deterministiskt när hela regressionssviten körs, så vänta uttryckligen på
-    // att den initiala queryn har settlat och etablera därefter en känd 1-id-bas.
-    await waitFor(() => {
-      expect(client.getQueryState(['conversations', USER_ID])?.fetchStatus).toBe('idle');
-    });
+    // Låt den initiala queryFn hinna settla innan id-mängden ändras.
     await act(async () => {
-      client.setQueryData(['conversations', USER_ID], makeConversations(1));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
-    await waitFor(() => {
-      expect(subscribedChannels.length).toBeGreaterThan(0);
-    });
-
-    const firstChannel = subscribedChannels.at(-1)!;
-    const subscriptionCountBeforeChange = subscribedChannels.length;
-    removedChannels.length = 0;
+    const firstChannel = subscribedChannels[0];
 
     await act(async () => {
       client.setQueryData(['conversations', USER_ID], makeConversations(2));
+      await Promise.resolve();
     });
 
-    await waitFor(() => {
-      expect(removedChannels).toEqual([firstChannel]);
-      expect(subscribedChannels).toHaveLength(subscriptionCountBeforeChange + 1);
-    });
+    expect(removedChannels).toEqual([firstChannel]);
+    expect(subscribedChannels).toHaveLength(2);
 
 
     const clearSpy = vi.spyOn(globalThis, 'clearTimeout');

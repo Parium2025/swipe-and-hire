@@ -10,8 +10,6 @@
  */
 
 const KEY = 'parium_auth_draft_v1';
-const VERSION = 2;
-const TTL_MS = 24 * 60 * 60 * 1000;
 
 export interface AuthDraft {
   role?: 'job_seeker' | 'employer';
@@ -21,12 +19,6 @@ export interface AuthDraft {
 }
 
 const SENSITIVE = new Set(['password', 'confirmPassword', 'phoneError']);
-
-type StoredAuthDraft = {
-  version: typeof VERSION;
-  expiresAt: number;
-  draft: AuthDraft;
-};
 
 const stripSensitive = (data?: Record<string, string>) => {
   if (!data) return undefined;
@@ -42,22 +34,9 @@ export const loadAuthDraft = (): AuthDraft => {
   try {
     const raw = sessionStorage.getItem(KEY);
     if (!raw) return {};
-    const parsed = JSON.parse(raw) as Partial<StoredAuthDraft>;
-    const valid =
-      parsed.version === VERSION &&
-      Number.isFinite(parsed.expiresAt) &&
-      Number(parsed.expiresAt) > Date.now() &&
-      parsed.draft &&
-      typeof parsed.draft === 'object';
-
-    if (!valid) {
-      sessionStorage.removeItem(KEY);
-      return {};
-    }
-
-    return parsed.draft as AuthDraft;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? (parsed as AuthDraft) : {};
   } catch {
-    try { sessionStorage.removeItem(KEY); } catch { /* noop */ }
     return {};
   }
 };
@@ -74,12 +53,7 @@ export const saveAuthDraft = (draft: AuthDraft) => {
       sessionStorage.removeItem(KEY);
       return;
     }
-    const stored: StoredAuthDraft = {
-      version: VERSION,
-      expiresAt: Date.now() + TTL_MS,
-      draft: payload,
-    };
-    sessionStorage.setItem(KEY, JSON.stringify(stored));
+    sessionStorage.setItem(KEY, JSON.stringify(payload));
   } catch {
     /* ignorera quota-fel */
   }

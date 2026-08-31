@@ -6,9 +6,9 @@
  *       committed identity is B (or logged out).
  * P1-2: a save wake (debounce timer / connectivity callback) created under A
  *       must stay A-scoped forever. It may never execute with B's owner
- *       configuration, so A's text can never be saved as B's note.
+ *       configuration, so A's text can never be upserted as B's note.
  *
- * Every revision RPC is recorded with the authenticated owner, so the assertions are
+ * Every upsert is recorded with its owner column value, so the assertions are
  * about real write attempts, not about source strings.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -21,8 +21,8 @@ const SAVE_DEBOUNCE_MS = 1200;
 
 let mockUser: { id: string } | null = null;
 
-/** Every revision RPC attempt reaching the backend mock. */
-const rpcCalls: Array<{ owner: string | null; content: string; expectedRevision: number }> = [];
+/** Every upsert attempt reaching the backend mock. */
+const upserts: Array<{ owner: string | null; content: string }> = [];
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: mockUser }),
@@ -61,38 +61,17 @@ vi.mock('@/integrations/supabase/client', () => {
     select: () => builder,
     eq: () => builder,
     maybeSingle: async () => ({
-      data: mockUser ? {
-        id: `row-${mockUser.id}`,
-        content: `${mockUser.id.toUpperCase()} SERVER`,
-        revision: 0,
-        updated_at: '2026-08-30T00:00:00.000Z',
-      } : null,
+      data: mockUser ? { id: `row-${mockUser.id}`, content: `${mockUser.id.toUpperCase()} SERVER` } : null,
       error: null as null,
     }),
+    upsert: async (row: Record<string, string>) => {
+      upserts.push({ owner: row.user_id ?? null, content: row.content ?? '' });
+      return { error: null as null };
+    },
   };
   return {
     supabase: {
       from: () => builder,
-      rpc: async (
-        fn: string,
-        args: { p_content: string; p_expected_revision: number; p_expected_user_id: string }
-      ) => {
-        if (fn !== 'save_jobseeker_note') throw new Error(`Unexpected RPC: ${fn}`);
-        rpcCalls.push({
-          owner: mockUser?.id ?? null,
-          content: args.p_content,
-          expectedRevision: args.p_expected_revision,
-        });
-        return {
-          data: [{
-            save_status: 'saved',
-            server_content: args.p_content,
-            server_revision: args.p_expected_revision + 1,
-            server_updated_at: '2026-08-30T00:00:00.000Z',
-          }],
-          error: null as null,
-        };
-      },
       removeChannel: () => {},
       auth: {
         getSession: async () => ({ data: { session: null } }),
@@ -138,7 +117,7 @@ describe('useNotesSync — cross-account save paths', () => {
     localStorage.clear();
     mockUser = null;
     online = true;
-    rpcCalls.length = 0;
+    upserts.length = 0;
     connectivityListeners.length = 0;
     vi.clearAllMocks();
   });
@@ -156,7 +135,7 @@ describe('useNotesSync — cross-account save paths', () => {
     mockUser = { id: 'b' };
     rerender();
     await waitFor(() => expect(result.current.content).toBe('B SERVER'));
-    rpcCalls.length = 0;
+    upserts.length = 0;
 
     act(() => {
       staleHandleA('A INJECTED');
@@ -171,7 +150,7 @@ describe('useNotesSync — cross-account save paths', () => {
     await flushDebounce();
 
     expect(result.current.isSaving).toBe(false);
-    expect(rpcCalls).toEqual([]);
+    expect(upserts).toEqual([]);
   });
 
   it('P1-1: a retained A handleChange is inert after logout (A -> null)', async () => {
@@ -183,7 +162,7 @@ describe('useNotesSync — cross-account save paths', () => {
     mockUser = null;
     rerender();
     expect(result.current.content).toBe('');
-    rpcCalls.length = 0;
+    upserts.length = 0;
 
     act(() => {
       staleHandleA('A INJECTED');
@@ -192,7 +171,7 @@ describe('useNotesSync — cross-account save paths', () => {
 
     expect(result.current.content).toBe('');
     expect(localStorage.getItem(`${PREFIX}_a__pending`)).toBeNull();
-    expect(rpcCalls).toEqual([]);
+    expect(upserts).toEqual([]);
   });
 
   it('P1-1: after logout and re-login as A, a retained pre-logout handle never writes under another owner', async () => {
@@ -206,14 +185,14 @@ describe('useNotesSync — cross-account save paths', () => {
     mockUser = { id: 'a' };
     rerender();
     await waitFor(() => expect(result.current.content).toBe('A SERVER'));
-    rpcCalls.length = 0;
+    upserts.length = 0;
 
     act(() => {
       preLogoutHandleA('A AGAIN');
     });
     await flushDebounce();
 
-    for (const u of rpcCalls) {
+    for (const u of upserts) {
       expect(u.owner).toBe('a');
     }
     expect(localStorage.getItem(`${PREFIX}_b__pending`)).toBeNull();
@@ -238,7 +217,7 @@ describe('useNotesSync — cross-account save paths', () => {
     mockUser = { id: 'b' };
     rerender();
     await waitFor(() => expect(result.current.content).toBe('B SERVER'));
-    rpcCalls.length = 0;
+    upserts.length = 0;
     online = true;
 
     // The retained A wake fires after the transition, and the stale A handle
@@ -249,11 +228,11 @@ describe('useNotesSync — cross-account save paths', () => {
     });
     await flushDebounce();
 
-    for (const u of rpcCalls) {
+    for (const u of upserts) {
       expect(u.owner).toBe('b');
       expect(u.content).not.toContain('A OFFLINE EDIT');
     }
-    expect(rpcCalls.filter((u) => u.owner === 'b' && u.content.startsWith('A '))).toEqual([]);
+    expect(upserts.filter((u) => u.owner === 'b' && u.content.startsWith('A '))).toEqual([]);
     // A's journal must remain intact and untouched by B's session.
     expect(localStorage.getItem(`${PREFIX}_a__pending`)).toContain('A OFFLINE EDIT');
   });
@@ -262,14 +241,14 @@ describe('useNotesSync — cross-account save paths', () => {
     mockUser = { id: 'a' };
     const { result } = renderNotes();
     await waitFor(() => expect(result.current.content).toBe('A SERVER'));
-    rpcCalls.length = 0;
+    upserts.length = 0;
 
     act(() => {
       result.current.handleChange('A REAL EDIT');
     });
     await flushDebounce();
 
-    expect(rpcCalls).toContainEqual({ owner: 'a', content: 'A REAL EDIT', expectedRevision: 0 });
+    expect(upserts).toContainEqual({ owner: 'a', content: 'A REAL EDIT' });
     await waitFor(() => expect(result.current.lastSaved).not.toBeNull());
     expect(result.current.saveFailed).toBe(false);
     expect(localStorage.getItem(`${PREFIX}_a__pending`)).toBeNull();
@@ -285,7 +264,7 @@ describe('useNotesSync — cross-account save paths', () => {
       result.current.handleChange('A RECONNECT EDIT');
     });
     await flushDebounce();
-    expect(rpcCalls).toEqual([]);
+    expect(upserts).toEqual([]);
 
     online = true;
     await act(async () => {
@@ -293,7 +272,7 @@ describe('useNotesSync — cross-account save paths', () => {
       await sleep(50);
     });
 
-    expect(rpcCalls).toContainEqual({ owner: 'a', content: 'A RECONNECT EDIT', expectedRevision: 0 });
+    expect(upserts).toContainEqual({ owner: 'a', content: 'A RECONNECT EDIT' });
   });
 
   it('a real saveFailed=true is masked immediately on the identity transition', async () => {

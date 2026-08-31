@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, startTransition } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { SignupConsent } from '@/components/auth/SignupConsent';
 import { PRIVACY_POLICY_VERSION, DPA_VERSION } from '@/lib/consentVersions';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatedBackground } from './AnimatedBackground';
 import { Button } from '@/components/ui/button';
@@ -13,12 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { SlidingTabs } from '@/components/ui/sliding-tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, User, Building2, Mail, Info, Key, Phone, Globe, MapPin, Check } from 'lucide-react';
+import { Eye, EyeOff, User, Building2, Mail, Info, Key, Phone, Globe, MapPin, Users, ChevronDown, Search, Check } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AuthSelectField from '@/components/auth/AuthSelectField';
 import { Textarea } from '@/components/ui/textarea';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
+import { useEmailAvailability, emailTakenMessage } from '@/hooks/useEmailAvailability';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
-import { AUTH_REGISTRATION_LIMITS, MIN_AUTH_PASSWORD_LENGTH, normalizeAuthWebsite } from '@/lib/authRegistrationValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -54,9 +57,12 @@ const AuthMobile = ({
   initialRole
 }: AuthMobileProps) => {
   
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode !== 'register');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = useState('');
   // Separate form data for each role
   const savedDraft = useRef(loadAuthDraft()).current;
   // Inloggning har helt eget state – delar aldrig fält med registreringen
@@ -102,8 +108,6 @@ const AuthMobile = ({
   const [showResend, setShowResend] = useState(false);
   const [resendEmail, setResendEmail] = useState('');
   const [pendingVerification, setPendingVerification] = useState<boolean>(() => hasPendingVerification());
-  const [websiteTouched, setWebsiteTouched] = useState(false);
-  const websiteInvalid = websiteTouched && !!employerData.website.trim() && !normalizeAuthWebsite(employerData.website);
 
   // Låt användaren registrera sig igen när hen byter till Registrera-fliken
   useEffect(() => {
@@ -119,6 +123,10 @@ const AuthMobile = ({
     return shouldRememberUser();
   });
 
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
+  const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
+  const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -143,15 +151,15 @@ const AuthMobile = ({
     try {
       const html = document.documentElement;
       const body = document.body;
-      const prev = html.style.scrollBehavior;
-      html.style.scrollBehavior = 'auto';
+      const prev = (html as any).style.scrollBehavior;
+      (html as any).style.scrollBehavior = 'auto';
       window.scrollTo(0, top);
       // double-write to be safe on iOS
-      html.scrollTop = top;
-      body.scrollTop = top;
+      (html as any).scrollTop = top;
+      (body as any).scrollTop = top;
       requestAnimationFrame(() => {
         window.scrollTo(0, top);
-        html.style.scrollBehavior = prev || '';
+        (html as any).style.scrollBehavior = prev || '';
       });
     } catch (scrollError) {
       console.warn('Failed to hard scroll:', scrollError);
@@ -193,7 +201,18 @@ const AuthMobile = ({
     setEmployerData(prev => ({ ...prev, password: "", confirmPassword: "" }));
     setShowPassword(false);
   };
-  // Login och registrering behåller separata e-postfält.
+  const signupEmail = (role === 'job_seeker' ? jobSeekerData.email : employerData.email);
+  const emailAvailability = useEmailAvailability(signupEmail, !isLogin);
+  const [emailBlurred, setEmailBlurred] = useState(false);
+  // Popular email domains for suggestions (Swedish and international)
+  const popularDomains = [
+    '@gmail.com', '@gmail.se', '@hotmail.com', '@hotmail.se', '@outlook.com', '@outlook.se',
+    '@yahoo.com', '@yahoo.se', '@icloud.com', '@live.se', '@live.com', '@telia.com', '@spray.se',
+    '@bredband2.com', '@comhem.se', '@me.com', '@msn.com', '@aol.com', '@protonmail.com', 
+    '@yandex.com', '@mail.ru'
+  ];
+
+  // Handle email input with suggestions
   const handleEmailChange = (value: string) => {
     // VIKTIGT: Om användaren ändrar e-postadressen EFTER registrering,
     // återställ formuläret så "Registrera"-knappen visas igen
@@ -208,6 +227,31 @@ const AuthMobile = ({
       setJobSeekerData(prev => ({ ...prev, email: value }));
     } else {
       setEmployerData(prev => ({ ...prev, email: value }));
+    }
+    
+    if (value.includes('@')) {
+      const [localPart, domainPart] = value.split('@');
+      
+      if (domainPart.length === 0) {
+        const suggestions = popularDomains.map(domain => localPart + domain);
+        setEmailSuggestions(suggestions);
+        setShowEmailSuggestions(true);
+      } else {
+        const filteredDomains = popularDomains.filter(domain => {
+          const domainWithoutAt = domain.substring(1);
+          return domainWithoutAt.toLowerCase().startsWith(domainPart.toLowerCase());
+        });
+        
+        if (filteredDomains.length > 0) {
+          const suggestions = filteredDomains.map(domain => localPart + domain);
+          setEmailSuggestions(suggestions);
+          setShowEmailSuggestions(true);
+        } else {
+          setShowEmailSuggestions(false);
+        }
+      }
+    } else {
+      setShowEmailSuggestions(false);
     }
   };
 
@@ -249,6 +293,35 @@ const AuthMobile = ({
     setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
+  // Clear all form data when switching between login and registration
+  const clearFormData = () => {
+    setJobSeekerData({
+      firstName: '',
+      lastName: '',
+      phone: '',
+      phoneError: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setEmployerData({
+      firstName: '',
+      lastName: '',
+      companyName: '',
+      orgNumber: '',
+      industry: '',
+      address: '',
+      website: '',
+      companyDescription: '',
+      employeeCount: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setShowPassword(false);
+    setPasswordStrength(0);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -271,7 +344,6 @@ const AuthMobile = ({
       const submittedPassword = String(submittedForm.get('auth-password') ?? '');
       const currentEmail = isLogin ? (submittedEmail || fallbackEmail) : fallbackEmail;
       const currentPassword = isLogin ? (submittedPassword || fallbackPassword) : fallbackPassword;
-      let normalizedWebsite: string | undefined;
       
        if (isLogin) {
           // 🎬 Splash triggas nu CENTRALT i signIn (useAuth.tsx) - ingen dubblering här
@@ -289,7 +361,6 @@ const AuthMobile = ({
           }
         }
         else {
-          clearAuthDraft();
           clearPendingVerification();
           setPendingVerification(false);
         }
@@ -321,17 +392,6 @@ const AuthMobile = ({
             toast({
               title: "Telefonnummer krävs",
               description: "Vänligen ange ditt telefonnummer.",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-
-          const phoneValidation = validateSwedishPhoneNumber(jobSeekerData.phone, true);
-          if (!phoneValidation.isValid) {
-            toast({
-              title: "Ogiltigt telefonnummer",
-              description: phoneValidation.error,
               variant: "destructive"
             });
             setLoading(false);
@@ -410,18 +470,6 @@ const AuthMobile = ({
             setLoading(false);
             return;
           }
-
-          normalizedWebsite = normalizeAuthWebsite(employerData.website) ?? undefined;
-          if (!normalizedWebsite) {
-            setWebsiteTouched(true);
-            toast({
-              title: "Ogiltig webbplats",
-              description: "Ange en giltig webbadress, till exempel https://exempel.se.",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
         }
 
         if (!currentEmail.trim()) {
@@ -445,10 +493,10 @@ const AuthMobile = ({
         }
 
         // Validera lösenordslängd
-        if (currentPassword.length < MIN_AUTH_PASSWORD_LENGTH) {
+        if (currentPassword.length < 7) {
           toast({
             title: "För kort lösenord",
-            description: `Lösenordet måste vara minst ${MIN_AUTH_PASSWORD_LENGTH} tecken.`,
+            description: "Lösenordet måste vara minst 7 tecken.",
             variant: "destructive"
           });
           setLoading(false);
@@ -492,7 +540,7 @@ const AuthMobile = ({
             org_number: employerData.orgNumber,
             industry: employerData.industry,
             address: employerData.address,
-            website: normalizedWebsite,
+            website: employerData.website,
             company_description: employerData.companyDescription,
             employee_count: employerData.employeeCount
           })
@@ -590,7 +638,6 @@ const AuthMobile = ({
                 <Input
                   id="newPassword"
                   type="password"
-                  maxLength={AUTH_REGISTRATION_LIMITS.password}
                     autoComplete="new-password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -603,10 +650,11 @@ const AuthMobile = ({
                 <Input
                   id="confirmPassword"
                   type="password"
-                  maxLength={AUTH_REGISTRATION_LIMITS.password}
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  onPaste={(e) => e.preventDefault()}
+                  onCopy={(e) => e.preventDefault()}
                   required
                           className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                 />
@@ -698,20 +746,12 @@ const AuthMobile = ({
             >
               <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
-                  <SlidingTabs idPrefix="auth-mobile" isLogin={isLogin} onTabChange={handleTabChange} />
+                  <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
-                    <div
-                      id="auth-mobile-login-panel"
-                      role="tabpanel"
-                      aria-labelledby="auth-mobile-login-tab"
-                      hidden={!isLogin}
-                      aria-hidden={!isLogin}
-                      {...(!isLogin ? { inert: '' } : {})}
-                      className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}
-                    >
+                    <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { const tag = (e.target as HTMLElement)?.tagName; if (e.key === 'Enter' && !e.nativeEvent.isComposing && tag !== 'BUTTON' && tag !== 'A' && tag !== 'TEXTAREA' && !loading) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
                         <Label htmlFor="login-email" className="text-white">
@@ -721,9 +761,9 @@ const AuthMobile = ({
                         <Input
                           id="login-email"
                           type="email"
-                          maxLength={AUTH_REGISTRATION_LIMITS.email}
                           value={loginData.email}
-                          onChange={(e) => handleEmailChange(e.target.value)}
+                          onChange={(e) => { setEmailBlurred(false); handleEmailChange(e.target.value); }}
+                             onBlur={() => setEmailBlurred(true)}
                           required
                           name="auth-email"
                           autoComplete="email"
@@ -744,7 +784,6 @@ const AuthMobile = ({
                           <Input
                             id="login-password"
                             type={showPassword ? 'text' : 'password'}
-                            maxLength={AUTH_REGISTRATION_LIMITS.password}
                             value={loginData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
@@ -755,14 +794,12 @@ const AuthMobile = ({
                           />
                           <button
                             type="button"
-                            aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
-                            aria-pressed={showPassword}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
-                            {showPassword ? <EyeOff aria-hidden="true" className="h-4 w-4" /> : <Eye aria-hidden="true" className="h-4 w-4" />}
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
                         </div>
                       </div>
@@ -807,7 +844,7 @@ const AuthMobile = ({
                               onClick={() => {
                                 const saved = getPendingVerificationEmail();
                                 const current = loginData.email;
-                                const fallback = saved || current;
+                                const fallback = saved || current || signupEmail;
                                 if (saved && !current.trim()) handleEmailChange(saved);
                                 setResendEmail(fallback);
                                 setShowResend(true);
@@ -855,15 +892,7 @@ const AuthMobile = ({
                     </div>
 
                    {/* Register form - always in DOM, overlay swap */}
-                    <div
-                      id="auth-mobile-signup-panel"
-                      role="tabpanel"
-                      aria-labelledby="auth-mobile-signup-tab"
-                      hidden={isLogin}
-                      aria-hidden={isLogin}
-                      {...(isLogin ? { inert: '' } : {})}
-                      className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}
-                    >
+                    <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
                        <form key="register-form" onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                        {/* User Role Selection - First */}
                        <div>
@@ -908,7 +937,6 @@ const AuthMobile = ({
                                <Label htmlFor="firstName" className="text-white">Förnamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName).trim()} /></Label>
                               <Input
                                 id="firstName"
-                                maxLength={AUTH_REGISTRATION_LIMITS.name}
                                 autoComplete="off"
                                 value={role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName}
                                 onChange={(e) => {
@@ -926,7 +954,6 @@ const AuthMobile = ({
                                <Label htmlFor="lastName" className="text-white">Efternamn <RequiredMark filled={!!(role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName).trim()} /></Label>
                               <Input
                                 id="lastName"
-                                maxLength={AUTH_REGISTRATION_LIMITS.name}
                                 autoComplete="off"
                                 value={role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName}
                                 onChange={(e) => {
@@ -950,9 +977,9 @@ const AuthMobile = ({
                            <Input
                              id="email"
                              type="email"
-                             maxLength={AUTH_REGISTRATION_LIMITS.email}
                              value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
-                             onChange={(e) => handleEmailChange(e.target.value)}
+                             onChange={(e) => { setEmailBlurred(false); handleEmailChange(e.target.value); }}
+                             onBlur={() => setEmailBlurred(true)}
                              required
                              name="email"
                              autoComplete="email"
@@ -969,6 +996,18 @@ const AuthMobile = ({
                                 </p>
                               </div>
                             </AuthFieldNotice>
+                            <AuthFieldNotice show={!!emailBlurred && !!emailAvailability.taken}>
+                              <p className="text-xs font-medium text-white">
+                                {emailTakenMessage(emailAvailability.existingRole)}{' '}
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabChange('login')}
+                                  className="underline underline-offset-2 text-white hover:text-white/80"
+                                >
+                                  Logga in
+                                </button>
+                              </p>
+                            </AuthFieldNotice>
                          </div>
                          
                            {role === 'job_seeker' && (
@@ -979,19 +1018,16 @@ const AuthMobile = ({
                                 </Label>
                                   <Input
                                     id="phone"
-                                    maxLength={AUTH_REGISTRATION_LIMITS.phone}
                                     autoComplete="off"
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
-                                    aria-invalid={!!jobSeekerData.phoneError}
-                                    aria-describedby={jobSeekerData.phoneError ? 'phone-error' : undefined}
                                     className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                                     placeholder="T.ex. 070-123 45 67"
                                     required
                                   />
                                  {jobSeekerData.phoneError && (
-                                   <p id="phone-error" role="alert" className="text-white text-sm mt-1">{jobSeekerData.phoneError}</p>
+                                   <p className="text-white text-sm mt-1">{jobSeekerData.phoneError}</p>
                                  )}
                               </div>
                            )}
@@ -1010,7 +1046,6 @@ const AuthMobile = ({
                                 <Label htmlFor="companyName" className="text-white">Företagsnamn <RequiredMark filled={!!employerData.companyName.trim()} /></Label>
                                  <Input
                                    id="companyName"
-                                   maxLength={AUTH_REGISTRATION_LIMITS.companyName}
                                    autoComplete="off"
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
@@ -1031,7 +1066,6 @@ const AuthMobile = ({
                                   searchable
                                   searchPlaceholder="Sök bransch..."
                                   allowCustom
-                                  maxLength={AUTH_REGISTRATION_LIMITS.industry}
                                 />
                               </div>
 
@@ -1053,7 +1087,6 @@ const AuthMobile = ({
                                 </Label>
                                  <Input
                                    id="address"
-                                   maxLength={AUTH_REGISTRATION_LIMITS.address}
                                    autoComplete="off"
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
@@ -1070,32 +1103,19 @@ const AuthMobile = ({
                                 </Label>
                                  <Input
                                    id="website"
-                                   maxLength={AUTH_REGISTRATION_LIMITS.website}
                                    autoComplete="off"
                                    value={employerData.website}
-                                   onChange={(e) => {
-                                     setWebsiteTouched(false);
-                                     setEmployerData(prev => ({ ...prev, website: e.target.value }));
-                                   }}
-                                   onBlur={() => setWebsiteTouched(true)}
-                                   aria-invalid={websiteInvalid}
-                                   aria-describedby={websiteInvalid ? 'website-error' : undefined}
+                                   onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white h-11 !min-h-0"
                                    required
                                  />
-                                 {websiteInvalid && (
-                                   <p id="website-error" role="alert" className="text-white text-sm mt-1">
-                                     Ange en giltig webbadress, till exempel https://exempel.se.
-                                   </p>
-                                 )}
                               </div>
 
                               <div>
                                 <Label htmlFor="companyDescription" className="text-white">Kort beskrivning</Label>
                                  <Textarea
                                    id="companyDescription"
-                                   maxLength={AUTH_REGISTRATION_LIMITS.companyDescription}
                                    value={employerData.companyDescription}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
                                    placeholder="Beskriv vad ert företag gör..."
@@ -1116,25 +1136,22 @@ const AuthMobile = ({
                           <Input
                             id="password"
                             type={showPassword ? 'text' : 'password'}
-                            maxLength={AUTH_REGISTRATION_LIMITS.password}
                             value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
-                            minLength={MIN_AUTH_PASSWORD_LENGTH}
+                            minLength={7}
                             name={`new-password-${role}`}
                             autoComplete="new-password"
                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white h-11 !min-h-0"
                           />
                            <button
                             type="button"
-                            aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
-                            aria-pressed={showPassword}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
-                            {showPassword ? <EyeOff aria-hidden="true" className="h-4 w-4" /> : <Eye aria-hidden="true" className="h-4 w-4" />}
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
                         </div>
                         {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
@@ -1163,7 +1180,7 @@ const AuthMobile = ({
                               </p>
                             </div>
                             <p className="text-xs text-white mt-2">
-                              Lösenordet måste vara minst {MIN_AUTH_PASSWORD_LENGTH} tecken (bokstäver, siffror eller tecken)
+                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken)
                             </p>
                           </>
                         )}
@@ -1179,8 +1196,9 @@ const AuthMobile = ({
                             <Input
                               id="confirmPassword"
                               type={showPassword ? 'text' : 'password'}
-                              maxLength={AUTH_REGISTRATION_LIMITS.password}
                               value={role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword}
+                              onPaste={(e) => e.preventDefault()}
+                              onCopy={(e) => e.preventDefault()}
                               onChange={(e) => {
                                 if (role === 'job_seeker') {
                                   setJobSeekerData(prev => ({ ...prev, confirmPassword: e.target.value }));
@@ -1195,14 +1213,12 @@ const AuthMobile = ({
                             />
                             <button
                               type="button"
-                              aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
-                              aria-pressed={showPassword}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 active:bg-transparent"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
                               onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                               onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                              {showPassword ? <EyeOff aria-hidden="true" className="h-4 w-4" /> : <Eye aria-hidden="true" className="h-4 w-4" />}
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                           </div>
                           {(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && 
@@ -1222,8 +1238,8 @@ const AuthMobile = ({
                        <Button 
                           type="submit" 
                           variant="glass"
-                          className={`w-full min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          disabled={loading || hasRegistered}
+                          className={`w-full min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''} ${emailAvailability.taken ? 'opacity-40 blur-[0.5px] cursor-not-allowed' : ''}`}
+                          disabled={loading || hasRegistered || emailAvailability.taken}
                           onMouseDown={(e) => e.preventDefault()}
                         >
                          {loading ? "Registrerar..." : "Registrera"}
@@ -1251,7 +1267,6 @@ const AuthMobile = ({
                       <Input
                         id="resend-email"
                         type="email"
-                        maxLength={AUTH_REGISTRATION_LIMITS.email}
                         value={resendEmail}
                         onChange={(e) => setResendEmail(e.target.value)}
                         required

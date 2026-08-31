@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
-import { VitePWA } from "vite-plugin-pwa";
 
 /**
  * Generates /version.json at build time with a unique build signature.
@@ -50,49 +49,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     versionJsonPlugin(),
-    VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.ts',
-      injectRegister: false,
-      registerType: 'prompt',
-      manifest: false,
-      devOptions: { enabled: false },
-      injectManifest: {
-        rollupFormat: 'iife',
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        globPatterns: [
-          'index.html',
-          'assets/index-*.js',
-          'assets/Index-*.js',
-          'assets/App-*.js',
-          'assets/index-*.css',
-          'assets/JobView-*.js',
-          'assets/useImagePreloader-*.js',
-          'assets/useApplicationQuota-*.js',
-          'assets/recordJobView-*.js',
-          'assets/arrow-left-*.js',
-          'assets/refresh-cw-*.js',
-          'assets/storageUtils-*.js',
-          'assets/parium-logo-rings-*.png',
-          'assets/web-*.js',
-          'manifest.json',
-          'parium-auth-logo.png',
-          'parium-icon-v4-192.png',
-          'parium-icon-v4-512.png',
-        ],
-        globIgnores: [
-          'version.json',
-          'sw.js',
-          'reset-cache.html',
-          '**/*.mp4',
-          '**/*.webm',
-          '**/*.jpg',
-          '**/*.jpeg',
-          '**/pdf.worker*.mjs',
-        ],
-      },
-    }),
     mcpPlugin(),
 
     mode === 'development' &&

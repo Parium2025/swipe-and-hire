@@ -12,7 +12,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
-import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership, hasPendingNotesJournalForUser, updateLastActivity } from '@/lib/authStorage';
+import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { setWeatherCacheUser } from '@/lib/weatherApi';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
@@ -25,8 +25,6 @@ import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { resetAccountScopedCaches, getAccountCacheOwner } from '@/lib/accountCacheReset';
-import { resetPreciseLocationConsent } from '@/lib/gpsCoordinator';
-import { replaceWithCleanAuthPage } from '@/lib/authNavigation';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -69,7 +67,6 @@ interface Organization {
 interface Profile {
   id: string;
   user_id: string;
-  role?: UserRole;
   first_name?: string;
   last_name?: string;
   phone?: string;
@@ -96,7 +93,6 @@ interface Profile {
   home_location?: string;
   organization_id?: string;
   onboarding_completed?: boolean;
-  background_location_enabled?: boolean | null;
 }
 
 // SessionStorage keys för omedelbar visning (som arbetsgivarsidan)
@@ -120,117 +116,6 @@ const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 const MY_APPLICATIONS_CACHE_KEY = 'parium_my_applications';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates';
-const CACHED_PROFILE_KEY = 'parium_cached_profile';
-const NOTES_BEFORE_SIGN_OUT_EVENT = 'parium:flush-pending-notes-before-sign-out';
-const NOTES_SIGN_OUT_FLUSH_TIMEOUT_MS = 3_000;
-const DEVICE_SESSION_CLEANUP_TIMEOUT_MS = 2_000;
-const SUPABASE_SIGN_OUT_TIMEOUT_MS = 8_000;
-
-interface PasswordSignInAttempt {
-  id: number;
-  normalizedEmail: string;
-  abandoned: boolean;
-  cleanupStarted: boolean;
-  cleanupAccessToken?: string;
-  requestSettled: boolean;
-  authEventMatched: boolean;
-  request: ReturnType<typeof supabase.auth.signInWithPassword> | null;
-}
-
-type AuthLinkSessionResult = {
-  data: {
-    user?: User | null;
-    session: Session | null;
-  };
-  error: unknown;
-};
-
-type AuthStateProcessor = (
-  event: string,
-  session: Session | null,
-  authorizedAuthLinkTransition: boolean,
-) => void;
-
-interface PendingAuthLinkTransition {
-  id: number;
-  abandoned: boolean;
-  operationSettled: boolean;
-  expected: { userId: string; accessToken: string } | null;
-  heldEvent: { event: string; session: Session | null } | null;
-  resolveEvent: (matched: boolean) => void;
-  rejectOperationWait: ((error: Error) => void) | null;
-  timeoutId: ReturnType<typeof setTimeout>;
-}
-
-const normalizeAuthEmail = (email: string | null | undefined): string =>
-  (email ?? '').trim().toLowerCase();
-
-const isTransientProfileReadError = (error: unknown): boolean => {
-  if (!getIsOnline()) return true;
-  if (!error || typeof error !== 'object') return false;
-  const candidate = error as { status?: unknown; code?: unknown; message?: unknown };
-  const status = Number(candidate.status);
-  if (Number.isFinite(status) && (status === 408 || status === 425 || status === 429 || status >= 500)) {
-    return true;
-  }
-  const code = typeof candidate.code === 'string' ? candidate.code.toUpperCase() : '';
-  if (['PGRST000', 'PGRST001', 'PGRST002', 'PGRST003'].includes(code)) return true;
-  const message = typeof candidate.message === 'string' ? candidate.message.toLowerCase() : '';
-  return /network|failed to fetch|timeout|timed out|connection|load failed/.test(message);
-};
-
-const flushPendingNotesBeforeSignOut = async (userId: string | null): Promise<boolean> => {
-  if (typeof window === 'undefined') return true;
-  const flushes: Promise<unknown>[] = [];
-  window.dispatchEvent(new CustomEvent(NOTES_BEFORE_SIGN_OUT_EVENT, {
-    detail: {
-      waitUntil: (flush: Promise<unknown>) => flushes.push(Promise.resolve(flush)),
-    },
-  }));
-  if (flushes.length === 0) return !hasPendingNotesJournalForUser(userId);
-
-  return new Promise<boolean>((resolve) => {
-    let finished = false;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    const finish = (flushed: boolean) => {
-      if (finished) return;
-      finished = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      resolve(flushed);
-    };
-    timeoutId = setTimeout(() => finish(false), NOTES_SIGN_OUT_FLUSH_TIMEOUT_MS);
-    void Promise.allSettled(flushes).then((results) => {
-      finish(
-        results.every((result) => result.status === 'fulfilled') &&
-        !hasPendingNotesJournalForUser(userId),
-      );
-    });
-  });
-};
-
-const readCachedProfileForUser = (expectedUserId?: string | null): Profile | null => {
-  try {
-    if (typeof window === 'undefined') return null;
-    const raw = localStorage.getItem(CACHED_PROFILE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<Profile> | null;
-    const isValid =
-      !!parsed &&
-      typeof parsed === 'object' &&
-      !Array.isArray(parsed) &&
-      typeof parsed.user_id === 'string' &&
-      parsed.user_id.length > 0 &&
-      (parsed.role === 'job_seeker' || parsed.role === 'employer');
-    if (!isValid || (expectedUserId != null && parsed.user_id !== expectedUserId)) {
-      localStorage.removeItem(CACHED_PROFILE_KEY);
-      return null;
-    }
-    return parsed as Profile;
-  } catch {
-    try { localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
-    return null;
-  }
-};
 
 interface AuthContextType {
   user: User | null;
@@ -295,16 +180,8 @@ interface AuthContextType {
   isCompanyUser: () => boolean;
   getRedirectPath: () => string;
   switchRole: (newRole: UserRole) => Promise<{ error?: any }>;
-  confirmEmail: (token: string) => Promise<{
-    success: boolean;
-    processed: true;
-    message: string;
-    email: string;
-  }>;
+  confirmEmail: (token: string) => Promise<{ success: boolean; message: string; email: string }>;
   cleanupExpiredConfirmations: () => Promise<void>;
-  runAuthLinkSessionTransition: <T extends AuthLinkSessionResult>(
-    operation: () => Promise<T>,
-  ) => Promise<T>;
 }
  
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -320,9 +197,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const accountAuthorityRef = useRef(createAccountAuthority(null));
   const setUser = useCallback((nextUser: User | null) => {
     const nextOwnerId = nextUser?.id ?? null;
-    if (accountAuthorityRef.current.current.ownerId !== nextOwnerId) {
-      resetPreciseLocationConsent();
-    }
     // VARJE accepterad övergång ger en ny generation — även när samma konto får
     // en ny session/auth-händelse utan mellanliggande utloggning. Annars förblir
     // ett svar från den föregående sessionen "aktuellt" och kan skriva.
@@ -331,10 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => {
     const authority = accountAuthorityRef.current;
-    return () => {
-      resetPreciseLocationConsent();
-      authority.invalidate();
-    };
+    return () => authority.invalidate();
   }, []);
 
   const [session, setSession] = useState<Session | null>(null);
@@ -343,32 +214,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // during render (module state only, no storage or React mutation) so child
   // state initializers never read another account's cache.
   setWeatherCacheUser(user?.id ?? null);
-  const [profile, setProfile] = useState<Profile | null>(() => readCachedProfileForUser());
-  const [userRoleBinding, setUserRoleBinding] = useState<{
-    ownerId: string | null;
-    value: UserRoleData | null;
-  }>({ ownerId: null, value: null });
-  const [organizationBinding, setOrganizationBinding] = useState<{
-    ownerId: string | null;
-    value: Organization | null;
-  }>({ ownerId: null, value: null });
-  const activeOwnerId = user?.id ?? null;
-  const userRole = activeOwnerId && userRoleBinding.ownerId === activeOwnerId
-    ? userRoleBinding.value
-    : null;
-  const organization = activeOwnerId && organizationBinding.ownerId === activeOwnerId
-    ? organizationBinding.value
-    : null;
-  const setUserRoleForOwner = useCallback((ownerId: string, value: UserRoleData | null) => {
-    const authority = accountAuthorityRef.current;
-    if (!authority.isCurrent(authority.current, ownerId)) return;
-    setUserRoleBinding({ ownerId, value });
-  }, []);
-  const setOrganizationForOwner = useCallback((ownerId: string, value: Organization | null) => {
-    const authority = accountAuthorityRef.current;
-    if (!authority.isCurrent(authority.current, ownerId)) return;
-    setOrganizationBinding({ ownerId, value });
-  }, []);
+  const CACHED_PROFILE_KEY = 'parium_cached_profile';
+  const [profile, setProfile] = useState<Profile | null>(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(CACHED_PROFILE_KEY) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        try { localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
+        return null;
+      }
+      return parsed as Profile;
+    } catch {
+      try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
+      return null;
+    }
+  });
+  const [userRole, setUserRole] = useState<UserRoleData | null>(null);
+
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
   const [mediaPreloadComplete, setMediaPreloadComplete] = useState(false); // 🎯 Ny state för att tracka media-laddning
@@ -520,13 +384,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSessionKickRef = useRef(false); // Suppress duplicate toast on session kick
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
-  const passwordSignInAttemptRef = useRef<PasswordSignInAttempt | null>(null);
-  const nextPasswordSignInAttemptIdRef = useRef(0);
-  const latestAcceptedPasswordAttemptIdRef = useRef(0);
-  const authLinkTransitionIdRef = useRef(0);
-  const pendingAuthLinkTransitionRef = useRef<PendingAuthLinkTransition | null>(null);
-  const quarantineSignOutInFlightRef = useRef(false);
-  const authStateProcessorRef = useRef<AuthStateProcessor | null>(null);
   const isSigningOutRef = useRef(false); // 🔒 Dubbelklickskydd på "Logga ut"
 
   const mediaPreloadCompleteRef = useRef(false);
@@ -537,243 +394,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Avoid doing heavy localStorage sweeps during the very first paint on /auth.
   const didInitialLoggedOutCleanupRef = useRef(false);
   const isRecoveringSessionRef = useRef(false); // 🛡️ Guard against concurrent recovery attempts
-
-  const quarantineRejectedAuthSession = useCallback((
-    rejectedAccessToken?: string,
-    hardReset = false,
-  ) => {
-    try { authStorage.clear(); } catch { /* Storage can be unavailable. */ }
-    if (!rejectedAccessToken && !hardReset) return;
-
-    // Never invoke another Supabase auth method from inside its auth callback;
-    // GoTrue holds an internal lock there. Verify and clear the exact rejected
-    // token on the next task instead, so an older cleanup cannot sign out a
-    // later unrelated session.
-    setTimeout(() => {
-      void supabase.auth.getSession().then(async ({ data }) => {
-        const currentToken = data.session?.access_token;
-        if (currentToken && rejectedAccessToken && currentToken !== rejectedAccessToken) {
-          // A different verified session has won the race. Do not let stale
-          // cleanup log it out or force a reload.
-          return;
-        }
-
-        // `authStorage.clear()` intentionally runs before this check. The
-        // Supabase client can therefore report no persisted session while its
-        // in-memory auth/realtime client still holds the rejected token. A
-        // local sign-out is required to emit SIGNED_OUT and reset that client.
-        const mustResetLocalClient =
-          !currentToken ||
-          (!!rejectedAccessToken && currentToken === rejectedAccessToken);
-        if (mustResetLocalClient && !quarantineSignOutInFlightRef.current) {
-          quarantineSignOutInFlightRef.current = true;
-          isManualSignOutRef.current = true;
-          try {
-            await supabase.auth.signOut({ scope: 'local' });
-          } finally {
-            isManualSignOutRef.current = false;
-            quarantineSignOutInFlightRef.current = false;
-            try { authStorage.clear(); } catch { /* Storage can be unavailable. */ }
-          }
-        }
-
-        if (hardReset) replaceWithCleanAuthPage();
-      }).catch(() => {
-        try { authStorage.clear(); } catch { /* Storage can be unavailable. */ }
-        if (hardReset) replaceWithCleanAuthPage();
-      });
-    }, 0);
-  }, []);
-
-  const settleAuthLinkTransition = useCallback((
-    transition: PendingAuthLinkTransition,
-    event: { event: string; session: Session | null } | null,
-    authorized: boolean,
-  ) => {
-    if (pendingAuthLinkTransitionRef.current !== transition) return;
-    clearTimeout(transition.timeoutId);
-    pendingAuthLinkTransitionRef.current = null;
-    if (!authorized) {
-      // Supabase persists a session before SIGNED_IN is dispatched. A
-      // mismatched, failed or timed-out ticket must therefore remove that
-      // credential immediately and must never replay the held event as an
-      // ordinary login (logged-out and same-user cases would otherwise pass
-      // the cross-account guard).
-      quarantineRejectedAuthSession(event?.session?.access_token);
-      if (transition.expected?.accessToken !== event?.session?.access_token) {
-        quarantineRejectedAuthSession(transition.expected?.accessToken);
-      }
-    } else if (event) {
-      authStateProcessorRef.current?.(event.event, event.session, authorized);
-    }
-    transition.resolveEvent(authorized);
-  }, [quarantineRejectedAuthSession]);
-
-  const runAuthLinkSessionTransition = useCallback(async <T extends AuthLinkSessionResult,>(
-    operation: () => Promise<T>,
-  ): Promise<T> => {
-    if (
-      pendingAuthLinkTransitionRef.current ||
-      isSigningInRef.current ||
-      passwordSignInAttemptRef.current
-    ) {
-      throw new Error('En säker autentiseringsåtgärd pågår redan.');
-    }
-
-    let resolveEvent!: (matched: boolean) => void;
-    const eventResult = new Promise<boolean>((resolve) => { resolveEvent = resolve; });
-    const transition: PendingAuthLinkTransition = {
-      id: ++authLinkTransitionIdRef.current,
-      abandoned: false,
-      operationSettled: false,
-      expected: null,
-      heldEvent: null,
-      resolveEvent,
-      rejectOperationWait: null,
-      timeoutId: undefined as unknown as ReturnType<typeof setTimeout>,
-    };
-    transition.timeoutId = setTimeout(() => {
-      // Keep an abandoned tombstone until the in-flight SDK call actually
-      // settles and the document is safely reset. Supabase may write and emit
-      // SIGNED_IN after our UI timeout; retaining the ticket lets the callback
-      // quarantine that late event instead of adopting it.
-      transition.abandoned = true;
-      quarantineRejectedAuthSession(
-        transition.heldEvent?.session?.access_token ?? transition.expected?.accessToken,
-        true,
-      );
-      transition.resolveEvent(false);
-      transition.rejectOperationWait?.(
-        new Error('Den säkra autentiseringsåtgärden tog för lång tid.'),
-      );
-    }, 15_000);
-    pendingAuthLinkTransitionRef.current = transition;
-
-    const operationPromise = Promise.resolve().then(operation);
-    // If the caller-facing timeout wins, the SDK promise keeps running. This
-    // observer owns the late cleanup while the abandoned ticket remains as a
-    // tombstone for any later SIGNED_IN event.
-    void operationPromise.then((lateResult) => {
-      if (!transition.abandoned) return;
-      transition.operationSettled = true;
-      const lateSession = lateResult.error ? null : lateResult.data?.session;
-      if (lateSession?.user?.id && lateSession.access_token) {
-        transition.expected = {
-          userId: lateSession.user.id,
-          accessToken: lateSession.access_token,
-        };
-      }
-      quarantineRejectedAuthSession(lateSession?.access_token, true);
-    }, () => {
-      if (!transition.abandoned) return;
-      transition.operationSettled = true;
-      quarantineRejectedAuthSession(undefined, true);
-    });
-
-    const operationWait = new Promise<T>((resolve, reject) => {
-      transition.rejectOperationWait = reject;
-      operationPromise.then(resolve, reject);
-    });
-
-    let result: T;
-    try {
-      result = await operationWait;
-    } catch (error) {
-      transition.rejectOperationWait = null;
-      if (transition.abandoned) throw error;
-      transition.operationSettled = true;
-      settleAuthLinkTransition(transition, transition.heldEvent, false);
-      throw error;
-    }
-
-    transition.rejectOperationWait = null;
-    transition.operationSettled = true;
-
-    if (transition.abandoned) {
-      const abandonedSession = result.error ? null : result.data?.session;
-      if (abandonedSession?.user?.id && abandonedSession.access_token) {
-        transition.expected = {
-          userId: abandonedSession.user.id,
-          accessToken: abandonedSession.access_token,
-        };
-      }
-      quarantineRejectedAuthSession(abandonedSession?.access_token, true);
-      throw new Error('Den säkra autentiseringsåtgärden tog för lång tid.');
-    }
-
-    if (pendingAuthLinkTransitionRef.current !== transition) {
-      throw new Error('Den säkra autentiseringsåtgärden tog för lång tid.');
-    }
-
-    const verifiedSession = result.error ? null : result.data?.session;
-    const userId = verifiedSession?.user?.id;
-    const accessToken = verifiedSession?.access_token;
-    if (!userId || !accessToken) {
-      settleAuthLinkTransition(transition, transition.heldEvent, false);
-      return result;
-    }
-
-    transition.expected = { userId, accessToken };
-    if (transition.heldEvent) {
-      const heldSession = transition.heldEvent.session;
-      const matched =
-        transition.heldEvent.event === 'SIGNED_IN' &&
-        heldSession?.user?.id === userId &&
-        heldSession?.access_token === accessToken;
-      settleAuthLinkTransition(transition, transition.heldEvent, matched);
-      if (!matched) throw new Error('Autentiseringssessionen matchade inte den begärda länken.');
-      return result;
-    }
-
-    const matched = await eventResult;
-    if (!matched) {
-      if (transition.abandoned) {
-        throw new Error('Den säkra autentiseringsåtgärden tog för lång tid.');
-      }
-      throw new Error('Autentiseringssessionen kunde inte verifieras.');
-    }
-    return result;
-  }, [quarantineRejectedAuthSession, settleAuthLinkTransition]);
-
-  const finishPasswordSignInAttempt = useCallback((attempt: PasswordSignInAttempt) => {
-    if (passwordSignInAttemptRef.current?.id !== attempt.id) return;
-    passwordSignInAttemptRef.current = null;
-    isSigningInRef.current = false;
-  }, []);
-
-  const discardAbandonedPasswordSession = useCallback((
-    attempt: PasswordSignInAttempt,
-    rejectedAccessToken?: string,
-  ) => {
-    if (attempt.cleanupStarted) {
-      // A later auth callback can carry the token even when the original SDK
-      // result did not. It still has to reset the in-memory Auth/Realtime client.
-      if (rejectedAccessToken && rejectedAccessToken !== attempt.cleanupAccessToken) {
-        attempt.cleanupAccessToken = rejectedAccessToken;
-        quarantineRejectedAuthSession(rejectedAccessToken);
-      }
-      return;
-    }
-    attempt.cleanupStarted = true;
-    attempt.cleanupAccessToken = rejectedAccessToken;
-
-    // Supabase persists before emitting SIGNED_IN. Remove both per-tab state
-    // and any Remember-me snapshot synchronously so reload/suspension cannot
-    // resurrect this rejected session before the next timer task runs.
-    try { authStorage.clear(); } catch { /* Browser auth storage can be unavailable. */ }
-
-    setTimeout(() => {
-      // Never let cleanup for an old attempt sign out a newer accepted login.
-      if (latestAcceptedPasswordAttemptIdRef.current > attempt.id) return;
-      const activeAttempt = passwordSignInAttemptRef.current;
-      if (activeAttempt && activeAttempt.id !== attempt.id) return;
-
-      // Supabase may keep the rejected token in memory/realtime after storage
-      // has been cleared. The shared quarantine emits a local SIGNED_OUT even
-      // when getSession() can no longer read that persisted credential.
-      quarantineRejectedAuthSession(rejectedAccessToken);
-    }, 0);
-  }, [quarantineRejectedAuthSession]);
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
   useEffect(() => {
@@ -959,53 +579,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 0);
     };
 
-    const processAuthStateChange: AuthStateProcessor = (
-      event,
-      session,
-      authorizedAuthLinkTransition,
-    ) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
         if (!mounted) return;
 
         const newUserId = session?.user?.id ?? null;
         const previousUserId = currentUserIdRef.current;
-        const activePasswordAttempt = passwordSignInAttemptRef.current;
-        const isMatchingPasswordAuthEvent =
-          event === 'SIGNED_IN' &&
-          !!session?.user &&
-          !!activePasswordAttempt &&
-          normalizeAuthEmail(session.user.email) === activePasswordAttempt.normalizedEmail;
-
-        if (activePasswordAttempt && newUserId !== null && !isMatchingPasswordAuthEvent) {
-          // `isSigningIn` is not authority on its own: an unrelated auth event
-          // can arrive while a password request is pending. Keep the current
-          // account and remove the unmatched credential written for this tab.
-          console.warn('Ignoring auth event that does not match the active password attempt');
-          quarantineRejectedAuthSession(session?.access_token);
-          return;
-        }
-
-        if (isMatchingPasswordAuthEvent && activePasswordAttempt) {
-          activePasswordAttempt.authEventMatched = true;
-          if (activePasswordAttempt.abandoned) {
-            discardAbandonedPasswordSession(activePasswordAttempt, session?.access_token);
-            if (activePasswordAttempt.requestSettled) {
-              finishPasswordSignInAttempt(activePasswordAttempt);
-            }
-            return;
-          }
-          latestAcceptedPasswordAttemptIdRef.current = activePasswordAttempt.id;
-          if (activePasswordAttempt.requestSettled) {
-            finishPasswordSignInAttempt(activePasswordAttempt);
-          }
-        }
 
         if (
           previousUserId !== null &&
           newUserId !== null &&
           previousUserId !== newUserId &&
           !isManualSignOutRef.current &&
-          !isMatchingPasswordAuthEvent &&
-          !authorizedAuthLinkTransition
+          !isSigningInRef.current
         ) {
           console.log('🔄 Session changed in another tab - different user detected');
           toast({
@@ -1062,25 +648,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // 🔒 Ägarbyte: rensa föregående kontos cache INNAN nästa konto renderas.
-        const ownerChanged = previousUserId !== newUserId;
-        const incomingCachedProfile = ownerChanged && newUserId
-          ? readCachedProfileForUser(newUserId)
-          : null;
         claimAccountCacheOwnership(newUserId);
-
-        // Bind profil-snapshoten i samma synkrona auth-händelse, innan user
-        // exponeras. Då kan aldrig föregående kontos profil blixtra till för
-        // den nya användaren medan nätverksprofilen laddas.
-        if (ownerChanged) {
-          setProfile(incomingCachedProfile);
-          // Roll och organisation är lika konto-kritiska som profilen. Bind en
-          // tom snapshot till den inkommande ägaren innan `user` exponeras.
-          setUserRoleBinding({ ownerId: newUserId, value: null });
-          setOrganizationBinding({ ownerId: newUserId, value: null });
-          if (incomingCachedProfile) {
-            try { safeSetItem(CACHED_PROFILE_KEY, JSON.stringify(incomingCachedProfile)); } catch { /* storage may be unavailable */ }
-          }
-        }
 
         currentUserIdRef.current = newUserId;
         setSession(session);
@@ -1137,8 +705,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } else {
           setProfile(null);
-          setUserRoleBinding({ ownerId: null, value: null });
-          setOrganizationBinding({ ownerId: null, value: null });
+          setUserRole(null);
+          setOrganization(null);
           setMediaPreloadComplete(false);
           profileLoadedRef.current = false;
           setPreloadedAvatarUrl(null);
@@ -1155,45 +723,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
           }
         }
-      };
-
-    authStateProcessorRef.current = processAuthStateChange;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mounted) return;
-        const transition = pendingAuthLinkTransitionRef.current;
-        if (event === 'SIGNED_IN' && transition) {
-          if (transition.abandoned) {
-            // Late SDK event after timeout: the ticket remains only as a
-            // tombstone until the originating operation settles.
-            quarantineRejectedAuthSession(session?.access_token, true);
-            return;
-          }
-          if (transition.expected) {
-            const matched =
-              session?.user?.id === transition.expected.userId &&
-              session?.access_token === transition.expected.accessToken;
-            settleAuthLinkTransition(
-              transition,
-              { event, session },
-              matched,
-            );
-            return;
-          }
-          if (!transition.heldEvent) {
-            // Supabase normally dispatches SIGNED_IN before the operation
-            // promise resolves. Hold the event until its exact user+token can
-            // be compared with the explicit link operation's return value.
-            transition.heldEvent = { event, session };
-            return;
-          }
-          // More than one account event can never be authorized by a
-          // single-use ticket. Reject the whole transition without accepting
-          // either event.
-          settleAuthLinkTransition(transition, transition.heldEvent, false);
-          return;
-        }
-        processAuthStateChange(event, session, false);
       }
     );
 
@@ -1202,22 +731,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionInitialized = true;
       finishInitialization();
 
-      const newUserId = session?.user?.id ?? null;
-      const ownerChanged = currentUserIdRef.current !== newUserId;
-      const incomingCachedProfile = ownerChanged && newUserId
-        ? readCachedProfileForUser(newUserId)
-        : null;
-      claimAccountCacheOwnership(newUserId);
-      if (ownerChanged) {
-        setProfile(incomingCachedProfile);
-        setUserRoleBinding({ ownerId: newUserId, value: null });
-        setOrganizationBinding({ ownerId: newUserId, value: null });
-        if (incomingCachedProfile) {
-          try { safeSetItem(CACHED_PROFILE_KEY, JSON.stringify(incomingCachedProfile)); } catch { /* storage may be unavailable */ }
-        }
-      }
+      claimAccountCacheOwnership(session?.user?.id ?? null);
 
-      currentUserIdRef.current = newUserId;
+      currentUserIdRef.current = session?.user?.id ?? null;
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -1261,41 +777,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
-      if (authStateProcessorRef.current === processAuthStateChange) {
-        authStateProcessorRef.current = null;
-      }
       removeConnectivityRecoveryListener();
       document.removeEventListener('visibilitychange', handleDeferredRecoveryVisibility);
       subscription.unsubscribe();
     };
-  }, [discardAbandonedPasswordSession, finishPasswordSignInAttempt, quarantineRejectedAuthSession, settleAuthLinkTransition]);
+  }, []);
 
   const fetchUserData = async (userId: string) => {
-    const authority = accountAuthorityRef.current;
-    const token = authority.current;
-    const stillOwner = () => authority.isCurrent(token, userId);
-    if (!stillOwner()) return;
     try {
       // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
       // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
       // the `authenticated` role to prevent cross-row leakage.
       const { data: profileRows, error: profileError } = await supabase
         .rpc('get_my_profile');
-      if (!stillOwner()) return;
       const profileData = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
 
  
       if (profileError) {
         console.error('Error fetching profile:', profileError);
-        // Ett nätfel får använda en stale snapshot, men bara när snapshoten
-        // uttryckligen tillhör samma autentiserade användare. Delade enheter
-        // får aldrig visa föregående kontos Home-data.
-        if (isTransientProfileReadError(profileError)) {
-          setProfile(readCachedProfileForUser(userId));
-        } else {
-          setProfile(null);
-          try { localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* storage may be unavailable */ }
-        }
+        // Vid fel: nollställ profil men markera som klar så att login inte fastnar
+        setProfile(null);
         setMediaPreloadComplete(true);
         profileLoadedRef.current = true; // 🔧 Still mark as "loaded" so login can proceed
         return;
@@ -1331,7 +832,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Video är tung – den cachas i bakgrunden men blockerar inte inloggning
         (async () => {
           try {
-            if (!stillOwner()) return;
             setMediaPreloadComplete(false);
             mediaPreloadCompleteRef.current = false;
             
@@ -1380,7 +880,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ? fetchWithRetry(processedProfile.cover_image_url, 'cover-image', 2000)
                 : Promise.resolve(null)
             ]);
-            if (!stillOwner()) return;
             
             avatarUrl = avatarResult;
             coverUrl = coverResult;
@@ -1397,13 +896,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   preloadImages(criticalImages, 'high'),
                   new Promise((resolve) => setTimeout(resolve, 500))
                 ]);
-                if (!stillOwner()) return;
               } catch (preloadError) {
                 console.warn('DOM preload timeout, continuing:', preloadError);
               }
             }
-
-            if (!stillOwner()) return;
+            
             // Sätt URLs för sidebar + spara i sessionStorage för omedelbar visning
             setPreloadedAvatarUrl(avatarUrl || coverUrl || null);
             setPreloadedCoverUrl(coverUrl || null);
@@ -1426,10 +923,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (processedProfile.video_url) {
               (async () => {
                 try {
-                  if (!stillOwner()) return;
                   // Använd retry-funktionen för stabilare hämtning
                   const videoUrl = await fetchWithRetry(processedProfile.video_url, 'profile-video', 3000, 2);
-                  if (!stillOwner()) return;
                   if (videoUrl) {
                     // Spara till state OCH sessionStorage
                     setPreloadedVideoUrl(videoUrl);
@@ -1449,11 +944,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               // viktiga för sidebarens <img> så den är decoded innan öppning.
               (async () => {
                 try {
-                  if (!stillOwner()) return;
                   const { imageCache } = await import('@/lib/imageCache');
-                  if (!stillOwner()) return;
                   await imageCache.preloadImages([companyLogoUrl]);
-                  if (!stillOwner()) return;
                 } catch (err) {
                   console.warn('Company logo preload failed:', err);
                 }
@@ -1462,12 +954,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             // 🌤️ Preload weather location in background (for employer home page)
             // This runs silently and caches the location so it's ready when user reaches home
-            preloadWeatherLocation({ isCurrent: stillOwner }).catch(err => {
+            preloadWeatherLocation().catch(err => {
               console.warn('Weather location preload failed (non-blocking):', err);
             });
           } catch (error) {
             console.error('Media preload error:', error);
-            if (!stillOwner()) return;
             setPreloadedAvatarUrl(null);
             setPreloadedCoverUrl(null);
             setPreloadedVideoUrl(null);
@@ -1485,12 +976,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               last_name: processedProfile.last_name,
               company_name: processedProfile.company_name,
               industry: processedProfile.industry,
-              role: processedProfile.role,
-              onboarding_completed: processedProfile.onboarding_completed,
-              location: processedProfile.location,
-              home_location: processedProfile.home_location,
-              address: processedProfile.address,
-              background_location_enabled: processedProfile.background_location_enabled,
               profile_image_url: processedProfile.profile_image_url,
               cover_image_url: processedProfile.cover_image_url,
               video_url: processedProfile.video_url,
@@ -1541,7 +1026,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         rolePromise,
         orgPromise
       ]);
-      if (!stillOwner()) return;
 
       const { data: roleData, error: roleError } = roleResult;
       const profileRole = profileData?.role as UserRole | undefined;
@@ -1552,7 +1036,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (profileRole) {
-        setUserRoleForOwner(userId, {
+        setUserRole({
           id: roleData?.id ?? `profile-role-${userId}`,
           user_id: userId,
           role: profileRole,
@@ -1576,7 +1060,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       } else {
-        setUserRoleForOwner(userId, null);
+        setUserRole(null);
       }
 
       if (!profileData?.organization_id && membershipOrgId) {
@@ -1585,18 +1069,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .select('*')
           .eq('id', membershipOrgId)
           .maybeSingle();
-        if (!stillOwner()) return;
 
         if (orgError) {
           console.error('Error fetching organization:', orgError);
         } else if (orgData) {
-          setOrganizationForOwner(userId, orgData);
+          setOrganization(orgData);
         }
       } else if (orgResult.data) {
         if (orgResult.error) {
           console.error('Error fetching organization:', orgResult.error);
         } else {
-          setOrganizationForOwner(userId, orgResult.data);
+          setOrganization(orgResult.data);
         }
       }
     } catch (error) {
@@ -1779,38 +1262,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string, roleHint?: UserRole) => {
-    // Supabase Auth does not expose a per-call AbortSignal for password login.
-    // Keep the one real request as a single-flight operation until IT settles;
-    // a UI timeout must never start a second request behind the first one.
-    if (
-      pendingAuthLinkTransitionRef.current ||
-      isSigningInRef.current ||
-      passwordSignInAttemptRef.current
-    ) {
-      return {
-        error: {
-          code: 'auth_in_progress',
-          message: 'Inloggning pågår. Vänta tills det aktuella försöket är klart.',
-        },
-      };
-    }
-
-    const attempt: PasswordSignInAttempt = {
-      id: ++nextPasswordSignInAttemptIdRef.current,
-      normalizedEmail: normalizeAuthEmail(email),
-      abandoned: false,
-      cleanupStarted: false,
-      cleanupAccessToken: undefined,
-      requestSettled: false,
-      authEventMatched: false,
-      request: null,
-    };
-    passwordSignInAttemptRef.current = attempt;
-    isSigningInRef.current = true;
-
     try {
       setAuthAction('login');
       setLoading(true);
+      isSigningInRef.current = true;
       
       const cachedRoleForEmail = getCachedAuthRoleForEmail(email);
 
@@ -1832,73 +1287,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         storage.clear();
       } catch {}
  
-      // 🛡️ Starta exakt ETT auth-anrop med en avgränsad väntetid för UI:t.
+      // 🛡️ Starta auth-anropet med timeout + ett automatiskt återförsök.
       // Om backend hänger (t.ex. 504/upstream timeout) får användaren ett tydligt
-      // felmeddelande i stället för en spinner som snurrar för evigt. Det
-      // underliggande Supabase-anropet hålls single-flight tills det faktiskt
-      // landar eftersom API:t saknar per-anrop-abort.
+      // felmeddelande i stället för en spinner som snurrar för evigt.
       const LOGIN_TIMEOUT_MS = 12000;
       const withTimeout = <T,>(p: PromiseLike<T>, ms: number): Promise<T | { __timeout: true }> =>
-        new Promise<T | { __timeout: true }>((resolve, reject) => {
-          let settled = false;
-          const timeoutId = setTimeout(() => {
-            if (settled) return;
-            settled = true;
-            resolve({ __timeout: true });
-          }, ms);
-          Promise.resolve(p).then(
-            (value) => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeoutId);
-              resolve(value);
-            },
-            (error) => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeoutId);
-              reject(error);
-            },
-          );
-        });
+        Promise.race([
+          Promise.resolve(p) as Promise<T>,
+          new Promise<{ __timeout: true }>((resolve) =>
+            setTimeout(() => resolve({ __timeout: true }), ms)
+          ),
+        ]);
 
-      const passwordRequest = supabase.auth.signInWithPassword({
-        email: attempt.normalizedEmail,
-        password,
-      });
-      attempt.request = passwordRequest;
-      void Promise.resolve(passwordRequest)
-        .then(({ data, error }) => {
-          attempt.requestSettled = true;
-          if (error || !data?.user) {
-            finishPasswordSignInAttempt(attempt);
-            return;
-          }
-          if (
-            attempt.abandoned ||
-            normalizeAuthEmail(data.user.email) !== attempt.normalizedEmail
-          ) {
-            attempt.abandoned = true;
-            discardAbandonedPasswordSession(attempt, data.session?.access_token);
-            if (attempt.authEventMatched) {
-              finishPasswordSignInAttempt(attempt);
-            }
-            return;
-          }
-          updateLastActivity();
-          if (attempt.authEventMatched) {
-            finishPasswordSignInAttempt(attempt);
-          }
-        }, () => {
-          attempt.requestSettled = true;
-          finishPasswordSignInAttempt(attempt);
-          // The awaited request below owns user-facing error handling.
-        });
+      const attemptSignIn = () =>
+        withTimeout(supabase.auth.signInWithPassword({ email, password }), LOGIN_TIMEOUT_MS);
 
-      const result = await withTimeout(passwordRequest, LOGIN_TIMEOUT_MS);
+      let result = await attemptSignIn();
 
-      if ('__timeout' in result) {
-        attempt.abandoned = true;
+      // Automatiskt återförsök en gång vid timeout – täcker korta glapp i backend
+      if ((result as any)?.__timeout) {
+        await new Promise((r) => setTimeout(r, 1500));
+        result = await attemptSignIn();
+      }
+
+      if ((result as any)?.__timeout) {
         authSplashEvents.hide();
         toast({
           title: "Servern svarar inte",
@@ -1908,6 +1320,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         setLoading(false);
         setAuthAction(null);
+        isSigningInRef.current = false;
         return { error: { code: 'auth_timeout', message: 'Auth request timed out' } };
       }
 
@@ -2020,13 +1433,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({ title: "Inloggningsfel", description: "Ett oväntat fel inträffade. Försök igen.", variant: "destructive" });
       return { error };
     } finally {
-      // If the UI timed out before Supabase settled, keep the single-flight
-      // guard active. Request settlement and its matching auth event jointly
-      // release the attempt; an exception before request creation releases it here.
-      if (attempt.request === null && passwordSignInAttemptRef.current?.id === attempt.id) {
-        finishPasswordSignInAttempt(attempt);
-      }
-      isSigningInRef.current = passwordSignInAttemptRef.current !== null;
+      isSigningInRef.current = false;
     }
   };
   const signInWithPhone = async (phone: string) => {
@@ -2034,8 +1441,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signInWithOtp({
         phone: phone,
         options: {
-          channel: 'sms',
-          shouldCreateUser: false,
+          channel: 'sms'
         }
       });
 
@@ -2066,13 +1472,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyOtp = async (phone: string, otp: string) => {
     try {
-      const { data, error } = await runAuthLinkSessionTransition(() =>
-        supabase.auth.verifyOtp({
-          phone,
-          token: otp,
-          type: 'sms'
-        })
-      );
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone,
+        token: otp,
+        type: 'sms'
+      });
 
       if (error) {
         toast({
@@ -2081,12 +1485,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           variant: "destructive"
         });
         return { error };
-      }
-
-      // Successful OTP verification is the phone-login equivalent of the
-      // explicit password action above; background auth events remain inert.
-      if (data.session) {
-        updateLastActivity();
       }
 
       toast({
@@ -2130,225 +1528,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setSession(null);
       setProfile(null);
-      setUserRoleBinding({ ownerId: null, value: null });
-      setOrganizationBinding({ ownerId: null, value: null });
+      setUserRole(null);
+      setOrganization(null);
       setLoading(false);
       setAuthAction(null);
-    };
-
-    let localSignOutCompleted = false;
-    let deviceCleanupSettled = false;
-    let deviceRollbackStarted = false;
-    let deviceCleanupPromise: Promise<void> | null = null;
-
-    const completeLocalSignOut = () => {
-      if (localSignOutCompleted) return;
-      localSignOutCompleted = true;
-
-      try {
-        clearSessionToken();
-        authStorage.clear();
-      } catch {
-        // Continue clearing account state even when browser storage is blocked.
-      }
-      try {
-        supabase.realtime.disconnect();
-      } catch {
-        // The credential and local UI must still be cleared if realtime is unavailable.
-      }
-      try {
-        void supabase.removeAllChannels().catch((error) => {
-          console.warn('Realtime channel cleanup after local logout failed:', error);
-        });
-      } catch {
-        // Channel cleanup is best-effort after the realtime socket is disconnected.
-      }
-      clearAllDrafts();
-      clearAllAppCaches();
-      try { queryClient.clear(); } catch {
-        // Query cache cleanup is best-effort after credential removal.
-      }
-      clearLocalState();
-      isSigningOutRef.current = false;
-
-      // A device cleanup that timed out may have been waiting on a token
-      // refresh. Clear once more when it settles so that late auth writes can
-      // never resurrect a locally completed logout.
-      if (deviceCleanupPromise) {
-        void deviceCleanupPromise.then(() => {
-          try { authStorage.clear(); } catch { /* Browser auth storage can be unavailable. */ }
-        });
-      }
-    };
-
-    const restoreAfterFailedSignOut = (
-      description: string,
-      title = 'Kunde inte logga ut',
-    ) => {
-      isManualSignOutRef.current = false;
-      isSigningOutRef.current = false;
-      endSignOutTracking();
-      authSplashEvents.hide();
-      setLoading(false);
-      setAuthAction(null);
-      toast({
-        title,
-        description,
-        variant: 'destructive',
-      });
-    };
-
-    const rollbackDeviceSession = async () => {
-      if (deviceRollbackStarted) return;
-      deviceRollbackStarted = true;
-      try {
-        await restoreSessionRegistration();
-      } catch (error) {
-        console.warn('Device session rollback failed:', error);
-      }
-    };
-
-    const scheduleDeviceSessionRollback = (): Promise<void> | null => {
-      if (!deviceCleanupPromise) return null;
-      if (deviceCleanupSettled) return rollbackDeviceSession();
-      void deviceCleanupPromise.then(() => rollbackDeviceSession());
-      return null;
     };
 
     try {
       setAuthAction('logout');
       setLoading(true);
 
-      // Anteckningar kan ha en aktiv CAS-save med en nyare lokal revision
-      // bakom sig. Vänta kort på den normala autentiserade dräneringen innan
-      // konto-cacher och JWT rensas. Vid timeout/offline/fel avbryts logout:
-      // journalen och den autentiserade sessionen måste finnas kvar så att
-      // användaren kan försöka igen utan tyst dataförlust.
-      const notesFlushed = await flushPendingNotesBeforeSignOut(
-        currentUserIdRef.current ?? user?.id ?? null,
-      );
-      if (!notesFlushed) {
-        restoreAfterFailedSignOut(
-          'Kontrollera anslutningen och försök logga ut igen.',
-          'Anteckningen är inte sparad',
-        );
-        return;
-      }
-
       const currentSplashRole = (profile as any)?.role || userRole?.role || null;
 
       // 🎬 Trigga auth splash för premium känsla vid utloggning
       authSplashEvents.show(currentSplashRole);
 
-      // 🔐 Rensa i rätt ordning och invänta resultatet:
+      // Rensa UI-state direkt så att utloggningen känns omedelbar.
+      clearAllDrafts();
+      clearAllAppCaches();
+      try { queryClient.clear(); } catch {}
+      clearLocalState();
+
+      // 🔐 Rensa i rätt ordning i bakgrunden:
       // 1) server-RPC (kräver giltig JWT), 2) Supabase signOut (sänder
       // SIGNED_OUT och tömmer sin egen storage), 3) vår storage-rensning
-      // SIST. UI/account-cache rensas först EFTER att signOut bekräftat att
-      // Supabase-credentials är borta. Vid fel ligger kontot kvar och kan
-      // försöka igen i stället för att hamna i ett halvt utloggat tillstånd.
-      // Device-session cleanup is best-effort. It may use an RPC/refresh and
-      // must never keep the authoritative Supabase credential logout waiting
-      // forever on a poor connection. Its promise remains safely observed if
-      // it completes after this bounded window.
-      deviceCleanupPromise = Promise.resolve()
-        .then(() => removeSession())
-        .catch((rpcErr) => {
+      // SIST så att inget sent refresh-svar kan återuppliva sessionen.
+      void (async () => {
+        try {
+          await removeSession();
+        } catch (rpcErr) {
           console.warn('Session cleanup RPC failed:', rpcErr);
-        })
-        .finally(() => {
-          deviceCleanupSettled = true;
-        });
+        }
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch (serverErr) {
+          console.warn('Supabase signOut failed:', serverErr);
+        }
+        try {
+          clearSessionToken();
+          authStorage.clear();
+        } catch {}
+        // Extra säkerhetsnät: om ett sent svar hann skriva tillbaka ett token
+        // strax efter rensningen tas det bort här.
+        setTimeout(() => {
+          try { authStorage.clear(); } catch {}
+        }, 1200);
+        isSigningOutRef.current = false;
+      })();
 
-      await new Promise<void>((resolve) => {
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          clearTimeout(timeoutId);
-          resolve();
-        };
-        const timeoutId = setTimeout(finish, DEVICE_SESSION_CLEANUP_TIMEOUT_MS);
-        void deviceCleanupPromise!.then(finish);
-      });
-
-      // The flush and credential removal are separated by the bounded device
-      // cleanup. Re-check the durable journal at that boundary so an edit made
-      // while logout was waiting cannot be cleared after the original flush.
-      if (hasPendingNotesJournalForUser(currentUserIdRef.current ?? user?.id ?? null)) {
-        restoreAfterFailedSignOut(
-          'En ny anteckningsändring väntar på att sparas. Försök igen när den är sparad.',
-          'Anteckningen är inte sparad',
-        );
-        const rollback = scheduleDeviceSessionRollback();
-        if (rollback) await rollback;
-        return;
-      }
-
-      const signOutRequest = Promise.resolve().then(() =>
-        supabase.auth.signOut({ scope: 'local' })
-      );
-      void signOutRequest.then(
-        () => {
-          if (localSignOutCompleted) {
-            try { authStorage.clear(); } catch { /* Browser auth storage can be unavailable. */ }
-          }
-        },
-        () => {
-          if (localSignOutCompleted) {
-            try { authStorage.clear(); } catch { /* Browser auth storage can be unavailable. */ }
-          }
-        },
-      );
-
-      const signOutResult = await new Promise<
-        Awaited<ReturnType<typeof supabase.auth.signOut>> | { __timeout: true }
-      >((resolve, reject) => {
-        let settled = false;
-        const finish = (
-          result: Awaited<ReturnType<typeof supabase.auth.signOut>> | { __timeout: true },
-        ) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timeoutId);
-          resolve(result);
-        };
-        const timeoutId = setTimeout(
-          () => finish({ __timeout: true }),
-          SUPABASE_SIGN_OUT_TIMEOUT_MS,
-        );
-        void signOutRequest.then(finish, (error) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timeoutId);
-          reject(error);
-        });
-      });
-
-      if ('__timeout' in signOutResult) {
-        console.warn('Supabase signOut timed out; completing local logout fail-safe');
-        completeLocalSignOut();
-        toast({
-          title: 'Utloggad lokalt',
-          description: 'Servern svarade inte, men inloggningen har tagits bort från den här enheten.',
-        });
-        return;
-      }
-
-      const { error: signOutError } = signOutResult;
-      if (signOutError) {
-        restoreAfterFailedSignOut('Anslutningen svarade inte. Ditt konto är kvar och du kan försöka igen.');
-        const rollback = scheduleDeviceSessionRollback();
-        if (rollback) await rollback;
-        return;
-      }
-
-      completeLocalSignOut();
-
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('Sign out error:', error);
-      restoreAfterFailedSignOut('Ditt konto är kvar och ingen lokal data har rensats. Försök igen.');
-      const rollback = scheduleDeviceSessionRollback();
-      if (rollback) await rollback;
+      // Även vid oväntat fel: rensa lokalt så användaren inte fastnar
+      clearAllDrafts();
+      clearAllAppCaches();
+      try { queryClient.clear(); } catch {}
+      clearSessionToken();
+      authStorage.clear();
+      clearLocalState();
+      isSigningOutRef.current = false;
     }
   };
 
@@ -2632,7 +1869,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Tillbaka till vår edge function - den kommer att fungera nu
       const { data, error } = await supabase.functions.invoke('send-reset-password', {
-        body: { email }
+        body: { email, origin: window.location.origin }
       });
 
       if (error) {
@@ -2776,18 +2013,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(data.error);
       }
 
-      // A transport-level 2xx response is not proof that the one-time token
-      // was consumed. Only the confirmation edge may make that assertion.
-      if (data?.processed !== true) {
-        throw new Error('Confirmation was not processed');
-      }
-
-      return {
-        success: true,
-        processed: true as const,
-        message: typeof data.message === 'string' ? data.message : 'E-postadressen är bekräftad.',
-        email: typeof data.email === 'string' ? data.email : '',
-      };
+      return { success: true, message: data.message, email: data.email };
     } catch (error: any) {
       console.error('Email confirmation error:', error);
       throw error;
@@ -3366,7 +2592,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextType = {
     user,
     session,
-    profile: user && profile?.user_id === user.id ? profile : null,
+    profile,
     userRole,
     organization,
     loading,
@@ -3408,8 +2634,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getRedirectPath,
     switchRole,
     confirmEmail,
-    cleanupExpiredConfirmations,
-    runAuthLinkSessionTransition,
+    cleanupExpiredConfirmations
   };
 
   // Track user activity for 24-hour inactivity timeout
@@ -3435,10 +2660,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const { removeSession, restoreSessionRegistration } = useSessionManager(
-    user?.id ?? null,
-    handleSessionKicked,
-  );
+  const { removeSession } = useSessionManager(user?.id ?? null, handleSessionKicked);
 
   return (
     <AuthContext.Provider value={value}>

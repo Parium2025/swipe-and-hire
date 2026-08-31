@@ -52,29 +52,13 @@ vi.mock('@/integrations/supabase/client', () => {
       const spec = responses[Math.min(queryCalls, responses.length - 1)] ?? { content: '' };
       queryCalls += 1;
       if (spec.delayMs) await new Promise<void>((r) => setTimeout(r, spec.delayMs));
-      return {
-        data: {
-          id: 'row-a',
-          content: spec.content,
-          revision: queryCalls - 1,
-          updated_at: '2026-08-30T00:00:00.000Z',
-        },
-        error: null as null,
-      };
+      return { data: { id: 'row-a', content: spec.content }, error: null as null };
     },
+    upsert: async () => ({ error: null as null }),
   };
   return {
     supabase: {
       from: () => builder,
-      rpc: async (_fn: string, args: { p_content: string; p_expected_revision: number; p_expected_user_id: string }) => ({
-        data: [{
-          save_status: 'saved',
-          server_content: args.p_content,
-          server_revision: args.p_expected_revision + 1,
-          server_updated_at: '2026-08-30T00:00:00.000Z',
-        }],
-        error: null as null,
-      }),
       removeChannel: () => {},
       auth: {
         getSession: async () => ({ data: { session: { access_token: 'TOKEN-1' } } }),

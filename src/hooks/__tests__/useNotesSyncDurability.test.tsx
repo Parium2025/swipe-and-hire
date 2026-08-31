@@ -41,34 +41,19 @@ vi.mock('@/lib/realtimeChannel', () => ({
 
 interface QueryResult { data: unknown; error: unknown }
 let queryResult: QueryResult = { data: null, error: null };
-interface RpcArgs { p_content: string; p_expected_revision: number; p_expected_user_id: string }
-interface RpcResult { data: unknown; error: unknown }
-const savedRpcResult = (args: RpcArgs): RpcResult => ({
-  data: [{
-    save_status: 'saved',
-    server_content: args.p_content,
-    server_revision: args.p_expected_revision + 1,
-    server_updated_at: '2026-08-30T00:00:00.000Z',
-  }],
-  error: null,
-});
-let rpcImpl: (args: RpcArgs) => Promise<RpcResult> = async (args) => savedRpcResult(args);
-let rpcCalls: RpcArgs[] = [];
+let upsertImpl: (row: unknown) => Promise<{ error: unknown }> = async () => ({ error: null });
+let upsertCalls: unknown[] = [];
 
 vi.mock('@/integrations/supabase/client', () => {
   const builder: any = {
     select: () => builder,
     eq: () => builder,
     maybeSingle: async () => queryResult,
+    upsert: (row: unknown) => { upsertCalls.push(row); return upsertImpl(row); },
   };
   return {
     supabase: {
       from: () => builder,
-      rpc: (fn: string, args: RpcArgs) => {
-        if (fn !== 'save_jobseeker_note') throw new Error(`Unexpected RPC: ${fn}`);
-        rpcCalls.push(args);
-        return rpcImpl(args);
-      },
       removeChannel: () => { channelCount--; },
       auth: {
         getSession: async () => ({ data: { session: null } }),
@@ -107,8 +92,8 @@ describe('useNotesSync — durability & isolation', () => {
     online = true;
     connectivityCb = null;
     channelCount = 0;
-    rpcCalls = [];
-    rpcImpl = async (args) => savedRpcResult(args);
+    upsertCalls = [];
+    upsertImpl = async () => ({ error: null });
     queryResult = { data: null, error: null };
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
@@ -139,10 +124,7 @@ describe('useNotesSync — durability & isolation', () => {
     mockUser = { id: 'u1' };
     localStorage.setItem(cleanKey('u1'), 'A');
     writePending('u1', 'B');
-    queryResult = {
-      data: { id: '1', content: 'A', revision: 0, updated_at: '2026-08-30T00:00:00.000Z' },
-      error: null,
-    };
+    queryResult = { data: { id: '1', content: 'A' }, error: null };
 
     const { result } = renderNotes();
     expect(result.current.content).toBe('B');
@@ -170,15 +152,12 @@ describe('useNotesSync — durability & isolation', () => {
 
     expect(localStorage.getItem(cleanKey('u1'))).toBe('SERVER');
     expect(JSON.parse(localStorage.getItem(pendingKey('u1'))!).c).toBe('offline edit');
-    expect(rpcCalls.length).toBe(0);
+    expect(upsertCalls.length).toBe(0);
   });
 
   it('successful save writes clean then removes pending; failure retains pending', async () => {
     mockUser = { id: 'u1' };
-    queryResult = {
-      data: { id: '1', content: '', revision: 0, updated_at: '2026-08-30T00:00:00.000Z' },
-      error: null,
-    };
+    queryResult = { data: { id: '1', content: '' }, error: null };
     const { result } = renderNotes();
     await waitFor(() => expect(result.current.isFetched).toBe(true));
 
@@ -188,7 +167,7 @@ describe('useNotesSync — durability & isolation', () => {
     await waitFor(() => expect(localStorage.getItem(cleanKey('u1'))).toBe('saved text'));
     expect(localStorage.getItem(pendingKey('u1'))).toBeNull();
 
-    rpcImpl = async () => ({ data: null, error: { message: 'nope' } });
+    upsertImpl = async () => ({ error: { message: 'nope' } });
     act(() => { result.current.handleChange('fails'); });
     await act(async () => { vi.advanceTimersByTime(1500); });
     await waitFor(() => expect(result.current.saveFailed).toBe(true));
@@ -198,77 +177,61 @@ describe('useNotesSync — durability & isolation', () => {
 
   it('empty-string edit is journaled and saved', async () => {
     mockUser = { id: 'u1' };
-    queryResult = {
-      data: { id: '1', content: 'x', revision: 0, updated_at: '2026-08-30T00:00:00.000Z' },
-      error: null,
-    };
+    queryResult = { data: { id: '1', content: 'x' }, error: null };
     const { result } = renderNotes();
     await waitFor(() => expect(result.current.isFetched).toBe(true));
 
     act(() => { result.current.handleChange(''); });
     expect(JSON.parse(localStorage.getItem(pendingKey('u1'))!).c).toBe('');
     await act(async () => { vi.advanceTimersByTime(1500); });
-    await waitFor(() => expect(rpcCalls.length).toBe(1));
-    expect(rpcCalls[0]).toEqual({ p_content: '', p_expected_revision: 0, p_expected_user_id: 'u1' });
+    await waitFor(() => expect(upsertCalls.length).toBe(1));
+    expect((upsertCalls[0] as any).content).toBe('');
   });
 
   it('edits during an in-flight save coalesce to latest and save exactly once after', async () => {
     mockUser = { id: 'u1' };
-    queryResult = {
-      data: { id: '1', content: '', revision: 0, updated_at: '2026-08-30T00:00:00.000Z' },
-      error: null,
-    };
-    const d = deferred<RpcResult>();
+    queryResult = { data: { id: '1', content: '' }, error: null };
+    const d = deferred<{ error: unknown }>();
     let call = 0;
-    rpcImpl = (args) => {
-      call++;
-      return call === 1 ? d.promise : Promise.resolve(savedRpcResult(args));
-    };
+    upsertImpl = (() => { call++; return call === 1 ? d.promise : Promise.resolve({ error: null }); }) as any;
 
     const { result } = renderNotes();
     await waitFor(() => expect(result.current.isFetched).toBe(true));
 
     act(() => { result.current.handleChange('A'); });
     await act(async () => { vi.advanceTimersByTime(1500); });
-    await waitFor(() => expect(rpcCalls.length).toBe(1));
+    await waitFor(() => expect(upsertCalls.length).toBe(1));
 
     act(() => { result.current.handleChange('B1'); });
     act(() => { result.current.handleChange('B'); });
     // reconnect signal while A in flight must not start a second concurrent save
     act(() => { connectivityCb?.(true); });
-    expect(rpcCalls.length).toBe(1);
+    expect(upsertCalls.length).toBe(1);
 
-    await act(async () => {
-      d.resolve(savedRpcResult(rpcCalls[0]));
-      await Promise.resolve();
-      vi.advanceTimersByTime(2000);
-    });
-    await waitFor(() => expect(rpcCalls.length).toBe(2));
-    expect(rpcCalls[1]).toEqual({ p_content: 'B', p_expected_revision: 1, p_expected_user_id: 'u1' });
+    await act(async () => { d.resolve({ error: null }); await Promise.resolve(); vi.advanceTimersByTime(2000); });
+    await waitFor(() => expect(upsertCalls.length).toBe(2));
+    expect((upsertCalls[1] as any).content).toBe('B');
     await act(async () => { vi.advanceTimersByTime(3000); });
-    expect(rpcCalls.length).toBe(2);
+    expect(upsertCalls.length).toBe(2);
   });
 
   it('a save resolving after account switch cannot touch the next account', async () => {
     mockUser = { id: 'a' };
-    queryResult = {
-      data: { id: '1', content: '', revision: 0, updated_at: '2026-08-30T00:00:00.000Z' },
-      error: null,
-    };
-    const d = deferred<RpcResult>();
-    rpcImpl = () => d.promise;
+    queryResult = { data: { id: '1', content: '' }, error: null };
+    const d = deferred<{ error: unknown }>();
+    upsertImpl = (() => d.promise) as any;
 
     const { result, rerender } = renderNotes();
     await waitFor(() => expect(result.current.isFetched).toBe(true));
     act(() => { result.current.handleChange('A CONTENT'); });
     await act(async () => { vi.advanceTimersByTime(1500); });
-    await waitFor(() => expect(rpcCalls.length).toBe(1));
+    await waitFor(() => expect(upsertCalls.length).toBe(1));
 
     mockUser = { id: 'b' };
     rerender();
     await waitFor(() => expect(result.current.content).toBe(''));
 
-    await act(async () => { d.resolve(savedRpcResult(rpcCalls[0])); await Promise.resolve(); });
+    await act(async () => { d.resolve({ error: null }); await Promise.resolve(); });
 
     expect(result.current.content).toBe('');
     expect(localStorage.getItem(cleanKey('b'))).not.toBe('A CONTENT');
@@ -278,10 +241,7 @@ describe('useNotesSync — durability & isolation', () => {
 
   it('unmount cleans up channel, listener and timers (no duplicate saves)', async () => {
     mockUser = { id: 'u1' };
-    queryResult = {
-      data: { id: '1', content: '', revision: 0, updated_at: '2026-08-30T00:00:00.000Z' },
-      error: null,
-    };
+    queryResult = { data: { id: '1', content: '' }, error: null };
     const { result, unmount } = renderNotes();
     await waitFor(() => expect(result.current.isFetched).toBe(true));
     act(() => { result.current.handleChange('draft'); });
@@ -290,6 +250,6 @@ describe('useNotesSync — durability & isolation', () => {
     expect(channelCount).toBe(0);
     expect(connectivityCb).toBeNull();
     await act(async () => { vi.advanceTimersByTime(5000); });
-    expect(rpcCalls.length).toBe(0);
+    expect(upsertCalls.length).toBe(0);
   });
 });

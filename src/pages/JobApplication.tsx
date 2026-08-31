@@ -362,12 +362,13 @@ const JobApplication = () => {
 
     if (!selectedProfile && getIsOnline()) {
       try {
-        const { data: profileRows } = await supabase.rpc('get_my_profile');
-        const currentProfile = Array.isArray(profileRows) ? profileRows[0] : null;
-        if (currentProfile?.user_id === user.id) {
-          profileImageSnapshot = currentProfile.profile_image_url || null;
-          videoSnapshot = currentProfile.video_url || null;
-        }
+        const { data: currentProfile } = await supabase
+          .from('profiles')
+          .select('profile_image_url, video_url')
+          .eq('user_id', user.id)
+          .single();
+        profileImageSnapshot = currentProfile?.profile_image_url || null;
+        videoSnapshot = currentProfile?.video_url || null;
       } catch {
         // Continue without snapshot — not critical
       }

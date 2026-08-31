@@ -12,15 +12,12 @@
  *   requestAppReload('build-version', { defer: true }); // tyst, vänta tills idle
  */
 
-import { activateWaitingServiceWorker } from './serviceWorkerManager';
-
 export type ReloadReason =
   | 'build-version'
   | 'chunk-error'
   | 'user-action'
   | 'gps-permission'
   | 'cv-retry'
-  | 'service-worker-upgrade'
   | 'bfcache-restore';
 
 interface ReloadOptions {
@@ -28,8 +25,8 @@ interface ReloadOptions {
   defer?: boolean;
   /** Cache-bust query param att lägga till URL */
   cacheBustParam?: { key: string; value: string };
-  /** Aktivera en färdiginstallerad app-shell precis före reload. */
-  activateWaitingWorker?: boolean;
+  /** Rensa runtime-cachar innan reload */
+  purgeCaches?: boolean;
 }
 
 const LOCK_KEY = 'parium_reload_lock';
@@ -68,10 +65,24 @@ const acquireLock = (): boolean => {
   }
 };
 
-const activateShellUpdate = async (): Promise<void> => {
-  // A controlled reload may activate a fully installed shell update, but it
-  // must never destroy valid offline caches or browser registrations globally.
-  await activateWaitingServiceWorker();
+const purgeRuntimeCaches = async (): Promise<void> => {
+  try {
+    if (typeof caches !== 'undefined' && caches.keys) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k).catch(() => false)));
+    }
+  } catch {
+    /* noop */
+  }
+
+  try {
+    if (typeof navigator !== 'undefined' && navigator.serviceWorker?.getRegistrations) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister().catch(() => false)));
+    }
+  } catch {
+    /* noop */
+  }
 };
 
 const performReload = (opts: ReloadOptions): void => {
@@ -137,8 +148,8 @@ const scheduleDeferredReload = (opts: ReloadOptions): void => {
       return;
     }
     log('deferred fire executing');
-    if (opts.activateWaitingWorker) {
-      void activateShellUpdate().finally(() => performReload(opts));
+    if (opts.purgeCaches) {
+      void purgeRuntimeCaches().finally(() => performReload(opts));
     } else {
       performReload(opts);
     }
@@ -224,8 +235,8 @@ export const requestAppReload = (reason: ReloadReason, options: ReloadOptions = 
   }
 
 
-  if (options.activateWaitingWorker) {
-    void activateShellUpdate().finally(() => performReload(options));
+  if (options.purgeCaches) {
+    void purgeRuntimeCaches().finally(() => performReload(options));
   } else {
     performReload(options);
   }
@@ -309,7 +320,7 @@ export const installBfcacheGuard = (): void => {
           log('bfcache restore — version mismatch, scheduling reload');
           requestAppReload('bfcache-restore', {
             defer: true,
-            activateWaitingWorker: true,
+            purgeCaches: true,
             cacheBustParam: { key: 'v', value: shortHash(sig) },
           });
         }

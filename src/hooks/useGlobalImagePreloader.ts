@@ -84,10 +84,13 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: profileRows } = await supabase.rpc('get_my_profile');
-        const currentProfile = Array.isArray(profileRows) ? profileRows[0] : null;
+        const { data: currentProfile } = await supabase
+          .from('profiles')
+          .select('profile_image_url, cover_image_url, video_url')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-        if (currentProfile?.user_id === user.id) {
+        if (currentProfile) {
           const tasks: Promise<void>[] = [];
           if (currentProfile.profile_image_url) tasks.push(prefetchMediaUrl(currentProfile.profile_image_url, 'profile-image'));
           if (currentProfile.cover_image_url) tasks.push(prefetchMediaUrl(currentProfile.cover_image_url, 'cover-image'));

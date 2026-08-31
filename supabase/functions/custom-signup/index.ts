@@ -1,24 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
-import { runDurableSignup } from "./orchestrator.ts";
-import {
-  approvedAppOrigin,
-  fetchWithTimeout,
-  genericPublicAuthResponse,
-  isValidPublicSignupEmail,
-  isValidPublicSignupPassword,
-  readBoundedJson,
-  runAuthBackgroundTask,
-  sanitizeSignupMetadata,
-  sha256Hex,
-  waitForPublicAuthResponseFloor,
-} from "../_shared/public-auth-security.ts";
+import { findUserByEmail } from "../_shared/find-user.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,168 +16,9 @@ const corsHeaders = {
 };
 
 interface SignupRequest {
-  email?: unknown;
-  password?: unknown;
-  data?: Record<string, unknown>;
-}
-
-interface ConfirmationMailDelivery {
   email: string;
-  role: string;
-  firstName?: string;
-  companyName?: string;
-  confirmationUrl: string;
-}
-
-const isExistingUserError = (message: string): boolean => {
-  const normalized = message.toLowerCase();
-  return normalized.includes("already been registered") ||
-    normalized.includes("user already registered") ||
-    normalized.includes("email_exists");
-};
-
-async function establishSignup(
-  normalizedEmail: string,
-  password: string,
-  metadata: Record<string, string>,
-  ip: string,
-): Promise<ConfirmationMailDelivery | null> {
-  console.log("Attempting signup", { role: metadata.role });
-
-  return runDurableSignup<ConfirmationMailDelivery>({
-    reserveRateLimit: async () => {
-      const response = await enforceRateLimit(
-        supabase,
-        "custom-signup",
-        [
-          { scope: "ip", identifier: ip, limit: 10, windowSeconds: 60 * 60 },
-          { scope: "email", identifier: normalizedEmail, limit: 3, windowSeconds: 60 * 60 },
-        ],
-        corsHeaders,
-      );
-      return response === null;
-    },
-    createIdentity: async () => {
-      // Auth's unique email identity is the concurrency authority. A separate
-      // existence lookup creates a TOCTOU race and amplifies timing signals.
-      const { data: user, error } = await supabase.auth.admin.createUser({
-        email: normalizedEmail,
-        password,
-        email_confirm: false,
-        user_metadata: metadata,
-        app_metadata: {
-          parium_signup_channel: "custom-signup-v1",
-        },
-      });
-
-      return {
-        userId: user?.user?.id ?? null,
-        existing: Boolean(error && isExistingUserError(error.message)),
-        errorCode: error?.code ?? (user?.user?.id ? undefined : "missing_user_id"),
-      };
-    },
-    issueConfirmation: async (userId) => {
-      const confirmationToken = crypto.randomUUID();
-      const confirmationTokenHash = await sha256Hex(confirmationToken);
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24 * 7);
-      const { error } = await supabase.rpc(
-        "issue_email_confirmation_token",
-        {
-          _user_id: userId,
-          _email: normalizedEmail,
-          _raw_token: confirmationToken,
-          _token_digest: confirmationTokenHash,
-          _expires_at: expiresAt.toISOString(),
-        },
-      );
-
-      if (error) {
-        return { delivery: null, errorCode: error.code ?? "unknown" };
-      }
-
-      const appBase = approvedAppOrigin(Deno.env.get("REDIRECT_URL"));
-      return {
-        delivery: {
-          email: normalizedEmail,
-          role: metadata.role,
-          firstName: metadata.first_name,
-          companyName: metadata.company_name,
-          confirmationUrl: `${appBase}/email-confirm#confirm=${confirmationToken}`,
-        },
-      };
-    },
-    reportFailure: (stage, code) => {
-      console.error("custom-signup critical path failed", { stage, code });
-    },
-  });
-}
-
-async function deliverConfirmationMail(
-  delivery: ConfirmationMailDelivery,
-): Promise<void> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (!supabaseUrl || !serviceRoleKey) {
-    console.error("Confirmation email delivery unavailable", {
-      code: "missing_server_configuration",
-    });
-    return;
-  }
-
-  let emailSent = false;
-  let lastErrorCode = "unknown";
-  const maxAttempts = 2;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      const emailResponse = await fetchWithTimeout(
-        `${supabaseUrl}/functions/v1/send-confirmation-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${serviceRoleKey}`,
-          },
-          body: JSON.stringify({
-            email: delivery.email,
-            role: delivery.role,
-            first_name: delivery.firstName,
-            confirmation_url: delivery.confirmationUrl,
-            company_name: delivery.companyName,
-          }),
-        },
-        10_000,
-      );
-
-      const result = emailResponse.ok
-        ? await emailResponse.json().catch(() => null) as { delivered?: boolean } | null
-        : null;
-      if (emailResponse.ok && result?.delivered === true) {
-        emailSent = true;
-        break;
-      }
-
-      if (emailResponse.ok && result?.delivered === false) {
-        lastErrorCode = "delivery_suppressed";
-        break;
-      }
-
-      lastErrorCode = `http_${emailResponse.status}`;
-    } catch (error: unknown) {
-      lastErrorCode = error instanceof Error ? error.name : "unknown_error";
-    }
-
-    if (attempt < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-  }
-
-  if (!emailSent) {
-    // Account and token are already durable. Resend-confirmation is the
-    // recovery path; never delete identity-linked rows after mail failure.
-    console.error("Confirmation email delivery failed", { code: lastErrorCode });
-  }
+  password: string;
+  data?: any;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -197,30 +27,261 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const body = await readBoundedJson<SignupRequest>(req);
-    if (!body) return genericPublicAuthResponse(corsHeaders);
-    const { email, password, data } = body;
-    const normalizedEmail = normalizeEmail(typeof email === "string" ? email : "");
-    const metadata = sanitizeSignupMetadata(data);
+    const { email, password, data }: SignupRequest = await req.json();
+    const normalizedEmail = normalizeEmail(email);
 
-    if (
-      !isValidPublicSignupEmail(normalizedEmail) ||
-      !isValidPublicSignupPassword(password) ||
-      !metadata
-    ) {
-      return genericPublicAuthResponse(corsHeaders);
+    if (!normalizedEmail || !password) {
+      return new Response(JSON.stringify({ error: "E-post och lösenord krävs" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
-    const responseStartedAt = performance.now();
-    const ip = requestIp(req);
-    const delivery = await establishSignup(normalizedEmail, password, metadata, ip);
-    if (delivery) {
-      runAuthBackgroundTask("custom-signup-mail", () => deliverConfirmationMail(delivery));
+    const rateLimitResponse = await enforceRateLimit(
+      supabase,
+      "custom-signup",
+      [
+        { scope: "email", identifier: normalizedEmail, limit: 3, windowSeconds: 60 * 60 },
+        { scope: "ip", identifier: requestIp(req), limit: 10, windowSeconds: 60 * 60 },
+      ],
+      corsHeaders,
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+    
+    const firstName = data?.first_name || 'där';
+    const isEmployer = data?.role === 'employer';
+    const companyName = data?.company_name || 'Ditt företag';
+
+    console.log("Attempting signup", { role: data?.role === "employer" ? "employer" : "job_seeker" });
+
+    // 1. Kontrollera om användaren redan finns och är bekräftad
+    try {
+      const existingUser = await findUserByEmail(supabase, normalizedEmail);
+
+      {
+        if (existingUser) {
+          // Kontrollera om användaren är bekräftad
+          if (existingUser.email_confirmed_at) {
+            console.log("Signup target already exists and is confirmed");
+            // Generic response — do NOT reveal that this specific email is registered.
+            // Mirrors resend-confirmation / send-reset-password to prevent enumeration.
+            return new Response(JSON.stringify({
+              success: true,
+              message: "Om adressen är giltig har vi skickat ett mejl med nästa steg.",
+              needsConfirmation: true
+            }), {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                ...corsHeaders,
+              },
+            });
+
+          } else {
+            // Användaren finns men är inte bekräftad - ta bort och skapa ny
+            console.log('Found existing unconfirmed signup, deleting first');
+            
+            // Ta bort från relaterade tabeller
+            await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
+            await supabase.from('profiles').delete().eq('user_id', existingUser.id);
+            await supabase.from('user_roles').delete().eq('user_id', existingUser.id);
+            
+            // Ta bort användaren
+            await supabase.auth.admin.deleteUser(existingUser.id);
+            console.log('Existing unconfirmed user deleted successfully');
+          }
+        }
+      }
+    } catch (cleanupError) {
+      console.error('Cleanup error (continuing anyway):', cleanupError);
     }
-    await waitForPublicAuthResponseFloor(responseStartedAt);
-    return genericPublicAuthResponse(corsHeaders);
-  } catch {
-    return genericPublicAuthResponse(corsHeaders);
+
+    // Rensa ev. gammal spärr från en tidigare kontoradering — annars blockeras
+    // bekräftelsemejlet och personen kan aldrig verifiera sitt nya konto.
+    try {
+      await supabase
+        .from('suppressed_emails')
+        .delete()
+        .eq('email', normalizedEmail)
+        .eq('reason', 'account_deleted');
+    } catch (e) {
+      console.warn('suppression cleanup failed (continuing):', (e as Error).message);
+    }
+
+    // 2. Skapa användare utan automatisk bekräftelse
+    const { data: user, error: signupError } = await supabase.auth.admin.createUser({
+      email: normalizedEmail,
+      password,
+      email_confirm: false, // Användaren måste bekräfta via mejl
+      user_metadata: data || {}
+    });
+
+    console.log('Signup result:', { hasUser: !!user?.user?.id, error: signupError?.message });
+
+    if (signupError) {
+      console.error('Signup error details:', signupError);
+      
+      // Handle existing user case (fallback) — generic response, no enumeration
+      if (signupError.message.includes("already been registered") ||
+          signupError.message.includes("User already registered") ||
+          signupError.message.includes("email_exists")) {
+
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Om adressen är giltig har vi skickat ett mejl med nästa steg.",
+          needsConfirmation: true
+        }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        });
+      }
+      throw new Error(signupError.message);
+
+    }
+
+    // 3. Skapa bekräftelsetoken och spara i databasen
+    const confirmationToken = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24 * 7); // 7 dagars giltighet
+
+    const { error: tokenError } = await supabase
+      .from('email_confirmations')
+      .insert({
+        user_id: user.user.id,
+        token: confirmationToken,
+        expires_at: expiresAt.toISOString()
+      });
+
+    if (tokenError) {
+      console.error('Error creating confirmation token:', tokenError);
+      throw new Error('Failed to create confirmation token');
+    }
+
+    // 4. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
+    const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
+    const defaultAppUrl = "https://parium.se";
+
+    // Om REDIRECT_URL är satt till en full URL och inte är en Supabase-domän, använd den
+    let appBase = defaultAppUrl;
+    if (redirectEnv && redirectEnv.startsWith("http")) {
+      appBase = redirectEnv.includes("supabase.co") ? defaultAppUrl : redirectEnv;
+    }
+
+    const confirmationUrl = `${appBase}/email-confirm?confirm=${confirmationToken}`;
+    
+    console.log("Sending confirmation email");
+
+
+
+    // 5. Anropa send-confirmation-email Edge Function via backendens SUPABASE_URL
+    // Med retry-logik för robusthet
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const maxRetries = 3;
+    let emailSent = false;
+    let lastError = '';
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Sending confirmation email (attempt ${attempt}/${maxRetries})...`);
+        
+        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-confirmation-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
+          },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            role: data?.role || 'job_seeker',
+            first_name: firstName,
+            confirmation_url: confirmationUrl,
+            company_name: data?.company_name
+          })
+        });
+
+        if (emailResponse.ok) {
+          console.log("Confirmation email sent successfully");
+          emailSent = true;
+          break;
+        } else {
+          const errorText = await emailResponse.text();
+          lastError = errorText;
+          console.error(`Email send attempt ${attempt} failed:`, errorText);
+          
+          // Vänta lite innan nästa försök (exponential backoff)
+          if (attempt < maxRetries) {
+            const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+            console.log(`Waiting ${waitTime}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        }
+      } catch (fetchError: any) {
+        lastError = fetchError.message;
+        console.error(`Email send attempt ${attempt} error:`, fetchError);
+        
+        if (attempt < maxRetries) {
+          const waitTime = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+
+    if (!emailSent) {
+      console.error('Failed to send confirmation email after all retries:', lastError);
+      
+      // KRITISKT: Radera användaren om mejlet inte kunde skickas
+      // Annars blir användaren fast (kan inte logga in, kan inte registrera igen)
+      console.log('Deleting newly-created user due to email send failure');
+      
+      try {
+        await supabase.from('email_confirmations').delete().eq('user_id', user.user.id);
+        await supabase.from('profiles').delete().eq('user_id', user.user.id);
+        await supabase.auth.admin.deleteUser(user.user.id);
+        console.log('User deleted successfully after email failure');
+      } catch (deleteError) {
+        console.error('Failed to cleanup user after email failure:', deleteError);
+      }
+      
+      // Returnera fel så användaren kan försöka igen senare
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: "Vi kunde inte skicka bekräftelsemejlet just nu. Vänligen försök igen om en stund eller kontakta support om problemet kvarstår.",
+        retryable: true
+      }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: "Konto skapat! Kolla din e-post för att bekräfta ditt konto.",
+      // Exponera bara id — inte hela auth-objektet med metadata.
+      user: { id: user.user.id },
+      needsConfirmation: true
+    }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
+    });
+
+  } catch (error: any) {
+    console.error("Error in custom-signup:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
   }
 };
 

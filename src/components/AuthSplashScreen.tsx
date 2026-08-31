@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { authSplashEvents } from '@/lib/authSplashEvents';
 
-import { AUTH_LOGO_URL } from '@/assets/authLogo';
+import authLogoDataUri from '@/assets/parium-auth-logo.png?inline';
 import { fetchPriority } from '@/lib/fetchPriority';
 
 // Bara en kort frame-cover. Logout är fast (den fungerar redan perfekt).
@@ -245,7 +245,7 @@ export function AuthSplashScreen() {
 
         {/* Parium Logo - inbäddad data-URI (offline-redo) */}
         <img
-          src={AUTH_LOGO_URL}
+          src={authLogoDataUri}
           alt="Parium"
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}

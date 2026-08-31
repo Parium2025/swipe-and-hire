@@ -4,19 +4,8 @@ import { FileText, Maximize2 } from 'lucide-react';
 import { RichNotesEditor, NotesToolbar } from '@/components/RichNotesEditor';
 import type { Editor } from '@tiptap/react';
 import { useNotesSync } from '@/hooks/useNotesSync';
-import { sanitizeRichTextHtml } from '@/lib/sanitizeRichText';
 import { GRADIENTS } from './dashboardConstants';
 import { ExpandedNotesDialog } from './ExpandedNotesDialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 function countWordsAndChars(html: string) {
   const text = html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
@@ -31,16 +20,7 @@ interface JobSeekerNotesCardProps {
 }
 
 export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardProps) => {
-  const {
-    content,
-    isSaving,
-    saveFailed,
-    lastSaved,
-    saveConflict,
-    handleChange,
-    acceptServerVersion,
-    overwriteWithLocalVersion,
-  } = useNotesSync({
+  const { content, isSaving, saveFailed, lastSaved, handleChange } = useNotesSync({
     table: 'jobseeker_notes',
     ownerColumn: 'user_id',
     cachePrefix: 'jobseeker_notes_cache',
@@ -49,7 +29,6 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
 
   const [notesEditor, setNotesEditor] = useState<Editor | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
   // ♿ Fokus ska tillbaka till exakt den knapp som öppnade fönstret — annars
   // hamnar tangentbordsanvändaren på BODY när dialogen stängs.
   const expandButtonRef = useRef<HTMLButtonElement>(null);
@@ -76,18 +55,9 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
     if (!isActive) setIsExpanded(false);
   }, [isActive]);
 
-  useEffect(() => {
-    if (!isActive) {
-      setConflictDialogOpen(false);
-    } else if (saveConflict) {
-      setConflictDialogOpen(true);
-    }
-  }, [saveConflict, isActive]);
-
   const handleEditorReady = useCallback((editor: Editor) => { setNotesEditor(editor); }, []);
 
   const { words, chars } = useMemo(() => countWordsAndChars(content), [content]);
-  const sanitizedFallbackContent = useMemo(() => sanitizeRichTextHtml(content), [content]);
 
   return (
     <>
@@ -122,7 +92,7 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
             {!notesEditor && content && (
               <div
                 className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white overflow-hidden pointer-events-none"
-                dangerouslySetInnerHTML={{ __html: sanitizedFallbackContent }}
+                dangerouslySetInnerHTML={{ __html: content }}
               />
             )}
             {!notesEditor && !content && (
@@ -148,15 +118,7 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
           {/* Footer: save status left, word/char count right */}
           <div className="flex items-center justify-between mt-1 min-h-[16px]">
             <span className="text-[11px] text-white font-medium">
-              {saveConflict ? (
-                <button
-                  type="button"
-                  onClick={() => setConflictDialogOpen(true)}
-                  className="text-amber-200 underline underline-offset-2 hover:text-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-sm"
-                >
-                  Synkkonflikt – välj version
-                </button>
-              ) : isSaving ? (
+              {isSaving ? (
                 <span className="animate-pulse">Sparar...</span>
               ) : saveFailed ? (
                 <span className="text-red-300">Kunde inte spara ✗</span>
@@ -181,27 +143,6 @@ export const JobSeekerNotesCard = memo(({ isActive = true }: JobSeekerNotesCardP
         saveFailed={saveFailed}
         lastSaved={lastSaved}
       />
-
-      <AlertDialog open={isActive && conflictDialogOpen && !!saveConflict} onOpenChange={setConflictDialogOpen}>
-        <AlertDialogContent elevated>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Välj vilken anteckning som ska sparas</AlertDialogTitle>
-            <AlertDialogDescription>
-              Anteckningen ändrades i en annan flik eller på en annan enhet. Din lokala version är
-              bevarad tills du väljer. Ingen version skrivs över automatiskt.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Avbryt</AlertDialogCancel>
-            <AlertDialogAction variant="outline" onClick={acceptServerVersion}>
-              Använd den andra versionen
-            </AlertDialogAction>
-            <AlertDialogAction onClick={overwriteWithLocalVersion}>
-              Behåll min version
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 });

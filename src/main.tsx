@@ -2,19 +2,16 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 
+import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 import { initSyncEngine } from './lib/offlineSyncEngine'
+import { nukeStaleCaches } from './lib/cacheNuke'
+import { forceServiceWorkerReset } from './lib/swForceReset'
 import { installBfcacheGuard, persistBuildSignature } from './lib/appReloader'
 import { installVersionWatcher } from './lib/versionWatcher'
-import { installServiceWorkerBuildHandshake } from './lib/serviceWorkerManager'
 import pariumLogoRings from './assets/parium-logo-rings.png'
-import { AUTH_LOGO_URL } from './assets/authLogo'
-import { initializeAuthBootstrapCredentials } from './lib/authBootstrapCredentials'
-
-// Installed before React bootstrap so a new worker can safely identify this
-// build and only migrate genuinely old, destructive multi-tab clients.
-installServiceWorkerBuildHandshake();
+import authLogoDataUri from './assets/parium-auth-logo.png?inline'
 
 // Preload + decode critical UI assets ASAP (before React mounts)
 const preloadAndDecodeImage = async (src: string, id: string) => {
@@ -39,8 +36,8 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
     const img = new Image();
     img.src = src;
     // decode() ensures it's ready to paint immediately when the element mounts
-    if (typeof img.decode === 'function') {
-      await img.decode();
+    if ('decode' in img && typeof (img as any).decode === 'function') {
+      await (img as any).decode();
     }
   } catch {
     // Never block app start for a preload
@@ -48,10 +45,78 @@ const preloadAndDecodeImage = async (src: string, id: string) => {
 };
 
 
+function redirectAuthTokensIfNeeded() {
+  if (typeof window === 'undefined') return false;
+  const { location } = window;
+  const pathname = location.pathname;
+
+  // Sidor med EGNA ?token=-parametrar (avprenumerationslänkar i mejl) får
+  // aldrig kapas hit — annars blir det en extra full sidladdning till /auth
+  // med blank skärm och splash-blink direkt från inkorgen.
+  if (pathname === '/unsubscribe' || pathname === '/unsubscribe/') return false;
+
+  const search = new URLSearchParams(location.search);
+  const hashStr = location.hash.startsWith('#') ? location.hash.slice(1) : '';
+  const hash = new URLSearchParams(hashStr);
+
+  // Äldre utskick länkar till /?token=<64 hex> eller /auth?token=<64 hex>.
+  // Identifiera dem synkront före React och auth-splashen hinner starta.
+  const legacyUnsubscribeToken = search.get('token') || '';
+  if (
+    !search.get('type') &&
+    !search.get('token_hash') &&
+    !hash.get('access_token') &&
+    !hash.get('refresh_token') &&
+    /^[a-f0-9]{64}$/i.test(legacyUnsubscribeToken)
+  ) {
+    location.replace(`${location.origin}/unsubscribe?token=${encodeURIComponent(legacyUnsubscribeToken)}`);
+    return true;
+  }
+
+  // Only redirect when not already on /auth
+  if (pathname === '/auth') return false;
+
+  const type = hash.get('type') || search.get('type');
+  const token = hash.get('token') || search.get('token');
+  const tokenHash = hash.get('token_hash') || search.get('token_hash');
+  const accessToken = hash.get('access_token') || search.get('access_token');
+  const refreshToken = hash.get('refresh_token') || search.get('refresh_token');
+  const errorCode = hash.get('error_code') || search.get('error_code') || hash.get('error') || search.get('error');
+  const errorDesc = hash.get('error_description') || search.get('error_description') || hash.get('error_message') || search.get('error_message');
+
+  const hasAccessPair = !!(accessToken && refreshToken);
+  const hasToken = !!(token || tokenHash);
+  const isRecoveryFlow = (type === 'recovery') || hasAccessPair || hasToken || !!errorCode || !!errorDesc;
+
+  if (isRecoveryFlow) {
+    const params = new URLSearchParams();
+    if (type) params.set('type', type);
+    if (tokenHash) params.set('token_hash', tokenHash);
+    if (token && !tokenHash) params.set('token', token);
+    if (accessToken) params.set('access_token', accessToken);
+    if (refreshToken) params.set('refresh_token', refreshToken);
+    if (errorCode) params.set('error_code', errorCode);
+    if (errorDesc) params.set('error_description', errorDesc);
+
+    const target = `${location.origin}/auth?${params.toString()}`;
+    location.replace(target);
+    return true;
+  }
+  return false;
+}
+
 async function bootstrap() {
-  // The first inline head script has already removed every auth credential
-  // from the address bar. Transfer its one-time payload before App mounts.
-  initializeAuthBootstrapCredentials();
+  const redirected = redirectAuthTokensIfNeeded();
+  if (redirected) return;
+
+  // 🧹 Nuke stale caches from before the "single tunnel" architecture.
+  // Runs once per cache version bump — instant, no network calls.
+  nukeStaleCaches();
+
+  // 🔁 Engångs-tvångsrensning av gammal Service Worker + Cache Storage på
+  // publicerade domäner (parium.se / parium-ab.lovable.app). Säkerställer att
+  // användare som var på en gammal SW automatiskt får senaste bundle.
+  forceServiceWorkerReset();
 
   // 🛡️ Installera bfcache-guard (iOS Safari back/forward cache → silent reload vid stale bundle)
   installBfcacheGuard();
@@ -83,32 +148,21 @@ async function bootstrap() {
   }
 
   // Start both preloads immediately (parallel)
-  const authLogoPromise = preloadAndDecodeImage(AUTH_LOGO_URL, 'auth-logo');
-  const warmNavigationLogo = () => {
-    void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
-  };
-
-  // Auth already has a high-priority splash image. Let that critical request
-  // finish before warming the post-login navigation logo on slow connections.
-  if (isAuthRoute) {
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(warmNavigationLogo, { timeout: 2_000 });
-    } else {
-      globalThis.setTimeout(warmNavigationLogo, 1_500);
-    }
-  } else {
-    warmNavigationLogo();
-  }
+  const authLogoPromise = preloadAndDecodeImage(authLogoDataUri, 'auth-logo');
+  void preloadAndDecodeImage(pariumLogoRings, 'nav-logo');
 
   // On /auth, wait for logo to be fully decoded before rendering
   if (isAuthRoute) {
     await authLogoPromise;
   }
 
+  // Service Worker intentionally disabled on published builds.
+  // A stale SW was the only layer that could keep Safari on an old landing page.
+  // Existing SW installs are removed by index.html + swForceReset + public/sw.js kill-switch.
+  
   // Initialize the offline sync engine (works without SW; background sync is best-effort only)
   initSyncEngine();
 
-  const { default: App } = await import('./App');
   const root = createRoot(document.getElementById('root')!);
   root.render(
     <GlobalErrorBoundary>
@@ -124,3 +178,4 @@ async function bootstrap() {
 }
 
 void bootstrap();
+

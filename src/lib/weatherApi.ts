@@ -71,14 +71,6 @@ export const getWeatherCacheUser = (): string | null => currentWeatherCacheUserI
 const locationKeyFor = (userId: string) => `${LOCATION_CACHE_PREFIX}${userId}`;
 const weatherKeyFor = (userId: string) => `${WEATHER_CACHE_PREFIX}${userId}`;
 
-/** ~1 km is sufficient for weather while ensuring exact GPS never persists. */
-const coarseCoordinate = (value: number) => Math.round(value * 100) / 100;
-
-const coarsenGpsLocation = <T extends { lat: number; lon: number; source?: string }>(location: T): T =>
-  location.source === 'gps'
-    ? { ...location, lat: coarseCoordinate(location.lat), lon: coarseCoordinate(location.lon) }
-    : location;
-
 const dropLegacyLocationKey = () => {
   try { localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY); } catch { /* ignore */ }
 };
@@ -109,17 +101,9 @@ export const getCachedLocation = (): CachedLocation | null => {
     }
     if (age > LOCATION_CACHE_MAX_AGE) {
       console.log('Location cache expired, will refresh');
-      // Location has no stale/offline reader. Remove it immediately so older
-      // clients cannot leave precise coordinates behind indefinitely.
-      try { localStorage.removeItem(key); } catch { /* ignore */ }
       return null;
     }
-    const privacySafeData = coarsenGpsLocation(data as CachedLocation);
-    if (privacySafeData.lat !== data.lat || privacySafeData.lon !== data.lon) {
-      // One-time migration of exact coordinates written by older clients.
-      try { localStorage.setItem(key, JSON.stringify(privacySafeData)); } catch { /* ignore */ }
-    }
-    return privacySafeData;
+    return data;
   } catch {
     try { localStorage.removeItem(key); } catch { /* ignore */ }
     return null;
@@ -131,7 +115,7 @@ export const setCachedLocation = (location: Omit<CachedLocation, 'timestamp'>) =
   const userId = currentWeatherCacheUserId;
   if (!userId) return;
   try {
-    const data: CachedLocation = coarsenGpsLocation({ ...location, timestamp: Date.now() });
+    const data: CachedLocation = { ...location, timestamp: Date.now() };
     localStorage.setItem(locationKeyFor(userId), JSON.stringify(data));
   } catch { /* Silent fail */ }
 };

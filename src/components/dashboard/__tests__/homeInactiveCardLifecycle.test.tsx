@@ -11,13 +11,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { Activity } from 'lucide-react';
 
 const notesSyncMount = vi.fn();
-const acceptServerVersion = vi.fn();
-const overwriteWithLocalVersion = vi.fn();
-let notesConflict: {
-  serverContent: string;
-  serverRevision: number;
-  serverUpdatedAt: string | null;
-} | null = null;
 vi.mock('@/hooks/useNotesSync', () => ({
   useNotesSync: () => {
     notesSyncMount();
@@ -26,10 +19,7 @@ vi.mock('@/hooks/useNotesSync', () => ({
       isSaving: false,
       saveFailed: false,
       lastSaved: null,
-      saveConflict: notesConflict,
       handleChange: vi.fn(),
-      acceptServerVersion,
-      overwriteWithLocalVersion,
     };
   },
 }));
@@ -177,12 +167,6 @@ describe('useCardInteractionPause städar timers vid inaktivering', () => {
 });
 
 describe('Expanderade anteckningar stängs när Home blir inaktiv', () => {
-  beforeEach(() => {
-    notesConflict = null;
-    acceptServerVersion.mockClear();
-    overwriteWithLocalVersion.mockClear();
-  });
-
   it('stänger dialogen, öppnar inte igen automatiskt och behåller useNotesSync monterad', () => {
     notesSyncMount.mockClear();
     const { rerender } = render(<JobSeekerNotesCard isActive={true} />);
@@ -196,19 +180,5 @@ describe('Expanderade anteckningar stängs när Home blir inaktiv', () => {
     rerender(<JobSeekerNotesCard isActive={true} />);
     expect(screen.queryByTestId('expanded-notes')).toBeNull();
     expect(notesSyncMount.mock.calls.length).toBeGreaterThan(0);
-  });
-
-  it('visar aldrig konfliktportalen över en annan route men öppnar den när Home aktiveras', () => {
-    notesConflict = {
-      serverContent: '<p>Serverversion</p>',
-      serverRevision: 8,
-      serverUpdatedAt: '2026-08-30T10:00:00.000Z',
-    };
-    const { rerender } = render(<JobSeekerNotesCard isActive={false} />);
-
-    expect(screen.queryByRole('alertdialog')).toBeNull();
-
-    rerender(<JobSeekerNotesCard isActive={true} />);
-    expect(screen.getByRole('alertdialog')).toBeTruthy();
   });
 });

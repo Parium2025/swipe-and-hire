@@ -8,11 +8,6 @@ import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { isHomeActivePath } from '@/lib/homeRoute';
 import { formatLocalDateTime } from '@/lib/localTime';
-import {
-  installLimitedHomeServiceWorkerRetry,
-  registerServiceWorkerForHome,
-} from '@/lib/serviceWorkerManager';
-import { requestAppReload } from '@/lib/appReloader';
 import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
@@ -40,35 +35,6 @@ const JobSeekerHome = memo(() => {
   const { pathname } = useLocation();
   
   const [showContent, setShowContent] = useState(false);
-
-  // The 6 MiB offline shell is useful for authenticated Home, but wasteful on
-  // every public landing-page visit. Register it only when jobseeker Home is
-  // actually mounted; data/auth/storage requests remain network-only.
-  useEffect(() => {
-    if (!import.meta.env.PROD) return;
-
-    let mounted = true;
-    let inFlight = false;
-    const registerShell = (): boolean => {
-      if (!mounted || inFlight) return false;
-      inFlight = true;
-      void registerServiceWorkerForHome()
-        .then((activated) => {
-          if (mounted && activated) requestAppReload('service-worker-upgrade');
-        })
-        .finally(() => {
-          inFlight = false;
-        });
-      return true;
-    };
-
-    registerShell();
-    const disposeRetry = installLimitedHomeServiceWorkerRetry(registerShell);
-    return () => {
-      mounted = false;
-      disposeRetry();
-    };
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);
@@ -154,11 +120,7 @@ const JobSeekerHome = memo(() => {
 
   return (
     <>
-      <GpsPrompt
-        weatherAvailable={hasConfirmedWeather(weather)}
-        keepOptInReachableWhenWeatherAvailable
-        active={isHomeActive}
-      />
+      <GpsPrompt weatherAvailable={hasConfirmedWeather(weather)} active={isHomeActive} />
       {showWeatherEffects && isHomeActive && <WeatherEffects weatherCode={weather.weatherCode} isLoading={weather.isLoading} isEvening={isEvening} />}
       <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 relative z-10 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         {/* Personal greeting */}

@@ -10,7 +10,7 @@
  *   direkt exakt en gång, även på touch-enheter.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -19,19 +19,6 @@ const touchCapable = { value: false };
 vi.mock('@/hooks/useInputCapability', () => ({
   useTouchCapable: () => touchCapable.value,
 }));
-
-vi.mock('@/components/ui/tooltip', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/components/ui/tooltip')>();
-  return {
-    ...actual,
-    // Radix' Portal/Popper-positionering är en separat integration och kan
-    // inte mäta layout i jsdom. Behåll den riktiga Root/Provider/Trigger-
-    // logiken här, men ersätt bara det positionsberoende innehållet.
-    TooltipContent: ({ children }: { children: React.ReactNode }) => (
-      <div role="tooltip">{children}</div>
-    ),
-  };
-});
 
 import { NotesToolbar } from '@/components/RichNotesEditor';
 
@@ -128,7 +115,7 @@ describe('Notes-verktygsfältets tillgänglighet', () => {
   it('behåller inte fokus-stöld: ingen tabIndex=-1 och fokus behålls på knappen', () => {
     render(<NotesToolbar editor={createFakeEditor()} large />);
     const bold = screen.getByRole('button', { name: 'Fet' });
-    act(() => bold.focus());
+    bold.focus();
     expect(document.activeElement).toBe(bold);
   });
 

@@ -2,13 +2,12 @@
   "name": "Parium",
   "short_name": "Parium",
   "description": "Parium kopplar samman kandidater och arbetsgivare på sekunder.",
-  "id": "/",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#001935",
   "theme_color": "#001935",
-  "orientation": "any",
+  "orientation": "portrait",
   "lang": "sv-SE",
   "icons": [
     {

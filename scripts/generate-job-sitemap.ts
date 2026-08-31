@@ -23,7 +23,7 @@ const readDotEnv = (key: string) => {
   try {
     const envFile = readFileSync(resolve(".env"), "utf8");
     const match = envFile.match(new RegExp(`^${key}=(.*)$`, "m"));
-    return match?.[1]?.trim().replace(/^['"]|['"]$/g, "");
+    return match?.[1]?.trim().replace(/^['\"]|['\"]$/g, "");
   } catch {
     return undefined;
   }
@@ -80,10 +80,6 @@ async function main() {
       apikey: anonKey,
       Authorization: `Bearer ${anonKey}`,
     },
-    // A degraded/unreachable backend must never leave Lovable or CI builds
-    // waiting indefinitely. The existing catch keeps the last committed
-    // sitemap when this best-effort refresh times out.
-    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

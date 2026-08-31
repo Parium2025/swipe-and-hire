@@ -17,11 +17,7 @@ vi.mock('@/lib/gpsUtils', () => ({
   isNativeApp: () => native,
 }));
 
-vi.mock('@/lib/gpsCoordinator', () => ({
-  canUsePreciseLocation: vi.fn(async () => false),
-  notePermissionGranted: vi.fn(),
-  notePermissionRevoked: vi.fn(),
-}));
+vi.mock('@/lib/gpsCoordinator', () => ({ notePermissionGranted: vi.fn() }));
 
 vi.mock('@/components/GpsHelpModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="gps-help" /> : null),
@@ -155,48 +151,5 @@ describe('GpsPrompt: asynkrona fortsättningar efter inaktivering är döda', ()
     expect(document.body.textContent).not.toContain('Plats är blockerad');
     // Stale error-callback hade satt visible=true → miniknapp direkt synlig.
     expect(screen.queryByRole('button', { name: 'Visa platsinformation' })).toBeNull();
-  });
-
-  it('native requestGpsPermission som resolvar efter unmount anropar inte onEnableGps', async () => {
-    native = true;
-    let resolvePermission: (value: boolean) => void = () => {};
-    requestGpsPermission.mockReturnValue(new Promise<boolean>((resolve) => {
-      resolvePermission = resolve;
-    }));
-    const onEnableGps = vi.fn();
-
-    const { unmount } = await renderVisiblePrompt(true, onEnableGps);
-    fireEvent.click(screen.getByRole('button', { name: 'Aktivera' }));
-    expect(requestGpsPermission).toHaveBeenCalledTimes(1);
-
-    unmount();
-    await act(async () => {
-      resolvePermission(true);
-      await Promise.resolve();
-    });
-
-    expect(onEnableGps).not.toHaveBeenCalled();
-  });
-
-  it('web success-callback efter unmount anropar inte onEnableGps', async () => {
-    let successCb: (() => void) | null = null;
-    Object.defineProperty(navigator, 'geolocation', {
-      configurable: true,
-      value: {
-        getCurrentPosition: vi.fn((onSuccess: () => void) => {
-          successCb = onSuccess;
-        }),
-      },
-    });
-    const onEnableGps = vi.fn();
-
-    const { unmount } = await renderVisiblePrompt(true, onEnableGps);
-    fireEvent.click(screen.getByRole('button', { name: 'Aktivera' }));
-    expect(successCb).not.toBeNull();
-
-    unmount();
-    act(() => { successCb!(); });
-
-    expect(onEnableGps).not.toHaveBeenCalled();
   });
 });

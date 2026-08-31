@@ -86,7 +86,7 @@ const checkVersion = async (reason: string): Promise<void> => {
     // sker vid nästa navigering eller när fliken göms.
     requestAppReload('build-version', {
       defer: true,
-      activateWaitingWorker: true,
+      purgeCaches: true,
       cacheBustParam: { key: '_v', value: shortHash(data.version) },
     });
   } catch {

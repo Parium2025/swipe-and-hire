@@ -1,10 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import {
-  canUsePreciseLocation,
-  notePermissionRevoked,
-  subscribeToPreciseLocationPermission,
-} from '@/lib/gpsCoordinator';
 import type { 
   BackgroundGeolocationPlugin, 
   Location, 
@@ -45,10 +40,6 @@ export const useBackgroundLocation = (options: UseBackgroundLocationOptions = {}
       return false;
     }
 
-    // A persisted settings toggle and an OS-level grant are not sufficient.
-    // Native exact tracking starts only after this page session's Activate.
-    if (!(await canUsePreciseLocation())) return false;
-
     try {
       // Remove existing watcher if any
       if (watcherIdRef.current) {
@@ -60,7 +51,7 @@ export const useBackgroundLocation = (options: UseBackgroundLocationOptions = {}
         {
           backgroundMessage: 'Parium uppdaterar vädret baserat på din plats',
           backgroundTitle: 'Platsuppdatering',
-          requestPermissions: false,
+          requestPermissions: true,
           stale: false,
           distanceFilter,
         },
@@ -68,24 +59,16 @@ export const useBackgroundLocation = (options: UseBackgroundLocationOptions = {}
           if (error) {
             if (error?.code === 'NOT_AUTHORIZED') {
               console.warn('Background location not authorized');
-              notePermissionRevoked();
             }
             return;
           }
 
           if (location && mountedRef.current && onLocationUpdate) {
-            void canUsePreciseLocation().then((allowed) => {
-              if (!allowed || !mountedRef.current) return;
-              onLocationUpdate(location.latitude, location.longitude);
-            });
+            console.log('Background location update:', location.latitude, location.longitude);
+            onLocationUpdate(location.latitude, location.longitude);
           }
         }
       );
-
-      if (!mountedRef.current || !(await canUsePreciseLocation())) {
-        await BackgroundGeolocation.removeWatcher({ id: watcherId });
-        return false;
-      }
 
       watcherIdRef.current = watcherId;
       console.log('Background location tracking started');
@@ -116,24 +99,14 @@ export const useBackgroundLocation = (options: UseBackgroundLocationOptions = {}
 
   useEffect(() => {
     mountedRef.current = true;
-    let disposed = false;
-    let unsubscribePermission = () => {};
 
     if (enabled && Capacitor.isNativePlatform()) {
-      const syncTracking = (allowed: boolean) => {
-        if (disposed) return;
-        if (allowed) void startBackgroundTracking();
-        else void stopBackgroundTracking();
-      };
-      unsubscribePermission = subscribeToPreciseLocationPermission(syncTracking);
-      void canUsePreciseLocation().then(syncTracking);
+      startBackgroundTracking();
     }
 
     return () => {
-      disposed = true;
-      unsubscribePermission();
       mountedRef.current = false;
-      void stopBackgroundTracking();
+      stopBackgroundTracking();
     };
   }, [enabled, startBackgroundTracking, stopBackgroundTracking]);
 

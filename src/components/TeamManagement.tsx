@@ -93,17 +93,10 @@ const TeamManagement = () => {
 
     if (!silent) setLoading(true);
     try {
-      // Caller-bound RPC derives the organization from auth.uid() and is the
-      // only browser path allowed to return colleague e-mail addresses.
-      const { data: members, error } = await supabase.rpc('get_my_organization_member_profiles');
-      if (error) throw error;
-      if (members?.length && !members.some((member) => member.user_id === user.id)) {
-        setOrganizationId(null);
-        setTeamMembers([]);
-        return;
-      }
-
-      const orgData = members?.[0]?.organization_id ?? null;
+      // Get user's organization
+      const { data: orgData } = await supabase.rpc('get_user_organization_id', {
+        p_user_id: user.id
+      });
       
       if (!orgData) {
         setOrganizationId(null);
@@ -114,16 +107,38 @@ const TeamManagement = () => {
       }
       
       setOrganizationId(orgData);
-      const normalizedMembers = (members ?? []).map((member) => ({
-        user_id: member.user_id,
-        role: member.role,
-        is_active: member.is_active,
-        first_name: member.first_name,
-        last_name: member.last_name,
-        email: member.email,
-      }));
-      setTeamMembers(normalizedMembers);
-      writeTeamCache(user.id, orgData, normalizedMembers);
+      
+      // Get all team members in the organization
+      const { data: roles, error } = await supabase
+        .from('user_roles')
+        .select('user_id, role, is_active')
+        .eq('organization_id', orgData)
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      const userIds = (roles || []).map((role) => role.user_id);
+      const { data: profileRows, error: profilesError } = userIds.length > 0
+        ? await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, email')
+          .in('user_id', userIds)
+        : { data: [], error: null };
+
+      if (profilesError) throw profilesError;
+
+      const profilesByUser = new Map((profileRows || []).map((row) => [row.user_id, row]));
+      const members = (roles || []).map((role) => {
+        const profileData = profilesByUser.get(role.user_id);
+        return {
+          ...role,
+          first_name: profileData?.first_name || null,
+          last_name: profileData?.last_name || null,
+          email: profileData?.email || null
+        };
+      });
+      setTeamMembers(members);
+      writeTeamCache(user.id, orgData, members);
     } catch (error) {
       console.error('Error fetching team:', error);
       toast({

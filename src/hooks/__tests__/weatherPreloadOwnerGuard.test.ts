@@ -37,7 +37,6 @@ const h = vi.hoisted(() => ({
 vi.mock('@/hooks/useBackgroundLocation', () => ({ useBackgroundLocation: () => ({}) }));
 
 vi.mock('@/lib/gpsCoordinator', () => ({
-  canUsePreciseLocation: async () => true,
   resolvePosition: async () => (h.gps ? await h.gps.promise : null),
   resetGpsCoordinator: () => {},
 }));

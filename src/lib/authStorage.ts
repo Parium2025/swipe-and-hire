@@ -26,10 +26,6 @@ const SNAPSHOT_PREFIX = 'parium-auth-snapshot:';
  * jobbsökare).
  */
 const SNAPSHOT_OWNER_KEY = 'parium-auth-snapshot-owner';
-const NOTES_PENDING_CACHE_PREFIXES = [
-  'jobseeker_notes_cache',
-  'employer_notes_cache',
-] as const;
 
 const SUPABASE_AUTH_KEY_PATTERN = /sb-[a-z0-9]+-auth-token/;
 
@@ -263,31 +259,6 @@ export const clearActivityTracking = (): void => {
 };
 
 /**
- * A durable notes journal is the last recoverable copy of an edit that has not
- * reached the server yet. Explicit logout must therefore treat the mere
- * presence of a current-account journal as unsaved data. Exact account-bound
- * keys avoid inspecting or blocking on another account's journal.
- *
- * Storage read failures are also treated as pending: if we cannot prove that
- * the journal is absent, clearing account caches would risk silent data loss.
- */
-export const hasPendingNotesJournalForUser = (userId: string | null | undefined): boolean => {
-  if (!userId || typeof window === 'undefined') return false;
-
-  for (const prefix of NOTES_PENDING_CACHE_PREFIXES) {
-    try {
-      if (localStorage.getItem(`${prefix}_${userId}__pending`) !== null) {
-        return true;
-      }
-    } catch {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-/**
  * Custom storage adapter for Supabase Auth.
  *
  * Strategy: per-tab isolation via sessionStorage + optional Remember Me snapshot
@@ -316,6 +287,7 @@ export class AuthStorageAdapter implements Storage {
         setTimeout(() => {
           try {
             this.clearAuthData();
+            clearActivityTracking();
           } catch {}
         }, 0);
         return null;
@@ -384,6 +356,7 @@ export class AuthStorageAdapter implements Storage {
       }
 
 
+      updateLastActivity();
     } else {
       try { sessionStorage.setItem(key, value); } catch {}
     }

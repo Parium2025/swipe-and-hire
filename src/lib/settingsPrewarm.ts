@@ -58,11 +58,40 @@ async function prewarmOutreachStudio(userId: string): Promise<void> {
 }
 
 async function prewarmTeam(userId: string): Promise<void> {
-  const { data: members, error } = await supabase.rpc('get_my_organization_member_profiles');
-  if (error || !members?.length) return;
-  if (!members.some((member) => member.user_id === userId)) return;
+  const { data: organizationId, error: orgError } = await supabase.rpc('get_user_organization_id', {
+    p_user_id: userId,
+  });
 
-  const organizationId = members[0].organization_id;
+  if (orgError || !organizationId) return;
+
+  const { data: roles, error: rolesError } = await supabase
+    .from('user_roles')
+    .select('user_id, role, is_active')
+    .eq('organization_id', organizationId)
+    .eq('is_active', true);
+
+  if (rolesError) return;
+
+  const userIds = (roles ?? []).map((role) => role.user_id);
+  const { data: profileRows, error: profilesError } = userIds.length > 0
+    ? await supabase
+      .from('profiles')
+      .select('user_id, first_name, last_name, email')
+      .in('user_id', userIds)
+    : { data: [], error: null };
+
+  if (profilesError) return;
+
+  const profilesByUser = new Map((profileRows ?? []).map((row) => [row.user_id, row]));
+  const members = (roles ?? []).map((role) => {
+    const profileData = profilesByUser.get(role.user_id);
+    return {
+      ...role,
+      first_name: profileData?.first_name || null,
+      last_name: profileData?.last_name || null,
+      email: profileData?.email || null,
+    };
+  });
 
   safeSetItem(
     `${TEAM_CACHE_PREFIX}${userId}`,

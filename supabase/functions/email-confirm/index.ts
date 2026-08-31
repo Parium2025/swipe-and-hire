@@ -1,23 +1,41 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const headers = {
-  "Content-Type": "application/json; charset=utf-8",
-  "Cache-Control": "no-store, max-age=0",
-  "Pragma": "no-cache",
-  "Referrer-Policy": "no-referrer",
-  "X-Content-Type-Options": "nosniff",
-};
+// This function is called via Supabase's internal hook URL pattern:
+//   /functions/v1/re_<hook_id>/email-confirm?confirm=TOKEN
+// It only needs to redirect the browser to the frontend /email-confirm route
+// so the React app can handle the actual confirmation flow.
+const handler = async (req: Request): Promise<Response> => {
+  const url = new URL(req.url);
+  const token = url.searchParams.get("confirm");
 
-// Compatibility tombstone for historical hook URLs that exposed reusable
-// confirmation capabilities in the request target. Current confirmation
-// emails link directly to /email-confirm with an in-fragment capability.
-const handler = (_req: Request): Response =>
-  new Response(
-    JSON.stringify({
-      code: "confirmation_redirect_retired",
-      message: "Begär ett nytt bekräftelsemejl.",
-    }),
-    { status: 410, headers },
-  );
+  // Logga aldrig bekräftelsetoken — den kan aktivera ett konto.
+  console.log("email-confirm hook accessed", { hasToken: !!token });
+
+  const envRedirect = Deno.env.get("REDIRECT_URL") || "";
+  const defaultRedirect = "https://parium.se";
+
+  // If REDIRECT_URL mistakenly points to a Supabase domain, fall back to app URL
+  const redirectBase = envRedirect.includes("supabase.co")
+    ? defaultRedirect
+    : envRedirect || defaultRedirect;
+
+  if (!token) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: `${redirectBase}/email-confirm?error=missing_token`,
+      },
+    });
+  }
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `${redirectBase}/email-confirm?confirm=${encodeURIComponent(
+        token,
+      )}`,
+    },
+  });
+};
 
 serve(handler);

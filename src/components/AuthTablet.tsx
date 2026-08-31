@@ -30,7 +30,7 @@ import { AuthFieldNotice } from '@/components/auth/AuthFieldNotice';
 import { loadAuthDraft, saveAuthDraft, clearAuthDraft, mergeDraft } from '@/lib/authFormDraft';
 import { AuthLogoInline } from '@/assets/authLogoInline';
 
-interface AuthDesktopProps {
+interface AuthTabletProps {
   isPasswordReset: boolean;
   newPassword: string;
   setNewPassword: (value: string) => void;
@@ -43,7 +43,7 @@ interface AuthDesktopProps {
   initialRole?: string;
 }
 
-const AuthDesktop = ({ 
+const AuthTablet = ({ 
   isPasswordReset, 
   newPassword, 
   setNewPassword, 
@@ -54,7 +54,7 @@ const AuthDesktop = ({
   onAuthModeChange,
   initialMode,
   initialRole
-}: AuthDesktopProps) => {
+}: AuthTabletProps) => {
   
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
@@ -561,73 +561,82 @@ const AuthDesktop = ({
 
   if (isPasswordReset) {
     return (
-      <div className="relative min-h-screen auth-dark">
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader className="text-center">
-              <CardTitle className="text-white">Nytt lösenord</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePasswordReset} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); handlePasswordReset(e); } }} className="space-y-4">
-                <div>
-                  <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
+      <div 
+        className="flex items-center justify-center p-4 auth-dark smooth-scroll touch-pan" 
+        style={{ 
+          WebkitOverflowScrolling: 'touch',
+          minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        }}
+      >
+        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white">Nytt lösenord</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordReset} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && (e.target as HTMLElement)?.tagName === 'INPUT' && !loading) { e.preventDefault(); handlePasswordReset(e); } }} className="space-y-4">
+              <div>
+                <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
                     autoComplete="new-password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    onPaste={(e) => e.preventDefault()}
-                    onCopy={(e) => e.preventDefault()}
-                    required
-                    className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
-                  />
-                </div>
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onPaste={(e) => e.preventDefault()}
+                  onCopy={(e) => e.preventDefault()}
+                  required
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                />
+              </div>
                 <Button type="submit" variant="glass" className="w-full" disabled={loading} onMouseDown={(e) => e.preventDefault()}>
-                  {loading ? "Sparar..." : "Spara nytt lösenord"}
-                </Button>
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => (onBackToLogin ? onBackToLogin() : handleBackToLogin())}
-                    className="text-sm text-white hover:underline"
-                  >
-                    Tillbaka till inloggning
-                  </button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+                {loading ? "Sparar..." : "Spara nytt lösenord"}
+              </Button>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => (onBackToLogin ? onBackToLogin() : handleBackToLogin())}
+                  className="text-sm text-white hover:underline"
+                >
+                  Tillbaka till inloggning
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div 
-      className="flex flex-col relative auth-dark" 
+      className="flex flex-col relative auth-dark smooth-scroll touch-pan" 
+      style={{ 
+        WebkitOverflowScrolling: 'touch',
+        minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+      }}
     >
-      {/* Bubblor renderas på Auth.tsx-nivå (viewport-fixed) för att alltid synas oavsett scroll */}
+      {/* Decorative bubbles only. /auth keeps a dark, readable form surface and must not create a false white zone behind controls. */}
+      <AnimatedBackground showGlow={false} />
 
-
-      <div className="relative z-10 flex flex-col min-h-full py-8 px-6">
+      <div className="relative z-10 flex flex-col min-h-screen py-safe">
         {/* Header med logo och text */}
-        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
-          <div className="text-center mb-4">
-            <div className="mb-2">
-              <div className="relative mx-auto w-fit flex items-center justify-center" style={{ height: '260px' }}>
+        <div className="flex flex-col items-center px-6 pt-6 pb-4">
+          <div className="text-center mb-6">
+            <div className="mb-4">
+              <div className="relative mx-auto w-fit min-h-[224px] md:min-h-[240px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-72 h-52 bg-primary-glow/25 rounded-full blur-[40px]"></div>
@@ -641,30 +650,22 @@ const AuthDesktop = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                 {/*
-                   IMPORTANT: Give the logo an explicit width.
-                   Background images have no intrinsic width; without this, `w-fit`
-                   wrappers can collapse and the logo can disappear.
-                 */}
-                 <button
-                   type="button"
-                   onClick={() => navigate('/')}
-                   aria-label="Gå till startsidan"
-                   className="relative rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 hover:opacity-95 active:scale-[0.99] transition-all"
-                 >
-                   <AuthLogoInline className="relative h-56 w-[min(35rem,90vw)] lg:h-64 lg:w-[min(40rem,90vw)]" />
-                 </button>
+                {/*
+                  IMPORTANT: Explicit width prevents `w-fit` wrappers from collapsing
+                  (background images have no intrinsic width).
+                */}
+                <AuthLogoInline className="relative h-[224px] w-[min(560px,90vw)] md:h-[240px] md:w-[min(600px,90vw)]" />
               </div>
             </div>
             
-            <h1 className="text-xl lg:text-2xl font-semibold text-white mb-3 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-4 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
               Framtiden börjar här
             </h1>
           </div>
 
           {/* Auth form */}
           <div className="w-full max-w-md">
-            <Card className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.55)] rounded-2xl overflow-hidden">
+            <Card className="bg-primary/85 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
@@ -692,7 +693,7 @@ const AuthDesktop = ({
                            enterKeyHint="next"
                           spellCheck={false}
                           autoCapitalize="none"
-                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
@@ -711,7 +712,7 @@ const AuthDesktop = ({
                             name="auth-password"
                             autoComplete="current-password"
                              enterKeyHint="go"
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                           <button
                             type="button"
@@ -868,7 +869,7 @@ const AuthDesktop = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                               />
                             </div>
                              <div>
@@ -885,7 +886,7 @@ const AuthDesktop = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                               />
                             </div>
                          </div>
@@ -907,7 +908,7 @@ const AuthDesktop = ({
                              inputMode="email"
                              spellCheck={false}
                              autoCapitalize="none"
-                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                            />
                             <AuthFieldNotice show={role === 'employer' && !!(employerData.email || '').trim()}>
                               <div className="flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
@@ -943,7 +944,7 @@ const AuthDesktop = ({
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
-                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                     placeholder="T.ex. 070-123 45 67"
                                     required
                                   />
@@ -971,7 +972,7 @@ const AuthDesktop = ({
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1012,7 +1013,7 @@ const AuthDesktop = ({
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1028,7 +1029,7 @@ const AuthDesktop = ({
                                    value={employerData.website}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1040,7 +1041,7 @@ const AuthDesktop = ({
                                   value={employerData.companyDescription}
                                   onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
                                   placeholder="Beskriv vad ert företag gör..."
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white resize-none"
+                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white resize-none"
                                   rows={2}
                                 />
                              </div>
@@ -1059,9 +1060,10 @@ const AuthDesktop = ({
                             value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
+                            minLength={7}
                             name={`new-password-${role}`}
                             autoComplete="new-password"
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                            <button
                             type="button"
@@ -1074,34 +1076,36 @@ const AuthDesktop = ({
                           </button>
                         </div>
                         {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
-                          <div className="mt-2">
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <div
-                                  key={i}
-                                  className={`h-1 flex-1 rounded ${
-                                    i < passwordStrength
-                                      ? passwordStrength < 3
-                                        ? 'bg-destructive'
-                                        : passwordStrength < 5
-                                        ? 'bg-yellow-500'
-                                        : 'bg-green-500'
-                                      : 'bg-muted'
-                                  }`}
-                                />
-                              ))}
+                          <>
+                            <div className="mt-2">
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className={`h-1 flex-1 rounded ${
+                                      i < passwordStrength
+                                        ? passwordStrength < 3
+                                          ? 'bg-destructive'
+                                          : passwordStrength < 5
+                                          ? 'bg-yellow-500'
+                                          : 'bg-green-500'
+                                        : 'bg-muted'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <p className="text-sm text-white mt-1">
+                                {passwordStrength < 3 && 'Svagt lösenord'}
+                                {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
+                                {passwordStrength >= 5 && 'Starkt lösenord'}
+                              </p>
                             </div>
-                            <p className="text-sm text-white mt-1">
-                              {passwordStrength < 3 && 'Svagt lösenord'}
-                              {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
-                              {passwordStrength >= 5 && 'Starkt lösenord'}
-                            </p>
                             <p className="text-xs text-white mt-2">
                               Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken)
                             </p>
-                          </div>
+                          </>
                         )}
-                       </div>
+                      </div>
 
                       {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
                         <div>
@@ -1126,25 +1130,25 @@ const AuthDesktop = ({
                               required
                               name={`confirm-password-${role}`}
                               autoComplete="new-password"
-                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                             />
                             <button
                               type="button"
                               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
+                              onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                              onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
                               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                           </div>
-                          {(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) &&
-                           (role === 'job_seeker' ? jobSeekerData.password : employerData.password) !==
+                          {(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && 
+                           (role === 'job_seeker' ? jobSeekerData.password : employerData.password) !== 
                            (role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && (
                             <p className="text-sm text-destructive mt-1">Lösenorden matchar inte</p>
                           )}
                         </div>
                       )}
-
-                      
                       
                       <SignupConsent
                         role={role}
@@ -1224,4 +1228,4 @@ const AuthDesktop = ({
   );
 };
 
-export default AuthDesktop;
+export default AuthTablet;

@@ -1,15 +1,10 @@
 // Skickar om kontobekräftelse via Lovable Emails (hanterad e-postleverans).
+// Ersätter tidigare Resend-baserad implementation. Callers (useAuth) behöver inte ändras.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 import { enforceRateLimit, normalizeEmail, requestIp } from "../_shared/rate-limit.ts";
-import {
-  genericPublicAuthResponse,
-  readBoundedJson,
-  runAuthBackgroundTask,
-  sha256Hex,
-  withTimeout,
-} from "../_shared/public-auth-security.ts";
-import { sendLoggedTemplateEmail } from "../_shared/transactional-email-templates/send-logged-email.ts";
+import { findUserByEmail } from "../_shared/find-user.ts";
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,95 +17,8 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
 );
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAIL_TIMEOUT_MS = 10_000;
-
 interface ResendRequest {
-  email?: unknown;
-}
-
-interface ResendLookupRow {
-  user_id: string;
-  email_confirmed: boolean;
-  account_role: "job_seeker" | "employer";
-  first_name: string | null;
-  company_name: string | null;
-}
-
-async function processResend(normalizedEmail: string, ip: string): Promise<void> {
-  const limited = await enforceRateLimit(
-    supabaseAdmin,
-    "resend-confirmation",
-    [
-      { scope: "ip", identifier: ip, limit: 20, windowSeconds: 60 * 60 },
-      { scope: "email", identifier: normalizedEmail, limit: 5, windowSeconds: 60 * 60 },
-    ],
-    corsHeaders,
-  );
-  if (limited) return;
-
-  const { data, error } = await supabaseAdmin.rpc("lookup_auth_email_for_resend", {
-    _email: normalizedEmail,
-  });
-  if (error) {
-    console.error("resend lookup failed", { code: error.code ?? "unknown" });
-    return;
-  }
-
-  const row = (Array.isArray(data) ? data[0] : null) as ResendLookupRow | null;
-  if (!row || row.email_confirmed) return;
-
-  const confirmationToken = crypto.randomUUID();
-  const confirmationTokenHash = await sha256Hex(confirmationToken);
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60_000).toISOString();
-  const isEmployer = row.account_role === "employer";
-  const confirmationUrl = `https://www.parium.se/email-confirm#confirm=${confirmationToken}`;
-
-  // Persist before delivery. Every resend gets its own digest-backed one-time
-  // capability, so concurrent mails cannot invalidate each other.
-  const { error: issueError } = await supabaseAdmin.rpc(
-    "issue_email_confirmation_token",
-    {
-      _user_id: row.user_id,
-      _email: normalizedEmail,
-      _raw_token: confirmationToken,
-      _token_digest: confirmationTokenHash,
-      _expires_at: expiresAt,
-    },
-  );
-  if (issueError) {
-    console.error("confirmation token issue failed", {
-      code: issueError.code ?? "unknown",
-    });
-    return;
-  }
-
-  const delivery = await withTimeout(
-    () => sendLoggedTemplateEmail(
-      isEmployer ? "employer-account-confirmation" : "account-confirmation",
-      normalizedEmail,
-      {
-        idempotencyKey: `resend-confirm-${row.user_id}-${crypto.randomUUID()}`,
-        templateData: isEmployer
-          ? {
-              first_name: row.first_name || "där",
-              confirmation_url: confirmationUrl,
-              company_name: row.company_name || "ert företag",
-            }
-          : {
-              first_name: row.first_name || "där",
-              confirmation_url: confirmationUrl,
-            },
-      },
-    ),
-    MAIL_TIMEOUT_MS,
-    "Confirmation resend timed out",
-  );
-
-  if (!delivery.sent) {
-    console.warn("confirmation resend suppressed");
-    return;
-  }
+  email: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -118,24 +26,133 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  let normalizedEmail = "";
   try {
-    const body = await readBoundedJson<ResendRequest>(req);
-    if (!body) return genericPublicAuthResponse(corsHeaders);
-    normalizedEmail = normalizeEmail(
-      typeof body.email === "string" ? body.email : "",
+    const { email } = (await req.json()) as ResendRequest;
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail) {
+      return new Response(
+        JSON.stringify({ error: "Email krävs" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const rateLimitResponse = await enforceRateLimit(
+      supabaseAdmin,
+      "resend-confirmation",
+      [
+        {
+          scope: "email",
+          identifier: normalizedEmail,
+          limit: 5,
+          windowSeconds: 60 * 60,
+          message:
+            "Du har begärt ett nytt bekräftelsemejl flera gånger den senaste timmen. Vänta en stund och försök igen – kolla under tiden skräpposten, mejlet kan redan ligga där.",
+        },
+        { scope: "ip", identifier: requestIp(req), limit: 20, windowSeconds: 60 * 60 },
+      ],
+      corsHeaders,
     );
-  } catch {
-    return genericPublicAuthResponse(corsHeaders);
-  }
+    if (rateLimitResponse) return rateLimitResponse;
 
-  if (!EMAIL_RE.test(normalizedEmail)) {
-    return genericPublicAuthResponse(corsHeaders);
-  }
+    console.log("Resending confirmation", { hasEmail: true });
 
-  const ip = requestIp(req);
-  runAuthBackgroundTask("resend-confirmation", () => processResend(normalizedEmail, ip));
-  return genericPublicAuthResponse(corsHeaders);
+    // 1) Hitta användaren via admin-API.
+    const user = await findUserByEmail(supabaseAdmin, normalizedEmail);
+    if (!user) {
+      // Ge generisk framgång för att inte avslöja huruvida adressen finns.
+      return new Response(
+        JSON.stringify({ success: true, message: "Om adressen finns skickas ett mejl." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (user.email_confirmed_at) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          alreadyConfirmed: true,
+          message: "Kontot är redan bekräftat. Du kan logga in direkt.",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // 2) Skapa ny bekräftelsetoken i egen tabell (samma mönster som custom-signup).
+    const confirmationToken = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24 * 7); // 7 dagars giltighet
+
+    // Rensa gamla tokens för användaren först
+    await supabaseAdmin
+      .from("email_confirmations")
+      .delete()
+      .eq("user_id", user.id);
+
+    const { error: tokenError } = await supabaseAdmin
+      .from("email_confirmations")
+      .insert({
+        user_id: user.id,
+        token: confirmationToken,
+        expires_at: expiresAt.toISOString(),
+      });
+
+    if (tokenError) {
+      console.error("Failed to create confirmation token:", tokenError);
+      throw new Error("Kunde inte skapa bekräftelselänk");
+    }
+
+    const confirmationUrl = `https://parium.se/email-confirm?confirm=${confirmationToken}`;
+
+    // 3) Hämta metadata för mall-personalisering.
+    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const role = metadata.role === "employer" ? "employer" : "job_seeker";
+    const firstName = (metadata.first_name as string) || "där";
+    const companyName = (metadata.company_name as string) || "ert företag";
+
+    // 4) Skicka via Lovable Emails.
+    const idempotencyKey = `resend-confirm-${user.id}-${Date.now()}`;
+    const isEmployer = role === "employer";
+    let data;
+    try {
+      data = await sendLoggedTemplateEmail(
+        isEmployer ? "employer-account-confirmation" : "account-confirmation",
+        normalizedEmail,
+        {
+          idempotencyKey,
+          templateData: isEmployer
+            ? {
+                first_name: firstName,
+                confirmation_url: confirmationUrl,
+                company_name: companyName,
+              }
+            : {
+                first_name: firstName,
+                confirmation_url: confirmationUrl,
+              },
+        },
+      );
+    } catch (sendErr) {
+      console.error("resend confirmation email failed:", sendErr);
+      return new Response(
+        JSON.stringify({ error: "E-postutskicket misslyckades" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    console.log("Resend confirmation sent via Lovable Emails");
+    return new Response(
+      JSON.stringify({ success: true, message: "Ny bekräftelselänk skickad!", data }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("resend-confirmation error:", message);
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
 };
 
 serve(handler);
