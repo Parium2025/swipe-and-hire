@@ -45,6 +45,38 @@ const extractUserId = (value: string): string | null => {
   }
 };
 
+/**
+ * Skyddsnät mot trasiga sessionsvärden (avbruten skrivning, korsad kopiering,
+ * full lagring). Ett halvskrivet värde skickas annars vidare till GoTrue som
+ * en token utan tre JWT-segment → 403 bad_jwt och användaren ser sig utloggad.
+ * Vi kastar bara värden som bevisligen är trasiga.
+ */
+const isUsableSessionValue = (value: string | null | undefined): value is string => {
+  if (!value) return false;
+  const raw = value.startsWith('base64-') ? value.slice(7) : value;
+  let text = raw;
+  if (value.startsWith('base64-')) {
+    try {
+      text = atob(raw);
+    } catch {
+      return false;
+    }
+  }
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return false;
+  }
+  if (!parsed || typeof parsed !== 'object') return false;
+  const token = parsed.access_token ?? parsed.currentSession?.access_token;
+  // Saknas access_token helt låter vi GoTrue avgöra; finns den måste den vara en JWT.
+  if (token === undefined || token === null) return true;
+  return typeof token === 'string' && token.split('.').length === 3;
+};
+
+
+
 
 /**
  * Module-level flag shared with useInactivityTimeout.
