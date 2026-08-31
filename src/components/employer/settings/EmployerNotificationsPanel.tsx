@@ -27,29 +27,29 @@ const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: Employe
           <h3 className="text-sm font-medium text-white">Aviseringar</h3>
         </div>
 
-        <div className="flex items-center justify-end gap-4 pb-1 border-b border-white/10">
-          <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
+        <div className="flex items-center justify-end gap-2 md:gap-4 pb-1 border-b border-white/10">
+          <div className="flex w-11 md:w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
             <Bell className="h-3 w-3 shrink-0" />
             <span>I appen</span>
           </div>
-          <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
+          <div className="flex w-11 md:w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
             <Smartphone className="h-3 w-3 shrink-0" />
             <span>Push</span>
           </div>
-          <div className="flex w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
+          <div className="flex w-11 md:w-14 items-center justify-center gap-1 text-xs text-white whitespace-nowrap">
             <Mail className="h-3 w-3 shrink-0" />
             <span>Mejl</span>
           </div>
         </div>
 
         {notificationItems.map(({ type, label, desc, hasEmail }) => (
-          <div key={type} className="flex items-center justify-between gap-3">
+          <div key={type} className="flex items-center justify-between gap-2 md:gap-3">
             <div className="flex-1 min-w-0">
-              <Label className="text-sm text-white">{label}</Label>
-              <p className="text-sm text-white">{desc}</p>
+              <Label className="text-sm font-medium leading-snug text-white">{label}</Label>
+              <p className="text-[13px] md:text-sm leading-snug text-white">{desc}</p>
             </div>
-            <div className="flex items-center gap-4 shrink-0">
-              <div className="flex w-14 justify-center">
+            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+              <div className="flex w-11 md:w-14 justify-center">
                 <Switch
                   checked={isEnabled(type, 'in_app')}
                   onCheckedChange={(checked) => toggle(type, checked, 'in_app')}
@@ -57,7 +57,7 @@ const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: Employe
                   aria-label={`I appen: ${label}`}
                 />
               </div>
-              <div className="flex w-14 justify-center">
+              <div className="flex w-11 md:w-14 justify-center">
                 <Switch
                   checked={isEnabled(type, 'push')}
                   onCheckedChange={(checked) => toggle(type, checked, 'push')}
@@ -65,7 +65,7 @@ const EmployerNotificationsPanel = ({ isEnabled, toggle, prefsLoading }: Employe
                   aria-label={`Push: ${label}`}
                 />
               </div>
-              <div className="flex w-14 justify-center">
+              <div className="flex w-11 md:w-14 justify-center">
                 {hasEmail && (
                   <Switch
                     checked={isEnabled(type, 'email')}
