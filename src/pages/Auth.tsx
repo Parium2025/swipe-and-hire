@@ -35,6 +35,22 @@ const Auth = () => {
     sessionStorage.removeItem('parium-skip-splash');
   }, []);
 
+  // Måla html/body med samma auth-gradient så att inget avvikande mörkt fält
+  // syns om iOS Safari skjuter upp sidan (tangentbord / verktygsfält).
+  useEffect(() => {
+    const roots = [document.documentElement, document.body];
+    const previous = roots.map((el) => el.style.backgroundImage);
+    roots.forEach((el) => {
+      el.style.setProperty('background-image', AUTH_BACKDROP_STYLE.backgroundImage, 'important');
+    });
+    return () => {
+      roots.forEach((el, i) => {
+        el.style.removeProperty('background-image');
+        if (previous[i]) el.style.backgroundImage = previous[i];
+      });
+    };
+  }, []);
+
   // AnimatedIntro removed - index.html splash handles the loading screen now
   const [isPasswordReset, setIsPasswordReset] = useState(() => {
     try {
@@ -754,8 +770,14 @@ const Auth = () => {
   const AuthBackdrop = () => (
     <div
       aria-hidden
-      className="fixed inset-x-0 top-0 z-0 h-[calc(100dvh+var(--chrome-strip-pad,0px))] overflow-hidden pointer-events-none"
-      style={authBackdropStyle}
+      className="fixed inset-x-0 top-0 z-0 overflow-hidden pointer-events-none"
+      style={{
+        ...authBackdropStyle,
+        // Extra höjd under viewporten: när iOS-tangentbordet öppnas skjuts
+        // sidan upp och en remsa av html-bakgrunden syns annars i botten.
+        height: 'calc(100dvh + var(--chrome-strip-pad, 0px) + 45vh)',
+        backgroundAttachment: 'scroll',
+      }}
     />
   );
 
