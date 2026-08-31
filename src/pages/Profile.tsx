@@ -1975,7 +1975,7 @@ const Profile = () => {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              ) : null}
+              ) : null)}
 
               <input
                 id="profile-image"
@@ -1988,12 +1988,14 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2 text-center">
-              <Label 
-                htmlFor="profile-image" 
-                className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
-              >
-                Klicka här för att välja en bild eller video (max 60 sekunder)
-              </Label>
+              {!activeCandidateProfile && (
+                <Label
+                  htmlFor="profile-image"
+                  className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+                >
+                  Klicka här för att välja en bild eller video (max 60 sekunder)
+                </Label>
+              )}
               
               {isUploadingMedia && (
                 <div className="mx-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2 text-left">
