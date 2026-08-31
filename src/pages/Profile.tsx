@@ -552,6 +552,22 @@ const Profile = () => {
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
   const { cachedUrl: cachedCoverUrl } = useCachedImage(signedCoverUrl);
+
+  // Vald profil i profilväljaren – null = grundprofilen ("Min profil").
+  // När en extraprofil är vald visas dess bild/video på huvudytan istället.
+  const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
+  const activeExtraImageUrl = useMediaUrl(activeCandidateProfile?.profile_image_url || undefined, 'profile-image');
+  const activeExtraVideoUrl = useMediaUrl(activeCandidateProfile?.video_url || undefined, 'profile-video');
+  const activeExtraVideoPoster = useVideoPoster(activeCandidateProfile?.video_url || undefined);
+
+  const displayIsVideo = activeCandidateProfile
+    ? !!activeCandidateProfile.video_url
+    : (isProfileVideo && !!videoUrl);
+  const displayVideoUrl = activeCandidateProfile ? activeExtraVideoUrl : signedVideoUrl;
+  const displayVideoPoster = activeCandidateProfile ? activeExtraVideoPoster : videoPosterUrl;
+  const displayImageUrl = activeCandidateProfile
+    ? activeExtraImageUrl
+    : (cachedProfileImageUrl || signedProfileImageUrl);
   
   // Extended profile fields - using correct database field names
   const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
