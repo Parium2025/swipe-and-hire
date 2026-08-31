@@ -75,9 +75,12 @@ const LANDSCAPE_TOP_BIAS_MAX = 50;
 // Surfplatta stående: mastern är exakt 3:4 (1200×1600 = 0,75). En iPad i
 // porträtt är 0,75 på pappret men webbläsarens adressfält/verktygsfält gör
 // den faktiska viewporten kortare (t.ex. 820×1120 = 0,73). Då kapar
-// object-cover några procent i HÖJD — och med `center` fördelas det lika
-// mellan topp och botten, vilket är precis där huvudena ligger. 25 % lägger
-// merparten av bortfallet i botten (golv/mark) så huvudet alltid får rum.
+// object-cover några procent i SIDLED — och med `center` fördelas det lika
+// mellan vänster och höger. Lagerscenen är komponerad något till höger i
+// 3:4-mastern, så vi glider mjukt från 50 % mot 68 % i sidled ju smalare
+// viewporten blir, vilket håller paret centrerat utan att påverka andra
+// scener märkbart. I höjd lägger 20 % merparten av bortfallet i botten
+// (golv/mark) så huvudena alltid får rum.
 const TABLET_TOP_BIAS = '20%';
 
 const landscapeObjectPosition = () => {
@@ -93,6 +96,23 @@ const landscapeObjectPosition = () => {
   const t = Math.min(1, (ratio - SOURCE_RATIO) / (2.1 - SOURCE_RATIO));
   const bias = LANDSCAPE_TOP_BIAS_MAX - t * (LANDSCAPE_TOP_BIAS_MAX - LANDSCAPE_TOP_BIAS_MIN);
   return `center ${bias.toFixed(1)}%`;
+};
+
+const tabletObjectPosition = () => {
+  if (typeof window === 'undefined') return `center ${TABLET_TOP_BIAS}`;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return `center ${TABLET_TOP_BIAS}`;
+  const ratio = w / h;
+  const SOURCE_TABLET_RATIO = 3 / 4; // 0.75
+  // Bredare än källan → beskärningen sker i höjdled, horisontellt är allt redan synligt.
+  if (ratio >= SOURCE_TABLET_RATIO) return `center ${TABLET_TOP_BIAS}`;
+  // Ju smalare viewport, desto mer beskärning i sidled → glid mjukt från
+  // 50 % (ingen sidbeskärning) mot 68 % vid porträttgränsen, vilket visar
+  // mer av källans högra sida och centrerar lagerscenen.
+  const t = Math.min(1, (SOURCE_TABLET_RATIO - ratio) / (SOURCE_TABLET_RATIO - PORTRAIT_MAX_RATIO));
+  const x = 50 + t * 18;
+  return `${x.toFixed(1)}% ${TABLET_TOP_BIAS}`;
 };
 
 
@@ -131,6 +151,7 @@ const HeroVideo = () => {
   const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
   const [tier, setTier] = useState<HeroTier>(getTier);
   const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
+  const [tabletPosition, setTabletPosition] = useState<string>(tabletObjectPosition);
   // iOS Lågeffektläge blockerar autoplay. Safari ritar då sin egen play-knapp
   // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
   // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
@@ -166,6 +187,7 @@ const HeroVideo = () => {
     let settleTimer: number | null = null;
     const handle = () => {
       setLandscapePosition(landscapeObjectPosition());
+      setTabletPosition(tabletObjectPosition());
       const nextTier = getTier();
       if (nextTier !== tierRef.current) {
         if (settleTimer !== null) {
@@ -500,7 +522,7 @@ const HeroVideo = () => {
             className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${
               autoplayBlocked || skipVideo ? 'z-10' : 'z-0'
             }`}
-            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? tabletPosition : 'center center' }}
           />
 
           <video
@@ -524,7 +546,7 @@ const HeroVideo = () => {
             // Varje nivå har en master med nästan samma proportion som viewporten,
             // så object-cover kapar bara några procent — aldrig svarta ränder.
             style={{
-              objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center',
+              objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? tabletPosition : 'center center',
               // Tona in först när en riktig bildruta finns — annars kan Safaris
               // tomma (svarta) videoyta lägga sig över posterlagret.
               opacity: videoPainted && !autoplayBlocked && !skipVideo ? 1 : 0,
