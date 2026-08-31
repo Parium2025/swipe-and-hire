@@ -8,6 +8,8 @@
 type SplashListener = (visible: boolean) => void;
 type AuthSplashRole = 'job_seeker' | 'employer';
 
+import { syncBrowserChrome } from '@/lib/browserChrome';
+
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
 let currentRole: AuthSplashRole | null = null;
@@ -27,8 +29,10 @@ const clearTransitionChrome = () => {
   try {
     delete document.documentElement.dataset.authTransition;
     delete document.body.dataset.authTransition;
-    document.documentElement.style.removeProperty('background-color');
-    document.body.style.removeProperty('background-color');
+    // Övergången kan avslutas efter att React redan har synkat den nya rutten.
+    // Ta därför inte bort inline-färgen här — det återställde Safari till en
+    // äldre samplad färg efter logout. Låt den aktuella rutten skriva sist.
+    syncBrowserChrome(window.location.pathname);
   } catch {
     /* ignore */
   }
@@ -152,6 +156,12 @@ export const authSplashEvents = {
   show(role?: string | null) {
     persistSplashRole(role);
     if (currentlyVisible) return;
+    // Vid logout ligger URL:en kvar på den skyddade rutten under första
+    // click-framen. Förbered auth-färgen innan Safari hinner sampla den gamla
+    // sidans nederkant. Login startar redan på /auth och synkas av rutten.
+    if (typeof window !== 'undefined' && window.location.pathname !== '/auth') {
+      syncBrowserChrome('/auth');
+    }
     // Täcker skärmen synkront i samma click-frame, innan React hinner committa
     // splash-komponenten. Det eliminerar mini-blixten vid login/logout.
     mountImmediateGate();

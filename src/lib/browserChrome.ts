@@ -28,6 +28,7 @@ const nudgeColor = (color: string) => {
 };
 
 const THEME_META_ID = 'parium-theme-color';
+let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
   // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
@@ -52,12 +53,20 @@ const writeThemeColor = (color: string) => {
 };
 
 const setThemeColor = (color: string) => {
+  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(pendingThemeFrame);
+    pendingThemeFrame = null;
+  }
+
   // Skriv först en nästan identisk färg, sedan målfärgen på nästa frame.
   // iOS Safari ignorerar annars ibland en uppdatering vid back-navigation
   // eftersom värdet uppfattas som oförändrat sedan förra samplingen.
   writeThemeColor(nudgeColor(color));
   if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(() => writeThemeColor(color));
+    pendingThemeFrame = requestAnimationFrame(() => {
+      pendingThemeFrame = null;
+      writeThemeColor(color);
+    });
   } else {
     writeThemeColor(color);
   }
