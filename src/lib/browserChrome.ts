@@ -136,15 +136,27 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
 };
 
-// Mountar en pageshow/popstate-listener som re-syncar chrome när Safari
-// restorar sidan från bfcache (back/forward). Annars sitter den gamla
-// theme-color-färgen kvar i URL-baren även efter SPA-back.
+// Mountar lyssnare som re-syncar chrome när Safari restorar sidan från
+// bfcache (back/forward), när fliken blir synlig igen, eller vid rotation
+// (Safari kan sampla om chrome-färgen vid layoutändringar). Resyncen
+// koalesceras via rAF så att en burst av events bara triggar en synk.
 let pageshowMounted = false;
+let resyncScheduled = false;
 export const mountChromePopstateGuard = () => {
   if (pageshowMounted || typeof window === 'undefined') return;
   pageshowMounted = true;
-  const resync = () => syncBrowserChrome(window.location.pathname);
-  window.addEventListener('pageshow', resync);
+  const resync = () => {
+    if (resyncScheduled) return;
+    resyncScheduled = true;
+    requestAnimationFrame(() => {
+      resyncScheduled = false;
+      syncBrowserChrome(window.location.pathname);
+    });
+  };
+  // Endast bfcache-restore — första laddningen hanteras redan av App.tsx.
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) resync();
+  });
   window.addEventListener('popstate', resync);
   // Tillbaka från en extern sida/app-växling: Safari kan ha kvar den gamla
   // sampladefärgen. Re-synka så snart sidan blir synlig igen.
@@ -152,9 +164,7 @@ export const mountChromePopstateGuard = () => {
     if (document.visibilityState === 'visible') resync();
   });
   window.addEventListener('focus', resync);
-};
-
-
-export const noteChromePath = (_pathname: string) => {
-  /* noop */
+  // Rotation/layoutändring: iOS Safari kan re-sampla verktygsbarens färg
+  // när viewporten byter proportioner.
+  window.addEventListener('orientationchange', resync);
 };
