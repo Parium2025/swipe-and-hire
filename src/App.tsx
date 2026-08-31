@@ -129,7 +129,7 @@ import { AuthSplashScreen } from "@/components/AuthSplashScreen";
 import { RealtimeKeepAlive } from "@/components/RealtimeKeepAlive";
 import { OfflineQueueRunner } from "@/components/OfflineQueueRunner";
 import { AppFailureMonitor } from "@/components/AppFailureMonitor";
-import { syncBrowserChrome, mountChromePopstateGuard, noteChromePath } from "@/lib/browserChrome";
+import { syncBrowserChrome, mountChromePopstateGuard } from "@/lib/browserChrome";
 import BottomChromeStrip from "@/components/BottomChromeStrip";
 import TopChromeStrip from "@/components/TopChromeStrip";
 import { PremiumLimitListener } from "@/components/premium/PremiumLimitListener";
@@ -201,7 +201,6 @@ const AnimatedRoutes = () => {
   useLayoutEffect(() => {
     mountChromePopstateGuard();
     syncBrowserChrome(location.pathname);
-    noteChromePath(location.pathname);
   }, [location.pathname]);
 
   return (
