@@ -75,9 +75,12 @@ const LANDSCAPE_TOP_BIAS_MAX = 50;
 // Surfplatta stående: mastern är exakt 3:4 (1200×1600 = 0,75). En iPad i
 // porträtt är 0,75 på pappret men webbläsarens adressfält/verktygsfält gör
 // den faktiska viewporten kortare (t.ex. 820×1120 = 0,73). Då kapar
-// object-cover några procent i HÖJD — och med `center` fördelas det lika
-// mellan topp och botten, vilket är precis där huvudena ligger. 25 % lägger
-// merparten av bortfallet i botten (golv/mark) så huvudet alltid får rum.
+// object-cover några procent i SIDLED — och med `center` fördelas det lika
+// mellan vänster och höger. Lagerscenen är komponerad något till höger i
+// 3:4-mastern, så vi glider mjukt från 50 % mot 58 % i sidled ju smalare
+// viewporten blir, vilket håller paret centrerat utan att påverka andra
+// scener märkbart. I höjd lägger 20 % merparten av bortfallet i botten
+// (golv/mark) så huvudena alltid får rum.
 const TABLET_TOP_BIAS = '20%';
 
 const landscapeObjectPosition = () => {
@@ -93,6 +96,23 @@ const landscapeObjectPosition = () => {
   const t = Math.min(1, (ratio - SOURCE_RATIO) / (2.1 - SOURCE_RATIO));
   const bias = LANDSCAPE_TOP_BIAS_MAX - t * (LANDSCAPE_TOP_BIAS_MAX - LANDSCAPE_TOP_BIAS_MIN);
   return `center ${bias.toFixed(1)}%`;
+};
+
+const tabletObjectPosition = () => {
+  if (typeof window === 'undefined') return `center ${TABLET_TOP_BIAS}`;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return `center ${TABLET_TOP_BIAS}`;
+  const ratio = w / h;
+  const SOURCE_TABLET_RATIO = 3 / 4; // 0.75
+  // Bredare än källan → beskärningen sker i höjdled, horisontellt är allt redan synligt.
+  if (ratio >= SOURCE_TABLET_RATIO) return `center ${TABLET_TOP_BIAS}`;
+  // Ju smalare viewport, desto mer beskärning i sidled → glid mjukt från
+  // 50 % (ingen sidbeskärning) mot 58 % vid porträttgränsen, vilket visar
+  // mer av källans högra sida och centrerar lagerscenen.
+  const t = Math.min(1, (SOURCE_TABLET_RATIO - ratio) / (SOURCE_TABLET_RATIO - PORTRAIT_MAX_RATIO));
+  const x = 50 + t * 8;
+  return `${x.toFixed(1)}% ${TABLET_TOP_BIAS}`;
 };
 
 
