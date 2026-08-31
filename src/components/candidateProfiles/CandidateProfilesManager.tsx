@@ -99,15 +99,15 @@ export function CandidateProfilesManager({ userId }: Props) {
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-3 text-[12px] text-white/70">
-                  <span className={`inline-flex items-center gap-1 ${p.cv_url ? 'text-white' : ''}`}>
-                    <FileText className="h-3.5 w-3.5" /> {p.cv_url ? 'CV' : 'Inget CV'}
+                <div className="mt-2 flex flex-wrap gap-3 text-[12px] text-white">
+                  <span className="inline-flex items-center gap-1 text-white">
+                    <FileText className="h-3.5 w-3.5 text-white" /> {p.cv_url ? 'CV' : 'Inget CV'}
                   </span>
-                  <span className={`inline-flex items-center gap-1 ${p.video_url ? 'text-white' : ''}`}>
-                    <Video className="h-3.5 w-3.5" /> {p.video_url ? 'Video' : 'Ingen video'}
+                  <span className="inline-flex items-center gap-1 text-white">
+                    <Video className="h-3.5 w-3.5 text-white" /> {p.video_url ? 'Video' : 'Ingen video'}
                   </span>
-                  <span className={`inline-flex items-center gap-1 ${p.profile_image_url ? 'text-white' : ''}`}>
-                    <ImageIcon className="h-3.5 w-3.5" /> {p.profile_image_url ? 'Bild' : 'Ingen bild'}
+                  <span className="inline-flex items-center gap-1 text-white">
+                    <ImageIcon className="h-3.5 w-3.5 text-white" /> {p.profile_image_url ? 'Bild' : 'Ingen bild'}
                   </span>
                 </div>
               </div>
@@ -153,9 +153,9 @@ export function CandidateProfilesManager({ userId }: Props) {
           onClick={openNew}
           className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 touch-manipulation bg-white/5 text-white border border-white/10 md:hover:bg-white/10 disabled:opacity-50"
         >
-          <span className="inline-flex items-center justify-center gap-2 w-full">
-            <Plus className="h-4 w-4" />
-            <span>{canCreateMore ? 'Lägg till profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
+          <span className="inline-flex items-center justify-center gap-2 leading-none">
+            <Plus className="h-4 w-4 shrink-0" />
+            <span className="leading-none">{canCreateMore ? 'Lägg till profil' : `Max ${MAX_CANDIDATE_PROFILES} profiler`}</span>
           </span>
         </button>
       </div>
