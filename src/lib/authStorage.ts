@@ -329,17 +329,24 @@ export class AuthStorageAdapter implements Storage {
       // 1. Primary: per-tab sessionStorage
       let value: string | null = null;
       try { value = sessionStorage.getItem(key); } catch {}
-      if (value) return value;
+      if (value) {
+        if (isUsableSessionValue(value)) return value;
+        // Trasigt värde: släng det i stället för att skicka en ogiltig token.
+        try { sessionStorage.removeItem(key); } catch {}
+      }
 
       // 2. Fallback: Remember Me snapshot in localStorage (renamed key —
       //    Supabase does NOT watch this key, so it won't trigger cross-tab sync).
       if (shouldRememberUser()) {
         const snap = readLocal(snapshotKey(key));
         if (snap) {
-          // Hydrate sessionStorage so subsequent reads are fast and
-          // Supabase's normal flow continues from sessionStorage only.
-          try { sessionStorage.setItem(key, snap); } catch {}
-          return snap;
+          if (isUsableSessionValue(snap)) {
+            // Hydrate sessionStorage so subsequent reads are fast and
+            // Supabase's normal flow continues from sessionStorage only.
+            try { sessionStorage.setItem(key, snap); } catch {}
+            return snap;
+          }
+          removeLocal(snapshotKey(key));
         }
       }
 
@@ -350,6 +357,10 @@ export class AuthStorageAdapter implements Storage {
       try {
         const legacy = localStorage.getItem(key);
         if (legacy) {
+          if (!isUsableSessionValue(legacy)) {
+            try { localStorage.removeItem(key); } catch {}
+            return null;
+          }
           try { sessionStorage.setItem(key, legacy); } catch {}
           if (shouldRememberUser()) {
             writeLocal(snapshotKey(key), legacy);
@@ -358,6 +369,7 @@ export class AuthStorageAdapter implements Storage {
           return legacy;
         }
       } catch {}
+
 
       return null;
     }
