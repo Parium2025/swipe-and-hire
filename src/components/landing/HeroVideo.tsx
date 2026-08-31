@@ -522,7 +522,7 @@ const HeroVideo = () => {
             className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${
               autoplayBlocked || skipVideo ? 'z-10' : 'z-0'
             }`}
-            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center' }}
+            style={{ objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? tabletPosition : 'center center' }}
           />
 
           <video
@@ -546,7 +546,7 @@ const HeroVideo = () => {
             // Varje nivå har en master med nästan samma proportion som viewporten,
             // så object-cover kapar bara några procent — aldrig svarta ränder.
             style={{
-              objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? `center ${TABLET_TOP_BIAS}` : 'center center',
+              objectPosition: tier === 'landscape' ? landscapePosition : tier === 'tablet' ? tabletPosition : 'center center',
               // Tona in först när en riktig bildruta finns — annars kan Safaris
               // tomma (svarta) videoyta lägga sig över posterlagret.
               opacity: videoPainted && !autoplayBlocked && !skipVideo ? 1 : 0,
