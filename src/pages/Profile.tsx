@@ -1977,7 +1977,8 @@ const Profile = () => {
               <ProfileSwitcherRail
                 ref={profileRailRef}
                 userId={user?.id}
-                baseImageUrl={signedProfileImageUrl}
+                baseImageUrl={isProfileVideo ? null : signedProfileImageUrl}
+                baseCoverUrl={signedCoverUrl}
                 baseHasVideo={isProfileVideo && !!videoUrl}
                 onActiveProfileChange={setActiveCandidateProfile}
               />
@@ -2130,8 +2131,8 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover-bild – samma uppsättning för grundprofilen och varje extraprofil. */}
-            {displayIsVideo && (
+            {/* Cover-bild – samma uppsättning för alla profiler, med eller utan video. */}
+            {(displayIsVideo || !!displayImagePath) && (
 
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
@@ -2142,7 +2143,7 @@ const Profile = () => {
                       onClick={handleEditExistingCover}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
                     >
-                      Anpassa din bild
+                      {displayIsVideo ? 'Anpassa din bild' : 'Anpassa cover-bild'}
                     </button>
                   )}
 
@@ -2176,6 +2177,18 @@ const Profile = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Bildprofil: gör det enkelt att komplettera med en video. */}
+                  {!displayIsVideo && (
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('profile-image')?.click()}
+                      disabled={isUploadingMedia}
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                    >
+                      Lägg till video
+                    </button>
+                  )}
                 </div>
                 <Input 
                   type="file" 

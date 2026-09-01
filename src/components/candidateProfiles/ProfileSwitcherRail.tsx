@@ -3,7 +3,6 @@ import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check } from 'lucide
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { getVideoPosterPath } from '@/lib/mediaManager';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -17,6 +16,8 @@ interface Props {
   userId?: string;
   /** Signerad URL till grundprofilens bild (om någon). */
   baseImageUrl?: string | null;
+  /** Signerad URL till grundprofilens cover-bild (används om profilen är en video). */
+  baseCoverUrl?: string | null;
   /** Om grundprofilen har en video istället för bild. */
   baseHasVideo?: boolean;
   /** Anropas när valet ändras – null betyder att grundprofilen ("Min profil") är vald. */
@@ -122,7 +123,7 @@ const SLOT_SPACING = 116;
  * på ett sidokort glidande flyttar det till mitten.
  */
 export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, Props>(function ProfileSwitcherRail(
-  { userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props,
+  { userId, baseImageUrl, baseCoverUrl, baseHasVideo, onActiveProfileChange }: Props,
   ref,
 ) {
   const { toast } = useToast();
@@ -155,27 +156,21 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
   const chips: ChipData[] = useMemo(() => [
     {
-      id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? null,
+      id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? baseCoverUrl ?? null,
       imagePath: null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault,
     },
     ...profiles.map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
-      // Miniatyr: profilbild först, annars videons poster, annars cover-bilden.
-      imagePath:
-        p.profile_image_url ||
-        (p.video_url ? getVideoPosterPath(p.video_url) : null) ||
-        p.cover_image_url,
+      // Miniatyr: profilbilden i första hand, annars cover-bilden. Aldrig videon.
+      imagePath: p.profile_image_url || p.cover_image_url,
       hasVideo: !!p.video_url,
       isDefault: p.id === effectiveDefaultId,
     })),
-  ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
+  ], [profiles, baseImageUrl, baseCoverUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
 
-  // Standardprofilen ligger alltid först; övriga följer i sin ordning.
-  const orderedChips = useMemo(() => {
-    const def = chips.filter((c) => c.isDefault);
-    const rest = chips.filter((c) => !c.isDefault);
-    return [...def, ...rest];
-  }, [chips]);
+  // Ordningen ligger fast (grundprofilen först, sedan skapandeordning) så att
+  // stjärnan bara glider in kortet i mitten – inga kort byter plats med varandra.
+  const orderedChips = chips;
 
   // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
   // och därmed glida in i mitten av karusellen.
@@ -359,7 +354,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
           return (
             <div
               key={slot.key}
-              className="absolute left-1/2 top-0 transition-all duration-300 ease-out"
+              className="absolute left-1/2 top-0 transition-all duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 transform: `translateX(calc(-50% + ${offset * SLOT_SPACING}px)) scale(${isCenter ? 1 : 0.85})`,
                 opacity: isCenter ? 1 : isVisible ? 0.7 : 0,
