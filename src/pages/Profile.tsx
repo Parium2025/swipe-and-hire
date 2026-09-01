@@ -1867,7 +1867,10 @@ const Profile = () => {
             <h3 className="text-base font-semibold text-white text-center">
               Profilbild/Profilvideo
             </h3>
-            <p className="text-white text-center text-sm">
+            <p className="text-white text-center text-xs mt-1">
+              (Du kan ha upp till tre profiler)
+            </p>
+            <p className="text-white text-center text-sm mt-2">
               Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt.
             </p>
 
