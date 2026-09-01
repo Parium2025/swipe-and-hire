@@ -99,6 +99,26 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     uploadedPathsRef.current.clear();
   };
 
+  const resetToSavedProfile = () => {
+    setLabel(profile?.label ?? '');
+    setCvUrl(profile?.cv_url ?? null);
+    setCvFilename(profile?.cv_filename ?? null);
+    setVideoUrl(profile?.video_url ?? null);
+    setImageUrl(profile?.profile_image_url ?? null);
+    setCoverUrl(profile?.cover_image_url ?? null);
+    setDeletedMedia(null);
+    setDeletedCover(null);
+    setDeletedCv(null);
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      void cleanupNewUploads();
+      resetToSavedProfile();
+    }
+    onOpenChange(nextOpen);
+  };
+
   const handleSaveProfile = async () => {
     const input: CandidateProfileInput = {
       label,
@@ -116,6 +136,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
       return;
     }
     await cleanupNewUploads();
+    resetToSavedProfile();
   };
 
   /** Bild eller video till profilen – samma flöde som på Min profil. */
@@ -189,7 +210,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
 <DialogContent
           className="max-h-[85vh] overflow-y-auto sm:max-w-lg bg-card-parium border-0 text-white"
           // På pekskärmar ska inte namnfältet autofokuseras – då åker tangentbordet
@@ -452,7 +473,11 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt']}
                   maxFileSize={50 * 1024 * 1024}
                   dropzoneClassName={DROPZONE}
-                  onFileUploaded={(url, fileName) => { setCvUrl(url); setCvFilename(fileName); }}
+                  onFileUploaded={(url, fileName) => {
+                    uploadedPathsRef.current.set(url, 'cv');
+                    setCvUrl(url);
+                    setCvFilename(fileName);
+                  }}
                   onFileRemoved={() => { setCvUrl(null); setCvFilename(null); }}
                 />
               )}
@@ -471,7 +496,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             </button>
             <button
               type="button"
-              onClick={() => { void cleanupNewUploads(); onOpenChange(false); }}
+              onClick={() => handleOpenChange(false)}
               className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/10 transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt
