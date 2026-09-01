@@ -420,9 +420,42 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   ];
   const activeIndex = Math.max(0, slots.findIndex((s) => s.key === activeId));
 
+  // Tangentbord: piltangenter flyttar mellan korten, Home/End hoppar längst ut,
+  // Enter/Blanksteg öppnar "Ny profil" och Delete tar bort vald extraprofil.
+  const handleRailKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const move = (next: number) => {
+      e.preventDefault();
+      const clamped = Math.min(slots.length - 1, Math.max(0, next));
+      const slot = slots[clamped];
+      if (slot) setActiveId(slot.key);
+    };
+    switch (e.key) {
+      case 'ArrowLeft': move(activeIndex - 1); break;
+      case 'ArrowRight': move(activeIndex + 1); break;
+      case 'Home': move(0); break;
+      case 'End': move(slots.length - 1); break;
+      case 'Enter':
+      case ' ':
+        if (slots[activeIndex]?.isAdd) { e.preventDefault(); openNew(); }
+        break;
+      case 'Delete':
+      case 'Backspace':
+        if (activeId !== 'base' && !slots[activeIndex]?.isAdd) { e.preventDefault(); requestDelete(activeId); }
+        break;
+      default: break;
+    }
+  };
+
   return (
     <div className="space-y-2">
-      <div className="relative mx-auto h-[128px] w-full max-w-[460px]">
+      <div
+        className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        role="listbox"
+        aria-label="Välj profil"
+        aria-activedescendant={`profile-slot-${slots[activeIndex]?.key ?? 'base'}`}
+        tabIndex={0}
+        onKeyDown={handleRailKeyDown}
+      >
         {slots.map((slot, idx) => {
           const offset = idx - activeIndex;
           const isCenter = offset === 0;
