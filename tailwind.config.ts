@@ -167,7 +167,15 @@ export default {
 						animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)'
 					}
 				},
+				// Stjärnmarkering av standardprofil
+				'star-pop': {
+					'0%': { transform: 'scale(1) rotate(0deg)' },
+					'35%': { transform: 'scale(1.45) rotate(-18deg)' },
+					'65%': { transform: 'scale(0.92) rotate(10deg)' },
+					'100%': { transform: 'scale(1) rotate(0deg)' },
+				},
 				// Weather effect keyframes (GPU-accelerated CSS instead of framer-motion)
+
 				'twinkle': {
 					'0%, 100%': { opacity: 'var(--tw-opacity, 0.5)' },
 					'50%': { opacity: 'calc(var(--tw-opacity, 0.5) * 0.4)' },
@@ -280,6 +288,8 @@ export default {
 					'gradient': 'gradient 15s ease infinite',
 					'bounce': 'soft-bounce 2s ease-in-out infinite',
 					'soft-bounce': 'soft-bounce 2s ease-in-out infinite',
+					'star-pop': 'star-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+
 				/* Landing page */
 					'landing-blob-1': 'landing-blob-1 18s ease-in-out infinite',
 					'landing-blob-2': 'landing-blob-2 22s ease-in-out infinite',

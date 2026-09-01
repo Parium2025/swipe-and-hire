@@ -46,7 +46,7 @@ import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
-import ProfileSwitcherRail from '@/components/candidateProfiles/ProfileSwitcherRail';
+import ProfileSwitcherRail, { type ProfileSwitcherRailHandle } from '@/components/candidateProfiles/ProfileSwitcherRail';
 import type { CandidateProfile } from '@/hooks/useCandidateProfiles';
 
 
@@ -558,9 +558,12 @@ const Profile = () => {
   // Vald profil i profilväljaren – null = grundprofilen ("Min profil").
   // När en extraprofil är vald visas dess bild/video på huvudytan istället.
   const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
+  const profileRailRef = useRef<ProfileSwitcherRailHandle>(null);
   const activeExtraImageUrl = useMediaUrl(activeCandidateProfile?.profile_image_url || undefined, 'profile-image');
   const activeExtraVideoUrl = useMediaUrl(activeCandidateProfile?.video_url || undefined, 'profile-video');
+  const activeExtraCoverUrl = useMediaUrl(activeCandidateProfile?.cover_image_url || undefined, 'cover-image');
   const activeExtraVideoPoster = useVideoPoster(activeCandidateProfile?.video_url || undefined);
+
 
   const displayIsVideo = activeCandidateProfile
     ? !!activeCandidateProfile.video_url
@@ -1877,6 +1880,7 @@ const Profile = () => {
 
             {!isEmployer && (
               <ProfileSwitcherRail
+                ref={profileRailRef}
                 userId={user?.id}
                 baseImageUrl={signedProfileImageUrl}
                 baseHasVideo={isProfileVideo && !!videoUrl}
@@ -1922,7 +1926,7 @@ const Profile = () => {
               {displayIsVideo ? (
                 <ProfileVideo
                   videoUrl={displayVideoUrl}
-                  coverImageUrl={activeCandidateProfile ? undefined : signedCoverUrl}
+                  coverImageUrl={activeCandidateProfile ? (activeExtraCoverUrl ?? undefined) : signedCoverUrl}
                   posterUrl={displayVideoPoster}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
@@ -1931,8 +1935,10 @@ const Profile = () => {
                 />
               ) : (
                 <div
-                  className={activeCandidateProfile ? '' : 'cursor-pointer'}
-                  onClick={activeCandidateProfile ? undefined : () => document.getElementById('profile-image')?.click()}
+                  className="cursor-pointer"
+                  onClick={activeCandidateProfile
+                    ? () => profileRailRef.current?.editActiveProfile()
+                    : () => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
                     {displayImageUrl ? (
@@ -2011,14 +2017,37 @@ const Profile = () => {
                 />
               )}
               
-              {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
+              {/* Vald extraprofil: egen media, egen cover, egen CV – helt separat tunnel. */}
+              {activeCandidateProfile && !isUploadingMedia && (
+                <div className="flex flex-col items-center space-y-2">
+                  {(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url) && (
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
+                      {activeCandidateProfile.video_url ? 'Video' : 'Bild'} uppladdad!
+                    </Badge>
+                  )}
+                  {activeCandidateProfile.cover_image_url && (
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
+                      Cover-bild uppladdad!
+                    </Badge>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => profileRailRef.current?.editActiveProfile()}
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+                  >
+                    Redigera den här profilen
+                  </button>
+                </div>
+              )}
+
+              {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && !isUploadingMedia && (
                 <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
               
               {/* Anpassa din bild button - only show for images, not videos */}
-              {(!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
+              {!activeCandidateProfile && (!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
                 <div className="flex flex-col items-center space-y-2">
                   <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                     Bild uppladdad!
@@ -2034,8 +2063,9 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover image upload - show when video exists OR when cover image exists without video */}
-            {(isProfileVideo && !!videoUrl) && (
+            {/* Cover image upload – endast för grundprofilen. Extraprofiler har egen cover i sin redigerare. */}
+            {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && (
+
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   {/* First row: Edit existing cover button - matchar arbetsgivarsidans struktur */}

@@ -22,6 +22,12 @@ interface Props {
   onActiveProfileChange?: (profile: CandidateProfile | null) => void;
 }
 
+/** Utåtriktade kommandon så att profilsidan kan öppna redigeraren för vald profil. */
+export interface ProfileSwitcherRailHandle {
+  editActiveProfile: () => void;
+}
+
+
 interface ChipData {
   id: string;
   label: string;
@@ -56,13 +62,15 @@ function ProfileAvatar({
 
 interface ChipProps extends ChipData {
   active: boolean;
+  /** Sant precis när stjärnan slagits på – ger en kort pop-animation. */
+  starBurst?: boolean;
   onSelect: () => void;
   onToggleDefault: () => void;
 }
 
 /** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
 }: ChipProps) {
   return (
     <div
@@ -92,12 +100,13 @@ function ProfileChip({
         className="absolute -top-1.5 -right-1.5 rounded-full border border-white/20 bg-[#0b2a55] p-1.5 transition-colors md:hover:bg-white/15"
       >
         <Star
-          className="h-3.5 w-3.5"
+          className={`h-3.5 w-3.5 transition-colors duration-200 ${starBurst ? 'animate-star-pop' : ''}`}
           style={isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: '#FFFFFF' }}
         />
       </button>
     </div>
   );
+
 }
 
 /** Avstånd mellan kortpositionerna i karusellen (kortbredd 104px + mellanrum). */
@@ -109,7 +118,10 @@ const SLOT_SPACING = 116;
  * aktivt kort i mitten, grannar tittar fram till vänster/höger, och ett tryck
  * på ett sidokort glidande flyttar det till mitten.
  */
-export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props) {
+export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, Props>(function ProfileSwitcherRail(
+  { userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props,
+  ref,
+) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const {
@@ -121,9 +133,22 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string>('base');
+  // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
+  const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
+  const [starBurstId, setStarBurstId] = useState<string | null>(null);
 
-  const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
+  const dbDefaultId = useMemo(
+    () => profiles.find((p) => p.is_default)?.id ?? 'base',
+    [profiles],
+  );
+  const effectiveDefaultId = pendingDefaultId ?? dbDefaultId;
+  const baseIsDefault = effectiveDefaultId === 'base';
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
+
+  // Släpp den optimistiska markeringen när databasen hunnit ikapp.
+  useEffect(() => {
+    if (pendingDefaultId && dbDefaultId === pendingDefaultId) setPendingDefaultId(null);
+  }, [pendingDefaultId, dbDefaultId]);
 
   const chips: ChipData[] = useMemo(() => [
     {
@@ -132,9 +157,10 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     },
     ...profiles.map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
-      imagePath: p.profile_image_url, hasVideo: !!p.video_url, isDefault: p.is_default,
+      imagePath: p.profile_image_url, hasVideo: !!p.video_url,
+      isDefault: p.id === effectiveDefaultId,
     })),
-  ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
+  ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
 
   // Standardprofilen ligger alltid först; övriga följer i sin ordning.
   const orderedChips = useMemo(() => {
@@ -145,7 +171,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
 
   // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
   // och därmed glida in i mitten av karusellen.
-  const defaultChipId = baseIsDefault ? 'base' : profiles.find((p) => p.is_default)?.id ?? 'base';
+  const defaultChipId = effectiveDefaultId;
   const prevDefaultRef = React.useRef<string | null>(null);
   useEffect(() => {
     if (prevDefaultRef.current === null) { prevDefaultRef.current = defaultChipId; return; }
@@ -163,18 +189,31 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
 
   const openNew = () => { setEditing(null); setEditorOpen(true); };
 
+  React.useImperativeHandle(ref, () => ({
+    editActiveProfile: () => {
+      if (!activeProfile) return;
+      setEditing(activeProfile);
+      setEditorOpen(true);
+    },
+  }), [activeProfile]);
+
   const selectChip = (id: string) => setActiveId(id);
 
   const makeDefault = async (id: string) => {
-    if (id === 'base') {
-      if (!baseIsDefault) await clearDefaultProfile();
-    } else {
-      const p = profiles.find((x) => x.id === id);
-      if (p && !p.is_default) await setDefaultProfile(id);
-    }
-    // Den stjärnmarkerade ska också visas som vald (ligga i mitten).
+    if (id === effectiveDefaultId) return;
+    // Direkt visuell respons: stjärnan poppar och kortet glider till mitten.
+    setPendingDefaultId(id);
     setActiveId(id);
+    setStarBurstId(id);
+    window.setTimeout(() => setStarBurstId((cur) => (cur === id ? null : cur)), 600);
+
+    if (id === 'base') {
+      await clearDefaultProfile();
+    } else {
+      await setDefaultProfile(id);
+    }
   };
+
 
   const handleSave = async (input: CandidateProfileInput) => {
     setSaving(true);
@@ -259,7 +298,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
                     className="-my-1 shrink-0 rounded-full p-2 touch-manipulation"
                   >
                     <Star
-                      className="h-4 w-4"
+                      className={`h-4 w-4 ${starBurstId === chip.id ? 'animate-star-pop' : ''}`}
                       style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
                     />
                   </button>
@@ -329,6 +368,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
                 <ProfileChip
                   {...slot.chip}
                   active={activeId === slot.chip.id}
+                  starBurst={starBurstId === slot.chip.id}
                   onSelect={() => selectChip(slot.chip!.id)}
                   onToggleDefault={() => makeDefault(slot.chip!.id)}
                 />
@@ -341,6 +381,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       {editor}
     </div>
   );
-}
+});
+
 
 export default ProfileSwitcherRail;
