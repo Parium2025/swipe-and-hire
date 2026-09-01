@@ -558,9 +558,12 @@ const Profile = () => {
   // Vald profil i profilväljaren – null = grundprofilen ("Min profil").
   // När en extraprofil är vald visas dess bild/video på huvudytan istället.
   const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
+  const profileRailRef = useRef<ProfileSwitcherRailHandle>(null);
   const activeExtraImageUrl = useMediaUrl(activeCandidateProfile?.profile_image_url || undefined, 'profile-image');
   const activeExtraVideoUrl = useMediaUrl(activeCandidateProfile?.video_url || undefined, 'profile-video');
+  const activeExtraCoverUrl = useMediaUrl(activeCandidateProfile?.cover_image_url || undefined, 'cover-image');
   const activeExtraVideoPoster = useVideoPoster(activeCandidateProfile?.video_url || undefined);
+
 
   const displayIsVideo = activeCandidateProfile
     ? !!activeCandidateProfile.video_url
