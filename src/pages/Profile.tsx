@@ -997,6 +997,14 @@ const Profile = () => {
       );
 
       if (uploadError) throw uploadError;
+
+      // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile({ cover_image_url: storagePath });
+        toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
+        return;
+      }
+
       
       // Update local state and track filename  
       setCoverImageUrl(storagePath);
