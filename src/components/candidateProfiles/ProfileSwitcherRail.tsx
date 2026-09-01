@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check } from 'lucide-react';
+import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -7,10 +7,15 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   useCandidateProfiles,
   type CandidateProfile, type CandidateProfileInput,
 } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
+
 
 interface Props {
   userId?: string;
@@ -70,11 +75,13 @@ interface ChipProps extends ChipData {
   starBurst?: boolean;
   onSelect: () => void;
   onToggleDefault: () => void;
+  /** Finns bara för extraprofiler – grundprofilen kan inte tas bort. */
+  onDelete?: () => void;
 }
 
 /** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault, onDelete,
 }: ChipProps) {
   return (
     <div
@@ -108,8 +115,21 @@ function ProfileChip({
           style={isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: '#FFFFFF' }}
         />
       </button>
+
+      {onDelete && active && (
+        <button
+          type="button"
+          onClick={onDelete}
+          title="Ta bort profil"
+          aria-label="Ta bort profil"
+          className="absolute -top-1.5 -left-1.5 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   );
+
 
 }
 
@@ -130,16 +150,19 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const isMobile = useIsMobile();
   const {
     profiles, canCreateMore,
-    createProfile, updateProfile, setDefaultProfile, clearDefaultProfile,
+    createProfile, updateProfile, deleteProfile, setDefaultProfile, clearDefaultProfile,
   } = useCandidateProfiles(userId);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string>('base');
+  // Profil som väntar på bekräftad borttagning.
+  const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
   // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
+
 
   const dbDefaultId = useMemo(
     () => profiles.find((p) => p.is_default)?.id ?? 'base',
@@ -246,15 +269,56 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
   const activeChip = chips.find((c) => c.id === activeId) ?? chips[0];
 
+  const requestDelete = (id: string) => {
+    const profile = profiles.find((p) => p.id === id);
+    if (profile) setDeleteTarget(profile);
+  };
+
+  const confirmDelete = async () => {
+    const target = deleteTarget;
+    if (!target) return;
+    setDeleteTarget(null);
+    if (activeId === target.id) setActiveId('base');
+    const res = await deleteProfile(target.id);
+    if ('error' in res && res.error) {
+      toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Profil borttagen', description: `${target.label} är borttagen.` });
+  };
+
   const editor = (
-    <CandidateProfileEditor
-      open={editorOpen}
-      onOpenChange={setEditorOpen}
-      profile={editing}
-      saving={saving}
-      onSave={handleSave}
-    />
+    <>
+      <CandidateProfileEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        profile={editing}
+        saving={saving}
+        onSave={handleSave}
+      />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort profil</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget ? `Vill du ta bort "${deleteTarget.label}"? Profilen och dess val av bild, video och CV tas bort.` : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); void confirmDelete(); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
+
 
   // Mobil: rullgardinsmeny – aldrig avklippta kort i kanten.
   if (isMobile) {
@@ -312,6 +376,17 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                       style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
                     />
                   </button>
+                  {chip.id !== 'base' && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); requestDelete(chip.id); }}
+                      aria-label="Ta bort profil"
+                      className="-my-1 shrink-0 rounded-full p-2 text-destructive touch-manipulation"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+
                 </DropdownMenuItem>
               </Fragment>
             ))}
@@ -381,6 +456,8 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                   starBurst={starBurstId === slot.chip.id}
                   onSelect={() => selectChip(slot.chip!.id)}
                   onToggleDefault={() => makeDefault(slot.chip!.id)}
+                  onDelete={slot.chip.id !== 'base' ? () => requestDelete(slot.chip!.id) : undefined}
+
                 />
               ) : null}
             </div>

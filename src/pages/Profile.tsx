@@ -2047,7 +2047,7 @@ const Profile = () => {
                       />
                     ) : null}
                     {!displayImageUrl && (
-                      <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
+                      <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
                     )}
@@ -2107,57 +2107,49 @@ const Profile = () => {
                 />
               )}
 
-              {/* Video uppladdad – samma märke oavsett vilken profil som visas. */}
-              {displayIsVideo && !isUploadingMedia && (
-                <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                  Video uppladdad!
-                </Badge>
-              )}
-
-              {/* Anpassa din bild – visas för bilder (inte videor), alla profiler */}
-              {!displayIsVideo && !!displayImagePath && !isUploadingMedia && (
-                <div className="flex flex-col items-center space-y-2">
-                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                    Bild uppladdad!
-                  </Badge>
-                  <button 
-                    type="button"
-                    onClick={handleEditExistingProfile}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
-                  >
-                    Anpassa din bild
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* Cover-bild – samma uppsättning för alla profiler, med eller utan video. */}
-            {(displayIsVideo || !!displayImagePath) && (
-
+            {/* Mediakontroller – allt i samma gråa panel, ingen glapp emellan. */}
+            {(displayIsVideo || !!displayImagePath) && !isUploadingMedia && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
-                  {/* First row: Edit existing cover button - matchar arbetsgivarsidans struktur */}
-                  {displayCoverPath && (
+                  <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
+                    {displayIsVideo ? 'Video uppladdad!' : 'Bild uppladdad!'}
+                  </Badge>
+
+                  {/* Bildprofil: anpassa profilbilden. Videoprofil: anpassa cover-bilden. */}
+                  {!displayIsVideo && (
+                    <button
+                      type="button"
+                      onClick={handleEditExistingProfile}
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                    >
+                      Anpassa din bild
+                    </button>
+                  )}
+                  {displayIsVideo && displayCoverPath && (
                     <button
                       type="button"
                       onClick={handleEditExistingCover}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
                     >
-                      {displayIsVideo ? 'Anpassa din bild' : 'Anpassa cover-bild'}
+                      Anpassa din bild
                     </button>
                   )}
 
-                  {/* Second row: Change cover button and trash */}
+                  {/* Byt media: bildprofil byter bild, videoprofil byter cover-bild. */}
                   <div className="relative flex items-center justify-center w-[180px]">
                     <button
                       type="button"
-                      onClick={() => document.getElementById('cover-image')?.click()}
-                      disabled={isUploadingCover}
+                      onClick={() => document.getElementById(displayIsVideo ? 'cover-image' : 'profile-image-only')?.click()}
+                      disabled={isUploadingCover || isUploadingMedia}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full"
                     >
-                      {displayCoverPath ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                      {displayIsVideo
+                        ? (displayCoverPath ? 'Ändra cover-bild' : 'Lägg till cover-bild')
+                        : 'Ändra bild'}
                     </button>
-                    {displayCoverPath && (
+                    {displayIsVideo && displayCoverPath && (
                       <button
                         onClick={deleteCoverImage}
                         disabled={isUploadingCover}
@@ -2166,7 +2158,7 @@ const Profile = () => {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
-                    {!activeCandidateProfile && !coverImageUrl && deletedCoverImage && (
+                    {displayIsVideo && !activeCandidateProfile && !coverImageUrl && deletedCoverImage && (
                       <button
                         onClick={restoreCoverImage}
                         disabled={isUploadingCover}
@@ -2178,11 +2170,11 @@ const Profile = () => {
                     )}
                   </div>
 
-                  {/* Bildprofil: gör det enkelt att komplettera med en video. */}
+                  {/* Bildprofil: komplettera med en video (endast videofiler). */}
                   {!displayIsVideo && (
                     <button
                       type="button"
-                      onClick={() => document.getElementById('profile-image')?.click()}
+                      onClick={() => document.getElementById('profile-video-only')?.click()}
                       disabled={isUploadingMedia}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
                     >
@@ -2190,23 +2182,40 @@ const Profile = () => {
                     </button>
                   )}
                 </div>
-                <Input 
-                  type="file" 
-                  id="cover-image" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={handleCoverChange} 
-                  disabled={isUploadingCover} 
+
+                <Input
+                  type="file"
+                  id="cover-image"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCoverChange}
+                  disabled={isUploadingCover}
                 />
-                
+                <input
+                  id="profile-image-only"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleMediaChange}
+                  disabled={isUploadingMedia}
+                />
+                <input
+                  id="profile-video-only"
+                  type="file"
+                  accept="video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
+                  className="hidden"
+                  onChange={handleMediaChange}
+                  disabled={isUploadingMedia}
+                />
+
                 {isUploadingCover && (
                   <UploadInlineProgress
                     label="Laddar upp cover-bild…"
                     percent={coverProgressInfo?.percent}
                   />
                 )}
-                
-                {displayCoverPath && !isUploadingCover && (
+
+                {displayIsVideo && displayCoverPath && !isUploadingCover && (
                   <div className="flex items-center justify-center">
                     <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
                       Cover-bild uppladdad!
@@ -2215,6 +2224,7 @@ const Profile = () => {
                 )}
               </div>
             )}
+
           </div>
         </div>
 
