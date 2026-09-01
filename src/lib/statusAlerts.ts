@@ -187,4 +187,8 @@ export async function reportAppException(failure: AppFailure, ownerUserId: strin
     _fingerprint: payload.fingerprint,
     _metadata: payload.metadata,
   } as never);
+
+  if (error) {
+    throw new Error(error.message || 'record_app_exception failed');
+  }
 }
