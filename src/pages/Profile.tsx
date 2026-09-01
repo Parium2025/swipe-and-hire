@@ -1848,8 +1848,7 @@ const Profile = () => {
     const uniquePending = Array.from(new Map(pendingMedia.map((item) => [item.path, item])).values());
 
     await Promise.allSettled(uniquePending.map(({ path, type }) => deleteMedia(path, type)));
-    applyMediaValues(originalValues);
-    setCvUrl(originalValues.cvUrl);
+    resetProfileFormToValues(originalValues);
     setDeletedProfileMedia(null);
     setDeletedCoverImage(null);
     setLocalMediaState(null);
