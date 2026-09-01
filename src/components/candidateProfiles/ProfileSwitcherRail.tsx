@@ -31,19 +31,21 @@ interface ChipProps {
   active: boolean;
   isDefault: boolean;
   signedImageUrl?: string | null;
+  chipRef?: (el: HTMLDivElement | null) => void;
   onSelect: () => void;
   onToggleDefault: () => void;
 }
 
 /** Ett profil-chip i raden. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, chipRef, onSelect, onToggleDefault,
 }: ChipProps) {
   const resolved = useMediaUrl(imagePath || undefined, 'profile-image');
   const src = signedImageUrl ?? resolved;
 
   return (
     <div
+      ref={chipRef}
       className={`relative shrink-0 snap-center w-[104px] rounded-2xl border p-2.5 text-center transition-colors touch-manipulation ${
         active ? 'border-white/60 bg-white/10' : 'border-white/10 bg-white/5 md:hover:bg-white/10'
       }`}
