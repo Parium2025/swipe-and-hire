@@ -84,13 +84,27 @@ function fingerprint(kind: AppFailure['kind'], message: string, source?: string,
 }
 
 // Rapporterings-endpoints får aldrig instrumenteras: annars blir ett misslyckat
-// felanrop ett nytt fel som rapporteras igen (oändlig loop).
-const SELF_REPORT_PATTERN = /(record_app_exception|create_system_performance_alert|send-push-notification|app-exception-watchdog)/;
+// felanrop ett nytt fel som rapporteras igen (oändlig loop). Matchningen är
+// strikt mot endpoint-sökvägar så inga andra URL:er råkar uteslutas.
+const SELF_REPORT_ENDPOINTS = [
+  '/rest/v1/rpc/record_app_exception',
+  '/rest/v1/rpc/create_system_performance_alert',
+  '/functions/v1/send-push-notification',
+  '/functions/v1/app-exception-watchdog',
+] as const;
+
+function urlString(input: RequestInfo | URL): string {
+  return typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+}
+
+function isSelfReportUrl(value: string): boolean {
+  return SELF_REPORT_ENDPOINTS.some((endpoint) => value.includes(endpoint));
+}
 
 function shouldTrackUrl(input: RequestInfo | URL): boolean {
-  const value = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-  if (SELF_REPORT_PATTERN.test(value)) return false;
-  return /\/rest\/v1\//.test(value) || /\/functions\/v1\//.test(value) || /supabase\.co/.test(value) || /lovable/.test(value);
+  const value = urlString(input);
+  if (isSelfReportUrl(value)) return false;
+  return value.includes('/rest/v1/') || value.includes('/functions/v1/');
 }
 
 // Skickbudget: max antal rapporter per session och minsta intervall per fingerprint.
