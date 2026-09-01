@@ -203,28 +203,18 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
         className="flex max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        <ProfileChip
-          label="Min profil"
-          signedImageUrl={baseImageUrl ?? null}
-          hasVideo={baseHasVideo}
-          active={activeId === 'base'}
-          isDefault={baseIsDefault}
-          chipRef={setChipRef('base')}
-          onSelect={() => selectChip('base')}
-          onToggleDefault={() => makeDefault('base')}
-        />
-
-        {profiles.map((p) => (
+        {orderedChips.map((chip) => (
           <ProfileChip
-            key={p.id}
-            label={p.label}
-            imagePath={p.profile_image_url}
-            hasVideo={!!p.video_url}
-            active={activeId === p.id}
-            isDefault={p.is_default}
-            chipRef={setChipRef(p.id)}
-            onSelect={() => selectChip(p.id)}
-            onToggleDefault={() => makeDefault(p.id)}
+            key={chip.id}
+            label={chip.label}
+            imagePath={chip.imagePath}
+            signedImageUrl={chip.signedImageUrl}
+            hasVideo={chip.hasVideo}
+            active={activeId === chip.id}
+            isDefault={chip.isDefault}
+            chipRef={setChipRef(chip.id)}
+            onSelect={() => selectChip(chip.id)}
+            onToggleDefault={() => makeDefault(chip.id)}
           />
         ))}
 
