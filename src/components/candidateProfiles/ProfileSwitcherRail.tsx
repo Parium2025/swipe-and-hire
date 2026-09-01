@@ -223,10 +223,11 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       setEditorOpen(true);
     },
     updateActiveProfile: async (patch: Partial<CandidateProfileInput>) => {
-      if (!activeProfile) return;
+      if (!activeProfile) throw new Error('Ingen profil är vald.');
       const res = await updateProfile(activeProfile.id, patch);
       if ('error' in res && res.error) {
         toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
+        throw new Error(res.error);
       }
     },
   }), [activeProfile, updateProfile, toast]);
