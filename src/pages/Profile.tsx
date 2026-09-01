@@ -933,10 +933,6 @@ const Profile = () => {
             ? { video_url: storagePath, profile_image_url: null }
             : { profile_image_url: storagePath, video_url: null }
         );
-        toast({
-          title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
-          description: `Sparad på profilen "${activeCandidateProfile.label}".`,
-        });
         return;
       }
 
@@ -973,11 +969,6 @@ const Profile = () => {
         profileFileName: storagePath,
         coverFileName,
         cvUrl
-      });
-      
-      toast({
-        title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
-        description: `Tryck på "Spara ändringar" för att spara din profil${isVideo ? 'video' : 'bild'}.`
       });
     } catch (error) {
       console.error('Upload error:', error);
@@ -1038,7 +1029,6 @@ const Profile = () => {
       if (activeCandidateProfile) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateActiveProfile({ cover_image_url: storagePath });
-        toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
         return;
       }
 
@@ -1060,11 +1050,6 @@ const Profile = () => {
         profileFileName,
         coverFileName: storagePath,
         cvUrl
-      });
-      
-      toast({
-        title: "Cover-bild uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din cover-bild."
       });
     } catch (error) {
       console.error('Cover upload error:', error);
@@ -1250,7 +1235,6 @@ const Profile = () => {
         setImageEditorOpen(false);
         if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
         setPendingImageSrc('');
-        toast({ title: 'Profilbild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
         return;
       }
 
@@ -1290,11 +1274,6 @@ const Profile = () => {
         profileFileName: storagePath,
         coverFileName,
         cvUrl
-      });
-      
-      toast({
-        title: "Profilbild uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din profilbild."
       });
     } catch (error) {
       console.error('Profile image upload error:', error);
@@ -1364,7 +1343,6 @@ const Profile = () => {
         setCoverEditorOpen(false);
         if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
         setPendingCoverSrc('');
-        toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
         return;
       }
 
@@ -1402,11 +1380,6 @@ const Profile = () => {
         profileFileName,
         coverFileName: storagePath,
         cvUrl
-      });
-      
-      toast({
-        title: "Cover-bild uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din cover-bild."
       });
     } catch (error) {
       console.error('Cover upload error:', error);
@@ -1455,7 +1428,6 @@ const Profile = () => {
         };
         await profileRailRef.current.updateActiveProfile({ profile_image_url: null, video_url: null });
         setDeletedCandidateMedia(snapshot);
-        toast({ title: 'Media borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
       } catch (error) {
         console.error('Error deleting candidate profile media:', error);
       }
@@ -1520,11 +1492,6 @@ const Profile = () => {
       
       // Mark as unsaved changes - user must click "Spara ändringar"
       setHasUnsavedChanges(true);
-      
-      toast({
-        title: "Media markerad för borttagning",
-        description: "Tryck på 'Spara ändringar' för att slutföra."
-      });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
       toast({
@@ -1543,7 +1510,6 @@ const Profile = () => {
           video_url: deletedCandidateMedia.videoUrl,
         });
         setDeletedCandidateMedia(null);
-        toast({ title: 'Återställd!', description: 'Profilens media har återställts.' });
       } catch (error) {
         console.error('Error restoring candidate profile media:', error);
       }
@@ -1572,13 +1538,6 @@ const Profile = () => {
     
     // Rensa ångra-data
     setDeletedProfileMedia(null);
-    
-    // checkForChanges körs automatiskt och räknar ut korrekt status
-    
-    toast({
-      title: "Återställd!",
-      description: "Din profilvideo har återställts."
-    });
   };
 
   const deleteCoverImage = async () => {
@@ -1595,7 +1554,6 @@ const Profile = () => {
         };
         await profileRailRef.current.updateActiveProfile({ cover_image_url: null });
         setDeletedCandidateMedia(snapshot);
-        toast({ title: 'Cover-bild borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
       } catch (error) {
         console.error('Error deleting candidate profile cover:', error);
       }
@@ -1627,11 +1585,6 @@ const Profile = () => {
       
       // Mark as unsaved changes - user must click "Spara ändringar"
       setHasUnsavedChanges(true);
-      
-      toast({
-        title: "Cover-bild markerad för borttagning",
-        description: "Tryck på 'Spara ändringar' för att slutföra."
-      });
     } catch (error) {
       console.error('Error in deleteCoverImage:', error);
       toast({
@@ -1648,7 +1601,6 @@ const Profile = () => {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateActiveProfile({ cover_image_url: deletedCandidateMedia.coverImageUrl });
         setDeletedCandidateMedia(null);
-        toast({ title: 'Återställd!', description: 'Din cover-bild har återställts.' });
       } catch (error) {
         console.error('Error restoring candidate profile cover:', error);
       }
@@ -1673,13 +1625,6 @@ const Profile = () => {
     
     // Clear undo data
     setDeletedCoverImage(null);
-    
-    // checkForChanges körs automatiskt och räknar ut korrekt status
-    
-    toast({
-      title: "Återställd!",
-      description: "Din cover-bild har återställts."
-    });
   };
 
   const handleEditExistingProfile = async () => {
@@ -1812,11 +1757,6 @@ const Profile = () => {
       // No unsaved changes since CV is already removed in DB
       setHasUnsavedChanges(false);
 
-      toast({
-        title: "CV borttaget",
-        description: "Ditt CV har tagits bort från din profil."
-      });
-
       // Refresh profile to update state
       await refreshProfile();
     } catch (error) {
@@ -1893,6 +1833,7 @@ const Profile = () => {
       setHasUnsavedChanges(false);
 
       toast({
+        id: 'profile-offline-queued',
         title: "Ändringar köade ✓",
         description: "Sparas automatiskt när du är online igen.",
         duration: 4000,
@@ -2057,6 +1998,7 @@ const Profile = () => {
         setDeletedCoverImage(null);
         
         toast({
+          id: 'profile-save-success',
           title: "Profil uppdaterad",
           description: "Dina ändringar har sparats.",
           duration: 2000,

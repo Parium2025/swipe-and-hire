@@ -76,13 +76,11 @@ interface ChipProps extends ChipData {
   starBurst?: boolean;
   onSelect: () => void;
   onToggleDefault: () => void;
-  /** Finns bara för extraprofiler – grundprofilen kan inte tas bort. */
-  onDelete?: () => void;
 }
 
 /** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault, onDelete,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
 }: ChipProps) {
   return (
     <div
@@ -116,22 +114,8 @@ function ProfileChip({
           style={isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: '#FFFFFF' }}
         />
       </button>
-
-      {onDelete && active && (
-        <button
-          type="button"
-          onClick={onDelete}
-          title="Ta bort profil"
-          aria-label="Ta bort profil"
-          className="absolute -top-1.5 -left-1.5 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      )}
     </div>
   );
-
-
 }
 
 /** Avstånd mellan kortpositionerna i karusellen (kortbredd 104px + mellanrum). */
@@ -340,7 +324,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   // Mobil: rullgardinsmeny – aldrig avklippta kort i kanten.
   if (isMobile) {
     return (
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -393,17 +377,6 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                       style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
                     />
                   </button>
-                  {chip.id !== 'base' && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); requestDelete(chip.id); }}
-                      aria-label="Ta bort profil"
-                      className="-my-1 shrink-0 rounded-full p-2 text-destructive touch-manipulation"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-
                 </DropdownMenuItem>
               </Fragment>
             ))}
@@ -421,6 +394,17 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {activeId !== 'base' && (
+          <button
+            type="button"
+            onClick={() => requestDelete(activeId)}
+            className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-destructive transition-colors active:bg-destructive/10 touch-manipulation"
+          >
+            <Trash2 className="h-4 w-4" />
+            Ta bort profil
+          </button>
+        )}
 
         {editor}
       </div>
@@ -473,14 +457,25 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                   starBurst={starBurstId === slot.chip.id}
                   onSelect={() => selectChip(slot.chip!.id)}
                   onToggleDefault={() => makeDefault(slot.chip!.id)}
-                  onDelete={slot.chip.id !== 'base' ? () => requestDelete(slot.chip!.id) : undefined}
-
                 />
               ) : null}
             </div>
           );
         })}
       </div>
+
+      {activeId !== 'base' && (
+        <div className="flex justify-center pt-1">
+          <button
+            type="button"
+            onClick={() => requestDelete(activeId)}
+            className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-destructive transition-colors md:hover:bg-destructive/10 md:hover:border-destructive/30"
+          >
+            <Trash2 className="h-4 w-4" />
+            Ta bort profil
+          </button>
+        </div>
+      )}
 
       {editor}
     </div>
