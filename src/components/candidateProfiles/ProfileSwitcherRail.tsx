@@ -159,7 +159,12 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     },
     ...profiles.map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
-      imagePath: p.profile_image_url, hasVideo: !!p.video_url,
+      // Miniatyr: profilbild först, annars videons poster, annars cover-bilden.
+      imagePath:
+        p.profile_image_url ||
+        (p.video_url ? getVideoPosterPath(p.video_url) : null) ||
+        p.cover_image_url,
+      hasVideo: !!p.video_url,
       isDefault: p.id === effectiveDefaultId,
     })),
   ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
