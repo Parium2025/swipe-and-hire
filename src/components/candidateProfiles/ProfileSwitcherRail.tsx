@@ -259,7 +259,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
     if ('error' in res && res.error) {
       toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
-      return;
+      return false;
     }
     if (!editing && 'data' in res) {
       const created = (res as { data?: CandidateProfile }).data;
@@ -267,6 +267,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
+    return true;
   };
 
   const activeChip = chips.find((c) => c.id === activeId) ?? chips[0];
