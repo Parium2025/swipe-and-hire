@@ -1830,6 +1830,32 @@ const Profile = () => {
   };
   const { isOnline, showOfflineToast } = useOnline();
 
+  const rollbackUnsavedBaseMedia = async () => {
+    if (!originalValues) return;
+
+    const savedPaths = new Set([
+      originalValues.profileImageUrl,
+      originalValues.videoUrl,
+      originalValues.coverImageUrl,
+      originalValues.cvUrl,
+    ].filter((path): path is string => !!path));
+    const pendingMedia = [
+      { path: profileImageUrl, type: 'profile-image' as const },
+      { path: videoUrl, type: 'profile-video' as const },
+      { path: coverImageUrl, type: 'cover-image' as const },
+      { path: cvUrl, type: 'cv' as const },
+    ].filter(({ path }) => !!path && !savedPaths.has(path));
+    const uniquePending = Array.from(new Map(pendingMedia.map((item) => [item.path, item])).values());
+
+    await Promise.allSettled(uniquePending.map(({ path, type }) => deleteMedia(path, type)));
+    applyMediaValues(originalValues);
+    setCvUrl(originalValues.cvUrl);
+    setDeletedProfileMedia(null);
+    setDeletedCoverImage(null);
+    setLocalMediaState(null);
+    setHasUnsavedChanges(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -2037,12 +2063,20 @@ const Profile = () => {
           duration: 2000,
           route: '/profile'
         });
+      } else {
+        await rollbackUnsavedBaseMedia();
+        toast({
+          title: 'Ändringarna återställdes',
+          description: 'Profilen kunde inte sparas. Nya filer har tagits bort och senast sparade media har återställts.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Profile update error:', error);
+      await rollbackUnsavedBaseMedia();
       toast({
-        title: "Fel vid uppdatering",
-        description: "Kunde inte uppdatera profilen.",
+        title: "Ändringarna återställdes",
+        description: "Profilen kunde inte sparas. Nya filer har tagits bort och senast sparade media har återställts.",
         variant: "destructive"
       });
     } finally {
