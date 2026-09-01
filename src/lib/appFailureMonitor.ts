@@ -83,9 +83,35 @@ function fingerprint(kind: AppFailure['kind'], message: string, source?: string,
   return `${kind}-${Math.abs(hash)}`;
 }
 
+// Rapporterings-endpoints får aldrig instrumenteras: annars blir ett misslyckat
+// felanrop ett nytt fel som rapporteras igen (oändlig loop).
+const SELF_REPORT_PATTERN = /(record_app_exception|create_system_performance_alert|send-push-notification|app-exception-watchdog)/;
+
 function shouldTrackUrl(input: RequestInfo | URL): boolean {
   const value = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+  if (SELF_REPORT_PATTERN.test(value)) return false;
   return /\/rest\/v1\//.test(value) || /\/functions\/v1\//.test(value) || /supabase\.co/.test(value) || /lovable/.test(value);
+}
+
+// Skickbudget: max antal rapporter per session och minsta intervall per fingerprint.
+const MAX_REPORTS_PER_SESSION = 20;
+const MIN_SEND_INTERVAL_MS = 2000;
+const FINGERPRINT_COOLDOWN_MS = 5 * 60 * 1000;
+let reportsSentThisSession = 0;
+let lastSendAt = 0;
+let reportingSuspended = false;
+const lastSentByFingerprint = new Map<string, number>();
+
+function canSendReport(fingerprintKey: string): boolean {
+  if (reportingSuspended) return false;
+  if (reportsSentThisSession >= MAX_REPORTS_PER_SESSION) return false;
+  const now = Date.now();
+  if (now - lastSendAt < MIN_SEND_INTERVAL_MS) return false;
+  if (now - (lastSentByFingerprint.get(fingerprintKey) ?? 0) < FINGERPRINT_COOLDOWN_MS) return false;
+  lastSendAt = now;
+  lastSentByFingerprint.set(fingerprintKey, now);
+  reportsSentThisSession += 1;
+  return true;
 }
 
 // Avbrutna anrop är inte fel: användaren navigerade vidare, stängde fliken,
@@ -123,14 +149,18 @@ function createFailure(partial: CreateFailureInput): AppFailure {
 
 function recordFailure(failure: AppFailure) {
   storeFailure(failure);
-  if (ownerUserId) {
-    void reportAppException(failure, ownerUserId).catch((error) => {
-      console.warn('App exception reporting failed:', error);
-    });
-    void notifyAppFailure(failure, ownerUserId).catch((error) => {
-      console.warn('App failure alert failed:', error);
-    });
-  }
+  // Utan inloggad användare saknas rättighet att skriva (anon har inte EXECUTE).
+  if (!ownerUserId) return;
+  if (!canSendReport(failure.fingerprint)) return;
+
+  void reportAppException(failure, ownerUserId).catch((error) => {
+    // Om rapporteringen själv failar: stäng av resten av sessionen.
+    reportingSuspended = true;
+    console.warn('App exception reporting failed, suspending reporting:', error);
+  });
+  void notifyAppFailure(failure, ownerUserId).catch((error) => {
+    console.warn('App failure alert failed:', error);
+  });
 }
 
 export function installAppFailureMonitor(getOwnerUserId: () => string | null | undefined) {
