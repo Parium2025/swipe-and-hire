@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -152,21 +152,13 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     })),
   ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
 
-  // Standardprofilen (stjärnan) ska alltid ligga mitt i raden. "Ny profil"-rutan
-  // räknas med i totalen så att mittenpositionen stämmer visuellt.
+  // Standardprofilen (stjärnan) ska alltid ligga först i raden – ingen profil
+  // får aldrig hamna framför standarden. "Ny profil"-rutan ligger alltid sist.
   const orderedChips = useMemo(() => {
-    const list = [...chips];
-    const defaultIdx = list.findIndex((c) => c.isDefault);
-    if (defaultIdx < 0) return list;
-    const totalTiles = list.length + (canCreateMore ? 1 : 0);
-    const mid = Math.floor((totalTiles - 1) / 2);
-    const targetIdx = Math.min(mid, list.length - 1);
-    if (defaultIdx !== targetIdx) {
-      const [def] = list.splice(defaultIdx, 1);
-      list.splice(targetIdx, 0, def);
-    }
-    return list;
-  }, [chips, canCreateMore]);
+    const def = chips.filter((c) => c.isDefault);
+    const rest = chips.filter((c) => !c.isDefault);
+    return [...def, ...rest];
+  }, [chips]);
 
   // När standardprofilen ändras (t.ex. via stjärnan) ska standard-chipet alltid
   // glida in i mitten – även efter att listan renderats om.
@@ -197,6 +189,8 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       const p = profiles.find((x) => x.id === id);
       if (p && !p.is_default) await setDefaultProfile(id);
     }
+    // Den stjärnmarkerade ska också visas som vald (komma upp i knappen).
+    setActiveId(id);
     centerChip(id);
   };
 
