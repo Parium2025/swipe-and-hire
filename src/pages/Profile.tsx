@@ -46,7 +46,7 @@ import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
-import ProfileSwitcherRail from '@/components/candidateProfiles/ProfileSwitcherRail';
+import ProfileSwitcherRail, { type ProfileSwitcherRailHandle } from '@/components/candidateProfiles/ProfileSwitcherRail';
 import type { CandidateProfile } from '@/hooks/useCandidateProfiles';
 
 
