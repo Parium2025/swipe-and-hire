@@ -981,6 +981,13 @@ const Profile = () => {
         cvUrl
       });
     } catch (error) {
+      // Användaren tryckte på "Avbryt" – inget fel, ingen offline-kö.
+      if (error instanceof UploadAbortedError || controller.signal.aborted) {
+        if (uploadedStoragePath) {
+          await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
+        }
+        return;
+      }
       console.error('Upload error:', error);
       if (activeCandidateProfile && uploadedStoragePath) {
         await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
