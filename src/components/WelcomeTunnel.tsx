@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
+import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import TunnelBirthDateField from '@/components/tunnel/TunnelBirthDateField';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -1642,14 +1643,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   
                   {isUploadingMedia && (
                     <div className="flex flex-col items-center gap-2">
-                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-full px-3 py-1.5">
-                        {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
-                      </Badge>
-                      {uploadingMediaType === 'video' && (
-                        <p className="text-white text-xs">
-                          (Obs, det kan ta uppemot 20-30 sekunder för att ladda upp en minuts video)
-                        </p>
-                      )}
+                      <UploadInlineProgress
+                        percent={uploadingMediaType === 'video' ? uploadProgress : undefined}
+                        hint={uploadingMediaType === 'video'
+                          ? 'Det kan ta 20–30 sekunder för en minuts video.'
+                          : undefined}
+                      />
                     </div>
                   )}
                   
@@ -1739,10 +1738,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     
                     {isUploadingCover && (
                       <div className="flex flex-col items-center w-full">
-                        <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse rounded-full">
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                          Laddar upp cover-bild...
-                        </Badge>
+                        <UploadInlineProgress label="Laddar upp cover-bild…" />
                       </div>
                     )}
                     

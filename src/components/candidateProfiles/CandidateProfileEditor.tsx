@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
+import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import { FileText, Camera, Video, Play, Trash2, Loader2, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -266,14 +267,17 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                 </div>
 
                 <div className="space-y-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() => mediaInputRef.current?.click()}
-                    disabled={uploading}
-                    className="text-white text-sm outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50"
-                  >
-                    {uploading ? 'Laddar upp…' : 'Klicka här för att välja en bild eller video (max 60 sekunder)'}
-                  </button>
+                  {uploading ? (
+                    <UploadInlineProgress />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => mediaInputRef.current?.click()}
+                      className="text-white text-sm outline-none focus:outline-none focus-visible:outline-none"
+                    >
+                      Klicka här för att välja en bild eller video (max 60 sekunder)
+                    </button>
+                  )}
 
                   {hasVideo && !uploading && (
                     <div className="flex justify-center">
@@ -406,8 +410,8 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
         onClose={() => { setEditorTarget(null); setEditorSrc(''); }}
         imageSrc={editorSrc}
         onSave={handleEditorSave}
-        aspectRatio={editorTarget === 'cover-image' ? undefined : 1}
-        isCircular={editorTarget !== 'cover-image'}
+        aspectRatio={1}
+        isCircular
       />
     </>
   );
