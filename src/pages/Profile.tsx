@@ -2047,7 +2047,7 @@ const Profile = () => {
                       />
                     ) : null}
                     {!displayImageUrl && (
-                      <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
+                      <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
                     )}
