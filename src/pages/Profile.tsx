@@ -1880,6 +1880,7 @@ const Profile = () => {
 
             {!isEmployer && (
               <ProfileSwitcherRail
+                ref={profileRailRef}
                 userId={user?.id}
                 baseImageUrl={signedProfileImageUrl}
                 baseHasVideo={isProfileVideo && !!videoUrl}
