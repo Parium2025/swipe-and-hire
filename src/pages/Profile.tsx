@@ -1342,6 +1342,12 @@ const Profile = () => {
   };
 
   const deleteProfileMedia = async () => {
+    // Vald extraprofil: ta bort dess egen bild/video direkt.
+    if (activeCandidateProfile) {
+      await profileRailRef.current?.updateActiveProfile({ profile_image_url: null, video_url: null });
+      toast({ title: 'Media borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      return;
+    }
     if (!user?.id) return;
     
     try {
