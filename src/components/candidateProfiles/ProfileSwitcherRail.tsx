@@ -399,10 +399,11 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
           <button
             type="button"
             onClick={() => requestDelete(activeId)}
-            className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-destructive transition-colors active:bg-destructive/10 touch-manipulation"
+            title="Ta bort profil"
+            aria-label="Ta bort profil"
+            className="flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2.5 text-destructive transition-colors active:bg-destructive/10 touch-manipulation"
           >
             <Trash2 className="h-4 w-4" />
-            Ta bort profil
           </button>
         )}
 
@@ -469,10 +470,11 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
           <button
             type="button"
             onClick={() => requestDelete(activeId)}
-            className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-destructive transition-colors md:hover:bg-destructive/10 md:hover:border-destructive/30"
+            title="Ta bort profil"
+            aria-label="Ta bort profil"
+            className="flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2.5 text-destructive transition-colors md:hover:bg-destructive/10 md:hover:border-destructive/30 touch-manipulation"
           >
             <Trash2 className="h-4 w-4" />
-            Ta bort profil
           </button>
         </div>
       )}
