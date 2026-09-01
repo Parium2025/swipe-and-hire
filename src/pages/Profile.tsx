@@ -2204,6 +2204,7 @@ const Profile = () => {
                   hint={uploadProgressInfo && uploadProgressInfo.secondsRemaining > 0
                     ? formatTimeRemaining(uploadProgressInfo.secondsRemaining) ?? undefined
                     : undefined}
+                  onCancel={cancelMediaUpload}
                 />
               )}
 
