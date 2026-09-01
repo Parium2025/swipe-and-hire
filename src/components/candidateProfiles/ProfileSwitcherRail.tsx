@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Star, Video as VideoIcon, User } from 'lucide-react';
+import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   useCandidateProfiles,
   type CandidateProfile, type CandidateProfileInput,
@@ -18,13 +22,40 @@ interface Props {
   onActiveProfileChange?: (profile: CandidateProfile | null) => void;
 }
 
-interface ChipProps {
+interface ChipData {
+  id: string;
   label: string;
-  imagePath?: string | null;
-  hasVideo?: boolean;
-  active: boolean;
+  imagePath: string | null;
+  signedImageUrl: string | null;
+  hasVideo: boolean;
   isDefault: boolean;
-  signedImageUrl?: string | null;
+}
+
+/** Rund miniatyr för en profil – bild, videoikon eller personikon. */
+function ProfileAvatar({
+  imagePath, signedImageUrl, hasVideo, size = 56,
+}: { imagePath?: string | null; signedImageUrl?: string | null; hasVideo?: boolean; size?: number }) {
+  const resolved = useMediaUrl(imagePath || undefined, 'profile-image');
+  const src = signedImageUrl ?? resolved;
+
+  return (
+    <span
+      className="flex items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10"
+      style={{ height: size, width: size }}
+    >
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+      ) : hasVideo ? (
+        <VideoIcon className="h-5 w-5 text-white" />
+      ) : (
+        <User className="h-5 w-5 text-white" />
+      )}
+    </span>
+  );
+}
+
+interface ChipProps extends ChipData {
+  active: boolean;
   chipRef?: (el: HTMLDivElement | null) => void;
   onSelect: () => void;
   onToggleDefault: () => void;
@@ -34,9 +65,6 @@ interface ChipProps {
 function ProfileChip({
   label, imagePath, hasVideo, active, isDefault, signedImageUrl, chipRef, onSelect, onToggleDefault,
 }: ChipProps) {
-  const resolved = useMediaUrl(imagePath || undefined, 'profile-image');
-  const src = signedImageUrl ?? resolved;
-
   return (
     <div
       ref={chipRef}
@@ -50,14 +78,8 @@ function ProfileChip({
         className="block w-full outline-none focus:outline-none focus-visible:outline-none"
         aria-pressed={active}
       >
-        <span className="mx-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10">
-          {src ? (
-            <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
-          ) : hasVideo ? (
-            <VideoIcon className="h-5 w-5 text-white" />
-          ) : (
-            <User className="h-5 w-5 text-white" />
-          )}
+        <span className="mx-auto block w-14">
+          <ProfileAvatar imagePath={imagePath} signedImageUrl={signedImageUrl} hasVideo={hasVideo} />
         </span>
         <span className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
           {label}
@@ -82,10 +104,11 @@ function ProfileChip({
 
 /**
  * Profilväljare överst i "Profilbild/Profilvideo".
- * Svep mellan profiler på touch, sätt standard med stjärnan och skapa nya med plus-rutan.
+ * Mobil: kompakt rullgardinsmeny. Större skärmar: rad med chips.
  */
 export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const {
     profiles, canCreateMore,
     createProfile, updateProfile, setDefaultProfile, clearDefaultProfile,
@@ -104,42 +127,46 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   }, []);
   // Manuell centrering av railens scrollposition (scrollIntoView kan störa sidans scroll).
   const centerChip = useCallback((id: string) => {
-    // Dubbel rAF + kort timeout: vänta ut eventuell re-render efter data-mutation
-    // så att chip-elementet som centreras är det som faktiskt är monterat.
     requestAnimationFrame(() => {
       setTimeout(() => {
         const rail = railRef.current;
         const chip = chipRefs.current.get(id);
         if (!rail || !chip) return;
         const target = chip.offsetLeft - rail.clientWidth / 2 + chip.clientWidth / 2;
-        rail.scrollTo({ left: target, behavior: 'smooth' });
-      }, 50);
+        rail.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+      }, 60);
     });
   }, []);
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
 
-  // Standardprofilen (stjärnan) ska alltid ligga i mitten av raden. När alla
-  // chips får plats finns ingen scroll att centrera med, så vi sorterar istället
-  // chip-ordningen så att standard-chipet hamnar på mittenindex. När raden
-  // svämmar över tar centerChip-scrollingen vid.
+  const chips: ChipData[] = useMemo(() => [
+    {
+      id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? null,
+      imagePath: null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault,
+    },
+    ...profiles.map((p) => ({
+      id: p.id, label: p.label, signedImageUrl: null,
+      imagePath: p.profile_image_url, hasVideo: !!p.video_url, isDefault: p.is_default,
+    })),
+  ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
+
+  // Standardprofilen (stjärnan) ska alltid ligga mitt i raden. "Ny profil"-rutan
+  // räknas med i totalen så att mittenpositionen stämmer visuellt.
   const orderedChips = useMemo(() => {
-    const chips = [
-      { id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? null, imagePath: null as string | null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault },
-      ...profiles.map((p) => ({
-        id: p.id, label: p.label, signedImageUrl: null as string | null,
-        imagePath: p.profile_image_url, hasVideo: !!p.video_url, isDefault: p.is_default,
-      })),
-    ];
-    const defaultIdx = chips.findIndex((c) => c.isDefault);
-    const mid = Math.floor(chips.length / 2);
-    if (defaultIdx >= 0 && defaultIdx !== mid && chips.length > 2) {
-      const [def] = chips.splice(defaultIdx, 1);
-      chips.splice(mid, 0, def);
+    const list = [...chips];
+    const defaultIdx = list.findIndex((c) => c.isDefault);
+    if (defaultIdx < 0) return list;
+    const totalTiles = list.length + (canCreateMore ? 1 : 0);
+    const mid = Math.floor((totalTiles - 1) / 2);
+    const targetIdx = Math.min(mid, list.length - 1);
+    if (defaultIdx !== targetIdx) {
+      const [def] = list.splice(defaultIdx, 1);
+      list.splice(targetIdx, 0, def);
     }
-    return chips;
-  }, [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
+    return list;
+  }, [chips, canCreateMore]);
 
   // När standardprofilen ändras (t.ex. via stjärnan) ska standard-chipet alltid
   // glida in i mitten – även efter att listan renderats om.
@@ -170,7 +197,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       const p = profiles.find((x) => x.id === id);
       if (p && !p.is_default) await setDefaultProfile(id);
     }
-    // Standardprofilen centreras i raden så den alltid hamnar i mitten.
     centerChip(id);
   };
 
@@ -193,54 +219,129 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
   };
 
+  const activeChip = chips.find((c) => c.id === activeId) ?? chips[0];
+
+  const editor = (
+    <CandidateProfileEditor
+      open={editorOpen}
+      onOpenChange={setEditorOpen}
+      profile={editing}
+      saving={saving}
+      onSave={handleSave}
+    />
+  );
+
+  // Mobil: rullgardinsmeny – aldrig avklippta kort i kanten.
+  if (isMobile) {
+    return (
+      <div className="flex justify-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex min-h-[56px] w-full max-w-[320px] items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-left text-white touch-manipulation active:bg-white/10"
+              aria-label="Byt profil"
+            >
+              <ProfileAvatar
+                imagePath={activeChip?.imagePath}
+                signedImageUrl={activeChip?.signedImageUrl}
+                hasVideo={activeChip?.hasVideo}
+                size={40}
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[15px] font-medium leading-tight text-white">
+                  {activeChip?.label}
+                </span>
+                <span className="block text-[12px] leading-tight text-white/70">
+                  {activeChip?.isDefault ? 'Standardprofil' : 'Tryck för att byta profil'}
+                </span>
+              </span>
+              <ChevronDown className="h-4 w-4 shrink-0 text-white/80" />
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="center" className="w-[288px]">
+            {chips.map((chip) => (
+              <DropdownMenuItem
+                key={chip.id}
+                onSelect={() => selectChip(chip.id)}
+                className="flex items-center gap-3 py-2"
+              >
+                <ProfileAvatar
+                  imagePath={chip.imagePath}
+                  signedImageUrl={chip.signedImageUrl}
+                  hasVideo={chip.hasVideo}
+                  size={32}
+                />
+                <span className="min-w-0 flex-1 truncate text-[14px]">{chip.label}</span>
+                {activeId === chip.id && <Check className="h-4 w-4 shrink-0" />}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); void makeDefault(chip.id); }}
+                  aria-label={chip.isDefault ? 'Standardprofil' : 'Gör till standard'}
+                  className="-my-1 shrink-0 rounded-full p-2 touch-manipulation"
+                >
+                  <Star
+                    className="h-4 w-4"
+                    style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
+                  />
+                </button>
+              </DropdownMenuItem>
+            ))}
+
+            {canCreateMore && (
+              <DropdownMenuItem onSelect={openNew} className="flex items-center gap-3 py-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-current/20">
+                  <Plus className="h-4 w-4" />
+                </span>
+                <span className="text-[14px]">Lägg till profil</span>
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {editor}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
       {/* Yttre flex centrerar raden när den får plats; inre div scrollar när den inte gör det. */}
       <div className="flex justify-center">
-      <div
-        ref={railRef}
-        className="flex max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        style={{ WebkitOverflowScrolling: 'touch' }}
-      >
-        {orderedChips.map((chip) => (
-          <ProfileChip
-            key={chip.id}
-            label={chip.label}
-            imagePath={chip.imagePath}
-            signedImageUrl={chip.signedImageUrl}
-            hasVideo={chip.hasVideo}
-            active={activeId === chip.id}
-            isDefault={chip.isDefault}
-            chipRef={setChipRef(chip.id)}
-            onSelect={() => selectChip(chip.id)}
-            onToggleDefault={() => makeDefault(chip.id)}
-          />
-        ))}
+        <div
+          ref={railRef}
+          className="flex max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto px-2 pb-1 pt-2 scroll-px-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          {orderedChips.map((chip) => (
+            <ProfileChip
+              key={chip.id}
+              {...chip}
+              active={activeId === chip.id}
+              chipRef={setChipRef(chip.id)}
+              onSelect={() => selectChip(chip.id)}
+              onToggleDefault={() => makeDefault(chip.id)}
+            />
+          ))}
 
-        {canCreateMore && (
-          <button
-            type="button"
-            onClick={openNew}
-            aria-label="Lägg till profil"
-            className="shrink-0 snap-center w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white transition-colors md:hover:bg-white/10 touch-manipulation"
-          >
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10">
-              <Plus className="h-5 w-5" />
-            </span>
-            <span className="mt-2 block truncate text-[12px] font-medium leading-tight">Ny profil</span>
-          </button>
-        )}
-      </div>
+          {canCreateMore && (
+            <button
+              type="button"
+              onClick={openNew}
+              aria-label="Lägg till profil"
+              className="shrink-0 snap-center w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white transition-colors md:hover:bg-white/10 touch-manipulation"
+            >
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10">
+                <Plus className="h-5 w-5" />
+              </span>
+              <span className="mt-2 block truncate text-[12px] font-medium leading-tight">Ny profil</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      <CandidateProfileEditor
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        profile={editing}
-        saving={saving}
-        onSave={handleSave}
-      />
+      {editor}
     </div>
   );
 }
