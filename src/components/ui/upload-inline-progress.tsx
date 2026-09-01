@@ -20,6 +20,7 @@ export function UploadInlineProgress({
   label = 'Laddar upp…',
   percent,
   hint,
+  onCancel,
   className,
 }: UploadInlineProgressProps) {
   const isDeterminate = typeof percent === 'number' && Number.isFinite(percent);
