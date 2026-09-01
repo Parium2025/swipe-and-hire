@@ -508,7 +508,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2.5 text-destructive transition-colors md:hover:bg-destructive/10 md:hover:border-destructive/30 touch-manipulation"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors touch-manipulation md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4" />
           </button>
