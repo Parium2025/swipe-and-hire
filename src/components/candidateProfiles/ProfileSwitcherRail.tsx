@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Plus, Star, Pencil, Trash2, Video as VideoIcon, User, AlertTriangle } from 'lucide-react';
+// Pencil/Trash2 återanvänds i editorn – här nedan används bara ikoner för chipsen.
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import {
