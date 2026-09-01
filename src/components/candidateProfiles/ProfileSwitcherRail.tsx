@@ -160,22 +160,16 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     },
     ...profiles.map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
-      // Miniatyr: profilbild först, annars videons poster, annars cover-bilden.
-      imagePath:
-        p.profile_image_url ||
-        (p.video_url ? getVideoPosterPath(p.video_url) : null) ||
-        p.cover_image_url,
+      // Miniatyr: profilbilden i första hand, annars cover-bilden. Aldrig videon.
+      imagePath: p.profile_image_url || p.cover_image_url,
       hasVideo: !!p.video_url,
       isDefault: p.id === effectiveDefaultId,
     })),
   ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
 
-  // Standardprofilen ligger alltid först; övriga följer i sin ordning.
-  const orderedChips = useMemo(() => {
-    const def = chips.filter((c) => c.isDefault);
-    const rest = chips.filter((c) => !c.isDefault);
-    return [...def, ...rest];
-  }, [chips]);
+  // Ordningen ligger fast (grundprofilen först, sedan skapandeordning) så att
+  // stjärnan bara glider in kortet i mitten – inga kort byter plats med varandra.
+  const orderedChips = chips;
 
   // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
   // och därmed glida in i mitten av karusellen.
