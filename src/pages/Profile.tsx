@@ -1926,7 +1926,7 @@ const Profile = () => {
               {displayIsVideo ? (
                 <ProfileVideo
                   videoUrl={displayVideoUrl}
-                  coverImageUrl={activeCandidateProfile ? undefined : signedCoverUrl}
+                  coverImageUrl={activeCandidateProfile ? (activeExtraCoverUrl ?? undefined) : signedCoverUrl}
                   posterUrl={displayVideoPoster}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
