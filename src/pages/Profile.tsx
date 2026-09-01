@@ -2636,6 +2636,8 @@ const Profile = () => {
         imageSrc={pendingCoverSrc}
         onSave={handleCoverImageSave}
         onRestoreOriginal={isEditingExistingCoverImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
+        aspectRatio={1}
+        isCircular
       />
 
 

@@ -410,8 +410,8 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
         onClose={() => { setEditorTarget(null); setEditorSrc(''); }}
         imageSrc={editorSrc}
         onSave={handleEditorSave}
-        aspectRatio={editorTarget === 'cover-image' ? undefined : 1}
-        isCircular={editorTarget !== 'cover-image'}
+        aspectRatio={1}
+        isCircular
       />
     </>
   );
