@@ -2031,9 +2031,7 @@ const Profile = () => {
               ) : (
                 <div
                   className="cursor-pointer"
-                  onClick={activeCandidateProfile
-                    ? () => profileRailRef.current?.editActiveProfile()
-                    : () => document.getElementById('profile-image')?.click()}
+                  onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
                     {displayImageUrl ? (
