@@ -1550,6 +1550,22 @@ const Profile = () => {
   };
 
   const handleEditExistingCover = async () => {
+    // Vald extraprofil: redigera dess egen cover-bild.
+    if (activeCandidateProfile) {
+      if (!activeCandidateProfile.cover_image_url) return;
+      try {
+        const signedUrl = await getMediaUrl(activeCandidateProfile.cover_image_url, 'cover-image', 86400);
+        if (signedUrl) {
+          setPendingCoverSrc(signedUrl);
+          setIsEditingExistingCoverImage(true);
+          setCoverEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading existing cover:', error);
+        toast({ title: 'Fel', description: 'Kunde inte ladda cover-bilden för redigering.', variant: 'destructive' });
+      }
+      return;
+    }
     if (!coverImageUrl) return;
     
     // 1) Om vi har en explicit uppladdad cover-bild, använd den ursprungliga filen
