@@ -512,6 +512,13 @@ const Profile = () => {
     coverImageUrl: string;
     coverFileName: string;
   } | null>(null);
+  const [deletedCandidateMedia, setDeletedCandidateMedia] = useState<{
+    profileId: string;
+    kind: 'media' | 'cover';
+    profileImageUrl: string | null;
+    videoUrl: string | null;
+    coverImageUrl: string | null;
+  } | null>(null);
   
   // Basic form fields
   const [firstName, setFirstName] = useState(profile?.first_name || '');
@@ -889,6 +896,7 @@ const Profile = () => {
 
   const uploadProfileMedia = async (file: File) => {
     const isVideo = looksLikeVideoFile(file);
+    let uploadedStoragePath = '';
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
     setUploadProgress(0);
@@ -915,10 +923,12 @@ const Profile = () => {
       setUploadProgress(100);
 
       if (uploadError) throw uploadError;
+      uploadedStoragePath = storagePath;
 
       // Vald extraprofil: media sparas direkt i dess egen tunnel.
       if (activeCandidateProfile) {
-        await profileRailRef.current?.updateActiveProfile(
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        await profileRailRef.current.updateActiveProfile(
           isVideo
             ? { video_url: storagePath, profile_image_url: null }
             : { profile_image_url: storagePath, video_url: null }
@@ -971,6 +981,15 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Upload error:', error);
+      if (activeCandidateProfile && uploadedStoragePath) {
+        await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
+        toast({
+          title: 'Uppladdningen återställdes',
+          description: 'Filen kunde inte kopplas till profilen och har därför tagits bort.',
+          variant: 'destructive',
+        });
+        return;
+      }
       // 🛟 Offline-fallback: lägg i kö och flush:a när nätet är tillbaka
       const enqueued = await enqueueMediaForLater({
         blob: file,
@@ -997,6 +1016,7 @@ const Profile = () => {
   };
 
   const uploadCoverImage = async (file: File) => {
+    let uploadedStoragePath = '';
     setIsUploadingCover(true);
     setCoverProgressInfo(null);
     
@@ -1012,10 +1032,12 @@ const Profile = () => {
       );
 
       if (uploadError) throw uploadError;
+      uploadedStoragePath = storagePath;
 
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
       if (activeCandidateProfile) {
-        await profileRailRef.current?.updateActiveProfile({ cover_image_url: storagePath });
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        await profileRailRef.current.updateActiveProfile({ cover_image_url: storagePath });
         toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
         return;
       }
@@ -1046,6 +1068,15 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Cover upload error:', error);
+      if (activeCandidateProfile && uploadedStoragePath) {
+        await deleteMedia(uploadedStoragePath, 'cover-image');
+        toast({
+          title: 'Uppladdningen återställdes',
+          description: 'Cover-bilden kunde inte kopplas till profilen och har därför tagits bort.',
+          variant: 'destructive',
+        });
+        return;
+      }
       const enqueued = await enqueueMediaForLater({
         blob: file,
         fileName: `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop() || 'bin'}`,
@@ -1181,6 +1212,7 @@ const Profile = () => {
   };
 
   const handleProfileImageSave = async (editedBlob: Blob) => {
+    let uploadedStoragePath = '';
     try {
       setIsUploadingMedia(true);
       setUploadingMediaType('image');
@@ -1209,10 +1241,12 @@ const Profile = () => {
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+      uploadedStoragePath = storagePath;
 
       // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
       if (activeCandidateProfile) {
-        await profileRailRef.current?.updateActiveProfile({ profile_image_url: storagePath, video_url: null });
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        await profileRailRef.current.updateActiveProfile({ profile_image_url: storagePath, video_url: null });
         setImageEditorOpen(false);
         if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
         setPendingImageSrc('');
@@ -1264,6 +1298,15 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Profile image upload error:', error);
+      if (activeCandidateProfile && uploadedStoragePath) {
+        await deleteMedia(uploadedStoragePath, 'profile-image');
+        toast({
+          title: 'Uppladdningen återställdes',
+          description: 'Bilden kunde inte kopplas till profilen och har därför tagits bort.',
+          variant: 'destructive',
+        });
+        return;
+      }
       const u = (await supabase.auth.getUser()).data.user;
       const enqueued = u ? await enqueueMediaForLater({
         blob: editedBlob,
@@ -1290,6 +1333,7 @@ const Profile = () => {
   };
 
   const handleCoverImageSave = async (editedBlob: Blob) => {
+    let uploadedStoragePath = '';
     try {
       setIsUploadingCover(true);
       
@@ -1311,10 +1355,12 @@ const Profile = () => {
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+      uploadedStoragePath = storagePath;
 
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
       if (activeCandidateProfile) {
-        await profileRailRef.current?.updateActiveProfile({ cover_image_url: storagePath });
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        await profileRailRef.current.updateActiveProfile({ cover_image_url: storagePath });
         setCoverEditorOpen(false);
         if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
         setPendingCoverSrc('');
@@ -1364,6 +1410,15 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Cover upload error:', error);
+      if (activeCandidateProfile && uploadedStoragePath) {
+        await deleteMedia(uploadedStoragePath, 'cover-image');
+        toast({
+          title: 'Uppladdningen återställdes',
+          description: 'Cover-bilden kunde inte kopplas till profilen och har därför tagits bort.',
+          variant: 'destructive',
+        });
+        return;
+      }
       const u = (await supabase.auth.getUser()).data.user;
       const enqueued = u ? await enqueueMediaForLater({
         blob: editedBlob,
@@ -1387,10 +1442,23 @@ const Profile = () => {
   };
 
   const deleteProfileMedia = async () => {
-    // Vald extraprofil: ta bort dess egen bild/video direkt.
+    // Vald extraprofil: samma återställningsbara flöde som grundprofilen.
     if (activeCandidateProfile) {
-      await profileRailRef.current?.updateActiveProfile({ profile_image_url: null, video_url: null });
-      toast({ title: 'Media borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      try {
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        const snapshot = {
+          profileId: activeCandidateProfile.id,
+          kind: 'media' as const,
+          profileImageUrl: activeCandidateProfile.profile_image_url,
+          videoUrl: activeCandidateProfile.video_url,
+          coverImageUrl: activeCandidateProfile.cover_image_url,
+        };
+        await profileRailRef.current.updateActiveProfile({ profile_image_url: null, video_url: null });
+        setDeletedCandidateMedia(snapshot);
+        toast({ title: 'Media borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      } catch (error) {
+        console.error('Error deleting candidate profile media:', error);
+      }
       return;
     }
     if (!user?.id) return;
@@ -1466,7 +1534,21 @@ const Profile = () => {
       });
     }
   };
-  const restoreProfileMedia = () => {
+  const restoreProfileMedia = async () => {
+    if (activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'media') {
+      try {
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        await profileRailRef.current.updateActiveProfile({
+          profile_image_url: deletedCandidateMedia.profileImageUrl,
+          video_url: deletedCandidateMedia.videoUrl,
+        });
+        setDeletedCandidateMedia(null);
+        toast({ title: 'Återställd!', description: 'Profilens media har återställts.' });
+      } catch (error) {
+        console.error('Error restoring candidate profile media:', error);
+      }
+      return;
+    }
     if (!deletedProfileMedia) return;
     
     // Återställ alla värden (inklusive video)
@@ -1500,10 +1582,23 @@ const Profile = () => {
   };
 
   const deleteCoverImage = async () => {
-    // Vald extraprofil: ta bort dess egen cover-bild direkt.
+    // Vald extraprofil: samma återställningsbara flöde som grundprofilen.
     if (activeCandidateProfile) {
-      await profileRailRef.current?.updateActiveProfile({ cover_image_url: null });
-      toast({ title: 'Cover-bild borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      try {
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        const snapshot = {
+          profileId: activeCandidateProfile.id,
+          kind: 'cover' as const,
+          profileImageUrl: activeCandidateProfile.profile_image_url,
+          videoUrl: activeCandidateProfile.video_url,
+          coverImageUrl: activeCandidateProfile.cover_image_url,
+        };
+        await profileRailRef.current.updateActiveProfile({ cover_image_url: null });
+        setDeletedCandidateMedia(snapshot);
+        toast({ title: 'Cover-bild borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      } catch (error) {
+        console.error('Error deleting candidate profile cover:', error);
+      }
       return;
     }
     if (!user?.id) return;
@@ -1547,7 +1642,18 @@ const Profile = () => {
     }
   };
   
-  const restoreCoverImage = () => {
+  const restoreCoverImage = async () => {
+    if (activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') {
+      try {
+        if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
+        await profileRailRef.current.updateActiveProfile({ cover_image_url: deletedCandidateMedia.coverImageUrl });
+        setDeletedCandidateMedia(null);
+        toast({ title: 'Återställd!', description: 'Din cover-bild har återställts.' });
+      } catch (error) {
+        console.error('Error restoring candidate profile cover:', error);
+      }
+      return;
+    }
     if (!deletedCoverImage) return;
     
     // Restore cover image values
@@ -1723,6 +1829,31 @@ const Profile = () => {
     }
   };
   const { isOnline, showOfflineToast } = useOnline();
+
+  const rollbackUnsavedBaseMedia = async () => {
+    if (!originalValues) return;
+
+    const savedPaths = new Set([
+      originalValues.profileImageUrl,
+      originalValues.videoUrl,
+      originalValues.coverImageUrl,
+      originalValues.cvUrl,
+    ].filter((path): path is string => !!path));
+    const pendingMedia = [
+      { path: profileImageUrl, type: 'profile-image' as const },
+      { path: videoUrl, type: 'profile-video' as const },
+      { path: coverImageUrl, type: 'cover-image' as const },
+      { path: cvUrl, type: 'cv' as const },
+    ].filter(({ path }) => !!path && !savedPaths.has(path));
+    const uniquePending = Array.from(new Map(pendingMedia.map((item) => [item.path, item])).values());
+
+    await Promise.allSettled(uniquePending.map(({ path, type }) => deleteMedia(path, type)));
+    resetProfileFormToValues(originalValues);
+    setDeletedProfileMedia(null);
+    setDeletedCoverImage(null);
+    setLocalMediaState(null);
+    setHasUnsavedChanges(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1931,12 +2062,20 @@ const Profile = () => {
           duration: 2000,
           route: '/profile'
         });
+      } else {
+        await rollbackUnsavedBaseMedia();
+        toast({
+          title: 'Ändringarna återställdes',
+          description: 'Profilen kunde inte sparas. Nya filer har tagits bort och senast sparade media har återställts.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Profile update error:', error);
+      await rollbackUnsavedBaseMedia();
       toast({
-        title: "Fel vid uppdatering",
-        description: "Kunde inte uppdatera profilen.",
+        title: "Ändringarna återställdes",
+        description: "Profilen kunde inte sparas. Nya filer har tagits bort och senast sparade media har återställts.",
         variant: "destructive"
       });
     } finally {
@@ -2056,14 +2195,14 @@ const Profile = () => {
               )}
 
               {/* Delete/Restore icon for profile media – samma för alla profiler */}
-              {!activeCandidateProfile && deletedProfileMedia && !videoUrl ? (
+              {((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'media') || (!activeCandidateProfile && deletedProfileMedia && !videoUrl)) ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    restoreProfileMedia();
+                    void restoreProfileMedia();
                   }}
                   className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
-                  title="Återställ video"
+                  aria-label="Återställ media"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </button>
@@ -2158,12 +2297,12 @@ const Profile = () => {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
-                    {displayIsVideo && !activeCandidateProfile && !coverImageUrl && deletedCoverImage && (
+                    {displayIsVideo && ((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') || (!activeCandidateProfile && !coverImageUrl && deletedCoverImage)) && (
                       <button
-                        onClick={restoreCoverImage}
+                        onClick={() => void restoreCoverImage()}
                         disabled={isUploadingCover}
                         className="absolute -right-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
-                        title="Ångra borttagning"
+                        aria-label="Återställ cover-bild"
                       >
                         <RotateCcw className="h-4 w-4" />
                       </button>

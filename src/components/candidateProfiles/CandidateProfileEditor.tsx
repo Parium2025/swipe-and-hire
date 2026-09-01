@@ -8,11 +8,11 @@ import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
-import { FileText, Camera, Video, Play, Trash2, Loader2, CheckCircle } from 'lucide-react';
+import { FileText, Camera, Video, Play, Trash2, Loader2, CheckCircle, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { uploadMedia } from '@/lib/mediaManager';
+import { deleteMedia, uploadMedia, type MediaType } from '@/lib/mediaManager';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { looksLikeVideoFile } from '@/lib/videoInput';
 import type { CandidateProfile, CandidateProfileInput } from '@/hooks/useCandidateProfiles';
@@ -22,7 +22,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   profile?: CandidateProfile | null;
   saving?: boolean;
-  onSave: (input: CandidateProfileInput) => void;
+  onSave: (input: CandidateProfileInput) => Promise<boolean>;
 }
 
 /** Samma solida kortyta som profilsidans sektioner – ingen streckad ram. */
@@ -44,6 +44,10 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [deletedMedia, setDeletedMedia] = useState<{ videoUrl: string | null; imageUrl: string | null; coverUrl: string | null } | null>(null);
+  const [deletedCover, setDeletedCover] = useState<string | null>(null);
+  const [deletedCv, setDeletedCv] = useState<{ url: string; filename: string | null } | null>(null);
+  const uploadedPathsRef = useRef(new Map<string, MediaType>());
 
   const [editorSrc, setEditorSrc] = useState('');
   const [editorTarget, setEditorTarget] = useState<'profile-image' | 'cover-image' | null>(null);
@@ -66,6 +70,10 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     setCoverUrl(profile?.cover_image_url ?? null);
     setEditorSrc('');
     setEditorTarget(null);
+    setDeletedMedia(null);
+    setDeletedCover(null);
+    setDeletedCv(null);
+    uploadedPathsRef.current.clear();
   }, [open, profile]);
 
   const labelFilled = label.trim().length > 0;
@@ -79,7 +87,56 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
       toast({ title: 'Uppladdningen misslyckades', description: error?.message ?? 'Försök igen.', variant: 'destructive' });
       return null;
     }
+    uploadedPathsRef.current.set(storagePath, type);
     return storagePath;
+  };
+
+  const cleanupNewUploads = async (keep: Set<string> = new Set()) => {
+    const removals = Array.from(uploadedPathsRef.current.entries())
+      .filter(([path]) => !keep.has(path))
+      .map(([path, type]) => deleteMedia(path, type));
+    await Promise.allSettled(removals);
+    uploadedPathsRef.current.clear();
+  };
+
+  const resetToSavedProfile = () => {
+    setLabel(profile?.label ?? '');
+    setCvUrl(profile?.cv_url ?? null);
+    setCvFilename(profile?.cv_filename ?? null);
+    setVideoUrl(profile?.video_url ?? null);
+    setImageUrl(profile?.profile_image_url ?? null);
+    setCoverUrl(profile?.cover_image_url ?? null);
+    setDeletedMedia(null);
+    setDeletedCover(null);
+    setDeletedCv(null);
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      void cleanupNewUploads();
+      resetToSavedProfile();
+    }
+    onOpenChange(nextOpen);
+  };
+
+  const handleSaveProfile = async () => {
+    const input: CandidateProfileInput = {
+      label,
+      cv_url: cvUrl,
+      cv_filename: cvFilename,
+      video_url: videoUrl,
+      profile_image_url: imageUrl,
+      cover_image_url: coverUrl,
+    };
+    const saved = await onSave(input);
+    if (saved) {
+      const referenced = new Set([cvUrl, videoUrl, imageUrl, coverUrl].filter((path): path is string => !!path));
+      await cleanupNewUploads(referenced);
+      uploadedPathsRef.current.clear();
+      return;
+    }
+    await cleanupNewUploads();
+    resetToSavedProfile();
   };
 
   /** Bild eller video till profilen – samma flöde som på Min profil. */
@@ -153,7 +210,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
 <DialogContent
           className="max-h-[85vh] overflow-y-auto sm:max-w-lg bg-card-parium border-0 text-white"
           // På pekskärmar ska inte namnfältet autofokuseras – då åker tangentbordet
@@ -245,11 +302,32 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </div>
                   )}
 
-                  {(hasVideo || hasImage) && (
+                  {deletedMedia ? (
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); setVideoUrl(null); setImageUrl(null); setCoverUrl(null); }}
-                      title="Ta bort"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setVideoUrl(deletedMedia.videoUrl);
+                        setImageUrl(deletedMedia.imageUrl);
+                        setCoverUrl(deletedMedia.coverUrl);
+                        setDeletedMedia(null);
+                      }}
+                      aria-label="Återställ media"
+                      className="absolute -top-3 -right-3 bg-white/20 md:hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </button>
+                  ) : (hasVideo || hasImage) && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletedMedia({ videoUrl, imageUrl, coverUrl });
+                        setVideoUrl(null);
+                        setImageUrl(null);
+                        setCoverUrl(null);
+                      }}
+                      aria-label="Ta bort media"
                       className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!bg-destructive/30"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -321,11 +399,20 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       >
                         {coverUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                       </button>
-                      {coverUrl && (
+                      {deletedCover ? (
                         <button
                           type="button"
-                          onClick={() => setCoverUrl(null)}
-                          title="Ta bort"
+                          onClick={() => { setCoverUrl(deletedCover); setDeletedCover(null); }}
+                          aria-label="Återställ cover-bild"
+                          className="absolute -right-10 bg-white/20 md:hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </button>
+                      ) : coverUrl && (
+                        <button
+                          type="button"
+                          onClick={() => { setDeletedCover(coverUrl); setCoverUrl(null); }}
+                          aria-label="Ta bort cover-bild"
                           className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!bg-destructive/30"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -356,11 +443,27 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   <span className="flex-1 truncate text-sm text-white">{cvFilename || 'CV uppladdat'}</span>
                   <button
                     type="button"
-                    onClick={() => { setCvUrl(null); setCvFilename(null); }}
-                    title="Ta bort"
+                    onClick={() => {
+                      setDeletedCv({ url: cvUrl, filename: cvFilename });
+                      setCvUrl(null);
+                      setCvFilename(null);
+                    }}
+                    aria-label="Ta bort CV"
                     className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30"
                   >
                     <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : deletedCv ? (
+                <div className="flex min-h-11 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                  <span className="flex-1 text-sm text-white">CV markerat för borttagning.</span>
+                  <button
+                    type="button"
+                    onClick={() => { setCvUrl(deletedCv.url); setCvFilename(deletedCv.filename); setDeletedCv(null); }}
+                    aria-label="Återställ CV"
+                    className="rounded-full bg-white/20 p-2 text-white transition-colors md:hover:bg-white/30"
+                  >
+                    <RotateCcw className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
@@ -370,7 +473,11 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt']}
                   maxFileSize={50 * 1024 * 1024}
                   dropzoneClassName={DROPZONE}
-                  onFileUploaded={(url, fileName) => { setCvUrl(url); setCvFilename(fileName); }}
+                  onFileUploaded={(url, fileName) => {
+                    uploadedPathsRef.current.set(url, 'cv');
+                    setCvUrl(url);
+                    setCvFilename(fileName);
+                  }}
                   onFileRemoved={() => { setCvUrl(null); setCvFilename(null); }}
                 />
               )}
@@ -381,14 +488,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             <button
               type="button"
               disabled={!labelFilled || saving || uploading}
-              onClick={() => onSave({
-                label,
-                cv_url: cvUrl,
-                cv_filename: cvFilename,
-                video_url: videoUrl,
-                profile_image_url: imageUrl,
-                cover_image_url: coverUrl,
-              })}
+              onClick={() => void handleSaveProfile()}
               className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm font-medium text-white rounded-full bg-green-600/80 md:hover:bg-green-600 border border-transparent transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:bg-green-600/60 disabled:opacity-70"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
@@ -396,7 +496,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             </button>
             <button
               type="button"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/10 transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt

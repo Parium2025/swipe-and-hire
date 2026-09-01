@@ -223,10 +223,11 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       setEditorOpen(true);
     },
     updateActiveProfile: async (patch: Partial<CandidateProfileInput>) => {
-      if (!activeProfile) return;
+      if (!activeProfile) throw new Error('Ingen profil är vald.');
       const res = await updateProfile(activeProfile.id, patch);
       if ('error' in res && res.error) {
         toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
+        throw new Error(res.error);
       }
     },
   }), [activeProfile, updateProfile, toast]);
@@ -258,7 +259,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
     if ('error' in res && res.error) {
       toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
-      return;
+      return false;
     }
     if (!editing && 'data' in res) {
       const created = (res as { data?: CandidateProfile }).data;
@@ -266,6 +267,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
+    return true;
   };
 
   const activeChip = chips.find((c) => c.id === activeId) ?? chips[0];
