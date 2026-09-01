@@ -2020,17 +2020,21 @@ const Profile = () => {
         clearProfileDraft(user?.id); // 🔒 Clear localStorage draft after successful save
         console.log('💾 Profile draft cleared after save');
         
-        // Clear undo states after successful save
-        setDeletedProfileMedia(null);
-        setDeletedCoverImage(null);
-        
-        toast({
-          id: 'profile-save-success',
-          title: "Profil uppdaterad",
-          description: "Dina ändringar har sparats.",
-          duration: 2000,
-          route: '/profile'
-        });
+        // Clear undo states after an explicit save. Vid autospar behålls
+        // "Ångra borttagning" så att man hinner ändra sig.
+        if (!silent) {
+          setDeletedProfileMedia(null);
+          setDeletedCoverImage(null);
+
+          toast({
+            id: 'profile-save-success',
+            title: "Profil uppdaterad",
+            description: "Dina ändringar har sparats.",
+            duration: 2000,
+            route: '/profile'
+          });
+        }
+
       } else {
         await rollbackUnsavedBaseMedia();
         toast({
