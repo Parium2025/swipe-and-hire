@@ -376,6 +376,17 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                       style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
                     />
                   </button>
+                  {chip.id !== 'base' && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); requestDelete(chip.id); }}
+                      aria-label="Ta bort profil"
+                      className="-my-1 shrink-0 rounded-full p-2 text-destructive touch-manipulation"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+
                 </DropdownMenuItem>
               </Fragment>
             ))}
