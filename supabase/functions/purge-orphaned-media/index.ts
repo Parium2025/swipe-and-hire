@@ -49,7 +49,7 @@ const BUCKETS: BucketConfig[] = [
       // samma bucket. Utan denna källa raderas de efter 7 dagar.
       {
         table: 'candidate_profiles',
-        columns: ['cv_url', 'video_url', 'profile_image_url'],
+        columns: ['cv_url', 'video_url', 'profile_image_url', 'cover_image_url'],
       },
       {
         table: 'job_applications',
