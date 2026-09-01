@@ -100,8 +100,18 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState<CandidateProfile | null>(null);
   const [activeId, setActiveId] = useState<string>('base');
+
+  // Refs per chip så att vi kan centrera det valda/standard-chipet i raden.
+  const chipRefs = React.useRef(new Map<string, HTMLDivElement>());
+  const setChipRef = useCallback((id: string) => (el: HTMLDivElement | null) => {
+    if (el) chipRefs.current.set(id, el); else chipRefs.current.delete(id);
+  }, []);
+  const centerChip = useCallback((id: string) => {
+    requestAnimationFrame(() => {
+      chipRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+  }, []);
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
