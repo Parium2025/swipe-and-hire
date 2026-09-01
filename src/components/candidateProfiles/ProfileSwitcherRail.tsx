@@ -233,7 +233,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex min-h-[56px] w-full max-w-[320px] items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-left text-white touch-manipulation active:bg-white/10"
+              className="group flex min-h-[56px] w-full max-w-[320px] items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-left text-white touch-manipulation active:bg-white/10"
               aria-label="Byt profil"
             >
               <ProfileAvatar
@@ -246,50 +246,55 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
                 <span className="block truncate text-[15px] font-medium leading-tight text-white">
                   {activeChip?.label}
                 </span>
-                <span className="block text-[12px] leading-tight text-white/70">
+                <span className="block text-[12px] leading-tight text-white">
                   {activeChip?.isDefault ? 'Standardprofil' : 'Tryck för att byta profil'}
                 </span>
               </span>
-              <ChevronDown className="h-4 w-4 shrink-0 text-white/80" />
+              <ChevronDown className="h-4 w-4 shrink-0 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="center" className="w-[288px]">
-            {chips.map((chip) => (
-              <DropdownMenuItem
-                key={chip.id}
-                onSelect={() => selectChip(chip.id)}
-                className="flex items-center gap-3 py-2"
-              >
-                <ProfileAvatar
-                  imagePath={chip.imagePath}
-                  signedImageUrl={chip.signedImageUrl}
-                  hasVideo={chip.hasVideo}
-                  size={32}
-                />
-                <span className="min-w-0 flex-1 truncate text-[14px]">{chip.label}</span>
-                {activeId === chip.id && <Check className="h-4 w-4 shrink-0" />}
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); void makeDefault(chip.id); }}
-                  aria-label={chip.isDefault ? 'Standardprofil' : 'Gör till standard'}
-                  className="-my-1 shrink-0 rounded-full p-2 touch-manipulation"
+          <DropdownMenuContent align="center" className="w-[288px] p-1">
+            {orderedChips.map((chip, idx) => (
+              <Fragment key={chip.id}>
+                {idx > 0 && <div className="mx-2 h-px bg-white/10" />}
+                <DropdownMenuItem
+                  onSelect={() => selectChip(chip.id)}
+                  className="flex items-center gap-3 py-2"
                 >
-                  <Star
-                    className="h-4 w-4"
-                    style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
+                  <ProfileAvatar
+                    imagePath={chip.imagePath}
+                    signedImageUrl={chip.signedImageUrl}
+                    hasVideo={chip.hasVideo}
+                    size={32}
                   />
-                </button>
-              </DropdownMenuItem>
+                  <span className="min-w-0 flex-1 truncate text-[14px]">{chip.label}</span>
+                  {activeId === chip.id && <Check className="h-4 w-4 shrink-0" />}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); void makeDefault(chip.id); }}
+                    aria-label={chip.isDefault ? 'Standardprofil' : 'Gör till standard'}
+                    className="-my-1 shrink-0 rounded-full p-2 touch-manipulation"
+                  >
+                    <Star
+                      className="h-4 w-4"
+                      style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
+                    />
+                  </button>
+                </DropdownMenuItem>
+              </Fragment>
             ))}
 
             {canCreateMore && (
-              <DropdownMenuItem onSelect={openNew} className="flex items-center gap-3 py-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-current/20">
-                  <Plus className="h-4 w-4" />
-                </span>
-                <span className="text-[14px]">Lägg till profil</span>
-              </DropdownMenuItem>
+              <>
+                <div className="mx-2 h-px bg-white/10" />
+                <DropdownMenuItem onSelect={openNew} className="flex items-center gap-3 py-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full border border-current/20">
+                    <Plus className="h-4 w-4" />
+                  </span>
+                  <span className="text-[14px]">Lägg till profil</span>
+                </DropdownMenuItem>
+              </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
