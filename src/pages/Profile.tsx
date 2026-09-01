@@ -907,7 +907,11 @@ const Profile = () => {
     setUploadProgress(0);
     setUploadProgressInfo(null);
     setUploadAttempt(1);
-    
+
+    const controller = new AbortController();
+    mediaUploadAbortRef.current?.abort();
+    mediaUploadAbortRef.current = controller;
+
     try {
       if (!user?.id) throw new Error('User not found');
       
@@ -917,6 +921,7 @@ const Profile = () => {
         isVideo ? 'profile-video' : 'profile-image',
         user.id,
         {
+          signal: controller.signal,
           onProgress: (p) => {
             setUploadProgress(p.percent);
             setUploadProgressInfo(p);
