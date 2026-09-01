@@ -1935,8 +1935,10 @@ const Profile = () => {
                 />
               ) : (
                 <div
-                  className={activeCandidateProfile ? '' : 'cursor-pointer'}
-                  onClick={activeCandidateProfile ? undefined : () => document.getElementById('profile-image')?.click()}
+                  className="cursor-pointer"
+                  onClick={activeCandidateProfile
+                    ? () => profileRailRef.current?.editActiveProfile()
+                    : () => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
                     {displayImageUrl ? (
