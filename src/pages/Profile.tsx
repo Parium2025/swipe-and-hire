@@ -1814,8 +1814,10 @@ const Profile = () => {
     setHasUnsavedChanges(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, opts?: { silent?: boolean }) => {
+    e?.preventDefault?.();
+    const silent = !!opts?.silent;
+
 
     if (!isOnline) {
       // 🚀 OFFLINE: Queue text-based profile updates for auto-sync
