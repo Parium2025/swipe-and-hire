@@ -7,6 +7,8 @@ interface UploadInlineProgressProps {
   percent?: number | null;
   /** Extra hjälptext under linjen. */
   hint?: string;
+  /** Visas som "Avbryt"-knapp under linjen när uppladdningen går att avbryta. */
+  onCancel?: () => void;
   className?: string;
 }
 
