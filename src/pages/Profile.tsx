@@ -1449,6 +1449,12 @@ const Profile = () => {
   };
 
   const deleteCoverImage = async () => {
+    // Vald extraprofil: ta bort dess egen cover-bild direkt.
+    if (activeCandidateProfile) {
+      await profileRailRef.current?.updateActiveProfile({ cover_image_url: null });
+      toast({ title: 'Cover-bild borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      return;
+    }
     if (!user?.id) return;
     
     try {
