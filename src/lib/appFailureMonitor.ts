@@ -149,14 +149,18 @@ function createFailure(partial: CreateFailureInput): AppFailure {
 
 function recordFailure(failure: AppFailure) {
   storeFailure(failure);
-  if (ownerUserId) {
-    void reportAppException(failure, ownerUserId).catch((error) => {
-      console.warn('App exception reporting failed:', error);
-    });
-    void notifyAppFailure(failure, ownerUserId).catch((error) => {
-      console.warn('App failure alert failed:', error);
-    });
-  }
+  // Utan inloggad användare saknas rättighet att skriva (anon har inte EXECUTE).
+  if (!ownerUserId) return;
+  if (!canSendReport(failure.fingerprint)) return;
+
+  void reportAppException(failure, ownerUserId).catch((error) => {
+    // Om rapporteringen själv failar: stäng av resten av sessionen.
+    reportingSuspended = true;
+    console.warn('App exception reporting failed, suspending reporting:', error);
+  });
+  void notifyAppFailure(failure, ownerUserId).catch((error) => {
+    console.warn('App failure alert failed:', error);
+  });
 }
 
 export function installAppFailureMonitor(getOwnerUserId: () => string | null | undefined) {
