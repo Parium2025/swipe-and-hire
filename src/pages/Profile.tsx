@@ -2158,13 +2158,13 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover image upload – endast för grundprofilen. Extraprofiler har egen cover i sin redigerare. */}
-            {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && (
+            {/* Cover-bild – samma uppsättning för grundprofilen och varje extraprofil. */}
+            {displayIsVideo && (
 
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   {/* First row: Edit existing cover button - matchar arbetsgivarsidans struktur */}
-                  {coverImageUrl && (
+                  {displayCoverPath && (
                     <button
                       type="button"
                       onClick={handleEditExistingCover}
@@ -2182,9 +2182,9 @@ const Profile = () => {
                       disabled={isUploadingCover}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full"
                     >
-                      {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                      {displayCoverPath ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                     </button>
-                    {coverImageUrl && (
+                    {displayCoverPath && (
                       <button
                         onClick={deleteCoverImage}
                         disabled={isUploadingCover}
@@ -2193,7 +2193,7 @@ const Profile = () => {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
-                    {!coverImageUrl && deletedCoverImage && (
+                    {!activeCandidateProfile && !coverImageUrl && deletedCoverImage && (
                       <button
                         onClick={restoreCoverImage}
                         disabled={isUploadingCover}
