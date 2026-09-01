@@ -148,6 +148,19 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
 
+  // Tangentbord: karusellen ska svara på piltangenter även när fokus ligger på
+  // ett kort inuti raden eller när musen bara hovrar över den.
+  const railRef = React.useRef<HTMLDivElement>(null);
+  const railHoverRef = React.useRef(false);
+  const railKeyHandlerRef = React.useRef<(e: KeyboardEvent) => void>(() => {});
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => railKeyHandlerRef.current(e);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+
+
 
   const dbDefaultId = useMemo(
     () => profiles.find((p) => p.is_default)?.id ?? 'base',
