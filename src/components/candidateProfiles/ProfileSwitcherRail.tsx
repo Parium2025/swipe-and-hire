@@ -25,6 +25,8 @@ interface Props {
 /** Utåtriktade kommandon så att profilsidan kan öppna redigeraren för vald profil. */
 export interface ProfileSwitcherRailHandle {
   editActiveProfile: () => void;
+  /** Sparar media direkt på den valda extraprofilen (egen tunnel). */
+  updateActiveProfile: (patch: Partial<CandidateProfileInput>) => Promise<void>;
 }
 
 
