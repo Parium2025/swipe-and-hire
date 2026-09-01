@@ -221,7 +221,7 @@ export function installAppFailureMonitor(getOwnerUserId: () => string | null | u
           severity: 'critical',
           title: 'Backend-anrop failade',
           message: `${response.status} ${response.statusText || 'Server error'} efter ${Math.round(performance.now() - startedAt)} ms`,
-          source: typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+          source: urlString(input),
           status: response.status,
         }));
       }
@@ -233,7 +233,7 @@ export function installAppFailureMonitor(getOwnerUserId: () => string | null | u
           severity: 'critical',
           title: 'Backend-anrop kunde inte nås',
           message: normalizeMessage(error),
-          source: typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+          source: urlString(input),
         }));
       }
       throw error;
