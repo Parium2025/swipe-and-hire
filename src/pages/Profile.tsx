@@ -1278,6 +1278,17 @@ const Profile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
+      // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile({ cover_image_url: storagePath });
+        setCoverEditorOpen(false);
+        if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
+        setPendingCoverSrc('');
+        toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
+        return;
+      }
+
+
       // Förladdda den signerade URL:en i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
         const signed = await getMediaUrl(storagePath, 'cover-image', 86400);
