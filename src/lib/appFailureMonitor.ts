@@ -168,7 +168,7 @@ function recordFailure(failure: AppFailure) {
   storeFailure(failure);
   // Utan inloggad användare saknas rättighet att skriva (anon har inte EXECUTE).
   if (!ownerUserId) return;
-  if (!canSendReport(failure.fingerprint)) return;
+  if (!tryClaimReportSlot(failure.fingerprint)) return;
 
   void reportAppException(failure, ownerUserId).catch((error) => {
     // Om rapporteringen själv failar: stäng av resten av sessionen.
