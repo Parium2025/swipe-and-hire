@@ -165,8 +165,9 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
           hasVideo={baseHasVideo}
           active={activeId === 'base'}
           isDefault={baseIsDefault}
-          onSelect={() => setActiveId('base')}
-          onToggleDefault={() => { if (!baseIsDefault) clearDefaultProfile(); }}
+          chipRef={setChipRef('base')}
+          onSelect={() => selectChip('base')}
+          onToggleDefault={() => makeDefault('base')}
         />
 
         {profiles.map((p) => (
@@ -177,8 +178,9 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
             hasVideo={!!p.video_url}
             active={activeId === p.id}
             isDefault={p.is_default}
-            onSelect={() => setActiveId(p.id)}
-            onToggleDefault={() => { if (!p.is_default) setDefaultProfile(p.id); }}
+            chipRef={setChipRef(p.id)}
+            onSelect={() => selectChip(p.id)}
+            onToggleDefault={() => makeDefault(p.id)}
           />
         ))}
 
