@@ -153,7 +153,14 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg bg-card-parium border-0 text-white">
+<DialogContent
+          className="max-h-[85vh] overflow-y-auto sm:max-w-lg bg-card-parium border-0 text-white"
+          // På pekskärmar ska inte namnfältet autofokuseras – då åker tangentbordet
+          // upp direkt när dialogen öppnas. På desktop behålls autofokus.
+          onOpenAutoFocus={(e) => {
+            if (window.matchMedia('(pointer: coarse)').matches) e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-white">{profile ? 'Redigera profil' : 'Ny profil'}</DialogTitle>
             <DialogDescription className="text-white">
