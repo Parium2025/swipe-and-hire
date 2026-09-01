@@ -3,6 +3,7 @@ import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check } from 'lucide
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { getVideoPosterPath } from '@/lib/mediaManager';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
