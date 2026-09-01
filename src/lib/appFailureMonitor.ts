@@ -116,7 +116,10 @@ let lastSendAt = 0;
 let reportingSuspended = false;
 const lastSentByFingerprint = new Map<string, number>();
 
-function canSendReport(fingerprintKey: string): boolean {
+// Bokar en sändningsplats och bär hela ansvaret för budgeten: returnerar true
+// endast om en rapport faktiskt får skickas just nu, och stämplar då budgeten
+// direkt så anroparen kan skicka utan vidare kontroll.
+function tryClaimReportSlot(fingerprintKey: string): boolean {
   if (reportingSuspended) return false;
   if (reportsSentThisSession >= MAX_REPORTS_PER_SESSION) return false;
   const now = Date.now();
