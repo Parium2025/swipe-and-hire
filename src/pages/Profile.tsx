@@ -915,6 +915,21 @@ const Profile = () => {
       setUploadProgress(100);
 
       if (uploadError) throw uploadError;
+
+      // Vald extraprofil: media sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile(
+          isVideo
+            ? { video_url: storagePath, profile_image_url: null }
+            : { profile_image_url: storagePath, video_url: null }
+        );
+        toast({
+          title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
+          description: `Sparad på profilen "${activeCandidateProfile.label}".`,
+        });
+        return;
+      }
+
       
       // Update local state
         if (isVideo) {
