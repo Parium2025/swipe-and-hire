@@ -573,6 +573,12 @@ const Profile = () => {
   const displayImageUrl = activeCandidateProfile
     ? activeExtraImageUrl
     : (cachedProfileImageUrl || signedProfileImageUrl);
+  /** Sökväg till den visade profilens bild (grundprofil eller vald extraprofil). */
+  const displayImagePath = activeCandidateProfile ? (activeCandidateProfile.profile_image_url || '') : profileImageUrl;
+  const displayHasMedia = activeCandidateProfile
+    ? !!(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url)
+    : !!(videoUrl || profileImageUrl);
+  const displayCoverPath = activeCandidateProfile ? (activeCandidateProfile.cover_image_url || '') : coverImageUrl;
   
   // Extended profile fields - using correct database field names
   const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
