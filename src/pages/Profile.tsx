@@ -29,6 +29,7 @@ import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import ImageEditor from '@/components/ImageEditor';
+import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -2001,26 +2002,13 @@ const Profile = () => {
               )}
               
               {isUploadingMedia && (
-                <div className="mx-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2 text-left">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-sm font-medium text-white tabular-nums">
-                      {uploadAttempt > 1
-                        ? `Försöker igen (försök ${uploadAttempt})…`
-                        : `${uploadProgress}%`}
-                    </span>
-                    {uploadProgressInfo && (
-                      <span className="text-[11px] text-white/60 tabular-nums">
-                        {formatBytes(uploadProgressInfo.loaded)} / {formatBytes(uploadProgressInfo.total)}
-                      </span>
-                    )}
-                  </div>
-                  <Progress value={uploadProgress} className="h-1.5 bg-white/10" />
-                  {uploadProgressInfo && uploadProgressInfo.secondsRemaining > 0 && (
-                    <div className="text-[11px] text-white/60 tabular-nums">
-                      {formatTimeRemaining(uploadProgressInfo.secondsRemaining)}
-                    </div>
-                  )}
-                </div>
+                <UploadInlineProgress
+                  label={uploadAttempt > 1 ? `Försöker igen (försök ${uploadAttempt})…` : 'Laddar upp…'}
+                  percent={uploadProgress > 0 ? uploadProgress : undefined}
+                  hint={uploadProgressInfo && uploadProgressInfo.secondsRemaining > 0
+                    ? formatTimeRemaining(uploadProgressInfo.secondsRemaining) ?? undefined
+                    : undefined}
+                />
               )}
               
               {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
@@ -2102,24 +2090,10 @@ const Profile = () => {
                 />
                 
                 {isUploadingCover && (
-                  <div className="w-full max-w-xs mx-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-sm font-medium text-white tabular-nums">
-                        {coverProgressInfo ? `${coverProgressInfo.percent}%` : 'Förbereder…'}
-                      </span>
-                      {coverProgressInfo && (
-                        <span className="text-[11px] text-white/60 tabular-nums">
-                          {formatBytes(coverProgressInfo.loaded)} / {formatBytes(coverProgressInfo.total)}
-                        </span>
-                      )}
-                    </div>
-                    <Progress value={coverProgressInfo?.percent ?? 0} className="h-1.5 bg-white/10" />
-                    {coverProgressInfo && coverProgressInfo.secondsRemaining > 0 && (
-                      <div className="text-[11px] text-white/60 tabular-nums">
-                        {formatTimeRemaining(coverProgressInfo.secondsRemaining)}
-                      </div>
-                    )}
-                  </div>
+                  <UploadInlineProgress
+                    label="Laddar upp cover-bild…"
+                    percent={coverProgressInfo?.percent}
+                  />
                 )}
                 
                 {coverImageUrl && !isUploadingCover && (
