@@ -254,15 +254,56 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
   const activeChip = chips.find((c) => c.id === activeId) ?? chips[0];
 
+  const requestDelete = (id: string) => {
+    const profile = profiles.find((p) => p.id === id);
+    if (profile) setDeleteTarget(profile);
+  };
+
+  const confirmDelete = async () => {
+    const target = deleteTarget;
+    if (!target) return;
+    setDeleteTarget(null);
+    if (activeId === target.id) setActiveId('base');
+    const res = await deleteProfile(target.id);
+    if ('error' in res && res.error) {
+      toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Profil borttagen', description: `${target.label} är borttagen.` });
+  };
+
   const editor = (
-    <CandidateProfileEditor
-      open={editorOpen}
-      onOpenChange={setEditorOpen}
-      profile={editing}
-      saving={saving}
-      onSave={handleSave}
-    />
+    <>
+      <CandidateProfileEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        profile={editing}
+        saving={saving}
+        onSave={handleSave}
+      />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort profil</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget ? `Vill du ta bort "${deleteTarget.label}"? Profilen och dess val av bild, video och CV tas bort.` : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); void confirmDelete(); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
+
 
   // Mobil: rullgardinsmeny – aldrig avklippta kort i kanten.
   if (isMobile) {
