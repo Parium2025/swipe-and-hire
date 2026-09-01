@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trash2 } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 
 interface CompanyLogoSectionProps {
   companyLogoUrl: string;
@@ -79,17 +80,10 @@ export const CompanyLogoSection = ({
           </label>
 
           {isUploadingLogo ? (
-            <div className="w-full max-w-xs mx-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-3 space-y-2">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-sm font-medium text-white tabular-nums">
-                  {uploadProgress > 0 ? `${uploadProgress}%` : 'Förbereder…'}
-                </span>
-                <span className="text-[11px] text-white/60">Laddar upp logga</span>
-              </div>
-              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                <div className="h-full bg-white transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
-              </div>
-            </div>
+            <UploadInlineProgress
+              label="Laddar upp logga…"
+              percent={uploadProgress > 0 ? uploadProgress : undefined}
+            />
           ) : companyLogoUrl ? (
             <div className="flex flex-col items-center space-y-2">
               <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">

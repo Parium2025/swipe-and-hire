@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { preloadSingleFile } from '@/lib/serviceWorkerManager';
 import { Progress } from '@/components/ui/progress';
+import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import { openCvFile } from '@/utils/cvUtils';
 import { CvViewer } from '@/components/CvViewer';
 import { uploadMedia, getMediaUrl, deleteMedia, type MediaType } from '@/lib/mediaManager';
@@ -320,7 +321,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             className="flex-1"
           >
             <Check className="h-4 w-4 mr-2" />
-            {uploading ? 'Laddar upp...' : 'Spara video'}
+            {uploading ? 'Laddar upp…' : 'Spara video'}
           </Button>
           <Button
             onClick={handleCancelPreview}
@@ -374,13 +375,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             </>
           ) : uploading ? (
             <>
-              <p className="text-xs sm:text-sm text-[#FFFFFF]">Laddar upp...</p>
-              {uploadProgress > 0 && (
-                <div className="max-w-xs mx-auto space-y-1">
-                  <Progress value={uploadProgress} className="h-2" />
-                  <p className="text-xs text-[#FFFFFF]">{uploadProgress}%</p>
-                </div>
-              )}
+              <UploadInlineProgress percent={uploadProgress > 0 ? uploadProgress : undefined} />
             </>
           ) : (
             <>
