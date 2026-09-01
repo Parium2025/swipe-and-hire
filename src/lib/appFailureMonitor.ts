@@ -84,13 +84,27 @@ function fingerprint(kind: AppFailure['kind'], message: string, source?: string,
 }
 
 // Rapporterings-endpoints får aldrig instrumenteras: annars blir ett misslyckat
-// felanrop ett nytt fel som rapporteras igen (oändlig loop).
-const SELF_REPORT_PATTERN = /(record_app_exception|create_system_performance_alert|send-push-notification|app-exception-watchdog)/;
+// felanrop ett nytt fel som rapporteras igen (oändlig loop). Matchningen är
+// strikt mot endpoint-sökvägar så inga andra URL:er råkar uteslutas.
+const SELF_REPORT_ENDPOINTS = [
+  '/rest/v1/rpc/record_app_exception',
+  '/rest/v1/rpc/create_system_performance_alert',
+  '/functions/v1/send-push-notification',
+  '/functions/v1/app-exception-watchdog',
+] as const;
+
+function urlString(input: RequestInfo | URL): string {
+  return typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+}
+
+function isSelfReportUrl(value: string): boolean {
+  return SELF_REPORT_ENDPOINTS.some((endpoint) => value.includes(endpoint));
+}
 
 function shouldTrackUrl(input: RequestInfo | URL): boolean {
-  const value = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-  if (SELF_REPORT_PATTERN.test(value)) return false;
-  return /\/rest\/v1\//.test(value) || /\/functions\/v1\//.test(value) || /supabase\.co/.test(value) || /lovable/.test(value);
+  const value = urlString(input);
+  if (isSelfReportUrl(value)) return false;
+  return value.includes('/rest/v1/') || value.includes('/functions/v1/');
 }
 
 // Skickbudget: max antal rapporter per session och minsta intervall per fingerprint.
@@ -102,7 +116,10 @@ let lastSendAt = 0;
 let reportingSuspended = false;
 const lastSentByFingerprint = new Map<string, number>();
 
-function canSendReport(fingerprintKey: string): boolean {
+// Bokar en sändningsplats och bär hela ansvaret för budgeten: returnerar true
+// endast om en rapport faktiskt får skickas just nu, och stämplar då budgeten
+// direkt så anroparen kan skicka utan vidare kontroll.
+function tryClaimReportSlot(fingerprintKey: string): boolean {
   if (reportingSuspended) return false;
   if (reportsSentThisSession >= MAX_REPORTS_PER_SESSION) return false;
   const now = Date.now();
@@ -151,7 +168,7 @@ function recordFailure(failure: AppFailure) {
   storeFailure(failure);
   // Utan inloggad användare saknas rättighet att skriva (anon har inte EXECUTE).
   if (!ownerUserId) return;
-  if (!canSendReport(failure.fingerprint)) return;
+  if (!tryClaimReportSlot(failure.fingerprint)) return;
 
   void reportAppException(failure, ownerUserId).catch((error) => {
     // Om rapporteringen själv failar: stäng av resten av sessionen.
@@ -204,7 +221,7 @@ export function installAppFailureMonitor(getOwnerUserId: () => string | null | u
           severity: 'critical',
           title: 'Backend-anrop failade',
           message: `${response.status} ${response.statusText || 'Server error'} efter ${Math.round(performance.now() - startedAt)} ms`,
-          source: typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+          source: urlString(input),
           status: response.status,
         }));
       }
@@ -216,7 +233,7 @@ export function installAppFailureMonitor(getOwnerUserId: () => string | null | u
           severity: 'critical',
           title: 'Backend-anrop kunde inte nås',
           message: normalizeMessage(error),
-          source: typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+          source: urlString(input),
         }));
       }
       throw error;
