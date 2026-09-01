@@ -22,6 +22,12 @@ interface Props {
   onActiveProfileChange?: (profile: CandidateProfile | null) => void;
 }
 
+/** Utåtriktade kommandon så att profilsidan kan öppna redigeraren för vald profil. */
+export interface ProfileSwitcherRailHandle {
+  editActiveProfile: () => void;
+}
+
+
 interface ChipData {
   id: string;
   label: string;
