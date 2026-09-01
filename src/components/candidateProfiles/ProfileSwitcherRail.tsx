@@ -144,18 +144,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
   };
 
-  const handleDelete = async () => {
-    if (!pendingDelete) return;
-    const removedId = pendingDelete.id;
-    const res = await deleteProfile(removedId);
-    setPendingDelete(null);
-    if ('error' in res && res.error) {
-      toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
-      return;
-    }
-    if (activeId === removedId) setActiveId('base');
-    toast({ title: 'Profil borttagen' });
-  };
 
   return (
     <div className="space-y-2">
@@ -204,27 +192,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       </div>
       </div>
 
-      {activeProfile && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            type="button"
-            onClick={() => openEdit(activeProfile)}
-            className="bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors touch-manipulation inline-flex items-center gap-1.5"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            Redigera profil
-          </button>
-          <button
-            type="button"
-            onClick={() => setPendingDelete(activeProfile)}
-            aria-label="Ta bort profil"
-            className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30 touch-manipulation"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-
       <CandidateProfileEditor
         open={editorOpen}
         onOpenChange={setEditorOpen}
@@ -232,38 +199,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
         saving={saving}
         onSave={handleSave}
       />
-
-      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
-        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
-          <AlertDialogHeader className="space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-white" />
-              </div>
-              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-                Ta bort profilen
-              </AlertDialogTitle>
-            </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed">
-              {pendingDelete?.label} tas bort permanent. Ansökningar du redan skickat påverkas inte – de behåller sin
-              egen kopia av CV, video och bild.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
-            <AlertDialogCancel className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50">
-              Avbryt
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              variant="destructiveSoft"
-              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContentNoFocus>
-      </AlertDialog>
     </div>
   );
 }
