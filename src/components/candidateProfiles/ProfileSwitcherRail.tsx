@@ -56,13 +56,15 @@ function ProfileAvatar({
 
 interface ChipProps extends ChipData {
   active: boolean;
+  /** Sant precis när stjärnan slagits på – ger en kort pop-animation. */
+  starBurst?: boolean;
   onSelect: () => void;
   onToggleDefault: () => void;
 }
 
 /** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
 }: ChipProps) {
   return (
     <div
@@ -92,12 +94,13 @@ function ProfileChip({
         className="absolute -top-1.5 -right-1.5 rounded-full border border-white/20 bg-[#0b2a55] p-1.5 transition-colors md:hover:bg-white/15"
       >
         <Star
-          className="h-3.5 w-3.5"
+          className={`h-3.5 w-3.5 transition-colors duration-200 ${starBurst ? 'animate-star-pop' : ''}`}
           style={isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: '#FFFFFF' }}
         />
       </button>
     </div>
   );
+
 }
 
 /** Avstånd mellan kortpositionerna i karusellen (kortbredd 104px + mellanrum). */
