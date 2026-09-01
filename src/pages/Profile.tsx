@@ -1823,13 +1823,16 @@ const Profile = () => {
       // 🚀 OFFLINE: Queue text-based profile updates for auto-sync
       const valid = validateRequiredFields();
       if (!valid) {
-        toast({
-          title: "Komplettera uppgifter",
-          description: "Fyll i alla obligatoriska fält markerade med rött.",
-          variant: "destructive",
-        });
+        if (!silent) {
+          toast({
+            title: "Komplettera uppgifter",
+            description: "Fyll i alla obligatoriska fält markerade med rött.",
+            variant: "destructive",
+          });
+        }
         return;
       }
+
 
       const offlineUpdates: any = {
         first_name: firstName.trim() || null,
