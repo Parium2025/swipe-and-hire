@@ -152,8 +152,8 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     })),
   ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
 
-  // Standardprofilen (stjärnan) ska alltid ligga först i raden – ingen profil
-  // får aldrig hamna framför standarden. "Ny profil"-rutan ligger alltid sist.
+  // Standardprofilen ligger först bland profilkorten. På större skärmar placeras
+  // den i railens fasta mittposition; övriga profiler och "Ny profil" följer efter.
   const orderedChips = useMemo(() => {
     const def = chips.filter((c) => c.isDefault);
     const rest = chips.filter((c) => !c.isDefault);
@@ -310,9 +310,11 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       <div className="flex justify-center">
         <div
           ref={railRef}
-          className="flex max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto px-2 pb-1 pt-2 scroll-px-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex w-full max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto px-2 pb-1 pt-2 scroll-px-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
+          <span aria-hidden="true" className="w-[calc(50%-62px)] shrink-0" />
+
           {orderedChips.map((chip) => (
             <ProfileChip
               key={chip.id}
