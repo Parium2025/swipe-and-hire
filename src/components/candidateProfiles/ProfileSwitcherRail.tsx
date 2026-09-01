@@ -120,6 +120,27 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
 
+  // Standardprofilen (stjärnan) ska alltid ligga i mitten av raden. När alla
+  // chips får plats finns ingen scroll att centrera med, så vi sorterar istället
+  // chip-ordningen så att standard-chipet hamnar på mittenindex. När raden
+  // svämmar över tar centerChip-scrollingen vid.
+  const orderedChips = useMemo(() => {
+    const chips = [
+      { id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? null, imagePath: null as string | null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault },
+      ...profiles.map((p) => ({
+        id: p.id, label: p.label, signedImageUrl: null as string | null,
+        imagePath: p.profile_image_url, hasVideo: !!p.video_url, isDefault: p.is_default,
+      })),
+    ];
+    const defaultIdx = chips.findIndex((c) => c.isDefault);
+    const mid = Math.floor(chips.length / 2);
+    if (defaultIdx >= 0 && defaultIdx !== mid && chips.length > 2) {
+      const [def] = chips.splice(defaultIdx, 1);
+      chips.splice(mid, 0, def);
+    }
+    return chips;
+  }, [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
+
   // När standardprofilen ändras (t.ex. via stjärnan) ska standard-chipet alltid
   // glida in i mitten – även efter att listan renderats om.
   const defaultChipId = baseIsDefault ? 'base' : profiles.find((p) => p.is_default)?.id ?? 'base';
@@ -182,28 +203,18 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
         className="flex max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        <ProfileChip
-          label="Min profil"
-          signedImageUrl={baseImageUrl ?? null}
-          hasVideo={baseHasVideo}
-          active={activeId === 'base'}
-          isDefault={baseIsDefault}
-          chipRef={setChipRef('base')}
-          onSelect={() => selectChip('base')}
-          onToggleDefault={() => makeDefault('base')}
-        />
-
-        {profiles.map((p) => (
+        {orderedChips.map((chip) => (
           <ProfileChip
-            key={p.id}
-            label={p.label}
-            imagePath={p.profile_image_url}
-            hasVideo={!!p.video_url}
-            active={activeId === p.id}
-            isDefault={p.is_default}
-            chipRef={setChipRef(p.id)}
-            onSelect={() => selectChip(p.id)}
-            onToggleDefault={() => makeDefault(p.id)}
+            key={chip.id}
+            label={chip.label}
+            imagePath={chip.imagePath}
+            signedImageUrl={chip.signedImageUrl}
+            hasVideo={chip.hasVideo}
+            active={activeId === chip.id}
+            isDefault={chip.isDefault}
+            chipRef={setChipRef(chip.id)}
+            onSelect={() => selectChip(chip.id)}
+            onToggleDefault={() => makeDefault(chip.id)}
           />
         ))}
 
