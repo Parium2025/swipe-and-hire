@@ -2011,14 +2011,37 @@ const Profile = () => {
                 />
               )}
               
-              {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
+              {/* Vald extraprofil: egen media, egen cover, egen CV – helt separat tunnel. */}
+              {activeCandidateProfile && !isUploadingMedia && (
+                <div className="flex flex-col items-center space-y-2">
+                  {(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url) && (
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
+                      {activeCandidateProfile.video_url ? 'Video' : 'Bild'} uppladdad!
+                    </Badge>
+                  )}
+                  {activeCandidateProfile.cover_image_url && (
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
+                      Cover-bild uppladdad!
+                    </Badge>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => profileRailRef.current?.editActiveProfile()}
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+                  >
+                    Redigera den här profilen
+                  </button>
+                </div>
+              )}
+
+              {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && !isUploadingMedia && (
                 <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
               
               {/* Anpassa din bild button - only show for images, not videos */}
-              {(!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
+              {!activeCandidateProfile && (!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
                 <div className="flex flex-col items-center space-y-2">
                   <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                     Bild uppladdad!
@@ -2034,8 +2057,9 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover image upload - show when video exists OR when cover image exists without video */}
-            {(isProfileVideo && !!videoUrl) && (
+            {/* Cover image upload – endast för grundprofilen. Extraprofiler har egen cover i sin redigerare. */}
+            {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && (
+
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   {/* First row: Edit existing cover button - matchar arbetsgivarsidans struktur */}
