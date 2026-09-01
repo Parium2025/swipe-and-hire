@@ -573,6 +573,12 @@ const Profile = () => {
   const displayImageUrl = activeCandidateProfile
     ? activeExtraImageUrl
     : (cachedProfileImageUrl || signedProfileImageUrl);
+  /** Sökväg till den visade profilens bild (grundprofil eller vald extraprofil). */
+  const displayImagePath = activeCandidateProfile ? (activeCandidateProfile.profile_image_url || '') : profileImageUrl;
+  const displayHasMedia = activeCandidateProfile
+    ? !!(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url)
+    : !!(videoUrl || profileImageUrl);
+  const displayCoverPath = activeCandidateProfile ? (activeCandidateProfile.cover_image_url || '') : coverImageUrl;
   
   // Extended profile fields - using correct database field names
   const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
@@ -909,6 +915,21 @@ const Profile = () => {
       setUploadProgress(100);
 
       if (uploadError) throw uploadError;
+
+      // Vald extraprofil: media sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile(
+          isVideo
+            ? { video_url: storagePath, profile_image_url: null }
+            : { profile_image_url: storagePath, video_url: null }
+        );
+        toast({
+          title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
+          description: `Sparad på profilen "${activeCandidateProfile.label}".`,
+        });
+        return;
+      }
+
       
       // Update local state
         if (isVideo) {
@@ -991,6 +1012,14 @@ const Profile = () => {
       );
 
       if (uploadError) throw uploadError;
+
+      // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile({ cover_image_url: storagePath });
+        toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
+        return;
+      }
+
       
       // Update local state and track filename  
       setCoverImageUrl(storagePath);
@@ -1181,6 +1210,17 @@ const Profile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
+      // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile({ profile_image_url: storagePath, video_url: null });
+        setImageEditorOpen(false);
+        if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
+        setPendingImageSrc('');
+        toast({ title: 'Profilbild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
+        return;
+      }
+
+
       // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
         const signed = await getMediaUrl(storagePath, 'profile-image', 86400);
@@ -1272,6 +1312,17 @@ const Profile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
+      // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile({ cover_image_url: storagePath });
+        setCoverEditorOpen(false);
+        if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
+        setPendingCoverSrc('');
+        toast({ title: 'Cover-bild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
+        return;
+      }
+
+
       // Förladdda den signerade URL:en i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
         const signed = await getMediaUrl(storagePath, 'cover-image', 86400);
@@ -1336,6 +1387,12 @@ const Profile = () => {
   };
 
   const deleteProfileMedia = async () => {
+    // Vald extraprofil: ta bort dess egen bild/video direkt.
+    if (activeCandidateProfile) {
+      await profileRailRef.current?.updateActiveProfile({ profile_image_url: null, video_url: null });
+      toast({ title: 'Media borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      return;
+    }
     if (!user?.id) return;
     
     try {
@@ -1443,6 +1500,12 @@ const Profile = () => {
   };
 
   const deleteCoverImage = async () => {
+    // Vald extraprofil: ta bort dess egen cover-bild direkt.
+    if (activeCandidateProfile) {
+      await profileRailRef.current?.updateActiveProfile({ cover_image_url: null });
+      toast({ title: 'Cover-bild borttagen', description: `Borttagen från profilen "${activeCandidateProfile.label}".` });
+      return;
+    }
     if (!user?.id) return;
     
     try {
@@ -1514,6 +1577,22 @@ const Profile = () => {
   };
 
   const handleEditExistingProfile = async () => {
+    // Vald extraprofil: redigera dess egen bild.
+    if (activeCandidateProfile) {
+      if (!activeCandidateProfile.profile_image_url || activeCandidateProfile.video_url) return;
+      try {
+        const signedUrl = await getMediaUrl(activeCandidateProfile.profile_image_url, 'profile-image', 86400);
+        if (signedUrl) {
+          setPendingImageSrc(signedUrl);
+          setIsEditingExistingProfileImage(true);
+          setImageEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading profile image for editing:', error);
+        toast({ title: 'Fel', description: 'Kunde inte ladda bilden för redigering.', variant: 'destructive' });
+      }
+      return;
+    }
     // Kan endast redigera bilder, inte videor
     if (!profileImageUrl || isProfileVideo) return;
     
@@ -1544,6 +1623,22 @@ const Profile = () => {
   };
 
   const handleEditExistingCover = async () => {
+    // Vald extraprofil: redigera dess egen cover-bild.
+    if (activeCandidateProfile) {
+      if (!activeCandidateProfile.cover_image_url) return;
+      try {
+        const signedUrl = await getMediaUrl(activeCandidateProfile.cover_image_url, 'cover-image', 86400);
+        if (signedUrl) {
+          setPendingCoverSrc(signedUrl);
+          setIsEditingExistingCoverImage(true);
+          setCoverEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading existing cover:', error);
+        toast({ title: 'Fel', description: 'Kunde inte ladda cover-bilden för redigering.', variant: 'destructive' });
+      }
+      return;
+    }
     if (!coverImageUrl) return;
     
     // 1) Om vi har en explicit uppladdad cover-bild, använd den ursprungliga filen
@@ -1936,9 +2031,7 @@ const Profile = () => {
               ) : (
                 <div
                   className="cursor-pointer"
-                  onClick={activeCandidateProfile
-                    ? () => profileRailRef.current?.editActiveProfile()
-                    : () => document.getElementById('profile-image')?.click()}
+                  onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
                     {displayImageUrl ? (
@@ -1961,10 +2054,8 @@ const Profile = () => {
                 </div>
               )}
 
-              {/* Delete/Restore icon for profile media */}
-              {/* Om video just raderats (deletedProfileMedia finns), visa restore istället för soptunna */}
-              {/* Dolt när en extraprofil visas – den redigeras via "Redigera profil" */}
-              {!activeCandidateProfile && (deletedProfileMedia && !videoUrl ? (
+              {/* Delete/Restore icon for profile media – samma för alla profiler */}
+              {!activeCandidateProfile && deletedProfileMedia && !videoUrl ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1975,7 +2066,7 @@ const Profile = () => {
                 >
                   <RotateCcw className="h-4 w-4" />
                 </button>
-              ) : !!(videoUrl || profileImageUrl) ? (
+              ) : displayHasMedia ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1985,7 +2076,7 @@ const Profile = () => {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              ) : null)}
+              ) : null}
 
               <input
                 id="profile-image"
@@ -1998,15 +2089,13 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2 text-center">
-              {!activeCandidateProfile && (
-                <Label
-                  htmlFor="profile-image"
-                  className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
-                >
-                  Klicka här för att välja en bild eller video (max 60 sekunder)
-                </Label>
-              )}
-              
+              <Label
+                htmlFor="profile-image"
+                className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+              >
+                Klicka här för att välja en bild eller video (max 60 sekunder)
+              </Label>
+
               {isUploadingMedia && (
                 <UploadInlineProgress
                   label={uploadAttempt > 1 ? `Försöker igen (försök ${uploadAttempt})…` : 'Laddar upp…'}
@@ -2016,38 +2105,16 @@ const Profile = () => {
                     : undefined}
                 />
               )}
-              
-              {/* Vald extraprofil: egen media, egen cover, egen CV – helt separat tunnel. */}
-              {activeCandidateProfile && !isUploadingMedia && (
-                <div className="flex flex-col items-center space-y-2">
-                  {(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url) && (
-                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                      {activeCandidateProfile.video_url ? 'Video' : 'Bild'} uppladdad!
-                    </Badge>
-                  )}
-                  {activeCandidateProfile.cover_image_url && (
-                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                      Cover-bild uppladdad!
-                    </Badge>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => profileRailRef.current?.editActiveProfile()}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
-                  >
-                    Redigera den här profilen
-                  </button>
-                </div>
-              )}
 
-              {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && !isUploadingMedia && (
+              {/* Video uppladdad – samma märke oavsett vilken profil som visas. */}
+              {displayIsVideo && !isUploadingMedia && (
                 <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                  {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
+                  Video uppladdad!
                 </Badge>
               )}
-              
-              {/* Anpassa din bild button - only show for images, not videos */}
-              {!activeCandidateProfile && (!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
+
+              {/* Anpassa din bild – visas för bilder (inte videor), alla profiler */}
+              {!displayIsVideo && !!displayImagePath && !isUploadingMedia && (
                 <div className="flex flex-col items-center space-y-2">
                   <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                     Bild uppladdad!
@@ -2063,13 +2130,13 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover image upload – endast för grundprofilen. Extraprofiler har egen cover i sin redigerare. */}
-            {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && (
+            {/* Cover-bild – samma uppsättning för grundprofilen och varje extraprofil. */}
+            {displayIsVideo && (
 
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   {/* First row: Edit existing cover button - matchar arbetsgivarsidans struktur */}
-                  {coverImageUrl && (
+                  {displayCoverPath && (
                     <button
                       type="button"
                       onClick={handleEditExistingCover}
@@ -2087,9 +2154,9 @@ const Profile = () => {
                       disabled={isUploadingCover}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full"
                     >
-                      {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                      {displayCoverPath ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                     </button>
-                    {coverImageUrl && (
+                    {displayCoverPath && (
                       <button
                         onClick={deleteCoverImage}
                         disabled={isUploadingCover}
@@ -2098,7 +2165,7 @@ const Profile = () => {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
-                    {!coverImageUrl && deletedCoverImage && (
+                    {!activeCandidateProfile && !coverImageUrl && deletedCoverImage && (
                       <button
                         onClick={restoreCoverImage}
                         disabled={isUploadingCover}
@@ -2126,7 +2193,7 @@ const Profile = () => {
                   />
                 )}
                 
-                {coverImageUrl && !isUploadingCover && (
+                {displayCoverPath && !isUploadingCover && (
                   <div className="flex items-center justify-center">
                     <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
                       Cover-bild uppladdad!
