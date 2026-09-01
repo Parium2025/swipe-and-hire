@@ -456,6 +456,8 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                   starBurst={starBurstId === slot.chip.id}
                   onSelect={() => selectChip(slot.chip!.id)}
                   onToggleDefault={() => makeDefault(slot.chip!.id)}
+                  onDelete={slot.chip.id !== 'base' ? () => requestDelete(slot.chip!.id) : undefined}
+
                 />
               ) : null}
             </div>
