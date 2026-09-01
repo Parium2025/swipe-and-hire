@@ -1520,6 +1520,22 @@ const Profile = () => {
   };
 
   const handleEditExistingProfile = async () => {
+    // Vald extraprofil: redigera dess egen bild.
+    if (activeCandidateProfile) {
+      if (!activeCandidateProfile.profile_image_url || activeCandidateProfile.video_url) return;
+      try {
+        const signedUrl = await getMediaUrl(activeCandidateProfile.profile_image_url, 'profile-image', 86400);
+        if (signedUrl) {
+          setPendingImageSrc(signedUrl);
+          setIsEditingExistingProfileImage(true);
+          setImageEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading profile image for editing:', error);
+        toast({ title: 'Fel', description: 'Kunde inte ladda bilden för redigering.', variant: 'destructive' });
+      }
+      return;
+    }
     // Kan endast redigera bilder, inte videor
     if (!profileImageUrl || isProfileVideo) return;
     
