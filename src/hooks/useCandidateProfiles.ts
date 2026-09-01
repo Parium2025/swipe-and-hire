@@ -134,6 +134,25 @@ export function useCandidateProfiles(userId?: string) {
         await supabase.from('candidate_profiles').update({ is_default: true }).eq('id', next.id);
       }
     }
+
+    // Databasraden är borta – filerna städas best-effort direkt. Dör nätet mitt
+    // i är det ofarligt: den veckovisa städrutinen (purge-orphaned-media) tar
+    // hand om allt som blivit kvar utan referens.
+    const paths = [removed?.cv_url, removed?.video_url, removed?.profile_image_url, removed?.cover_image_url]
+      .filter((p): p is string => !!p)
+      .flatMap((p) => {
+        const clean = p.split('?')[0];
+        // Videor har en posterbild bredvid sig som aldrig finns i databasen.
+        return [clean, `${clean.replace(/\.[^./]+$/, '')}-poster.jpg`];
+      });
+    if (paths.length > 0) {
+      try {
+        await supabase.storage.from('job-applications').remove(paths);
+      } catch (cleanupError) {
+        console.warn('[candidateProfiles] filstädning misslyckades:', cleanupError);
+      }
+    }
+
     await load();
     return {} as const;
   }, [profiles, load]);

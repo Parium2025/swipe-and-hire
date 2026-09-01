@@ -401,7 +401,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2.5 text-destructive transition-colors active:bg-destructive/10 touch-manipulation"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors touch-manipulation active:bg-destructive/30"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -420,9 +420,42 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   ];
   const activeIndex = Math.max(0, slots.findIndex((s) => s.key === activeId));
 
+  // Tangentbord: piltangenter flyttar mellan korten, Home/End hoppar längst ut,
+  // Enter/Blanksteg öppnar "Ny profil" och Delete tar bort vald extraprofil.
+  const handleRailKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const move = (next: number) => {
+      e.preventDefault();
+      const clamped = Math.min(slots.length - 1, Math.max(0, next));
+      const slot = slots[clamped];
+      if (slot) setActiveId(slot.key);
+    };
+    switch (e.key) {
+      case 'ArrowLeft': move(activeIndex - 1); break;
+      case 'ArrowRight': move(activeIndex + 1); break;
+      case 'Home': move(0); break;
+      case 'End': move(slots.length - 1); break;
+      case 'Enter':
+      case ' ':
+        if (slots[activeIndex]?.isAdd) { e.preventDefault(); openNew(); }
+        break;
+      case 'Delete':
+      case 'Backspace':
+        if (activeId !== 'base' && !slots[activeIndex]?.isAdd) { e.preventDefault(); requestDelete(activeId); }
+        break;
+      default: break;
+    }
+  };
+
   return (
     <div className="space-y-2">
-      <div className="relative mx-auto h-[128px] w-full max-w-[460px]">
+      <div
+        className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        role="listbox"
+        aria-label="Välj profil"
+        aria-activedescendant={`profile-slot-${slots[activeIndex]?.key ?? 'base'}`}
+        tabIndex={0}
+        onKeyDown={handleRailKeyDown}
+      >
         {slots.map((slot, idx) => {
           const offset = idx - activeIndex;
           const isCenter = offset === 0;
@@ -431,6 +464,9 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
           return (
             <div
               key={slot.key}
+              id={`profile-slot-${slot.key}`}
+              role={slot.isAdd ? undefined : 'option'}
+              aria-selected={slot.isAdd ? undefined : isCenter}
               className="absolute left-1/2 top-0 transition-all duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 transform: `translateX(calc(-50% + ${offset * SLOT_SPACING}px)) scale(${isCenter ? 1 : 0.85})`,
@@ -472,7 +508,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2.5 text-destructive transition-colors md:hover:bg-destructive/10 md:hover:border-destructive/30 touch-manipulation"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors touch-manipulation md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4" />
           </button>

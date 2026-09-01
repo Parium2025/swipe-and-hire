@@ -34,7 +34,7 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
-import { formatBytes, formatTimeRemaining, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
+import { formatBytes, formatTimeRemaining, UploadAbortedError, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
 import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
@@ -386,6 +386,11 @@ const Profile = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadProgressInfo, setUploadProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [uploadAttempt, setUploadAttempt] = useState(1);
+  // Avbryt pågående mediauppladdning (t.ex. en 60-sekunders video på svagt nät).
+  const mediaUploadAbortRef = useRef<AbortController | null>(null);
+  const cancelMediaUpload = useCallback(() => {
+    mediaUploadAbortRef.current?.abort();
+  }, []);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
@@ -902,7 +907,11 @@ const Profile = () => {
     setUploadProgress(0);
     setUploadProgressInfo(null);
     setUploadAttempt(1);
-    
+
+    const controller = new AbortController();
+    mediaUploadAbortRef.current?.abort();
+    mediaUploadAbortRef.current = controller;
+
     try {
       if (!user?.id) throw new Error('User not found');
       
@@ -912,6 +921,7 @@ const Profile = () => {
         isVideo ? 'profile-video' : 'profile-image',
         user.id,
         {
+          signal: controller.signal,
           onProgress: (p) => {
             setUploadProgress(p.percent);
             setUploadProgressInfo(p);
@@ -971,6 +981,13 @@ const Profile = () => {
         cvUrl
       });
     } catch (error) {
+      // Användaren tryckte på "Avbryt" – inget fel, ingen offline-kö.
+      if (error instanceof UploadAbortedError || controller.signal.aborted) {
+        if (uploadedStoragePath) {
+          await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
+        }
+        return;
+      }
       console.error('Upload error:', error);
       if (activeCandidateProfile && uploadedStoragePath) {
         await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
@@ -998,6 +1015,7 @@ const Profile = () => {
         });
       }
     } finally {
+      if (mediaUploadAbortRef.current === controller) mediaUploadAbortRef.current = null;
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
       setUploadProgress(0);
@@ -1005,6 +1023,7 @@ const Profile = () => {
       setUploadAttempt(1);
     }
   };
+
 
   const uploadCoverImage = async (file: File) => {
     let uploadedStoragePath = '';
@@ -2185,6 +2204,7 @@ const Profile = () => {
                   hint={uploadProgressInfo && uploadProgressInfo.secondsRemaining > 0
                     ? formatTimeRemaining(uploadProgressInfo.secondsRemaining) ?? undefined
                     : undefined}
+                  onCancel={cancelMediaUpload}
                 />
               )}
 

@@ -7,6 +7,8 @@ interface UploadInlineProgressProps {
   percent?: number | null;
   /** Extra hjälptext under linjen. */
   hint?: string;
+  /** Visas som "Avbryt"-knapp under linjen när uppladdningen går att avbryta. */
+  onCancel?: () => void;
   className?: string;
 }
 
@@ -18,6 +20,7 @@ export function UploadInlineProgress({
   label = 'Laddar upp…',
   percent,
   hint,
+  onCancel,
   className,
 }: UploadInlineProgressProps) {
   const isDeterminate = typeof percent === 'number' && Number.isFinite(percent);
@@ -48,6 +51,18 @@ export function UploadInlineProgress({
       </div>
 
       {hint && <p className="text-xs text-white text-center">{hint}</p>}
+
+      {onCancel && (
+        <div className="flex justify-center pt-0.5">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-full border border-white/20 bg-white/5 px-4 py-1 text-xs font-medium text-white transition-colors md:hover:bg-white/10 md:hover:border-white/50 touch-manipulation"
+          >
+            Avbryt
+          </button>
+        </div>
+      )}
     </div>
   );
 }
