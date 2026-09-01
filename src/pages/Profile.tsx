@@ -386,6 +386,11 @@ const Profile = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadProgressInfo, setUploadProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [uploadAttempt, setUploadAttempt] = useState(1);
+  // Avbryt pågående mediauppladdning (t.ex. en 60-sekunders video på svagt nät).
+  const mediaUploadAbortRef = useRef<AbortController | null>(null);
+  const cancelMediaUpload = useCallback(() => {
+    mediaUploadAbortRef.current?.abort();
+  }, []);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
