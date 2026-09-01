@@ -197,7 +197,14 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       setEditing(activeProfile);
       setEditorOpen(true);
     },
-  }), [activeProfile]);
+    updateActiveProfile: async (patch: Partial<CandidateProfileInput>) => {
+      if (!activeProfile) return;
+      const res = await updateProfile(activeProfile.id, patch);
+      if ('error' in res && res.error) {
+        toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
+      }
+    },
+  }), [activeProfile, updateProfile, toast]);
 
   const selectChip = (id: string) => setActiveId(id);
 
