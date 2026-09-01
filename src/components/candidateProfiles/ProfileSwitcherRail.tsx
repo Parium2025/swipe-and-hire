@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Plus, Star, Pencil, Trash2, Video as VideoIcon, User, AlertTriangle } from 'lucide-react';
-// Pencil/Trash2 återanvänds i editorn – här nedan används bara ikoner för chipsen.
+import { Plus, Star, Video as VideoIcon, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import {
@@ -94,7 +88,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const { toast } = useToast();
   const {
     profiles, canCreateMore,
-    createProfile, updateProfile, deleteProfile, setDefaultProfile, clearDefaultProfile,
+    createProfile, updateProfile, setDefaultProfile, clearDefaultProfile,
   } = useCandidateProfiles(userId);
 
   const [editorOpen, setEditorOpen] = useState(false);
