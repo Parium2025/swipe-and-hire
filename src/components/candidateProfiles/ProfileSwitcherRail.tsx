@@ -148,6 +148,19 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
 
+  // Tangentbord: karusellen ska svara på piltangenter även när fokus ligger på
+  // ett kort inuti raden eller när musen bara hovrar över den.
+  const railRef = React.useRef<HTMLDivElement>(null);
+  const railHoverRef = React.useRef(false);
+  const railKeyHandlerRef = React.useRef<(e: KeyboardEvent) => void>(() => {});
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => railKeyHandlerRef.current(e);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+
+
 
   const dbDefaultId = useMemo(
     () => profiles.find((p) => p.is_default)?.id ?? 'base',
@@ -422,7 +435,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
   // Tangentbord: piltangenter flyttar mellan korten, Home/End hoppar längst ut,
   // Enter/Blanksteg öppnar "Ny profil" och Delete tar bort vald extraprofil.
-  const handleRailKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const runRailKey = (e: KeyboardEvent | React.KeyboardEvent<HTMLDivElement>) => {
     const move = (next: number) => {
       e.preventDefault();
       const clamped = Math.min(slots.length - 1, Math.max(0, next));
@@ -446,16 +459,32 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     }
   };
 
+  // Global lyssnare: fungerar när fokus ligger på ett kort i raden eller när
+  // musen hovrar över karusellen — men aldrig när man skriver i ett fält
+  // eller har en dialog öppen.
+  railKeyHandlerRef.current = (e: KeyboardEvent) => {
+    if (editorOpen || deleteTarget) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const focusInside = !!railRef.current && railRef.current.contains(document.activeElement);
+    if (!focusInside && !railHoverRef.current) return;
+    runRailKey(e);
+  };
+
   return (
     <div className="space-y-2">
       <div
+        ref={railRef}
         className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         role="listbox"
         aria-label="Välj profil"
         aria-activedescendant={`profile-slot-${slots[activeIndex]?.key ?? 'base'}`}
         tabIndex={0}
-        onKeyDown={handleRailKeyDown}
+        onMouseEnter={() => { railHoverRef.current = true; }}
+        onMouseLeave={() => { railHoverRef.current = false; }}
+        onKeyDown={(e) => { if (e.target === e.currentTarget) runRailKey(e); }}
       >
+
         {slots.map((slot, idx) => {
           const offset = idx - activeIndex;
           const isCenter = offset === 0;

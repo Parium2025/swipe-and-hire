@@ -1814,20 +1814,25 @@ const Profile = () => {
     setHasUnsavedChanges(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, opts?: { silent?: boolean }) => {
+    e?.preventDefault?.();
+    const silent = !!opts?.silent;
+
 
     if (!isOnline) {
       // 🚀 OFFLINE: Queue text-based profile updates for auto-sync
       const valid = validateRequiredFields();
       if (!valid) {
-        toast({
-          title: "Komplettera uppgifter",
-          description: "Fyll i alla obligatoriska fält markerade med rött.",
-          variant: "destructive",
-        });
+        if (!silent) {
+          toast({
+            title: "Komplettera uppgifter",
+            description: "Fyll i alla obligatoriska fält markerade med rött.",
+            variant: "destructive",
+          });
+        }
         return;
       }
+
 
       const offlineUpdates: any = {
         first_name: firstName.trim() || null,
@@ -1863,13 +1868,16 @@ const Profile = () => {
     // Validate required fields before saving
     const valid = validateRequiredFields();
     if (!valid) {
-      toast({
-        title: "Komplettera uppgifter",
-        description: "Fyll i alla obligatoriska fält markerade med rött.",
-        variant: "destructive",
-      });
+      if (!silent) {
+        toast({
+          title: "Komplettera uppgifter",
+          description: "Fyll i alla obligatoriska fält markerade med rött.",
+          variant: "destructive",
+        });
+      }
       return;
     }
+
 
     setLoading(true);
 
@@ -2012,17 +2020,21 @@ const Profile = () => {
         clearProfileDraft(user?.id); // 🔒 Clear localStorage draft after successful save
         console.log('💾 Profile draft cleared after save');
         
-        // Clear undo states after successful save
-        setDeletedProfileMedia(null);
-        setDeletedCoverImage(null);
-        
-        toast({
-          id: 'profile-save-success',
-          title: "Profil uppdaterad",
-          description: "Dina ändringar har sparats.",
-          duration: 2000,
-          route: '/profile'
-        });
+        // Clear undo states after an explicit save. Vid autospar behålls
+        // "Ångra borttagning" så att man hinner ändra sig.
+        if (!silent) {
+          setDeletedProfileMedia(null);
+          setDeletedCoverImage(null);
+
+          toast({
+            id: 'profile-save-success',
+            title: "Profil uppdaterad",
+            description: "Dina ändringar har sparats.",
+            duration: 2000,
+            route: '/profile'
+          });
+        }
+
       } else {
         await rollbackUnsavedBaseMedia();
         toast({
@@ -2043,6 +2055,24 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+  // 🔄 Autospar: grundprofilen sparas direkt, precis som extraprofilerna.
+  // Ingen "Spara ändringar"-knapp behövs längre. Ogiltiga fält sparas inte
+  // (fältfelen visas som vanligt), och ingen notis visas vid lyckad sparning.
+  const submitRef = useRef(handleSubmit);
+  submitRef.current = handleSubmit;
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    if (loading || isUploadingMedia || isUploadingCover) return;
+    if (isDiscardingChangesRef.current) return;
+    const t = setTimeout(() => { void submitRef.current(undefined, { silent: true }); }, 900);
+    return () => clearTimeout(t);
+  }, [hasUnsavedChanges, loading, isUploadingMedia, isUploadingCover,
+      firstName, lastName, bio, userLocation, postalCode, phone, birthDate,
+      employmentStatus, workingHours, availability, companyName, orgNumber,
+      profileImageUrl, videoUrl, coverImageUrl, cvUrl, isProfileVideo]);
+
+
 
   if (!showContent) {
     // Innehållsformat skelett istället för en tom osynlig yta — samma
@@ -2772,17 +2802,6 @@ const Profile = () => {
                 </div>
               )}
 
-              {hasUnsavedChanges && (
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-8 h-11 !min-h-0 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={loading || isUploadingMedia || isUploadingCover}
-                  >
-                    {loading ? 'Sparar...' : 'Spara ändringar'}
-                  </button>
-                </div>
-              )}
             </form>
           </div>
         </div>
