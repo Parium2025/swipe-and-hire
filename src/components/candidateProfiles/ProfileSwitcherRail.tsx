@@ -298,7 +298,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                     className="-my-1 shrink-0 rounded-full p-2 touch-manipulation"
                   >
                     <Star
-                      className="h-4 w-4"
+                      className={`h-4 w-4 ${starBurstId === chip.id ? 'animate-star-pop' : ''}`}
                       style={chip.isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: 'currentColor' }}
                     />
                   </button>
