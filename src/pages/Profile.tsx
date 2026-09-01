@@ -1187,6 +1187,17 @@ const Profile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
+      // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
+      if (activeCandidateProfile) {
+        await profileRailRef.current?.updateActiveProfile({ profile_image_url: storagePath, video_url: null });
+        setImageEditorOpen(false);
+        if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
+        setPendingImageSrc('');
+        toast({ title: 'Profilbild uppladdad!', description: `Sparad på profilen "${activeCandidateProfile.label}".` });
+        return;
+      }
+
+
       // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
         const signed = await getMediaUrl(storagePath, 'profile-image', 86400);
