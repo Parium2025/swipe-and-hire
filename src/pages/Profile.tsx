@@ -2093,15 +2093,13 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2 text-center">
-              {!activeCandidateProfile && (
-                <Label
-                  htmlFor="profile-image"
-                  className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
-                >
-                  Klicka här för att välja en bild eller video (max 60 sekunder)
-                </Label>
-              )}
-              
+              <Label
+                htmlFor="profile-image"
+                className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+              >
+                Klicka här för att välja en bild eller video (max 60 sekunder)
+              </Label>
+
               {isUploadingMedia && (
                 <UploadInlineProgress
                   label={uploadAttempt > 1 ? `Försöker igen (försök ${uploadAttempt})…` : 'Laddar upp…'}
@@ -2111,38 +2109,16 @@ const Profile = () => {
                     : undefined}
                 />
               )}
-              
-              {/* Vald extraprofil: egen media, egen cover, egen CV – helt separat tunnel. */}
-              {activeCandidateProfile && !isUploadingMedia && (
-                <div className="flex flex-col items-center space-y-2">
-                  {(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url) && (
-                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                      {activeCandidateProfile.video_url ? 'Video' : 'Bild'} uppladdad!
-                    </Badge>
-                  )}
-                  {activeCandidateProfile.cover_image_url && (
-                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                      Cover-bild uppladdad!
-                    </Badge>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => profileRailRef.current?.editActiveProfile()}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
-                  >
-                    Redigera den här profilen
-                  </button>
-                </div>
-              )}
 
-              {!activeCandidateProfile && (isProfileVideo && !!videoUrl) && !isUploadingMedia && (
+              {/* Video uppladdad – samma märke oavsett vilken profil som visas. */}
+              {displayIsVideo && !isUploadingMedia && (
                 <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                  {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
+                  Video uppladdad!
                 </Badge>
               )}
-              
-              {/* Anpassa din bild button - only show for images, not videos */}
-              {!activeCandidateProfile && (!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
+
+              {/* Anpassa din bild – visas för bilder (inte videor), alla profiler */}
+              {!displayIsVideo && !!displayImagePath && !isUploadingMedia && (
                 <div className="flex flex-col items-center space-y-2">
                   <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
                     Bild uppladdad!
