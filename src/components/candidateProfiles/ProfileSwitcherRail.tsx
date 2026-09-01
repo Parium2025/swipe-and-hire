@@ -1,10 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { Plus, Star, Pencil, Trash2, Video as VideoIcon, User, AlertTriangle } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Plus, Star, Video as VideoIcon, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import {
@@ -30,19 +25,21 @@ interface ChipProps {
   active: boolean;
   isDefault: boolean;
   signedImageUrl?: string | null;
+  chipRef?: (el: HTMLDivElement | null) => void;
   onSelect: () => void;
   onToggleDefault: () => void;
 }
 
 /** Ett profil-chip i raden. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, chipRef, onSelect, onToggleDefault,
 }: ChipProps) {
   const resolved = useMediaUrl(imagePath || undefined, 'profile-image');
   const src = signedImageUrl ?? resolved;
 
   return (
     <div
+      ref={chipRef}
       className={`relative shrink-0 snap-center w-[104px] rounded-2xl border p-2.5 text-center transition-colors touch-manipulation ${
         active ? 'border-white/60 bg-white/10' : 'border-white/10 bg-white/5 md:hover:bg-white/10'
       }`}
@@ -91,14 +88,24 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const { toast } = useToast();
   const {
     profiles, canCreateMore,
-    createProfile, updateProfile, deleteProfile, setDefaultProfile, clearDefaultProfile,
+    createProfile, updateProfile, setDefaultProfile, clearDefaultProfile,
   } = useCandidateProfiles(userId);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState<CandidateProfile | null>(null);
   const [activeId, setActiveId] = useState<string>('base');
+
+  // Refs per chip så att vi kan centrera det valda/standard-chipet i raden.
+  const chipRefs = React.useRef(new Map<string, HTMLDivElement>());
+  const setChipRef = useCallback((id: string) => (el: HTMLDivElement | null) => {
+    if (el) chipRefs.current.set(id, el); else chipRefs.current.delete(id);
+  }, []);
+  const centerChip = useCallback((id: string) => {
+    requestAnimationFrame(() => {
+      chipRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+  }, []);
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
@@ -110,7 +117,19 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   }, [activeProfile, onActiveProfileChange]);
 
   const openNew = () => { setEditing(null); setEditorOpen(true); };
-  const openEdit = (p: CandidateProfile) => { setEditing(p); setEditorOpen(true); };
+
+  const selectChip = (id: string) => { setActiveId(id); centerChip(id); };
+
+  const makeDefault = async (id: string) => {
+    if (id === 'base') {
+      if (!baseIsDefault) await clearDefaultProfile();
+    } else {
+      const p = profiles.find((x) => x.id === id);
+      if (p && !p.is_default) await setDefaultProfile(id);
+    }
+    // Standardprofilen centreras i raden så den alltid hamnar i mitten.
+    centerChip(id);
+  };
 
   const handleSave = async (input: CandidateProfileInput) => {
     setSaving(true);
@@ -125,24 +144,12 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     }
     if (!editing && 'data' in res) {
       const created = (res as { data?: CandidateProfile }).data;
-      if (created) setActiveId(created.id);
+      if (created) { setActiveId(created.id); centerChip(created.id); }
     }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
   };
 
-  const handleDelete = async () => {
-    if (!pendingDelete) return;
-    const removedId = pendingDelete.id;
-    const res = await deleteProfile(removedId);
-    setPendingDelete(null);
-    if ('error' in res && res.error) {
-      toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
-      return;
-    }
-    if (activeId === removedId) setActiveId('base');
-    toast({ title: 'Profil borttagen' });
-  };
 
   return (
     <div className="space-y-2">
@@ -158,8 +165,9 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
           hasVideo={baseHasVideo}
           active={activeId === 'base'}
           isDefault={baseIsDefault}
-          onSelect={() => setActiveId('base')}
-          onToggleDefault={() => { if (!baseIsDefault) clearDefaultProfile(); }}
+          chipRef={setChipRef('base')}
+          onSelect={() => selectChip('base')}
+          onToggleDefault={() => makeDefault('base')}
         />
 
         {profiles.map((p) => (
@@ -170,8 +178,9 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
             hasVideo={!!p.video_url}
             active={activeId === p.id}
             isDefault={p.is_default}
-            onSelect={() => setActiveId(p.id)}
-            onToggleDefault={() => { if (!p.is_default) setDefaultProfile(p.id); }}
+            chipRef={setChipRef(p.id)}
+            onSelect={() => selectChip(p.id)}
+            onToggleDefault={() => makeDefault(p.id)}
           />
         ))}
 
@@ -191,27 +200,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       </div>
       </div>
 
-      {activeProfile && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            type="button"
-            onClick={() => openEdit(activeProfile)}
-            className="bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors touch-manipulation inline-flex items-center gap-1.5"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            Redigera profil
-          </button>
-          <button
-            type="button"
-            onClick={() => setPendingDelete(activeProfile)}
-            aria-label="Ta bort profil"
-            className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30 touch-manipulation"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-
       <CandidateProfileEditor
         open={editorOpen}
         onOpenChange={setEditorOpen}
@@ -219,38 +207,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
         saving={saving}
         onSave={handleSave}
       />
-
-      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
-        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
-          <AlertDialogHeader className="space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-white" />
-              </div>
-              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-                Ta bort profilen
-              </AlertDialogTitle>
-            </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed">
-              {pendingDelete?.label} tas bort permanent. Ansökningar du redan skickat påverkas inte – de behåller sin
-              egen kopia av CV, video och bild.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
-            <AlertDialogCancel className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50">
-              Avbryt
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              variant="destructiveSoft"
-              className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContentNoFocus>
-      </AlertDialog>
     </div>
   );
 }
