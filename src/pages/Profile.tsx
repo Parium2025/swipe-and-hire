@@ -1977,7 +1977,8 @@ const Profile = () => {
               <ProfileSwitcherRail
                 ref={profileRailRef}
                 userId={user?.id}
-                baseImageUrl={signedProfileImageUrl}
+                baseImageUrl={isProfileVideo ? null : signedProfileImageUrl}
+                baseCoverUrl={signedCoverUrl}
                 baseHasVideo={isProfileVideo && !!videoUrl}
                 onActiveProfileChange={setActiveCandidateProfile}
               />
