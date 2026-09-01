@@ -2056,10 +2056,8 @@ const Profile = () => {
                 </div>
               )}
 
-              {/* Delete/Restore icon for profile media */}
-              {/* Om video just raderats (deletedProfileMedia finns), visa restore istället för soptunna */}
-              {/* Dolt när en extraprofil visas – den redigeras via "Redigera profil" */}
-              {!activeCandidateProfile && (deletedProfileMedia && !videoUrl ? (
+              {/* Delete/Restore icon for profile media – samma för alla profiler */}
+              {!activeCandidateProfile && deletedProfileMedia && !videoUrl ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2070,7 +2068,7 @@ const Profile = () => {
                 >
                   <RotateCcw className="h-4 w-4" />
                 </button>
-              ) : !!(videoUrl || profileImageUrl) ? (
+              ) : displayHasMedia ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2080,7 +2078,7 @@ const Profile = () => {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              ) : null)}
+              ) : null}
 
               <input
                 id="profile-image"
