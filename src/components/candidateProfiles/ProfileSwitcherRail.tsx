@@ -96,19 +96,41 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string>('base');
 
-  // Refs per chip så att vi kan centrera det valda/standard-chipet i raden.
+  // Refs per chip + rail-container, så att vi kan centrera det valda/standard-chipet.
   const chipRefs = React.useRef(new Map<string, HTMLDivElement>());
+  const railRef = React.useRef<HTMLDivElement | null>(null);
   const setChipRef = useCallback((id: string) => (el: HTMLDivElement | null) => {
     if (el) chipRefs.current.set(id, el); else chipRefs.current.delete(id);
   }, []);
+  // Manuell centrering av railens scrollposition (scrollIntoView kan störa sidans scroll).
   const centerChip = useCallback((id: string) => {
+    // Dubbel rAF + kort timeout: vänta ut eventuell re-render efter data-mutation
+    // så att chip-elementet som centreras är det som faktiskt är monterat.
     requestAnimationFrame(() => {
-      chipRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      setTimeout(() => {
+        const rail = railRef.current;
+        const chip = chipRefs.current.get(id);
+        if (!rail || !chip) return;
+        const target = chip.offsetLeft - rail.clientWidth / 2 + chip.clientWidth / 2;
+        rail.scrollTo({ left: target, behavior: 'smooth' });
+      }, 50);
     });
   }, []);
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
+
+  // När standardprofilen ändras (t.ex. via stjärnan) ska standard-chipet alltid
+  // glida in i mitten – även efter att listan renderats om.
+  const defaultChipId = baseIsDefault ? 'base' : profiles.find((p) => p.is_default)?.id ?? 'base';
+  const prevDefaultRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    if (prevDefaultRef.current === null) { prevDefaultRef.current = defaultChipId; return; }
+    if (prevDefaultRef.current !== defaultChipId) {
+      prevDefaultRef.current = defaultChipId;
+      centerChip(defaultChipId);
+    }
+  }, [defaultChipId, centerChip]);
 
   // Meddela föräldern (Profile.tsx) vilken profil som är vald så att
   // huvudytan kan visa just den profilens bild/video.
@@ -156,7 +178,8 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       {/* Yttre flex centrerar raden när den får plats; inre div scrollar när den inte gör det. */}
       <div className="flex justify-center">
       <div
-        className="flex max-w-full snap-x snap-mandatory gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        ref={railRef}
+        className="flex max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto pb-1 pt-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <ProfileChip
