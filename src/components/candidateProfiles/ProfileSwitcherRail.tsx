@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check, Trash2 } from 'lucide-react';
+import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
