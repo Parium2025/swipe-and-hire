@@ -34,7 +34,7 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
-import { formatBytes, formatTimeRemaining, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
+import { formatBytes, formatTimeRemaining, UploadAbortedError, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
 import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
