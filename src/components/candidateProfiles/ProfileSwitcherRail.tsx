@@ -117,7 +117,19 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   }, [activeProfile, onActiveProfileChange]);
 
   const openNew = () => { setEditing(null); setEditorOpen(true); };
-  const openEdit = (p: CandidateProfile) => { setEditing(p); setEditorOpen(true); };
+
+  const selectChip = (id: string) => { setActiveId(id); centerChip(id); };
+
+  const makeDefault = async (id: string) => {
+    if (id === 'base') {
+      if (!baseIsDefault) await clearDefaultProfile();
+    } else {
+      const p = profiles.find((x) => x.id === id);
+      if (p && !p.is_default) await setDefaultProfile(id);
+    }
+    // Standardprofilen centreras i raden så den alltid hamnar i mitten.
+    centerChip(id);
+  };
 
   const handleSave = async (input: CandidateProfileInput) => {
     setSaving(true);
@@ -132,7 +144,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     }
     if (!editing && 'data' in res) {
       const created = (res as { data?: CandidateProfile }).data;
-      if (created) setActiveId(created.id);
+      if (created) { setActiveId(created.id); centerChip(created.id); }
     }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
