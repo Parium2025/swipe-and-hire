@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -56,19 +56,17 @@ function ProfileAvatar({
 
 interface ChipProps extends ChipData {
   active: boolean;
-  chipRef?: (el: HTMLDivElement | null) => void;
   onSelect: () => void;
   onToggleDefault: () => void;
 }
 
-/** Ett profil-chip i raden. Miniatyr + namn + stjärna för standard. */
+/** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, chipRef, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, onSelect, onToggleDefault,
 }: ChipProps) {
   return (
     <div
-      ref={chipRef}
-      className={`relative shrink-0 snap-center w-[104px] rounded-2xl border p-2.5 text-center transition-colors touch-manipulation ${
+      className={`relative w-[104px] rounded-2xl border p-2.5 text-center transition-colors touch-manipulation ${
         active ? 'border-white/60 bg-white/10' : 'border-white/10 bg-white/5 md:hover:bg-white/10'
       }`}
     >
@@ -102,9 +100,14 @@ function ProfileChip({
   );
 }
 
+/** Avstånd mellan kortpositionerna i karusellen (kortbredd 104px + mellanrum). */
+const SLOT_SPACING = 116;
+
 /**
  * Profilväljare överst i "Profilbild/Profilvideo".
- * Mobil: kompakt rullgardinsmeny. Större skärmar: rad med chips.
+ * Mobil: kompakt rullgardinsmeny. Större skärmar: karusell som jobbkorten –
+ * aktivt kort i mitten, grannar tittar fram till vänster/höger, och ett tryck
+ * på ett sidokort glidande flyttar det till mitten.
  */
 export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActiveProfileChange }: Props) {
   const { toast } = useToast();
@@ -118,25 +121,6 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string>('base');
-
-  // Refs per chip + rail-container, så att vi kan centrera det valda/standard-chipet.
-  const chipRefs = React.useRef(new Map<string, HTMLDivElement>());
-  const railRef = React.useRef<HTMLDivElement | null>(null);
-  const setChipRef = useCallback((id: string) => (el: HTMLDivElement | null) => {
-    if (el) chipRefs.current.set(id, el); else chipRefs.current.delete(id);
-  }, []);
-  // Manuell centrering av railens scrollposition (scrollIntoView kan störa sidans scroll).
-  const centerChip = useCallback((id: string) => {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        const rail = railRef.current;
-        const chip = chipRefs.current.get(id);
-        if (!rail || !chip) return;
-        const target = chip.offsetLeft - rail.clientWidth / 2 + chip.clientWidth / 2;
-        rail.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
-      }, 60);
-    });
-  }, []);
 
   const baseIsDefault = useMemo(() => !profiles.some((p) => p.is_default), [profiles]);
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
@@ -152,25 +136,24 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     })),
   ], [profiles, baseImageUrl, baseHasVideo, baseIsDefault]);
 
-  // Standardprofilen ligger först bland profilkorten. På större skärmar placeras
-  // den i railens fasta mittposition; övriga profiler och "Ny profil" följer efter.
+  // Standardprofilen ligger alltid först; övriga följer i sin ordning.
   const orderedChips = useMemo(() => {
     const def = chips.filter((c) => c.isDefault);
     const rest = chips.filter((c) => !c.isDefault);
     return [...def, ...rest];
   }, [chips]);
 
-  // När standardprofilen ändras (t.ex. via stjärnan) ska standard-chipet alltid
-  // glida in i mitten – även efter att listan renderats om.
+  // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
+  // och därmed glida in i mitten av karusellen.
   const defaultChipId = baseIsDefault ? 'base' : profiles.find((p) => p.is_default)?.id ?? 'base';
   const prevDefaultRef = React.useRef<string | null>(null);
   useEffect(() => {
     if (prevDefaultRef.current === null) { prevDefaultRef.current = defaultChipId; return; }
     if (prevDefaultRef.current !== defaultChipId) {
       prevDefaultRef.current = defaultChipId;
-      centerChip(defaultChipId);
+      setActiveId(defaultChipId);
     }
-  }, [defaultChipId, centerChip]);
+  }, [defaultChipId]);
 
   // Meddela föräldern (Profile.tsx) vilken profil som är vald så att
   // huvudytan kan visa just den profilens bild/video.
@@ -180,7 +163,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
 
   const openNew = () => { setEditing(null); setEditorOpen(true); };
 
-  const selectChip = (id: string) => { setActiveId(id); centerChip(id); };
+  const selectChip = (id: string) => setActiveId(id);
 
   const makeDefault = async (id: string) => {
     if (id === 'base') {
@@ -189,9 +172,8 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
       const p = profiles.find((x) => x.id === id);
       if (p && !p.is_default) await setDefaultProfile(id);
     }
-    // Den stjärnmarkerade ska också visas som vald (komma upp i knappen).
+    // Den stjärnmarkerade ska också visas som vald (ligga i mitten).
     setActiveId(id);
-    centerChip(id);
   };
 
   const handleSave = async (input: CandidateProfileInput) => {
@@ -207,7 +189,7 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     }
     if (!editing && 'data' in res) {
       const created = (res as { data?: CandidateProfile }).data;
-      if (created) { setActiveId(created.id); centerChip(created.id); }
+      if (created) setActiveId(created.id);
     }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
@@ -304,42 +286,56 @@ export function ProfileSwitcherRail({ userId, baseImageUrl, baseHasVideo, onActi
     );
   }
 
+  // Desktop: karusell. "Ny profil" är sista platsen i karusellen.
+  type Slot = { key: string; chip?: ChipData; isAdd?: boolean };
+  const slots: Slot[] = [
+    ...orderedChips.map((chip) => ({ key: chip.id, chip })),
+    ...(canCreateMore ? [{ key: 'add', isAdd: true } as Slot] : []),
+  ];
+  const activeIndex = Math.max(0, slots.findIndex((s) => s.key === activeId));
+
   return (
     <div className="space-y-2">
-      {/* Yttre flex centrerar raden när den får plats; inre div scrollar när den inte gör det. */}
-      <div className="flex justify-center">
-        <div
-          ref={railRef}
-          className="flex w-full max-w-full snap-x snap-proximity gap-2.5 overflow-x-auto px-2 pb-1 pt-2 scroll-px-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          <span aria-hidden="true" className="w-[calc(50%-62px)] shrink-0" />
+      <div className="relative mx-auto h-[128px] w-full max-w-[460px]">
+        {slots.map((slot, idx) => {
+          const offset = idx - activeIndex;
+          const isCenter = offset === 0;
+          const isVisible = Math.abs(offset) <= 1;
 
-          {orderedChips.map((chip) => (
-            <ProfileChip
-              key={chip.id}
-              {...chip}
-              active={activeId === chip.id}
-              chipRef={setChipRef(chip.id)}
-              onSelect={() => selectChip(chip.id)}
-              onToggleDefault={() => makeDefault(chip.id)}
-            />
-          ))}
-
-          {canCreateMore && (
-            <button
-              type="button"
-              onClick={openNew}
-              aria-label="Lägg till profil"
-              className="shrink-0 snap-center w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white transition-colors md:hover:bg-white/10 touch-manipulation"
+          return (
+            <div
+              key={slot.key}
+              className="absolute left-1/2 top-0 transition-all duration-300 ease-out"
+              style={{
+                transform: `translateX(calc(-50% + ${offset * SLOT_SPACING}px)) scale(${isCenter ? 1 : 0.85})`,
+                opacity: isCenter ? 1 : isVisible ? 0.7 : 0,
+                zIndex: isCenter ? 20 : isVisible ? 10 : 0,
+                pointerEvents: isVisible ? 'auto' : 'none',
+              }}
             >
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10">
-                <Plus className="h-5 w-5" />
-              </span>
-              <span className="mt-2 block truncate text-[12px] font-medium leading-tight">Ny profil</span>
-            </button>
-          )}
-        </div>
+              {slot.isAdd ? (
+                <button
+                  type="button"
+                  onClick={openNew}
+                  aria-label="Lägg till profil"
+                  className="w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white transition-colors md:hover:bg-white/10 touch-manipulation"
+                >
+                  <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10">
+                    <Plus className="h-5 w-5" />
+                  </span>
+                  <span className="mt-2 block truncate text-[12px] font-medium leading-tight">Ny profil</span>
+                </button>
+              ) : slot.chip ? (
+                <ProfileChip
+                  {...slot.chip}
+                  active={activeId === slot.chip.id}
+                  onSelect={() => selectChip(slot.chip!.id)}
+                  onToggleDefault={() => makeDefault(slot.chip!.id)}
+                />
+              ) : null}
+            </div>
+          );
+        })}
       </div>
 
       {editor}
