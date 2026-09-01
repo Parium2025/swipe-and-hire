@@ -11,10 +11,12 @@ interface ToastOptions {
   duration?: number;
   /** Gör notisen klickbar i notiscentret – navigerar hit vid klick. */
   route?: string;
+  /** Ersätter en befintlig toast med samma id istället för att stapla. */
+  id?: string;
 }
 
 // Wrapper-funktion som matchar det gamla API:t men använder Sonner
-function toast({ title, description, variant, action, duration, route }: ToastOptions) {
+function toast({ title, description, variant, action, duration, route, id }: ToastOptions) {
   const message = title || description || "";
   const options: ExternalToast = {
     description: title ? description : undefined,
@@ -23,6 +25,7 @@ function toast({ title, description, variant, action, duration, route }: ToastOp
     // undefined över våra centrala visningstider i sonner.tsx.
     ...(duration !== undefined ? { duration } : {}),
     ...(route ? { route } : {}),
+    ...(id ? { id } : {}),
   } as ExternalToast;
 
   if (variant === "destructive") {
