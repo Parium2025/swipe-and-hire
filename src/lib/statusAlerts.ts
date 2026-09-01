@@ -173,7 +173,7 @@ export async function reportAppException(failure: AppFailure, ownerUserId: strin
     },
   };
 
-  await supabase.rpc('record_app_exception' as never, {
+  const { error } = await supabase.rpc('record_app_exception' as never, {
     _owner_user_id: ownerUserId,
     _environment: payload.environment,
     _kind: payload.kind,
