@@ -1868,13 +1868,16 @@ const Profile = () => {
     // Validate required fields before saving
     const valid = validateRequiredFields();
     if (!valid) {
-      toast({
-        title: "Komplettera uppgifter",
-        description: "Fyll i alla obligatoriska fält markerade med rött.",
-        variant: "destructive",
-      });
+      if (!silent) {
+        toast({
+          title: "Komplettera uppgifter",
+          description: "Fyll i alla obligatoriska fält markerade med rött.",
+          variant: "destructive",
+        });
+      }
       return;
     }
+
 
     setLoading(true);
 
