@@ -266,14 +266,17 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                 </div>
 
                 <div className="space-y-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() => mediaInputRef.current?.click()}
-                    disabled={uploading}
-                    className="text-white text-sm outline-none focus:outline-none focus-visible:outline-none disabled:opacity-50"
-                  >
-                    {uploading ? 'Laddar upp…' : 'Klicka här för att välja en bild eller video (max 60 sekunder)'}
-                  </button>
+                  {uploading ? (
+                    <UploadInlineProgress />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => mediaInputRef.current?.click()}
+                      className="text-white text-sm outline-none focus:outline-none focus-visible:outline-none"
+                    >
+                      Klicka här för att välja en bild eller video (max 60 sekunder)
+                    </button>
+                  )}
 
                   {hasVideo && !uploading && (
                     <div className="flex justify-center">
