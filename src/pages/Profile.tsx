@@ -1015,6 +1015,7 @@ const Profile = () => {
         });
       }
     } finally {
+      if (mediaUploadAbortRef.current === controller) mediaUploadAbortRef.current = null;
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
       setUploadProgress(0);
@@ -1022,6 +1023,7 @@ const Profile = () => {
       setUploadAttempt(1);
     }
   };
+
 
   const uploadCoverImage = async (file: File) => {
     let uploadedStoragePath = '';
