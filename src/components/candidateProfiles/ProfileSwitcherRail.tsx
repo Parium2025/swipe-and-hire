@@ -75,11 +75,13 @@ interface ChipProps extends ChipData {
   starBurst?: boolean;
   onSelect: () => void;
   onToggleDefault: () => void;
+  /** Finns bara för extraprofiler – grundprofilen kan inte tas bort. */
+  onDelete?: () => void;
 }
 
 /** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
+  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault, onDelete,
 }: ChipProps) {
   return (
     <div
@@ -113,8 +115,21 @@ function ProfileChip({
           style={isDefault ? { color: '#FFC44D', fill: '#FFC44D' } : { color: '#FFFFFF' }}
         />
       </button>
+
+      {onDelete && active && (
+        <button
+          type="button"
+          onClick={onDelete}
+          title="Ta bort profil"
+          aria-label="Ta bort profil"
+          className="absolute -top-1.5 -left-1.5 rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   );
+
 
 }
 
