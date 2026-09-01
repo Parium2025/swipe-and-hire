@@ -135,16 +135,19 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const isMobile = useIsMobile();
   const {
     profiles, canCreateMore,
-    createProfile, updateProfile, setDefaultProfile, clearDefaultProfile,
+    createProfile, updateProfile, deleteProfile, setDefaultProfile, clearDefaultProfile,
   } = useCandidateProfiles(userId);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string>('base');
+  // Profil som väntar på bekräftad borttagning.
+  const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
   // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
+
 
   const dbDefaultId = useMemo(
     () => profiles.find((p) => p.is_default)?.id ?? 'base',
