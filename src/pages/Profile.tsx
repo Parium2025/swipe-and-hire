@@ -2056,6 +2056,24 @@ const Profile = () => {
     }
   };
 
+  // 🔄 Autospar: grundprofilen sparas direkt, precis som extraprofilerna.
+  // Ingen "Spara ändringar"-knapp behövs längre. Ogiltiga fält sparas inte
+  // (fältfelen visas som vanligt), och ingen notis visas vid lyckad sparning.
+  const submitRef = useRef(handleSubmit);
+  submitRef.current = handleSubmit;
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    if (loading || isUploadingMedia || isUploadingCover) return;
+    if (isDiscardingChangesRef.current) return;
+    const t = setTimeout(() => { void submitRef.current(undefined, { silent: true }); }, 900);
+    return () => clearTimeout(t);
+  }, [hasUnsavedChanges, loading, isUploadingMedia, isUploadingCover,
+      firstName, lastName, bio, userLocation, postalCode, phone, birthDate,
+      employmentStatus, workingHours, availability, companyName, orgNumber,
+      profileImageUrl, videoUrl, coverImageUrl, cvUrl, isProfileVideo]);
+
+
+
   if (!showContent) {
     // Innehållsformat skelett istället för en tom osynlig yta — samma
     // standard som övriga sidor.
