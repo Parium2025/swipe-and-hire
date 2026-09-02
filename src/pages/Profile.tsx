@@ -2068,6 +2068,11 @@ const Profile = () => {
         <p className="text-sm text-white mt-1">
           Hantera din personliga information
         </p>
+        {!isEmployer && (
+          <p className="mt-1 text-xs text-white">
+            Du kan ha upp till tre profiler.
+          </p>
+        )}
         <div
           className="mt-1 h-4 text-xs text-white/70"
           aria-live="polite"
@@ -2096,10 +2101,6 @@ const Profile = () => {
         {/* Profile Image/Video Card */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
           <div className="p-4 space-y-2">
-            <h3 className="text-base font-semibold text-white text-center">Profilmedia</h3>
-            <p className="text-white text-center text-xs mt-1">
-              (Du kan ha upp till tre profiler)
-            </p>
             {!isEmployer && (
               <ProfileSwitcherRail
                 ref={profileRailRef}
@@ -2205,18 +2206,14 @@ const Profile = () => {
 
             </div>
 
-            {/* Mediakontroller – status är text, handlingar är knappar. */}
+            {/* Mediakontroller */}
             {(displayIsVideo || !!displayImagePath) && !isUploadingMedia && (
-              <div className="mt-4 flex w-full flex-col items-center gap-3 rounded-lg bg-white/5 p-4">
+              <div className="mt-2 flex w-full flex-col items-center gap-3">
                 <div className="flex flex-col items-center gap-2 text-center">
-                  {displayIsVideo && <p className="text-sm text-white">Profilvideo uppladdad.</p>}
-                  {displayImagePath && <p className="text-sm text-white">Profilbild uppladdad.</p>}
-                  {displayIsVideo && displayCoverPath && <p className="text-sm text-white">Cover-bild uppladdad.</p>}
-
                   {displayImagePath && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="glass"
                       onClick={handleEditExistingProfile}
                       className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                     >
@@ -2226,7 +2223,7 @@ const Profile = () => {
                   {displayIsVideo && displayCoverPath && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="glass"
                       onClick={handleEditExistingCover}
                       className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                     >
@@ -2238,7 +2235,7 @@ const Profile = () => {
                   <div className="relative flex w-full max-w-xs items-center justify-center">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="glass"
                       onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover || isUploadingMedia}
                       className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm"
@@ -2262,7 +2259,7 @@ const Profile = () => {
                   {!displayIsVideo && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="glass"
                       onClick={() => document.getElementById('profile-video-only')?.click()}
                       disabled={isUploadingMedia}
                       className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
@@ -2273,7 +2270,7 @@ const Profile = () => {
                   {displayIsVideo && !displayImagePath && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="glass"
                       onClick={() => document.getElementById('profile-image-only')?.click()}
                       disabled={isUploadingMedia}
                       className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
