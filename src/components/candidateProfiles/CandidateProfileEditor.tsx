@@ -267,15 +267,15 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       coverImageUrl={signedCover ?? undefined}
                       posterUrl={posterUrl}
                       alt="Profilvideo"
-                      className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
+                      className="w-32 h-32 ring-4 ring-inset ring-white/10 rounded-full overflow-hidden"
                       countdownVariant="circle"
                     />
                   ) : (
                     <div className="cursor-pointer" onClick={() => mediaInputRef.current?.click()}>
-                      <Avatar className="h-32 w-32 border-4 border-white/10">
+                      <Avatar className="h-32 w-32 ring-4 ring-inset ring-white/10">
                         {signedImage ? <AvatarImage src={signedImage} alt="Profilbild" className="object-cover" /> : null}
                         {!signedImage && (
-                          <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white">
+                          <AvatarFallback className="absolute inset-0 text-4xl font-semibold bg-white/20 text-white">
                             <Camera className="h-8 w-8" />
                           </AvatarFallback>
                         )}
@@ -329,14 +329,13 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   {uploading ? (
                     <UploadInlineProgress />
                   ) : (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
                       onClick={() => mediaInputRef.current?.click()}
-                      className="h-auto max-w-full whitespace-normal px-2 py-1 text-center text-sm"
+                      className="h-auto max-w-full cursor-pointer whitespace-normal bg-transparent px-2 py-1 text-center text-sm text-white outline-none [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0"
                     >
                       Välj en profilbild, profilvideo eller båda (video max 60 sekunder).
-                    </Button>
+                    </button>
                   )}
 
                   {hasImage && !uploading && (
