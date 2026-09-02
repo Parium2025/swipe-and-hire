@@ -168,6 +168,13 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
+  // Ingen glidande animation vid första målningen — korten ska stå still
+  // direkt när sidan öppnas. Animationen slås på först efter första ramen.
+  const [railAnimated, setRailAnimated] = useState(false);
+  useLayoutEffect(() => {
+    const id = requestAnimationFrame(() => setRailAnimated(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
 
   // Tangentbord: karusellen ska svara på piltangenter även när fokus ligger på
