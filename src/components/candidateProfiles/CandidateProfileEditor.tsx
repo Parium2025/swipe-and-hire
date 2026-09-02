@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
@@ -27,10 +27,6 @@ interface Props {
 
 /** Samma solida kortyta som profilsidans sektioner – ingen streckad ram. */
 const DROPZONE = 'rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-5 md:hover:bg-white/10';
-
-/** Samma pillerknapp som "Anpassa din bild" på Min profil. */
-const PILL =
-  'bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors outline-none focus:outline-none focus-visible:outline-none';
 
 /** Dialog för att skapa eller redigera en kandidatprofil (namn, CV, media). */
 export function CandidateProfileEditor({ open, onOpenChange, profile, saving, onSave }: Props) {
@@ -258,9 +254,6 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 space-y-4">
               <div className="text-center space-y-1">
                 <h3 className="text-base font-semibold text-white">Profilmedia</h3>
-                <p className="text-sm text-white">
-                  Lägg till en profilbild, en profilvideo eller båda.
-                </p>
               </div>
 
               <div className="flex flex-col items-center space-y-4">
@@ -333,31 +326,26 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   {uploading ? (
                     <UploadInlineProgress />
                   ) : (
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={() => mediaInputRef.current?.click()}
-                      className="text-white text-sm outline-none focus:outline-none focus-visible:outline-none"
+                      className="h-auto max-w-full whitespace-normal px-2 py-1 text-center text-sm"
                     >
-                      Välj en profilbild eller profilvideo (max 60 sekunder).
-                    </button>
+                      Välj en profilbild, profilvideo eller båda (video max 60 sekunder).
+                    </Button>
                   )}
 
                   {hasVideo && !uploading && (
-                    <div className="flex justify-center">
-                      <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                        Profilvideo uppladdad
-                      </Badge>
-                    </div>
+                    <p className="text-sm text-white">Profilvideo uppladdad.</p>
                   )}
 
                   {hasImage && !uploading && (
                     <div className="flex flex-col items-center space-y-2">
-                      <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                        Profilbild uppladdad
-                      </Badge>
-                      <button type="button" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className={PILL}>
-                        Anpassa din bild
-                      </button>
+                      <p className="text-sm text-white">Profilbild uppladdad.</p>
+                      <Button type="button" variant="outline" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm">
+                        Anpassa profilbild
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -366,24 +354,29 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                 {hasVideo && (
                   <div className="flex flex-col items-center space-y-3 mt-2 p-4 rounded-lg bg-white/5 w-full">
                     {coverUrl && (
-                      <button
+                      <>
+                      <p className="text-sm text-white">Cover-bild uppladdad.</p>
+                      <Button
                         type="button"
+                        variant="outline"
                         onClick={() => openExistingInEditor(signedCover, 'cover-image')}
-                        className={`${PILL} w-[180px]`}
+                        className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
-                        Anpassa din bild
-                      </button>
+                        Anpassa cover-bild
+                      </Button>
+                      </>
                     )}
 
-                    <div className="relative flex items-center justify-center w-[180px]">
-                      <button
+                    {!coverUrl && <div className="relative flex w-full max-w-xs items-center justify-center">
+                      <Button
                         type="button"
+                        variant="outline"
                         onClick={() => coverInputRef.current?.click()}
                         disabled={uploading}
-                        className={`${PILL} w-full`}
+                        className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm"
                       >
-                        {coverUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
-                      </button>
+                        Lägg till cover-bild
+                      </Button>
                       {deletedCover ? (
                         <button
                           type="button"
@@ -393,25 +386,12 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         >
                           <RotateCcw className="h-4 w-4" />
                         </button>
-                      ) : coverUrl && (
-                        <button
-                          type="button"
-                          onClick={() => { setDeletedCover(coverUrl); setCoverUrl(null); }}
-                          aria-label="Ta bort cover-bild"
-                          className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
+                      ) : null}
                     </div>
+                    }
 
                     <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" className="hidden" onChange={handleCoverChange} disabled={uploading} />
 
-                    {coverUrl && !uploading && (
-                      <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
-                        Cover-bild uppladdad!
-                      </Badge>
-                    )}
                   </div>
                 )}
               </div>
