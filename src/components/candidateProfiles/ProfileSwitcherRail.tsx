@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -149,7 +149,10 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
-  const [activeId, setActiveId] = useState<string>(() => profiles.find((profile) => profile.is_default)?.id ?? 'base');
+  // null betyder att användaren ännu inte gjort ett eget val. Då härleds den
+  // aktiva profilen direkt från den senaste cache-/databasversionen av default,
+  // i stället för att hinna måla grundprofilen under en mellanrender.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   // Profil som väntar på bekräftad borttagning.
   const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
   // Ångra-fönster: profilen döljs direkt men raderas i databasen först efter
@@ -187,6 +190,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   );
   const effectiveDefaultId = pendingDefaultId ?? dbDefaultId;
   const baseIsDefault = effectiveDefaultId === 'base';
+  const activeId = selectedId ?? effectiveDefaultId;
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
 
   // Släpp den optimistiska markeringen när databasen hunnit ikapp.
@@ -228,22 +232,10 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     });
   }, [profiles]);
 
-  // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
-  // och därmed glida in i mitten av karusellen.
-  const defaultChipId = effectiveDefaultId;
-  const prevDefaultRef = React.useRef<string | null>(null);
-  useEffect(() => {
-    if (prevDefaultRef.current === null) { prevDefaultRef.current = defaultChipId; return; }
-    if (prevDefaultRef.current !== defaultChipId) {
-      prevDefaultRef.current = defaultChipId;
-      setActiveId(defaultChipId);
-      onActiveProfileChange?.(profiles.find((profile) => profile.id === defaultChipId) ?? null);
-    }
-  }, [defaultChipId, onActiveProfileChange, profiles]);
-
   // Meddela föräldern (Profile.tsx) vilken profil som är vald så att
-  // huvudytan kan visa just den profilens bild/video.
-  useEffect(() => {
+  // huvudytan kan visa just den profilens bild/video. Layout-effekten körs
+  // före paint när SWR-cachen hydreras, så fel profil hinner aldrig blixtra.
+  useLayoutEffect(() => {
     onActiveProfileChange?.(activeProfile);
   }, [activeProfile, onActiveProfileChange]);
 
@@ -285,7 +277,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     // Uppdatera rail och huvudmedia i samma React-event. Den tidigare effekten
     // meddelade föräldern först efter paint och skapade en synlig mellanframe
     // där valet hade bytts men bild, status och knappar fortfarande var gamla.
-    setActiveId(id);
+    setSelectedId(id);
     onActiveProfileChange?.(nextProfile);
   };
 
