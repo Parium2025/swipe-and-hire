@@ -250,12 +250,8 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               </p>
             </div>
 
-            {/* Profilmedia – bild och video är två separata, kombinerbara tillgångar. */}
+            {/* Bild och video är två separata, kombinerbara tillgångar. */}
             <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 space-y-4">
-              <div className="text-center space-y-1">
-                <h3 className="text-base font-semibold text-white">Profilmedia</h3>
-              </div>
-
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
                   {hasVideo ? (
@@ -336,14 +332,9 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </Button>
                   )}
 
-                  {hasVideo && !uploading && (
-                    <p className="text-sm text-white">Profilvideo uppladdad.</p>
-                  )}
-
                   {hasImage && !uploading && (
                     <div className="flex flex-col items-center space-y-2">
-                      <p className="text-sm text-white">Profilbild uppladdad.</p>
-                      <Button type="button" variant="outline" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm">
+                      <Button type="button" variant="glass" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm">
                         Anpassa profilbild
                       </Button>
                     </div>
@@ -355,10 +346,9 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   <div className="flex flex-col items-center space-y-3 mt-2 p-4 rounded-lg bg-white/5 w-full">
                     {coverUrl && (
                       <>
-                      <p className="text-sm text-white">Cover-bild uppladdad.</p>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="glass"
                         onClick={() => openExistingInEditor(signedCover, 'cover-image')}
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
@@ -370,7 +360,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     {!coverUrl && <div className="relative flex w-full max-w-xs items-center justify-center">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="glass"
                         onClick={() => coverInputRef.current?.click()}
                         disabled={uploading}
                         className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm"
