@@ -9,4 +9,4 @@
 - [x] Bevara media som fortfarande används av historiska ansökningar
 - [x] Stoppa SVG-uppladdningar i både filväljare och central validering
 - [x] Stoppa sena uppladdningar från att skriva till en borttagen kandidatprofil
-- [ ] Lägg regressions- och E2E-tester för hela profil–ansökan-kedjan
+- [x] Lägg regressions- och E2E-tester för hela profil–ansökan-kedjan

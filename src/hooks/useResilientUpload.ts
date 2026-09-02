@@ -33,7 +33,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-image': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff'],
     shouldCompress: true,
   },
   'profile-video': {
@@ -46,7 +46,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'cover-image': {
     bucket: 'job-applications',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff'],
     shouldCompress: true,
   },
   'cv': {
@@ -64,13 +64,13 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'company-logo': {
     bucket: 'company-logos',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff'],
     shouldCompress: true,
   },
   'job-image': {
     bucket: 'job-images',
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff'],
     shouldCompress: true,
   },
 };
@@ -120,6 +120,13 @@ export function useResilientUpload(): UseResilientUploadResult {
     userId: string,
   ): Promise<string | null> => {
     const config = MEDIA_CONFIG[mediaType];
+
+    if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+      const msg = 'SVG-filer är inte tillåtna. Välj JPEG, PNG eller WebP.';
+      setState({ ...INITIAL_STATE, status: 'error', error: msg });
+      toast.error(msg);
+      return null;
+    }
 
     // Validering: storlek
     const sizeMB = file.size / (1024 * 1024);
