@@ -103,7 +103,7 @@ function ProfileChip({
         <span className="mx-auto block w-14">
           <ProfileAvatar imagePath={imagePath} signedImageUrl={signedImageUrl} hasVideo={hasVideo} />
         </span>
-        <span className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
+        <span title={label} className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
           {label}
         </span>
       </button>
@@ -451,7 +451,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                 size={40}
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-medium leading-tight text-white">
+                <span title={activeChip?.label} className="block truncate text-[15px] font-medium leading-tight text-white">
                   {activeChip?.label}
                 </span>
                 <span className="block text-[12px] leading-tight text-white">
@@ -476,7 +476,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                     hasVideo={chip.hasVideo}
                     size={32}
                   />
-                  <span className="min-w-0 flex-1 truncate text-[14px]">{chip.label}</span>
+                  <span className="min-w-0 flex-1 whitespace-normal break-words text-[14px] leading-snug">{chip.label}</span>
                   {activeId === chip.id && <Check className="h-4 w-4 shrink-0" />}
                   <button
                     type="button"

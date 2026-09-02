@@ -2178,9 +2178,6 @@ const Profile = () => {
                     <Video className="h-5 w-5 text-white" />
                   </div>
                 </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
-                  <Play className="h-2 w-2 text-primary animate-pulse" />
-                </div>
               </div>
 
               {/* "eller" text */}
@@ -2194,9 +2191,6 @@ const Profile = () => {
                   <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                     <Camera className="h-5 w-5 text-white" />
                   </div>
-                </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
-                  <Camera className="h-2 w-2 text-primary" />
                 </div>
               </div>
             </div>
