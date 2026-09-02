@@ -213,7 +213,7 @@ const Subscription = () => {
       </div>
 
       {/* Plans grid — matchar landningssidan */}
-      <div className={`relative grid gap-5 ${isPremium ? 'md:grid-cols-1 max-w-[560px] mx-auto w-full' : 'md:grid-cols-2'}`}>
+      <div className={`relative grid gap-5 min-h-[360px] ${isPremium ? 'md:grid-cols-1 max-w-[560px] mx-auto w-full' : 'md:grid-cols-2'}`}>
         {(premiumLoading ? [] : plans)
           .filter((plan) => (isPremium ? plan.id === 'premium' : true))
           .map((plan) => {
