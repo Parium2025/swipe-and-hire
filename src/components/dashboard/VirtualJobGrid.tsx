@@ -91,7 +91,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             }}
           >
             {tab.jobs.map((job, idx) => (
-              <div className="job-card-grid-item" key={job.id} style={{ contain: 'layout style paint' }}>
+              <div className="job-card-grid-item w-full" key={job.id} style={{ contain: 'layout style paint' }}>
                 {renderCard(job, idx)}
               </div>
             ))}
