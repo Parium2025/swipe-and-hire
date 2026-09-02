@@ -330,6 +330,27 @@ const JobApplication = () => {
     submitInProgressRef.current = true;
     setSubmitting(true);
 
+    // Profilen kan ha raderats i en annan flik/enhet efter att väljaren laddades.
+    // Stoppa onlineansökan i stället för att skicka en inaktuell ögonblicksbild.
+    if (selectedProfile && getIsOnline()) {
+      const { data: currentSelectedProfile, error: selectedProfileError } = await supabase
+        .from('candidate_profiles')
+        .select('id')
+        .eq('id', selectedProfile.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (selectedProfileError || !currentSelectedProfile) {
+        submitInProgressRef.current = false;
+        setSubmitting(false);
+        toast({
+          title: 'Profilen finns inte längre',
+          description: 'Välj profil igen innan du skickar ansökan.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     // Build the application payload
     // Ögonblicksbild: har användaren valt en kandidatprofil gäller exakt den profilens
     // media (tomt = tomt). Annars används kontots vanliga profil.
