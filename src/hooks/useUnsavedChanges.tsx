@@ -6,6 +6,12 @@ interface UnsavedChangesContextType {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   checkBeforeNavigation: (targetUrl: string) => boolean;
+  /**
+   * Sidor som autosparar registrerar en flush här. Då visas ingen
+   * "Osparade ändringar"-dialog – ändringen skrivs istället direkt.
+   * Returnerar en avregistrerare.
+   */
+  registerAutosaveFlush: (flush: () => void) => () => void;
 }
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefined>(undefined);
@@ -23,6 +29,14 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPathRef = useRef(`${location.pathname}${location.search}`);
+  const autosaveFlushRef = useRef<(() => void) | null>(null);
+
+  const registerAutosaveFlush = (flush: () => void) => {
+    autosaveFlushRef.current = flush;
+    return () => {
+      if (autosaveFlushRef.current === flush) autosaveFlushRef.current = null;
+    };
+  };
 
   const setHasUnsavedChanges = (value: boolean) => {
     if (value && suppressDirtyAfterConfirmRef.current) {
@@ -59,6 +73,12 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Autosparande sida: skriv ned ändringen och låt navigeringen ske.
+      if (autosaveFlushRef.current) {
+        autosaveFlushRef.current();
+        return;
+      }
+
       const originPath = currentPathRef.current;
       const targetPath = `${window.location.pathname}${window.location.search}`;
 
@@ -80,6 +100,10 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
     // Guard against tab close / reload while there are unsaved changes.
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (autosaveFlushRef.current) {
+        autosaveFlushRef.current();
+        return;
+      }
       if (hasUnsavedChangesRef.current) {
         e.preventDefault();
         // Required for legacy browsers to actually show the prompt.
@@ -96,6 +120,10 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
+    if (autosaveFlushRef.current) {
+      autosaveFlushRef.current();
+      return true;
+    }
     if (hasUnsavedChangesRef.current) {
       pendingNavigationSourceRef.current = 'app';
       setPendingNavigation(targetUrl);
@@ -143,6 +171,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       hasUnsavedChanges,
       setHasUnsavedChanges,
       checkBeforeNavigation,
+      registerAutosaveFlush,
     }}>
       {children}
       <UnsavedChangesDialog
