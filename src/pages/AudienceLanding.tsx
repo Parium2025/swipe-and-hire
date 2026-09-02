@@ -398,9 +398,32 @@ const getViewportSize = () => ({
   height: window.visualViewport?.height ?? window.innerHeight,
 });
 
+// Stabil höjdbas för telefon-/hero-storlekar. In-app-webbläsare (t.ex.
+// Snapchats webview) och mobil-Safari ändrar visualViewport-höjden när deras
+// verktygsrader glider undan under scroll — utan den här spärren räknas
+// telefonens storlek om mitt i scrollen och den "växer". Höjden baslinjäs
+// därför bara om när BREDDEN ändras (rotation, split-view, fönster-resize).
+// Verktygsradskollaps och tangentbord påverkar aldrig storleken.
+let sizingBaselineWidth: number | null = null;
+let sizingBaselineHeight: number | null = null;
+
+const getSizingViewportSize = () => {
+  const width = window.visualViewport?.width ?? window.innerWidth;
+  const liveHeight = window.visualViewport?.height ?? window.innerHeight;
+  if (
+    sizingBaselineWidth === null ||
+    sizingBaselineHeight === null ||
+    Math.abs(width - sizingBaselineWidth) > 1
+  ) {
+    sizingBaselineWidth = width;
+    sizingBaselineHeight = liveHeight;
+  }
+  return { width, height: sizingBaselineHeight };
+};
+
 const isMobileLikeHeroViewport = () => {
   if (typeof window === 'undefined') return false;
-  const { width, height } = getViewportSize();
+  const { width, height } = getSizingViewportSize();
   const isCoarse = window.matchMedia('(pointer: coarse)').matches;
   // Mobil-layout (stackad: text överst, telefon under) används endast på
   // riktiga små skärmar OCH på pekplattor i PORTRÄTT. På iPad i landskap
@@ -414,7 +437,7 @@ const isMobileLikeHeroViewport = () => {
 
 const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
   if (typeof window === 'undefined') return null;
-  const { width, height } = getViewportSize();
+  const { width, height } = getSizingViewportSize();
   if (isMobileLikeHeroViewport()) return 'mobile';
   if (width < 1180 && height > width) return 'portraitTablet';
   return null;
@@ -456,7 +479,7 @@ const useHeroSafeTopPadding = () => {
   const [topPx, setTopPx] = useState<number>(() => {
     if (typeof window === 'undefined') return 0;
     const w = window.innerWidth;
-    const h = window.visualViewport?.height ?? window.innerHeight;
+    const h = getSizingViewportSize().height;
     const rem = 16;
     const clamp = (min: number, pref: number, max: number) =>
       Math.max(min, Math.min(max, pref));
@@ -472,7 +495,7 @@ const useHeroSafeTopPadding = () => {
       const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
       const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
       const w = window.innerWidth;
-      const h = window.visualViewport?.height ?? window.innerHeight;
+      const h = getSizingViewportSize().height;
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       // Speglar Tailwind-clampen för att bevara nuvarande utseende:
       // base:  clamp(5.25rem, 12svh, 6rem)
@@ -521,7 +544,7 @@ const calculateInlinePhoneMetrics = (
   }
 
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-  const { width, height } = getViewportSize();
+  const { width, height } = getSizingViewportSize();
   const placement = getInlinePhonePlacement();
   const isPortraitTablet = placement === 'portraitTablet';
 
@@ -762,7 +785,7 @@ const calculateMobileHeroMinHeight = () => {
   if (!hero || !anchor) return null;
 
   const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-  const { height } = getViewportSize();
+  const { height } = getSizingViewportSize();
   const heroTop = hero.getBoundingClientRect().top;
   const anchorBottom = anchor.getBoundingClientRect().bottom - heroTop;
   const metrics = calculateInlinePhoneMetrics();
@@ -842,8 +865,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   const calculatePhoneMetrics = (): HeroPhoneMetrics => {
     if (typeof window === 'undefined') return { isDesktop: true, top: 0, height: 660, zoom: 0.68, yOffset: 0 };
     if (lastHeroMetricsRef.current && !document.querySelector('[data-hero-intro-stage]')) return lastHeroMetricsRef.current;
-    const width = window.visualViewport?.width ?? window.innerWidth;
-    const height = window.visualViewport?.height ?? window.innerHeight;
+    const { width, height } = getSizingViewportSize();
 
     const isCoarse = typeof window.matchMedia === 'function'
       ? window.matchMedia('(pointer: coarse)').matches
