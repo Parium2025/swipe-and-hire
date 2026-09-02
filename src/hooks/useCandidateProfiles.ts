@@ -1,6 +1,47 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+const candidateProfilesMemoryCache = new Map<string, CandidateProfile[]>();
+const CANDIDATE_PROFILES_CACHE_PREFIX = 'parium_candidate_profiles';
+
+function isCandidateProfile(value: unknown): value is CandidateProfile {
+  if (!value || typeof value !== 'object') return false;
+  const profile = value as Partial<CandidateProfile>;
+  return typeof profile.id === 'string'
+    && typeof profile.user_id === 'string'
+    && typeof profile.label === 'string'
+    && typeof profile.is_default === 'boolean'
+    && typeof profile.sort_order === 'number';
+}
+
+function readCandidateProfilesCache(userId?: string): CandidateProfile[] {
+  if (!userId) return [];
+  const memoryCached = candidateProfilesMemoryCache.get(userId);
+  if (memoryCached) return memoryCached;
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const raw = window.sessionStorage.getItem(`${CANDIDATE_PROFILES_CACHE_PREFIX}:${userId}`);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.every(isCandidateProfile)) return [];
+    candidateProfilesMemoryCache.set(userId, parsed);
+    return parsed;
+  } catch {
+    return [];
+  }
+}
+
+function writeCandidateProfilesCache(userId: string, profiles: CandidateProfile[]) {
+  candidateProfilesMemoryCache.set(userId, profiles);
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(`${CANDIDATE_PROFILES_CACHE_PREFIX}:${userId}`, JSON.stringify(profiles));
+  } catch {
+    // Minnescachen räcker om webbläsaren blockerar sessionStorage.
+  }
+}
+
 /** Totalt antal profiler inklusive grundprofilen. */
 export const MAX_CANDIDATE_PROFILES = 3;
 /** Antal extra profiler utöver grundprofilen som kan sparas. */
@@ -37,13 +78,14 @@ export interface CandidateProfileInput {
  * väljas vid ansökan. Vid ansökan tas en ögonblicksbild av vald profil.
  */
 export function useCandidateProfiles(userId?: string) {
-  const [profiles, setProfiles] = useState<CandidateProfile[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [profiles, setProfiles] = useState<CandidateProfile[]>(() => readCandidateProfilesCache(userId));
+  const [loading, setLoading] = useState(() => !!userId && readCandidateProfilesCache(userId).length === 0);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!userId) {
       setProfiles([]);
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -58,13 +100,17 @@ export function useCandidateProfiles(userId?: string) {
       setError(error.message);
     } else {
       setError(null);
-      setProfiles((data ?? []) as CandidateProfile[]);
+      const nextProfiles = (data ?? []) as CandidateProfile[];
+      writeCandidateProfilesCache(userId, nextProfiles);
+      setProfiles(nextProfiles);
     }
     setLoading(false);
   }, [userId]);
 
   useEffect(() => {
-    load();
+    const cachedProfiles = readCandidateProfilesCache(userId);
+    setProfiles(cachedProfiles);
+    void load();
   }, [load]);
 
   const clearDefaults = useCallback(async (exceptId?: string) => {

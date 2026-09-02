@@ -334,7 +334,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
                   {hasImage && !uploading && (
                     <div className="flex flex-col items-center space-y-2">
-                      <Button type="button" variant="glass" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm">
+                      <Button type="button" variant="glass" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation">
                         Anpassa profilbild
                       </Button>
                     </div>

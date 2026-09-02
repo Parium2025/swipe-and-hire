@@ -544,9 +544,10 @@ const Profile = () => {
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
   // Om profilbilden har markerats för borttagning ska vi INTE falla tillbaka till värdet från databasen
   const effectiveProfileImagePath = profileImageUrl || (deletedProfileMedia ? null : (profile as any)?.profile_image_url);
+  const effectiveVideoPath = videoUrl || (deletedProfileMedia ? null : (profile as any)?.video_url);
   const fallbackProfileImageUrl = useMediaUrl(effectiveProfileImagePath, 'profile-image');
-  const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
-  const videoPosterUrl = useVideoPoster(videoUrl || (profile as any)?.video_url);
+  const signedVideoUrl = useMediaUrl(effectiveVideoPath, 'profile-video');
+  const videoPosterUrl = useVideoPoster(effectiveVideoPath);
   
   // För cover image: använd inte fallback från profile om coverImageUrl explicit är tom (har raderats)
   const effectiveCoverImagePath = coverImageUrl || ((deletedCoverImage || deletedProfileMedia) ? null : (profile as any)?.cover_image_url);
@@ -585,18 +586,18 @@ const Profile = () => {
 
   const displayIsVideo = activeCandidateProfile
     ? !!activeCandidateProfile.video_url
-    : (isProfileVideo && !!videoUrl);
+    : !!effectiveVideoPath;
   const displayVideoUrl = activeCandidateProfile ? activeExtraVideoUrl : signedVideoUrl;
   const displayVideoPoster = activeCandidateProfile ? activeExtraVideoPoster : videoPosterUrl;
   const displayImageUrl = activeCandidateProfile
     ? activeExtraImageUrl
     : (cachedProfileImageUrl || signedProfileImageUrl);
   /** Sökväg till den visade profilens bild (grundprofil eller vald extraprofil). */
-  const displayImagePath = activeCandidateProfile ? (activeCandidateProfile.profile_image_url || '') : profileImageUrl;
+  const displayImagePath = activeCandidateProfile ? (activeCandidateProfile.profile_image_url || '') : (effectiveProfileImagePath || '');
   const displayHasMedia = activeCandidateProfile
     ? !!(activeCandidateProfile.video_url || activeCandidateProfile.profile_image_url)
-    : !!(videoUrl || profileImageUrl);
-  const displayCoverPath = activeCandidateProfile ? (activeCandidateProfile.cover_image_url || '') : coverImageUrl;
+    : !!(effectiveVideoPath || effectiveProfileImagePath);
+  const displayCoverPath = activeCandidateProfile ? (activeCandidateProfile.cover_image_url || '') : (effectiveCoverImagePath || '');
   
   // Extended profile fields - using correct database field names
   const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
@@ -2107,7 +2108,7 @@ const Profile = () => {
                 userId={user?.id}
                 baseImageUrl={isProfileVideo ? null : signedProfileImageUrl}
                 baseCoverUrl={signedCoverUrl}
-                baseHasVideo={isProfileVideo && !!videoUrl}
+                baseHasVideo={!!effectiveVideoPath}
                 onActiveProfileChange={setActiveCandidateProfile}
               />
             )}
@@ -2235,7 +2236,7 @@ const Profile = () => {
                       type="button"
                       variant="glass"
                       onClick={handleEditExistingProfile}
-                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Anpassa profilbild
                     </Button>
@@ -2245,7 +2246,7 @@ const Profile = () => {
                       type="button"
                       variant="glass"
                       onClick={handleEditExistingCover}
-                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Anpassa cover-bild
                     </Button>
@@ -2258,7 +2259,7 @@ const Profile = () => {
                       variant="glass"
                       onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover || isUploadingMedia}
-                      className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm"
+                      className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Lägg till cover-bild
                     </Button>
@@ -2282,7 +2283,7 @@ const Profile = () => {
                       variant="glass"
                       onClick={() => document.getElementById('profile-video-only')?.click()}
                       disabled={isUploadingMedia}
-                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Lägg till profilvideo
                     </Button>
@@ -2293,7 +2294,7 @@ const Profile = () => {
                       variant="glass"
                       onClick={() => document.getElementById('profile-image-only')?.click()}
                       disabled={isUploadingMedia}
-                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Lägg till profilbild
                     </Button>
