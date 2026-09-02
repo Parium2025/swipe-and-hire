@@ -2207,7 +2207,7 @@ const Profile = () => {
             </div>
 
             {/* Mediakontroller */}
-            {(displayIsVideo || !!displayImagePath) && !isUploadingMedia && (
+            {!isUploadingMedia && (
               <div className="mt-2 flex w-full flex-col items-center gap-3">
                 <div className="grid w-full max-w-sm grid-cols-2 gap-2" aria-label="Status för profilmedia">
                   <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
