@@ -998,7 +998,7 @@ const SearchJobs = memo(() => {
         {isSearchResultsLoading ? (
           // Vid filter/refetch används samma kortgeometri och aktuella antal som
           // den riktiga listan — inte ett separat generiskt femraders-skal.
-          <JobCardGridSkeleton count={filteredAndSortedJobs.length || Math.min(jobs.length, 3)} />
+          <JobCardGridSkeleton count={filteredAndSortedJobs.length} />
         ) : filteredAndSortedJobs.length === 0 ? (
           <div className="text-center py-16 px-4">
             <p className="text-white text-lg font-medium">Inga jobb hittades</p>
