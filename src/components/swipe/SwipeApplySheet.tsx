@@ -26,7 +26,7 @@ interface SwipeApplySheetProps {
 export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const [isClosing, setIsClosing] = useState(false);
-  const { profiles, baseProfile, selectedId, selectProfile, selectionReset } = useApplicationProfileSelection(user?.id);
+  const { profiles, baseProfile, selectedId, selectProfile, selectionReset, loading: profileSelectionLoading } = useApplicationProfileSelection(user?.id);
 
   const {
     questions,
@@ -206,14 +206,14 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                       {profileSelector}
                       <button
                         onClick={handleSubmit}
-                        disabled={submitting || hasAlreadyApplied}
+                        disabled={submitting || hasAlreadyApplied || profileSelectionLoading}
                         className={`h-14 px-10 rounded-full font-semibold text-base transition-all active:scale-[0.97] ${
                           hasAlreadyApplied
                             ? 'bg-green-500 text-white cursor-not-allowed'
                             : 'bg-green-500 text-white shadow-lg shadow-green-500/30'
                         }`}
                       >
-                        {hasAlreadyApplied ? 'Redan sökt' : submitting ? 'Skickar...' : 'Skicka ansökan'}
+                         {hasAlreadyApplied ? 'Redan sökt' : (submitting || profileSelectionLoading) ? 'Förbereder...' : 'Skicka ansökan'}
                       </button>
                     </div>
                   ) : (
@@ -222,8 +222,8 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                       answers={answers}
                       onAnswerChange={handleAnswerChange}
                       onSubmit={handleSubmit}
-                      isSubmitting={submitting}
-                      canSubmit={canSubmit}
+                       isSubmitting={submitting || profileSelectionLoading}
+                       canSubmit={canSubmit && !profileSelectionLoading}
                       hasAlreadyApplied={hasAlreadyApplied}
                       profileSelector={profileSelector}
                     />

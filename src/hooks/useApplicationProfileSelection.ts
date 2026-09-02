@@ -24,6 +24,20 @@ export function useApplicationProfileSelection(userId?: string) {
   const [initialized, setInitialized] = useState(false);
   const [selectionReset, setSelectionReset] = useState(false);
 
+  // Hooken kan leva kvar genom ett kontobyte. Ett val från föregående konto får
+  // aldrig användas medan nästa kontos profiler laddas in.
+  useEffect(() => {
+    setSelectedId(null);
+    setInitialized(false);
+    setSelectionReset(false);
+    setBaseProfile({
+      label: 'Min profil',
+      cv_url: null,
+      profile_image_url: null,
+      video_url: null,
+    });
+  }, [userId]);
+
   useEffect(() => {
     if (!userId) return;
     let active = true;
@@ -39,6 +53,8 @@ export function useApplicationProfileSelection(userId?: string) {
         video_url: typeof row?.video_url === 'string' ? row.video_url : null,
       });
       setBaseLoading(false);
+    }, () => {
+      if (active) setBaseLoading(false);
     });
     return () => { active = false; };
   }, [userId]);

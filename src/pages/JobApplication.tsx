@@ -97,6 +97,7 @@ const JobApplication = () => {
     selectedId,
     selectProfile,
     selectionReset,
+    loading: profileSelectionLoading,
   } = useApplicationProfileSelection(user?.id);
 
   
@@ -286,7 +287,7 @@ const JobApplication = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user || !job || submitInProgressRef.current) return;
+    if (!user || !job || submitInProgressRef.current || profileSelectionLoading) return;
 
     const requiredStandardFieldsPresent = [
       formData.firstName,
@@ -1046,11 +1047,11 @@ const JobApplication = () => {
         </div>
         <Button
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || profileSelectionLoading}
           className="w-full py-4 text-lg font-semibold"
         >
           <Send className="h-5 w-5 mr-2" />
-          {submitting ? 'Skickar ansökan...' : 'Skicka ansökan'}
+          {submitting ? 'Skickar ansökan...' : profileSelectionLoading ? 'Förbereder profil...' : 'Skicka ansökan'}
         </Button>
         
         <p className="text-sm text-gray-500 text-center mt-2">
