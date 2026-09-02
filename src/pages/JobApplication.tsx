@@ -129,7 +129,9 @@ const JobApplication = () => {
 
   // Håll formulärets CV i synk med det gemensamma profilvalet.
   useEffect(() => {
-    const profileCv = selectedProfile?.cv_url ?? baseProfile.cv_url ?? '';
+    // Ögonblicksbild: en vald extraprofil utan CV betyder tomt CV — aldrig
+    // en tyst reserv från huvudkontot.
+    const profileCv = selectedProfile ? (selectedProfile.cv_url ?? '') : (baseProfile.cv_url ?? '');
     setFormData(prev => {
       if (prev.cvUrl === profileCv) return prev;
       return { ...prev, cvUrl: profileCv };
