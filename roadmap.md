@@ -10,4 +10,4 @@
 - [x] Bedöm databastillägg i public och flytta endast med säker beroendeplan
 - [ ] Åtgärda verifierade kapacitetsrisker för 250 000 användare och miljontals konton
 - [ ] Verifiera säkerhet, funktion, tester och kapacitetsantaganden efter ändringarna
-- [ ] Rätta sökjobb-skeleton så antal och geometri speglar den faktiska jobblistan, även vid en annons
+- [x] Rätta sökjobb-skeleton så antal och geometri speglar den faktiska jobblistan, även vid en annons
