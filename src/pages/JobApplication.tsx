@@ -360,11 +360,10 @@ const JobApplication = () => {
 
     if (!selectedProfile && getIsOnline()) {
       try {
-        const { data: currentProfile } = await supabase
-          .from('profiles')
-          .select('profile_image_url, video_url, cover_image_url')
-          .eq('user_id', user.id)
-          .single();
+        const { data: myProfileRows } = await supabase.rpc('get_my_profile');
+        const currentProfile = (Array.isArray(myProfileRows) ? myProfileRows[0] : null) as
+          | { profile_image_url?: string | null; video_url?: string | null; cover_image_url?: string | null }
+          | null;
         profileImageSnapshot = currentProfile?.profile_image_url || null;
         videoSnapshot = currentProfile?.video_url || null;
         coverImageSnapshot = currentProfile?.cover_image_url || null;
