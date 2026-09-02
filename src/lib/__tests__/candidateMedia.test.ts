@@ -9,6 +9,7 @@ describe('resolveCandidateMedia', () => {
   const live = {
     profile_image_url: 'live-image.jpg',
     video_url: 'live-video.mp4',
+    cover_image_url: 'live-cover.jpg',
     is_profile_video: true,
   };
 
@@ -19,12 +20,14 @@ describe('resolveCandidateMedia', () => {
         candidate_profile_label: 'Lager',
         profile_image_snapshot_url: 'snap-image.jpg',
         video_snapshot_url: 'snap-video.mp4',
+        cover_image_snapshot_url: 'snap-cover.jpg',
       },
       live
     );
     expect(result).toEqual({
       profile_image_url: 'snap-image.jpg',
       video_url: 'snap-video.mp4',
+      cover_image_url: 'snap-cover.jpg',
       is_profile_video: true,
     });
   });
@@ -62,6 +65,7 @@ describe('resolveCandidateMedia', () => {
     expect(resolveCandidateMedia(null, null)).toEqual({
       profile_image_url: null,
       video_url: null,
+      cover_image_url: null,
       is_profile_video: null,
     });
   });
