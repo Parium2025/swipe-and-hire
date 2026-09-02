@@ -1700,7 +1700,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                               e.stopPropagation();
                               deleteCoverImage();
                             }}
-                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus-visible:outline-none focus:ring-0"
+                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                            aria-label="Ta bort cover-bild"
                             title="Ta bort cover-bild"
                           >
                             <Trash2 className="h-4 w-4" />

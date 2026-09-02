@@ -2333,7 +2333,8 @@ const Profile = () => {
                       <button
                         onClick={deleteCoverImage}
                         disabled={isUploadingCover}
-                        className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors disabled:opacity-50 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                        className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 disabled:opacity-50 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                        aria-label="Ta bort cover-bild"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -2342,7 +2343,7 @@ const Profile = () => {
                       <button
                         onClick={() => void restoreCoverImage()}
                         disabled={isUploadingCover}
-                        className="absolute -right-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+                        className="absolute -right-10 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 disabled:opacity-50 hover:bg-white/30"
                         aria-label="Återställ cover-bild"
                       >
                         <RotateCcw className="h-4 w-4" />

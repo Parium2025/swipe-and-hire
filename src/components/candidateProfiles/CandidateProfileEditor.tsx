@@ -398,7 +398,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                           type="button"
                           onClick={() => { setCoverUrl(deletedCover); setDeletedCover(null); }}
                           aria-label="Återställ cover-bild"
-                          className="absolute -right-10 bg-white/20 md:hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                          className="absolute -right-10 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:bg-white/30"
                         >
                           <RotateCcw className="h-4 w-4" />
                         </button>
@@ -407,7 +407,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                           type="button"
                           onClick={() => { setDeletedCover(coverUrl); setCoverUrl(null); }}
                           aria-label="Ta bort cover-bild"
-                          className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!bg-destructive/30"
+                          className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
