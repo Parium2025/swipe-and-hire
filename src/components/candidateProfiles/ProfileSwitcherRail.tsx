@@ -48,6 +48,7 @@ interface ChipData {
   id: string;
   label: string;
   imagePath: string | null;
+  imageMediaType: 'profile-image' | 'cover-image';
   signedImageUrl: string | null;
   hasVideo: boolean;
   isDefault: boolean;
@@ -55,9 +56,9 @@ interface ChipData {
 
 /** Rund miniatyr för en profil – bild, videoikon eller personikon. */
 function ProfileAvatar({
-  imagePath, signedImageUrl, hasVideo, size = 56,
-}: { imagePath?: string | null; signedImageUrl?: string | null; hasVideo?: boolean; size?: number }) {
-  const resolved = useMediaUrl(imagePath || undefined, 'profile-image');
+  imagePath, imageMediaType = 'profile-image', signedImageUrl, hasVideo, size = 56,
+}: { imagePath?: string | null; imageMediaType?: 'profile-image' | 'cover-image'; signedImageUrl?: string | null; hasVideo?: boolean; size?: number }) {
+  const resolved = useMediaUrl(imagePath || undefined, imageMediaType);
   const src = signedImageUrl ?? resolved;
 
   return (
@@ -86,7 +87,7 @@ interface ChipProps extends ChipData {
 
 /** Ett profilkort i karusellen. Miniatyr + namn + stjärna för standard. */
 function ProfileChip({
-  label, imagePath, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
+  label, imagePath, imageMediaType, hasVideo, active, isDefault, signedImageUrl, starBurst, onSelect, onToggleDefault,
 }: ChipProps) {
   return (
     <div
@@ -101,7 +102,7 @@ function ProfileChip({
         aria-pressed={active}
       >
         <span className="mx-auto block w-14">
-          <ProfileAvatar imagePath={imagePath} signedImageUrl={signedImageUrl} hasVideo={hasVideo} />
+          <ProfileAvatar imagePath={imagePath} imageMediaType={imageMediaType} signedImageUrl={signedImageUrl} hasVideo={hasVideo} />
         </span>
         <span title={label} className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
           {label}
@@ -195,12 +196,13 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const chips: ChipData[] = useMemo(() => [
     {
       id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? baseCoverUrl ?? null,
-      imagePath: null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault,
+      imagePath: null, imageMediaType: baseImageUrl ? 'profile-image' : 'cover-image', hasVideo: !!baseHasVideo, isDefault: baseIsDefault,
     },
     ...profiles.filter((p) => !pendingDeleteIds.includes(p.id)).map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
       // Miniatyr: profilbilden i första hand, annars cover-bilden. Aldrig videon.
       imagePath: p.profile_image_url || p.cover_image_url,
+      imageMediaType: p.profile_image_url ? 'profile-image' as const : 'cover-image' as const,
       hasVideo: !!p.video_url,
       isDefault: p.id === effectiveDefaultId,
     })),
@@ -216,8 +218,9 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   // skulle de inaktiva profilernas bilder börja hämtas först vid första trycket.
   useEffect(() => {
     profiles.forEach((profile) => {
-      const thumbnailPath = profile.profile_image_url || profile.cover_image_url;
-      if (thumbnailPath) void prefetchMediaUrl(thumbnailPath, 'profile-image');
+      if (profile.profile_image_url) void prefetchMediaUrl(profile.profile_image_url, 'profile-image');
+      if (profile.cover_image_url) void prefetchMediaUrl(profile.cover_image_url, 'cover-image');
+      if (profile.video_url) void prefetchMediaUrl(profile.video_url, 'profile-video');
     });
   }, [profiles]);
 
@@ -446,6 +449,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             >
               <ProfileAvatar
                 imagePath={activeChip?.imagePath}
+                imageMediaType={activeChip?.imageMediaType}
                 signedImageUrl={activeChip?.signedImageUrl}
                 hasVideo={activeChip?.hasVideo}
                 size={40}
@@ -472,6 +476,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                 >
                   <ProfileAvatar
                     imagePath={chip.imagePath}
+                    imageMediaType={chip.imageMediaType}
                     signedImageUrl={chip.signedImageUrl}
                     hasVideo={chip.hasVideo}
                     size={32}
