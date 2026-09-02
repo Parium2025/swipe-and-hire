@@ -1188,7 +1188,7 @@ const Profile = () => {
           "Kunde inte läsa videofilen. Kontrollera att det är en giltig videofil."
         );
       }
-    } else if (file.type.startsWith('image/')) {
+    } else if (file.type.startsWith('image/') && file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
       // Spara originalfilen för framtida redigeringar
       setOriginalProfileImageFile(file);
       const imageUrl = URL.createObjectURL(file);
@@ -1202,7 +1202,7 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type.startsWith('image/')) {
+    if (file.type.startsWith('image/') && file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
       // Spara originalfilen för framtida redigeringar
       setOriginalCoverImageFile(file);
       const imageUrl = URL.createObjectURL(file);
@@ -2261,7 +2261,7 @@ const Profile = () => {
               <input
                 id="profile-image"
                 type="file"
-                accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
+                 accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
                 onChange={handleMediaChange}
                 className="hidden"
                 disabled={isUploadingMedia}
@@ -2367,7 +2367,7 @@ const Profile = () => {
                 <Input
                   type="file"
                   id="cover-image"
-                  accept="image/*"
+                   accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
                   className="hidden"
                   onChange={handleCoverChange}
                   disabled={isUploadingCover}
@@ -2375,7 +2375,7 @@ const Profile = () => {
                 <input
                   id="profile-image-only"
                   type="file"
-                  accept="image/*"
+                   accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
                   className="hidden"
                   onChange={handleMediaChange}
                   disabled={isUploadingMedia}

@@ -12,7 +12,7 @@ import { FileText, Camera, Video, Play, Trash2, Loader2, CheckCircle, RotateCcw 
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { deleteMedia, uploadMedia, type MediaType } from '@/lib/mediaManager';
+import { uploadMedia, type MediaType } from '@/lib/mediaManager';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { looksLikeVideoFile } from '@/lib/videoInput';
 import type { CandidateProfile, CandidateProfileInput } from '@/hooks/useCandidateProfiles';
@@ -48,6 +48,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
   const [deletedCover, setDeletedCover] = useState<string | null>(null);
   const [deletedCv, setDeletedCv] = useState<{ url: string; filename: string | null } | null>(null);
   const uploadedPathsRef = useRef(new Map<string, MediaType>());
+  const uploadAbortRef = useRef<AbortController | null>(null);
 
   const [editorSrc, setEditorSrc] = useState('');
   const [editorTarget, setEditorTarget] = useState<'profile-image' | 'cover-image' | null>(null);
@@ -80,9 +81,13 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
   const uploadFile = async (file: File, type: 'profile-image' | 'profile-video' | 'cover-image') => {
     if (!user?.id) return null;
+    const controller = new AbortController();
+    uploadAbortRef.current?.abort();
+    uploadAbortRef.current = controller;
     setUploading(true);
-    const { storagePath, error } = await uploadMedia(file, type, user.id);
+    const { storagePath, error } = await uploadMedia(file, type, user.id, { signal: controller.signal });
     setUploading(false);
+    if (uploadAbortRef.current === controller) uploadAbortRef.current = null;
     if (error || !storagePath) {
       toast({ title: 'Uppladdningen misslyckades', description: error?.message ?? 'Försök igen.', variant: 'destructive' });
       return null;
@@ -92,10 +97,9 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
   };
 
   const cleanupNewUploads = async (keep: Set<string> = new Set()) => {
-    const removals = Array.from(uploadedPathsRef.current.entries())
-      .filter(([path]) => !keep.has(path))
-      .map(([path, type]) => deleteMedia(path, type));
-    await Promise.allSettled(removals);
+    // Filer tas aldrig bort direkt från klienten. Referenssäker backendstädning
+    // tar hand om övergivna uppladdningar efter säkerhetsfristen.
+    void keep;
     uploadedPathsRef.current.clear();
   };
 
@@ -113,6 +117,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
+      uploadAbortRef.current?.abort();
       void cleanupNewUploads();
       resetToSavedProfile();
     }
@@ -172,16 +177,22 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
       return;
     }
 
-    if (file.type.startsWith('image/')) {
+    if (file.type.startsWith('image/') && file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
       setEditorSrc(URL.createObjectURL(file));
       setEditorTarget('profile-image');
+    } else {
+      toast({ title: 'Filtypen stöds inte', description: 'Välj JPEG, PNG eller WebP.', variant: 'destructive' });
     }
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!file) return;
+    if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+      toast({ title: 'Filtypen stöds inte', description: 'Välj JPEG, PNG eller WebP.', variant: 'destructive' });
+      return;
+    }
     setEditorSrc(URL.createObjectURL(file));
     setEditorTarget('cover-image');
   };
@@ -331,7 +342,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   <input
                     ref={mediaInputRef}
                     type="file"
-                    accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
                     onChange={handleMediaChange}
                     className="hidden"
                     disabled={uploading}
@@ -414,7 +425,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       )}
                     </div>
 
-                    <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={uploading} />
+                    <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" className="hidden" onChange={handleCoverChange} disabled={uploading} />
 
                     {coverUrl && !uploading && (
                       <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">

@@ -1621,7 +1621,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <input
                     id="profileMedia"
                     type="file"
-                    accept="image/*,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
                     onChange={handleMediaChange}
                     className="hidden"
                     disabled={isUploadingMedia}
@@ -1726,7 +1726,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     <Input 
                       type="file" 
                       id="coverImage" 
-                      accept="image/*" 
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" 
                       className="hidden" 
                       onChange={handleCoverChange} 
                       disabled={isUploadingCover} 
