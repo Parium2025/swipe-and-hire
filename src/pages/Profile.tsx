@@ -2061,16 +2061,30 @@ const Profile = () => {
   // (fältfelen visas som vanligt), och ingen notis visas vid lyckad sparning.
   const submitRef = useRef(handleSubmit);
   submitRef.current = handleSubmit;
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (loading || isUploadingMedia || isUploadingCover) return;
     if (isDiscardingChangesRef.current) return;
-    const t = setTimeout(() => { void submitRef.current(undefined, { silent: true }); }, 900);
+    const t = setTimeout(async () => {
+      if (savedResetRef.current) clearTimeout(savedResetRef.current);
+      setSaveStatus('saving');
+      try {
+        await submitRef.current(undefined, { silent: true });
+        setSaveStatus('saved');
+        savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+      } catch {
+        setSaveStatus('idle');
+      }
+    }, 900);
     return () => clearTimeout(t);
   }, [hasUnsavedChanges, loading, isUploadingMedia, isUploadingCover,
       firstName, lastName, bio, userLocation, postalCode, phone, birthDate,
       employmentStatus, workingHours, availability, companyName, orgNumber,
       profileImageUrl, videoUrl, coverImageUrl, cvUrl, isProfileVideo]);
+
 
 
 
@@ -2087,7 +2101,29 @@ const Profile = () => {
         <p className="text-sm text-white mt-1">
           Hantera din personliga information
         </p>
+        <div
+          className="mt-1 h-4 text-xs text-white/70"
+          aria-live="polite"
+          role="status"
+        >
+          <span
+            className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                Sparar…
+              </>
+            ) : (
+              <>
+                <Check className="h-3 w-3" aria-hidden="true" />
+                Sparat
+              </>
+            )}
+          </span>
+        </div>
       </div>
+
 
       <div className="space-y-6">
         {/* Profile Image/Video Card */}
