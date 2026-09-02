@@ -8,9 +8,10 @@ type ConfettiFn = ReturnType<typeof confetti.create>;
 
 let canvasEl: HTMLCanvasElement | null = null;
 let cachedFire: ConfettiFn | null = null;
-let confettiModule: Promise<typeof import('canvas-confetti')> | null = null;
+let confettiModule: ReturnType<typeof importConfetti> | null = null;
 
-const loadConfetti = () => confettiModule ??= import('canvas-confetti');
+const importConfetti = async () => (await import('canvas-confetti')).default;
+const loadConfetti = () => confettiModule ??= importConfetti();
 
 /**
  * Egen fullskärms-canvas som ligger överst i DOM:en med maximal z-index.
@@ -57,7 +58,7 @@ async function getFire(): Promise<ConfettiFn | null> {
     // Det gör att dashboardens omrendering och dialogstängning aldrig kan få
     // desktop-konfettin att hacka. Biblioteket faller automatiskt tillbaka på
     // vanlig canvas på äldre iOS-versioner.
-    const { default: confettiLib } = await loadConfetti();
+    const confettiLib = await loadConfetti();
     cachedFire = confettiLib.create(canvas, { resize: true, useWorker: true });
   }
   return cachedFire;
