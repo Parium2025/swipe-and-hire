@@ -157,9 +157,9 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        const uniqueApplicants = Array.from(
-          new Map((applicants || []).map((app) => [app.applicant_id, app])).values()
-        );
+        // En kandidat kan bara ha en ansökan per jobb (unik DB-constraint), så
+        // behåll databasens id-ordning intakt för den resumérbara keyset-markören.
+        const uniqueApplicants = applicants || [];
 
         if (uniqueApplicants.length === 0) {
           // No candidates to notify, mark as done
