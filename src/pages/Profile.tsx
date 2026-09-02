@@ -18,7 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink, Bot, AlertTriangle, Loader2, WifiOff } from 'lucide-react';
+import { User, MapPin, Building, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Play, Check, X, Trash2, ChevronDown, RotateCcw, ExternalLink, Bot, AlertTriangle, Loader2, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
@@ -2070,7 +2070,7 @@ const Profile = () => {
         </p>
         {!isEmployer && (
           <p className="mt-1 text-xs text-white">
-            Du kan ha upp till tre profiler.
+            (Du kan ha upp till tre profiler)
           </p>
         )}
         <div
@@ -2209,6 +2209,24 @@ const Profile = () => {
             {/* Mediakontroller */}
             {(displayIsVideo || !!displayImagePath) && !isUploadingMedia && (
               <div className="mt-2 flex w-full flex-col items-center gap-3">
+                <div className="grid w-full max-w-sm grid-cols-2 gap-2" aria-label="Status för profilmedia">
+                  <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                    <span className="min-w-0 text-left text-xs font-medium text-white">
+                      Video {displayIsVideo ? 'uppladdad' : 'inte uppladdad'}
+                    </span>
+                    <span className={displayIsVideo ? 'text-green-400' : 'text-destructive'} aria-hidden="true">
+                      {displayIsVideo ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                    </span>
+                  </div>
+                  <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                    <span className="min-w-0 text-left text-xs font-medium text-white">
+                      Cover-bild {displayCoverPath ? 'uppladdad' : 'inte uppladdad'}
+                    </span>
+                    <span className={displayCoverPath ? 'text-green-400' : 'text-destructive'} aria-hidden="true">
+                      {displayCoverPath ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                    </span>
+                  </div>
+                </div>
                 <div className="flex flex-col items-center gap-2 text-center">
                   {displayImagePath && (
                     <Button
