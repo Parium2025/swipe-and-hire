@@ -196,14 +196,15 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? baseCoverUrl ?? null,
       imagePath: null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault,
     },
-    ...profiles.filter((p) => p.id !== pendingDeleteId).map((p) => ({
+    ...profiles.filter((p) => !pendingDeleteIds.includes(p.id)).map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
       // Miniatyr: profilbilden i första hand, annars cover-bilden. Aldrig videon.
       imagePath: p.profile_image_url || p.cover_image_url,
       hasVideo: !!p.video_url,
       isDefault: p.id === effectiveDefaultId,
     })),
-  ], [profiles, pendingDeleteId, baseImageUrl, baseCoverUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
+  ], [profiles, pendingDeleteIds, baseImageUrl, baseCoverUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
+
 
   // Ordningen ligger fast (grundprofilen först, sedan skapandeordning) så att
   // stjärnan bara glider in kortet i mitten – inga kort byter plats med varandra.
