@@ -13,7 +13,6 @@ import {
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +33,6 @@ import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useIsMobile } from '@/hooks/use-mobile'; // kept for swipe mode layout
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { getTimeRemaining } from '@/lib/date'; // kept for swipe jobs mapping
@@ -51,6 +49,7 @@ import { SearchFiltersPanel } from '@/components/search/SearchFiltersPanel';
 import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard';
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
+import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
@@ -991,27 +990,9 @@ const SearchJobs = memo(() => {
         </div>
         
         {isSearchResultsLoading ? (
-          // Show skeletons during any loading state (initial, back-navigation, filter change)
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Card key={i} className="bg-white/5 border-white/10">
-                <CardContent className="p-4 min-h-[120px]">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <Skeleton className="h-6 w-3/4 bg-white/10 mb-3" />
-                      <Skeleton className="h-4 w-1/2 bg-white/10 mb-3" />
-                      <div className="flex gap-4">
-                        <Skeleton className="h-4 w-24 bg-white/10" />
-                        <Skeleton className="h-4 w-20 bg-white/10" />
-                        <Skeleton className="h-4 w-28 bg-white/10" />
-                      </div>
-                    </div>
-                    <Skeleton className="h-7 w-28 bg-white/10 rounded-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          // Vid filter/refetch används samma kortgeometri och aktuella antal som
+          // den riktiga listan — inte ett separat generiskt femraders-skal.
+          <JobCardGridSkeleton count={filteredAndSortedJobs.length || Math.min(jobs.length, 3)} />
         ) : filteredAndSortedJobs.length === 0 ? (
           <div className="text-center py-16 px-4">
             <p className="text-white text-lg font-medium">Inga jobb hittades</p>

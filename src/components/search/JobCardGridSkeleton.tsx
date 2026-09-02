@@ -30,12 +30,12 @@ export const JobCardGridSkeleton = memo(function JobCardGridSkeleton({ count }: 
       }`}
     >
       {Array.from({ length: safeCount }).map((_, i) => (
-        <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
+        <div key={i} className="job-card-mobile-shell rounded-2xl overflow-hidden bg-white/[0.04]">
           {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
           <div className={`w-full ${SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
           {/* Kortkropp — matchar ReadOnlyMobileJobCard exakt:
               logo UNDER bilden (pt-1), aldrig -mt-8/överhäng. */}
-          <div className="p-4 space-y-2.5">
+          <div className="job-card-mobile-body p-4 space-y-2.5">
             <div className="flex justify-center pt-1">
               <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
             </div>
