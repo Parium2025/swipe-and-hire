@@ -1055,6 +1055,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       canSubmit={canSubmitApplication}
                       hasAlreadyApplied={alreadyAppliedForUi}
                       justApplied={justApplied}
+                      profileSelector={applicationProfileSelector}
                     />
                   </div>
                 )}
