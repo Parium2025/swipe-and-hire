@@ -7,6 +7,7 @@ export interface BaseApplicationProfile {
   cv_url: string | null;
   profile_image_url: string | null;
   video_url: string | null;
+  cover_image_url: string | null;
 }
 
 export type ApplicationProfileSelection = CandidateProfile | null;
@@ -18,6 +19,7 @@ export function useApplicationProfileSelection(userId?: string) {
     cv_url: null,
     profile_image_url: null,
     video_url: null,
+    cover_image_url: null,
   });
   const [baseLoading, setBaseLoading] = useState(false);
   const [baseProfileUserId, setBaseProfileUserId] = useState<string | null>(null);
@@ -37,6 +39,7 @@ export function useApplicationProfileSelection(userId?: string) {
       cv_url: null,
       profile_image_url: null,
       video_url: null,
+      cover_image_url: null,
     });
   }, [userId]);
 
@@ -53,6 +56,7 @@ export function useApplicationProfileSelection(userId?: string) {
         cv_url: typeof row?.cv_url === 'string' ? row.cv_url : null,
         profile_image_url: typeof row?.profile_image_url === 'string' ? row.profile_image_url : null,
         video_url: typeof row?.video_url === 'string' ? row.video_url : null,
+        cover_image_url: typeof row?.cover_image_url === 'string' ? row.cover_image_url : null,
       });
       setBaseProfileUserId(userId);
       setBaseLoading(false);
@@ -104,6 +108,7 @@ export function useApplicationProfileSelection(userId?: string) {
       cv_url: null,
       profile_image_url: null,
       video_url: null,
+      cover_image_url: null,
     },
     selectedProfile,
     selectedId,

@@ -80,7 +80,7 @@ export function useApplySubmit({
         });
       }
       const selectedProfileRes = selectedProfileId
-        ? await supabase.from('candidate_profiles').select('id, label, cv_url, video_url, profile_image_url').eq('id', selectedProfileId).eq('user_id', userId).maybeSingle()
+        ? await supabase.from('candidate_profiles').select('id, label, cv_url, video_url, profile_image_url, cover_image_url').eq('id', selectedProfileId).eq('user_id', userId).maybeSingle()
         : null;
       if (selectedProfileRes?.error) throw selectedProfileRes.error;
       const candidateProfile = selectedProfileRes?.data ?? null;
@@ -114,6 +114,9 @@ export function useApplySubmit({
         video_snapshot_url: candidateProfile
           ? candidateProfile.video_url ?? null
           : profile?.video_url || null,
+        cover_image_snapshot_url: candidateProfile
+          ? candidateProfile.cover_image_url ?? null
+          : profile?.cover_image_url || null,
         candidate_profile_label: candidateProfile?.label ?? null,
         candidate_profile_id: candidateProfile?.id ?? null,
         custom_answers: answers,

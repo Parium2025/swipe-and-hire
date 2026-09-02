@@ -34,6 +34,7 @@ export interface ApplicationSnapshot {
   last_name: string | null;
   profile_image_snapshot_url: string | null;
   video_snapshot_url: string | null;
+  cover_image_snapshot_url: string | null;
   cv_url: string | null;
   job_title: string | null;
   candidate_profile_label?: string | null;
@@ -426,6 +427,7 @@ export function useConversations() {
             last_name,
             profile_image_snapshot_url,
             video_snapshot_url,
+            cover_image_snapshot_url,
             candidate_profile_label,
             applied_at,
             cv_url,
@@ -444,6 +446,7 @@ export function useConversations() {
             candidate_profile_label: (app as any).candidate_profile_label ?? null,
             applied_at: (app as any).applied_at ?? null,
             video_snapshot_url: app.video_snapshot_url,
+            cover_image_snapshot_url: app.cover_image_snapshot_url,
             cv_url: app.cv_url,
             job_title: (app.job as any)?.title || null,
           });

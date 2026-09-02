@@ -23,6 +23,7 @@ interface CandidateSlideProfileTabProps {
   rating: number;
   profileImageUrl: string | null;
   videoUrl: string | null;
+  coverImageUrl: string | null;
   signedCvUrl: string | null;
   isProfileVideo: boolean;
   initials: string;
@@ -40,6 +41,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
   rating,
   profileImageUrl,
   videoUrl,
+  coverImageUrl,
   signedCvUrl,
   isProfileVideo,
   initials,
@@ -72,7 +74,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
           <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
             <ProfileVideo
               videoUrl={videoUrl}
-              coverImageUrl={profileImageUrl || undefined}
+              coverImageUrl={coverImageUrl || profileImageUrl || undefined}
               userInitials={initials}
               className="w-full h-full"
               showCountdown={true}

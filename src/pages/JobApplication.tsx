@@ -335,16 +335,18 @@ const JobApplication = () => {
     // media (tomt = tomt). Annars används kontots vanliga profil.
     let profileImageSnapshot: string | null = selectedProfile?.profile_image_url || null;
     let videoSnapshot: string | null = selectedProfile?.video_url || null;
+    let coverImageSnapshot: string | null = selectedProfile?.cover_image_url || null;
 
     if (!selectedProfile && getIsOnline()) {
       try {
         const { data: currentProfile } = await supabase
           .from('profiles')
-          .select('profile_image_url, video_url')
+          .select('profile_image_url, video_url, cover_image_url')
           .eq('user_id', user.id)
           .single();
         profileImageSnapshot = currentProfile?.profile_image_url || null;
         videoSnapshot = currentProfile?.video_url || null;
+        coverImageSnapshot = currentProfile?.cover_image_url || null;
       } catch {
         // Continue without snapshot — not critical
       }
@@ -365,6 +367,7 @@ const JobApplication = () => {
       cv_url: formData.cvUrl,
       profile_image_snapshot_url: profileImageSnapshot,
       video_snapshot_url: videoSnapshot,
+      cover_image_snapshot_url: coverImageSnapshot,
       candidate_profile_id: selectedProfile?.id ?? null,
       candidate_profile_label: selectedProfile?.label ?? null,
 
