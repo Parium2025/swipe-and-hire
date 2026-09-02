@@ -228,7 +228,15 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     onActiveProfileChange?.(activeProfile);
   }, [activeProfile, onActiveProfileChange]);
 
-  const openNew = () => { setEditing(null); setEditorOpen(true); };
+  // Väntande raderingar slutförs först, annars kan databasens gräns för antal
+  // profiler slå till fast användaren precis tagit bort en profil.
+  const openNew = () => {
+    void flushPendingDeletesRef.current().finally(() => {
+      setEditing(null);
+      setEditorOpen(true);
+    });
+  };
+
 
   React.useImperativeHandle(ref, () => ({
     editActiveProfile: () => {
