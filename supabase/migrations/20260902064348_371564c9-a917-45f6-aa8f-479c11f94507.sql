@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public can view employer safe profile rows" ON public.profiles;
