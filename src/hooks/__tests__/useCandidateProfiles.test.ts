@@ -85,6 +85,7 @@ function profile(id: string, extra: Row = {}): Row {
 }
 
 beforeEach(() => {
+  sessionStorage.clear();
   state.rows = [];
   state.inserted = [];
   state.updates = [];
@@ -96,6 +97,18 @@ describe('useCandidateProfiles', () => {
   it('tillåter max 3 profiler totalt (2 extra utöver grundprofilen)', () => {
     expect(MAX_CANDIDATE_PROFILES).toBe(3);
     expect(MAX_EXTRA_CANDIDATE_PROFILES).toBe(2);
+  });
+
+  it('återanvänder kontospecifik profilmetadata direkt vid återmontering', async () => {
+    state.rows = [profile('cached', { is_default: true, profile_image_url: 'u1/profile.jpg' })];
+    const first = renderHook(() => useCandidateProfiles('u1'));
+    await waitFor(() => expect(first.result.current.profiles).toHaveLength(1));
+    first.unmount();
+
+    state.rows = [];
+    const second = renderHook(() => useCandidateProfiles('u1'));
+    expect(second.result.current.profiles[0]?.id).toBe('cached');
+    expect(second.result.current.profiles[0]?.profile_image_url).toBe('u1/profile.jpg');
   });
 
   it('nekar en ny profil när maxgränsen är nådd', async () => {

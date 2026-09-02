@@ -148,7 +148,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
-  const [activeId, setActiveId] = useState<string>('base');
+  const [activeId, setActiveId] = useState<string>(() => profiles.find((profile) => profile.is_default)?.id ?? 'base');
   // Profil som väntar på bekräftad borttagning.
   const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
   // Ångra-fönster: profilen döljs direkt men raderas i databasen först efter
