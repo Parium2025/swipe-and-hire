@@ -583,7 +583,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     <div className="space-y-2">
       <div
         ref={railRef}
-        className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
         role="listbox"
         aria-label="Välj profil"
         aria-activedescendant={`profile-slot-${slots[activeIndex]?.key ?? 'base'}`}
@@ -617,7 +617,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                   type="button"
                   onClick={openNew}
                   aria-label="Lägg till profil"
-                  className="w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white transition-colors md:hover:bg-white/10 touch-manipulation"
+                  className="w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white outline-none transition-all duration-200 md:hover:bg-white/10 active:scale-[0.97] touch-manipulation focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
                 >
                   <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10">
                     <Plus className="h-5 w-5" />
