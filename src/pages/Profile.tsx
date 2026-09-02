@@ -18,7 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink, Bot, AlertTriangle, Loader2, WifiOff } from 'lucide-react';
+import { User, MapPin, Building, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink, Bot, AlertTriangle, Loader2, WifiOff } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
@@ -634,8 +634,8 @@ const Profile = () => {
         postalCode: (profile as any)?.postal_code || '',
         phone: profile.phone || '',
         birthDate: profile.birth_date || '',
-        // If profile has a video, treat it as the active profile media (ignore any stale image path in DB)
-        profileImageUrl: dbHasVideo ? '' : ((profile as any)?.profile_image_url || ''),
+        // Bild och video kan samexistera; videon styr bara vilken förhandsvisning som är aktiv.
+        profileImageUrl: (profile as any)?.profile_image_url || '',
         videoUrl: dbHasVideo ? (profile as any).video_url : '',
         cvUrl: (profile as any)?.cv_url || '',
         companyName: profile.company_name || '',
@@ -936,8 +936,8 @@ const Profile = () => {
         await profileRailRef.current.updateProfileById(
           targetProfileId,
           isVideo
-            ? { video_url: storagePath, profile_image_url: null }
-            : { profile_image_url: storagePath, video_url: null }
+            ? { video_url: storagePath }
+            : { profile_image_url: storagePath }
         );
         return;
       }
@@ -952,13 +952,11 @@ const Profile = () => {
             setCoverFileName(previousImage);
           }
           setVideoUrl(storagePath);
-          setProfileImageUrl(''); // Clear regular image when video is uploaded
           setIsProfileVideo(true);
           // Signed URL handled by useMediaUrl hook
         } else {
           setProfileImageUrl(storagePath);
-          setVideoUrl('');
-          setIsProfileVideo(false);
+          setIsProfileVideo(!!videoUrl);
         }
       
       setProfileFileName(storagePath);
@@ -966,12 +964,12 @@ const Profile = () => {
       setHasUnsavedChanges(true);
       // 🔒 Save to sessionStorage to survive remounts
       setLocalMediaState({
-        profileImageUrl: isVideo ? '' : storagePath,
-        videoUrl: isVideo ? storagePath : '',
+        profileImageUrl: isVideo ? profileImageUrl : storagePath,
+        videoUrl: isVideo ? storagePath : videoUrl,
         coverImageUrl: isVideo && !coverImageUrl && (profileImageUrl || originalValues?.profileImageUrl) 
           ? (profileImageUrl || originalValues?.profileImageUrl || '') 
           : coverImageUrl,
-        isProfileVideo: isVideo,
+        isProfileVideo: isVideo || !!videoUrl,
         profileFileName: storagePath,
         coverFileName,
         cvUrl
@@ -1243,7 +1241,7 @@ const Profile = () => {
       // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath, video_url: null });
+        await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath });
         setImageEditorOpen(false);
         if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
         setPendingImageSrc('');
@@ -1261,7 +1259,7 @@ const Profile = () => {
       
       // Update local state instead of saving immediately
       setProfileImageUrl(storagePath);
-      setIsProfileVideo(false); // Mark as image, not video
+      setIsProfileVideo(!!videoUrl);
       setProfileFileName(storagePath); // Track the new filename (storage path) for deletion
       // Keep cover image when uploading profile image
       
@@ -1280,9 +1278,9 @@ const Profile = () => {
       // 🔒 Save to sessionStorage to survive remounts
       setLocalMediaState({
         profileImageUrl: storagePath,
-        videoUrl: '',
+        videoUrl,
         coverImageUrl,
-        isProfileVideo: false,
+        isProfileVideo: !!videoUrl,
         profileFileName: storagePath,
         coverFileName,
         cvUrl
@@ -1641,7 +1639,7 @@ const Profile = () => {
   const handleEditExistingProfile = async () => {
     // Vald extraprofil: redigera dess egen bild.
     if (activeCandidateProfile) {
-      if (!activeCandidateProfile.profile_image_url || activeCandidateProfile.video_url) return;
+      if (!activeCandidateProfile.profile_image_url) return;
       try {
         const signedUrl = await getMediaUrl(activeCandidateProfile.profile_image_url, 'profile-image', 86400);
         if (signedUrl) {
@@ -1655,8 +1653,7 @@ const Profile = () => {
       }
       return;
     }
-    // Kan endast redigera bilder, inte videor
-    if (!profileImageUrl || isProfileVideo) return;
+    if (!profileImageUrl) return;
     
     // Visa alltid originalbilden i editorn (om den finns)
     if (originalProfileImageFile) {
@@ -1903,53 +1900,11 @@ const Profile = () => {
         availability: availability || null,
       };
 
-      // Handle profile image/video updates
-      // 🔒 KRITISK FIX: profile_image_url ska ALDRIG vara null om vi har cover_image_url
-      // Detta säkerställer att sidebaren alltid har något att visa
-      if (isProfileVideo && videoUrl) {
-        // It's a video - save storage path only
-        updates.video_url = videoUrl;
-        
-        // If user had a profile image but no cover, make the profile image the cover
-        if (profileImageUrl && !coverImageUrl) {
-          updates.cover_image_url = profileImageUrl; // Preserve old profile image as cover
-          setCoverImageUrl(profileImageUrl); // Update local state
-          setCoverFileName(profileFileName); // Track for deletion
-          // 🔒 BEHÅLL profile_image_url som cover för fallback (istället för null)
-          updates.profile_image_url = profileImageUrl;
-        } else if (coverImageUrl) {
-          // Keep existing cover image when video exists
-          updates.cover_image_url = coverImageUrl;
-          // 🔒 KRITISK: Sätt profile_image_url till cover som fallback
-          updates.profile_image_url = coverImageUrl;
-        } else {
-          // Ingen cover och ingen profilbild - sätt till null (oundvikligt)
-          updates.cover_image_url = null;
-          updates.profile_image_url = null;
-        }
-        
-        updates.is_profile_video = true;
-      } else if (!profileImageUrl && coverImageUrl) {
-        // No video/image but has cover - make cover the profile image (but keep cover as cover)
-        updates.profile_image_url = coverImageUrl;
-        updates.video_url = null;
-        updates.cover_image_url = coverImageUrl; // Preserve cover image so it remains available when adding video again
-        updates.is_profile_video = false;
-        
-        // Update local state to reflect this change
-        setProfileImageUrl(coverImageUrl);
-        setIsProfileVideo(false);
-        setProfileFileName(coverFileName);
-        // Do NOT clear cover state here
-        setDeletedCoverImage(null);
-        setDeletedProfileMedia(null); // Clear undo states
-      } else {
-        // It's an image or no media - ALDRIG null om cover finns
-        updates.profile_image_url = profileImageUrl || coverImageUrl || null;
-        updates.video_url = null;
-        updates.cover_image_url = coverImageUrl || null;
-        updates.is_profile_video = false;
-      }
+      // Bild, video och videons cover är separata tillgångar och får samexistera.
+      updates.profile_image_url = profileImageUrl || null;
+      updates.video_url = videoUrl || null;
+      updates.cover_image_url = coverImageUrl || null;
+      updates.is_profile_video = !!videoUrl;
 
       if (isEmployer) {
         updates.company_name = companyName.trim() || null;
@@ -2141,14 +2096,12 @@ const Profile = () => {
         {/* Profile Image/Video Card */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
           <div className="p-4 space-y-2">
-            <h3 className="text-base font-semibold text-white text-center">
-              Profilbild/Profilvideo
-            </h3>
+            <h3 className="text-base font-semibold text-white text-center">Profilmedia</h3>
             <p className="text-white text-center text-xs mt-1">
               (Du kan ha upp till tre profiler)
             </p>
             <p className="text-white text-center text-sm mt-2">
-              Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt.
+              Lägg till en profilbild, en profilvideo eller båda.
             </p>
 
             {!isEmployer && (
@@ -2161,33 +2114,6 @@ const Profile = () => {
                 onActiveProfileChange={setActiveCandidateProfile}
               />
             )}
-            
-            
-            {/* Video and Camera Icons */}
-            <div className="flex items-center justify-center space-x-4">
-              {/* Video option */}
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
-                  <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                    <Video className="h-5 w-5 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* "eller" text */}
-              <div className="text-white text-sm font-medium flex-shrink-0">
-                eller
-              </div>
-
-              {/* Image option */}
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
-                  <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                    <Camera className="h-5 w-5 text-white" />
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
           <div className="p-4 flex flex-col items-center space-y-4">
             <div className="relative">
@@ -2267,7 +2193,7 @@ const Profile = () => {
                 htmlFor="profile-image"
                 className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
               >
-                Klicka här för att välja en bild eller video (max 60 sekunder)
+                Välj en profilbild eller profilvideo (max 60 sekunder).
               </Label>
 
               {isUploadingMedia && (
@@ -2288,17 +2214,20 @@ const Profile = () => {
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
-                    {displayIsVideo ? 'Video uppladdad!' : 'Bild uppladdad!'}
+                    {displayIsVideo && displayImagePath
+                      ? 'Profilbild och video uppladdade'
+                      : displayIsVideo
+                        ? 'Profilvideo uppladdad'
+                        : 'Profilbild uppladdad'}
                   </Badge>
 
-                  {/* Bildprofil: anpassa profilbilden. Videoprofil: anpassa cover-bilden. */}
-                  {!displayIsVideo && (
+                  {displayImagePath && (
                     <button
                       type="button"
                       onClick={handleEditExistingProfile}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
                     >
-                      Anpassa din bild
+                      Anpassa profilbild
                     </button>
                   )}
                   {displayIsVideo && displayCoverPath && (
@@ -2307,7 +2236,7 @@ const Profile = () => {
                       onClick={handleEditExistingCover}
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
                     >
-                      Anpassa din bild
+                      Anpassa cover-bild
                     </button>
                   )}
 
@@ -2345,7 +2274,7 @@ const Profile = () => {
                     )}
                   </div>
 
-                  {/* Bildprofil: komplettera med en video (endast videofiler). */}
+                  {/* Lägg till den mediatyp som saknas; bild och video kan samexistera. */}
                   {!displayIsVideo && (
                     <button
                       type="button"
@@ -2354,6 +2283,16 @@ const Profile = () => {
                       className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
                     >
                       Lägg till video
+                    </button>
+                  )}
+                  {displayIsVideo && !displayImagePath && (
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('profile-image-only')?.click()}
+                      disabled={isUploadingMedia}
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                    >
+                      Lägg till profilbild
                     </button>
                   )}
                 </div>
@@ -2393,7 +2332,7 @@ const Profile = () => {
                 {displayIsVideo && displayCoverPath && !isUploadingCover && (
                   <div className="flex items-center justify-center">
                     <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
-                      Cover-bild uppladdad!
+                      Cover-bild uppladdad
                     </Badge>
                   </div>
                 )}

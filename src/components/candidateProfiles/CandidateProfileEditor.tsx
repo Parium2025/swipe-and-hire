@@ -8,7 +8,7 @@ import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
-import { FileText, Camera, Video, Play, Trash2, Loader2, CheckCircle, RotateCcw } from 'lucide-react';
+import { FileText, Camera, Trash2, Loader2, CheckCircle, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -166,7 +166,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
           return;
         }
         const path = await uploadFile(file, 'profile-video');
-        if (path) { setVideoUrl(path); setImageUrl(null); }
+        if (path) setVideoUrl(path);
       });
       video.onerror = () => finish(() => {
         toast({ title: 'Ogiltig videofil', description: 'Filen är skadad eller har ett format som inte stöds.', variant: 'destructive' });
@@ -204,7 +204,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     const path = await uploadFile(file, target);
     if (path) {
       if (target === 'cover-image') setCoverUrl(path);
-      else { setImageUrl(path); setVideoUrl(null); }
+      else setImageUrl(path);
     }
     setEditorTarget(null);
     setEditorSrc('');
@@ -254,34 +254,14 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               </p>
             </div>
 
-            {/* Profilbild/Profilvideo – identiskt system som på Min profil. */}
+            {/* Profilmedia – bild och video är två separata, kombinerbara tillgångar. */}
             <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 space-y-4">
               <div className="text-center space-y-1">
-                <h3 className="text-base font-semibold text-white">Profilbild/Profilvideo</h3>
+                <h3 className="text-base font-semibold text-white">Profilmedia</h3>
                 <p className="text-sm text-white">
-                  Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt.
+                  Lägg till en profilbild, en profilvideo eller båda.
                 </p>
               </div>
-
-              {!hasVideo && !hasImage && (
-                <div className="flex items-center justify-center space-x-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-white/5 backdrop-blur-sm">
-                      <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                        <Video className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-white text-sm font-medium">eller</div>
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-white/5 backdrop-blur-sm">
-                      <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                        <Camera className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
@@ -358,14 +338,14 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       onClick={() => mediaInputRef.current?.click()}
                       className="text-white text-sm outline-none focus:outline-none focus-visible:outline-none"
                     >
-                      Klicka här för att välja en bild eller video (max 60 sekunder)
+                      Välj en profilbild eller profilvideo (max 60 sekunder).
                     </button>
                   )}
 
                   {hasVideo && !uploading && (
                     <div className="flex justify-center">
                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                        Video uppladdad!
+                        Profilvideo uppladdad
                       </Badge>
                     </div>
                   )}
@@ -373,7 +353,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                   {hasImage && !uploading && (
                     <div className="flex flex-col items-center space-y-2">
                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
-                        Bild uppladdad!
+                        Profilbild uppladdad
                       </Badge>
                       <button type="button" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className={PILL}>
                         Anpassa din bild

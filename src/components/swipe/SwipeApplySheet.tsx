@@ -54,6 +54,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
     userEmail: user?.email,
     onApplied,
     selectedProfileId: selectedId,
+    questions,
   });
 
   const profileSelector = (

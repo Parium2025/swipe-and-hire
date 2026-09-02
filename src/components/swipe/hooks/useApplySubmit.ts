@@ -5,6 +5,8 @@ import { toast } from '@/hooks/use-toast';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { useApplicationQuota } from '@/hooks/useApplicationQuota';
 import { hasAllRequiredApplicationAnswers } from '@/lib/applicationAnswerValidation';
+import type { JobQuestion } from '@/types/jobWizard';
+import type { Json } from '@/integrations/supabase/types';
 
 interface UseApplySubmitOptions {
   jobId: string;
@@ -15,6 +17,7 @@ interface UseApplySubmitOptions {
   userEmail?: string | null;
   onApplied: () => void;
   selectedProfileId: string | null;
+  questions: (JobQuestion & { id: string })[];
 }
 
 /**
@@ -35,6 +38,7 @@ export function useApplySubmit({
   userEmail,
   onApplied,
   selectedProfileId,
+  questions,
 }: UseApplySubmitOptions) {
   const queryClient = useQueryClient();
   const { quota, refresh: refreshQuota } = useApplicationQuota();
@@ -64,17 +68,12 @@ export function useApplySubmit({
       // 📸 Snapshot: frys frågorna som visas för kandidaten precis nu.
       // Arbetsgivaren kommer alltid se exakt dessa frågor + svar, även om
       // frågorna senare ändras. Nya sökande får de nya frågorna.
-      const [profileRes, questionsRes] = await Promise.all([
-        supabase.rpc('get_my_profile'),
-        supabase
-          .from('job_questions')
-          .select('id, question_text, question_type, options, is_required, order_index')
-          .eq('job_id', jobId)
-          .order('order_index'),
-      ]);
+      const profileRes = await supabase.rpc('get_my_profile');
       const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
-      const questionsSnapshot = questionsRes.data ?? [];
+      // Använd exakt frågeversionen som kandidaten har sett och besvarat.
+      // En arbetsgivare kan annars hinna ändra frågorna mellan öppning och skickning.
+      const questionsSnapshot = questions;
       if (!hasAllRequiredApplicationAnswers(questionsSnapshot, answers)) {
         throw Object.assign(new Error('Besvara alla obligatoriska frågor innan du skickar ansökan.'), {
           code: '23514',
@@ -118,7 +117,7 @@ export function useApplySubmit({
         candidate_profile_label: candidateProfile?.label ?? null,
         candidate_profile_id: candidateProfile?.id ?? null,
         custom_answers: answers,
-        questions_snapshot: questionsSnapshot,
+        questions_snapshot: questionsSnapshot as unknown as Json,
         status: 'pending',
       });
 
@@ -205,6 +204,7 @@ export function useApplySubmit({
     refreshQuota,
     onApplied,
     selectedProfileId,
+    questions,
   ]);
 
   return {
