@@ -11,7 +11,13 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "load:test": "bun scripts/load-test.ts"
+    "load:test": "bun scripts/load-test.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=/nix/store/pp3i69v0m7vh8nicq8f4pbabc2awhm1g-playwright-browsers-with-overrides playwright test",
+    "test:e2e:public": "PLAYWRIGHT_BROWSERS_PATH=/nix/store/pp3i69v0m7vh8nicq8f4pbabc2awhm1g-playwright-browsers-with-overrides playwright test e2e/public-pages.spec.ts e2e/auth-guards.spec.ts e2e/landing-viewport-stability.spec.ts",
+    "typecheck": "tsgo --noEmit",
+    "verify": "tsgo --noEmit && vitest run && PLAYWRIGHT_BROWSERS_PATH=/nix/store/pp3i69v0m7vh8nicq8f4pbabc2awhm1g-playwright-browsers-with-overrides playwright test"
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "^1.2.26",
@@ -29,7 +35,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^3.9.0",
     "@lovable.dev/mcp-js": "^0.28.0",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "1.56.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
