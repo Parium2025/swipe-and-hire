@@ -975,8 +975,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 <div className="min-w-0 w-full overflow-hidden text-center flex flex-col items-center">
                   <TruncatedText
                     text={getDisplayCompanyName(job)}
-                    alwaysShowTooltip="desktop-only"
                     tooltipSide="bottom"
+
                     className="block w-full overflow-hidden text-base font-bold leading-tight text-white line-clamp-2 text-center"
                     style={{
                       color: '#FFFFFF',
