@@ -102,7 +102,7 @@ export function CandidateProfilePicker({ profiles, selectedId, onSelect, basePro
                   <ProfileAvatar imagePath={option.profile_image_url} hasVideo={!!option.video_url} size={32} />
                   <span className="min-w-0 flex-1">
                     <span className="block whitespace-normal break-words text-[14px] font-medium leading-snug">{option.label}</span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-tight opacity-80">
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-tight">
                       <span className="inline-flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{option.cv_url ? 'CV' : 'Inget CV'}</span>
                       <span className="inline-flex items-center gap-1"><Video className="h-3.5 w-3.5" />{option.video_url ? 'Video' : 'Ingen video'}</span>
                       <span className="inline-flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" />{option.profile_image_url ? 'Bild' : 'Ingen bild'}</span>
