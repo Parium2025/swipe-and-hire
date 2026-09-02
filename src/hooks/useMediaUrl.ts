@@ -8,6 +8,10 @@ const signedUrlMemoryCache = new Map<string, { url: string; expiresAt: number }>
 // Track pågående laddningar globalt för att undvika duplicerade requests
 const ongoingLoads = new Map<string, Promise<string | null>>();
 
+// Versionsräknare per cache-nyckel. När media ersätts/raderas får ett äldre
+// pågående signed-URL-anrop aldrig återfylla cachen efter invalidationen.
+const cacheGenerations = new Map<string, number>();
+
 // Bygg en kort signatur av transform-options för cache-key
 const transformSig = (t?: ImageTransformOptions) =>
   t ? `_w${t.width ?? ''}h${t.height ?? ''}q${t.quality ?? ''}r${t.resize ?? ''}` : '';
@@ -124,6 +128,7 @@ function getOrCreateSignedUrlLoad(
   priority: LoadPriority = 'high'
 ): Promise<string | null> {
   const cacheKey = getCacheKey(storagePath, mediaType, transform);
+  const loadGeneration = cacheGenerations.get(cacheKey) ?? 0;
   const existing = ongoingLoads.get(cacheKey);
   if (existing) {
     // Ett synligt kort får inte ärva ett enda best-effort-försök från en
@@ -173,6 +178,7 @@ function getOrCreateSignedUrlLoad(
           signedUrl = null;
         }
         if (signedUrl) {
+          if ((cacheGenerations.get(cacheKey) ?? 0) !== loadGeneration) return null;
           storeSignedUrlCache(cacheKey, signedUrl, expiresInSeconds, now);
           failedLoads.delete(cacheKey);
           return signedUrl;
@@ -185,7 +191,7 @@ function getOrCreateSignedUrlLoad(
     })
     .finally(() => {
       releaseSignedUrlSlot();
-      ongoingLoads.delete(cacheKey);
+      if (ongoingLoads.get(cacheKey) === promise) ongoingLoads.delete(cacheKey);
     });
 
   ongoingLoads.set(cacheKey, promise);
@@ -266,6 +272,7 @@ export function clearMediaUrlCache(
 
   for (const [key, cached] of signedUrlMemoryCache.entries()) {
     if (!matchesStoragePath(key)) continue;
+    cacheGenerations.set(key, (cacheGenerations.get(key) ?? 0) + 1);
     imageCache.evict(cached.url);
     signedUrlMemoryCache.delete(key);
   }
@@ -276,7 +283,10 @@ export function clearMediaUrlCache(
   imageCache.evictByPattern(normalizedStoragePath);
 
   for (const key of Array.from(ongoingLoads.keys())) {
-    if (matchesStoragePath(key)) ongoingLoads.delete(key);
+    if (matchesStoragePath(key)) {
+      cacheGenerations.set(key, (cacheGenerations.get(key) ?? 0) + 1);
+      ongoingLoads.delete(key);
+    }
   }
 
   // Släpp ev. "misslyckad"-markering så nästa render får försöka direkt.
@@ -326,6 +336,11 @@ export function useMediaUrl(
   
   const [url, setUrl] = useState<string | null>(cachedUrl);
 
+  const mountedRef = useRef(true);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Hooken lever kvar när man byter kandidat i en öppen dialog (komponenten
   // monteras inte om). useState-initialvärdet gäller bara första mount, så utan
   // den här synkroniseringen ritades första framen efter bytet UTAN bild — även
@@ -334,13 +349,13 @@ export function useMediaUrl(
   const mediaKey = storagePath ? `${storagePath}|${mediaType}|${transformKey}` : null;
   if (mediaKey !== mediaKeyRef.current) {
     mediaKeyRef.current = mediaKey;
+    retryCountRef.current = 0;
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
     setUrl(cachedUrl);
   }
-
-  const mountedRef = useRef(true);
-  const [retryNonce, setRetryNonce] = useState(0);
-  const retryCountRef = useRef(0);
-  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -373,7 +388,7 @@ export function useMediaUrl(
     const refreshSignedUrl = async () => {
       clearMediaUrlCache(storagePath, mediaType);
       const freshSignedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
-      if (!freshSignedUrl || !mountedRef.current) {
+      if (cancelled || !freshSignedUrl || !mountedRef.current) {
         scheduleVisibleRetry();
         return;
       }
@@ -421,7 +436,7 @@ export function useMediaUrl(
       try {
         const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform);
         
-        if (!signedUrl || !mountedRef.current) {
+        if (cancelled || !signedUrl || !mountedRef.current) {
           scheduleVisibleRetry();
           return;
         }
@@ -429,7 +444,7 @@ export function useMediaUrl(
         retryCountRef.current = 0;
 
         // Visa signed URL direkt
-        if (mountedRef.current) {
+        if (!cancelled && mountedRef.current) {
           setUrl(signedUrl);
         }
 

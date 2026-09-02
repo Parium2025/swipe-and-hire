@@ -2209,23 +2209,25 @@ const Profile = () => {
             {/* Mediakontroller */}
             {!isUploadingMedia && (
               <div className="mt-2 flex w-full flex-col items-center gap-3">
-                <div className="grid w-full max-w-sm grid-cols-2 gap-2" aria-label="Status för profilmedia">
-                  <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                    <span className="min-w-0 break-words text-left text-xs font-medium leading-tight text-white">
-                      Video {displayIsVideo ? 'uppladdad' : 'inte uppladdad'}
+                <div className={`grid w-full max-w-sm gap-2 ${displayIsVideo ? 'grid-cols-2' : 'grid-cols-1'}`} aria-label="Status för profilmedia">
+                  <div className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-2 backdrop-blur-sm">
+                    <span className="min-w-0 break-words text-center text-xs font-medium leading-tight text-white">
+                      {displayIsVideo ? 'Video uppladdad' : `Bild ${displayImagePath ? 'uppladdad' : 'inte uppladdad'}`}
                     </span>
-                    <span className={displayIsVideo ? 'text-success' : 'text-destructive'} aria-hidden="true">
-                      {displayIsVideo ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                    </span>
-                  </div>
-                  <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                    <span className="min-w-0 break-words text-left text-xs font-medium leading-tight text-white">
-                      Cover-bild {displayCoverPath ? 'uppladdad' : 'inte uppladdad'}
-                    </span>
-                    <span className={displayCoverPath ? 'text-success' : 'text-destructive'} aria-hidden="true">
-                      {displayCoverPath ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                    <span className={(displayIsVideo || !!displayImagePath) ? 'text-success' : 'text-destructive'} aria-hidden="true">
+                      {(displayIsVideo || !!displayImagePath) ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                     </span>
                   </div>
+                  {displayIsVideo && (
+                    <div className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-2 backdrop-blur-sm">
+                      <span className="min-w-0 break-words text-center text-xs font-medium leading-tight text-white">
+                        Cover-bild {displayCoverPath ? 'uppladdad' : 'inte uppladdad'}
+                      </span>
+                      <span className={displayCoverPath ? 'text-success' : 'text-destructive'} aria-hidden="true">
+                        {displayCoverPath ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col items-center gap-2 text-center">
                   {displayImagePath && (

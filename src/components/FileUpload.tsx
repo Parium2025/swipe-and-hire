@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import { openCvFile } from '@/utils/cvUtils';
 import { CvViewer } from '@/components/CvViewer';
-import { uploadMedia, getMediaUrl, deleteMedia, type MediaType } from '@/lib/mediaManager';
+import { uploadMedia, getMediaUrl, type MediaType } from '@/lib/mediaManager';
 import { useOnline } from '@/hooks/useOnlineStatus';
 
 interface FileUploadProps {
