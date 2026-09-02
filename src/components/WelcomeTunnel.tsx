@@ -22,7 +22,7 @@ import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
-import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
+import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { RequiredMark } from '@/components/wizard/RequiredMark';

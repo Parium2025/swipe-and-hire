@@ -426,38 +426,6 @@ export async function getMediaUrl(
 }
 
 /**
- * Ta bort media från storage
- */
-export async function deleteMedia(
-  storagePath: string,
-  mediaType: MediaType
-): Promise<{ success: boolean; error?: Error }> {
-  if (!storagePath) return { success: false, error: new Error('No path provided') };
-  
-  const config = MEDIA_CONFIG[mediaType];
-  
-  // Om det är en URL, extrahera path
-  let cleanPath = storagePath;
-  if (storagePath.startsWith('http')) {
-    const match = storagePath.match(/\/storage\/v1\/object\/(?:public|sign)\/[^/]+\/(.+?)(?:\?|$)/);
-    if (match) {
-      cleanPath = match[1];
-    }
-  }
-  
-  const { error } = await supabase.storage
-    .from(config.bucket)
-    .remove([cleanPath]);
-  
-  if (error) {
-    console.error(`Delete error for ${mediaType}:`, error);
-    return { success: false, error };
-  }
-  
-  return { success: true };
-}
-
-/**
  * Hjälpfunktion: Detektera mediatyp från fil eller URL
  */
 export function detectMediaType(file: File): MediaType | null {
