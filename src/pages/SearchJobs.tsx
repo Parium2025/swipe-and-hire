@@ -574,11 +574,11 @@ const SearchJobs = memo(() => {
 
   // Seed job data into React Query cache for instant JobView rendering
   useEffect(() => {
-    // Även noll och en träff måste skrivas, annars återanvänds ett äldre
-    // generiskt antal nästa gång skeletonen visas.
-    writeCachedCount(SKELETON_COUNT_KEYS.searchJobs, jobs.length);
     if (jobs.length > 0) {
       seedJobsFromSearch(jobs);
+      // Cacha senaste resultatantal så JobListSkeleton kan rendera exakt
+      // rätt antal kort vid nästa cold-load — inga fejkade 6 kort.
+      writeCachedCount(SKELETON_COUNT_KEYS.searchJobs, jobs.length);
     }
   }, [jobs, seedJobsFromSearch]);
 
