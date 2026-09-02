@@ -572,13 +572,10 @@ const SearchJobs = memo(() => {
     }
   }, [jobImageUrls, jobViewImageUrls, companyLogoUrls]);
 
-  // Seed job data into React Query cache for instant JobView rendering
+  // Seed job data into React Query cache for instant JobView rendering.
   useEffect(() => {
     if (jobs.length > 0) {
       seedJobsFromSearch(jobs);
-      // Cacha senaste resultatantal så JobListSkeleton kan rendera exakt
-      // rätt antal kort vid nästa cold-load — inga fejkade 6 kort.
-      writeCachedCount(SKELETON_COUNT_KEYS.searchJobs, jobs.length);
     }
   }, [jobs, seedJobsFromSearch]);
 
@@ -616,6 +613,15 @@ const SearchJobs = memo(() => {
 
     return result;
   }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryRange]);
+
+  // Cacha det faktiska, färdigfiltrerade resultatantalet — även 0 och 1.
+  // Skriv aldrig under laddning, eftersom `jobs` då kan vara ett tillfälligt
+  // tomt mellanläge och annars ge fel skeleton vid nästa besök.
+  useEffect(() => {
+    if (!isSearchResultsLoading) {
+      writeCachedCount(SKELETON_COUNT_KEYS.searchJobs, filteredAndSortedJobs.length);
+    }
+  }, [filteredAndSortedJobs.length, isSearchResultsLoading]);
 
   // Display jobs with lazy loading
   const displayedJobs = useMemo(() => {
