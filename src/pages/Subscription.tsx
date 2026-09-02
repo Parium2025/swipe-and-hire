@@ -295,7 +295,7 @@ const Subscription = () => {
                   Hantera betalmetod
                 </button>
               )}
-            </motion.div>
+            </div>
           );
         })}
       </div>
