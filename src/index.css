@@ -1161,7 +1161,7 @@ All colors MUST be HSL.
 
   /* Centrera ett ensamt kort på 2-kolumns-grid (sm: iPad porträtt etc.) */
   @media (min-width: 640px) and (max-width: 1023.98px) {
-    .job-card-grid-single > .job-card-mobile-shell:first-child {
+    .job-card-grid-single > :is(.job-card-mobile-shell, .job-card-grid-item):first-child {
       grid-column: 1 / -1;
       justify-self: center;
       width: 100%;
@@ -1175,7 +1175,7 @@ All colors MUST be HSL.
     }
 
     /* Employer dashboard: center 1 card on 3-col grid */
-    .job-card-grid-single > .job-card-mobile-shell:first-child {
+    .job-card-grid-single > :is(.job-card-mobile-shell, .job-card-grid-item):first-child {
       grid-column: 2;
     }
 
@@ -1183,11 +1183,11 @@ All colors MUST be HSL.
     .job-card-grid-double {
       justify-content: center;
     }
-    .job-card-grid-double > .job-card-mobile-shell:first-child {
+    .job-card-grid-double > :is(.job-card-mobile-shell, .job-card-grid-item):first-child {
       grid-column: 1 / 2;
       justify-self: end;
     }
-    .job-card-grid-double > .job-card-mobile-shell:nth-child(2) {
+    .job-card-grid-double > :is(.job-card-mobile-shell, .job-card-grid-item):nth-child(2) {
       grid-column: 2 / 3;
       justify-self: start;
     }

@@ -45,6 +45,11 @@ function VirtualJobGridImpl<T extends JobPosting>({
     <div className={className} style={{ isolation: 'isolate', position: 'relative' }}>
       {tabs.map((tab) => {
         const isVisible = tab.key === activeTab;
+        const countLayoutClass = tab.jobs.length === 1
+          ? 'job-card-grid-single'
+          : tab.jobs.length === 2
+            ? 'job-card-grid-double'
+            : '';
         if (tab.jobs.length === 0) {
           return (
             <div
@@ -67,7 +72,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             key={tab.key}
             // Identiska klasser för synlig/dold panel: inga stilskillnader som
             // tvingar Safari att rita om (transform/backdrop-filter) vid flikbyte.
-            className={`${gridClassName} job-card-grid-no-entry`}
+            className={`${gridClassName} ${countLayoutClass} job-card-grid-no-entry`}
             aria-hidden={!isVisible}
             {...(!isVisible ? { inert: '' } : {})}
             // Inaktiva paneler layoutas och rasteriseras i förväg så bilder,
@@ -86,7 +91,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             }}
           >
             {tab.jobs.map((job, idx) => (
-              <div key={job.id} style={{ contain: 'layout style paint' }}>
+              <div className="job-card-grid-item" key={job.id} style={{ contain: 'layout style paint' }}>
                 {renderCard(job, idx)}
               </div>
             ))}

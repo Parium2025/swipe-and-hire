@@ -14,3 +14,4 @@
 - [x] Eliminera blinkning vid profilbyte genom atomiskt byte och full pre-warm av bild, video, cover och status
 - [x] Stabilisera hero-telefonens storlek mot in-app-webbläsares dynamiska viewport (Snapchat)
 - [ ] Svara på genomgång av React Query-prefetch i hela appen
+- [x] Synka kortrytmen i Dashboard och Mina annonser med jobbsökarvyn
