@@ -367,7 +367,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const notificationSettingsRef = useRef<HTMLDivElement>(null);
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerAutosaveFlush } = useUnsavedChanges();
   const isDiscardingChangesRef = useRef(false);
   const didInitProfileRef = useRef(false);
   const { enqueueProfileUpdate } = useOfflineProfileQueue(user?.id);
@@ -816,21 +816,8 @@ const Profile = () => {
     }
   }, [hasValidLocation, errors.userLocation]);
 
-  // Prevent leaving page with unsaved changes (browser/tab close)
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [hasUnsavedChanges]);
+  // Profilsidan autosparar – ingen "osparade ändringar"-varning behövs här.
+  // Istället skrivs eventuell väntande ändring ned direkt när användaren lämnar.
 
   // Reset form to original values when user confirms leaving without saving on same route
   useEffect(() => {
@@ -2106,6 +2093,15 @@ const Profile = () => {
       firstName, lastName, bio, userLocation, postalCode, phone, birthDate,
       employmentStatus, workingHours, availability, companyName, orgNumber,
       profileImageUrl, videoUrl, coverImageUrl, cvUrl, isProfileVideo]);
+
+  // Lämnar användaren sidan innan debounce-fönstret gått ut skrivs ändringen
+  // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
+  const hasUnsavedRef = useRef(hasUnsavedChanges);
+  hasUnsavedRef.current = hasUnsavedChanges;
+  useEffect(() => registerAutosaveFlush(() => {
+    if (!hasUnsavedRef.current) return;
+    void submitRef.current(undefined, { silent: true });
+  }), [registerAutosaveFlush]);
 
 
 

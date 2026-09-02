@@ -150,6 +150,10 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [activeId, setActiveId] = useState<string>('base');
   // Profil som väntar på bekräftad borttagning.
   const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
+  // Ångra-fönster: profilen döljs direkt men raderas i databasen först efter
+  // några sekunder, så att "Ångra" kan avbryta utan att något gått förlorat.
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const pendingDeleteRef = React.useRef<{ id: string; timer: number } | null>(null);
   // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
@@ -186,14 +190,14 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       id: 'base', label: 'Min profil', signedImageUrl: baseImageUrl ?? baseCoverUrl ?? null,
       imagePath: null, hasVideo: !!baseHasVideo, isDefault: baseIsDefault,
     },
-    ...profiles.map((p) => ({
+    ...profiles.filter((p) => p.id !== pendingDeleteId).map((p) => ({
       id: p.id, label: p.label, signedImageUrl: null,
       // Miniatyr: profilbilden i första hand, annars cover-bilden. Aldrig videon.
       imagePath: p.profile_image_url || p.cover_image_url,
       hasVideo: !!p.video_url,
       isDefault: p.id === effectiveDefaultId,
     })),
-  ], [profiles, baseImageUrl, baseCoverUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
+  ], [profiles, pendingDeleteId, baseImageUrl, baseCoverUrl, baseHasVideo, baseIsDefault, effectiveDefaultId]);
 
   // Ordningen ligger fast (grundprofilen först, sedan skapandeordning) så att
   // stjärnan bara glider in kortet i mitten – inga kort byter plats med varandra.
@@ -287,17 +291,55 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     if (profile) setDeleteTarget(profile);
   };
 
-  const confirmDelete = async () => {
-    const target = deleteTarget;
-    if (!target) return;
-    setDeleteTarget(null);
-    if (activeId === target.id) setActiveId('base');
-    const res = await deleteProfile(target.id);
+  /** Kör den uppskjutna raderingen på riktigt (efter ångra-fönstret). */
+  const commitDelete = React.useCallback(async (id: string, label: string) => {
+    pendingDeleteRef.current = null;
+    const res = await deleteProfile(id);
+    setPendingDeleteId((cur) => (cur === id ? null : cur));
     if ('error' in res && res.error) {
       toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
       return;
     }
-    toast({ title: 'Profil borttagen', description: `${target.label} är borttagen.` });
+    toast({ id: 'profile-delete', title: 'Profil borttagen', description: `${label} är borttagen.` });
+  }, [deleteProfile, toast]);
+
+  // Lämnar användaren sidan innan ångra-fönstret löpt ut ska raderingen ändå
+  // gå igenom – annars skulle profilen "återuppstå" vid nästa besök.
+  useEffect(() => () => {
+    const pending = pendingDeleteRef.current;
+    if (pending) {
+      window.clearTimeout(pending.timer);
+      void deleteProfile(pending.id);
+    }
+  }, [deleteProfile]);
+
+  const confirmDelete = () => {
+    const target = deleteTarget;
+    if (!target) return;
+    setDeleteTarget(null);
+    if (activeId === target.id) setActiveId('base');
+    setPendingDeleteId(target.id);
+
+    const timer = window.setTimeout(() => { void commitDelete(target.id, target.label); }, 6000);
+    pendingDeleteRef.current = { id: target.id, timer };
+
+    toast({
+      id: 'profile-delete',
+      title: 'Profil borttagen',
+      description: `${target.label} är borttagen.`,
+      duration: 6000,
+      action: {
+        label: 'Ångra',
+        onClick: () => {
+          const pending = pendingDeleteRef.current;
+          if (!pending || pending.id !== target.id) return;
+          window.clearTimeout(pending.timer);
+          pendingDeleteRef.current = null;
+          setPendingDeleteId(null);
+          setActiveId(target.id);
+        },
+      } as unknown as React.ReactNode,
+    });
   };
 
   const editor = (
