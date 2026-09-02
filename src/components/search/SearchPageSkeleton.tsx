@@ -112,7 +112,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
       >
         <SkeletonChrome />
 
-        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-4">
+        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-4 responsive-container-wide w-full">
           {/* "Sök Jobb" title */}
           <div className="flex items-center justify-center">
             <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
