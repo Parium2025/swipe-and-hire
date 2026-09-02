@@ -35,6 +35,12 @@ export interface ProfileSwitcherRailHandle {
   editActiveProfile: () => void;
   /** Sparar media direkt på den valda extraprofilen (egen tunnel). */
   updateActiveProfile: (patch: Partial<CandidateProfileInput>) => Promise<void>;
+  /**
+   * Sparar media på en specifik profil. Används av långa uppladdningar så att
+   * mediat alltid hamnar på den profil som var vald när uppladdningen startade
+   * — även om användaren hinner byta profil under tiden.
+   */
+  updateProfileById: (profileId: string, patch: Partial<CandidateProfileInput>) => Promise<void>;
 }
 
 
@@ -222,6 +228,13 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     updateActiveProfile: async (patch: Partial<CandidateProfileInput>) => {
       if (!activeProfile) throw new Error('Ingen profil är vald.');
       const res = await updateProfile(activeProfile.id, patch);
+      if ('error' in res && res.error) {
+        toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
+        throw new Error(res.error);
+      }
+    },
+    updateProfileById: async (profileId: string, patch: Partial<CandidateProfileInput>) => {
+      const res = await updateProfile(profileId, patch);
       if ('error' in res && res.error) {
         toast({ title: 'Kunde inte spara', description: res.error, variant: 'destructive' });
         throw new Error(res.error);
@@ -435,7 +448,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
   // Tangentbord: piltangenter flyttar mellan korten, Home/End hoppar längst ut,
   // Enter/Blanksteg öppnar "Ny profil" och Delete tar bort vald extraprofil.
-  const runRailKey = (e: KeyboardEvent | React.KeyboardEvent<HTMLDivElement>) => {
+  const runRailKey = (e: KeyboardEvent | React.KeyboardEvent<HTMLDivElement>, focusInside = true) => {
     const move = (next: number) => {
       e.preventDefault();
       const clamped = Math.min(slots.length - 1, Math.max(0, next));
@@ -451,9 +464,13 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       case ' ':
         if (slots[activeIndex]?.isAdd) { e.preventDefault(); openNew(); }
         break;
+      // Radering kräver att fokus faktiskt ligger i karusellen — Backspace är
+      // en webbläsargenväg och får aldrig öppna en raderingsdialog av misstag.
       case 'Delete':
-      case 'Backspace':
-        if (activeId !== 'base' && !slots[activeIndex]?.isAdd) { e.preventDefault(); requestDelete(activeId); }
+        if (focusInside && activeId !== 'base' && !slots[activeIndex]?.isAdd) {
+          e.preventDefault();
+          requestDelete(activeId);
+        }
         break;
       default: break;
     }
@@ -468,7 +485,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
     const focusInside = !!railRef.current && railRef.current.contains(document.activeElement);
     if (!focusInside && !railHoverRef.current) return;
-    runRailKey(e);
+    runRailKey(e, focusInside);
   };
 
   return (
@@ -482,7 +499,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
         tabIndex={0}
         onMouseEnter={() => { railHoverRef.current = true; }}
         onMouseLeave={() => { railHoverRef.current = false; }}
-        onKeyDown={(e) => { if (e.target === e.currentTarget) runRailKey(e); }}
+        onKeyDown={(e) => { if (e.target === e.currentTarget) runRailKey(e, true); }}
       >
 
         {slots.map((slot, idx) => {
