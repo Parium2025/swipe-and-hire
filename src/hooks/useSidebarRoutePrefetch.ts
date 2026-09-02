@@ -165,6 +165,40 @@ export function useSidebarRoutePrefetch() {
         });
         break;
       }
+      case '/subscription': {
+        if (queryClient.getQueryData(['is-premium', user.id])) break;
+        queryClient.prefetchQuery({
+          queryKey: ['is-premium', user.id],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('is_premium, premium_until')
+              .eq('user_id', user.id)
+              .maybeSingle();
+            if (error || !data) return false;
+            if (data.is_premium === true) return true;
+            return !!data.premium_until && new Date(data.premium_until as string) > new Date();
+          },
+          staleTime: 60_000,
+        }).catch(() => { prefetchedRef.current.delete(key); });
+        break;
+      }
+      case '/billing': {
+        if (queryClient.getQueryData(['billing-purchases', user.id])) break;
+        queryClient.prefetchQuery({
+          queryKey: ['billing-purchases', user.id],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('one_time_purchases')
+              .select('id, price_sek, purchased_at, created_at, status, stripe_payment_intent_id')
+              .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data ?? [];
+          },
+          staleTime: 60_000,
+        }).catch(() => { prefetchedRef.current.delete(key); });
+        break;
+      }
       // /my-candidates och /messages varmhålls redan via
       // useEmployerBackgroundSync + ConversationsProvider, så ingen
       // extra hover-prefetch behövs här.
