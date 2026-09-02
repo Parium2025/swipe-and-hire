@@ -11,3 +11,4 @@
 - [ ] Åtgärda verifierade kapacitetsrisker för 250 000 användare och miljontals konton
 - [ ] Verifiera säkerhet, funktion, tester och kapacitetsantaganden efter ändringarna
 - [x] Rätta sökjobb-skeleton så antal och geometri speglar den faktiska jobblistan, även vid en annons
+- [ ] Eliminera blinkning vid profilbyte genom atomiskt byte och full pre-warm av bild, video, cover och status
