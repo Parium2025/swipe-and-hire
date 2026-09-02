@@ -1749,6 +1749,7 @@ export type Database = {
         Row: {
           application_instructions: string | null
           applications_count: number | null
+          auto_close_cursor: string | null
           auto_close_notified_at: string | null
           benefits: string[] | null
           category: string | null
@@ -1806,6 +1807,7 @@ export type Database = {
         Insert: {
           application_instructions?: string | null
           applications_count?: number | null
+          auto_close_cursor?: string | null
           auto_close_notified_at?: string | null
           benefits?: string[] | null
           category?: string | null
@@ -1863,6 +1865,7 @@ export type Database = {
         Update: {
           application_instructions?: string | null
           applications_count?: number | null
+          auto_close_cursor?: string | null
           auto_close_notified_at?: string | null
           benefits?: string[] | null
           category?: string | null
@@ -4631,6 +4634,7 @@ export type Database = {
         Returns: {
           application_instructions: string | null
           applications_count: number | null
+          auto_close_cursor: string | null
           auto_close_notified_at: string | null
           benefits: string[] | null
           category: string | null
