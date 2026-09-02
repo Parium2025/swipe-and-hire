@@ -2336,6 +2336,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'postgres_changes',
           { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${user.id}` },
           refreshEmployerStats,
+        )
+        // Kandidaträknarna ska tickas live när en kandidat sparas/tas bort.
+        // Filtrerat på recruiter_id → ingen global fanout.
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'my_candidates', filter: `recruiter_id=eq.${user.id}` },
+          scheduleJobRefresh,
         );
     }
     authChannel.subscribe((status) => handleChannelStatus('authCounts', status));

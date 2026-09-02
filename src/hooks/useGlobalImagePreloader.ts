@@ -84,11 +84,12 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: currentProfile } = await supabase
-          .from('profiles')
-          .select('profile_image_url, cover_image_url, video_url')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // Media-kolumnerna är inte läsbara direkt i `profiles` — använd den
+        // säkra RPC:n som returnerar hela den egna profilen.
+        const { data: myProfileRows } = await supabase.rpc('get_my_profile');
+        const currentProfile = (Array.isArray(myProfileRows) ? myProfileRows[0] : null) as
+          | { profile_image_url?: string | null; cover_image_url?: string | null; video_url?: string | null }
+          | null;
 
         if (currentProfile) {
           const tasks: Promise<void>[] = [];
