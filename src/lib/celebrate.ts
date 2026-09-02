@@ -1,4 +1,4 @@
-import confetti from 'canvas-confetti';
+import type confetti from 'canvas-confetti';
 
 // Identisk palett överallt (mobil + desktop): vitt + Pariums blå toner.
 const BRAND_COLORS = ['#ffffff', '#67e8f9', '#38bdf8', '#0ea5e9'];
@@ -8,6 +8,9 @@ type ConfettiFn = ReturnType<typeof confetti.create>;
 
 let canvasEl: HTMLCanvasElement | null = null;
 let cachedFire: ConfettiFn | null = null;
+let confettiModule: Promise<typeof import('canvas-confetti')> | null = null;
+
+const loadConfetti = () => confettiModule ??= import('canvas-confetti');
 
 /**
  * Egen fullskärms-canvas som ligger överst i DOM:en med maximal z-index.
@@ -46,7 +49,7 @@ function ensureCanvas(): HTMLCanvasElement | null {
   return canvasEl;
 }
 
-function getFire(): ConfettiFn | null {
+async function getFire(): Promise<ConfettiFn | null> {
   const canvas = ensureCanvas();
   if (!canvas) return null;
   if (!cachedFire) {
@@ -54,7 +57,8 @@ function getFire(): ConfettiFn | null {
     // Det gör att dashboardens omrendering och dialogstängning aldrig kan få
     // desktop-konfettin att hacka. Biblioteket faller automatiskt tillbaka på
     // vanlig canvas på äldre iOS-versioner.
-    cachedFire = confetti.create(canvas, { resize: true, useWorker: true });
+    const { default: confettiLib } = await loadConfetti();
+    cachedFire = confettiLib.create(canvas, { resize: true, useWorker: true });
   }
   return cachedFire;
 }
@@ -69,7 +73,7 @@ function getFire(): ConfettiFn | null {
  */
 let lastCelebrateAt = 0;
 
-export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
+export async function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
   if (typeof window === 'undefined') return;
 
   // Skydd mot dubbelanrop (t.ex. om två flöden triggar samma publicering) —
@@ -78,7 +82,7 @@ export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
   if (now - lastCelebrateAt < 1200) return;
   lastCelebrateAt = now;
 
-  const fire = getFire();
+  const fire = await getFire();
   if (!fire) return;
 
   const base: confetti.Options = {
@@ -127,11 +131,11 @@ export function celebrate(_options?: { intensity?: 'normal' | 'big' }) {
  */
 export function prewarmCelebration() {
   if (typeof window === 'undefined') return;
-  getFire();
+  void getFire();
 }
 
 if (typeof window !== 'undefined') {
-  const warm = () => { try { getFire(); } catch { /* noop */ } };
+  const warm = () => { void getFire().catch(() => undefined); };
   const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
   if (ric) ric(warm);
   else setTimeout(warm, 1200);

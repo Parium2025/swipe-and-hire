@@ -97,7 +97,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
       const account = payload?.account as { email?: string } | undefined;
 
       // 1) Läsbar PDF (art. 15)
-      const pdf = buildDataExportPdf(payload, account?.email);
+      const pdf = await buildDataExportPdf(payload, account?.email);
       pdf.save(`parium-mina-uppgifter-${stamp}.pdf`);
 
       // 2) Maskinläsbar JSON (art. 20)
