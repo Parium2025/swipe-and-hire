@@ -2100,10 +2100,6 @@ const Profile = () => {
             <p className="text-white text-center text-xs mt-1">
               (Du kan ha upp till tre profiler)
             </p>
-            <p className="text-white text-center text-sm mt-2">
-              Lägg till en profilbild, en profilvideo eller båda.
-            </p>
-
             {!isEmployer && (
               <ProfileSwitcherRail
                 ref={profileRailRef}
@@ -2193,7 +2189,7 @@ const Profile = () => {
                 htmlFor="profile-image"
                 className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
               >
-                Välj en profilbild eller profilvideo (max 60 sekunder).
+                Välj en profilbild, profilvideo eller båda (video max 60 sekunder).
               </Label>
 
               {isUploadingMedia && (
@@ -2209,60 +2205,47 @@ const Profile = () => {
 
             </div>
 
-            {/* Mediakontroller – allt i samma gråa panel, ingen glapp emellan. */}
+            {/* Mediakontroller – status är text, handlingar är knappar. */}
             {(displayIsVideo || !!displayImagePath) && !isUploadingMedia && (
-              <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
-                <div className="flex flex-col items-center gap-2">
-                  <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
-                    {displayIsVideo && displayImagePath
-                      ? 'Profilbild och video uppladdade'
-                      : displayIsVideo
-                        ? 'Profilvideo uppladdad'
-                        : 'Profilbild uppladdad'}
-                  </Badge>
+              <div className="mt-4 flex w-full flex-col items-center gap-3 rounded-lg bg-white/5 p-4">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  {displayIsVideo && <p className="text-sm text-white">Profilvideo uppladdad.</p>}
+                  {displayImagePath && <p className="text-sm text-white">Profilbild uppladdad.</p>}
+                  {displayIsVideo && displayCoverPath && <p className="text-sm text-white">Cover-bild uppladdad.</p>}
 
                   {displayImagePath && (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={handleEditExistingProfile}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                     >
                       Anpassa profilbild
-                    </button>
+                    </Button>
                   )}
                   {displayIsVideo && displayCoverPath && (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={handleEditExistingCover}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                     >
                       Anpassa cover-bild
-                    </button>
+                    </Button>
                   )}
 
-                  {/* Byt media: bildprofil byter bild, videoprofil byter cover-bild. */}
-                  <div className="relative flex items-center justify-center w-[180px]">
-                    <button
+                  {displayIsVideo && !displayCoverPath && (
+                  <div className="relative flex w-full max-w-xs items-center justify-center">
+                    <Button
                       type="button"
-                      onClick={() => document.getElementById(displayIsVideo ? 'cover-image' : 'profile-image-only')?.click()}
+                      variant="outline"
+                      onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover || isUploadingMedia}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full"
+                      className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm"
                     >
-                      {displayIsVideo
-                        ? (displayCoverPath ? 'Ändra cover-bild' : 'Lägg till cover-bild')
-                        : 'Ändra bild'}
-                    </button>
-                    {displayIsVideo && displayCoverPath && (
-                      <button
-                        onClick={deleteCoverImage}
-                        disabled={isUploadingCover}
-                        className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 disabled:opacity-50 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
-                        aria-label="Ta bort cover-bild"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                    {displayIsVideo && ((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') || (!activeCandidateProfile && !coverImageUrl && deletedCoverImage)) && (
+                      Lägg till cover-bild
+                    </Button>
+                    {((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') || (!activeCandidateProfile && !coverImageUrl && deletedCoverImage)) && (
                       <button
                         onClick={() => void restoreCoverImage()}
                         disabled={isUploadingCover}
@@ -2273,27 +2256,30 @@ const Profile = () => {
                       </button>
                     )}
                   </div>
+                  )}
 
                   {/* Lägg till den mediatyp som saknas; bild och video kan samexistera. */}
                   {!displayIsVideo && (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={() => document.getElementById('profile-video-only')?.click()}
                       disabled={isUploadingMedia}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                     >
-                      Lägg till video
-                    </button>
+                      Lägg till profilvideo
+                    </Button>
                   )}
                   {displayIsVideo && !displayImagePath && (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={() => document.getElementById('profile-image-only')?.click()}
                       disabled={isUploadingMedia}
-                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px]"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                     >
                       Lägg till profilbild
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -2329,13 +2315,6 @@ const Profile = () => {
                   />
                 )}
 
-                {displayIsVideo && displayCoverPath && !isUploadingCover && (
-                  <div className="flex items-center justify-center">
-                    <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
-                      Cover-bild uppladdad
-                    </Badge>
-                  </div>
-                )}
               </div>
             )}
 
