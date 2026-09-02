@@ -63,22 +63,29 @@ const generateSitemap = (jobs: JobRow[]) => {
 async function main() {
   const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL");
   const anonKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || getEnv("VITE_SUPABASE_ANON_KEY") || getEnv("SUPABASE_ANON_KEY");
+  const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
 
-  if (!supabaseUrl || !anonKey) {
-    console.warn("Skipping job sitemap generation: public backend env vars are unavailable.");
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+    console.warn("Skipping job sitemap generation: secure backend build env vars are unavailable.");
     return;
   }
 
-  // Anonym direktläsning av job_postings är avsiktligt stängd. Sitemap använder
-  // en separat RPC som endast lämnar ut URL-metadata för aktiva annonser.
-  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_public_sitemap_jobs`, {
-    method: "POST",
+  // Anonym direktläsning av job_postings är avsiktligt stängd. Sitemap skapas
+  // endast i betrodd CI/buildmiljö med service_role och publicerar en statisk XML.
+  const now = new Date().toISOString();
+  const params = new URLSearchParams({
+    select: "id,updated_at,created_at,expires_at",
+    is_active: "eq.true",
+    deleted_at: "is.null",
+    or: `(expires_at.is.null,expires_at.gt.${now})`,
+    order: "created_at.desc",
+    limit: "45000",
+  });
+  const response = await fetch(`${supabaseUrl}/rest/v1/job_postings?${params}`, {
     headers: {
       apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`,
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${serviceRoleKey}`,
     },
-    body: JSON.stringify({ p_limit: 45000 }),
   });
 
   if (!response.ok) {
@@ -87,8 +94,7 @@ async function main() {
     return;
   }
 
-  const payload = (await response.json()) as JobRow[] | PublicJobFacetsResponse;
-  const jobs = Array.isArray(payload) ? payload : payload.jobs ?? [];
+  const jobs = (await response.json()) as JobRow[];
   writeFileSync(OUTPUT_PATH, generateSitemap(jobs));
   console.log(`sitemap-jobs.xml written (${jobs.length} active jobs)`);
 }
