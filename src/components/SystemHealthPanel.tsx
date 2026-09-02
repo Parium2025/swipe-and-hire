@@ -298,15 +298,15 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       if (funcError || !storageData) {
         console.error('Edge function error:', funcError);
         // Fallback to estimates
-        const [profilesWithVideoRes, profilesWithCvRes, profilesWithImageRes] = await Promise.all([
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('video_url', 'is', null),
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('cv_url', 'is', null),
-          supabase.from('profiles').select('id', { count: 'exact', head: true }).not('profile_image_url', 'is', null),
-        ]);
+        // Media-kolumnerna är inte läsbara direkt i `profiles` — använd admin-RPC:n.
+        const { data: mediaCountsRows } = await supabase.rpc('get_admin_profile_media_counts');
+        const mediaCounts = (Array.isArray(mediaCountsRows) ? mediaCountsRows[0] : null) as
+          | { video_count?: number; cv_count?: number; image_count?: number }
+          | null;
 
-        const videoCount = profilesWithVideoRes.count || 0;
-        const cvCount = profilesWithCvRes.count || 0;
-        const imageCount = profilesWithImageRes.count || 0;
+        const videoCount = Number(mediaCounts?.video_count ?? 0);
+        const cvCount = Number(mediaCounts?.cv_count ?? 0);
+        const imageCount = Number(mediaCounts?.image_count ?? 0);
 
         // Estimate bandwidth: videos are the killer
         // Each video view = ~15MB, CV download = ~0.5MB, image load = ~0.3MB
