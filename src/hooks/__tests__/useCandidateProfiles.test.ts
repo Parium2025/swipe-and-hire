@@ -109,6 +109,8 @@ describe('useCandidateProfiles', () => {
     const second = renderHook(() => useCandidateProfiles('u1'));
     expect(second.result.current.profiles[0]?.id).toBe('cached');
     expect(second.result.current.profiles[0]?.profile_image_url).toBe('u1/profile.jpg');
+    // Låt stale-while-revalidate-förfrågan avslutas inom testets act-livscykel.
+    await waitFor(() => expect(second.result.current.loading).toBe(false));
   });
 
   it('nekar en ny profil när maxgränsen är nådd', async () => {

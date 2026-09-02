@@ -1,8 +1,9 @@
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { prefetchMediaUrl, useMediaUrl } from '@/hooks/useMediaUrl';
+import { getVideoPosterPath } from '@/lib/mediaManager';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -148,7 +149,10 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateProfile | null>(null);
   const [saving, setSaving] = useState(false);
-  const [activeId, setActiveId] = useState<string>(() => profiles.find((profile) => profile.is_default)?.id ?? 'base');
+  // null betyder att användaren ännu inte gjort ett eget val. Då härleds den
+  // aktiva profilen direkt från den senaste cache-/databasversionen av default,
+  // i stället för att hinna måla grundprofilen under en mellanrender.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   // Profil som väntar på bekräftad borttagning.
   const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
   // Ångra-fönster: profilen döljs direkt men raderas i databasen först efter
@@ -186,6 +190,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   );
   const effectiveDefaultId = pendingDefaultId ?? dbDefaultId;
   const baseIsDefault = effectiveDefaultId === 'base';
+  const activeId = selectedId ?? effectiveDefaultId;
   const activeProfile = profiles.find((p) => p.id === activeId) ?? null;
 
   // Släpp den optimistiska markeringen när databasen hunnit ikapp.
@@ -220,25 +225,17 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     profiles.forEach((profile) => {
       if (profile.profile_image_url) void prefetchMediaUrl(profile.profile_image_url, 'profile-image');
       if (profile.cover_image_url) void prefetchMediaUrl(profile.cover_image_url, 'cover-image');
-      if (profile.video_url) void prefetchMediaUrl(profile.video_url, 'profile-video');
+      if (profile.video_url) {
+        void prefetchMediaUrl(profile.video_url, 'profile-video');
+        void prefetchMediaUrl(getVideoPosterPath(profile.video_url), 'profile-image');
+      }
     });
   }, [profiles]);
 
-  // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
-  // och därmed glida in i mitten av karusellen.
-  const defaultChipId = effectiveDefaultId;
-  const prevDefaultRef = React.useRef<string | null>(null);
-  useEffect(() => {
-    if (prevDefaultRef.current === null) { prevDefaultRef.current = defaultChipId; return; }
-    if (prevDefaultRef.current !== defaultChipId) {
-      prevDefaultRef.current = defaultChipId;
-      setActiveId(defaultChipId);
-    }
-  }, [defaultChipId]);
-
   // Meddela föräldern (Profile.tsx) vilken profil som är vald så att
-  // huvudytan kan visa just den profilens bild/video.
-  useEffect(() => {
+  // huvudytan kan visa just den profilens bild/video. Layout-effekten körs
+  // före paint när SWR-cachen hydreras, så fel profil hinner aldrig blixtra.
+  useLayoutEffect(() => {
     onActiveProfileChange?.(activeProfile);
   }, [activeProfile, onActiveProfileChange]);
 
@@ -275,13 +272,20 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     },
   }), [activeProfile, updateProfile, toast]);
 
-  const selectChip = (id: string) => setActiveId(id);
+  const selectChip = (id: string) => {
+    const nextProfile = profiles.find((profile) => profile.id === id) ?? null;
+    // Uppdatera rail och huvudmedia i samma React-event. Den tidigare effekten
+    // meddelade föräldern först efter paint och skapade en synlig mellanframe
+    // där valet hade bytts men bild, status och knappar fortfarande var gamla.
+    setSelectedId(id);
+    onActiveProfileChange?.(nextProfile);
+  };
 
   const makeDefault = async (id: string) => {
     if (id === effectiveDefaultId) return;
     // Direkt visuell respons: stjärnan poppar och kortet glider till mitten.
     setPendingDefaultId(id);
-    setActiveId(id);
+    selectChip(id);
     setStarBurstId(id);
     window.setTimeout(() => setStarBurstId((cur) => (cur === id ? null : cur)), 600);
 
@@ -306,7 +310,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     }
     if (!editing && 'data' in res) {
       const created = (res as { data?: CandidateProfile }).data;
-      if (created) setActiveId(created.id);
+      if (created) selectChip(created.id);
     }
     setEditorOpen(false);
     toast({ title: editing ? 'Profil uppdaterad' : 'Profil skapad', description: input.label });
@@ -352,7 +356,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     const target = deleteTarget;
     if (!target) return;
     setDeleteTarget(null);
-    if (activeId === target.id) setActiveId('base');
+    if (activeId === target.id) selectChip('base');
     setPendingDeleteIds((cur) => (cur.includes(target.id) ? cur : [...cur, target.id]));
 
     const timer = window.setTimeout(() => { void commitDelete(target.id); }, 6000);
@@ -371,7 +375,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
           window.clearTimeout(pendingTimer);
           pendingDeletesRef.current.delete(target.id);
           setPendingDeleteIds((cur) => cur.filter((x) => x !== target.id));
-          setActiveId(target.id);
+          selectChip(target.id);
         },
       } as unknown as React.ReactNode,
     });
@@ -544,7 +548,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       e.preventDefault();
       const clamped = Math.min(slots.length - 1, Math.max(0, next));
       const slot = slots[clamped];
-      if (slot) setActiveId(slot.key);
+      if (slot) selectChip(slot.key);
     };
     switch (e.key) {
       case 'ArrowLeft': move(activeIndex - 1); break;

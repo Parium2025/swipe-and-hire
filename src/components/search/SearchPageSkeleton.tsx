@@ -112,7 +112,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
       >
         <SkeletonChrome />
 
-        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-4">
+        <div className="flex-1 min-h-0 overflow-hidden p-3 space-y-4 responsive-container-wide w-full">
           {/* "Sök Jobb" title */}
           <div className="flex items-center justify-center">
             <div className={`h-6 w-24 rounded ${SKELETON_SHAPE}`} />
@@ -167,12 +167,12 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
               {Array.from({ length: cardCount }).map((_, i) => (
 
-                <div key={i} className="rounded-2xl overflow-hidden bg-white/[0.04]">
+                <div key={i} className="job-card-mobile-shell rounded-2xl overflow-hidden bg-white/[0.04]">
                   {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
                   <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
                   {/* Kortkropp — matchar ReadOnlyMobileJobCard exakt:
                       logo UNDER bilden (pt-1), aldrig -mt-8/överhäng. */}
-                  <div className="p-4 space-y-2.5">
+                  <div className="job-card-mobile-body p-4 space-y-2.5">
                     {/* Logo (w-14 h-14 som riktiga kortet) */}
                     <div className="flex justify-center pt-1">
                       <div className={`h-14 w-14 rounded-full ${SKELETON_SHAPE}`} />
