@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-
 /** Läsbara etiketter för sektioner i dataexporten. */
 const SECTION_LABELS: Record<string, string> = {
   account: 'Konto',
@@ -116,7 +114,8 @@ function formatValue(value: unknown): string | null {
  * Bygger en läsbar PDF av dataexporten (GDPR art. 15).
  * JSON-filen finns kvar separat för dataportabilitet (art. 20).
  */
-export function buildDataExportPdf(payload: Record<string, unknown>, accountEmail?: string) {
+export async function buildDataExportPdf(payload: Record<string, unknown>, accountEmail?: string) {
+  const { default: jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();

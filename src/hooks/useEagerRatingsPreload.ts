@@ -167,7 +167,7 @@ const isWeatherCacheValid = (): boolean => {
   }
 };
 
-export const useEagerRatingsPreload = () => {
+export const useEagerRatingsPreload = (enabled = true) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
@@ -668,7 +668,7 @@ export const useEagerRatingsPreload = () => {
   // 🚀 HUVUDFUNKTION: Förladda ALL data
   // KRITISKT: Ratings MÅSTE laddas FÖRE snapshot så att betyg är tillgängliga för merge
   const preloadAllData = useCallback(async (force = false) => {
-    if (!user) return;
+    if (!enabled || !user) return;
     
     // Undvik dubbla preloads (inom 2 sekunder)
     const now = Date.now();
@@ -705,11 +705,11 @@ export const useEagerRatingsPreload = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, profile, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot, preloadJobPostings, preloadConversations, preloadInterviews, preloadJobTemplates]);
+  }, [enabled, user, profile, preloadRatingsAndStages, preloadWeatherIfStale, preloadCandidateSnapshot, preloadJobPostings, preloadConversations, preloadInterviews, preloadJobTemplates]);
 
   // Exponera preload-funktionen globalt så useAuth kan trigga den vid login
   useEffect(() => {
-    if (user) {
+    if (enabled && user) {
       globalPreloadFunction = () => preloadAllData(true);
     } else {
       globalPreloadFunction = null;
@@ -718,11 +718,11 @@ export const useEagerRatingsPreload = () => {
     return () => {
       globalPreloadFunction = null;
     };
-  }, [user, preloadAllData]);
+  }, [enabled, user, preloadAllData]);
 
   // 🔄 PERIODISK REFRESH: Håll all data färsk var 5:e minut
   useEffect(() => {
-    if (!user) {
+    if (!enabled || !user) {
       if (periodicRefreshRef.current) {
         clearInterval(periodicRefreshRef.current);
         periodicRefreshRef.current = null;
@@ -741,10 +741,10 @@ export const useEagerRatingsPreload = () => {
         periodicRefreshRef.current = null;
       }
     };
-  }, [user, preloadAllData]);
+  }, [enabled, user, preloadAllData]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!enabled || !user) return;
 
     // 🚀 PERFORMANCE: Defer initial preload to after first paint
     // This prevents main-thread blocking on touch devices during mount
@@ -793,11 +793,11 @@ export const useEagerRatingsPreload = () => {
       document.removeEventListener('keydown', handleFirstInteraction);
       document.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [user, preloadAllData]);
+  }, [enabled, user, preloadAllData]);
 
   // 📡 REALTIME SUBSCRIPTIONS för employer
   useEffect(() => {
-    if (!user) return;
+    if (!enabled || !user) return;
 
     const instanceId = crypto.randomUUID();
 
@@ -854,7 +854,7 @@ export const useEagerRatingsPreload = () => {
       supabase.removeChannel(templatesChannel);
       supabase.removeChannel(stageSettingsChannel);
     };
-  }, [user, preloadInterviews, preloadJobTemplates, preloadRatingsAndStages]);
+  }, [enabled, user, preloadInterviews, preloadJobTemplates, preloadRatingsAndStages]);
 };
 
 export default useEagerRatingsPreload;

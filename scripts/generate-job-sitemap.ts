@@ -59,12 +59,15 @@ const generateSitemap = (jobs: JobRow[]) => {
 async function main() {
   const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL");
   const anonKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || getEnv("VITE_SUPABASE_ANON_KEY") || getEnv("SUPABASE_ANON_KEY");
+  const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
 
-  if (!supabaseUrl || !anonKey) {
-    console.warn("Skipping job sitemap generation: public backend env vars are unavailable.");
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+    console.warn("Skipping job sitemap generation: secure backend build env vars are unavailable.");
     return;
   }
 
+  // Anonym direktläsning av job_postings är avsiktligt stängd. Sitemap skapas
+  // endast i betrodd CI/buildmiljö med service_role och publicerar en statisk XML.
   const now = new Date().toISOString();
   const params = new URLSearchParams({
     select: "id,updated_at,created_at,expires_at",
@@ -74,11 +77,10 @@ async function main() {
     order: "created_at.desc",
     limit: "45000",
   });
-
   const response = await fetch(`${supabaseUrl}/rest/v1/job_postings?${params}`, {
     headers: {
       apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`,
+      Authorization: `Bearer ${serviceRoleKey}`,
     },
   });
 

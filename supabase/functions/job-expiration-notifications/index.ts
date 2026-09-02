@@ -10,6 +10,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const AUTO_CLOSE_BATCH_SIZE = 100;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -123,6 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
         id,
         title,
         employer_id,
+        auto_close_cursor,
         profiles!job_postings_employer_id_fkey (
           company_name
         )
@@ -145,22 +147,25 @@ const handler = async (req: Request): Promise<Response> => {
           .from("job_applications")
           .select("id, applicant_id")
           .eq("job_id", job.id)
-          .not("status", "in", '("hired","rejected")');
+          .not("status", "in", '("hired","rejected")')
+          .gt("id", job.auto_close_cursor ?? "00000000-0000-0000-0000-000000000000")
+          .order("id", { ascending: true })
+          .limit(AUTO_CLOSE_BATCH_SIZE);
 
         if (appError) {
           console.error(`Error fetching applicants for job ${job.id}:`, appError);
           continue;
         }
 
-        const uniqueApplicants = Array.from(
-          new Map((applicants || []).map((app) => [app.applicant_id, app])).values()
-        );
+        // En kandidat kan bara ha en ansökan per jobb (unik DB-constraint), så
+        // behåll databasens id-ordning intakt för den resumérbara keyset-markören.
+        const uniqueApplicants = applicants || [];
 
         if (uniqueApplicants.length === 0) {
           // No candidates to notify, mark as done
           await supabase
             .from("job_postings")
-            .update({ auto_close_notified_at: now.toISOString() })
+            .update({ auto_close_notified_at: now.toISOString(), auto_close_cursor: null })
             .eq("id", job.id);
           continue;
         }
@@ -332,14 +337,19 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
 
-        // Markera jobbet som notifierat ENDAST om alla kandidater fick sin återkoppling.
-        // Annars lämnas det öppet så nästa körning gör ett nytt försök.
+        // Markera jobbet som klart först när sista, korta sidan har behandlats.
+        // Fulla sidor sparar en keyset-markör och fortsätter nästa cron-körning,
+        // så populära annonser aldrig behöver tusentals nätverksanrop i samma körning.
         if (failedForJob === 0) {
+          const isFinalBatch = uniqueApplicants.length < AUTO_CLOSE_BATCH_SIZE;
+          const lastApplicationId = uniqueApplicants[uniqueApplicants.length - 1]?.id ?? null;
           await supabase
             .from("job_postings")
-            .update({ auto_close_notified_at: now.toISOString() })
+            .update(isFinalBatch
+              ? { auto_close_notified_at: now.toISOString(), auto_close_cursor: null }
+              : { auto_close_cursor: lastApplicationId })
             .eq("id", job.id);
-          console.log(`Auto-close messages sent for "${job.title}" to ${uniqueApplicants.length} candidates`);
+          console.log(`Auto-close batch sent for "${job.title}" to ${uniqueApplicants.length} candidates (${isFinalBatch ? "done" : "continues"})`);
         } else {
           console.warn(`Auto-close incomplete for "${job.title}": ${failedForJob}/${uniqueApplicants.length} failed — will retry next run`);
         }

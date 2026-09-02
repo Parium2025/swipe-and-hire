@@ -391,8 +391,10 @@ export const useJobSeekerBackgroundSync = () => {
   useEffect(() => {
     if (!user || !isJobSeeker) return;
 
-    // Realtime för sparade jobb
-    const savedJobsChannel = createRealtimeChannel(`job-seeker-saved-jobs-${user.id}`)
+    // En filtrerad kanal per jobbsökarsession i stället för sex separata
+    // WebSocket-kanaler. Nya jobb hämtas vid fokus/aktivitet, inte genom en
+    // global fan-out till varje ansluten jobbsökare.
+    const channel = createRealtimeChannel(`job-seeker-sync-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -405,10 +407,6 @@ export const useJobSeekerBackgroundSync = () => {
           preloadSavedJobs(user.id);
         }
       )
-      .subscribe();
-
-    // Realtime för ansökningar
-    const applicationsChannel = createRealtimeChannel(`job-seeker-applications-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -421,99 +419,6 @@ export const useJobSeekerBackgroundSync = () => {
           preloadMyApplications(user.id);
         }
       )
-      .subscribe();
-
-    // Realtime för meddelanden
-    const messagesChannel = createRealtimeChannel(`job-seeker-messages-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_messages',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
-        }
-      )
-      .subscribe();
-
-    // Realtime för jobb - 🔥 SCALED: Lyssnar BARA på INSERT (nya jobb).
-    // Tidigare lyssnade vi på * (alla events) globalt, vilket gjorde att VARJE
-    // jobbsökare fick events när VARJE jobb i hela databasen ändrades — och triggade
-    // 6+ cache-invalidations + 2 preloads per event. Vid 500 sökare online och 50
-    // jobb-uppdateringar/h = ~150 000 onödiga refetches/dag.
-    //
-    // UPDATE/DELETE (t.ex. company_logo ändras via DB-trigger) propageras nu via:
-    //  1. employerProfilesChannel nedan (lyssnar på profiles UPDATE → branding)
-    //  2. naturlig refetch via React Query staleTime
-    //
-    // Debounce: max 1 invalidation per 5s vid burst (när många nya jobb postas samtidigt).
-    let newJobsTimer: ReturnType<typeof setTimeout> | null = null;
-    const scheduleNewJobsRefresh = () => {
-      if (newJobsTimer) return;
-      newJobsTimer = setTimeout(() => {
-        newJobsTimer = null;
-        localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
-        preloadAvailableJobs();
-        preloadMyApplications(user.id);
-        queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
-        queryClient.invalidateQueries({ queryKey: ['jobs'] });
-        queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-        queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
-        queryClient.invalidateQueries({ queryKey: ['job-details'] });
-      }, 5000);
-    };
-
-    const newJobsChannel = createRealtimeChannel('job-seeker-new-jobs')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'job_postings',
-        },
-        () => {
-          scheduleNewJobsRefresh();
-        }
-      )
-      .subscribe();
-
-    // Realtime för profiles - om arbetsgivaren ändrar namn/logo i sin profil
-    // triggas DB-funktionen sync_company_name_to_jobs som uppdaterar job_postings,
-    // men vi lyssnar även här direkt för att vara dubbelt säkra.
-    const employerProfilesChannel = createRealtimeChannel('job-seeker-employer-profiles')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-        },
-        (payload: any) => {
-          const newRow = payload?.new ?? {};
-          const oldRow = payload?.old ?? {};
-          const brandingChanged =
-            newRow.company_name !== oldRow.company_name ||
-            newRow.company_logo_url !== oldRow.company_logo_url;
-          if (!brandingChanged) return;
-
-          localStorage.removeItem(AVAILABLE_JOBS_CACHE_KEY);
-          preloadAvailableJobs();
-          preloadMyApplications(user.id);
-          queryClient.invalidateQueries({ queryKey: ['available-jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['jobs'] });
-          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-          queryClient.invalidateQueries({ queryKey: ['job-prefetch'] });
-          queryClient.invalidateQueries({ queryKey: ['job-details'] });
-        }
-      )
-      .subscribe();
-
-    // Realtime för intervjuer (bokade intervjuer för kandidaten)
-    const interviewsChannel = createRealtimeChannel(`job-seeker-interviews-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -529,13 +434,7 @@ export const useJobSeekerBackgroundSync = () => {
       .subscribe();
 
     return () => {
-      if (newJobsTimer) clearTimeout(newJobsTimer);
-      supabase.removeChannel(savedJobsChannel);
-      supabase.removeChannel(applicationsChannel);
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(newJobsChannel);
-      supabase.removeChannel(employerProfilesChannel);
-      supabase.removeChannel(interviewsChannel);
+      supabase.removeChannel(channel);
     };
   }, [user, isJobSeeker, preloadSavedJobs, preloadMyApplications, preloadAvailableJobs, preloadCandidateInterviews, queryClient]);
 };

@@ -67,13 +67,12 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
   // Update browser tab title with unread message count
   useEmployerDocumentTitle();
   
-  // EAGER: Förladda ratings vid FÖRSTA aktivitet (tab-focus, musrörelse)
-  // Detta körs INNAN useCandidateBackgroundSync så ratings är redo direkt
-  useEagerRatingsPreload();
-  
-  // Kontinuerlig bakgrundssynk av kandidatdata (30s intervall)
-  // Gör att /candidates och /my-candidates alltid har färsk data utan laddningstid
-  useCandidateBackgroundSync();
+  const isCandidateRoute = location.pathname === '/candidates' || location.pathname === '/my-candidates';
+
+  // Kandidatpreload och dess realtime-kanal behövs endast i kandidatverktygen.
+  // Hookarna är alltid anropade men gör inget på övriga arbetsgivarsidor.
+  useEagerRatingsPreload(isCandidateRoute);
+  useCandidateBackgroundSync(isCandidateRoute);
 
   // Keyboard shortcut: Cmd+N / Ctrl+N to open "Create New Job" dialog
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
