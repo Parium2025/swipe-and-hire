@@ -1,5 +1,8 @@
 import { test, expect } from "../playwright-fixture";
 
+// Dev-servern kompilerar rutter lat, så guard-testerna får extra tid.
+test.describe.configure({ timeout: 90_000 });
+
 /**
  * Skyddade vyer får aldrig visa data för utloggade besökare. Testet är
  * medvetet tolerant kring exakt destination (inloggningsvy eller landning)
@@ -41,7 +44,7 @@ for (const route of PROTECTED_ROUTES) {
           return text.length > 0;
         },
         route,
-        { timeout: 20_000 },
+        { timeout: 45_000 },
       )
       .then(() => true)
       .catch(() => false);
