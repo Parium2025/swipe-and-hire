@@ -2178,7 +2178,7 @@ const Profile = () => {
                     <Video className="h-5 w-5 text-white" />
                   </div>
                 </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
                   <Play className="h-2 w-2 text-primary animate-pulse" />
                 </div>
               </div>
@@ -2195,7 +2195,7 @@ const Profile = () => {
                     <Camera className="h-5 w-5 text-white" />
                   </div>
                 </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
                   <Camera className="h-2 w-2 text-primary" />
                 </div>
               </div>
@@ -2246,7 +2246,7 @@ const Profile = () => {
                     e.stopPropagation();
                     void restoreProfileMedia();
                   }}
-                  className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  className="absolute -top-3 -right-3 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 hover:bg-white/30"
                   aria-label="Återställ media"
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -2257,7 +2257,8 @@ const Profile = () => {
                     e.stopPropagation();
                     deleteProfileMedia();
                   }}
-                  className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                  className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                  aria-label="Ta bort profilmedia"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

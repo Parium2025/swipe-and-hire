@@ -1538,7 +1538,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <Video className="h-5 w-5 text-white" />
                       </div>
                     </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
                       <Play className="h-2 w-2 text-primary animate-pulse" />
                     </div>
                   </div>
@@ -1555,7 +1555,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <Camera className="h-5 w-5 text-white" />
                       </div>
                     </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
                       <Camera className="h-2 w-2 text-primary" />
                     </div>
                   </div>
@@ -1603,7 +1603,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         deleteProfileMedia();
                       }}
-                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                      aria-label="Ta bort profilmedia"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
