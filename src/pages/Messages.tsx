@@ -84,10 +84,10 @@ export default function Messages() {
     enabled: blockedIds.length > 0,
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<Record<string, string>> => {
+      // Visningsnamn hämtas via låst databasfunktion – råa profilrader är inte
+      // längre läsbara för andra användare (känsliga fält får aldrig läcka).
       const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, company_name, role')
-        .in('user_id', blockedIds);
+        .rpc('get_chat_member_profiles', { _user_ids: blockedIds });
       if (error) throw error;
       const map: Record<string, string> = {};
       (data || []).forEach((p) => {
