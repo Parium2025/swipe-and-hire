@@ -110,7 +110,7 @@ export function useCandidateProfiles(userId?: string) {
 
   const updateProfile = useCallback(async (id: string, patch: Partial<CandidateProfileInput>) => {
     if (patch.is_default) await clearDefaults(id);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('candidate_profiles')
       .update({
         ...patch,
