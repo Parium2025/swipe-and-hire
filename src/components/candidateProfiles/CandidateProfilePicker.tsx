@@ -43,7 +43,7 @@ export function CandidateProfilePicker({ profiles, selectedId, onSelect, basePro
   const current = options.find((option) => option.id === selectedId) ?? base;
 
   const MediaStatus = ({ option }: { option: PickerOption }) => (
-    <span className={`mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-tight ${dark ? 'text-white/90' : 'text-muted-foreground'}`}>
+    <span className={`mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-tight ${dark ? 'text-white' : 'text-muted-foreground'}`}>
       <span className="inline-flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{option.cv_url ? 'CV' : 'Inget CV'}</span>
       <span className="inline-flex items-center gap-1"><Video className="h-3.5 w-3.5" />{option.video_url ? 'Video' : 'Ingen video'}</span>
       <span className="inline-flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" />{option.profile_image_url ? 'Bild' : 'Ingen bild'}</span>
@@ -56,7 +56,7 @@ export function CandidateProfilePicker({ profiles, selectedId, onSelect, basePro
 
   const summary = (option: PickerOption) => (
     <span className="min-w-0 flex-1 text-left">
-      <span className={`block text-[11px] font-medium uppercase tracking-wide ${dark ? 'text-white/70' : 'text-muted-foreground'}`}>
+      <span className={`block text-[11px] font-medium uppercase tracking-wide ${dark ? 'text-white' : 'text-muted-foreground'}`}>
         Du söker med
       </span>
       <span className="block truncate text-[15px] font-semibold leading-tight">{option.label}</span>
