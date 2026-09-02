@@ -475,6 +475,19 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const isJobExpired = job ? getTimeRemaining(job.created_at, job.expires_at).isExpired : false;
   const { isOnline, showOfflineToast } = useOnline();
 
+  // Visas i granskningssteget så kandidaten alltid ser vilken profil ansökan skickas med.
+  const applicationProfileSelector = (
+    <CandidateProfilePicker
+      profiles={candidateProfiles}
+      baseProfile={applicationBaseProfile}
+      selectedId={selectedProfileId}
+      onSelect={selectProfile}
+      dark
+      selectionReset={profileSelectionReset}
+    />
+  );
+
+
   const handleOpenCompanyProfile = async () => {
     await hapticLight();
     setShowCompanyProfile(true);
