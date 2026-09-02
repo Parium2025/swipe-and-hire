@@ -2122,7 +2122,7 @@ const Profile = () => {
                   posterUrl={displayVideoPoster}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
-                  className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
+                  className="w-32 h-32 ring-4 ring-inset ring-white/10 rounded-full overflow-hidden"
                   countdownVariant="circle"
                 />
               ) : (
@@ -2130,7 +2130,7 @@ const Profile = () => {
                   className="cursor-pointer"
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/10">
+                  <Avatar className="h-32 w-32 ring-4 ring-inset ring-white/10">
                     {displayImageUrl ? (
                       <AvatarImage
                         src={displayImageUrl || undefined}
@@ -2143,7 +2143,7 @@ const Profile = () => {
                       />
                     ) : null}
                     {!displayImageUrl && (
-                      <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white">
+                      <AvatarFallback className="absolute inset-0 text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
                     )}

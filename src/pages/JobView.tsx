@@ -19,6 +19,8 @@ import { hapticLight } from '@/lib/haptics';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
+import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
+import { useApplicationProfileSelection } from '@/hooks/useApplicationProfileSelection';
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
 import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
@@ -148,6 +150,14 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const isEmployerRole = (role?: string | null) => role === 'employer' || role === 'company_admin' || role === 'recruiter';
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || isEmployerRole(userRole?.role));
   const { getPrefetchedJob } = useJobPrefetchCache();
+  // Profilval för ansökan — samma källa och regler som swipe-flödet.
+  const {
+    profiles: candidateProfiles,
+    baseProfile: applicationBaseProfile,
+    selectedId: selectedProfileId,
+    selectProfile,
+    selectionReset: profileSelectionReset,
+  } = useApplicationProfileSelection(user?.id);
   const navigationImageState = (location.state ?? {}) as {
     initialHeroImageUrl?: string;
     initialCompanyLogoUrl?: string;
@@ -545,7 +555,29 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       const { data: profileRows } = await supabase.rpc('get_my_profile');
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
 
-      
+      // 📸 Ögonblicksbild av vald kandidatprofil — exakt samma regler som swipe-flödet.
+      // Är en extraprofil vald gäller EXAKT den; tomt är tomt (inget fallback till kontot).
+      let candidateProfile: {
+        id: string;
+        label: string | null;
+        cv_url: string | null;
+        video_url: string | null;
+        profile_image_url: string | null;
+        cover_image_url: string | null;
+      } | null = null;
+      if (selectedProfileId && user?.id) {
+        const { data: selectedRow, error: selectedError } = await supabase
+          .from('candidate_profiles')
+          .select('id, label, cv_url, video_url, profile_image_url, cover_image_url')
+          .eq('id', selectedProfileId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (selectedError) throw selectedError;
+        if (!selectedRow) throw new Error('Den valda profilen finns inte längre. Välj profil igen.');
+        candidateProfile = selectedRow;
+      }
+      const snapshotCvUrl = candidateProfile ? candidateProfile.cv_url ?? null : profile?.cv_url || null;
+
       let age = null;
       if (profile?.birth_date) {
         const birthYear = new Date(profile.birth_date).getFullYear();
@@ -562,9 +594,20 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         location: profile?.home_location || profile?.location || null,
         age: age,
         bio: profile?.bio || null,
-        cv_url: profile?.cv_url || null,
+        cv_url: snapshotCvUrl,
         availability: profile?.availability || null,
         employment_status: profile?.employment_type || null,
+        profile_image_snapshot_url: candidateProfile
+          ? candidateProfile.profile_image_url ?? null
+          : profile?.profile_image_url || null,
+        video_snapshot_url: candidateProfile
+          ? candidateProfile.video_url ?? null
+          : profile?.video_url || null,
+        cover_image_snapshot_url: candidateProfile
+          ? candidateProfile.cover_image_url ?? null
+          : profile?.cover_image_url || null,
+        candidate_profile_label: candidateProfile?.label ?? null,
+        candidate_profile_id: candidateProfile?.id ?? null,
         custom_answers: answers,
         questions_snapshot: jobQuestions as unknown as Json,
         status: 'pending'
@@ -593,7 +636,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           });
       }
 
-      if (profile?.cv_url) {
+      if (snapshotCvUrl) {
         supabase.functions.invoke('generate-cv-summary', {
           body: { applicant_id: user?.id, job_id: jobId },
         }).catch(err => console.warn('Background CV summary generation failed:', err));
