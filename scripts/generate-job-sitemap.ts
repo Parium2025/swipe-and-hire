@@ -11,10 +11,6 @@ type JobRow = {
   expires_at: string | null;
 };
 
-type PublicJobFacetsResponse = {
-  jobs?: JobRow[];
-};
-
 const escapeXml = (value: string) =>
   value
     .replace(/&/g, "&amp;")
