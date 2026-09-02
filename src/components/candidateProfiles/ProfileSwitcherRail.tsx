@@ -299,36 +299,42 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   };
 
   /** Kör den uppskjutna raderingen på riktigt (efter ångra-fönstret). */
-  const commitDelete = React.useCallback(async (id: string, label: string) => {
-    pendingDeleteRef.current = null;
-    const res = await deleteProfile(id);
-    setPendingDeleteId((cur) => (cur === id ? null : cur));
+  const commitDelete = React.useCallback(async (id: string) => {
+    const timer = pendingDeletesRef.current.get(id);
+    if (timer !== undefined) window.clearTimeout(timer);
+    pendingDeletesRef.current.delete(id);
+
+    const res = await deleteProfileRef.current(id);
     if ('error' in res && res.error) {
-      toast({ title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
+      // Raderingen gick inte igenom – visa profilen igen istället för att
+      // låtsas att den är borta.
+      setPendingDeleteIds((cur) => cur.filter((x) => x !== id));
+      toast({ id: 'profile-delete', title: 'Kunde inte ta bort', description: res.error, variant: 'destructive' });
       return;
     }
-    toast({ id: 'profile-delete', title: 'Profil borttagen', description: `${label} är borttagen.` });
-  }, [deleteProfile, toast]);
+    setPendingDeleteIds((cur) => cur.filter((x) => x !== id));
+  }, [toast]);
 
   // Lämnar användaren sidan innan ångra-fönstret löpt ut ska raderingen ändå
   // gå igenom – annars skulle profilen "återuppstå" vid nästa besök.
+  // Tomma beroenden: effekten får bara städa vid avmontering.
   useEffect(() => () => {
-    const pending = pendingDeleteRef.current;
-    if (pending) {
-      window.clearTimeout(pending.timer);
-      void deleteProfile(pending.id);
-    }
-  }, [deleteProfile]);
+    pendingDeletesRef.current.forEach((timer, id) => {
+      window.clearTimeout(timer);
+      void deleteProfileRef.current(id);
+    });
+    pendingDeletesRef.current.clear();
+  }, []);
 
   const confirmDelete = () => {
     const target = deleteTarget;
     if (!target) return;
     setDeleteTarget(null);
     if (activeId === target.id) setActiveId('base');
-    setPendingDeleteId(target.id);
+    setPendingDeleteIds((cur) => (cur.includes(target.id) ? cur : [...cur, target.id]));
 
-    const timer = window.setTimeout(() => { void commitDelete(target.id, target.label); }, 6000);
-    pendingDeleteRef.current = { id: target.id, timer };
+    const timer = window.setTimeout(() => { void commitDelete(target.id); }, 6000);
+    pendingDeletesRef.current.set(target.id, timer);
 
     toast({
       id: 'profile-delete',
@@ -338,16 +344,23 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       action: {
         label: 'Ångra',
         onClick: () => {
-          const pending = pendingDeleteRef.current;
-          if (!pending || pending.id !== target.id) return;
-          window.clearTimeout(pending.timer);
-          pendingDeleteRef.current = null;
-          setPendingDeleteId(null);
+          const pendingTimer = pendingDeletesRef.current.get(target.id);
+          if (pendingTimer === undefined) return;
+          window.clearTimeout(pendingTimer);
+          pendingDeletesRef.current.delete(target.id);
+          setPendingDeleteIds((cur) => cur.filter((x) => x !== target.id));
           setActiveId(target.id);
         },
       } as unknown as React.ReactNode,
     });
   };
+
+  /** Slutför alla väntande raderingar direkt (t.ex. innan en ny profil skapas). */
+  const flushPendingDeletes = React.useCallback(async () => {
+    const ids = Array.from(pendingDeletesRef.current.keys());
+    for (const id of ids) await commitDelete(id);
+  }, [commitDelete]);
+
 
   const editor = (
     <>
