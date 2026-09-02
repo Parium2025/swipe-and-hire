@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const candidateProfilesMemoryCache = new Map<string, CandidateProfile[]>();
@@ -81,20 +81,29 @@ export function useCandidateProfiles(userId?: string) {
   const [profiles, setProfiles] = useState<CandidateProfile[]>(() => readCandidateProfilesCache(userId));
   const [loading, setLoading] = useState(() => !!userId && readCandidateProfilesCache(userId).length === 0);
   const [error, setError] = useState<string | null>(null);
+  const loadGenerationRef = useRef(0);
 
   const load = useCallback(async () => {
+    const generation = ++loadGenerationRef.current;
     if (!userId) {
       setProfiles([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    // Stale-while-revalidate: behåll redan validerad cache synlig och markera
+    // bara kallstart som blockerande laddning.
+    const cachedProfiles = readCandidateProfilesCache(userId);
+    setLoading(cachedProfiles.length === 0);
     const { data, error } = await supabase
       .from('candidate_profiles')
       .select('*')
       .eq('user_id', userId)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
+
+    // Ett sent svar från föregående konto/laddning får aldrig skriva över den
+    // nu aktiva användarens profiler.
+    if (generation !== loadGenerationRef.current) return;
 
     if (error) {
       setError(error.message);
@@ -108,8 +117,11 @@ export function useCandidateProfiles(userId?: string) {
   }, [userId]);
 
   useEffect(() => {
+    loadGenerationRef.current += 1;
     const cachedProfiles = readCandidateProfilesCache(userId);
     setProfiles(cachedProfiles);
+    setLoading(!!userId && cachedProfiles.length === 0);
+    setError(null);
     void load();
   }, [load]);
 

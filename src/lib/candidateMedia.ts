@@ -15,6 +15,7 @@ const SNAPSHOT_ERA_START = Date.parse('2026-02-05T00:00:00Z');
 export interface CandidateMedia {
   profile_image_url: string | null;
   video_url: string | null;
+  cover_image_url: string | null;
   is_profile_video: boolean | null;
 }
 
@@ -24,6 +25,7 @@ export interface ApplicationSnapshotFields {
   candidate_profile_label?: string | null;
   profile_image_snapshot_url?: string | null;
   video_snapshot_url?: string | null;
+  cover_image_snapshot_url?: string | null;
 }
 
 export function resolveCandidateMedia(
@@ -32,6 +34,7 @@ export function resolveCandidateMedia(
 ): CandidateMedia {
   const image = app?.profile_image_snapshot_url ?? null;
   const video = app?.video_snapshot_url ?? null;
+  const cover = app?.cover_image_snapshot_url ?? null;
 
   const appliedAt = app?.applied_at || app?.created_at || null;
   const isSnapshotEra =
@@ -44,6 +47,7 @@ export function resolveCandidateMedia(
     return {
       profile_image_url: image,
       video_url: video,
+      cover_image_url: cover,
       is_profile_video: video ? true : false,
     };
   }
@@ -51,6 +55,7 @@ export function resolveCandidateMedia(
   return {
     profile_image_url: live?.profile_image_url ?? null,
     video_url: live?.video_url ?? null,
+    cover_image_url: live?.cover_image_url ?? null,
     is_profile_video: live?.is_profile_video ?? null,
   };
 }

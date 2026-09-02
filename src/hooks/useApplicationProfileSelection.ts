@@ -7,6 +7,7 @@ export interface BaseApplicationProfile {
   cv_url: string | null;
   profile_image_url: string | null;
   video_url: string | null;
+  cover_image_url: string | null;
 }
 
 export type ApplicationProfileSelection = CandidateProfile | null;
@@ -18,11 +19,29 @@ export function useApplicationProfileSelection(userId?: string) {
     cv_url: null,
     profile_image_url: null,
     video_url: null,
+    cover_image_url: null,
   });
   const [baseLoading, setBaseLoading] = useState(false);
+  const [baseProfileUserId, setBaseProfileUserId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const [initializedUserId, setInitializedUserId] = useState<string | null>(null);
   const [selectionReset, setSelectionReset] = useState(false);
+
+  // Hooken kan leva kvar genom ett kontobyte. Ett val från föregående konto får
+  // aldrig användas medan nästa kontos profiler laddas in.
+  useEffect(() => {
+    setSelectedId(null);
+    setInitializedUserId(null);
+    setBaseProfileUserId(null);
+    setSelectionReset(false);
+    setBaseProfile({
+      label: 'Min profil',
+      cv_url: null,
+      profile_image_url: null,
+      video_url: null,
+      cover_image_url: null,
+    });
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -37,25 +56,29 @@ export function useApplicationProfileSelection(userId?: string) {
         cv_url: typeof row?.cv_url === 'string' ? row.cv_url : null,
         profile_image_url: typeof row?.profile_image_url === 'string' ? row.profile_image_url : null,
         video_url: typeof row?.video_url === 'string' ? row.video_url : null,
+        cover_image_url: typeof row?.cover_image_url === 'string' ? row.cover_image_url : null,
       });
+      setBaseProfileUserId(userId);
       setBaseLoading(false);
+    }, () => {
+      if (active) setBaseLoading(false);
     });
     return () => { active = false; };
   }, [userId]);
 
   useEffect(() => {
-    if (profilesLoading || initialized) return;
+    if (!userId || profilesLoading || initializedUserId === userId) return;
     setSelectedId(profiles.find((profile) => profile.is_default)?.id ?? null);
-    setInitialized(true);
-  }, [initialized, profiles, profilesLoading]);
+    setInitializedUserId(userId);
+  }, [initializedUserId, profiles, profilesLoading, userId]);
 
   useEffect(() => {
-    if (!initialized || selectedId === null || profilesLoading) return;
+    if (initializedUserId !== userId || selectedId === null || profilesLoading) return;
     if (!profiles.some((profile) => profile.id === selectedId)) {
       setSelectedId(profiles.find((profile) => profile.is_default)?.id ?? null);
       setSelectionReset(true);
     }
-  }, [initialized, profiles, profilesLoading, selectedId]);
+  }, [initializedUserId, profiles, profilesLoading, selectedId, userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -80,12 +103,18 @@ export function useApplicationProfileSelection(userId?: string) {
 
   return {
     profiles,
-    baseProfile,
+    baseProfile: baseProfileUserId === userId ? baseProfile : {
+      label: 'Min profil' as const,
+      cv_url: null,
+      profile_image_url: null,
+      video_url: null,
+      cover_image_url: null,
+    },
     selectedProfile,
     selectedId,
     selectProfile,
     selectionReset,
     clearSelectionReset: () => setSelectionReset(false),
-    loading: profilesLoading || baseLoading || !initialized,
+    loading: !userId || profilesLoading || baseLoading || initializedUserId !== userId || baseProfileUserId !== userId,
   };
 }

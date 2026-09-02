@@ -97,6 +97,7 @@ const JobApplication = () => {
     selectedId,
     selectProfile,
     selectionReset,
+    loading: profileSelectionLoading,
   } = useApplicationProfileSelection(user?.id);
 
   
@@ -286,7 +287,7 @@ const JobApplication = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user || !job || submitInProgressRef.current) return;
+    if (!user || !job || submitInProgressRef.current || profileSelectionLoading) return;
 
     const requiredStandardFieldsPresent = [
       formData.firstName,
@@ -329,21 +330,44 @@ const JobApplication = () => {
     submitInProgressRef.current = true;
     setSubmitting(true);
 
+    // Profilen kan ha raderats i en annan flik/enhet efter att väljaren laddades.
+    // Stoppa onlineansökan i stället för att skicka en inaktuell ögonblicksbild.
+    if (selectedProfile && getIsOnline()) {
+      const { data: currentSelectedProfile, error: selectedProfileError } = await supabase
+        .from('candidate_profiles')
+        .select('id')
+        .eq('id', selectedProfile.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (selectedProfileError || !currentSelectedProfile) {
+        submitInProgressRef.current = false;
+        setSubmitting(false);
+        toast({
+          title: 'Profilen finns inte längre',
+          description: 'Välj profil igen innan du skickar ansökan.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     // Build the application payload
     // Ögonblicksbild: har användaren valt en kandidatprofil gäller exakt den profilens
     // media (tomt = tomt). Annars används kontots vanliga profil.
     let profileImageSnapshot: string | null = selectedProfile?.profile_image_url || null;
     let videoSnapshot: string | null = selectedProfile?.video_url || null;
+    let coverImageSnapshot: string | null = selectedProfile?.cover_image_url || null;
 
     if (!selectedProfile && getIsOnline()) {
       try {
         const { data: currentProfile } = await supabase
           .from('profiles')
-          .select('profile_image_url, video_url')
+          .select('profile_image_url, video_url, cover_image_url')
           .eq('user_id', user.id)
           .single();
         profileImageSnapshot = currentProfile?.profile_image_url || null;
         videoSnapshot = currentProfile?.video_url || null;
+        coverImageSnapshot = currentProfile?.cover_image_url || null;
       } catch {
         // Continue without snapshot — not critical
       }
@@ -364,6 +388,7 @@ const JobApplication = () => {
       cv_url: formData.cvUrl,
       profile_image_snapshot_url: profileImageSnapshot,
       video_snapshot_url: videoSnapshot,
+      cover_image_snapshot_url: coverImageSnapshot,
       candidate_profile_id: selectedProfile?.id ?? null,
       candidate_profile_label: selectedProfile?.label ?? null,
 
@@ -1046,11 +1071,11 @@ const JobApplication = () => {
         </div>
         <Button
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || profileSelectionLoading}
           className="w-full py-4 text-lg font-semibold"
         >
           <Send className="h-5 w-5 mr-2" />
-          {submitting ? 'Skickar ansökan...' : 'Skicka ansökan'}
+          {submitting ? 'Skickar ansökan...' : profileSelectionLoading ? 'Förbereder profil...' : 'Skicka ansökan'}
         </Button>
         
         <p className="text-sm text-gray-500 text-center mt-2">

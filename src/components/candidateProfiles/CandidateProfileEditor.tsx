@@ -57,6 +57,13 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
   const signedCover = useMediaUrl(coverUrl ?? undefined, 'cover-image');
   const posterUrl = useVideoPoster(videoUrl);
 
+  // Förhandsgranskningar från filväljaren är blob-URL:er. Släpp alltid den
+  // föregående när användaren väljer om, sparar, stänger eller komponenten
+  // avmonteras så långa bildredigeringssessioner inte läcker minne.
+  useEffect(() => () => {
+    if (editorSrc.startsWith('blob:')) URL.revokeObjectURL(editorSrc);
+  }, [editorSrc]);
+
   useEffect(() => {
     if (!open) return;
     setLabel(profile?.label ?? '');

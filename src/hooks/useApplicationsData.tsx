@@ -34,6 +34,7 @@ export interface ApplicationData {
   job_occupation?: string | null;
   profile_image_url?: string | null;
   video_url?: string | null;
+  cover_image_url?: string | null;
   is_profile_video?: boolean | null;
   viewed_at?: string | null;
   last_active_at?: string | null;
@@ -393,7 +394,7 @@ export const useApplicationsData = (
          if (ids.length > 0) {
            const { data: snapRows } = await supabase
              .from('job_applications')
-             .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url')
+              .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url')
              .in('id', ids);
            (snapRows || []).forEach((row: any) => snapshotById.set(row.id, row));
          }
@@ -495,6 +496,7 @@ export const useApplicationsData = (
            job_occupation: item.job_occupation || null,
            profile_image_url: media.profile_image_url,
            video_url: media.video_url,
+            cover_image_url: media.cover_image_url,
            is_profile_video: media.is_profile_video,
            // Prefer activity RPC to stay 1:1 med "Mina kandidater"
            last_active_at: activityLastActive ?? liveMedia.last_active_at,

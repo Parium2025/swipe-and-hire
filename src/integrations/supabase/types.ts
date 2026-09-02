@@ -1599,6 +1599,7 @@ export type Database = {
           bio: string | null
           candidate_profile_id: string | null
           candidate_profile_label: string | null
+          cover_image_snapshot_url: string | null
           cover_letter: string | null
           created_at: string
           custom_answers: Json | null
@@ -1629,6 +1630,7 @@ export type Database = {
           bio?: string | null
           candidate_profile_id?: string | null
           candidate_profile_label?: string | null
+          cover_image_snapshot_url?: string | null
           cover_letter?: string | null
           created_at?: string
           custom_answers?: Json | null
@@ -1659,6 +1661,7 @@ export type Database = {
           bio?: string | null
           candidate_profile_id?: string | null
           candidate_profile_label?: string | null
+          cover_image_snapshot_url?: string | null
           cover_letter?: string | null
           created_at?: string
           custom_answers?: Json | null
