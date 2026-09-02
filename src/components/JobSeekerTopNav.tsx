@@ -37,6 +37,7 @@ import NotificationCenter from "@/components/NotificationCenter";
 import { resetPageCoachMarks } from "@/components/onboarding/PageIntroCoach";
 import { replayWelcomeCard } from "@/components/AppOnboardingTour";
 import { useNavOverflowGuard } from '@/hooks/useNavOverflowGuard';
+import { useSidebarRoutePrefetch } from '@/hooks/useSidebarRoutePrefetch';
 
 
 // Jobb dropdown items
