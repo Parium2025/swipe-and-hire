@@ -2094,6 +2094,15 @@ const Profile = () => {
       employmentStatus, workingHours, availability, companyName, orgNumber,
       profileImageUrl, videoUrl, coverImageUrl, cvUrl, isProfileVideo]);
 
+  // Lämnar användaren sidan innan debounce-fönstret gått ut skrivs ändringen
+  // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
+  const hasUnsavedRef = useRef(hasUnsavedChanges);
+  hasUnsavedRef.current = hasUnsavedChanges;
+  useEffect(() => registerAutosaveFlush(() => {
+    if (!hasUnsavedRef.current) return;
+    void submitRef.current(undefined, { silent: true });
+  }), [registerAutosaveFlush]);
+
 
 
 
