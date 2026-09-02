@@ -14,6 +14,7 @@ interface UseApplySubmitOptions {
   userId?: string;
   userEmail?: string | null;
   onApplied: () => void;
+  selectedProfileId: string | null;
 }
 
 /**
@@ -33,6 +34,7 @@ export function useApplySubmit({
   userId,
   userEmail,
   onApplied,
+  selectedProfileId,
 }: UseApplySubmitOptions) {
   const queryClient = useQueryClient();
   const { quota, refresh: refreshQuota } = useApplicationQuota();
@@ -62,20 +64,13 @@ export function useApplySubmit({
       // 📸 Snapshot: frys frågorna som visas för kandidaten precis nu.
       // Arbetsgivaren kommer alltid se exakt dessa frågor + svar, även om
       // frågorna senare ändras. Nya sökande får de nya frågorna.
-      const [profileRes, questionsRes, candidateProfileRes] = await Promise.all([
+      const [profileRes, questionsRes] = await Promise.all([
         supabase.rpc('get_my_profile'),
         supabase
           .from('job_questions')
           .select('id, question_text, question_type, options, is_required, order_index')
           .eq('job_id', jobId)
           .order('order_index'),
-        // 📌 Standardprofilen (av jobbsökarens sparade kandidatprofiler) vinner i snabbansökan.
-        supabase
-          .from('candidate_profiles')
-          .select('label, cv_url, video_url, profile_image_url')
-          .eq('user_id', userId)
-          .eq('is_default', true)
-          .maybeSingle(),
       ]);
       const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
@@ -85,10 +80,13 @@ export function useApplySubmit({
           code: '23514',
         });
       }
-      const candidateProfile = candidateProfileRes.data ?? null;
-      const snapshotCvUrl = candidateProfile
-        ? candidateProfile.cv_url ?? null
-        : profile?.cv_url || null;
+      const selectedProfileRes = selectedProfileId
+        ? await supabase.from('candidate_profiles').select('id, label, cv_url, video_url, profile_image_url').eq('id', selectedProfileId).eq('user_id', userId).maybeSingle()
+        : null;
+      if (selectedProfileRes?.error) throw selectedProfileRes.error;
+      const candidateProfile = selectedProfileRes?.data ?? null;
+      if (selectedProfileId && !candidateProfile) throw new Error('Den valda profilen finns inte längre. Välj profil igen.');
+      const snapshotCvUrl = candidateProfile ? candidateProfile.cv_url ?? null : profile?.cv_url || null;
 
       let age: number | null = null;
       if (profile?.birth_date) {
@@ -118,6 +116,7 @@ export function useApplySubmit({
           ? candidateProfile.video_url ?? null
           : profile?.video_url || null,
         candidate_profile_label: candidateProfile?.label ?? null,
+        candidate_profile_id: candidateProfile?.id ?? null,
         custom_answers: answers,
         questions_snapshot: questionsSnapshot,
         status: 'pending',
@@ -205,6 +204,7 @@ export function useApplySubmit({
     queryClient,
     refreshQuota,
     onApplied,
+    selectedProfileId,
   ]);
 
   return {

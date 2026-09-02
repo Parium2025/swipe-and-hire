@@ -23,6 +23,7 @@ interface ApplicationQuestionsWizardProps {
   justApplied?: boolean;
   /** Preview mode: allows navigation but disables inputs and hides submit */
   previewMode?: boolean;
+  profileSelector?: React.ReactNode;
 }
 
 export function ApplicationQuestionsWizard({
@@ -35,6 +36,7 @@ export function ApplicationQuestionsWizard({
   hasAlreadyApplied,
   justApplied = false,
   previewMode = false,
+  profileSelector,
 }: ApplicationQuestionsWizardProps) {
   // If already applied, start directly on the review step
   const [currentStep, setCurrentStep] = useState(hasAlreadyApplied && !previewMode ? questions.length : 0);
@@ -469,6 +471,8 @@ export function ApplicationQuestionsWizard({
                   );
                 })}
               </div>
+
+              {!hasAlreadyApplied && profileSelector && <div className="mt-3 px-1">{profileSelector}</div>}
 
             </div>
           ) : null}

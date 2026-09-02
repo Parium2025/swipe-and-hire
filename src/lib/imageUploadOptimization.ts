@@ -30,7 +30,7 @@ interface CompressOptions {
  * Compress and resize an image Blob/File before upload.
  * Returns the original blob unchanged if anything fails (safe fallback).
  *
- * - Skips compression for SVGs (vector — no benefit).
+ * - SVG is rejected centrally before this utility is called.
  * - Skips compression if input is already small enough.
  */
 export async function compressImageBlob(
@@ -43,8 +43,9 @@ export async function compressImageBlob(
     mimeType = 'image/webp',
   } = options;
 
-  // Don't touch SVGs — they're vector and tiny
-  if (input.type === 'image/svg+xml') return input;
+  if (input.type === 'image/svg+xml') {
+    throw new Error('SVG-filer är inte tillåtna.');
+  }
 
   // Snabb utväg: redan liten och i rätt format
   if (

@@ -10,6 +10,8 @@ import type { SwipeJob } from './types';
 import { useApplyData } from './hooks/useApplyData';
 import { useApplySubmit } from './hooks/useApplySubmit';
 import { hasAllRequiredApplicationAnswers } from '@/lib/applicationAnswerValidation';
+import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
+import { useApplicationProfileSelection } from '@/hooks/useApplicationProfileSelection';
 
 interface SwipeApplySheetProps {
   jobId: string;
@@ -24,6 +26,7 @@ interface SwipeApplySheetProps {
 export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, onApplied }: SwipeApplySheetProps) {
   const { user } = useAuth();
   const [isClosing, setIsClosing] = useState(false);
+  const { profiles, baseProfile, selectedId, selectProfile, selectionReset } = useApplicationProfileSelection(user?.id);
 
   const {
     questions,
@@ -50,7 +53,19 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
     userId: user?.id,
     userEmail: user?.email,
     onApplied,
+    selectedProfileId: selectedId,
   });
+
+  const profileSelector = (
+    <CandidateProfilePicker
+      profiles={profiles}
+      baseProfile={baseProfile}
+      selectedId={selectedId}
+      onSelect={selectProfile}
+      dark
+      selectionReset={selectionReset}
+    />
+  );
 
   useEffect(() => {
     if (open) {
@@ -187,6 +202,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                       <p className="text-white text-sm max-w-xs">
                         Inga frågor att besvara. Din profilinformation skickas direkt med ansökan.
                       </p>
+                      {profileSelector}
                       <button
                         onClick={handleSubmit}
                         disabled={submitting || hasAlreadyApplied}
@@ -208,6 +224,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                       isSubmitting={submitting}
                       canSubmit={canSubmit}
                       hasAlreadyApplied={hasAlreadyApplied}
+                      profileSelector={profileSelector}
                     />
                   )}
                 </>

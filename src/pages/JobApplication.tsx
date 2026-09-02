@@ -21,7 +21,7 @@ import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { useApplicationQuota } from '@/hooks/useApplicationQuota';
 import { ApplicationLimitDialog } from '@/components/premium/ApplicationLimitDialog';
 import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
-import { useCandidateProfiles, type CandidateProfile } from '@/hooks/useCandidateProfiles';
+import { useApplicationProfileSelection } from '@/hooks/useApplicationProfileSelection';
 import { hasAllRequiredApplicationAnswers, isPermanentApplicationError } from '@/lib/applicationAnswerValidation';
 import type { Database, Json } from '@/integrations/supabase/types';
 
@@ -90,9 +90,14 @@ const JobApplication = () => {
   const [initialFormData, setInitialFormData] = useState<any>(null);
 
   // Flera kandidatprofiler: välj vilken profil (CV/video/bild) som följer med ansökan.
-  const { profiles: candidateProfiles } = useCandidateProfiles(user?.id);
-  const [selectedProfile, setSelectedProfile] = useState<CandidateProfile | null>(null);
-  const [profilePicked, setProfilePicked] = useState(false);
+  const {
+    profiles: candidateProfiles,
+    baseProfile,
+    selectedProfile,
+    selectedId,
+    selectProfile,
+    selectionReset,
+  } = useApplicationProfileSelection(user?.id);
 
   
   // Form data
@@ -121,44 +126,14 @@ const JobApplication = () => {
     customAnswers: {} as Record<string, any>
   });
 
-  // Förvälj standardprofilen (en gång) och fyll i dess CV.
+  // Håll formulärets CV i synk med det gemensamma profilvalet.
   useEffect(() => {
-    if (profilePicked || candidateProfiles.length === 0) return;
-    const preferred = candidateProfiles.find(p => p.is_default) ?? null;
-    setProfilePicked(true);
-    if (preferred) {
-      setSelectedProfile(preferred);
-      if (preferred.cv_url) {
-        setFormData(prev => (prev.cvUrl ? prev : { ...prev, cvUrl: preferred.cv_url as string }));
-      }
-    }
-  }, [candidateProfiles, profilePicked]);
-
-  const handleProfileSelect = (profile: CandidateProfile | null) => {
-    setProfilePicked(true);
-    const previousProfileCv = selectedProfile?.cv_url ?? null;
-    setSelectedProfile(profile);
+    const profileCv = selectedProfile?.cv_url ?? baseProfile.cv_url ?? '';
     setFormData(prev => {
-      // Byt bara ut CV:t om det kom från en profil – ett manuellt uppladdat CV behålls.
-      const cameFromProfile = !prev.cvUrl || prev.cvUrl === previousProfileCv;
-      if (profile?.cv_url) return { ...prev, cvUrl: profile.cv_url };
-      return cameFromProfile ? { ...prev, cvUrl: '' } : prev;
+      if (prev.cvUrl === profileCv) return prev;
+      return { ...prev, cvUrl: profileCv };
     });
-  };
-
-  // Håll vald profil i synk om den ändras eller raderas i ett annat fönster.
-  useEffect(() => {
-    if (!selectedProfile) return;
-    const fresh = candidateProfiles.find(p => p.id === selectedProfile.id);
-    if (!fresh) {
-      setSelectedProfile(null);
-      setFormData(prev => (prev.cvUrl === selectedProfile.cv_url ? { ...prev, cvUrl: '' } : prev));
-      return;
-    }
-    if (fresh !== selectedProfile && JSON.stringify(fresh) !== JSON.stringify(selectedProfile)) {
-      setSelectedProfile(fresh);
-    }
-  }, [candidateProfiles, selectedProfile]);
+  }, [baseProfile.cv_url, selectedProfile]);
 
 
 
@@ -389,6 +364,7 @@ const JobApplication = () => {
       cv_url: formData.cvUrl,
       profile_image_snapshot_url: profileImageSnapshot,
       video_snapshot_url: videoSnapshot,
+      candidate_profile_id: selectedProfile?.id ?? null,
       candidate_profile_label: selectedProfile?.label ?? null,
 
       custom_answers: {
@@ -970,15 +946,6 @@ const JobApplication = () => {
                 </div>
               </div>
 
-              {/* Val av kandidatprofil (visas bara om användaren har sparade profiler) */}
-              {candidateProfiles.length > 0 && (
-                <CandidateProfilePicker
-                  profiles={candidateProfiles}
-                  selectedId={selectedProfile?.id ?? null}
-                  onSelect={handleProfileSelect}
-                />
-              )}
-
               {/* CV Upload */}
               <div>
                 <Label className="text-gray-900 font-medium block mb-2">
@@ -1035,7 +1002,7 @@ const JobApplication = () => {
                   </p>
                   <FileUpload
                     questionType="document"
-                    acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain', 'image/*']}
+                      acceptedFileTypes={['application/pdf', '.pdf', '.doc', '.docx', '.rtf', '.odt', '.txt', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/rtf', 'application/vnd.oasis.opendocument.text', 'text/plain', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']}
                     maxFileSize={50 * 1024 * 1024}
                     onFileUploaded={(url, fileName) => {
                       handleInputChange('additionalDocuments', url);
@@ -1068,6 +1035,15 @@ const JobApplication = () => {
 
       {/* Submit Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
+        <div className="mx-auto mb-3 max-w-2xl">
+          <CandidateProfilePicker
+            profiles={candidateProfiles}
+            baseProfile={baseProfile}
+            selectedId={selectedId}
+            onSelect={selectProfile}
+            selectionReset={selectionReset}
+          />
+        </div>
         <Button
           onClick={handleSubmit}
           disabled={submitting}
