@@ -103,7 +103,7 @@ export const CompanyLogoSection = ({
         <input
           id="logo-upload"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
           onChange={onFileChange}
           className="hidden"
           disabled={isUploadingLogo}

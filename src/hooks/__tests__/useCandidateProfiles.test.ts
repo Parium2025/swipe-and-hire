@@ -5,7 +5,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
  * Enhetstester för jobbsökarens extraprofiler:
  * - maxgränsen (3 profiler totalt = 2 extra)
  * - standardprofil flyttas när den som är standard tas bort
- * - filstädning körs vid borttagning
+ * - filer raderas aldrig direkt vid borttagning
  */
 
 type Row = Record<string, unknown>;
@@ -128,15 +128,13 @@ describe('useCandidateProfiles', () => {
     expect(promoted?.filters).toContainEqual(['eq', 'id', 'b']);
   });
 
-  it('städar profilens filer och videons posterbild vid borttagning', async () => {
+  it('lämnar profilens filer till referenssäker backendstädning', async () => {
     state.rows = [profile('a', { video_url: 'u1/clip.mp4', profile_image_url: 'u1/img.jpg?v=2' })];
     const { result } = renderHook(() => useCandidateProfiles('u1'));
     await waitFor(() => expect(result.current.profiles).toHaveLength(1));
 
     await act(async () => { await result.current.deleteProfile('a'); });
-    expect(state.removedPaths).toEqual(
-      expect.arrayContaining(['u1/clip.mp4', 'u1/clip-poster.jpg', 'u1/img.jpg', 'u1/img-poster.jpg'])
-    );
+    expect(state.removedPaths).toEqual([]);
   });
 
   it('rensar övriga standarder när en ny standard sätts', async () => {

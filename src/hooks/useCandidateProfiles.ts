@@ -110,17 +110,21 @@ export function useCandidateProfiles(userId?: string) {
 
   const updateProfile = useCallback(async (id: string, patch: Partial<CandidateProfileInput>) => {
     if (patch.is_default) await clearDefaults(id);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('candidate_profiles')
       .update({
         ...patch,
         ...(patch.label !== undefined ? { label: patch.label.trim() } : {}),
       })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId ?? '')
+      .select('id')
+      .maybeSingle();
     if (error) return { error: error.message } as const;
+    if (!data) return { error: 'Profilen finns inte längre' } as const;
     await load();
     return {} as const;
-  }, [clearDefaults, load]);
+  }, [clearDefaults, load, userId]);
 
   const deleteProfile = useCallback(async (id: string) => {
     const removed = profiles.find(p => p.id === id);
@@ -132,24 +136,6 @@ export function useCandidateProfiles(userId?: string) {
       const next = profiles.find(p => p.id !== id);
       if (next) {
         await supabase.from('candidate_profiles').update({ is_default: true }).eq('id', next.id);
-      }
-    }
-
-    // Databasraden är borta – filerna städas best-effort direkt. Dör nätet mitt
-    // i är det ofarligt: den veckovisa städrutinen (purge-orphaned-media) tar
-    // hand om allt som blivit kvar utan referens.
-    const paths = [removed?.cv_url, removed?.video_url, removed?.profile_image_url, removed?.cover_image_url]
-      .filter((p): p is string => !!p)
-      .flatMap((p) => {
-        const clean = p.split('?')[0];
-        // Videor har en posterbild bredvid sig som aldrig finns i databasen.
-        return [clean, `${clean.replace(/\.[^./]+$/, '')}-poster.jpg`];
-      });
-    if (paths.length > 0) {
-      try {
-        await supabase.storage.from('job-applications').remove(paths);
-      } catch (cleanupError) {
-        console.warn('[candidateProfiles] filstädning misslyckades:', cleanupError);
       }
     }
 

@@ -426,7 +426,7 @@ const EmployerProfile = () => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
                 onChange={handleImageChange}
                 className="hidden"
               />

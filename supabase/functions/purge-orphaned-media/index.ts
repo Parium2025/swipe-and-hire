@@ -195,6 +195,80 @@ async function sweepBucket(
   }
 }
 
+async function isReferenced(
+  // deno-lint-ignore no-explicit-any
+  admin: any,
+  bucket: BucketConfig,
+  path: string,
+): Promise<boolean> {
+  for (const { table, columns } of bucket.sources) {
+    for (const column of columns) {
+      const { data, error } = await admin.from(table).select(column).eq(column, path).limit(1)
+      if (error) throw new Error(`Kunde inte kontrollera ${table}.${column}: ${error.message}`)
+      if (data && data.length > 0) return true
+    }
+  }
+  return false
+}
+
+async function processDeletionQueue(
+  // deno-lint-ignore no-explicit-any
+  admin: any,
+  dryRun: boolean,
+) {
+  const { data, error } = await admin
+    .from('media_deletion_queue')
+    .select('id,bucket,storage_path,attempts')
+    .lte('not_before', new Date().toISOString())
+    .order('created_at')
+    .limit(PAGE)
+
+  if (error) throw new Error(`Kunde inte läsa mediastädkön: ${error.message}`)
+
+  let deleted = 0
+  let retained = 0
+  for (const item of data ?? []) {
+    const config = BUCKETS.find((bucket) => bucket.bucket === item.bucket)
+    if (!config) {
+      await admin.from('media_deletion_queue').update({
+        attempts: item.attempts + 1,
+        last_error: 'Okänd bucket',
+        not_before: new Date(Date.now() + 30 * 86400000).toISOString(),
+      }).eq('id', item.id)
+      continue
+    }
+
+    const path = normalize(item.storage_path)
+    if (!path || await isReferenced(admin, config, path)) {
+      retained++
+      if (!dryRun) {
+        await admin.from('media_deletion_queue').update({
+          not_before: new Date(Date.now() + 30 * 86400000).toISOString(),
+          last_error: null,
+        }).eq('id', item.id)
+      }
+      continue
+    }
+
+    if (dryRun) continue
+    const paths = [path]
+    if (item.media_kind === 'profile-video') paths.push(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+    const { error: removeError } = await admin.storage.from(item.bucket).remove(paths)
+    if (removeError) {
+      await admin.from('media_deletion_queue').update({
+        attempts: item.attempts + 1,
+        last_error: removeError.message,
+        not_before: new Date(Date.now() + 86400000).toISOString(),
+      }).eq('id', item.id)
+    } else {
+      deleted++
+      await admin.from('media_deletion_queue').delete().eq('id', item.id)
+    }
+  }
+
+  return { processed: data?.length ?? 0, deleted, retained }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -227,6 +301,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const queue = await processDeletionQueue(admin, dryRun)
     const results = []
     for (const config of targets) {
       results.push(await sweepBucket(admin, config, dryRun))
@@ -235,6 +310,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         dry_run: dryRun,
+        queue,
         buckets: results,
         total_orphaned: results.reduce((sum, r) => sum + r.orphaned, 0),
         total_deleted: results.reduce((sum, r) => sum + r.deleted, 0),

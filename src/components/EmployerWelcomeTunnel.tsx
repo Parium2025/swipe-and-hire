@@ -343,7 +343,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   <input
                     id="logo-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
                     onChange={handleLogoChange}
                     className="hidden"
                     disabled={isUploadingLogo}

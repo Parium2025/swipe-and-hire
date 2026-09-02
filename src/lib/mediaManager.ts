@@ -48,7 +48,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff']
   },
   'profile-video': {
     bucket: 'job-applications',
@@ -62,7 +62,7 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff']
   },
   'cv': {
     bucket: 'job-applications',
@@ -80,13 +80,13 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'company-logos',
     isPublic: true,
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff']
   },
   'job-image': {
     bucket: 'job-images',
     isPublic: true,
     maxSizeMB: 50,
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff', 'image/svg+xml']
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif', 'image/avif', 'image/bmp', 'image/tiff']
   }
 };
 
@@ -119,6 +119,11 @@ export async function uploadMedia(
   options?: UploadMediaOptions
 ): Promise<{ storagePath: string; error?: Error }> {
   const config = MEDIA_CONFIG[mediaType];
+
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  if (file.type === 'image/svg+xml' || extension === 'svg') {
+    return { storagePath: '', error: new Error('SVG-filer är inte tillåtna. Välj JPEG, PNG eller WebP.') };
+  }
   
   // Validera filstorlek
   const fileSizeMB = file.size / (1024 * 1024);
