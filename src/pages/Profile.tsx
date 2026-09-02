@@ -2061,16 +2061,30 @@ const Profile = () => {
   // (fältfelen visas som vanligt), och ingen notis visas vid lyckad sparning.
   const submitRef = useRef(handleSubmit);
   submitRef.current = handleSubmit;
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (loading || isUploadingMedia || isUploadingCover) return;
     if (isDiscardingChangesRef.current) return;
-    const t = setTimeout(() => { void submitRef.current(undefined, { silent: true }); }, 900);
+    const t = setTimeout(async () => {
+      if (savedResetRef.current) clearTimeout(savedResetRef.current);
+      setSaveStatus('saving');
+      try {
+        await submitRef.current(undefined, { silent: true });
+        setSaveStatus('saved');
+        savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+      } catch {
+        setSaveStatus('idle');
+      }
+    }, 900);
     return () => clearTimeout(t);
   }, [hasUnsavedChanges, loading, isUploadingMedia, isUploadingCover,
       firstName, lastName, bio, userLocation, postalCode, phone, birthDate,
       employmentStatus, workingHours, availability, companyName, orgNumber,
       profileImageUrl, videoUrl, coverImageUrl, cvUrl, isProfileVideo]);
+
 
 
 
