@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { Plus, Star, Video as VideoIcon, User, ChevronDown, Check, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { prefetchMediaUrl, useMediaUrl } from '@/hooks/useMediaUrl';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -103,7 +103,7 @@ function ProfileChip({
         <span className="mx-auto block w-14">
           <ProfileAvatar imagePath={imagePath} signedImageUrl={signedImageUrl} hasVideo={hasVideo} />
         </span>
-        <span className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
+        <span title={label} className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
           {label}
         </span>
       </button>
@@ -210,6 +210,16 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   // Ordningen ligger fast (grundprofilen först, sedan skapandeordning) så att
   // stjärnan bara glider in kortet i mitten – inga kort byter plats med varandra.
   const orderedChips = chips;
+
+  // Värm samtliga dropdown-miniatyrer redan när profilsidan laddas. Radix
+  // monterar menyinnehållet först när det öppnas, så utan denna förvärmning
+  // skulle de inaktiva profilernas bilder börja hämtas först vid första trycket.
+  useEffect(() => {
+    profiles.forEach((profile) => {
+      const thumbnailPath = profile.profile_image_url || profile.cover_image_url;
+      if (thumbnailPath) void prefetchMediaUrl(thumbnailPath, 'profile-image');
+    });
+  }, [profiles]);
 
   // När standardprofilen ändras (t.ex. via stjärnan) ska den också bli aktiv
   // och därmed glida in i mitten av karusellen.
@@ -441,7 +451,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                 size={40}
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-medium leading-tight text-white">
+                <span title={activeChip?.label} className="block truncate text-[15px] font-medium leading-tight text-white">
                   {activeChip?.label}
                 </span>
                 <span className="block text-[12px] leading-tight text-white">
@@ -466,7 +476,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                     hasVideo={chip.hasVideo}
                     size={32}
                   />
-                  <span className="min-w-0 flex-1 truncate text-[14px]">{chip.label}</span>
+                  <span className="min-w-0 flex-1 whitespace-normal break-words text-[14px] leading-snug">{chip.label}</span>
                   {activeId === chip.id && <Check className="h-4 w-4 shrink-0" />}
                   <button
                     type="button"
@@ -503,7 +513,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors touch-manipulation active:bg-destructive/30"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 active:bg-destructive/30"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -630,7 +640,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors touch-manipulation md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4" />
           </button>

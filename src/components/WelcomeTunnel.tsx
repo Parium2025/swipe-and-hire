@@ -1538,9 +1538,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <Video className="h-5 w-5 text-white" />
                       </div>
                     </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                      <Play className="h-2 w-2 text-primary animate-pulse" />
-                    </div>
                   </div>
 
                   {/* "eller" text */}
@@ -1554,9 +1551,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                         <Camera className="h-5 w-5 text-white" />
                       </div>
-                    </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                      <Camera className="h-2 w-2 text-primary" />
                     </div>
                   </div>
                 </div>
@@ -1603,7 +1597,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         deleteProfileMedia();
                       }}
-                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                      aria-label="Ta bort profilmedia"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -1705,7 +1700,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                               e.stopPropagation();
                               deleteCoverImage();
                             }}
-                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus-visible:outline-none focus:ring-0"
+                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                            aria-label="Ta bort cover-bild"
                             title="Ta bort cover-bild"
                           >
                             <Trash2 className="h-4 w-4" />

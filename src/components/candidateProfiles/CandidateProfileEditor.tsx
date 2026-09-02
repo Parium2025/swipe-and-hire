@@ -260,9 +260,6 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         <Video className="h-5 w-5 text-white" />
                       </div>
                     </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                      <Play className="h-2 w-2 text-primary" />
-                    </div>
                   </div>
                   <div className="text-white text-sm font-medium">eller</div>
                   <div className="relative">
@@ -270,9 +267,6 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                         <Camera className="h-5 w-5 text-white" />
                       </div>
-                    </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                      <Camera className="h-2 w-2 text-primary" />
                     </div>
                   </div>
                 </div>
@@ -313,7 +307,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         setDeletedMedia(null);
                       }}
                       aria-label="Återställ media"
-                      className="absolute -top-3 -right-3 bg-white/20 md:hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                      className="absolute -top-3 -right-3 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:bg-white/30"
                     >
                       <RotateCcw className="h-4 w-4" />
                     </button>
@@ -328,7 +322,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         setCoverUrl(null);
                       }}
                       aria-label="Ta bort media"
-                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!bg-destructive/30"
+                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -404,7 +398,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                           type="button"
                           onClick={() => { setCoverUrl(deletedCover); setDeletedCover(null); }}
                           aria-label="Återställ cover-bild"
-                          className="absolute -right-10 bg-white/20 md:hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                          className="absolute -right-10 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:bg-white/30"
                         >
                           <RotateCcw className="h-4 w-4" />
                         </button>
@@ -413,7 +407,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                           type="button"
                           onClick={() => { setDeletedCover(coverUrl); setCoverUrl(null); }}
                           aria-label="Ta bort cover-bild"
-                          className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white shadow-lg transition-colors md:hover:!bg-destructive/30"
+                          className="absolute -right-10 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
