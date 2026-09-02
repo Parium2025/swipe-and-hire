@@ -152,11 +152,17 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   const [deleteTarget, setDeleteTarget] = useState<CandidateProfile | null>(null);
   // Ångra-fönster: profilen döljs direkt men raderas i databasen först efter
   // några sekunder, så att "Ångra" kan avbryta utan att något gått förlorat.
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const pendingDeleteRef = React.useRef<{ id: string; timer: number } | null>(null);
+  // Flera profiler kan ligga i fönstret samtidigt.
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+  const pendingDeletesRef = React.useRef<Map<string, number>>(new Map());
+  // Stabil referens: raderingsfunktionen byter identitet varje gång listan
+  // laddas om, och får aldrig trigga städ-effekten mitt i ångra-fönstret.
+  const deleteProfileRef = React.useRef(deleteProfile);
+  deleteProfileRef.current = deleteProfile;
   // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
+
 
   // Tangentbord: karusellen ska svara på piltangenter även när fokus ligger på
   // ett kort inuti raden eller när musen bara hovrar över den.
