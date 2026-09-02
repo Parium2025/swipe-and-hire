@@ -423,7 +423,7 @@ const getSizingViewportSize = () => {
 
 const isMobileLikeHeroViewport = () => {
   if (typeof window === 'undefined') return false;
-  const { width, height } = getViewportSize();
+  const { width, height } = getSizingViewportSize();
   const isCoarse = window.matchMedia('(pointer: coarse)').matches;
   // Mobil-layout (stackad: text överst, telefon under) används endast på
   // riktiga små skärmar OCH på pekplattor i PORTRÄTT. På iPad i landskap
@@ -437,7 +437,7 @@ const isMobileLikeHeroViewport = () => {
 
 const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
   if (typeof window === 'undefined') return null;
-  const { width, height } = getViewportSize();
+  const { width, height } = getSizingViewportSize();
   if (isMobileLikeHeroViewport()) return 'mobile';
   if (width < 1180 && height > width) return 'portraitTablet';
   return null;
