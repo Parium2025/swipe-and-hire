@@ -615,7 +615,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
               id={`profile-slot-${slot.key}`}
               role={slot.isAdd ? undefined : 'option'}
               aria-selected={slot.isAdd ? undefined : isCenter}
-              className="absolute left-1/2 top-0 transition-all duration-500 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
+              className={`absolute left-1/2 top-0 [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] ${railAnimated ? 'transition-all duration-500' : ''}`}
               style={{
                 transform: `translateX(calc(-50% + ${offset * SLOT_SPACING}px)) scale(${isCenter ? 1 : 0.85})`,
                 opacity: isCenter ? 1 : isVisible ? 0.7 : 0,
