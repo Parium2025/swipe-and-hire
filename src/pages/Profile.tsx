@@ -391,6 +391,9 @@ const Profile = () => {
   const cancelMediaUpload = useCallback(() => {
     mediaUploadAbortRef.current?.abort();
   }, []);
+  // Lämnar användaren sidan mitt i en uppladdning ska nätverksarbetet dö med
+  // sidan — annars fortsätter XHR:en och skriver state på en avmonterad vy.
+  useEffect(() => () => { mediaUploadAbortRef.current?.abort(); }, []);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
@@ -571,6 +574,9 @@ const Profile = () => {
   // När en extraprofil är vald visas dess bild/video på huvudytan istället.
   const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
   const profileRailRef = useRef<ProfileSwitcherRailHandle>(null);
+  // Sant först när handleSubmit faktiskt persisterade något (inte vid
+  // valideringsfel) — styr "Sparat"-statusen i autosparet.
+  const lastSaveOkRef = useRef(false);
   const activeExtraImageUrl = useMediaUrl(activeCandidateProfile?.profile_image_url || undefined, 'profile-image');
   const activeExtraVideoUrl = useMediaUrl(activeCandidateProfile?.video_url || undefined, 'profile-video');
   const activeExtraCoverUrl = useMediaUrl(activeCandidateProfile?.cover_image_url || undefined, 'cover-image');
@@ -900,6 +906,8 @@ const Profile = () => {
 
 
   const uploadProfileMedia = async (file: File) => {
+    // Bind uppladdningen till profilen som var vald när den startade.
+    const targetProfileId = activeCandidateProfile?.id ?? null;
     const isVideo = looksLikeVideoFile(file);
     let uploadedStoragePath = '';
     setIsUploadingMedia(true);
@@ -936,9 +944,10 @@ const Profile = () => {
       uploadedStoragePath = storagePath;
 
       // Vald extraprofil: media sparas direkt i dess egen tunnel.
-      if (activeCandidateProfile) {
+      if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateActiveProfile(
+        await profileRailRef.current.updateProfileById(
+          targetProfileId,
           isVideo
             ? { video_url: storagePath, profile_image_url: null }
             : { profile_image_url: storagePath, video_url: null }
@@ -1026,6 +1035,7 @@ const Profile = () => {
 
 
   const uploadCoverImage = async (file: File) => {
+    const targetProfileId = activeCandidateProfile?.id ?? null;
     let uploadedStoragePath = '';
     setIsUploadingCover(true);
     setCoverProgressInfo(null);
@@ -1045,9 +1055,9 @@ const Profile = () => {
       uploadedStoragePath = storagePath;
 
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
-      if (activeCandidateProfile) {
+      if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateActiveProfile({ cover_image_url: storagePath });
+        await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
         return;
       }
 
@@ -1216,6 +1226,7 @@ const Profile = () => {
   };
 
   const handleProfileImageSave = async (editedBlob: Blob) => {
+    const targetProfileId = activeCandidateProfile?.id ?? null;
     let uploadedStoragePath = '';
     try {
       setIsUploadingMedia(true);
@@ -1248,9 +1259,9 @@ const Profile = () => {
       uploadedStoragePath = storagePath;
 
       // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
-      if (activeCandidateProfile) {
+      if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateActiveProfile({ profile_image_url: storagePath, video_url: null });
+        await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath, video_url: null });
         setImageEditorOpen(false);
         if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
         setPendingImageSrc('');
@@ -1331,6 +1342,7 @@ const Profile = () => {
   };
 
   const handleCoverImageSave = async (editedBlob: Blob) => {
+    const targetProfileId = activeCandidateProfile?.id ?? null;
     let uploadedStoragePath = '';
     try {
       setIsUploadingCover(true);
@@ -1356,9 +1368,9 @@ const Profile = () => {
       uploadedStoragePath = storagePath;
 
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
-      if (activeCandidateProfile) {
+      if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateActiveProfile({ cover_image_url: storagePath });
+        await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
         setCoverEditorOpen(false);
         if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
         setPendingCoverSrc('');
@@ -1445,7 +1457,7 @@ const Profile = () => {
           videoUrl: activeCandidateProfile.video_url,
           coverImageUrl: activeCandidateProfile.cover_image_url,
         };
-        await profileRailRef.current.updateActiveProfile({ profile_image_url: null, video_url: null });
+        await profileRailRef.current.updateProfileById(snapshot.profileId, { profile_image_url: null, video_url: null });
         setDeletedCandidateMedia(snapshot);
       } catch (error) {
         console.error('Error deleting candidate profile media:', error);
@@ -1524,7 +1536,7 @@ const Profile = () => {
     if (activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'media') {
       try {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateActiveProfile({
+        await profileRailRef.current.updateProfileById(deletedCandidateMedia.profileId, {
           profile_image_url: deletedCandidateMedia.profileImageUrl,
           video_url: deletedCandidateMedia.videoUrl,
         });
@@ -1571,7 +1583,7 @@ const Profile = () => {
           videoUrl: activeCandidateProfile.video_url,
           coverImageUrl: activeCandidateProfile.cover_image_url,
         };
-        await profileRailRef.current.updateActiveProfile({ cover_image_url: null });
+        await profileRailRef.current.updateProfileById(snapshot.profileId, { cover_image_url: null });
         setDeletedCandidateMedia(snapshot);
       } catch (error) {
         console.error('Error deleting candidate profile cover:', error);
@@ -1618,7 +1630,7 @@ const Profile = () => {
     if (activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') {
       try {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
-        await profileRailRef.current.updateActiveProfile({ cover_image_url: deletedCandidateMedia.coverImageUrl });
+        await profileRailRef.current.updateProfileById(deletedCandidateMedia.profileId, { cover_image_url: deletedCandidateMedia.coverImageUrl });
         setDeletedCandidateMedia(null);
       } catch (error) {
         console.error('Error restoring candidate profile cover:', error);
@@ -1817,6 +1829,8 @@ const Profile = () => {
   const handleSubmit = async (e?: React.FormEvent, opts?: { silent?: boolean }) => {
     e?.preventDefault?.();
     const silent = !!opts?.silent;
+    // Autosparet får bara visa "Sparat" när något faktiskt persisterades.
+    lastSaveOkRef.current = false;
 
 
     if (!isOnline) {
@@ -1854,6 +1868,7 @@ const Profile = () => {
       }
 
       enqueueProfileUpdate(offlineUpdates);
+      lastSaveOkRef.current = true;
       setHasUnsavedChanges(false);
 
       toast({
@@ -2016,6 +2031,7 @@ const Profile = () => {
         
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
+        lastSaveOkRef.current = true;
         setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
         clearProfileDraft(user?.id); // 🔒 Clear localStorage draft after successful save
         console.log('💾 Profile draft cleared after save');
@@ -2073,8 +2089,14 @@ const Profile = () => {
       setSaveStatus('saving');
       try {
         await submitRef.current(undefined, { silent: true });
-        setSaveStatus('saved');
-        savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+        // "Sparat" visas bara om något faktiskt persisterades — annars
+        // (t.ex. ogiltiga obligatoriska fält) återgår statusen tyst.
+        if (lastSaveOkRef.current) {
+          setSaveStatus('saved');
+          savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+        } else {
+          setSaveStatus('idle');
+        }
       } catch {
         setSaveStatus('idle');
       }
