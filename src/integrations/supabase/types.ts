@@ -1597,6 +1597,7 @@ export type Database = {
           applied_at: string | null
           availability: string | null
           bio: string | null
+          candidate_profile_id: string | null
           candidate_profile_label: string | null
           cover_letter: string | null
           created_at: string
@@ -1626,6 +1627,7 @@ export type Database = {
           applied_at?: string | null
           availability?: string | null
           bio?: string | null
+          candidate_profile_id?: string | null
           candidate_profile_label?: string | null
           cover_letter?: string | null
           created_at?: string
@@ -1655,6 +1657,7 @@ export type Database = {
           applied_at?: string | null
           availability?: string | null
           bio?: string | null
+          candidate_profile_id?: string | null
           candidate_profile_label?: string | null
           cover_letter?: string | null
           created_at?: string
@@ -1679,6 +1682,13 @@ export type Database = {
           work_schedule?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "job_applications_candidate_profile_id_fkey"
+            columns: ["candidate_profile_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "job_applications_job_id_fkey"
             columns: ["job_id"]
@@ -2256,6 +2266,42 @@ export type Database = {
           revision?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      media_deletion_queue: {
+        Row: {
+          attempts: number
+          bucket: string
+          created_at: string
+          id: string
+          last_error: string | null
+          media_kind: string
+          not_before: string
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          bucket: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          media_kind: string
+          not_before?: string
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          bucket?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          media_kind?: string
+          not_before?: string
+          storage_path?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -4478,6 +4524,10 @@ export type Database = {
           p_priority?: number
         }
         Returns: string
+      }
+      queue_profile_media_deletion: {
+        Args: { p_bucket: string; p_media_kind: string; p_storage_path: string }
+        Returns: undefined
       }
       record_app_exception: {
         Args: {
