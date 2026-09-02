@@ -159,6 +159,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   // laddas om, och får aldrig trigga städ-effekten mitt i ångra-fönstret.
   const deleteProfileRef = React.useRef(deleteProfile);
   deleteProfileRef.current = deleteProfile;
+  const flushPendingDeletesRef = React.useRef<() => Promise<void>>(async () => {});
   // Optimistisk stjärna: kortet flyttar sig direkt, innan databasen svarat.
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null);
   const [starBurstId, setStarBurstId] = useState<string | null>(null);
@@ -368,6 +369,11 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     const ids = Array.from(pendingDeletesRef.current.keys());
     for (const id of ids) await commitDelete(id);
   }, [commitDelete]);
+  flushPendingDeletesRef.current = flushPendingDeletes;
+
+  // Under ångra-fönstret räknas den borttagna profilen fortfarande i databasen,
+  // men platsen ska ändå vara valbar i gränssnittet.
+  const canAddMore = canCreateMore || pendingDeleteIds.length > 0;
 
 
   const editor = (
@@ -477,7 +483,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
               </Fragment>
             ))}
 
-            {canCreateMore && (
+            {canAddMore && (
               <>
                 <div className="mx-2 h-px bg-white/10" />
                 <DropdownMenuItem onSelect={openNew} className="flex items-center gap-3 py-2">
@@ -512,7 +518,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
   type Slot = { key: string; chip?: ChipData; isAdd?: boolean };
   const slots: Slot[] = [
     ...orderedChips.map((chip) => ({ key: chip.id, chip })),
-    ...(canCreateMore ? [{ key: 'add', isAdd: true } as Slot] : []),
+    ...(canAddMore ? [{ key: 'add', isAdd: true } as Slot] : []),
   ];
   const activeIndex = Math.max(0, slots.findIndex((s) => s.key === activeId));
 
