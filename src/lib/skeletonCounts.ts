@@ -7,8 +7,8 @@
  *   2. Sidans skeleton läser `readCachedCount(key, fallback)` och rendrar
  *      exakt så många placeholder-shape-rader/kort.
  *
- * Clampas alltid till [1, max] så vi aldrig visar tomt eller överväldigande
- * många placeholders (max sätts per sida, default 9).
+ * Clampas alltid till [0, max] så ett känt tomt resultat förblir tomt och vi
+ * aldrig visar överväldigande många placeholders (max sätts per sida).
  */
 
 export const SKELETON_COUNT_KEYS = {

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
 import { useDevice } from '@/hooks/use-device';
+import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 
 /**
  * Full-screen skeleton overlay for SearchJobs.
@@ -164,37 +165,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
           )}
 
           <div className="flex-1 overflow-hidden">
-            <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${cardCount === 1 ? ' job-card-grid-single' : cardCount === 2 ? ' job-card-grid-double' : ''}`}>
-              {Array.from({ length: cardCount }).map((_, i) => (
-
-                <div key={i} className="job-card-mobile-shell rounded-2xl overflow-hidden bg-white/[0.04]">
-                  {/* Bild — samma aspekt (2:1) som riktiga jobbkortet & hero */}
-                  <div className={`w-full ${SKELETON_SHAPE}`} style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }} />
-                  {/* Kortkropp — matchar ReadOnlyMobileJobCard exakt:
-                      logo UNDER bilden (pt-1), aldrig -mt-8/överhäng. */}
-                  <div className="job-card-mobile-body p-4 space-y-2.5">
-                    {/* Logo (w-14 h-14 som riktiga kortet) */}
-                    <div className="flex justify-center pt-1">
-                      <div className={`h-14 w-14 rounded-full ${SKELETON_SHAPE}`} />
-                    </div>
-                    {/* Titel — 2 rader centrerad */}
-                    <div className="space-y-2 pt-1">
-                      <div className={`h-5 w-4/5 mx-auto rounded ${SKELETON_SHAPE}`} />
-                      <div className={`h-5 w-3/5 mx-auto rounded ${SKELETON_SHAPE}`} />
-                    </div>
-                    {/* Info-pills */}
-                    <div className="flex flex-wrap justify-center gap-2 pt-1">
-                      <div className={`h-6 w-20 rounded-full ${SKELETON_SHAPE}`} />
-                      <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      <div className={`h-6 w-28 rounded-full ${SKELETON_SHAPE}`} />
-                      <div className={`h-6 w-24 rounded-full ${SKELETON_SHAPE}`} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <JobCardGridSkeleton count={cardCount} />
           </div>
         </div>
       </motion.div>
