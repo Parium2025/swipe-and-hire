@@ -27,6 +27,7 @@ import {
  * Inga queries ändras — samma nycklar, samma format, rent additivt.
  */
 export function useSecondaryPagesPrewarm() {
+  const queryClient = useQueryClient();
   const { user, userRole } = useAuth();
   const isEmployer = userRole?.role === 'employer';
   const userId = user?.id;
