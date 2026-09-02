@@ -28,10 +28,6 @@ interface Props {
 /** Samma solida kortyta som profilsidans sektioner – ingen streckad ram. */
 const DROPZONE = 'rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-5 md:hover:bg-white/10';
 
-/** Samma pillerknapp som "Anpassa din bild" på Min profil. */
-const PILL =
-  'bg-white/5 backdrop-blur-sm border border-white/10 text-white md:hover:bg-white/10 md:hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors outline-none focus:outline-none focus-visible:outline-none';
-
 /** Dialog för att skapa eller redigera en kandidatprofil (namn, CV, media). */
 export function CandidateProfileEditor({ open, onOpenChange, profile, saving, onSave }: Props) {
   const { user } = useAuth();
