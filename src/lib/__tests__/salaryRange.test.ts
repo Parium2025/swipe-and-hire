@@ -38,7 +38,7 @@ describe("parseSalary", () => {
 
 describe("formatSalary", () => {
   it("formaterar intervall på svenska", () => {
-    expect(formatSalary({ salary_min: 30000, salary_max: 40000 })).toBe('30 000 – 40 000 kr/mån'.replaceAll(' ', '\u00A0'));
+    expect(formatSalary({ salary_min: 30000, salary_max: 40000 })).toBe(`${(30000).toLocaleString('sv-SE')} – ${(40000).toLocaleString('sv-SE')} kr/mån`);
   });
 
   it("visar intervjutexten för after_interview", () => {
@@ -57,7 +57,7 @@ describe("getJobBadgeSalary (swipe)", () => {
 
   it("formaterar intervall i badgen", () => {
     const text = getJobBadgeSalary({ salary_min: 25000, salary_max: 30000, salary_type: "monthly" });
-    expect(text).toBe('25 000 – 30 000 kr/mån'.replaceAll(' ', '\u00A0'));
+    expect(text).toBe(`${(25000).toLocaleString('sv-SE')} – ${(30000).toLocaleString('sv-SE')} kr/mån`);
   });
 
   it("faller tillbaka på salary_transparency-intervall", () => {
