@@ -8,7 +8,7 @@ import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
-import { FileText, Camera, Trash2, Loader2, CheckCircle, RotateCcw } from 'lucide-react';
+import { FileText, Camera, Trash2, Loader2, CheckCircle, Check, X, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -340,6 +340,27 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </div>
                   )}
                 </div>
+
+                {!uploading && (
+                  <div className="grid w-full max-w-sm grid-cols-2 gap-2" aria-label="Status för profilmedia">
+                    <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                      <span className="min-w-0 break-words text-left text-xs font-medium leading-tight text-white">
+                        Video {hasVideo ? 'uppladdad' : 'inte uppladdad'}
+                      </span>
+                      <span className={hasVideo ? 'text-success' : 'text-destructive'} aria-hidden="true">
+                        {hasVideo ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                      </span>
+                    </div>
+                    <div className="flex min-h-12 items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                      <span className="min-w-0 break-words text-left text-xs font-medium leading-tight text-white">
+                        Cover-bild {coverUrl ? 'uppladdad' : 'inte uppladdad'}
+                      </span>
+                      <span className={coverUrl ? 'text-success' : 'text-destructive'} aria-hidden="true">
+                        {coverUrl ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Cover-bild – visas när profilen har en video, precis som på Min profil. */}
                 {hasVideo && (
