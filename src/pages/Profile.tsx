@@ -33,7 +33,7 @@ import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
+import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 import { formatBytes, formatTimeRemaining, UploadAbortedError, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
 import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';
 import { Progress } from '@/components/ui/progress';
@@ -979,17 +979,13 @@ const Profile = () => {
     } catch (error) {
       // Användaren tryckte på "Avbryt" – inget fel, ingen offline-kö.
       if (error instanceof UploadAbortedError || controller.signal.aborted) {
-        if (uploadedStoragePath) {
-          await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
-        }
         return;
       }
       console.error('Upload error:', error);
       if (activeCandidateProfile && uploadedStoragePath) {
-        await deleteMedia(uploadedStoragePath, isVideo ? 'profile-video' : 'profile-image');
         toast({
           title: 'Uppladdningen återställdes',
-          description: 'Filen kunde inte kopplas till profilen och har därför tagits bort.',
+          description: 'Filen kunde inte kopplas till profilen och kommer att städas säkert.',
           variant: 'destructive',
         });
         return;
@@ -1070,10 +1066,9 @@ const Profile = () => {
     } catch (error) {
       console.error('Cover upload error:', error);
       if (activeCandidateProfile && uploadedStoragePath) {
-        await deleteMedia(uploadedStoragePath, 'cover-image');
         toast({
           title: 'Uppladdningen återställdes',
-          description: 'Cover-bilden kunde inte kopplas till profilen och har därför tagits bort.',
+          description: 'Cover-bilden kunde inte kopplas till profilen och kommer att städas säkert.',
           variant: 'destructive',
         });
         return;
@@ -1295,10 +1290,9 @@ const Profile = () => {
     } catch (error) {
       console.error('Profile image upload error:', error);
       if (activeCandidateProfile && uploadedStoragePath) {
-        await deleteMedia(uploadedStoragePath, 'profile-image');
         toast({
           title: 'Uppladdningen återställdes',
-          description: 'Bilden kunde inte kopplas till profilen och har därför tagits bort.',
+          description: 'Bilden kunde inte kopplas till profilen och kommer att städas säkert.',
           variant: 'destructive',
         });
         return;
@@ -1402,10 +1396,9 @@ const Profile = () => {
     } catch (error) {
       console.error('Cover upload error:', error);
       if (activeCandidateProfile && uploadedStoragePath) {
-        await deleteMedia(uploadedStoragePath, 'cover-image');
         toast({
           title: 'Uppladdningen återställdes',
-          description: 'Cover-bilden kunde inte kopplas till profilen och har därför tagits bort.',
+          description: 'Cover-bilden kunde inte kopplas till profilen och kommer att städas säkert.',
           variant: 'destructive',
         });
         return;
@@ -1805,7 +1798,8 @@ const Profile = () => {
     ].filter(({ path }) => !!path && !savedPaths.has(path));
     const uniquePending = Array.from(new Map(pendingMedia.map((item) => [item.path, item])).values());
 
-    await Promise.allSettled(uniquePending.map(({ path, type }) => deleteMedia(path, type)));
+    // Övergivna filer städas av backend först efter full referenskontroll.
+    void uniquePending;
     resetProfileFormToValues(originalValues);
     setDeletedProfileMedia(null);
     setDeletedCoverImage(null);
