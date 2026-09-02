@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { prewarmSupportTickets } from '@/lib/supportPrewarm';
@@ -26,6 +27,7 @@ import {
  * Inga queries ändras — samma nycklar, samma format, rent additivt.
  */
 export function useSecondaryPagesPrewarm() {
+  const queryClient = useQueryClient();
   const { user, userRole } = useAuth();
   const isEmployer = userRole?.role === 'employer';
   const userId = user?.id;
@@ -35,6 +37,40 @@ export function useSecondaryPagesPrewarm() {
 
     const run = async () => {
       prewarmSupportTickets(userId);
+
+      // ── Ekonomi (Abonnemang + Betalningar) ──
+      // Samma query-nycklar som sidorna använder, så vyerna målas direkt
+      // vid kallstart i stället för att fejda/hoppa in när datan landar.
+      if (!queryClient.getQueryData(['is-premium', userId])) {
+        void queryClient.prefetchQuery({
+          queryKey: ['is-premium', userId],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('is_premium, premium_until')
+              .eq('user_id', userId)
+              .maybeSingle();
+            if (error || !data) return false;
+            if (data.is_premium === true) return true;
+            return !!data.premium_until && new Date(data.premium_until as string) > new Date();
+          },
+          staleTime: 60_000,
+        }).catch(() => { /* sidan hämtar själv */ });
+      }
+      if (!queryClient.getQueryData(['billing-purchases', userId])) {
+        void queryClient.prefetchQuery({
+          queryKey: ['billing-purchases', userId],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('one_time_purchases')
+              .select('id, price_sek, purchased_at, created_at, status, stripe_payment_intent_id')
+              .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data ?? [];
+          },
+          staleTime: 60_000,
+        }).catch(() => { /* sidan hämtar själv */ });
+      }
 
       if (!isEmployer) return;
 
@@ -81,5 +117,5 @@ export function useSecondaryPagesPrewarm() {
 
     const id = window.setTimeout(() => { void run(); }, 600);
     return () => window.clearTimeout(id);
-  }, [userId, isEmployer]);
+  }, [userId, isEmployer, queryClient]);
 }

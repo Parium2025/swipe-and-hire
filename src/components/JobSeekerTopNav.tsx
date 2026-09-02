@@ -69,6 +69,7 @@ const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hov
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function JobSeekerTopNav() {
+  const prefetchRoute = useSidebarRoutePrefetch();
   const { 
     profile, 
     signOut, 
@@ -296,6 +297,8 @@ function JobSeekerTopNav() {
                   <DropdownMenuItem
                     key={item.url}
                     onClick={() => { handleNavigation(item.url); setEconomyOpen(false); }}
+                    onMouseEnter={() => prefetchRoute(item.url)}
+                    onTouchStart={() => prefetchRoute(item.url)}
                     className={`${dropdownItemClass} ${isActive ? dropdownItemActiveClass : ''}`}
                   >
                     <item.icon className="h-4 w-4" />

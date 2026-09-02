@@ -99,7 +99,10 @@ const Subscription = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   // Verklig premiumstatus från databasen — inte ett hårdkodat värde.
-  const { isPremium } = useIsPremium();
+  // Kallstart utan hopp: planerna renderas först när premiumstatusen är känd,
+  // så listan aldrig går från två kort till ett när svaret landar. Statusen
+  // förvärms i bakgrunden, så i praktiken är den redan cachad vid montering.
+  const { isPremium, isLoading: premiumLoading } = useIsPremium();
   const currentPlan: 'basic' | 'premium' = isPremium ? 'premium' : 'basic';
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('premium');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -210,18 +213,15 @@ const Subscription = () => {
       </div>
 
       {/* Plans grid — matchar landningssidan */}
-      <div className={`relative grid gap-5 ${isPremium ? 'md:grid-cols-1 max-w-[560px] mx-auto w-full' : 'md:grid-cols-2'}`}>
-        {plans
+      <div className={`relative grid gap-5 min-h-[360px] ${isPremium ? 'md:grid-cols-1 max-w-[560px] mx-auto w-full' : 'md:grid-cols-2'}`}>
+        {(premiumLoading ? [] : plans)
           .filter((plan) => (isPremium ? plan.id === 'premium' : true))
           .map((plan) => {
           const isActive = selectedPlan === plan.id;
           const isCurrent = plan.id === currentPlan;
           return (
-            <motion.div
+            <div
               key={plan.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease }}
               onPointerDownCapture={() => setSelectedPlan(plan.id)}
               onFocusCapture={() => setSelectedPlan(plan.id)}
               onClick={() => setSelectedPlan(plan.id)}
@@ -298,7 +298,7 @@ const Subscription = () => {
                   Hantera betalmetod
                 </button>
               )}
-            </motion.div>
+            </div>
           );
         })}
       </div>
