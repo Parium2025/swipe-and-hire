@@ -167,7 +167,7 @@ const isWeatherCacheValid = (): boolean => {
   }
 };
 
-export const useEagerRatingsPreload = () => {
+export const useEagerRatingsPreload = (enabled = true) => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);

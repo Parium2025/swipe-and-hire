@@ -27,7 +27,7 @@ const REALTIME_DEBOUNCE_MS = 800;
  * 8 queries × 10s × N användare = ohållbart vid skala.
  * Realtime + filter räcker; tab-focus-recovery hanteras av RealtimeKeepAlive.
  */
-export const useCandidateBackgroundSync = () => {
+export const useCandidateBackgroundSync = (enabled = true) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isRunningRef = useRef(false);
@@ -35,7 +35,7 @@ export const useCandidateBackgroundSync = () => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !enabled) return;
 
     const userId = user.id;
 
@@ -116,7 +116,7 @@ export const useCandidateBackgroundSync = () => {
         channelRef.current = null;
       }
     };
-  }, [user, queryClient]);
+  }, [user, enabled, queryClient]);
 };
 
 /**
