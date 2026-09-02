@@ -217,11 +217,8 @@ const Subscription = () => {
           const isActive = selectedPlan === plan.id;
           const isCurrent = plan.id === currentPlan;
           return (
-            <motion.div
+            <div
               key={plan.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease }}
               onPointerDownCapture={() => setSelectedPlan(plan.id)}
               onFocusCapture={() => setSelectedPlan(plan.id)}
               onClick={() => setSelectedPlan(plan.id)}
