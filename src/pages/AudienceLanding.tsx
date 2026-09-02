@@ -398,6 +398,29 @@ const getViewportSize = () => ({
   height: window.visualViewport?.height ?? window.innerHeight,
 });
 
+// Stabil höjdbas för telefon-/hero-storlekar. In-app-webbläsare (t.ex.
+// Snapchats webview) och mobil-Safari ändrar visualViewport-höjden när deras
+// verktygsrader glider undan under scroll — utan den här spärren räknas
+// telefonens storlek om mitt i scrollen och den "växer". Höjden baslinjäs
+// därför bara om när BREDDEN ändras (rotation, split-view, fönster-resize).
+// Verktygsradskollaps och tangentbord påverkar aldrig storleken.
+let sizingBaselineWidth: number | null = null;
+let sizingBaselineHeight: number | null = null;
+
+const getSizingViewportSize = () => {
+  const width = window.visualViewport?.width ?? window.innerWidth;
+  const liveHeight = window.visualViewport?.height ?? window.innerHeight;
+  if (
+    sizingBaselineWidth === null ||
+    sizingBaselineHeight === null ||
+    Math.abs(width - sizingBaselineWidth) > 1
+  ) {
+    sizingBaselineWidth = width;
+    sizingBaselineHeight = liveHeight;
+  }
+  return { width, height: sizingBaselineHeight };
+};
+
 const isMobileLikeHeroViewport = () => {
   if (typeof window === 'undefined') return false;
   const { width, height } = getViewportSize();
