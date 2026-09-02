@@ -64,34 +64,19 @@ async function prewarmTeam(userId: string): Promise<void> {
 
   if (orgError || !organizationId) return;
 
-  const { data: roles, error: rolesError } = await supabase
-    .from('user_roles')
-    .select('user_id, role, is_active')
-    .eq('organization_id', organizationId)
-    .eq('is_active', true);
+  // E-post kan inte läsas direkt ur `profiles` — samma säkra RPC som TeamManagement.
+  const { data: memberRows, error: membersError } = await supabase.rpc('get_my_organization_member_profiles');
 
-  if (rolesError) return;
+  if (membersError) return;
 
-  const userIds = (roles ?? []).map((role) => role.user_id);
-  const { data: profileRows, error: profilesError } = userIds.length > 0
-    ? await supabase
-      .from('profiles')
-      .select('user_id, first_name, last_name, email')
-      .in('user_id', userIds)
-    : { data: [], error: null };
-
-  if (profilesError) return;
-
-  const profilesByUser = new Map((profileRows ?? []).map((row) => [row.user_id, row]));
-  const members = (roles ?? []).map((role) => {
-    const profileData = profilesByUser.get(role.user_id);
-    return {
-      ...role,
-      first_name: profileData?.first_name || null,
-      last_name: profileData?.last_name || null,
-      email: profileData?.email || null,
-    };
-  });
+  const members = (memberRows ?? []).map((row) => ({
+    user_id: row.user_id,
+    role: row.role,
+    is_active: row.is_active,
+    first_name: row.first_name || null,
+    last_name: row.last_name || null,
+    email: row.email || null,
+  }));
 
   safeSetItem(
     `${TEAM_CACHE_PREFIX}${userId}`,
