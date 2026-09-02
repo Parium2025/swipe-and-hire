@@ -1065,6 +1065,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
                     <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
+
+                    {!alreadyAppliedForUi && (
+                      <div className="mx-auto max-w-md text-left">{applicationProfileSelector}</div>
+                    )}
+                    
                     
                     <div className="flex justify-center pt-2">
                       {alreadyAppliedForUi ? (
