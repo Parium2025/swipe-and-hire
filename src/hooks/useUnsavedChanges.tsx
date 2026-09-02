@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
@@ -31,12 +31,12 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const currentPathRef = useRef(`${location.pathname}${location.search}`);
   const autosaveFlushRef = useRef<(() => void) | null>(null);
 
-  const registerAutosaveFlush = (flush: () => void) => {
+  const registerAutosaveFlush = useCallback((flush: () => void) => {
     autosaveFlushRef.current = flush;
     return () => {
       if (autosaveFlushRef.current === flush) autosaveFlushRef.current = null;
     };
-  };
+  }, []);
 
   const setHasUnsavedChanges = (value: boolean) => {
     if (value && suppressDirtyAfterConfirmRef.current) {
