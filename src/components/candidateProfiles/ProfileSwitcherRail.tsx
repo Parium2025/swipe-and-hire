@@ -327,21 +327,18 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       id: 'profile-delete',
       title: 'Profil borttagen',
       description: `${target.label} är borttagen.`,
-      action: (
-        <ToastAction
-          altText="Ångra borttagning"
-          onClick={() => {
-            const pending = pendingDeleteRef.current;
-            if (!pending || pending.id !== target.id) return;
-            window.clearTimeout(pending.timer);
-            pendingDeleteRef.current = null;
-            setPendingDeleteId(null);
-            setActiveId(target.id);
-          }}
-        >
-          Ångra
-        </ToastAction>
-      ),
+      duration: 6000,
+      action: {
+        label: 'Ångra',
+        onClick: () => {
+          const pending = pendingDeleteRef.current;
+          if (!pending || pending.id !== target.id) return;
+          window.clearTimeout(pending.timer);
+          pendingDeleteRef.current = null;
+          setPendingDeleteId(null);
+          setActiveId(target.id);
+        },
+      } as unknown as React.ReactNode,
     });
   };
 
