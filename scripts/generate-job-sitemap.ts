@@ -11,6 +11,10 @@ type JobRow = {
   expires_at: string | null;
 };
 
+type PublicJobFacetsResponse = {
+  jobs?: JobRow[];
+};
+
 const escapeXml = (value: string) =>
   value
     .replace(/&/g, "&amp;")
@@ -65,21 +69,16 @@ async function main() {
     return;
   }
 
-  const now = new Date().toISOString();
-  const params = new URLSearchParams({
-    select: "id,updated_at,created_at,expires_at",
-    is_active: "eq.true",
-    deleted_at: "is.null",
-    or: `(expires_at.is.null,expires_at.gt.${now})`,
-    order: "created_at.desc",
-    limit: "45000",
-  });
-
-  const response = await fetch(`${supabaseUrl}/rest/v1/job_postings?${params}`, {
+  // Anonym direktläsning av job_postings är avsiktligt stängd. Sitemap använder
+  // en separat RPC som endast lämnar ut URL-metadata för aktiva annonser.
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_public_sitemap_jobs`, {
+    method: "POST",
     headers: {
       apikey: anonKey,
       Authorization: `Bearer ${anonKey}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({ p_limit: 45000 }),
   });
 
   if (!response.ok) {
@@ -88,7 +87,8 @@ async function main() {
     return;
   }
 
-  const jobs = (await response.json()) as JobRow[];
+  const payload = (await response.json()) as JobRow[] | PublicJobFacetsResponse;
+  const jobs = Array.isArray(payload) ? payload : payload.jobs ?? [];
   writeFileSync(OUTPUT_PATH, generateSitemap(jobs));
   console.log(`sitemap-jobs.xml written (${jobs.length} active jobs)`);
 }
