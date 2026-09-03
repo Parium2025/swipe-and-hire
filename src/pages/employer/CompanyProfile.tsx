@@ -872,15 +872,8 @@ const CompanyProfile = () => {
               orgDefaultVideoLink={orgDefaultVideoLink}
             />
 
-            <div className="flex justify-center pt-6">
-              <button
-                type="submit"
-                disabled={loading || !hasUnsavedChanges}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-9 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Sparar...' : 'Spara ändringar'}
-              </button>
-            </div>
+            <div className="pt-2" />
+
           </form>
         </div>
       </div>
