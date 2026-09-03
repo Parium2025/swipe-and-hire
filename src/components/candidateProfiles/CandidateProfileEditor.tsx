@@ -413,8 +413,17 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       >
                         Anpassa cover-bild
                       </Button>
+                      <Button
+                        type="button"
+                        variant="glass"
+                        onClick={() => { setDeletedCover(coverUrl); setCoverUrl(null); }}
+                        className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
+                      >
+                        Ta bort cover-bild
+                      </Button>
                       </>
                     )}
+
 
                     {!coverUrl && <div className="relative flex w-full max-w-xs items-center justify-center">
                       <Button
