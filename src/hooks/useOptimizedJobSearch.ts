@@ -1333,6 +1333,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
                 };
               }
             );
+            // Patchen ovan ger omedelbar visuell uppdatering, men en redigerad
+            // annons kan ha bytt ort, yrke, lön eller titel — och matchar då
+            // kanske inte längre sökningen (eller sorteras om). Därför låter vi
+            // alltid servern räkna om resultatet direkt efteråt (debounce:at).
+            scheduleSearchInvalidate();
           }
 
           if (payload.eventType === 'DELETE') {
@@ -1350,7 +1355,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         },
       }],
     });
-  }, [queryClient, realtimeJobIdsKey]);
+  }, [queryClient, realtimeJobIdsKey, scheduleSearchInvalidate]);
+
 
   // 🆕 Nya annonser: id-filtrerade kanalen ovan kan per definition inte se rader
   // som ännu inte finns i resultatet. En separat lyssnare håller listan live.
