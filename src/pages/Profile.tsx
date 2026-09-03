@@ -1669,7 +1669,11 @@ const Profile = () => {
     
     // Clear undo data
     setDeletedCoverImage(null);
+    // Autosparet hade redan hunnit skriva bort cover-bilden i databasen —
+    // markera som ändrad så att återställningen faktiskt persisteras.
+    setHasUnsavedChanges(true);
   };
+
 
   const handleEditExistingProfile = async () => {
     // Vald extraprofil: redigera dess egen bild.
