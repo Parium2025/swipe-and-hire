@@ -176,9 +176,20 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
         </div>
 
         {/* Views badge — top-right */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
-          <Eye className="h-3.5 w-3.5 text-white" />
-          <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+          {unviewedCount > 0 && (
+            <span
+              className="flex items-center gap-1 rounded-full border border-white/20 bg-blue-500 px-2.5 py-1 shadow-lg"
+              aria-label={`${unviewedCount} nya ansökningar du inte sett`}
+            >
+              <UserPlus className="h-3.5 w-3.5 text-white" />
+              <span className="text-xs font-semibold text-white">{unviewedCount} nya</span>
+            </span>
+          )}
+          <span className="flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
+            <Eye className="h-3.5 w-3.5 text-white" />
+            <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
+          </span>
         </div>
       </div>
 
