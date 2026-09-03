@@ -913,30 +913,54 @@ export function CandidatesTable({
                       ) : '-'}
                     </TableCell>
                     <TableCell>
-                      {!isMyCandidatesLoading && !isMyCandidatesSettling && !isAlreadyAdded && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          aria-label="Lägg till i kandidatlista"
-                          className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
-                          disabled={addCandidate.isPending}
-                          onPointerDown={(e) => e.preventDefault()}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (needsListPicker) {
-                              setSelectedApplicationForTeam(application);
-                              setTeamDialogOpen(true);
-                            } else {
-                              addCandidate.mutate({
-                                applicationId: application.id,
-                                applicantId: application.applicant_id,
-                                jobId: application.job_id,
-                              });
-                            }
-                          }}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
+                      {!isMyCandidatesLoading && !isMyCandidatesSettling && (
+                        isAlreadyAdded ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                aria-label="Kandidaten finns i din lista – öppna listväljaren"
+                                className="h-8 w-8 p-0 text-green-400 hover:text-green-400 bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                                onPointerDown={(e) => e.preventDefault()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedApplicationForTeam(application);
+                                  setTeamDialogOpen(true);
+                                }}
+                              >
+                                <UserCheck className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p className="text-xs">Finns i din lista. Klicka för att flytta eller lägga till hos kollega.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label="Lägg till i kandidatlista"
+                            className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                            disabled={addCandidate.isPending}
+                            onPointerDown={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (needsListPicker) {
+                                setSelectedApplicationForTeam(application);
+                                setTeamDialogOpen(true);
+                              } else {
+                                addCandidate.mutate({
+                                  applicationId: application.id,
+                                  applicantId: application.applicant_id,
+                                  jobId: application.job_id,
+                                });
+                              }
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        )
                       )}
                     </TableCell>
                   </TableRow>
