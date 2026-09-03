@@ -8,7 +8,7 @@ import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
-import { readThroughCache } from '@/lib/performanceGuards';
+import { readThroughCache, clearPersistentCacheByPrefix } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
