@@ -21,6 +21,7 @@ const CACHE_VERSION = 1;
 const PROFILE_TTL_MS = 15 * 60 * 1000;
 const memoryCache = new Map<string, { data: unknown; timestamp: number }>();
 const inFlight = new Map<string, Promise<unknown>>();
+const requestGeneration = new Map<string, number>();
 const rateQueues = new Map<string, Promise<unknown>>();
 const lastRunAt = new Map<string, number>();
 
@@ -66,24 +67,42 @@ export function writePersistentCache<T>(key: string, data: T): void {
  * ändrats och en läsning genom cachen annars skulle ge ett gammalt svar.
  */
 export function clearPersistentCacheByPrefix(prefix: string): void {
+  const invalidatedKeys = new Set<string>();
   for (const key of Array.from(memoryCache.keys())) {
-    if (key.startsWith(prefix)) memoryCache.delete(key);
+    if (key.startsWith(prefix)) {
+      memoryCache.delete(key);
+      invalidatedKeys.add(key);
+    }
   }
   for (const key of Array.from(inFlight.keys())) {
-    if (key.startsWith(prefix)) inFlight.delete(key);
+    if (key.startsWith(prefix)) {
+      inFlight.delete(key);
+      invalidatedKeys.add(key);
+    }
   }
   try {
     const storage = typeof window !== 'undefined' ? window.localStorage : null;
-    if (!storage) return;
-    const doomed: string[] = [];
-    for (let i = 0; i < storage.length; i += 1) {
-      const key = storage.key(i);
-      if (key && key.startsWith(prefix)) doomed.push(key);
+    if (storage) {
+      const doomed: string[] = [];
+      for (let i = 0; i < storage.length; i += 1) {
+        const key = storage.key(i);
+        if (key && key.startsWith(prefix)) doomed.push(key);
+      }
+      doomed.forEach((key) => {
+        storage.removeItem(key);
+        invalidatedKeys.add(key);
+      });
     }
-    doomed.forEach((key) => storage.removeItem(key));
   } catch {
     // Storage kan vara blockerad (privat läge) — cachen är då ändå bara i minnet.
   }
+
+  // En redan startad request kan inte avbrytas här. Genom att höja dess
+  // generation hindrar vi dess gamla svar från att skriva tillbaka stale data
+  // efter att realtid har tömt cachen och en ny request redan har slutförts.
+  invalidatedKeys.forEach((key) => {
+    requestGeneration.set(key, (requestGeneration.get(key) ?? 0) + 1);
+  });
 }
 
 export async function readThroughCache<T>(
@@ -98,11 +117,16 @@ export async function readThroughCache<T>(
   const existing = inFlight.get(key) as Promise<T> | undefined;
   if (existing) return existing;
 
+  const generation = (requestGeneration.get(key) ?? 0) + 1;
+  requestGeneration.set(key, generation);
   const pending = loader().then((data) => {
-    if (validate(data)) writePersistentCache(key, data);
+    if (validate(data) && requestGeneration.get(key) === generation) {
+      writePersistentCache(key, data);
+    }
     return data;
   }).finally(() => {
-    inFlight.delete(key);
+    // En äldre request får inte radera registreringen för en nyare request.
+    if (inFlight.get(key) === pending) inFlight.delete(key);
   });
 
   inFlight.set(key, pending);
