@@ -747,7 +747,7 @@ export function CandidatesTable({
           hasTeam={hasTeam}
           getDisplayRating={getDisplayRating}
           getTeamInfo={getTeamInfo}
-          isInMyCandidates={isApplicantInMyCandidates}
+          isInMyCandidates={isApplicantAdded}
           onToggleSelect={handleMobileToggleSelect}
           onRowClick={handleRowClick}
           onAddCandidate={handleMobileAddCandidate}
@@ -795,7 +795,7 @@ export function CandidatesTable({
                 : sortedApplications
               ).map((application, rowIdx) => {
                 const trueIndex = useVirtualRendering ? virtualRows[rowIdx].index : rowIdx;
-                const isAlreadyAdded = isApplicantInMyCandidates(application.applicant_id);
+                const isAlreadyAdded = isApplicantAdded(application.applicant_id);
                 const teamInfo = getTeamInfo(application.id);
                 const isSelected = selectedIds.has(application.id);
 
