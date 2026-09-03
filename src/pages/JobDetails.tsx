@@ -605,9 +605,24 @@ const JobDetails = () => {
           onUpdateJobLocally={updateJobLocally}
         />
 
+        {/* Swipe-läge — mobil/touch */}
+        {useMobileView && applications.length > 0 && (
+          <div className="flex justify-center pb-3">
+            <Button
+              variant="outline"
+              className="min-h-11"
+              onClick={() => setSwipeFilterOpen(true)}
+            >
+              <Layers className="h-4 w-4" />
+              <span>Swipe-läge</span>
+            </Button>
+          </div>
+        )}
+
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
         <SectionErrorBoundary fallbackLabel="Kandidatvy">
         {useMobileView ? (
+
           <MobileCandidateView
             jobId={jobId || ''}
             applications={applications}
