@@ -598,11 +598,10 @@ const Profile = () => {
   const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
   // Byter man profil hör ångra-läget inte längre hemma i vyn.
   const handleActiveProfileChange = useCallback((next: CandidateProfile | null) => {
-    setActiveCandidateProfile(prev => {
-      if (prev?.id !== next?.id) setDeletedCandidateMedia(null);
-      return next;
-    });
+    setActiveCandidateProfile(next);
+    setDeletedCandidateMedia(prev => (prev && prev.profileId !== next?.id ? null : prev));
   }, []);
+
   const profileRailRef = useRef<ProfileSwitcherRailHandle>(null);
 
   // Sant först när handleSubmit faktiskt persisterade något (inte vid
