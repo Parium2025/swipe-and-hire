@@ -377,19 +377,19 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                 </div>
 
                 {!uploading && (
-                  <div className={`grid w-full max-w-sm gap-2 ${hasVideo ? 'grid-cols-2' : 'grid-cols-1'}`} aria-label="Status för profilmedia">
-                    <div className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-2 backdrop-blur-sm">
-                      <span className="min-w-0 break-words text-center text-xs font-medium leading-tight text-white">
-                        {hasVideo ? 'Video uppladdad' : `Bild ${hasImage ? 'uppladdad' : 'inte uppladdad'}`}
+                  <div className="flex w-full max-w-sm flex-wrap items-center justify-center gap-2" aria-label="Status för profilmedia">
+                    <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
+                      <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
+                        {hasVideo ? 'Video' : `Bild${hasImage ? '' : ' saknas'}`}
                       </span>
                       <span className={(hasVideo || hasImage) ? 'text-success' : 'text-destructive'} aria-hidden="true">
                         {(hasVideo || hasImage) ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                       </span>
                     </div>
                     {hasVideo && (
-                      <div className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-2 backdrop-blur-sm">
-                        <span className="min-w-0 break-words text-center text-xs font-medium leading-tight text-white">
-                          Cover-bild {coverUrl ? 'uppladdad' : 'inte uppladdad'}
+                      <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
+                        <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
+                          Cover-bild{coverUrl ? '' : ' saknas'}
                         </span>
                         <span className={coverUrl ? 'text-success' : 'text-destructive'} aria-hidden="true">
                           {coverUrl ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
@@ -397,6 +397,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       </div>
                     )}
                   </div>
+
                 )}
 
                 {/* Cover-bild – visas när profilen har en video, precis som på Min profil. */}
@@ -412,8 +413,17 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       >
                         Anpassa cover-bild
                       </Button>
+                      <Button
+                        type="button"
+                        variant="glass"
+                        onClick={() => { setDeletedCover(coverUrl); setCoverUrl(null); }}
+                        className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
+                      >
+                        Ta bort cover-bild
+                      </Button>
                       </>
                     )}
+
 
                     {!coverUrl && <div className="relative flex w-full max-w-xs items-center justify-center">
                       <Button
