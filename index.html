@@ -752,5 +752,83 @@
       // This prevents SW from interfering with HMR and causing slow reloads on touch devices
     </script>
     <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
+    <!-- 🩺 BOOT-WATCHDOG: en svart/blank skärm får aldrig bli permanent.
+         Om #root fortfarande är tomt efter 9 sekunder rensas SW/Cache och sidan
+         laddas om en gång med cache-bust. Hjälper det inte visas en synlig
+         fallback med en "Ladda om"-knapp istället för en tom skärm. -->
+    <script>
+      (function() {
+        try {
+          var ATTEMPT_KEY = 'parium_boot_watchdog_attempt';
+          var attempts = 0;
+          try { attempts = parseInt(sessionStorage.getItem(ATTEMPT_KEY) || '0', 10) || 0; } catch (e) {}
+
+          var clearAttempts = function() {
+            try { sessionStorage.removeItem(ATTEMPT_KEY); } catch (e) {}
+          };
+
+          var showFallback = function(root) {
+            root.innerHTML =
+              '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
+              '<p style="margin:0;font-size:18px;font-weight:600;">Sidan kunde inte laddas</p>' +
+              '<p style="margin:0;font-size:15px;line-height:1.5;max-width:320px;">Något gick fel när Parium startade. Kontrollera din anslutning och försök igen.</p>' +
+              '<button id="parium-boot-retry" style="margin-top:8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);color:#FFFFFF;font-size:16px;font-weight:600;">Ladda om</button>' +
+              '</div>';
+            var btn = document.getElementById('parium-boot-retry');
+            if (btn) {
+              btn.addEventListener('click', function() {
+                clearAttempts();
+                try {
+                  var u = new URL(window.location.href);
+                  u.searchParams.set('_boot', String(Date.now()));
+                  window.location.replace(u.toString());
+                } catch (e) {
+                  window.location.reload();
+                }
+              });
+            }
+          };
+
+          var check = function() {
+            var root = document.getElementById('root');
+            if (!root) return;
+            if (root.childElementCount > 0) { clearAttempts(); return; }
+
+            if (attempts >= 1) { showFallback(root); return; }
+
+            try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts + 1)); } catch (e) {}
+
+            var tasks = [];
+            try {
+              if (window.caches && caches.keys) {
+                tasks.push(caches.keys().then(function(keys) {
+                  return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                }).catch(function() {}));
+              }
+            } catch (e) {}
+            try {
+              if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                tasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
+                  return Promise.all(rs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
+                }).catch(function() {}));
+              }
+            } catch (e) {}
+
+            Promise.all(tasks).finally(function() {
+              try {
+                var u = new URL(window.location.href);
+                u.searchParams.set('_boot', String(Date.now()));
+                window.location.replace(u.toString());
+              } catch (e) {
+                try { window.location.reload(); } catch (e2) {}
+              }
+            });
+          };
+
+          setTimeout(check, 9000);
+        } catch (e) { /* noop */ }
+      })();
+    </script>
+
   </body>
 </html>
