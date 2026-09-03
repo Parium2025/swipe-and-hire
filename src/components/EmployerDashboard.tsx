@@ -60,6 +60,8 @@ const EmployerDashboard = memo(() => {
   // Server-side truth — exakta totaler även vid 10k+ jobb
   const { data: serverCounts } = useEmployerJobsCounts('personal');
   const { data: serverStats } = useEmployerDashboardStats('personal');
+  // Osedda ansökningar per annons — pricken försvinner när kandidaten öppnats.
+  const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const queryClient = useQueryClient();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
