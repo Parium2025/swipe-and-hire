@@ -277,6 +277,10 @@ export const CandidateSlide = memo(function CandidateSlide({
             </motion.div>
           </AnimatePresence>
         </div>
+        </>
+        )}
+
+
 
         {/* Separator / next hint */}
         {!isLast && (
