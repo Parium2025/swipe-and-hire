@@ -1323,7 +1323,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     };
 
 
-    return createBulletproofChannel({
+    const cleanupChannel = createBulletproofChannel({
       channelName: 'optimized-search-new-jobs',
       subscriptions: [
         {
@@ -1356,6 +1356,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         },
       ],
     });
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      cleanupChannel();
+    };
   }, [queryClient]);
 
 

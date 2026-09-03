@@ -82,16 +82,17 @@ export function clearPersistentCacheByPrefix(prefix: string): void {
   }
   try {
     const storage = typeof window !== 'undefined' ? window.localStorage : null;
-    if (!storage) return;
-    const doomed: string[] = [];
-    for (let i = 0; i < storage.length; i += 1) {
-      const key = storage.key(i);
-      if (key && key.startsWith(prefix)) doomed.push(key);
+    if (storage) {
+      const doomed: string[] = [];
+      for (let i = 0; i < storage.length; i += 1) {
+        const key = storage.key(i);
+        if (key && key.startsWith(prefix)) doomed.push(key);
+      }
+      doomed.forEach((key) => {
+        storage.removeItem(key);
+        invalidatedKeys.add(key);
+      });
     }
-    doomed.forEach((key) => {
-      storage.removeItem(key);
-      invalidatedKeys.add(key);
-    });
   } catch {
     // Storage kan vara blockerad (privat läge) — cachen är då ändå bara i minnet.
   }
