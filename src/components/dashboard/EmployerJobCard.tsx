@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Eye, Users, RotateCcw } from 'lucide-react';
+import { ChevronDown, Eye, Users, RotateCcw, UserPlus } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
