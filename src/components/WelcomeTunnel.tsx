@@ -1654,6 +1654,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       )}
                     </div>
                   )}
+
+                  {deletedProfileMedia && !formData.profileImageUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        restoreProfileMedia();
+                      }}
+                      className="mx-auto flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Ångra borttagning
+                    </button>
+                  )}
+
                 </div>
 
                 {/* Cover image upload - show when video exists */}
