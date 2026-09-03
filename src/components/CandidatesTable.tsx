@@ -7,6 +7,7 @@ import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
+import { useApplicantMembership } from '@/hooks/useApplicantMembership';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueListDialog';
