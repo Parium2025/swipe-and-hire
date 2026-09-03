@@ -40,6 +40,7 @@ import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
+import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
@@ -785,6 +786,7 @@ const EmployerDashboard = memo(() => {
                       cardIndex={idx}
                       collapsible
                       expanded={expandAll}
+                      unviewedCount={unviewedByJob.get(job.id) ?? 0}
                     />
                     {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
@@ -873,6 +875,7 @@ const EmployerDashboard = memo(() => {
                       cardIndex={idx}
                       collapsible
                       expanded={expandAll}
+                      unviewedCount={unviewedByJob.get(job.id) ?? 0}
                     />
                     {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
