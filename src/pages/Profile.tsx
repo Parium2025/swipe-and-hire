@@ -1490,6 +1490,7 @@ const Profile = () => {
         setDeletedCandidateMedia(snapshot);
       } catch (error) {
         console.error('Error deleting candidate profile media:', error);
+        toast({ title: 'Kunde inte ta bort', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -1572,6 +1573,7 @@ const Profile = () => {
         setDeletedCandidateMedia(null);
       } catch (error) {
         console.error('Error restoring candidate profile media:', error);
+        toast({ title: 'Kunde inte återställa', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -1620,6 +1622,7 @@ const Profile = () => {
         setDeletedCandidateMedia(snapshot);
       } catch (error) {
         console.error('Error deleting candidate profile cover:', error);
+        toast({ title: 'Kunde inte ta bort', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -1667,6 +1670,7 @@ const Profile = () => {
         setDeletedCandidateMedia(null);
       } catch (error) {
         console.error('Error restoring candidate profile cover:', error);
+        toast({ title: 'Kunde inte återställa', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -2182,7 +2186,7 @@ const Profile = () => {
                 baseImageUrl={isProfileVideo ? null : signedProfileImageUrl}
                 baseCoverUrl={signedCoverUrl}
                 baseHasVideo={!!effectiveVideoPath}
-                onActiveProfileChange={setActiveCandidateProfile}
+                onActiveProfileChange={handleActiveProfileChange}
               />
             )}
           </div>
