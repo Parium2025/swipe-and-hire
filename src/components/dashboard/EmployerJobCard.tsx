@@ -57,6 +57,8 @@ interface EmployerJobCardProps {
   defaultExpanded?: boolean;
   /** Controlled expanded state (global "Visa detaljer") */
   expanded?: boolean;
+  /** Antal ansökningar arbetsgivaren inte öppnat ännu — visas som blå "nya"-pill */
+  unviewedCount?: number;
 }
 
 const GRADIENTS = [
