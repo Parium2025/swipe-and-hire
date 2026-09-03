@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Mail, MailX, Smartphone } from 'lucide-react';
+import { Bell, Loader2, Mail, MailX, Smartphone } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
