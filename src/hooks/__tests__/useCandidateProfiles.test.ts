@@ -115,7 +115,7 @@ describe('useCandidateProfiles', () => {
 
   it('nekar en ny profil när maxgränsen är nådd', async () => {
     state.rows = [profile('a'), profile('b')];
-    const { result } = renderHook(() => useCandidateProfiles('u1'));
+    const { result } = renderHook(() => useCandidateProfiles('u-limit'));
     await waitFor(() => expect(result.current.profiles).toHaveLength(2));
     expect(result.current.canCreateMore).toBe(false);
 
@@ -134,8 +134,9 @@ describe('useCandidateProfiles', () => {
   });
 
   it('utser en ny standardprofil när standarden tas bort', async () => {
+    // Egen användare: modulens minnescache från tidigare test får inte läcka in.
     state.rows = [profile('a', { is_default: true }), profile('b')];
-    const { result } = renderHook(() => useCandidateProfiles('u1'));
+    const { result } = renderHook(() => useCandidateProfiles('u-promote-default'));
     await waitFor(() => expect(result.current.profiles).toHaveLength(2));
 
     await act(async () => { await result.current.deleteProfile('a'); });
@@ -146,7 +147,7 @@ describe('useCandidateProfiles', () => {
 
   it('lämnar profilens filer till referenssäker backendstädning', async () => {
     state.rows = [profile('a', { video_url: 'u1/clip.mp4', profile_image_url: 'u1/img.jpg?v=2' })];
-    const { result } = renderHook(() => useCandidateProfiles('u1'));
+    const { result } = renderHook(() => useCandidateProfiles('u-file-cleanup'));
     await waitFor(() => expect(result.current.profiles).toHaveLength(1));
 
     await act(async () => { await result.current.deleteProfile('a'); });
@@ -155,7 +156,7 @@ describe('useCandidateProfiles', () => {
 
   it('rensar övriga standarder när en ny standard sätts', async () => {
     state.rows = [profile('a', { is_default: true }), profile('b')];
-    const { result } = renderHook(() => useCandidateProfiles('u1'));
+    const { result } = renderHook(() => useCandidateProfiles('u-set-default'));
     await waitFor(() => expect(result.current.profiles).toHaveLength(2));
 
     await act(async () => { await result.current.setDefaultProfile('b'); });
