@@ -124,9 +124,12 @@ export const JobSeekerNotificationSettings = () => {
               <div className="flex w-11 md:w-14 justify-center">
                 {hasEmail && (
                   <Switch
-                    checked={isEnabled(type, 'email')}
-                    onCheckedChange={(checked) => toggle(type, checked, 'email')}
-                    disabled={isLoading}
+                    checked={!emailBlocked && isEnabled(type, 'email')}
+                    onCheckedChange={(checked) => {
+                      if (emailBlocked) return;
+                      toggle(type, checked, 'email');
+                    }}
+                    disabled={isLoading || emailBlocked}
                     aria-label={`Mejl: ${label}`}
                   />
                 )}
