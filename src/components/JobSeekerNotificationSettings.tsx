@@ -73,11 +73,15 @@ export const JobSeekerNotificationSettings = () => {
               </div>
               <Button
                 variant="glass"
-                size="sm"
-                onClick={handleResubscribe}
+                onClick={(e) => { e.currentTarget.blur(); handleResubscribe(); }}
                 disabled={updatingSubscription}
-                className="mt-1"
+                className="mt-1 h-10 rounded-full px-5 text-sm text-white transition-none hover:bg-white/10 hover:text-white active:scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               >
+                {updatingSubscription ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Mail className="h-4 w-4 mr-2" />
+                )}
                 {updatingSubscription ? 'Aktiverar…' : 'Aktivera mejlutskick igen'}
               </Button>
             </div>
