@@ -363,6 +363,7 @@ const JobDetails = () => {
     if (isTouchDevice) {
       // Touch: continuous vertical scroll viewer
       const idx = stageApps.findIndex(a => a.id === app.id);
+      setSwipeFilteredApps(null);
       setSwipeStageApps(stageApps);
       setSwipeInitialIndex(idx >= 0 ? idx : 0);
       setSwipeViewerOpen(true);
