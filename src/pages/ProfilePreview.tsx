@@ -794,14 +794,31 @@ export default function ProfilePreview() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center space-y-4 w-full">
-            {/* Desktop preview - clean Apple-style card without heavy monitor chrome */}
-            <div className="relative w-full max-w-[720px] max-h-[75vh] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-black">
-              <div 
-                className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar p-4 sm:p-6"
-                style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-              >
-                <DesktopListView />
+          <div className="flex flex-col items-center space-y-4">
+            {/* Desktop monitor frame - professional mockup */}
+            <div className="relative">
+              {/* Monitor screen */}
+              <div className="relative w-[340px] sm:w-[520px] md:w-[700px] max-w-[90vw] rounded-t-xl bg-black p-2 sm:p-3 shadow-2xl">
+                {/* Screen bezel */}
+                <div className="relative w-full h-[200px] sm:h-[300px] md:h-[420px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                  {/* Innehåll med exakt samma preview-struktur som mobilvyn */}
+                  <div 
+                    className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
+                    style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+                  >
+                    <div className="h-full p-4">
+                      <DesktopListView />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Monitor stand */}
+              <div className="flex flex-col items-center">
+                {/* Stand neck */}
+                <div className="w-16 h-8 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
+                {/* Stand base */}
+                <div className="w-40 h-3 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
               </div>
             </div>
           </div>
