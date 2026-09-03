@@ -1302,20 +1302,43 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   }, [queryClient, realtimeJobIdsKey]);
 
   // 🆕 Nya annonser: id-filtrerade kanalen ovan kan per definition inte se rader
-  // som ännu inte finns i resultatet. En separat INSERT-lyssnare håller
-  // "Aktiva jobb" / "Unika företag" / "Nya denna vecka" live utan omladdning.
+  // som ännu inte finns i resultatet. En separat lyssnare håller listan live.
+  // Vi lyssnar på både INSERT (helt nya annonser) och UPDATE (t.ex. återpublicering
+  // eller status active) — en annons som blir synlig men saknas i resultatet
+  // triggar en invalidering så att den dyker upp utan omladdning.
+  const visibleJobIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    visibleJobIdsRef.current = new Set(jobIds);
+  }, [jobIds]);
+
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleInvalidate = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+      }, 400);
+    };
+
     const channel = createRealtimeChannel('optimized-search-new-jobs')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'job_postings' },
         (payload) => {
           if (!isRealtimeJobVisible(payload.new as RealtimeJobPosting)) return;
-          if (timer) clearTimeout(timer);
-          timer = setTimeout(() => {
-            queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-          }, 400);
+          scheduleInvalidate();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'job_postings' },
+        (payload) => {
+          const nextJob = payload.new as RealtimeJobPosting;
+          if (!nextJob?.id) return;
+          if (!isRealtimeJobVisible(nextJob)) return;
+          // Redan synlig annons hanteras av den id-filtrerade kanalen ovan.
+          if (visibleJobIdsRef.current.has(nextJob.id)) return;
+          scheduleInvalidate();
         }
       )
       .subscribe();
@@ -1325,6 +1348,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+
 
 
 
