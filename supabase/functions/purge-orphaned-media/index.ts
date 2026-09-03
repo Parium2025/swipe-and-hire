@@ -146,8 +146,12 @@ async function sweepBucket(
   // 🎬 Posterbilder ligger bredvid videon (`<samma-namn>-poster.jpg`) och finns
   // aldrig i databasen. Utan detta skydd raderas de och listorna tappar sin
   // stillbild. Skydda dem så länge grundfilen är refererad.
+  // 🖼️ Samma sak för originalbilden (`<samma-namn>-original`) som gör att
+  // "Återställ" i bildredigeraren kan gå tillbaka till obeskuren bild.
   for (const path of Array.from(referenced)) {
-    referenced.add(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+    const base = path.replace(/\.[^./]+$/, '')
+    referenced.add(`${base}-poster.jpg`)
+    referenced.add(`${base}-original`)
   }
   const allFiles = await listAllFilesRecursive(admin, config.bucket, '')
 
