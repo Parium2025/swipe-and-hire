@@ -3,6 +3,7 @@ import { StartDatePicker } from '@/components/StartDatePicker';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
+import { isValidClockTime } from '@/lib/clockTime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -924,8 +925,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              (!TYPES_WITH_DURATION.has(formData.employment_type) || (formData.duration_amount && parseInt(formData.duration_amount, 10) > 0)) &&
              formData.salary_type &&
              formData.salary_transparency &&
-             formData.work_start_time.trim() &&
-             formData.work_end_time.trim() &&
+             isValidClockTime(formData.work_start_time) &&
+             isValidClockTime(formData.work_end_time) &&
              parseInt(formData.positions_count) > 0;
     }
     if (currentStep === 2) {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { isValidClockTime } from '@/lib/clockTime';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useFitScale } from '@/hooks/useFitScale';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
@@ -161,9 +162,8 @@ const getCreateDraftKeys = (templateId?: string | null) =>
       }
     : { session: JOB_WIZARD_SESSION_KEY, local: JOB_WIZARD_DRAFT_KEY };
 
-// Valid clock time in HH:MM (00:00–23:59)
-export const isValidClockTime = (value: string): boolean =>
-  /^([01]\d|2[0-3]):([0-5]\d)$/.test((value || '').trim());
+// Valid clock time in HH:MM (00:00–23:59) — shared in @/lib/clockTime
+export { isValidClockTime } from '@/lib/clockTime';
 
 
 const MobileJobWizard = ({
