@@ -2363,14 +2363,6 @@ const Profile = () => {
                   disabled={isUploadingCover}
                 />
                 <input
-                  id="profile-image-only"
-                  type="file"
-                   accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
-                  className="hidden"
-                  onChange={handleMediaChange}
-                  disabled={isUploadingMedia}
-                />
-                <input
                   id="profile-video-only"
                   type="file"
                   accept="video/*,.mp4,.m4v,.mov,.webm,.3gp,.3g2,.mkv"
