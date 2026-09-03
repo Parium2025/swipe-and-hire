@@ -1,5 +1,5 @@
 import { memo, useRef, useState, useCallback } from 'react';
-import { Star, UserPlus, Users, ChevronRight } from 'lucide-react';
+import { Star, UserPlus, UserCheck, Users, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -148,22 +148,36 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
           </span>
         </div>
 
-        {/* Right side: add button or chevron */}
+        {/* Right side: add/status button or chevron */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          {!isMyCandidatesLoading && !isAlreadyAdded && !selectionMode && (
-            <button
-              className="h-8 w-8 flex items-center justify-center rounded-full text-white active:scale-[0.97]"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (hasTeam) {
+          {!isMyCandidatesLoading && !selectionMode && (
+            isAlreadyAdded ? (
+              <button
+                aria-label="Kandidaten finns i din lista – öppna listväljaren"
+                className="h-8 w-8 flex items-center justify-center rounded-full text-green-400 active:scale-[0.97]"
+                onClick={(e) => {
+                  e.stopPropagation();
                   onAddToTeam();
-                } else {
-                  onAddCandidate();
-                }
-              }}
-            >
-              <UserPlus className="h-4 w-4" />
-            </button>
+                }}
+              >
+                <UserCheck className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                aria-label="Lägg till i kandidatlista"
+                className="h-8 w-8 flex items-center justify-center rounded-full text-white active:scale-[0.97]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (hasTeam) {
+                    onAddToTeam();
+                  } else {
+                    onAddCandidate();
+                  }
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
+              </button>
+            )
           )}
           {!selectionMode && (
             <ChevronRight className="h-4 w-4 text-white flex-shrink-0" />

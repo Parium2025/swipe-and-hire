@@ -11,7 +11,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueListDialog';
 import { useCandidateLists } from '@/hooks/useCandidateLists';
-import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
+import { UserPlus, UserCheck, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { Button } from '@/components/ui/button';
@@ -95,7 +95,7 @@ export function CandidatesTable({
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
-  const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
+  const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -736,7 +736,7 @@ export function CandidatesTable({
           hasTeam={hasTeam}
           getDisplayRating={getDisplayRating}
           getTeamInfo={getTeamInfo}
-          isInMyCandidates={isInMyCandidates}
+          isInMyCandidates={isApplicantInMyCandidates}
           onToggleSelect={handleMobileToggleSelect}
           onRowClick={handleRowClick}
           onAddCandidate={handleMobileAddCandidate}
@@ -784,7 +784,7 @@ export function CandidatesTable({
                 : sortedApplications
               ).map((application, rowIdx) => {
                 const trueIndex = useVirtualRendering ? virtualRows[rowIdx].index : rowIdx;
-                const isAlreadyAdded = isInMyCandidates(application.id);
+                const isAlreadyAdded = isApplicantInMyCandidates(application.applicant_id);
                 const teamInfo = getTeamInfo(application.id);
                 const isSelected = selectedIds.has(application.id);
 
@@ -913,30 +913,54 @@ export function CandidatesTable({
                       ) : '-'}
                     </TableCell>
                     <TableCell>
-                      {!isMyCandidatesLoading && !isMyCandidatesSettling && !isAlreadyAdded && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          aria-label="Lägg till i kandidatlista"
-                          className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
-                          disabled={addCandidate.isPending}
-                          onPointerDown={(e) => e.preventDefault()}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (needsListPicker) {
-                              setSelectedApplicationForTeam(application);
-                              setTeamDialogOpen(true);
-                            } else {
-                              addCandidate.mutate({
-                                applicationId: application.id,
-                                applicantId: application.applicant_id,
-                                jobId: application.job_id,
-                              });
-                            }
-                          }}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
+                      {!isMyCandidatesLoading && !isMyCandidatesSettling && (
+                        isAlreadyAdded ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                aria-label="Kandidaten finns i din lista – öppna listväljaren"
+                                className="h-8 w-8 p-0 text-green-400 hover:text-green-400 bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                                onPointerDown={(e) => e.preventDefault()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedApplicationForTeam(application);
+                                  setTeamDialogOpen(true);
+                                }}
+                              >
+                                <UserCheck className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p className="text-xs">Finns i din lista. Klicka för att flytta eller lägga till hos kollega.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label="Lägg till i kandidatlista"
+                            className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                            disabled={addCandidate.isPending}
+                            onPointerDown={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (needsListPicker) {
+                                setSelectedApplicationForTeam(application);
+                                setTeamDialogOpen(true);
+                              } else {
+                                addCandidate.mutate({
+                                  applicationId: application.id,
+                                  applicantId: application.applicant_id,
+                                  jobId: application.job_id,
+                                });
+                              }
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        )
                       )}
                     </TableCell>
                   </TableRow>
