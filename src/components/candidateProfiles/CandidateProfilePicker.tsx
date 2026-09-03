@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Check, ChevronDown, FileText, Video, Image as ImageIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ProfileAvatar } from '@/components/candidateProfiles/ProfileAvatar';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import type { CandidateProfile } from '@/hooks/useCandidateProfiles';
 import type { BaseApplicationProfile } from '@/hooks/useApplicationProfileSelection';
 
@@ -41,6 +42,25 @@ export function CandidateProfilePicker({ profiles, selectedId, onSelect, basePro
   };
   const options: PickerOption[] = [base, ...profiles.map(toOption)];
   const current = options.find((option) => option.id === selectedId) ?? base;
+
+  // Alla profilbilder i listan förvärms redan när väljaren monteras – när
+  // dropdownen öppnas finns signed URL + blob i cache, så inget laddas då.
+  const imagePaths = useMemo(
+    () => options.map((option) => option.profile_image_url).filter((path): path is string => !!path),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [options.map((option) => option.profile_image_url ?? '').join('|')],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    imagePaths.forEach((path) => {
+      if (cancelled) return;
+      void prefetchMediaUrl(path, 'profile-image').catch(() => {});
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [imagePaths]);
 
   const MediaStatus = ({ option }: { option: PickerOption }) => (
     <span className={`mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-tight ${dark ? 'text-white' : 'text-muted-foreground'}`}>
@@ -99,7 +119,7 @@ export function CandidateProfilePicker({ profiles, selectedId, onSelect, basePro
                   onSelect={() => onSelect(option.id ? profiles.find((profile) => profile.id === option.id) ?? null : null)}
                   className="flex items-center gap-3 py-2"
                 >
-                  <ProfileAvatar imagePath={option.profile_image_url} hasVideo={!!option.video_url} size={32} />
+                  <ProfileAvatar imagePath={option.profile_image_url} hasVideo={!!option.video_url} size={32} eager />
                   <span className="min-w-0 flex-1">
                     <span className="block whitespace-normal break-words text-[14px] font-medium leading-snug">{option.label}</span>
                     <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-tight">

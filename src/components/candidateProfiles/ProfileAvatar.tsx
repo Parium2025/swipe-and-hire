@@ -4,13 +4,15 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 /** Rund miniatyr för en profil – bild, videoikon eller personikon. */
 export function ProfileAvatar({
-  imagePath, imageMediaType = 'profile-image', signedImageUrl, hasVideo, size = 56,
+  imagePath, imageMediaType = 'profile-image', signedImageUrl, hasVideo, size = 56, eager = false,
 }: {
   imagePath?: string | null;
   imageMediaType?: 'profile-image' | 'cover-image';
   signedImageUrl?: string | null;
   hasVideo?: boolean;
   size?: number;
+  /** Sätt när miniatyren ska målas direkt (t.ex. i en dropdown som redan är förvärmd). */
+  eager?: boolean;
 }) {
   const resolved = useMediaUrl(imagePath || undefined, imageMediaType);
   const src = signedImageUrl ?? resolved;
@@ -21,7 +23,14 @@ export function ProfileAvatar({
       style={{ height: size, width: size }}
     >
       {src ? (
-        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full object-cover"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding={eager ? 'sync' : 'async'}
+          fetchPriority={eager ? 'high' : 'auto'}
+        />
       ) : hasVideo ? (
         <VideoIcon className="h-5 w-5" />
       ) : (
