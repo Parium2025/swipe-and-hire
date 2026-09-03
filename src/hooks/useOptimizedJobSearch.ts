@@ -1399,9 +1399,18 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
             // att samma rad ska behandlas som en helt ny annons i sökresultatet.
             // En redigerad annons som ännu inte finns i resultatet (cachedJob=null)
             // kan ha börjat matcha sökningen — då räknar servern om listan.
-            if (!cachedJob || realtimeTimestampChanged(cachedJob, nextJob)) {
+            // Den id-filtrerade kanalen täcker bara de 200 första annonserna i
+            // listan. En redigerad annons längre ner måste därför fångas här:
+            // om något sökrelevant fält skiljer sig mot vår cache räknar servern
+            // om listan så sortering, filter och visat innehåll blir korrekt.
+            if (
+              !cachedJob ||
+              realtimeTimestampChanged(cachedJob, nextJob) ||
+              realtimeSearchFieldsChanged(cachedJob, nextJob)
+            ) {
               scheduleInvalidate();
             }
+
           },
         },
       ],
