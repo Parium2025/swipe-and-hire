@@ -126,7 +126,8 @@ describe('useCandidateProfiles', () => {
   });
 
   it('sätter första profilen som standard och ger nästa sort_order', async () => {
-    const { result } = renderHook(() => useCandidateProfiles('u1'));
+    // Egen användare så att modulens minnescache från tidigare test inte läcker in.
+    const { result } = renderHook(() => useCandidateProfiles('u-first-default'));
     await waitFor(() => expect(result.current.loading).toBe(false));
     await act(async () => { await result.current.createProfile({ label: '  Lager  ' }); });
     expect(state.inserted[0]).toMatchObject({ label: 'Lager', is_default: true, sort_order: 0 });
