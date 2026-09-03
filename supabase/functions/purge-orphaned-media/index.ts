@@ -53,7 +53,7 @@ const BUCKETS: BucketConfig[] = [
       },
       {
         table: 'job_applications',
-        columns: ['cv_url', 'profile_image_snapshot_url', 'video_snapshot_url'],
+        columns: ['cv_url', 'profile_image_snapshot_url', 'video_snapshot_url', 'cover_image_snapshot_url'],
       },
       { table: 'profile_cv_summaries', columns: ['cv_url'] },
       { table: 'cv_analysis_queue', columns: ['cv_url'] },
