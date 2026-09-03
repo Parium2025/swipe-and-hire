@@ -56,8 +56,8 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
         <div className="relative w-full h-full flex flex-col overflow-hidden" style={{ cursor: onOpen ? 'pointer' : 'default' }}>
-          {/* Bakgrundsgradient — mildare och ljusare, täcker läsbarheten */}
-          <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+          {/* Bakgrundsgradient — mjuk och ljus, täcker läsbarheten */}
+          <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/70 via-black/25 to-transparent pointer-events-none" />
 
           {/* Avatar/video — nedflyttad för mindre dött space upptill */}
           <div
