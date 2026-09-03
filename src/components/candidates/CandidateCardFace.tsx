@@ -56,9 +56,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
         <div className="relative w-full h-full bg-transparent overflow-hidden" style={{ cursor: onOpen ? 'pointer' : 'default' }}>
-          {/* Avatar/video — centrerat längst upp */}
+          {/* Avatar/video — nedflyttad för mindre dött space upptill */}
           <div
-            className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[165px] h-[165px]"
+            className="absolute top-12 left-1/2 transform -translate-x-1/2 w-[165px] h-[165px]"
             style={{ cursor: onOpen ? 'pointer' : 'default' }}
             onClick={(e) => {
               if (showVideo) e.stopPropagation();
