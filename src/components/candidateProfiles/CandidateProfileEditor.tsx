@@ -353,6 +353,25 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </button>
                   )}
 
+                  {deletedMedia && !uploading && (
+                    <div className="flex flex-col items-center space-y-2">
+                      <Button
+                        type="button"
+                        variant="glass"
+                        onClick={() => {
+                          setVideoUrl(deletedMedia.videoUrl);
+                          setImageUrl(deletedMedia.imageUrl);
+                          setCoverUrl(deletedMedia.coverUrl);
+                          setDeletedMedia(null);
+                        }}
+                        className="h-auto min-h-10 w-full max-w-xs gap-2 whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Ångra borttagning
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Vid video visas cover-bilden i cirkeln – då räcker "Anpassa cover-bild". */}
                   {hasImage && !hasVideo && !uploading && (
                     <div className="flex flex-col items-center space-y-2">
