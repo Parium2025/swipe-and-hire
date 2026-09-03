@@ -8,7 +8,7 @@ import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
-import { readThroughCache } from '@/lib/performanceGuards';
+import { readThroughCache, clearPersistentCacheByPrefix } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
@@ -1316,9 +1316,13 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     const scheduleInvalidate = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
+        // Viktigt: den korta hot-cachen måste tömmas först, annars läser
+        // refetchen tillbaka exakt samma gamla resultat och listan står still.
+        clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
         queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
       }, 400);
     };
+
 
     const channel = createRealtimeChannel('optimized-search-new-jobs')
       .on(
