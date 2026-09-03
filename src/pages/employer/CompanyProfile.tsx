@@ -543,20 +543,54 @@ const CompanyProfile = () => {
         console.warn('Failed to clear company profile draft');
       }
 
-      toast({
-        title: "Företagsprofil uppdaterad",
-        description: "Din företagsprofil har uppdaterats."
-      });
+      if (!silent) {
+        toast({
+          title: "Företagsprofil uppdaterad",
+          description: "Din företagsprofil har uppdaterats."
+        });
+      }
+      return true;
     } catch (error) {
       toast({
         title: "Fel",
         description: "Kunde inte uppdatera företagsprofilen.",
         variant: "destructive"
       });
+      return false;
     } finally {
       setLoading(false);
     }
   };
+
+  // 🔄 Autospar: företagsprofilen sparas direkt, precis som jobbsökarprofilen.
+  // Ogiltiga fält sparas aldrig (felen visas vid fältet) och ingen notis visas
+  // vid lyckad sparning — bara en diskret "Sparat"-indikator.
+  const saveRef = useRef(handleSave);
+  saveRef.current = handleSave;
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    if (loading || isUploadingLogo) return;
+    const t = setTimeout(async () => {
+      if (savedResetRef.current) clearTimeout(savedResetRef.current);
+      setSaveStatus('saving');
+      try {
+        const ok = await saveRef.current({ silent: true });
+        if (ok) {
+          setSaveStatus('saved');
+          savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+        } else {
+          setSaveStatus('idle');
+        }
+      } catch {
+        setSaveStatus('idle');
+      }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [hasUnsavedChanges, loading, isUploadingLogo, formData]);
+
 
   // Visa loggan via exakt samma transformerade URL som sidebar/header redan
   // har laddat och cachat — då finns bilden i browser-cachen direkt när sidan
