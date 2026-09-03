@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { Button } from '@/components/ui/button';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { Layers } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -942,6 +943,19 @@ const MyCandidates = () => {
           </DragOverlay>
         </DndContext>
       )}
+
+      {/* Urvalskriterier innan swipe-läget startar */}
+      <CandidateSwipeFilterSheet
+        open={swipeFilterOpen}
+        onOpenChange={setSwipeFilterOpen}
+        candidates={allCandidatesAsAppData}
+        criteria={(swipeJobCriteria || []).map(c => ({ id: c.id, title: c.title }))}
+        onStart={(filtered) => {
+          setSwipeFilteredApps(filtered);
+          setSwipeInitialIndex(0);
+          setSwipeViewerOpen(true);
+        }}
+      />
 
       {/* Swipe Viewer — continuous scroll navigation */}
       <CandidateSwipeViewer
