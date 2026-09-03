@@ -97,8 +97,8 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             </div>
           )}
 
-          {/* Gradient längst ner med minimal info */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3">
+          {/* Gradient med minimal info — flyttat upp närmare ringen */}
+          <div className="absolute bottom-8 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 pt-8 pb-2">
             <div className="text-white w-full">
               <TruncatedText
                 text={fullName}
