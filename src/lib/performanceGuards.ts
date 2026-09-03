@@ -60,6 +60,32 @@ export function writePersistentCache<T>(key: string, data: T): void {
   safeSetItem(key, JSON.stringify({ data, timestamp, version: CACHE_VERSION }));
 }
 
+/**
+ * Rensar alla cache-poster vars nyckel börjar med prefixet — både minnes-
+ * och localStorage-lagret. Används när realtid säger att underliggande data
+ * ändrats och en läsning genom cachen annars skulle ge ett gammalt svar.
+ */
+export function clearPersistentCacheByPrefix(prefix: string): void {
+  for (const key of Array.from(memoryCache.keys())) {
+    if (key.startsWith(prefix)) memoryCache.delete(key);
+  }
+  for (const key of Array.from(inFlight.keys())) {
+    if (key.startsWith(prefix)) inFlight.delete(key);
+  }
+  try {
+    const storage = typeof window !== 'undefined' ? window.localStorage : null;
+    if (!storage) return;
+    const doomed: string[] = [];
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
+      if (key && key.startsWith(prefix)) doomed.push(key);
+    }
+    doomed.forEach((key) => storage.removeItem(key));
+  } catch {
+    // Storage kan vara blockerad (privat läge) — cachen är då ändå bara i minnet.
+  }
+}
+
 export async function readThroughCache<T>(
   key: string,
   ttlMs: number,
