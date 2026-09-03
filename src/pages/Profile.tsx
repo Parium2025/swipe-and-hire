@@ -1065,8 +1065,10 @@ const Profile = () => {
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         return;
       }
+
 
       
       // Update local state and track filename  
