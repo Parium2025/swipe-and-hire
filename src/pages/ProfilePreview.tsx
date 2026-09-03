@@ -24,6 +24,7 @@ import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
 import { ProfilePreviewSkeleton } from '@/components/profile/ProfilePreviewSkeleton';
+import { CandidateCardFace } from '@/components/candidates/CandidateCardFace';
 
 interface ProfileViewData {
   id: string;
