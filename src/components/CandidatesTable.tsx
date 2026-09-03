@@ -7,6 +7,7 @@ import { CandidateProfileDialog } from './CandidateProfileDialog';
 import { CandidateAvatar } from './CandidateAvatar';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
+import { useApplicantMembership } from '@/hooks/useApplicantMembership';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueListDialog';
@@ -96,6 +97,16 @@ export function CandidatesTable({
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
   const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
+  // Serverkoll för de personer som visas — täcker kandidater som inte är laddade i minnet
+  const visibleApplicantIds = useMemo(
+    () => applications.map((a) => a.applicant_id).filter(Boolean) as string[],
+    [applications]
+  );
+  const serverMembership = useApplicantMembership(visibleApplicantIds);
+  const isApplicantAdded = useCallback(
+    (applicantId: string) => isApplicantInMyCandidates(applicantId) || serverMembership.has(applicantId),
+    [isApplicantInMyCandidates, serverMembership]
+  );
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -736,7 +747,7 @@ export function CandidatesTable({
           hasTeam={hasTeam}
           getDisplayRating={getDisplayRating}
           getTeamInfo={getTeamInfo}
-          isInMyCandidates={isApplicantInMyCandidates}
+          isInMyCandidates={isApplicantAdded}
           onToggleSelect={handleMobileToggleSelect}
           onRowClick={handleRowClick}
           onAddCandidate={handleMobileAddCandidate}
@@ -784,7 +795,7 @@ export function CandidatesTable({
                 : sortedApplications
               ).map((application, rowIdx) => {
                 const trueIndex = useVirtualRendering ? virtualRows[rowIdx].index : rowIdx;
-                const isAlreadyAdded = isApplicantInMyCandidates(application.applicant_id);
+                const isAlreadyAdded = isApplicantAdded(application.applicant_id);
                 const teamInfo = getTeamInfo(application.id);
                 const isSelected = selectedIds.has(application.id);
 
