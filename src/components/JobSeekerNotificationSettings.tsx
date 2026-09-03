@@ -1,19 +1,47 @@
-import { Bell, Mail, Smartphone } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, Mail, MailX, Smartphone } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 import { useNotificationPreferences, NotificationType } from '@/hooks/useNotificationPreferences';
+import { useEmailSubscription } from '@/hooks/useEmailSubscription';
 
 const JOBSEEKER_NOTIFICATION_TYPES: { type: NotificationType; label: string; description: string; hasEmail?: boolean }[] = [
   { type: 'application_status', label: 'Ansökningar', description: 'Bekräftelse när du söker ett jobb', hasEmail: true },
   { type: 'interview_scheduled', label: 'Intervjuinbjudningar', description: 'När du blir inbjuden till intervju' },
   { type: 'new_message', label: 'Meddelanden', description: 'När du får nya meddelanden' },
-  { type: 'saved_search_match', label: 'Nya jobb i dina sökningar', description: 'När nya jobb stämmer med dina sparade sökningar' },
+  { type: 'saved_search_match', label: 'Nya jobb i dina sökningar', description: 'När nya jobb stämmer med dina sökningar' },
   { type: 'saved_job_expiring', label: 'Sparade jobb utgår', description: 'När ett sparat jobb snart går ut' },
   { type: 'job_closed', label: 'Avslutade annonser', description: 'När en annons du sökt stängs eller utgår', hasEmail: true },
 ];
 
 export const JobSeekerNotificationSettings = () => {
   const { isEnabled, toggle, isLoading } = useNotificationPreferences();
+  const { subscribed, isKnown, setSubscribed } = useEmailSubscription();
+  const [updatingSubscription, setUpdatingSubscription] = useState(false);
+
+  const emailBlocked = isKnown && !subscribed;
+
+  const handleResubscribe = async () => {
+    setUpdatingSubscription(true);
+    try {
+      await setSubscribed(true);
+      toast({
+        title: 'Mejlutskick aktiverade',
+        description: 'Du får app-mejl igen enligt dina inställningar nedan.',
+      });
+    } catch {
+      toast({
+        title: 'Kunde inte aktivera mejlutskick',
+        description: 'Försök igen om en stund.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingSubscription(false);
+    }
+  };
+
 
   return (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
