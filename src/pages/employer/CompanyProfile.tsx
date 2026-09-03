@@ -23,6 +23,7 @@ import { CompanyLogoSection } from './companyProfile/CompanyLogoSection';
 import { CompanySocialMediaSection, getPlatformLabel, validateUrl } from './companyProfile/CompanySocialMediaSection';
 import { CompanyInterviewSettings } from './companyProfile/CompanyInterviewSettings';
 import { DeleteSocialLinkDialog, DeleteLogoDialog } from './companyProfile/CompanyProfileDialogs';
+import { isValidMeetingLink } from './companyProfile/meetingLinkValidation';
 import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
