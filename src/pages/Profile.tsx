@@ -596,7 +596,15 @@ const Profile = () => {
   // Vald profil i profilväljaren – null = grundprofilen ("Min profil").
   // När en extraprofil är vald visas dess bild/video på huvudytan istället.
   const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
+  // Byter man profil hör ångra-läget inte längre hemma i vyn.
+  const handleActiveProfileChange = useCallback((next: CandidateProfile | null) => {
+    setActiveCandidateProfile(prev => {
+      if (prev?.id !== next?.id) setDeletedCandidateMedia(null);
+      return next;
+    });
+  }, []);
   const profileRailRef = useRef<ProfileSwitcherRailHandle>(null);
+
   // Sant först när handleSubmit faktiskt persisterade något (inte vid
   // valideringsfel) — styr "Sparat"-statusen i autosparet.
   const lastSaveOkRef = useRef(false);
