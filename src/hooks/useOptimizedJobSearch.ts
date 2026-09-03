@@ -1003,6 +1003,37 @@ const realtimeTimestampChanged = (
 ) => previous?.created_at !== next?.created_at || previous?.published_at !== next?.published_at;
 
 /**
+ * Sökrelevanta fält: ändras något av dem måste servern räkna om listan, annars
+ * kan en redigerad annons ligga kvar på fel plats eller i fel filter.
+ */
+const REALTIME_SEARCH_FIELDS = [
+  'title',
+  'occupation',
+  'category',
+  'employment_type',
+  'location',
+  'workplace_city',
+  'workplace_municipality',
+  'workplace_county',
+  'work_location_type',
+  'remote_work_possible',
+  'salary_min',
+  'salary_max',
+  'salary_type',
+  'expires_at',
+] as const;
+
+const realtimeSearchFieldsChanged = (
+  previous?: RealtimeJobPosting | null,
+  next?: RealtimeJobPosting | null,
+) => {
+  if (!previous || !next) return true;
+  return REALTIME_SEARCH_FIELDS.some(
+    (field) => (previous as any)[field] !== (next as any)[field],
+  );
+};
+
+/**
  * Måste spegla samma regel som `search_jobs`-RPC:n: publicerad, aktiv, ej
  * raderad OCH ej utgången. Utan expires_at-kontrollen blev en annons som
  * gick ut medan jobbsökaren hade listan öppen kvar i listan tills nästa
@@ -1399,9 +1430,18 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
             // att samma rad ska behandlas som en helt ny annons i sökresultatet.
             // En redigerad annons som ännu inte finns i resultatet (cachedJob=null)
             // kan ha börjat matcha sökningen — då räknar servern om listan.
-            if (!cachedJob || realtimeTimestampChanged(cachedJob, nextJob)) {
+            // Den id-filtrerade kanalen täcker bara de 200 första annonserna i
+            // listan. En redigerad annons längre ner måste därför fångas här:
+            // om något sökrelevant fält skiljer sig mot vår cache räknar servern
+            // om listan så sortering, filter och visat innehåll blir korrekt.
+            if (
+              !cachedJob ||
+              realtimeTimestampChanged(cachedJob, nextJob) ||
+              realtimeSearchFieldsChanged(cachedJob, nextJob)
+            ) {
               scheduleInvalidate();
             }
+
           },
         },
       ],
