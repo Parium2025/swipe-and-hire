@@ -33,7 +33,7 @@ import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
+import { uploadMedia, getMediaUrl, getOriginalImageUrl, uploadOriginalImage } from '@/lib/mediaManager';
 import { formatBytes, formatTimeRemaining, UploadAbortedError, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
 import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';
 import { Progress } from '@/components/ui/progress';
@@ -482,6 +482,28 @@ const Profile = () => {
   const [cvOpen, setCvOpen] = useState(false);
   const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
   const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
+  // Sant när editorn öppnades med en källbild som ännu inte finns sparad som
+  // original i lagringen. Då sparar vi den vid nästa "Spara" så att
+  // "Återställ" i editorn alltid kan gå tillbaka till originalbilden.
+  const persistProfileOriginalRef = useRef(true);
+  const persistCoverOriginalRef = useRef(true);
+
+  /** Sparar editorns källbild som original bredvid den beskurna bilden (best-effort). */
+  const persistOriginalImage = useCallback(async (
+    sourceSrc: string,
+    croppedPath: string,
+    mediaType: 'profile-image' | 'cover-image',
+  ) => {
+    if (!sourceSrc || !croppedPath) return;
+    try {
+      const response = await fetch(sourceSrc);
+      const blob = await response.blob();
+      if (!blob.size) return;
+      await uploadOriginalImage(croppedPath, blob, mediaType);
+    } catch (error) {
+      console.warn('Kunde inte spara originalbilden:', error);
+    }
+  }, []);
 
   const resetProfileFormToValues = useCallback((values: ProfileFormValues) => {
     setFirstName(values.firstName || '');
@@ -1185,6 +1207,7 @@ const Profile = () => {
     } else if (file.type.startsWith('image/') && file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
       // Spara originalfilen för framtida redigeringar
       setOriginalProfileImageFile(file);
+      persistProfileOriginalRef.current = true;
       const imageUrl = URL.createObjectURL(file);
       setPendingImageSrc(imageUrl);
       setIsEditingExistingProfileImage(false); // ny uppladdning, inte befintlig
@@ -1199,6 +1222,7 @@ const Profile = () => {
     if (file.type.startsWith('image/') && file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
       // Spara originalfilen för framtida redigeringar
       setOriginalCoverImageFile(file);
+      persistCoverOriginalRef.current = true;
       const imageUrl = URL.createObjectURL(file);
       setPendingCoverSrc(imageUrl);
       setIsEditingExistingCoverImage(false); // ny uppladdning
@@ -1238,6 +1262,12 @@ const Profile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
       uploadedStoragePath = storagePath;
+
+      // Spara originalbilden bredvid beskärningen så att "Återställ" i editorn
+      // alltid kan gå tillbaka till originalet – även efter omladdning.
+      if (persistProfileOriginalRef.current) {
+        await persistOriginalImage(pendingImageSrc, storagePath, 'profile-image');
+      }
 
       // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
       if (targetProfileId) {
@@ -1346,6 +1376,10 @@ const Profile = () => {
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
       uploadedStoragePath = storagePath;
+
+      if (persistCoverOriginalRef.current) {
+        await persistOriginalImage(pendingCoverSrc, storagePath, 'cover-image');
+      }
 
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
       if (targetProfileId) {
