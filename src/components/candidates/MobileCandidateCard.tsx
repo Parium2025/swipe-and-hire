@@ -1,5 +1,5 @@
 import { memo, useRef, useState, useCallback } from 'react';
-import { Star, UserPlus, Users, ChevronRight } from 'lucide-react';
+import { Star, UserPlus, UserCheck, Users, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CandidateAvatar } from '@/components/CandidateAvatar';

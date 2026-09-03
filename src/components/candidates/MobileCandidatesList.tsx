@@ -48,7 +48,7 @@ export function MobileCandidatesList({
             application={application}
             rating={getDisplayRating(application)}
             teamInfo={getTeamInfo(application.id)}
-            isAlreadyAdded={isInMyCandidates(application.id)}
+            isAlreadyAdded={isInMyCandidates(application.applicant_id)}
             isMyCandidatesLoading={isMyCandidatesLoading}
             selectionMode={selectionMode}
             isSelected={selectedIds.has(application.id)}
