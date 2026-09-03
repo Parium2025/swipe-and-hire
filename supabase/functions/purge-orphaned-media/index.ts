@@ -53,7 +53,7 @@ const BUCKETS: BucketConfig[] = [
       },
       {
         table: 'job_applications',
-        columns: ['cv_url', 'profile_image_snapshot_url', 'video_snapshot_url'],
+        columns: ['cv_url', 'profile_image_snapshot_url', 'video_snapshot_url', 'cover_image_snapshot_url'],
       },
       { table: 'profile_cv_summaries', columns: ['cv_url'] },
       { table: 'cv_analysis_queue', columns: ['cv_url'] },
@@ -146,8 +146,12 @@ async function sweepBucket(
   // 🎬 Posterbilder ligger bredvid videon (`<samma-namn>-poster.jpg`) och finns
   // aldrig i databasen. Utan detta skydd raderas de och listorna tappar sin
   // stillbild. Skydda dem så länge grundfilen är refererad.
+  // 🖼️ Samma sak för originalbilden (`<samma-namn>-original`) som gör att
+  // "Återställ" i bildredigeraren kan gå tillbaka till obeskuren bild.
   for (const path of Array.from(referenced)) {
-    referenced.add(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+    const base = path.replace(/\.[^./]+$/, '')
+    referenced.add(`${base}-poster.jpg`)
+    referenced.add(`${base}-original`)
   }
   const allFiles = await listAllFilesRecursive(admin, config.bucket, '')
 
@@ -218,7 +222,7 @@ async function processDeletionQueue(
 ) {
   const { data, error } = await admin
     .from('media_deletion_queue')
-    .select('id,bucket,storage_path,attempts')
+    .select('id,bucket,storage_path,attempts,media_kind')
     .lte('not_before', new Date().toISOString())
     .order('created_at')
     .limit(PAGE)
@@ -251,8 +255,12 @@ async function processDeletionQueue(
     }
 
     if (dryRun) continue
+    // Sidovagnar (poster för video, obeskuret original för bilder) finns aldrig
+    // i databasen – de måste städas tillsammans med grundfilen.
+    const base = path.replace(/\.[^./]+$/, '')
     const paths = [path]
-    if (item.media_kind === 'profile-video') paths.push(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+    if (item.media_kind === 'profile-video') paths.push(`${base}-poster.jpg`)
+    else paths.push(`${base}-original`)
     const { error: removeError } = await admin.storage.from(item.bucket).remove(paths)
     if (removeError) {
       await admin.from('media_deletion_queue').update({
