@@ -222,7 +222,7 @@ async function processDeletionQueue(
 ) {
   const { data, error } = await admin
     .from('media_deletion_queue')
-    .select('id,bucket,storage_path,attempts')
+    .select('id,bucket,storage_path,attempts,media_kind')
     .lte('not_before', new Date().toISOString())
     .order('created_at')
     .limit(PAGE)
@@ -255,8 +255,12 @@ async function processDeletionQueue(
     }
 
     if (dryRun) continue
+    // Sidovagnar (poster för video, obeskuret original för bilder) finns aldrig
+    // i databasen – de måste städas tillsammans med grundfilen.
+    const base = path.replace(/\.[^./]+$/, '')
     const paths = [path]
-    if (item.media_kind === 'profile-video') paths.push(`${path.replace(/\.[^./]+$/, '')}-poster.jpg`)
+    if (item.media_kind === 'profile-video') paths.push(`${base}-poster.jpg`)
+    else paths.push(`${base}-original`)
     const { error: removeError } = await admin.storage.from(item.bucket).remove(paths)
     if (removeError) {
       await admin.from('media_deletion_queue').update({
