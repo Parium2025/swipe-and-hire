@@ -311,22 +311,8 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </div>
                   )}
 
-                  {deletedMedia ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setVideoUrl(deletedMedia.videoUrl);
-                        setImageUrl(deletedMedia.imageUrl);
-                        setCoverUrl(deletedMedia.coverUrl);
-                        setDeletedMedia(null);
-                      }}
-                      aria-label="Återställ media"
-                      className="absolute -top-3 -right-3 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:bg-white/30"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </button>
-                  ) : (hasVideo || hasImage) && (
+                  {/* Ta bort-ikon; ångra visas som knapp nedanför, som för cover-bilden. */}
+                  {(hasVideo || hasImage) && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -342,6 +328,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
+
 
                   <input
                     ref={mediaInputRef}
@@ -364,6 +351,25 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     >
                       Välj en profilbild, profilvideo eller båda (video max 60 sekunder).
                     </button>
+                  )}
+
+                  {deletedMedia && !uploading && (
+                    <div className="flex flex-col items-center space-y-2">
+                      <Button
+                        type="button"
+                        variant="glass"
+                        onClick={() => {
+                          setVideoUrl(deletedMedia.videoUrl);
+                          setImageUrl(deletedMedia.imageUrl);
+                          setCoverUrl(deletedMedia.coverUrl);
+                          setDeletedMedia(null);
+                        }}
+                        className="h-auto min-h-10 w-full max-w-xs gap-2 whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Ångra borttagning
+                      </Button>
+                    </div>
                   )}
 
                   {/* Vid video visas cover-bilden i cirkeln – då räcker "Anpassa cover-bild". */}
