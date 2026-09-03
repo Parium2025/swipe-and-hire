@@ -397,6 +397,7 @@ const Dashboard = memo(() => {
                   collapsible
                   expanded={expandAll}
                   onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                  unviewedCount={unviewedByJob.get((job as any).id) ?? 0}
                 />
 
 
