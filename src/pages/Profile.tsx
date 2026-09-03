@@ -596,7 +596,14 @@ const Profile = () => {
   // Vald profil i profilväljaren – null = grundprofilen ("Min profil").
   // När en extraprofil är vald visas dess bild/video på huvudytan istället.
   const [activeCandidateProfile, setActiveCandidateProfile] = useState<CandidateProfile | null>(null);
+  // Byter man profil hör ångra-läget inte längre hemma i vyn.
+  const handleActiveProfileChange = useCallback((next: CandidateProfile | null) => {
+    setActiveCandidateProfile(next);
+    setDeletedCandidateMedia(prev => (prev && prev.profileId !== next?.id ? null : prev));
+  }, []);
+
   const profileRailRef = useRef<ProfileSwitcherRailHandle>(null);
+
   // Sant först när handleSubmit faktiskt persisterade något (inte vid
   // valideringsfel) — styr "Sparat"-statusen i autosparet.
   const lastSaveOkRef = useRef(false);
@@ -962,8 +969,11 @@ const Profile = () => {
             ? { video_url: storagePath }
             : { profile_image_url: storagePath }
         );
+        // Ny media ersätter borttagningen – ångra får inte skriva över den.
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         return;
       }
+
 
       
       // Update local state
@@ -1062,8 +1072,10 @@ const Profile = () => {
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         return;
       }
+
 
       
       // Update local state and track filename  
@@ -1273,11 +1285,13 @@ const Profile = () => {
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath });
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         setImageEditorOpen(false);
         if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
         setPendingImageSrc('');
         return;
       }
+
 
 
       // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
@@ -1385,11 +1399,13 @@ const Profile = () => {
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         setCoverEditorOpen(false);
         if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
         setPendingCoverSrc('');
         return;
       }
+
 
 
       // Förladdda den signerade URL:en i bakgrunden (utan att blockera UI)
@@ -1474,6 +1490,7 @@ const Profile = () => {
         setDeletedCandidateMedia(snapshot);
       } catch (error) {
         console.error('Error deleting candidate profile media:', error);
+        toast({ title: 'Kunde inte ta bort', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -1556,6 +1573,7 @@ const Profile = () => {
         setDeletedCandidateMedia(null);
       } catch (error) {
         console.error('Error restoring candidate profile media:', error);
+        toast({ title: 'Kunde inte återställa', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -1604,6 +1622,7 @@ const Profile = () => {
         setDeletedCandidateMedia(snapshot);
       } catch (error) {
         console.error('Error deleting candidate profile cover:', error);
+        toast({ title: 'Kunde inte ta bort', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -1651,6 +1670,7 @@ const Profile = () => {
         setDeletedCandidateMedia(null);
       } catch (error) {
         console.error('Error restoring candidate profile cover:', error);
+        toast({ title: 'Kunde inte återställa', description: 'Försök igen om en stund.', variant: 'destructive' });
       }
       return;
     }
@@ -2166,7 +2186,7 @@ const Profile = () => {
                 baseImageUrl={isProfileVideo ? null : signedProfileImageUrl}
                 baseCoverUrl={signedCoverUrl}
                 baseHasVideo={!!effectiveVideoPath}
-                onActiveProfileChange={setActiveCandidateProfile}
+                onActiveProfileChange={handleActiveProfileChange}
               />
             )}
           </div>
