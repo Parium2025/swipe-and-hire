@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -1265,6 +1265,24 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     });
   }, [rawJobs, reviewsData, selectedLocations]);
 
+  // Delad, debounce:ad invalidering. Både den id-filtrerade kanalen (redigerad
+  // annons som redan visas) och den breda kanalen (ny/återpublicerad annons)
+  // använder samma timer, så flera händelser i följd ger EN refetch.
+  const invalidateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleSearchInvalidate = useCallback(() => {
+    if (invalidateTimerRef.current) clearTimeout(invalidateTimerRef.current);
+    invalidateTimerRef.current = setTimeout(() => {
+      // Viktigt: den korta hot-cachen måste tömmas först, annars läser
+      // refetchen tillbaka exakt samma gamla resultat och listan står still.
+      clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
+      queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
+    }, 400);
+  }, [queryClient]);
+
+  useEffect(() => () => {
+    if (invalidateTimerRef.current) clearTimeout(invalidateTimerRef.current);
+  }, []);
+
   // 🔥 SCALE: Realtime-listenern är scope:ad till de jobb som faktiskt visas.
   // PostgREST in.()-filter cap:as på 200 ids; vi prenumererar på max 200 av
   // de mest relevanta (första sidan), inte hela det infinitivt växande resultatet.
@@ -1272,6 +1290,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     if (jobIds.length === 0) return '';
     return jobIds.slice(0, 200).sort().join(',');
   }, [jobIds]);
+
 
   useEffect(() => {
     if (!realtimeJobIdsKey) return;
@@ -1314,6 +1333,11 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
                 };
               }
             );
+            // Patchen ovan ger omedelbar visuell uppdatering, men en redigerad
+            // annons kan ha bytt ort, yrke, lön eller titel — och matchar då
+            // kanske inte längre sökningen (eller sorteras om). Därför låter vi
+            // alltid servern räkna om resultatet direkt efteråt (debounce:at).
+            scheduleSearchInvalidate();
           }
 
           if (payload.eventType === 'DELETE') {
@@ -1331,7 +1355,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
         },
       }],
     });
-  }, [queryClient, realtimeJobIdsKey]);
+  }, [queryClient, realtimeJobIdsKey, scheduleSearchInvalidate]);
+
 
   // 🆕 Nya annonser: id-filtrerade kanalen ovan kan per definition inte se rader
   // som ännu inte finns i resultatet. En separat lyssnare håller listan live.
@@ -1339,17 +1364,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // eller status active) — en annons som blir synlig men saknas i resultatet
   // triggar en invalidering så att den dyker upp utan omladdning.
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const scheduleInvalidate = () => {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        // Viktigt: den korta hot-cachen måste tömmas först, annars läser
-        // refetchen tillbaka exakt samma gamla resultat och listan står still.
-        clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
-        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-      }, 400);
-    };
-
+    const scheduleInvalidate = scheduleSearchInvalidate;
 
     const cleanupChannel = createBulletproofChannel({
       channelName: 'optimized-search-new-jobs',
@@ -1382,6 +1397,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
             // meddelanden och urval ska ligga kvar. RPC:n flyttar created_at och
             // published_at till nu, vilket är den stabila realtidssignalen för
             // att samma rad ska behandlas som en helt ny annons i sökresultatet.
+            // En redigerad annons som ännu inte finns i resultatet (cachedJob=null)
+            // kan ha börjat matcha sökningen — då räknar servern om listan.
             if (!cachedJob || realtimeTimestampChanged(cachedJob, nextJob)) {
               scheduleInvalidate();
             }
@@ -1390,11 +1407,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       ],
     });
 
-    return () => {
-      if (timer) clearTimeout(timer);
-      cleanupChannel();
-    };
-  }, [queryClient]);
+    return cleanupChannel;
+  }, [queryClient, scheduleSearchInvalidate]);
+
 
 
 
