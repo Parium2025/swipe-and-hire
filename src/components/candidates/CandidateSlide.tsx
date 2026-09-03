@@ -10,6 +10,7 @@ import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { TABS, type TabKey } from './CandidateSlideConstants';
 import { CandidateSlideProfileTab } from './CandidateSlideProfileTab';
+import { CandidateCardFace } from './CandidateCardFace';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
 interface CandidateSlideProps {
@@ -37,6 +38,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   const isProfileVideo = application.is_profile_video;
   const initials = `${(application.first_name?.[0] || '').toUpperCase()}${(application.last_name?.[0] || '').toUpperCase()}`;
   const [activeTab, setActiveTab] = useState<TabKey>('profil');
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const swipeLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
