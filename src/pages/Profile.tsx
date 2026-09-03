@@ -2228,19 +2228,9 @@ const Profile = () => {
                 </div>
               )}
 
-              {/* Delete/Restore icon for profile media – samma för alla profiler */}
-              {((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'media') || (!activeCandidateProfile && deletedProfileMedia && !videoUrl)) ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void restoreProfileMedia();
-                  }}
-                  className="absolute -top-3 -right-3 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 hover:bg-white/30"
-                  aria-label="Återställ media"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </button>
-              ) : displayHasMedia ? (
+              {/* Ta bort-ikon för profilmedia – ångra visas som knapp nedanför,
+                  precis som för cover-bilden. */}
+              {displayHasMedia && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2251,7 +2241,8 @@ const Profile = () => {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              ) : null}
+              )}
+
 
               <input
                 id="profile-image"
