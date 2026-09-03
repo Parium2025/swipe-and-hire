@@ -432,7 +432,7 @@ const CompanyProfile = () => {
 
     toast({
       title: "Länk borttagen",
-      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Klicka på Spara ändringar för att bekräfta.`,
+      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Ändringen sparas automatiskt.`,
     });
 
     setDeleteDialogOpen(false);
