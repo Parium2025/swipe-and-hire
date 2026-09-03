@@ -80,7 +80,7 @@ function getGradientForId(id: string) {
 }
 
 
-export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false, expanded: expandedProp }: EmployerJobCardProps) => {
+export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, collapsible = false, defaultExpanded = false, expanded: expandedProp, unviewedCount = 0 }: EmployerJobCardProps) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(expandedProp ?? defaultExpanded);
   useEffect(() => {
