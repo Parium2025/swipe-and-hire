@@ -59,24 +59,27 @@ export const JobSeekerNotificationSettings = () => {
         </p>
 
         {emailBlocked && (
-          <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 p-3">
-            <div className="flex items-start gap-2">
-              <MailX className="h-4 w-4 shrink-0 mt-0.5 text-amber-300" />
+          <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 p-4 md:p-3">
+            <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400/15">
+                <MailX className="h-4 w-4 text-amber-300" />
+              </div>
               <div className="min-w-0 space-y-2">
                 <p className="text-sm font-medium text-white">Du har avregistrerat dig från mejl</p>
                 <p className="text-sm text-white">
                   Dina mejlval nedan är sparade, men inga app-mejl skickas till din adress förrän du aktiverar dem igen.
                   Inloggnings- och lösenordsmejl påverkas inte.
                 </p>
-                <Button
-                  variant="glass"
-                  size="sm"
-                  onClick={handleResubscribe}
-                  disabled={updatingSubscription}
-                >
-                  {updatingSubscription ? 'Aktiverar…' : 'Aktivera mejlutskick igen'}
-                </Button>
               </div>
+              <Button
+                variant="glass"
+                size="sm"
+                onClick={handleResubscribe}
+                disabled={updatingSubscription}
+                className="mt-1"
+              >
+                {updatingSubscription ? 'Aktiverar…' : 'Aktivera mejlutskick igen'}
+              </Button>
             </div>
           </div>
         )}
