@@ -1316,9 +1316,13 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     const scheduleInvalidate = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
+        // Viktigt: den korta hot-cachen måste tömmas först, annars läser
+        // refetchen tillbaka exakt samma gamla resultat och listan står still.
+        clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
         queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
       }, 400);
     };
+
 
     const channel = createRealtimeChannel('optimized-search-new-jobs')
       .on(
