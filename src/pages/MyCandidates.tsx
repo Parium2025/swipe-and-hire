@@ -6,6 +6,9 @@ import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { useJobCriteria } from '@/hooks/useCriteriaResults';
+import { Layers } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -204,6 +207,8 @@ const MyCandidates = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
+  const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
+  const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
 
   // ── Centralized application fetching ─────────────────
   const candidateFallback = useMemo(() => selectedCandidate ? {
@@ -504,6 +509,7 @@ const MyCandidates = () => {
       // Touch: continuous vertical scroll viewer
       const stageCandidates = filteredCandidatesByStage[candidate.stage] || [];
       const idx = stageCandidates.findIndex(c => c.id === candidate.id);
+      setSwipeFilteredApps(null);
       setSwipeStageCandidates(stageCandidates);
       setSwipeInitialIndex(idx >= 0 ? idx : 0);
       setSwipeViewerOpen(true);
@@ -726,8 +732,22 @@ const MyCandidates = () => {
 
   // Applications for the swipe viewer
   const swipeApplicationsData = useMemo(() => {
+    if (swipeFilteredApps) return swipeFilteredApps;
     return swipeStageCandidates.map(mapCandidateToAppData);
-  }, [swipeStageCandidates, mapCandidateToAppData]);
+  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData]);
+
+  // Alla visade kandidater som underlag för swipe-läget
+  const allCandidatesAsAppData = useMemo(
+    () => displayedCandidates.map(mapCandidateToAppData),
+    [displayedCandidates, mapCandidateToAppData],
+  );
+
+  // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
+  const singleSwipeJobId = useMemo(() => {
+    const ids = new Set(displayedCandidates.map(c => c.job_id).filter(Boolean));
+    return ids.size === 1 ? (Array.from(ids)[0] as string) : null;
+  }, [displayedCandidates]);
+  const { data: swipeJobCriteria } = useJobCriteria(singleSwipeJobId);
 
   // When user taps "open full profile" from swipe viewer → open dialog
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
@@ -796,6 +816,13 @@ const MyCandidates = () => {
           </CardContent>
         </Card>
       ) : useMobileView ? (
+        <>
+        <div className="flex justify-center pb-3">
+          <Button variant="outline" className="min-h-11" onClick={() => setSwipeFilterOpen(true)}>
+            <Layers className="h-4 w-4" />
+            <span>Swipe-läge</span>
+          </Button>
+        </div>
         <MobileMyCandidatesView
           candidates={displayedCandidates}
           stages={activeStageOrder}
@@ -919,7 +946,7 @@ const MyCandidates = () => {
         applications={swipeApplicationsData}
         initialIndex={swipeInitialIndex}
         open={swipeViewerOpen}
-        onClose={() => setSwipeViewerOpen(false)}
+        onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
         onOpenFullProfile={handleSwipeOpenFullProfile}
         getDisplayRating={getDisplayRating}
         onLoadMore={() => {
