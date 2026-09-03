@@ -9,7 +9,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { ChevronDown, Search, Check } from 'lucide-react';
+import { ChevronDown, Search, Check, Loader2 } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
@@ -23,6 +23,7 @@ import { CompanyLogoSection } from './companyProfile/CompanyLogoSection';
 import { CompanySocialMediaSection, getPlatformLabel, validateUrl } from './companyProfile/CompanySocialMediaSection';
 import { CompanyInterviewSettings } from './companyProfile/CompanyInterviewSettings';
 import { DeleteSocialLinkDialog, DeleteLogoDialog } from './companyProfile/CompanyProfileDialogs';
+import { isValidMeetingLink } from './companyProfile/meetingLinkValidation';
 import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
@@ -315,7 +316,7 @@ const CompanyProfile = () => {
       
       toast({
         title: "Logga uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din företagslogga."
+        description: "Din företagslogga sparas automatiskt."
       });
     } catch (error) {
       console.error('Logo upload error:', error);
@@ -408,7 +409,7 @@ const CompanyProfile = () => {
     
     toast({
       title: "Logga borttagen",
-      description: "Tryck på \"Spara ändringar\" för att bekräfta borttagningen."
+      description: "Borttagningen sparas automatiskt."
     });
   };
 
@@ -431,38 +432,61 @@ const CompanyProfile = () => {
 
     toast({
       title: "Länk borttagen",
-      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Klicka på Spara ändringar för att bekräfta.`,
+      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Ändringen sparas automatiskt.`,
     });
 
     setDeleteDialogOpen(false);
     setLinkToDelete(null);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
+    const silent = !!opts?.silent;
     const sanitizedFormData: CompanyFormData = {
       ...formData,
       interview_video_link: normalizeMeetingLink(formData.interview_video_link || ''),
     };
 
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
-      toast({
-        title: "Valideringsfel",
-        description: "Organisationsnummer måste vara exakt 10 siffror eller lämnas tomt.",
-        variant: "destructive"
-      });
-      return;
+      if (!silent) {
+        toast({
+          title: "Valideringsfel",
+          description: "Organisationsnummer måste vara exakt 10 siffror eller lämnas tomt.",
+          variant: "destructive"
+        });
+      }
+      return false;
+    }
+
+    // Ogiltig möteslänk sparas aldrig — fältet visar felet direkt i formuläret.
+    if (sanitizedFormData.interview_video_link && !isValidMeetingLink(sanitizedFormData.interview_video_link)) {
+      if (!silent) {
+        toast({
+          title: "Ogiltig möteslänk",
+          description: "Kontrollera länken innan du sparar.",
+          variant: "destructive"
+        });
+      }
+      return false;
     }
 
     for (const link of sanitizedFormData.company_social_media_links) {
       if (!validateUrl(link.url, link.platform)) {
-        toast({
-          title: "Ogiltig URL",
-          description: `Kontrollera URL:en för ${getPlatformLabel(link.platform)}`,
-          variant: "destructive"
-        });
-        return;
+        if (!silent) {
+          toast({
+            title: "Ogiltig URL",
+            description: `Kontrollera URL:en för ${getPlatformLabel(link.platform)}`,
+            variant: "destructive"
+          });
+        }
+        return false;
       }
     }
+
+    if (!isOnline) {
+      if (!silent) showOfflineToast();
+      return false;
+    }
+
 
     try {
       setLoading(true);
@@ -519,20 +543,54 @@ const CompanyProfile = () => {
         console.warn('Failed to clear company profile draft');
       }
 
-      toast({
-        title: "Företagsprofil uppdaterad",
-        description: "Din företagsprofil har uppdaterats."
-      });
+      if (!silent) {
+        toast({
+          title: "Företagsprofil uppdaterad",
+          description: "Din företagsprofil har uppdaterats."
+        });
+      }
+      return true;
     } catch (error) {
       toast({
         title: "Fel",
         description: "Kunde inte uppdatera företagsprofilen.",
         variant: "destructive"
       });
+      return false;
     } finally {
       setLoading(false);
     }
   };
+
+  // 🔄 Autospar: företagsprofilen sparas direkt, precis som jobbsökarprofilen.
+  // Ogiltiga fält sparas aldrig (felen visas vid fältet) och ingen notis visas
+  // vid lyckad sparning — bara en diskret "Sparat"-indikator.
+  const saveRef = useRef(handleSave);
+  saveRef.current = handleSave;
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    if (loading || isUploadingLogo) return;
+    const t = setTimeout(async () => {
+      if (savedResetRef.current) clearTimeout(savedResetRef.current);
+      setSaveStatus('saving');
+      try {
+        const ok = await saveRef.current({ silent: true });
+        if (ok) {
+          setSaveStatus('saved');
+          savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+        } else {
+          setSaveStatus('idle');
+        }
+      } catch {
+        setSaveStatus('idle');
+      }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [hasUnsavedChanges, loading, isUploadingLogo, formData]);
+
 
   // Visa loggan via exakt samma transformerade URL som sidebar/header redan
   // har laddat och cachat — då finns bilden i browser-cachen direkt när sidan
@@ -572,10 +630,28 @@ const CompanyProfile = () => {
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
           <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater.</p>
+          <div className="mt-1 h-4 text-xs text-white/70" aria-live="polite" role="status">
+            <span
+              className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+            >
+              {saveStatus === 'saving' ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  Sparar…
+                </>
+              ) : (
+                <>
+                  <Check className="h-3 w-3" aria-hidden="true" />
+                  Sparat
+                </>
+              )}
+            </span>
+          </div>
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
+          <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-5 md:space-y-3">
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
@@ -796,15 +872,8 @@ const CompanyProfile = () => {
               orgDefaultVideoLink={orgDefaultVideoLink}
             />
 
-            <div className="flex justify-center pt-6">
-              <button
-                type="submit"
-                disabled={loading || !hasUnsavedChanges}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-9 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Sparar...' : 'Spara ändringar'}
-              </button>
-            </div>
+            <div className="pt-2" />
+
           </form>
         </div>
       </div>
