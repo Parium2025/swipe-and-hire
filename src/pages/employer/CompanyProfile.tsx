@@ -439,31 +439,54 @@ const CompanyProfile = () => {
     setLinkToDelete(null);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
+    const silent = !!opts?.silent;
     const sanitizedFormData: CompanyFormData = {
       ...formData,
       interview_video_link: normalizeMeetingLink(formData.interview_video_link || ''),
     };
 
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
-      toast({
-        title: "Valideringsfel",
-        description: "Organisationsnummer måste vara exakt 10 siffror eller lämnas tomt.",
-        variant: "destructive"
-      });
-      return;
+      if (!silent) {
+        toast({
+          title: "Valideringsfel",
+          description: "Organisationsnummer måste vara exakt 10 siffror eller lämnas tomt.",
+          variant: "destructive"
+        });
+      }
+      return false;
+    }
+
+    // Ogiltig möteslänk sparas aldrig — fältet visar felet direkt i formuläret.
+    if (sanitizedFormData.interview_video_link && !isValidMeetingLink(sanitizedFormData.interview_video_link)) {
+      if (!silent) {
+        toast({
+          title: "Ogiltig möteslänk",
+          description: "Kontrollera länken innan du sparar.",
+          variant: "destructive"
+        });
+      }
+      return false;
     }
 
     for (const link of sanitizedFormData.company_social_media_links) {
       if (!validateUrl(link.url, link.platform)) {
-        toast({
-          title: "Ogiltig URL",
-          description: `Kontrollera URL:en för ${getPlatformLabel(link.platform)}`,
-          variant: "destructive"
-        });
-        return;
+        if (!silent) {
+          toast({
+            title: "Ogiltig URL",
+            description: `Kontrollera URL:en för ${getPlatformLabel(link.platform)}`,
+            variant: "destructive"
+          });
+        }
+        return false;
       }
     }
+
+    if (!isOnline) {
+      if (!silent) showOfflineToast();
+      return false;
+    }
+
 
     try {
       setLoading(true);
