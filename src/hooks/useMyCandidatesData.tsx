@@ -1188,6 +1188,12 @@ export function useMyCandidatesData(
     return candidates.some(c => c.application_id === applicationId);
   }, [candidates]);
 
+  // Check if a person (applicant) already exists in my candidates — oavsett vilken ansökan.
+  // En kandidat = en person = en lista, så UI:t måste kolla på person-nivå.
+  const isApplicantInMyCandidates = useCallback((applicantId: string) => {
+    return candidates.some(c => c.applicant_id === applicantId);
+  }, [candidates]);
+
   // Mark application as viewed
   const markAsViewed = useMutation({
     mutationFn: async (applicationId: string) => {
