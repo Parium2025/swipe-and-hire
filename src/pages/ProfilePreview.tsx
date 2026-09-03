@@ -795,8 +795,8 @@ export default function ProfilePreview() {
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            {/* Desktop monitor frame - professional mockup */}
-            <div className="relative">
+            {/* Desktop monitor frame - professional mockup - något komprimerad för bättre proportioner */}
+            <div className="relative transform scale-[0.88] origin-top">
               {/* Monitor screen */}
               <div className="relative w-[340px] sm:w-[520px] md:w-[700px] max-w-[90vw] rounded-t-xl bg-black p-2 sm:p-3 shadow-2xl">
                 {/* Screen bezel */}
