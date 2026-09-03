@@ -311,22 +311,8 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </div>
                   )}
 
-                  {deletedMedia ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setVideoUrl(deletedMedia.videoUrl);
-                        setImageUrl(deletedMedia.imageUrl);
-                        setCoverUrl(deletedMedia.coverUrl);
-                        setDeletedMedia(null);
-                      }}
-                      aria-label="Återställ media"
-                      className="absolute -top-3 -right-3 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:bg-white/30"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </button>
-                  ) : (hasVideo || hasImage) && (
+                  {/* Ta bort-ikon; ångra visas som knapp nedanför, som för cover-bilden. */}
+                  {(hasVideo || hasImage) && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -342,6 +328,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
+
 
                   <input
                     ref={mediaInputRef}
