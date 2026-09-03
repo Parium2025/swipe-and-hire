@@ -92,7 +92,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
           {/* Text direkt under profilbilden */}
           {showVideo && (
-            <div className="absolute top-[210px] left-1/2 transform -translate-x-1/2 text-center">
+            <div className="absolute top-[228px] left-1/2 transform -translate-x-1/2 text-center">
               <p className="text-sm font-medium text-white">Video tillgängligt</p>
             </div>
           )}
