@@ -23,7 +23,14 @@ export function ProfileAvatar({
       style={{ height: size, width: size }}
     >
       {src ? (
-        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full object-cover"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding={eager ? 'sync' : 'async'}
+          fetchPriority={eager ? 'high' : 'auto'}
+        />
       ) : hasVideo ? (
         <VideoIcon className="h-5 w-5" />
       ) : (
