@@ -17,12 +17,13 @@ const launchOptions = { args: ["--no-sandbox", "--disable-dev-shm-usage", "--dis
 
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
   // Vite kompilerar rutter lat; under parallell last tar första besöket
   // på en tung sida längre tid än en normal användare upplever.
   timeout: 90_000,
   expect: { timeout: 15_000 },
   fullyParallel: true,
-  retries: 1,
+  retries: 2,
   workers: 2,
 
   reporter: [["list"]],
