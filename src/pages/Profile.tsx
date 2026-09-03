@@ -1278,11 +1278,13 @@ const Profile = () => {
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath });
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         setImageEditorOpen(false);
         if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
         setPendingImageSrc('');
         return;
       }
+
 
 
       // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
