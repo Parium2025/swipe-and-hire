@@ -11,6 +11,9 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { Button } from '@/components/ui/button';
+import { Layers } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
@@ -105,6 +108,8 @@ const JobDetails = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
+  const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
+  const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
