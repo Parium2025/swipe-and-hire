@@ -1,7 +1,11 @@
-import { Bell, Mail, Smartphone } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, Mail, MailX, Smartphone } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 import { useNotificationPreferences, NotificationType } from '@/hooks/useNotificationPreferences';
+import { useEmailSubscription } from '@/hooks/useEmailSubscription';
 
 const JOBSEEKER_NOTIFICATION_TYPES: { type: NotificationType; label: string; description: string; hasEmail?: boolean }[] = [
   { type: 'application_status', label: 'Ansökningar', description: 'Bekräftelse när du söker ett jobb', hasEmail: true },
@@ -14,6 +18,30 @@ const JOBSEEKER_NOTIFICATION_TYPES: { type: NotificationType; label: string; des
 
 export const JobSeekerNotificationSettings = () => {
   const { isEnabled, toggle, isLoading } = useNotificationPreferences();
+  const { subscribed, isKnown, setSubscribed } = useEmailSubscription();
+  const [updatingSubscription, setUpdatingSubscription] = useState(false);
+
+  const emailBlocked = isKnown && !subscribed;
+
+  const handleResubscribe = async () => {
+    setUpdatingSubscription(true);
+    try {
+      await setSubscribed(true);
+      toast({
+        title: 'Mejlutskick aktiverade',
+        description: 'Du får app-mejl igen enligt dina inställningar nedan.',
+      });
+    } catch {
+      toast({
+        title: 'Kunde inte aktivera mejlutskick',
+        description: 'Försök igen om en stund.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingSubscription(false);
+    }
+  };
+
 
   return (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
@@ -30,6 +58,28 @@ export const JobSeekerNotificationSettings = () => {
           en enskild konversation direkt i chatten.
         </p>
 
+        {emailBlocked && (
+          <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 p-3">
+            <div className="flex items-start gap-2">
+              <MailX className="h-4 w-4 shrink-0 mt-0.5 text-amber-300" />
+              <div className="min-w-0 space-y-2">
+                <p className="text-sm font-medium text-white">Du har avregistrerat dig från mejl</p>
+                <p className="text-sm text-white">
+                  Dina mejlval nedan är sparade, men inga app-mejl skickas till din adress förrän du aktiverar dem igen.
+                  Inloggnings- och lösenordsmejl påverkas inte.
+                </p>
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={handleResubscribe}
+                  disabled={updatingSubscription}
+                >
+                  {updatingSubscription ? 'Aktiverar…' : 'Aktivera mejlutskick igen'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
 
         {/* Column headers */}
