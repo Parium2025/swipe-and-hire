@@ -39,7 +39,16 @@ export function useEmailSubscription() {
         body: { action: subscribed ? 'resubscribe' : 'unsubscribe' },
       });
       if (error) throw error;
-      queryClient.setQueryData(['email-subscription', userId], data ?? null);
+      // Optimistiskt: visa direkt det läge användaren valde även om e-posttjänsten
+      // är fördröjt konsekvent, så att mejlreglagen slås på direkt vid aktivering.
+      queryClient.setQueryData(['email-subscription', userId], {
+        recipient: data?.recipient ?? '',
+        subscribed,
+      } satisfies EmailSubscriptionState);
+      // Synka om mot e-posttjänsten efter en stund för att bekräfta läget.
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['email-subscription', userId] });
+      }, 15_000);
       return data as EmailSubscriptionState;
     },
     [queryClient, userId],
