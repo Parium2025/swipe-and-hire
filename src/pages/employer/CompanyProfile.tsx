@@ -630,10 +630,28 @@ const CompanyProfile = () => {
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
           <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater.</p>
+          <div className="mt-1 h-4 text-xs text-white/70" aria-live="polite" role="status">
+            <span
+              className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+            >
+              {saveStatus === 'saving' ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  Sparar…
+                </>
+              ) : (
+                <>
+                  <Check className="h-3 w-3" aria-hidden="true" />
+                  Sparat
+                </>
+              )}
+            </span>
+          </div>
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
+          <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-5 md:space-y-3">
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
