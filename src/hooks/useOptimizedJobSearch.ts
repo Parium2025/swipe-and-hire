@@ -27,12 +27,20 @@ interface CachedSearch {
   timestamp: number;
 }
 
-function searchCacheKey(parts: unknown[]): string {
+function cacheKeyWithPrefix(prefix: string, parts: unknown[]): string {
   try {
-    return SEARCH_CACHE_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(parts)))).slice(0, 120);
+    return prefix + btoa(unescape(encodeURIComponent(JSON.stringify(parts)))).slice(0, 120);
   } catch {
-    return SEARCH_CACHE_PREFIX + JSON.stringify(parts).slice(0, 120);
+    return prefix + JSON.stringify(parts).slice(0, 120);
   }
+}
+
+function searchCacheKey(parts: unknown[]): string {
+  return cacheKeyWithPrefix(SEARCH_CACHE_PREFIX, parts);
+}
+
+export function hotSearchCacheKey(parts: unknown[]): string {
+  return cacheKeyWithPrefix(HOT_SEARCH_CACHE_PREFIX, parts);
 }
 
 function readSearchCache(key: string): SearchJob[] | null {
@@ -1125,7 +1133,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
 
       try {
         return readThroughCache<SearchJob[]>(
-          searchCacheKey([HOT_SEARCH_CACHE_PREFIX, fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, pageSize, sort, cursor ? `${cursor.createdAt}|${cursor.id}` : '', employerIdsKey, createdAfter || '']),
+          hotSearchCacheKey([fullSearchQuery, cityFilter, countyFilter, employmentCodes, categoryFilter, salarySearch?.targetSalary, salarySearch?.isMinimumSearch, pageSize, sort, cursor ? `${cursor.createdAt}|${cursor.id}` : '', employerIdsKey, createdAfter || '']),
           HOT_SEARCH_CACHE_TTL,
           async () => {
             const { data, error } = await measurePerformance('search', () => supabase.rpc('search_jobs', {
