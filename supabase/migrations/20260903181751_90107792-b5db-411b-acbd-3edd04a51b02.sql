@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.get_user_organization_id(uuid) TO authenticated;
