@@ -96,6 +96,16 @@ export function CandidatesTable({
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
   const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
+  // Serverkoll för de personer som visas — täcker kandidater som inte är laddade i minnet
+  const visibleApplicantIds = useMemo(
+    () => applications.map((a) => a.applicant_id).filter(Boolean) as string[],
+    [applications]
+  );
+  const serverMembership = useApplicantMembership(visibleApplicantIds);
+  const isApplicantAdded = useCallback(
+    (applicantId: string) => isApplicantInMyCandidates(applicantId) || serverMembership.has(applicantId),
+    [isApplicantInMyCandidates, serverMembership]
+  );
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
