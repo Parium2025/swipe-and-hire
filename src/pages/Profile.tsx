@@ -1582,7 +1582,11 @@ const Profile = () => {
     
     // Rensa ångra-data
     setDeletedProfileMedia(null);
+    // Autosparet kan redan ha skrivit bort medierna — markera som ändrad så att
+    // återställningen sparas tillbaka i databasen.
+    setHasUnsavedChanges(true);
   };
+
 
   const deleteCoverImage = async () => {
     // Vald extraprofil: samma återställningsbara flöde som grundprofilen.
@@ -1669,7 +1673,11 @@ const Profile = () => {
     
     // Clear undo data
     setDeletedCoverImage(null);
+    // Autosparet hade redan hunnit skriva bort cover-bilden i databasen —
+    // markera som ändrad så att återställningen faktiskt persisteras.
+    setHasUnsavedChanges(true);
   };
+
 
   const handleEditExistingProfile = async () => {
     // Vald extraprofil: redigera dess egen bild.
@@ -2317,28 +2325,31 @@ const Profile = () => {
 
 
                   {displayIsVideo && !displayCoverPath && (
-                  <div className="relative flex w-full max-w-xs items-center justify-center">
+                  <>
                     <Button
                       type="button"
                       variant="glass"
                       onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover || isUploadingMedia}
-                      className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
+                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Lägg till cover-bild
                     </Button>
                     {((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') || (!activeCandidateProfile && !coverImageUrl && deletedCoverImage)) && (
-                      <button
+                      <Button
+                        type="button"
+                        variant="glass"
                         onClick={() => void restoreCoverImage()}
                         disabled={isUploadingCover}
-                        className="absolute -right-10 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 disabled:opacity-50 hover:bg-white/30"
-                        aria-label="Återställ cover-bild"
+                        className="h-auto min-h-10 w-full max-w-xs gap-2 whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                       >
                         <RotateCcw className="h-4 w-4" />
-                      </button>
+                        Ångra borttagning
+                      </Button>
                     )}
-                  </div>
+                  </>
                   )}
+
 
                   {/* Lägg till den mediatyp som saknas; när video finns är videon primär media. */}
                   {!displayIsVideo && (

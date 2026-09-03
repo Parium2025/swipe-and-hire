@@ -426,28 +426,30 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     )}
 
 
-                    {!coverUrl && <div className="relative flex w-full max-w-xs items-center justify-center">
+                    {!coverUrl && <>
                       <Button
                         type="button"
                         variant="glass"
                         onClick={() => coverInputRef.current?.click()}
                         disabled={uploading}
-                        className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center text-sm"
+                        className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
                         Lägg till cover-bild
                       </Button>
                       {deletedCover ? (
-                        <button
+                        <Button
                           type="button"
+                          variant="glass"
                           onClick={() => { setCoverUrl(deletedCover); setDeletedCover(null); }}
-                          aria-label="Återställ cover-bild"
-                          className="absolute -right-10 rounded-full bg-white/20 p-2 text-white outline-none backdrop-blur-sm transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:bg-white/30"
+                          className="h-auto min-h-10 w-full max-w-xs gap-2 whitespace-normal px-4 py-2 text-center text-sm"
                         >
                           <RotateCcw className="h-4 w-4" />
-                        </button>
+                          Ångra borttagning
+                        </Button>
                       ) : null}
-                    </div>
+                    </>
                     }
+
 
                     <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" className="hidden" onChange={handleCoverChange} disabled={uploading} />
 
