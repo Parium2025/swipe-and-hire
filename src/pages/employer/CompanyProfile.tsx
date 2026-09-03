@@ -409,7 +409,7 @@ const CompanyProfile = () => {
     
     toast({
       title: "Logga borttagen",
-      description: "Tryck på \"Spara ändringar\" för att bekräfta borttagningen."
+      description: "Borttagningen sparas automatiskt."
     });
   };
 
