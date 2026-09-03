@@ -855,6 +855,8 @@ const MyCandidates = () => {
             />
           ) : undefined}
         />
+        </>
+
       ) : (
         <DndContext
           sensors={sensors}
