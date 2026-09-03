@@ -11,7 +11,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
 import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueListDialog';
 import { useCandidateLists } from '@/hooks/useCandidateLists';
-import { UserPlus, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
+import { UserPlus, UserCheck, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { Button } from '@/components/ui/button';
@@ -95,7 +95,7 @@ export function CandidatesTable({
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
-  const { isInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
+  const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
   const { teamMembers, hasTeam } = useTeamMembers();
   const { user } = useAuth();
   const queryClient = useQueryClient();

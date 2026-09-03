@@ -1267,6 +1267,7 @@ export function useMyCandidatesData(
     updateNotes,
     updateRating,
     isInMyCandidates,
+    isApplicantInMyCandidates,
     markAsViewed,
   };
 }
