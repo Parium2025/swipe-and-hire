@@ -1674,10 +1674,15 @@ const Profile = () => {
   const handleEditExistingProfile = async () => {
     // Vald extraprofil: redigera dess egen bild.
     if (activeCandidateProfile) {
-      if (!activeCandidateProfile.profile_image_url) return;
+      const storedPath = activeCandidateProfile.profile_image_url;
+      if (!storedPath) return;
       try {
-        const signedUrl = await getMediaUrl(activeCandidateProfile.profile_image_url, 'profile-image', 86400);
+        // Öppna alltid originalbilden när den finns sparad – då kan "Återställ"
+        // i editorn gå tillbaka till hela originalet, inte bara till beskärningen.
+        const originalUrl = await getOriginalImageUrl(storedPath, 'profile-image');
+        const signedUrl = originalUrl ?? await getMediaUrl(storedPath, 'profile-image', 86400);
         if (signedUrl) {
+          persistProfileOriginalRef.current = !originalUrl;
           setPendingImageSrc(signedUrl);
           setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
@@ -1693,14 +1698,17 @@ const Profile = () => {
     // Visa alltid originalbilden i editorn (om den finns)
     if (originalProfileImageFile) {
       const imageUrl = URL.createObjectURL(originalProfileImageFile);
+      persistProfileOriginalRef.current = true;
       setPendingImageSrc(imageUrl);
       setIsEditingExistingProfileImage(true);
       setImageEditorOpen(true);
     } else {
-      // Fallback: Hämta den signerade URL:en för den befintliga profilbilden
+      // Fallback: originalbilden i lagringen, annars den beskurna bilden
       try {
-        const signedUrl = await getMediaUrl(profileImageUrl, 'profile-image', 86400);
+        const originalUrl = await getOriginalImageUrl(profileImageUrl, 'profile-image');
+        const signedUrl = originalUrl ?? await getMediaUrl(profileImageUrl, 'profile-image', 86400);
         if (signedUrl) {
+          persistProfileOriginalRef.current = !originalUrl;
           setPendingImageSrc(signedUrl);
           setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
@@ -1719,10 +1727,13 @@ const Profile = () => {
   const handleEditExistingCover = async () => {
     // Vald extraprofil: redigera dess egen cover-bild.
     if (activeCandidateProfile) {
-      if (!activeCandidateProfile.cover_image_url) return;
+      const storedCoverPath = activeCandidateProfile.cover_image_url;
+      if (!storedCoverPath) return;
       try {
-        const signedUrl = await getMediaUrl(activeCandidateProfile.cover_image_url, 'cover-image', 86400);
+        const originalUrl = await getOriginalImageUrl(storedCoverPath, 'cover-image');
+        const signedUrl = originalUrl ?? await getMediaUrl(storedCoverPath, 'cover-image', 86400);
         if (signedUrl) {
+          persistCoverOriginalRef.current = !originalUrl;
           setPendingCoverSrc(signedUrl);
           setIsEditingExistingCoverImage(true);
           setCoverEditorOpen(true);
@@ -1738,6 +1749,7 @@ const Profile = () => {
     // 1) Om vi har en explicit uppladdad cover-bild, använd den ursprungliga filen
     if (originalCoverImageFile) {
       const imageUrl = URL.createObjectURL(originalCoverImageFile);
+      persistCoverOriginalRef.current = true;
       setPendingCoverSrc(imageUrl);
       setIsEditingExistingCoverImage(true);
       setCoverEditorOpen(true);
@@ -1748,16 +1760,19 @@ const Profile = () => {
     //    använd den ursprungliga profilbildsfilen som "original" för covern
     if (isProfileVideo && originalProfileImageFile) {
       const imageUrl = URL.createObjectURL(originalProfileImageFile);
+      persistCoverOriginalRef.current = true;
       setPendingCoverSrc(imageUrl);
       setIsEditingExistingCoverImage(true);
       setCoverEditorOpen(true);
       return;
     }
 
-    // 3) Fallback: hämta signerad URL för befintlig cover-bild från lagring
+    // 3) Fallback: originalbilden i lagringen, annars den beskurna cover-bilden
     try {
-      const signedUrl = await getMediaUrl(coverImageUrl, 'cover-image', 86400);
+      const originalUrl = await getOriginalImageUrl(coverImageUrl, 'cover-image');
+      const signedUrl = originalUrl ?? await getMediaUrl(coverImageUrl, 'cover-image', 86400);
       if (signedUrl) {
+        persistCoverOriginalRef.current = !originalUrl;
         setPendingCoverSrc(signedUrl);
         setIsEditingExistingCoverImage(true);
         setCoverEditorOpen(true);
