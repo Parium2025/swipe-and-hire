@@ -1582,7 +1582,11 @@ const Profile = () => {
     
     // Rensa ångra-data
     setDeletedProfileMedia(null);
+    // Autosparet kan redan ha skrivit bort medierna — markera som ändrad så att
+    // återställningen sparas tillbaka i databasen.
+    setHasUnsavedChanges(true);
   };
+
 
   const deleteCoverImage = async () => {
     // Vald extraprofil: samma återställningsbara flöde som grundprofilen.
