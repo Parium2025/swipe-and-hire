@@ -240,7 +240,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     if (storedPath) {
       originalUrl = await getOriginalImageUrl(storedPath, target);
     }
-    persistOriginalRef.current = !originalUrl;
+    persistOriginalRef.current = true; // ny sökväg per sparning: originalet måste följa med varje beskärning
     const nextSrc = originalUrl ?? src;
     if (!nextSrc) return;
     setEditorSrc(nextSrc);

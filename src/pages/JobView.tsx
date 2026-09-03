@@ -335,6 +335,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           : Promise.resolve({ data: null, error: null }),
       ]);
 
+      let data = jobResult.data as any;
+
       if (jobResult.error) {
         // If auth-related error, retry once after a short delay
         if (retryCount < 2 && (jobResult.error.message?.includes('JWT') || jobResult.error.code === 'PGRST301')) {
@@ -342,10 +344,22 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           setTimeout(() => fetchJob(retryCount + 1), 1000);
           return;
         }
-        throw jobResult.error;
+        // 🔓 Utan giltig session har rollen `anon` ingen SELECT på job_postings
+        // (42501). Då hämtar vi den publika delen via säkra RPC:n istället för
+        // att visa "Jobbet hittades inte".
+        if (jobResult.error.code === '42501') {
+          const { data: publicData } = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
+          const publicJob = (publicData as any)?.job;
+          if (publicJob) {
+            data = publicJob;
+          } else {
+            throw jobResult.error;
+          }
+        } else {
+          throw jobResult.error;
+        }
       }
 
-      const data = jobResult.data;
 
       // Job not found (deleted or doesn't exist)
       if (!data) {
