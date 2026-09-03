@@ -154,7 +154,26 @@ export const CandidateSlide = memo(function CandidateSlide({
     <div className="w-full flex flex-col items-center px-6 py-8">
       <div className="w-full max-w-sm flex flex-col items-center gap-5">
 
+        {/* ── Kortfront — identisk med jobbsökarens förhandsgranskning ── */}
+        <div className="w-full h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+          <CandidateCardFace
+            firstName={application.first_name}
+            lastName={application.last_name}
+            age={application.age}
+            residence={application.location}
+            profileImageUrl={profileImageUrl}
+            coverImageUrl={coverImageUrl}
+            videoUrl={videoUrl}
+            hasVideo={!!isProfileVideo}
+            ctaLabel={detailsOpen ? 'Dölj info' : 'Tryck för mer info'}
+            onOpen={() => setDetailsOpen(v => !v)}
+          />
+        </div>
+
+        {detailsOpen && (
+        <>
         {/* ── Tabs — sliding indicator ── */}
+
         <div className="w-full flex items-center border-b border-white/20 relative">
           <motion.div
             className="absolute bottom-0 h-0.5 bg-white"
