@@ -1710,7 +1710,7 @@ const Profile = () => {
         const originalUrl = await getOriginalImageUrl(storedPath, 'profile-image');
         const signedUrl = originalUrl ?? await getMediaUrl(storedPath, 'profile-image', 86400);
         if (signedUrl) {
-          persistProfileOriginalRef.current = !originalUrl;
+          persistProfileOriginalRef.current = true; // ny sökväg per sparning: originalet måste följa med varje beskärning
           setPendingImageSrc(signedUrl);
           setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
@@ -1736,7 +1736,7 @@ const Profile = () => {
         const originalUrl = await getOriginalImageUrl(profileImageUrl, 'profile-image');
         const signedUrl = originalUrl ?? await getMediaUrl(profileImageUrl, 'profile-image', 86400);
         if (signedUrl) {
-          persistProfileOriginalRef.current = !originalUrl;
+          persistProfileOriginalRef.current = true; // ny sökväg per sparning: originalet måste följa med varje beskärning
           setPendingImageSrc(signedUrl);
           setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
@@ -1761,7 +1761,7 @@ const Profile = () => {
         const originalUrl = await getOriginalImageUrl(storedCoverPath, 'cover-image');
         const signedUrl = originalUrl ?? await getMediaUrl(storedCoverPath, 'cover-image', 86400);
         if (signedUrl) {
-          persistCoverOriginalRef.current = !originalUrl;
+          persistCoverOriginalRef.current = true; // ny sökväg per sparning: originalet måste följa med varje beskärning
           setPendingCoverSrc(signedUrl);
           setIsEditingExistingCoverImage(true);
           setCoverEditorOpen(true);
@@ -1800,7 +1800,7 @@ const Profile = () => {
       const originalUrl = await getOriginalImageUrl(coverImageUrl, 'cover-image');
       const signedUrl = originalUrl ?? await getMediaUrl(coverImageUrl, 'cover-image', 86400);
       if (signedUrl) {
-        persistCoverOriginalRef.current = !originalUrl;
+        persistCoverOriginalRef.current = true; // ny sökväg per sparning: originalet måste följa med varje beskärning
         setPendingCoverSrc(signedUrl);
         setIsEditingExistingCoverImage(true);
         setCoverEditorOpen(true);
