@@ -1008,6 +1008,26 @@ const realtimeTimestampChanged = (
  * gick ut medan jobbsökaren hade listan öppen kvar i listan tills nästa
  * refetch — sökningen och realtidsströmmen hade två olika sanningar.
  */
+/**
+ * Letar upp en annons i det redan hämtade sökresultatet. Används som ersättning
+ * för `payload.old`, som bara garanterat innehåller primärnyckeln.
+ */
+const findCachedRealtimeJob = (
+  client: ReturnType<typeof useQueryClient>,
+  jobId: string,
+): RealtimeJobPosting | null => {
+  const entries = client.getQueriesData<{ pages: SearchJob[][] }>({ queryKey: ['optimized-job-search'] });
+  for (const [, data] of entries) {
+    const pages = data?.pages;
+    if (!pages) continue;
+    for (const page of pages) {
+      const hit = page.find((job) => job.id === jobId);
+      if (hit) return hit as RealtimeJobPosting;
+    }
+  }
+  return null;
+};
+
 const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => {
   if (!job?.is_active || job?.deleted_at) return false;
   const expiresAt = job.expires_at;
