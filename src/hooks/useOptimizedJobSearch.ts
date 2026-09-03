@@ -1364,17 +1364,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // eller status active) — en annons som blir synlig men saknas i resultatet
   // triggar en invalidering så att den dyker upp utan omladdning.
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const scheduleInvalidate = () => {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        // Viktigt: den korta hot-cachen måste tömmas först, annars läser
-        // refetchen tillbaka exakt samma gamla resultat och listan står still.
-        clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
-        queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-      }, 400);
-    };
-
+    const scheduleInvalidate = scheduleSearchInvalidate;
 
     const cleanupChannel = createBulletproofChannel({
       channelName: 'optimized-search-new-jobs',
@@ -1407,6 +1397,8 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
             // meddelanden och urval ska ligga kvar. RPC:n flyttar created_at och
             // published_at till nu, vilket är den stabila realtidssignalen för
             // att samma rad ska behandlas som en helt ny annons i sökresultatet.
+            // En redigerad annons som ännu inte finns i resultatet (cachedJob=null)
+            // kan ha börjat matcha sökningen — då räknar servern om listan.
             if (!cachedJob || realtimeTimestampChanged(cachedJob, nextJob)) {
               scheduleInvalidate();
             }
@@ -1415,11 +1407,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       ],
     });
 
-    return () => {
-      if (timer) clearTimeout(timer);
-      cleanupChannel();
-    };
-  }, [queryClient]);
+    return cleanupChannel;
+  }, [queryClient, scheduleSearchInvalidate]);
+
 
 
 
