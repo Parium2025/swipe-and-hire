@@ -1,0 +1,1 @@
+ALTER TABLE public.job_postings REPLICA IDENTITY DEFAULT;

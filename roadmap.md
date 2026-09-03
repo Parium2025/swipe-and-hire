@@ -15,3 +15,4 @@
 - [x] Stabilisera hero-telefonens storlek mot in-app-webbläsares dynamiska viewport (Snapchat)
 - [ ] Svara på genomgång av React Query-prefetch i hela appen
 - [x] Synka kortrytmen i Dashboard och Mina annonser med jobbsökarvyn
+- [x] Ta bort realtidens beroende av payload.old och lätta WAL-belastningen på job_postings
