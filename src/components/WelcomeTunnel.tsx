@@ -1604,19 +1604,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     </button>
                   )}
                   
-                  {/* Undo button - shown when media was just deleted */}
-                  {deletedProfileMedia && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        restoreProfileMedia();
-                      }}
-                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
-                      title="Ångra borttagning"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </button>
-                  )}
+
+
 
                   <input
                     id="profileMedia"
