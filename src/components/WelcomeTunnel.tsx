@@ -1604,19 +1604,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     </button>
                   )}
                   
-                  {/* Undo button - shown when media was just deleted */}
-                  {deletedProfileMedia && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        restoreProfileMedia();
-                      }}
-                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
-                      title="Ångra borttagning"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </button>
-                  )}
+
+
 
                   <input
                     id="profileMedia"
@@ -1665,6 +1654,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       )}
                     </div>
                   )}
+
+                  {deletedProfileMedia && !formData.profileImageUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        restoreProfileMedia();
+                      }}
+                      className="mx-auto flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Ångra borttagning
+                    </button>
+                  )}
+
                 </div>
 
                 {/* Cover image upload - show when video exists */}
@@ -1708,20 +1712,22 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                           </button>
                         )}
 
-                        {deletedCoverImage && !formData.coverImageUrl && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              restoreCoverImage();
-                            }}
-                            className="absolute -right-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
-                            title="Återställ cover-bild"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </button>
-                        )}
                       </div>
+
+                      {deletedCoverImage && !formData.coverImageUrl && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            restoreCoverImage();
+                          }}
+                          className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Ångra borttagning
+                        </button>
+                      )}
+
                     </div>
                     <Input 
                       type="file" 
