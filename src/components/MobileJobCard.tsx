@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Eye, Users, Edit, Trash2, RotateCcw } from 'lucide-react';
+import { ChevronDown, Eye, Users, UserPlus, Edit, Trash2, RotateCcw } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -37,6 +37,8 @@ interface MobileJobCardProps {
   defaultExpanded?: boolean;
   /** Controlled expanded state — when set, syncs local state (used for global "Visa detaljer") */
   expanded?: boolean;
+  /** Antal ansökningar arbetsgivaren inte öppnat ännu — visas som blå "nya"-pill */
+  unviewedCount?: number;
 }
 
 const GRADIENTS = [
@@ -70,7 +72,7 @@ const ActionTip = ({ label, children }: { label: string; children: React.ReactNo
 );
 
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp, unviewedCount = 0 }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   // Endast annonsens ägare får återpublicera – kollegor får skapa en egen annons istället.
@@ -203,9 +205,20 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
           )}
         </div>
 
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
-          <Eye className="h-3.5 w-3.5 text-white" />
-          <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+          {unviewedCount > 0 && (
+            <span
+              className="flex items-center gap-1 rounded-full border border-white/20 bg-blue-500 px-2.5 py-1 shadow-lg"
+              aria-label={`${unviewedCount} nya ansökningar du inte sett`}
+            >
+              <UserPlus className="h-3.5 w-3.5 text-white" />
+              <span className="text-xs font-semibold text-white">{unviewedCount} nya</span>
+            </span>
+          )}
+          <span className="flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
+            <Eye className="h-3.5 w-3.5 text-white" />
+            <span className="text-xs font-medium text-white">{job.views_count || 0}</span>
+          </span>
         </div>
       </div>
 
@@ -342,6 +355,11 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
                     <Users className="h-3.5 w-3.5 flex-shrink-0" />
                     {job.applications_count || 0}
+                    {unviewedCount > 0 && (
+                      <span className="ml-1 rounded-full bg-blue-500 px-2 py-0.5 text-[11px] font-semibold text-white">
+                        {unviewedCount} nya
+                      </span>
+                    )}
                   </span>
                 </div>
 

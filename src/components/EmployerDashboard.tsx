@@ -40,6 +40,7 @@ import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
+import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
@@ -59,6 +60,8 @@ const EmployerDashboard = memo(() => {
   // Server-side truth — exakta totaler även vid 10k+ jobb
   const { data: serverCounts } = useEmployerJobsCounts('personal');
   const { data: serverStats } = useEmployerDashboardStats('personal');
+  // Osedda ansökningar per annons — pricken försvinner när kandidaten öppnats.
+  const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const queryClient = useQueryClient();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -785,6 +788,7 @@ const EmployerDashboard = memo(() => {
                       cardIndex={idx}
                       collapsible
                       expanded={expandAll}
+                      unviewedCount={unviewedByJob.get(job.id) ?? 0}
                     />
                     {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
@@ -873,6 +877,7 @@ const EmployerDashboard = memo(() => {
                       cardIndex={idx}
                       collapsible
                       expanded={expandAll}
+                      unviewedCount={unviewedByJob.get(job.id) ?? 0}
                     />
                     {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
