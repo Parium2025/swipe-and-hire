@@ -55,10 +55,13 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         onDragStart={(e) => e.preventDefault()}
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
-        <div className="relative w-full h-full bg-transparent overflow-hidden" style={{ cursor: onOpen ? 'pointer' : 'default' }}>
+        <div className="relative w-full h-full flex flex-col overflow-hidden" style={{ cursor: onOpen ? 'pointer' : 'default' }}>
+          {/* Bakgrundsgradient som täcker hela vägen ner från mitten */}
+          <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
+
           {/* Avatar/video — nedflyttad för mindre dött space upptill */}
           <div
-            className="absolute top-12 left-1/2 transform -translate-x-1/2 w-[165px] h-[165px]"
+            className="relative z-10 mt-12 mx-auto w-[165px] h-[165px]"
             style={{ cursor: onOpen ? 'pointer' : 'default' }}
             onClick={(e) => {
               if (showVideo) e.stopPropagation();
@@ -92,13 +95,13 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
           {/* Text direkt under profilbilden */}
           {showVideo && (
-            <div className="absolute top-[228px] left-1/2 transform -translate-x-1/2 text-center">
+            <div className="relative z-10 text-center mt-2">
               <p className="text-sm font-medium text-white">Video tillgängligt</p>
             </div>
           )}
 
-          {/* Gradient med minimal info — flyttat upp närmare ringen */}
-          <div className="absolute bottom-8 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 pt-8 pb-2">
+          {/* Namn/ålder/ort — centrerat mellan ringen och CTA:n */}
+          <div className="relative z-10 flex-1 flex flex-col justify-center items-center px-2 text-center">
             <div className="text-white w-full">
               <TruncatedText
                 text={fullName}
@@ -115,17 +118,18 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                 {showAge && age ? <p>{age} år</p> : null}
                 {residence ? <p>Bor i {residence}</p> : null}
               </div>
-
-              {onOpen && (
-                <div className="flex items-center justify-center mt-3">
-                  <div className="bg-white/20 rounded-md px-2 py-1 flex items-center gap-1">
-                    <span className="text-xs text-white">{ctaLabel}</span>
-                    <ArrowRight className="h-3 w-3 text-white" />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* CTA — ligger kvar på botten utan glapp */}
+          {onOpen && (
+            <div className="relative z-10 flex items-center justify-center mb-3">
+              <div className="bg-white/20 rounded-md px-2 py-1 flex items-center gap-1">
+                <span className="text-xs text-white">{ctaLabel}</span>
+                <ArrowRight className="h-3 w-3 text-white" />
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>
