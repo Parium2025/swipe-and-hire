@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 import { getTimeRemaining } from '@/lib/date';
 import { detectSalarySearch, allKnownLocationTerms } from '@/lib/smartSearch';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
@@ -989,6 +989,11 @@ interface RealtimeJobPosting extends Partial<SearchJob> {
   published_at?: string | null;
 }
 
+const realtimeTimestampChanged = (
+  previous?: RealtimeJobPosting | null,
+  next?: RealtimeJobPosting | null,
+) => previous?.created_at !== next?.created_at || previous?.published_at !== next?.published_at;
+
 /**
  * Måste spegla samma regel som `search_jobs`-RPC:n: publicerad, aktiv, ej
  * raderad OCH ej utgången. Utan expires_at-kontrollen blev en annons som
@@ -1245,11 +1250,14 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     const ids = realtimeJobIdsKey.split(',');
     const filter = `id=in.(${ids.join(',')})`;
 
-    const channel = createRealtimeChannel(`optimized-search-realtime-${ids.length}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_postings', filter },
-        (payload) => {
+    return createBulletproofChannel({
+      channelName: `optimized-search-realtime-${ids.length}`,
+      subscriptions: [{
+        event: '*',
+        schema: 'public',
+        table: 'job_postings',
+        filter,
+        callback: (payload) => {
           const nextJob = payload.new as RealtimeJobPosting;
           const previousJob = payload.old as RealtimeJobPosting;
 
@@ -1292,13 +1300,9 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
               }
             );
           }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+        },
+      }],
+    });
   }, [queryClient, realtimeJobIdsKey]);
 
   // 🆕 Nya annonser: id-filtrerade kanalen ovan kan per definition inte se rader
@@ -1306,11 +1310,6 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // Vi lyssnar på både INSERT (helt nya annonser) och UPDATE (t.ex. återpublicering
   // eller status active) — en annons som blir synlig men saknas i resultatet
   // triggar en invalidering så att den dyker upp utan omladdning.
-  const visibleJobIdsRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    visibleJobIdsRef.current = new Set(jobIds);
-  }, [jobIds]);
-
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const scheduleInvalidate = () => {
@@ -1324,33 +1323,39 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     };
 
 
-    const channel = createRealtimeChannel('optimized-search-new-jobs')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'job_postings' },
-        (payload) => {
+    return createBulletproofChannel({
+      channelName: 'optimized-search-new-jobs',
+      subscriptions: [
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'job_postings',
+          callback: (payload) => {
           if (!isRealtimeJobVisible(payload.new as RealtimeJobPosting)) return;
           scheduleInvalidate();
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'job_postings' },
-        (payload) => {
-          const nextJob = payload.new as RealtimeJobPosting;
-          if (!nextJob?.id) return;
-          if (!isRealtimeJobVisible(nextJob)) return;
-          // Redan synlig annons hanteras av den id-filtrerade kanalen ovan.
-          if (visibleJobIdsRef.current.has(nextJob.id)) return;
-          scheduleInvalidate();
-        }
-      )
-      .subscribe();
+          },
+        },
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'job_postings',
+          callback: (payload) => {
+            const nextJob = payload.new as RealtimeJobPosting;
+            const previousJob = payload.old as RealtimeJobPosting;
+            if (!nextJob?.id || !isRealtimeJobVisible(nextJob)) return;
 
-    return () => {
-      if (timer) clearTimeout(timer);
-      supabase.removeChannel(channel);
-    };
+            // Återpublicering behåller samma ID för att alla ansökningar,
+            // meddelanden och urval ska ligga kvar. RPC:n flyttar created_at och
+            // published_at till nu, vilket är den stabila realtidssignalen för
+            // att samma rad ska behandlas som en helt ny annons i sökresultatet.
+            const becameVisible = !isRealtimeJobVisible(previousJob);
+            if (becameVisible || realtimeTimestampChanged(previousJob, nextJob)) {
+              scheduleInvalidate();
+            }
+          },
+        },
+      ],
+    });
   }, [queryClient]);
 
 
