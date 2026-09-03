@@ -5,6 +5,7 @@ import { useFitScale } from '@/hooks/useFitScale';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { syncJobQuestions } from '@/lib/jobQuestionsSync';
+import { isValidClockTime } from '@/lib/clockTime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

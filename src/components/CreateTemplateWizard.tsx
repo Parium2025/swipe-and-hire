@@ -3,6 +3,7 @@ import { StartDatePicker } from '@/components/StartDatePicker';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { supabase } from '@/integrations/supabase/client';
+import { isValidClockTime } from '@/lib/clockTime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
