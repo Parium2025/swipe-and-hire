@@ -380,8 +380,14 @@ const JobDetails = () => {
   }, [applicationsByStatus, resolveStageForApplication, markApplicationAsViewed, isTouchDevice]);
 
   const swipeApplicationsAsData = useMemo(() => {
+    if (swipeFilteredApps) return swipeFilteredApps;
     return swipeStageApps.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));
-  }, [swipeStageApps, jobId, job?.title]);
+  }, [swipeFilteredApps, swipeStageApps, jobId, job?.title]);
+
+  const allApplicationsAsData = useMemo(
+    () => applications.map(app => mapToApplicationData(app, jobId || '', job?.title || '')),
+    [applications, jobId, job?.title],
+  );
 
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
     setSwipeViewerOpen(false);
@@ -763,11 +769,24 @@ const JobDetails = () => {
             applications={swipeApplicationsAsData}
             initialIndex={swipeInitialIndex}
             open={swipeViewerOpen}
-            onClose={() => setSwipeViewerOpen(false)}
+            onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
             onOpenFullProfile={handleSwipeOpenFullProfile}
             getDisplayRating={getDisplayRating}
           />
         )}
+
+        {/* Urvalskriterier innan swipe-läget startar */}
+        <CandidateSwipeFilterSheet
+          open={swipeFilterOpen}
+          onOpenChange={setSwipeFilterOpen}
+          candidates={allApplicationsAsData}
+          criteria={(jobCriteria || []).map(c => ({ id: c.id, title: c.title }))}
+          onStart={(filtered) => {
+            setSwipeFilteredApps(filtered);
+            setSwipeInitialIndex(0);
+            setSwipeViewerOpen(true);
+          }}
+        />
 
         {/* Selection Criteria Dialog */}
         {jobId && (
