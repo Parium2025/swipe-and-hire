@@ -295,6 +295,59 @@ export function getVideoPosterPath(videoPath: string): string {
 }
 
 /**
+ * Härled sökvägen till originalbilden (före beskärning) för en sparad bild.
+ * Samma bucket, samma mapp. Saknas originalet returnerar signeringen null och
+ * editorn faller tillbaka på den beskurna bilden.
+ */
+export function getOriginalImagePath(imagePath: string): string {
+  if (!imagePath) return '';
+  return `${imagePath.replace(/\.[^./]+$/, '')}-original`;
+}
+
+/**
+ * Spara originalfilen bredvid den beskurna bilden (best-effort).
+ * Gör att "Återställ" i bildredigeraren alltid kan gå tillbaka till originalet,
+ * även efter omladdning eller på en annan enhet.
+ */
+export async function uploadOriginalImage(
+  croppedStoragePath: string,
+  originalFile: File | Blob,
+  mediaType: MediaType
+): Promise<void> {
+  try {
+    const path = getOriginalImagePath(croppedStoragePath);
+    if (!path) return;
+    const config = MEDIA_CONFIG[mediaType];
+    await supabase.storage.from(config.bucket).upload(path, originalFile, {
+      contentType: originalFile.type || 'image/jpeg',
+      cacheControl: '31536000',
+      upsert: true,
+    });
+    clearMissingMedia(path);
+  } catch (error) {
+    console.warn('[mediaManager] originalbild kunde inte sparas', error);
+  }
+}
+
+/**
+ * Hämta en visnings-URL för originalbilden om den finns, annars null.
+ */
+export async function getOriginalImageUrl(
+  croppedStoragePath: string,
+  mediaType: MediaType,
+  expiresInSeconds: number = 86400
+): Promise<string | null> {
+  const path = getOriginalImagePath(croppedStoragePath);
+  if (!path) return null;
+  if (isKnownMissingMedia(path, mediaType)) return null;
+  try {
+    return await getMediaUrl(path, mediaType, expiresInSeconds);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * 🔒 KRITISKT: Generera URL för att visa/ladda ner media
  * 
  * ⚠️ ANVÄND useMediaUrl HOOK I KOMPONENTER - ANROPA INTE DIREKT ⚠️

@@ -12,7 +12,7 @@ import { FileText, Camera, Trash2, Loader2, CheckCircle, Check, X, RotateCcw } f
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { uploadMedia, type MediaType } from '@/lib/mediaManager';
+import { uploadMedia, type MediaType, getOriginalImageUrl, uploadOriginalImage } from '@/lib/mediaManager';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { looksLikeVideoFile } from '@/lib/videoInput';
 import type { CandidateProfile, CandidateProfileInput } from '@/hooks/useCandidateProfiles';
@@ -81,6 +81,8 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
   }, [open, profile]);
 
   const labelFilled = label.trim().length > 0;
+  // Sant när editorns källbild ännu inte finns sparad som original i lagringen.
+  const persistOriginalRef = useRef(true);
 
   const uploadFile = async (file: File, type: 'profile-image' | 'profile-video' | 'cover-image') => {
     if (!user?.id) return null;
@@ -181,6 +183,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     }
 
     if (file.type.startsWith('image/') && file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
+      persistOriginalRef.current = true;
       setEditorSrc(URL.createObjectURL(file));
       setEditorTarget('profile-image');
     } else {
@@ -196,16 +199,29 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
       toast({ title: 'Filtypen stöds inte', description: 'Välj JPEG, PNG eller WebP.', variant: 'destructive' });
       return;
     }
+    persistOriginalRef.current = true;
     setEditorSrc(URL.createObjectURL(file));
     setEditorTarget('cover-image');
   };
 
   const handleEditorSave = async (blob: Blob) => {
     const target = editorTarget;
+    const source = editorSrc;
+    const shouldPersistOriginal = persistOriginalRef.current;
     if (!target) return;
     const file = new File([blob], target === 'cover-image' ? 'cover-image.jpg' : 'profile-image.jpg', { type: 'image/jpeg' });
     const path = await uploadFile(file, target);
     if (path) {
+      // Spara originalbilden bredvid beskärningen så att "Återställ" i editorn
+      // alltid kan gå tillbaka till originalet.
+      if (shouldPersistOriginal && source) {
+        try {
+          const originalBlob = await (await fetch(source)).blob();
+          if (originalBlob.size) await uploadOriginalImage(path, originalBlob, target);
+        } catch (error) {
+          console.warn('Kunde inte spara originalbilden:', error);
+        }
+      }
       if (target === 'cover-image') setCoverUrl(path);
       else setImageUrl(path);
     }
@@ -213,9 +229,21 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     setEditorSrc('');
   };
 
-  const openExistingInEditor = (src: string | null, target: 'profile-image' | 'cover-image') => {
-    if (!src) return;
-    setEditorSrc(src);
+  /** Öppnar en redan sparad bild – originalet om det finns, annars beskärningen. */
+  const openExistingInEditor = async (
+    src: string | null,
+    target: 'profile-image' | 'cover-image',
+    storedPath?: string | null,
+  ) => {
+    if (!src && !storedPath) return;
+    let originalUrl: string | null = null;
+    if (storedPath) {
+      originalUrl = await getOriginalImageUrl(storedPath, target);
+    }
+    persistOriginalRef.current = !originalUrl;
+    const nextSrc = originalUrl ?? src;
+    if (!nextSrc) return;
+    setEditorSrc(nextSrc);
     setEditorTarget(target);
   };
 
@@ -338,9 +366,10 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     </button>
                   )}
 
-                  {hasImage && !uploading && (
+                  {/* Vid video visas cover-bilden i cirkeln – då räcker "Anpassa cover-bild". */}
+                  {hasImage && !hasVideo && !uploading && (
                     <div className="flex flex-col items-center space-y-2">
-                      <Button type="button" variant="glass" onClick={() => openExistingInEditor(signedImage, 'profile-image')} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation">
+                      <Button type="button" variant="glass" onClick={() => void openExistingInEditor(signedImage, 'profile-image', imageUrl)} className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation">
                         Anpassa profilbild
                       </Button>
                     </div>
@@ -378,7 +407,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       <Button
                         type="button"
                         variant="glass"
-                        onClick={() => openExistingInEditor(signedCover, 'cover-image')}
+                        onClick={() => void openExistingInEditor(signedCover, 'cover-image', coverUrl)}
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
                         Anpassa cover-bild
