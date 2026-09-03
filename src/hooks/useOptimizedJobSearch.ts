@@ -1349,15 +1349,20 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
           table: 'job_postings',
           callback: (payload) => {
             const nextJob = payload.new as RealtimeJobPosting;
-            const previousJob = payload.old as RealtimeJobPosting;
             if (!nextJob?.id || !isRealtimeJobVisible(nextJob)) return;
+
+            // Vi jämför mot vårt EGET cachade tillstånd i stället för payload.old.
+            // Skälet: payload.old innehåller bara primärnyckeln om tabellen inte
+            // kör REPLICA IDENTITY FULL. Genom att läsa cachen fungerar logiken
+            // med båda inställningarna — och databasen slipper skriva hela den
+            // gamla raden till WAL vid varje uppdatering.
+            const cachedJob = findCachedRealtimeJob(queryClient, nextJob.id);
 
             // Återpublicering behåller samma ID för att alla ansökningar,
             // meddelanden och urval ska ligga kvar. RPC:n flyttar created_at och
             // published_at till nu, vilket är den stabila realtidssignalen för
             // att samma rad ska behandlas som en helt ny annons i sökresultatet.
-            const becameVisible = !isRealtimeJobVisible(previousJob);
-            if (becameVisible || realtimeTimestampChanged(previousJob, nextJob)) {
+            if (!cachedJob || realtimeTimestampChanged(cachedJob, nextJob)) {
               scheduleInvalidate();
             }
           },
