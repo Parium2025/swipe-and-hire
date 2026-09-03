@@ -24,6 +24,7 @@ import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
 import { ProfilePreviewSkeleton } from '@/components/profile/ProfilePreviewSkeleton';
+import { CandidateCardFace } from '@/components/candidates/CandidateCardFace';
 
 interface ProfileViewData {
   id: string;
@@ -211,105 +212,23 @@ export default function ProfilePreview() {
     };
 
     // FÖRSTA VY: Minimal Tinder-stil med swipe - anpassat för mobil-mockup
-    const TinderCard = () => {
-      return (
-      <div className="w-full h-full relative">
-        <Card 
-          className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 h-full"
-          onClick={() => setShowDetailedView(true)}
-          onDragStart={(e) => e.preventDefault()}
-          style={{
-            cursor: 'pointer'
-          }}
-        >
-          {/* Helskärm profilbild/video */}
-          <div className="relative w-full h-full bg-transparent overflow-hidden" style={{ cursor: 'pointer' }}>
-            {/* Avatar-område för både bild och video - centrerat längst upp */}
-            <div 
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[165px] h-[165px]"
-              style={{ cursor: 'pointer' }}
-              onClick={(e) => {
-                // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
-                if (data.video_url) {
-                  e.stopPropagation();
-                }
-              }}
-            >
-               {/* Använd ProfileVideo komponenten om video finns */}
-               {data.video_url && effectiveVideoUrl ? (
-                  <ProfileVideo
-                   videoUrl={effectiveVideoUrl}
-                   coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
-                   posterUrl={videoPosterUrl}
-                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
-                   alt="Profilbild"
-                   className="w-full h-full rounded-full"
-                   countdownVariant="circle"
-                   showCountdown={true}
-                    disablePlayback={false}
-                 />
-               ) : (
-                /* Om ingen video, visa Avatar med fallback till initialer */
-                <Avatar className="w-[165px] h-[165px] border-2 border-white/40 shadow-2xl">
-                  <AvatarImage 
-                    src={profileImageUrl || signedCoverUrl || ''} 
-                    alt="Profilbild"
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold" delayMs={200}>
-                    {`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-
-            {/* Text direkt under profilbilden - beroende på media */}
-            {(data.video_url || data.profile_image_url) && (
-              <div className="absolute top-[210px] left-1/2 transform -translate-x-1/2 text-center">
-                <p className="text-sm font-medium text-white">
-                  {data.video_url ? 'Video tillgängligt' : 'Enbart profilbild vald'}
-                </p>
-              </div>
-            )}
-
-            {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3" style={{ cursor: 'pointer' }}>
-              <div className="text-white w-full">
-                <TruncatedText
-                  text={`${data.first_name} ${data.last_name}`}
-                  className="two-line-ellipsis two-line-ellipsis-nopad block w-full"
-                >
-                  <NameAutoFit
-                    text={`${data.first_name} ${data.last_name}`}
-                    className="text-lg font-bold mb-0.5 break-words w-full text-white"
-                    minFontPx={isMobile ? 13 : 14}
-                  />
-                </TruncatedText>
-                
-                {/* Info på separata rader */}
-                <div className="space-y-0.5 text-xs text-white">
-                  {isConsented && data.age && (
-                    <p>{data.age} år</p>
-                  )}
-                  {data.location && (
-                    <p>Bor i {formatResidence(data.location, profile?.home_location)}</p>
-                  )}
-                </div>
-                
-                {/* Swipe-indikator */}
-                <div className="flex items-center justify-center mt-3">
-                  <div className="bg-white/20 rounded-md px-2 py-1 flex items-center gap-1">
-                    <span className="text-xs text-white">Tryck för mer info</span>
-                    <ArrowRight className="h-3 w-3 text-white" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
+    const TinderCard = () => (
+      <CandidateCardFace
+        firstName={data.first_name}
+        lastName={data.last_name}
+        age={data.age}
+        showAge={!!isConsented}
+        residence={data.location ? formatResidence(data.location, profile?.home_location) : null}
+        profileImageUrl={profileImageUrl}
+        coverImageUrl={signedCoverUrl}
+        videoUrl={effectiveVideoUrl}
+        posterUrl={videoPosterUrl}
+        hasVideo={!!data.video_url}
+        minNameFontPx={isMobile ? 13 : 14}
+        onOpen={() => setShowDetailedView(true)}
+      />
     );
-    };
+
 
     // ANDRA VY: Fullständig information - matchar exakt struktur från Min Profil
     const DetailedView = () => {

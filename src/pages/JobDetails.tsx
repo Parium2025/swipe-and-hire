@@ -11,6 +11,9 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { Button } from '@/components/ui/button';
+import { Layers } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
@@ -105,6 +108,8 @@ const JobDetails = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
+  const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
+  const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
@@ -358,6 +363,7 @@ const JobDetails = () => {
     if (isTouchDevice) {
       // Touch: continuous vertical scroll viewer
       const idx = stageApps.findIndex(a => a.id === app.id);
+      setSwipeFilteredApps(null);
       setSwipeStageApps(stageApps);
       setSwipeInitialIndex(idx >= 0 ? idx : 0);
       setSwipeViewerOpen(true);
@@ -375,8 +381,14 @@ const JobDetails = () => {
   }, [applicationsByStatus, resolveStageForApplication, markApplicationAsViewed, isTouchDevice]);
 
   const swipeApplicationsAsData = useMemo(() => {
+    if (swipeFilteredApps) return swipeFilteredApps;
     return swipeStageApps.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));
-  }, [swipeStageApps, jobId, job?.title]);
+  }, [swipeFilteredApps, swipeStageApps, jobId, job?.title]);
+
+  const allApplicationsAsData = useMemo(
+    () => applications.map(app => mapToApplicationData(app, jobId || '', job?.title || '')),
+    [applications, jobId, job?.title],
+  );
 
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
     setSwipeViewerOpen(false);
@@ -605,9 +617,24 @@ const JobDetails = () => {
           onUpdateJobLocally={updateJobLocally}
         />
 
+        {/* Swipe-läge — mobil/touch */}
+        {useMobileView && applications.length > 0 && (
+          <div className="flex justify-center pb-3">
+            <Button
+              variant="outline"
+              className="min-h-11"
+              onClick={() => setSwipeFilterOpen(true)}
+            >
+              <Layers className="h-4 w-4" />
+              <span>Swipe-läge</span>
+            </Button>
+          </div>
+        )}
+
         {/* Touch devices: tab-based candidate list. Desktop: kanban with drag-and-drop */}
         <SectionErrorBoundary fallbackLabel="Kandidatvy">
         {useMobileView ? (
+
           <MobileCandidateView
             jobId={jobId || ''}
             applications={applications}
@@ -743,11 +770,24 @@ const JobDetails = () => {
             applications={swipeApplicationsAsData}
             initialIndex={swipeInitialIndex}
             open={swipeViewerOpen}
-            onClose={() => setSwipeViewerOpen(false)}
+            onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
             onOpenFullProfile={handleSwipeOpenFullProfile}
             getDisplayRating={getDisplayRating}
           />
         )}
+
+        {/* Urvalskriterier innan swipe-läget startar */}
+        <CandidateSwipeFilterSheet
+          open={swipeFilterOpen}
+          onOpenChange={setSwipeFilterOpen}
+          candidates={allApplicationsAsData}
+          criteria={(jobCriteria || []).map(c => ({ id: c.id, title: c.title }))}
+          onStart={(filtered) => {
+            setSwipeFilteredApps(filtered);
+            setSwipeInitialIndex(0);
+            setSwipeViewerOpen(true);
+          }}
+        />
 
         {/* Selection Criteria Dialog */}
         {jobId && (
