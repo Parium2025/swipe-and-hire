@@ -1392,11 +1392,13 @@ const Profile = () => {
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         setCoverEditorOpen(false);
         if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
         setPendingCoverSrc('');
         return;
       }
+
 
 
       // Förladdda den signerade URL:en i bakgrunden (utan att blockera UI)
