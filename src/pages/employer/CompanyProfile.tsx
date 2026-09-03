@@ -316,7 +316,7 @@ const CompanyProfile = () => {
       
       toast({
         title: "Logga uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din företagslogga."
+        description: "Din företagslogga sparas automatiskt."
       });
     } catch (error) {
       console.error('Logo upload error:', error);
