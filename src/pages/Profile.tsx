@@ -2305,10 +2305,11 @@ const Profile = () => {
                       </Button>
                       <Button
                         type="button"
-                        variant="glass"
+                        variant="glassRed"
                         onClick={() => void deleteCoverImage()}
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                       >
+                        <Trash2 className="h-4 w-4" />
                         Ta bort cover-bild
                       </Button>
                     </>
@@ -2339,7 +2340,7 @@ const Profile = () => {
                   </div>
                   )}
 
-                  {/* Lägg till den mediatyp som saknas; bild och video kan samexistera. */}
+                  {/* Lägg till den mediatyp som saknas; när video finns är videon primär media. */}
                   {!displayIsVideo && (
                     <Button
                       type="button"
@@ -2349,17 +2350,6 @@ const Profile = () => {
                       className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
                       Lägg till profilvideo
-                    </Button>
-                  )}
-                  {displayIsVideo && !displayImagePath && (
-                    <Button
-                      type="button"
-                      variant="glass"
-                      onClick={() => document.getElementById('profile-image-only')?.click()}
-                      disabled={isUploadingMedia}
-                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
-                    >
-                      Lägg till profilbild
                     </Button>
                   )}
                 </div>
