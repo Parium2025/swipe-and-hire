@@ -27,6 +27,13 @@ export const JobSeekerNotificationSettings = () => {
     setUpdatingSubscription(true);
     try {
       await setSubscribed(true);
+      // Slå automatiskt på mejl för de notistyper som har mejl-stöd
+      // (Ansökningar, Avslutade annonser) om de stod av.
+      for (const { type, hasEmail } of JOBSEEKER_NOTIFICATION_TYPES) {
+        if (hasEmail && !isEnabled(type, 'email')) {
+          toggle(type, true, 'email');
+        }
+      }
       toast({
         title: 'Mejlutskick aktiverade',
         description: 'Du får app-mejl igen enligt dina inställningar nedan.',
