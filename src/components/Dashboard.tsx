@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { MobileJobCard } from '@/components/MobileJobCard';
+import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { isEmployerJobActive, isEmployerJobExpired } from '@/lib/jobStatus';
 import { StatsGrid } from '@/components/StatsGrid';
 import { JobSearchBar } from '@/components/JobSearchBar';
@@ -45,6 +46,7 @@ const Dashboard = memo(() => {
   // Server-side truth — skalar till 10k+ jobb utan klient-belastning
   const { data: serverCounts } = useEmployerJobsCounts('organization');
   const { data: serverStats } = useEmployerDashboardStats('organization');
+  const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
   
@@ -445,6 +447,7 @@ const Dashboard = memo(() => {
                   collapsible
                   expanded={expandAll}
                   hideActions
+                  unviewedCount={unviewedByJob.get((job as any).id) ?? 0}
                 />
 
 
