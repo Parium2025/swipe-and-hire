@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { isValidClockTime } from '@/lib/clockTime';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useFitScale } from '@/hooks/useFitScale';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
