@@ -2294,15 +2294,26 @@ const Profile = () => {
                     </Button>
                   )}
                   {displayIsVideo && displayCoverPath && (
-                    <Button
-                      type="button"
-                      variant="glass"
-                      onClick={handleEditExistingCover}
-                      className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
-                    >
-                      Anpassa cover-bild
-                    </Button>
+                    <>
+                      <Button
+                        type="button"
+                        variant="glass"
+                        onClick={handleEditExistingCover}
+                        className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
+                      >
+                        Anpassa cover-bild
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="glass"
+                        onClick={() => void deleteCoverImage()}
+                        className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
+                      >
+                        Ta bort cover-bild
+                      </Button>
+                    </>
                   )}
+
 
                   {displayIsVideo && !displayCoverPath && (
                   <div className="relative flex w-full max-w-xs items-center justify-center">
