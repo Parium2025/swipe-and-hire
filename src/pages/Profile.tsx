@@ -2231,7 +2231,9 @@ const Profile = () => {
                   )}
                 </div>
                 <div className="flex flex-col items-center gap-2 text-center">
-                  {displayImagePath && (
+                  {/* Vid video visas cover-bilden i cirkeln – då är "Anpassa cover-bild"
+                      den enda relevanta knappen (annars två knappar för samma bild). */}
+                  {displayImagePath && !displayIsVideo && (
                     <Button
                       type="button"
                       variant="glass"
