@@ -569,27 +569,35 @@ const CompanyProfile = () => {
   saveRef.current = handleSave;
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Skydd mot omförsöksloop: samma misslyckade data sparas aldrig om och om igen.
+  const failedSignatureRef = useRef<string | null>(null);
   useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (loading || isUploadingLogo) return;
+    const signature = JSON.stringify(formData);
+    if (failedSignatureRef.current === signature) return;
     const t = setTimeout(async () => {
       if (savedResetRef.current) clearTimeout(savedResetRef.current);
       setSaveStatus('saving');
       try {
         const ok = await saveRef.current({ silent: true });
         if (ok) {
+          failedSignatureRef.current = null;
           setSaveStatus('saved');
           savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
         } else {
+          failedSignatureRef.current = signature;
           setSaveStatus('idle');
         }
       } catch {
+        failedSignatureRef.current = signature;
         setSaveStatus('idle');
       }
     }, 900);
     return () => clearTimeout(t);
   }, [hasUnsavedChanges, loading, isUploadingLogo, formData]);
+
 
 
   // Visa loggan via exakt samma transformerade URL som sidebar/header redan
