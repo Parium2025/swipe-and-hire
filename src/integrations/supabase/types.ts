@@ -4293,6 +4293,13 @@ export type Database = {
         Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
       }
+      get_employer_unviewed_application_counts: {
+        Args: never
+        Returns: {
+          job_id: string
+          unviewed_count: number
+        }[]
+      }
       get_job_market_counts: { Args: never; Returns: Json }
       get_jobseeker_dashboard_stats: {
         Args: { p_user_id: string }
