@@ -962,8 +962,11 @@ const Profile = () => {
             ? { video_url: storagePath }
             : { profile_image_url: storagePath }
         );
+        // Ny media ersätter borttagningen – ångra får inte skriva över den.
+        setDeletedCandidateMedia(prev => (prev?.profileId === targetProfileId ? null : prev));
         return;
       }
+
 
       
       // Update local state
