@@ -249,6 +249,11 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
                     <Users className="h-3.5 w-3.5 flex-shrink-0" />
                     {job.applications_count || 0}
+                    {unviewedCount > 0 && (
+                      <span className="ml-1 rounded-full bg-blue-500 px-2 py-0.5 text-[11px] font-semibold text-white">
+                        {unviewedCount} nya
+                      </span>
+                    )}
                   </span>
                 </div>
 
