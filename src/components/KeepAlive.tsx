@@ -123,6 +123,9 @@ function KeepAliveCached({
   // faktiskt räcker till, och tappar aldrig värdet om komponenten remountas.
   const previousDisplayedKeyRef = useRef(activeKey);
   const settleRef = useRef<{ cancel: () => void } | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const measuredHeightsRef = useRef<Map<string, number>>(new Map());
 
   // Endast skal som uttryckligen lämnat över scrollen till KeepAlive
   // (arbetsgivarens shell) hanteras här. Jobbsökarsidan sköts som tidigare av
@@ -144,7 +147,8 @@ function KeepAliveCached({
   // omedelbart om användaren själv rör skärmen.
   const holdPosition = (container: HTMLElement, target: number) => {
     settleRef.current?.cancel();
-    if (target <= 0) return;
+    const previousOverflowAnchor = container.style.overflowAnchor;
+    container.style.overflowAnchor = 'none';
 
     const start = performance.now();
     let frame = 0;
@@ -156,6 +160,8 @@ function KeepAliveCached({
       container.removeEventListener('touchstart', onGesture);
       container.removeEventListener('wheel', onGesture);
       container.removeEventListener('pointerdown', onGesture);
+      container.style.overflowAnchor = previousOverflowAnchor;
+      if (rootRef.current) rootRef.current.style.minHeight = '';
       settleRef.current = null;
     };
 
@@ -170,7 +176,7 @@ function KeepAliveCached({
 
       if (Math.abs(container.scrollTop - target) <= 1) {
         stableFrames += 1;
-        if (stableFrames >= 5) return release();
+        if (stableFrames >= 2) return release();
       } else {
         stableFrames = 0;
         applyScroll(container, target);
@@ -219,7 +225,23 @@ function KeepAliveCached({
     if (activeKey === displayedKey) return;
     const container = getScrollContainer();
     if (!container) return;
+    const displayedNode = nodeRefs.current.get(displayedKey);
+    if (displayedNode) {
+      measuredHeightsRef.current.set(displayedKey, displayedNode.scrollHeight);
+    }
     setKeepAliveScroll(displayedKey, container.scrollTop);
+
+    // Reservera den inkommande vyns senast uppmätta höjd redan innan den
+    // gamla vyn döljs. iOS Safari klipper annars den delade scroll-containern
+    // till den kortare detaljvyn och hinner måla listan i ett tillfälligt läge
+    // innan scrollTop återställs. Höjdreserv + avstängd scroll anchoring gör
+    // återgången atomisk utan att ändra användarens sparade position.
+    const incomingHeight = measuredHeightsRef.current.get(activeKey);
+    if (rootRef.current) {
+      rootRef.current.style.minHeight = incomingHeight && incomingHeight > 0
+        ? `${incomingHeight}px`
+        : '';
+    }
   }, [activeKey, displayedKey]);
 
   // Återställ även vid allra första monteringen (t.ex. efter en omladdning
@@ -375,7 +397,7 @@ function KeepAliveCached({
   }, [activeKey, displayedKey, keepKeys]);
 
   return (
-    <div className="relative w-full h-full flex flex-col min-h-0">
+    <div ref={rootRef} className="relative w-full h-full flex flex-col min-h-0">
       {mountedKeysRef.current.map((key) => {
         const isDisplayed = key === displayedKey;
         const enterClasses = isEntered
@@ -384,6 +406,10 @@ function KeepAliveCached({
         return (
           <div
             key={key}
+            ref={(node) => {
+              if (node) nodeRefs.current.set(key, node);
+              else nodeRefs.current.delete(key);
+            }}
             style={
               isDisplayed
                 ? { willChange: isAnimating ? 'opacity, transform' : 'auto' }
