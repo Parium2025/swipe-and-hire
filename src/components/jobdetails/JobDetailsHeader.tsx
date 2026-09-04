@@ -98,10 +98,12 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
             const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
             if (navState?.fromRoute) {
               const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
+              requestScrollRestore(navState.fromRoute);
               navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
             } else if (window.history.state?.idx > 0) {
               navigate(-1);
             } else {
+              requestScrollRestore('/dashboard');
               navigate('/dashboard', { replace: true });
             }
           }}

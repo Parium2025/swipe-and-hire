@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePullToDismiss } from '@/hooks/usePullToDismiss';
+import { requestScrollRestore } from '@/lib/scrollRestoration';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -78,10 +79,12 @@ const JobDetails = () => {
     const navState = (location.state as { fromRoute?: '/dashboard' | '/my-jobs'; fromTab?: 'active' | 'expired' | 'draft' } | null) ?? null;
     if (navState?.fromRoute) {
       const tabSuffix = navState.fromTab && navState.fromTab !== 'active' ? `?tab=${navState.fromTab}` : '';
+      requestScrollRestore(navState.fromRoute);
       navigate(`${navState.fromRoute}${tabSuffix}`, { replace: true });
     } else if (window.history.state?.idx > 0) {
       navigate(-1);
     } else {
+      requestScrollRestore('/dashboard');
       navigate('/dashboard', { replace: true });
     }
   }, [location.state, navigate]);
