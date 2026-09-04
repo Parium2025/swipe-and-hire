@@ -153,34 +153,43 @@ async function fetchCriterionResults(
 ): Promise<Map<string, CriterionResult[]>> {
   const byEvaluation = new Map<string, CriterionResult[]>();
 
-  for (const ids of chunk(evaluationIds, IN_CHUNK)) {
-    for (let from = 0; ; from += ROWS_PER_REQUEST) {
-      const { data, error } = await supabase
-        .from('criterion_results')
-        .select('evaluation_id, criterion_id, result, reasoning')
-        .in('evaluation_id', ids)
-        .order('evaluation_id', { ascending: true })
-        .order('criterion_id', { ascending: true })
-        .range(from, from + ROWS_PER_REQUEST - 1);
+  // Chunkarna är oberoende av varandra och körs parallellt; pagineringen inom
+  // varje chunk måste däremot vara sekventiell (offset beror på föregående svar).
+  const groups = await Promise.all(
+    chunk(evaluationIds, IN_CHUNK).map(async (ids) => {
+      const rows: { evaluation_id: string; criterion_id: string; result: string; reasoning: string | null }[] = [];
+      for (let from = 0; ; from += ROWS_PER_REQUEST) {
+        const { data, error } = await supabase
+          .from('criterion_results')
+          .select('evaluation_id, criterion_id, result, reasoning')
+          .in('evaluation_id', ids)
+          .order('evaluation_id', { ascending: true })
+          .order('criterion_id', { ascending: true })
+          .range(from, from + ROWS_PER_REQUEST - 1);
 
-      if (error) break;
-      const rows = data || [];
-      rows.forEach((cr) => {
-        const existing = byEvaluation.get(cr.evaluation_id) || [];
-        existing.push({
-          criterion_id: cr.criterion_id,
-          result: cr.result as 'match' | 'no_match' | 'no_data',
-          reasoning: cr.reasoning || undefined,
-          title: criteriaMap.get(cr.criterion_id) || 'Okänt kriterium',
-        });
-        byEvaluation.set(cr.evaluation_id, existing);
-      });
-      if (rows.length < ROWS_PER_REQUEST) break;
-    }
-  }
+        if (error) break;
+        const page = data || [];
+        rows.push(...(page as typeof rows));
+        if (page.length < ROWS_PER_REQUEST) break;
+      }
+      return rows;
+    }),
+  );
+
+  groups.flat().forEach((cr) => {
+    const existing = byEvaluation.get(cr.evaluation_id) || [];
+    existing.push({
+      criterion_id: cr.criterion_id,
+      result: cr.result as 'match' | 'no_match' | 'no_data',
+      reasoning: cr.reasoning || undefined,
+      title: criteriaMap.get(cr.criterion_id) || 'Okänt kriterium',
+    });
+    byEvaluation.set(cr.evaluation_id, existing);
+  });
 
   return byEvaluation;
 }
+
 
 /** Berika en sida råa ansökningsrader med betyg, media, aktivitet och kriterier. */
 async function hydrateApplications(
