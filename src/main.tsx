@@ -187,5 +187,10 @@ async function bootstrap() {
 // "bundlen är igång men appen tar tid" (→ vänta, ladda ALDRIG om mitt i).
 (window as unknown as { __pariumMainStarted?: boolean }).__pariumMainStarted = true;
 
-void bootstrap();
+void bootstrap().catch(() => {
+  // Om bootstrap kraschar innan render → appen kommer aldrig upp.
+  // Nollställ flaggan så att watchdogen behandlar det som ett bundle-fel
+  // och går vidare med automatisk omladdning istället för att vänta i evighet.
+  (window as unknown as { __pariumMainStarted?: boolean }).__pariumMainStarted = false;
+});
 
