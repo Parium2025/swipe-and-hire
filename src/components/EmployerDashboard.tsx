@@ -132,11 +132,8 @@ const EmployerDashboard = memo(() => {
   const [initialLoadDone, setInitialLoadDone] = useState(__employerDashboardHasMountedOnce);
   useEffect(() => {
     if (!loading && !initialLoadDone) {
-      const t = setTimeout(() => {
-        setInitialLoadDone(true);
-        __employerDashboardHasMountedOnce = true;
-      }, 150);
-      return () => clearTimeout(t);
+      setInitialLoadDone(true);
+      __employerDashboardHasMountedOnce = true;
     }
   }, [loading, initialLoadDone]);
 
@@ -793,6 +790,7 @@ const EmployerDashboard = memo(() => {
                       onDelete={handleDeleteClick}
                       onEditDraft={handleEditDraft}
                       onPrefetch={prefetchJob}
+                      onPrefetchNow={prefetchNow}
                       onRepublish={handleRepublishClick}
                       cardIndex={idx}
                       collapsible
@@ -883,6 +881,7 @@ const EmployerDashboard = memo(() => {
                       onDelete={handleDeleteClick}
                       onEditDraft={handleEditDraft}
                       onPrefetch={prefetchJob}
+                      onPrefetchNow={prefetchNow}
                       onRepublish={handleRepublishClick}
                       cardIndex={idx}
                       collapsible

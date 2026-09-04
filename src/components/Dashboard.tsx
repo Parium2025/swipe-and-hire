@@ -68,11 +68,8 @@ const Dashboard = memo(() => {
   const [initialLoadDone, setInitialLoadDone] = useState(__employerOrgDashboardHasMountedOnce);
   useEffect(() => {
     if (!isLoading && !initialLoadDone) {
-      const t = setTimeout(() => {
-        setInitialLoadDone(true);
-        __employerOrgDashboardHasMountedOnce = true;
-      }, 150);
-      return () => clearTimeout(t);
+      setInitialLoadDone(true);
+      __employerOrgDashboardHasMountedOnce = true;
     }
   }, [isLoading, initialLoadDone]);
 
@@ -453,6 +450,7 @@ const Dashboard = memo(() => {
                   onEdit={() => {}}
                   onDelete={() => {}}
                   onPrefetch={prefetchJob}
+                  onPrefetchNow={prefetchNow}
                   collapsible
                   expanded={expandAll}
                   hideActions

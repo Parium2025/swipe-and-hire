@@ -27,6 +27,7 @@ interface MobileJobCardProps {
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
   onPrefetch?: (jobId: string) => void;
+  onPrefetchNow?: (jobId: string, job?: JobPosting) => void;
   onRepublish?: (job: JobPosting) => void;
   /** Card index in list — first 6 load eagerly, rest lazy */
   cardIndex?: number;
@@ -73,7 +74,7 @@ const ActionTip = ({ label, children }: { label: string; children: React.ReactNo
 );
 
 
-export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp, unviewedCount = 0 }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft, onPrefetch, onPrefetchNow, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp, unviewedCount = 0 }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   // Endast annonsens ägare får återpublicera – kollegor får skapa en egen annons istället.
@@ -142,8 +143,11 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
   };
 
   const handleTouchStart = () => {
-    if (!isDraft && !isExpired && onPrefetch) {
-      onPrefetch(job.id);
+    if (!isDraft && !isExpired) {
+      // Touch har inget hover-intent att filtrera. Kör direkt så en snabb tap
+      // aldrig hinner navigera före den tidigare 100 ms-timern.
+      if (onPrefetchNow) onPrefetchNow(job.id, job);
+      else onPrefetch?.(job.id);
     }
   };
 

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useLayoutEffect } from 'react';
+import { consumePendingScrollRestore, readPositions } from '@/lib/scrollRestoration';
 
 // ---------------------------------------------------------------------------
 // Scrollminne per KeepAlive-vy — modulnivå + sessionStorage
@@ -243,7 +244,16 @@ function KeepAliveCached({
     previousDisplayedKeyRef.current = displayedKey;
 
     settleRef.current?.cancel();
-    const target = getKeepAliveScroll(displayedKey);
+    // Programmatisk retur från annonsdetaljen (krysset) sparas synkront via
+    // saveScrollNow i det gemensamma scrollminnet. Läs just den snapshotten
+    // när returmarkören finns, i stället för att lita på KeepAlive-minnet som
+    // Safari kan ha hunnit klippa till 0 när den höga listan doldes.
+    const pendingRestore = consumePendingScrollRestore(displayedKey);
+    const sharedTarget = pendingRestore ? readPositions()[displayedKey]?.top : undefined;
+    const target = typeof sharedTarget === 'number'
+      ? sharedTarget
+      : getKeepAliveScroll(displayedKey);
+    if (pendingRestore) setKeepAliveScroll(displayedKey, target);
     applyScroll(container, target);
     holdPosition(container, target);
   }, [displayedKey]);
