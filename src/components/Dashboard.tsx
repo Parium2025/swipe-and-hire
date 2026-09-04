@@ -40,7 +40,7 @@ const getEmptyMessage = (searchTerm: string, activeTab: JobStatusTab): string =>
 let __employerOrgDashboardHasMountedOnce = false;
 
 const Dashboard = memo(() => {
-  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ 
+  const { jobs: allJobs, stats, recruiters, isLoading, loadMore, hasMore, isLoadingMore } = useJobsData({ 
     scope: 'organization',
     enableRealtime: true 
   });
