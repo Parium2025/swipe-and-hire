@@ -40,7 +40,7 @@ const getEmptyMessage = (searchTerm: string, activeTab: JobStatusTab): string =>
 let __employerOrgDashboardHasMountedOnce = false;
 
 const Dashboard = memo(() => {
-  const { jobs: allJobs, stats, recruiters, isLoading } = useJobsData({ 
+  const { jobs: allJobs, stats, recruiters, isLoading, loadMore, hasMore, isLoadingMore } = useJobsData({ 
     scope: 'organization',
     enableRealtime: true 
   });
@@ -198,7 +198,22 @@ const Dashboard = memo(() => {
 
   const tabFilteredJobs = activeTab === 'expired' ? tabBuckets.expired : tabBuckets.active;
 
-  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
+  // 📄 Utgångna hämtas sidvis från servern — håll alltid en sida i förväg klar.
+  const archiveHasMore = activeTab === 'expired' && !searchTerm.trim() && hasMore.expired;
+
+  useEffect(() => {
+    if (!archiveHasMore || isLoadingMore) return;
+    if ((page + 1) * pageSize <= tabFilteredJobs.length) return;
+    void loadMore('expired');
+  }, [archiveHasMore, isLoadingMore, tabFilteredJobs.length, page, pageSize, loadMore]);
+
+  const loadedPages = Math.ceil(tabFilteredJobs.length / pageSize);
+  const totalPages = Math.max(
+    1,
+    archiveHasMore
+      ? Math.max(loadedPages, Math.ceil((serverCounts?.expired ?? tabFilteredJobs.length) / pageSize))
+      : loadedPages,
+  );
 
   // Samma klamp som i Mina annonser: sidan får aldrig peka utanför listan.
   useEffect(() => {
