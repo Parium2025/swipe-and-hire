@@ -780,9 +780,14 @@
 
           var root = function() { return document.getElementById('root'); };
 
+          // VIKTIGT: vaktens egen statusruta ligger också i #root. Den får
+          // ALDRIG räknas som "appen har startat" — då slutade automatiken
+          // försöka och användaren fastnade på "Väntar på anslutning".
           var isBooted = function() {
+            if (window.__pariumBooted === true) return true;
             var el = root();
-            return !!el && el.childElementCount > 0;
+            if (!el || el.childElementCount === 0) return false;
+            return !el.querySelector('[data-parium-boot-status]');
           };
 
           // Diskret, självförklarande status — ingen knapp, inget att trycka på.
@@ -791,8 +796,9 @@
             if (!el || isBooted()) return;
             messageShown = true;
             el.innerHTML =
-              '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
+              '<div data-parium-boot-status="1" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
               '<div style="width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);border-top-color:#FFFFFF;animation:parium-boot-spin 0.9s linear infinite;"></div>' +
+
               '<p style="margin:0;font-size:16px;font-weight:600;">' + (offline ? 'Väntar på anslutning' : 'Startar Parium') + '</p>' +
               '<p style="margin:0;font-size:14px;line-height:1.5;max-width:300px;">' +
               (offline
@@ -807,7 +813,7 @@
             var el = root();
             if (!el || isBooted()) return;
             el.innerHTML =
-              '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
+              '<div data-parium-boot-status="1" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
               '<p style="margin:0;font-size:18px;font-weight:600;">Sidan kunde inte laddas</p>' +
               '<p style="margin:0;font-size:15px;line-height:1.5;max-width:320px;">Vi fortsätter försöka i bakgrunden. Du kan också ladda om direkt.</p>' +
               '<button id="parium-boot-retry" style="margin-top:8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);color:#FFFFFF;font-size:16px;font-weight:600;">Ladda om</button>' +
@@ -889,15 +895,23 @@
               try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
 
               if (attempts > 5) {
-                // Sista utvägen: visa knapp men fortsätt ändå automatiskt.
+                // Sista utvägen: visa knapp — men automatiken fortsätter ändå,
+                // nu i lugnare takt (var 30:e sekund) så vi aldrig loopar hårt.
                 showManualFallback();
                 recovering = false;
-                setTimeout(function() { if (!isBooted()) { recovering = false; recover(); } }, backoffMs(attempts));
+                setTimeout(function() { if (!isBooted()) hardReload(); }, 30000);
                 return;
               }
 
+
               if (attempts >= 2 && !messageShown) showStatus(false);
-              setTimeout(hardReload, backoffMs(attempts));
+              // Guard: hinner appen starta under backoffen får vi ALDRIG
+              // rycka undan sidan med en omladdning.
+              setTimeout(function() {
+                if (isBooted()) { booted = true; recovering = false; clearAttempts(); return; }
+                hardReload();
+              }, backoffMs(attempts));
+
             });
           };
 
