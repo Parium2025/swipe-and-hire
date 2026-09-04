@@ -149,7 +149,6 @@ function KeepAliveCached({
   const rootRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
-  const spacerRef = useRef<HTMLDivElement | null>(null);
   const isRestoringRef = useRef(false);
 
   // Endast skal som uttryckligen lämnat över scrollen till KeepAlive
@@ -175,12 +174,12 @@ function KeepAliveCached({
   // reserv klipper webbläsaren scrollTop till 0 och användaren ser innehållet
   // högst upp innan datan laddat — sedan ett synligt hopp ner.
   //
-  // Reserven läggs i ETT eget spacer-element sist i scroll-containern, inte
-  // som min-height på vår rot. Det är avgörande: rotens min-height skulle få
-  // den visade vyn att sträckas ut, och då mäter vi vår egen reserv som om
-  // det vore riktigt innehåll — reserven släpptes direkt och positionen
-  // klipptes tillbaka till 0. Med ett fristående spacer-element kan vi mäta
-  // det faktiska innehållet (scrollHeight minus reservens höjd) och behålla
+  // Reserven läggs som extra padding-bottom på själva scroll-containern —
+  // inte som min-height på vår rot och inte som ett spacer-element. Båda de
+  // varianterna mäter fel: min-height sträcker ut den visade vyn (då ser vår
+  // egen reserv ut som riktigt innehåll och släpps direkt), och ett spacer-
+  // element i flex-kolumnen trycker i stället ihop innehållet. Med padding kan
+  // vi mäta det verkliga innehållet (scrollHeight minus reserven) och behålla
   // reserven exakt tills riktigt innehåll finns.
   const reserveStateRef = useRef<{ container: HTMLElement; basePadding: number; extra: number } | null>(null);
 
