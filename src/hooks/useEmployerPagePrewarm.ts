@@ -37,6 +37,10 @@ export function useEmployerPagePrewarm() {
     const timers: number[] = [];
 
     const run = () => {
+      // "X nya"-siffran på jobbkorten: värm direkt så den aldrig poppar in
+      // efter att kortet redan syns.
+      void prefetchUnviewedApplicationCounts(queryClient, userId);
+
       // Antal och statistik har egna query-nycklar och ingår inte i
       // route-prefetchen. Värm båda scopes parallellt så inga siffror poppar in
       // först när Mina/Företagets annonser öppnas.
