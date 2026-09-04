@@ -201,20 +201,62 @@ async function hydrateApplications(
 
   const applicantIds = applicationsData.map((a) => a.applicant_id);
 
+  const idGroups = chunk(applicantIds, IN_CHUNK);
+
+  // Media + senaste aktivitet beror INTE på betyg/kriterier/utvärderingar.
+  // Tidigare startade de först efter tre väntande steg, vilket gav en kedja av
+  // nätverksrundor innan kandidatkorten kunde ritas. Nu startar allt samtidigt.
+  const mediaByApplicant = new Map<
+    string,
+    { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }
+  >();
+  const activityByApplicant = new Map<string, { last_active_at: string | null }>();
+
+  const mediaAndActivityPromise = Promise.all(
+    idGroups.map(async (ids) => {
+      const [{ data: batchMediaData }, activityResult] = await Promise.all([
+        measurePerformance('matching', () =>
+          supabase.rpc('get_applicant_profile_media_batch', { p_applicant_ids: ids, p_employer_id: userId }),
+        ),
+        measurePerformance('matching', () =>
+          supabase.rpc('get_applicant_latest_activity', { p_applicant_ids: ids, p_employer_id: userId }),
+        ),
+      ]);
+
+      if (batchMediaData && Array.isArray(batchMediaData)) {
+        batchMediaData.forEach((row: any) => {
+          mediaByApplicant.set(row.applicant_id, {
+            profile_image_url: row.profile_image_url,
+            video_url: row.video_url,
+            is_profile_video: row.is_profile_video,
+            city: row.city || null,
+          });
+        });
+        // Auto-invalidera bildcachen när kandidaten bytt profilbild/video
+        syncProfileMediaVersions(batchMediaData as any);
+      }
+
+      (activityResult.data || []).forEach((a: { applicant_id: string; last_active_at: string | null }) => {
+        activityByApplicant.set(a.applicant_id, { last_active_at: a.last_active_at });
+      });
+    }),
+  );
+
   const [ratingsByApplicant, criteriaResult, evaluationsResult] = await Promise.all([
     fetchRatings(userId, applicantIds),
     supabase.from('job_criteria').select('id, title').eq('job_id', jobId),
     (async () => {
-      const rows: { id: string; applicant_id: string }[] = [];
-      for (const ids of chunk(applicantIds, IN_CHUNK)) {
-        const { data } = await supabase
-          .from('candidate_evaluations')
-          .select('id, applicant_id')
-          .eq('job_id', jobId)
-          .in('applicant_id', ids);
-        rows.push(...((data || []) as { id: string; applicant_id: string }[]));
-      }
-      return rows;
+      const groups = await Promise.all(
+        idGroups.map(async (ids) => {
+          const { data } = await supabase
+            .from('candidate_evaluations')
+            .select('id, applicant_id')
+            .eq('job_id', jobId)
+            .in('applicant_id', ids);
+          return (data || []) as { id: string; applicant_id: string }[];
+        }),
+      );
+      return groups.flat();
     })(),
   ]);
 
@@ -225,45 +267,13 @@ async function hydrateApplications(
   evaluationsResult.forEach((e) => evaluationByApplicant.set(e.applicant_id, e.id));
 
   const evaluationIds = evaluationsResult.map((e) => e.id);
-  const resultsByEvaluation =
+  const [resultsByEvaluation] = await Promise.all([
     evaluationIds.length > 0
-      ? await fetchCriterionResults(evaluationIds, criteriaMap)
-      : new Map<string, CriterionResult[]>();
+      ? fetchCriterionResults(evaluationIds, criteriaMap)
+      : Promise.resolve(new Map<string, CriterionResult[]>()),
+    mediaAndActivityPromise,
+  ]);
 
-  // Media + senaste aktivitet i batch-RPC:er — chunkade så även 1 000 sökande går igenom.
-  const mediaByApplicant = new Map<
-    string,
-    { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }
-  >();
-  const activityByApplicant = new Map<string, { last_active_at: string | null }>();
-
-  for (const ids of chunk(applicantIds, IN_CHUNK)) {
-    const [{ data: batchMediaData }, activityResult] = await Promise.all([
-      measurePerformance('matching', () =>
-        supabase.rpc('get_applicant_profile_media_batch', { p_applicant_ids: ids, p_employer_id: userId }),
-      ),
-      measurePerformance('matching', () =>
-        supabase.rpc('get_applicant_latest_activity', { p_applicant_ids: ids, p_employer_id: userId }),
-      ),
-    ]);
-
-    if (batchMediaData && Array.isArray(batchMediaData)) {
-      batchMediaData.forEach((row: any) => {
-        mediaByApplicant.set(row.applicant_id, {
-          profile_image_url: row.profile_image_url,
-          video_url: row.video_url,
-          is_profile_video: row.is_profile_video,
-          city: row.city || null,
-        });
-      });
-      // Auto-invalidera bildcachen när kandidaten bytt profilbild/video
-      syncProfileMediaVersions(batchMediaData as any);
-    }
-
-    (activityResult.data || []).forEach((a: { applicant_id: string; last_active_at: string | null }) => {
-      activityByApplicant.set(a.applicant_id, { last_active_at: a.last_active_at });
-    });
-  }
 
   return applicationsData.map((app) => {
     const liveMedia =
