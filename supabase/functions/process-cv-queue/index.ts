@@ -63,6 +63,7 @@ serve(async (req) => {
     
     if (!batch || batch.length === 0) {
       console.log('No CVs in queue to process');
+      await supabase.rpc('release_job_lock', { _key: 'process-cv-queue' });
       return new Response(
         JSON.stringify({ success: true, processed: 0, message: 'Queue empty' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -132,6 +133,7 @@ serve(async (req) => {
     
     console.log(`Processed ${batch.length} CVs. ${count || 0} remaining in queue.`);
     
+    await supabase.rpc('release_job_lock', { _key: 'process-cv-queue' });
     return new Response(
       JSON.stringify({
         success: true,
@@ -144,6 +146,7 @@ serve(async (req) => {
     
   } catch (error) {
     console.error('Queue processing error:', error);
+    try { await supabase.rpc('release_job_lock', { _key: 'process-cv-queue' }); } catch { /* ignore */ }
     return new Response(
       JSON.stringify({ 
         success: false, 
