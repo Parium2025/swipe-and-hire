@@ -761,4 +761,21 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
     },
     staleTime: Infinity,
   });
+  // Urvalskriterierna ritas i kandidatkorten. De saknades i förvärmningen, så
+  // annonsvyn fick vänta på dem efter öppning — samma hämtning som useJobCriteria.
+  queryClient.prefetchQuery({
+    queryKey: ['job-criteria', jobId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('job_criteria')
+        .select('*')
+        .eq('job_id', jobId)
+        .eq('is_active', true)
+        .order('order_index');
+      if (error) throw error;
+      return (data || []).filter((c) => c.title?.trim() && c.prompt?.trim());
+    },
+    staleTime: 30_000,
+  });
 }
+
