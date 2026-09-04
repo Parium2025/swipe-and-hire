@@ -69,6 +69,9 @@ interface UseProgressivePaginationOptions {
   delayBetweenPages?: number;
 }
 
+const PAGE_ONE_WAIT_STEP_MS = 500;
+const PAGE_ONE_WAIT_LIMIT_MS = 10_000;
+
 export function useProgressivePagination({
   queryKey,
   enabled,
@@ -94,16 +97,17 @@ export function useProgressivePagination({
 
     const effectiveDelay = isSlowConnection() ? delayBetweenPages * 2 : delayBetweenPages;
 
-    const fetchNext = async (pagesLoadedSoFar: number): Promise<void> => {
+    const fetchNext = async (pagesLoadedSoFar: number, waitedForFirstPageMs = 0): Promise<void> => {
       if (cancelledRef.current) return;
       if (pagesLoadedSoFar >= effectiveMax) return;
 
       const data = queryClient.getQueryData<InfinitePageData>(queryKey);
       if (!data || !data.pages || data.pages.length === 0) {
         // Sida 1 finns inte än — vänta och försök igen (max 10 sek)
-        await new Promise((r) => setTimeout(r, 500));
+        if (waitedForFirstPageMs >= PAGE_ONE_WAIT_LIMIT_MS) return;
+        await new Promise((r) => setTimeout(r, PAGE_ONE_WAIT_STEP_MS));
         if (cancelledRef.current) return;
-        return fetchNext(pagesLoadedSoFar);
+        return fetchNext(pagesLoadedSoFar, waitedForFirstPageMs + PAGE_ONE_WAIT_STEP_MS);
       }
 
       // Avbryt om vi redan har laddat tillräckligt

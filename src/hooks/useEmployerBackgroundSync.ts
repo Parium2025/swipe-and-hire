@@ -3,7 +3,6 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { useAuth } from './useAuth';
-import { dropDeletedJobs } from '@/hooks/useJobsData';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
@@ -47,7 +46,7 @@ export const triggerEmployerBackgroundSync = async () => {
 };
 
 export const useEmployerBackgroundSync = () => {
-  const { user, userRole, profile } = useAuth();
+  const { user, userRole } = useAuth();
   const queryClient = useQueryClient();
   const hasPreloadedRef = useRef(false);
   const isPreloadingRef = useRef(false);
@@ -55,51 +54,6 @@ export const useEmployerBackgroundSync = () => {
 
   // Endast för arbetsgivare
   const isEmployer = userRole?.role === 'employer';
-
-  // 📋 Preload arbetsgivarens jobb (alltid hämta färsk data - realtime synkar)
-  const preloadJobs = useCallback(async (userId: string, orgId: string | null) => {
-    // useJobsData äger den kompletta jobb-cachen. Den här bakgrundssynken får
-    // aldrig skriva en trunkerad lista till samma queryKey — därför hämtar vi
-    // hela datasetet med keyset-paginering utan hård gräns.
-    const PAGE_SIZE = 1000;
-    const jobs: any[] = [];
-    let cursor: { created_at: string; id: string } | null = null;
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      let query = supabase
-        .from('job_postings')
-        .select(`
-          *,
-          employer_profile:profiles!job_postings_employer_id_fkey (
-            first_name,
-            last_name
-          )
-        `)
-        .eq('employer_id', userId)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-        .order('id', { ascending: false })
-        .limit(PAGE_SIZE);
-
-      if (cursor) {
-        query = query.or(
-          `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
-        );
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      const batch = data ?? [];
-      jobs.push(...batch);
-      if (batch.length < PAGE_SIZE) break;
-      const last: any = batch[batch.length - 1];
-      cursor = { created_at: last.created_at, id: last.id };
-    }
-
-    queryClient.setQueryData(['jobs', 'personal', orgId, userId], dropDeletedJobs(jobs));
-
-  }, [queryClient]);
 
   // 📅 Preload arbetsgivarens intervjuer (alltid hämta färsk data - realtime synkar)
   const preloadInterviews = useCallback(async (userId: string) => {
@@ -270,12 +224,12 @@ export const useEmployerBackgroundSync = () => {
     isPreloadingRef.current = true;
     lastEmployerPreloadTimestamp = now;
     const userId = user.id;
-    const orgId = profile?.organization_id || null;
 
     try {
-      // Kör alla preloads parallellt för maximal hastighet
+      // Annonslistorna ägs uteslutande av useJobsData/useEmployerPagePrewarm.
+      // Den äldre vägen laddade ned hela historiken och kunde skriva över den
+      // statusdelade sidcachen med 100 000+ rader.
       await Promise.all([
-        preloadJobs(userId, orgId),
         preloadInterviews(userId),
         preloadMyCandidates(userId),
         preloadConversations(userId),
@@ -288,7 +242,7 @@ export const useEmployerBackgroundSync = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, isEmployer, profile?.organization_id, preloadJobs, preloadInterviews, preloadMyCandidates, preloadConversations]);
+  }, [user, isEmployer, preloadInterviews, preloadMyCandidates, preloadConversations]);
 
   // Exponera preload-funktionen globalt
   useEffect(() => {
@@ -384,25 +338,6 @@ export const useEmployerBackgroundSync = () => {
   useEffect(() => {
     if (!user || !isEmployer) return;
 
-    let jobsDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const cleanupJobs = createBulletproofChannel({
-      channelName: `employer-jobs-${user.id}`,
-      subscriptions: [
-        {
-          table: 'job_postings',
-          filter: `employer_id=eq.${user.id}`,
-          callback: () => {
-            if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
-            jobsDebounceTimer = setTimeout(() => {
-              preloadJobs(user.id, profile?.organization_id || null);
-              queryClient.invalidateQueries({ queryKey: ['jobs'] });
-            }, 1500);
-          },
-        },
-      ],
-    });
-
     const cleanupInterviews = createBulletproofChannel({
       channelName: `employer-interviews-sync-${user.id}`,
       subscriptions: [
@@ -429,12 +364,10 @@ export const useEmployerBackgroundSync = () => {
     });
 
     return () => {
-      if (jobsDebounceTimer) clearTimeout(jobsDebounceTimer);
-      cleanupJobs();
       cleanupInterviews();
       cleanupCandidates();
     };
-  }, [user, isEmployer, profile?.organization_id, preloadJobs, preloadInterviews, queryClient]);
+  }, [user, isEmployer, preloadInterviews, queryClient]);
 };
 
 export default useEmployerBackgroundSync;

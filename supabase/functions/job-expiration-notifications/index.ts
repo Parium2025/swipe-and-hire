@@ -21,9 +21,22 @@ const handler = async (req: Request): Promise<Response> => {
 
 
   console.log("Job expiration notification cron started");
+  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+  let lockAcquired = false;
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+    const { data: gotLock, error: lockError } = await supabase.rpc('try_claim_job_lock', {
+      _key: 'job-expiration-notifications',
+      _ttl_seconds: 55 * 60,
+    });
+    if (lockError) throw lockError;
+    if (gotLock !== true) {
+      return new Response(JSON.stringify({ success: true, skipped: 'already_running' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    lockAcquired = true;
+
     const now = new Date();
     const eightHoursFromNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
@@ -356,6 +369,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    await supabase.rpc('release_job_lock', { _key: 'job-expiration-notifications' });
+    lockAcquired = false;
+
     return new Response(
       JSON.stringify({
         message: "Job expiration notifications processed",
@@ -367,6 +383,13 @@ const handler = async (req: Request): Promise<Response> => {
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {
+    if (lockAcquired) {
+      try {
+        await supabase.rpc('release_job_lock', { _key: 'job-expiration-notifications' });
+      } catch {
+        // Låsets TTL frigör körningen om även cleanup misslyckas.
+      }
+    }
     console.error("Error in job-expiration-notifications:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

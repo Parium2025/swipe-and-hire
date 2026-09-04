@@ -23,3 +23,5 @@
 - [x] Visa arbetsgivardashboardens skeleton i exakt samma scroll-yta och sparade position vid omladdning
 - [x] Snabbare öppning av annons: betyg, media och aktivitet hämtas parallellt; urvalskriterier förvärms
 - [x] Dela upp annonshämtningen per status: aktiva strömmas helt, utgångna/utkast hämtas sidvis från servern med en sida i förväg
+- [x] Ta bort äldre obegränsad annonsbakgrundssynk, dubbla realtime-kanaler och onödiga återhämtningar vid sidbyte
+- [x] Förhindra överlappande körningar av annonsstängning och fullskanning av sparade sökningar
