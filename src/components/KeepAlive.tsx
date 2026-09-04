@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useLayoutEffect } from 'react';
-import { consumePendingScrollRestore, readPositions } from '@/lib/scrollRestoration';
+import { consumePendingScrollRestore, readPositions, SCROLL_HEIGHT_TOLERANCE_PX } from '@/lib/scrollRestoration';
 
 // ---------------------------------------------------------------------------
 // Scrollminne per KeepAlive-vy — modulnivå + sessionStorage
