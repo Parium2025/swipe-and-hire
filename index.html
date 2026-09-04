@@ -891,6 +891,16 @@
                 return;
               }
 
+              // Bundlen HAR laddats och kör — appen är på väg upp men tar tid
+              // (tung första laddning, långsam enhet). Att ladda om nu skulle
+              // bara avbryta en fungerande start och kunna loopa i all framtid.
+              // Vänta istället och kontrollera igen.
+              if (window.__pariumMainStarted === true) {
+                recovering = false;
+                setTimeout(function() { if (!isBooted()) recover(); }, 5000);
+                return;
+              }
+
               attempts += 1;
               try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
 
