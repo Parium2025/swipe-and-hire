@@ -293,8 +293,10 @@ export const CandidateProfileDialog = ({
         dismissTimerRef.current = null;
       }
       setPullY(0);
+      setDismissDuration(320);
       setIsPulling(false);
       setIsDismissing(false);
+      pullTrackingRef.current = null;
     }
   }, [open]);
 
@@ -407,7 +409,7 @@ export const CandidateProfileDialog = ({
     return profilePaneRef.current;
   }, [mobileTab]);
 
-  const closeWithMotion = useCallback(() => {
+  const closeWithMotion = useCallback((startY = pullY, velocity = 0) => {
     if (isDismissing) return;
     if (window.innerWidth >= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onOpenChange(false);
@@ -421,14 +423,21 @@ export const CandidateProfileDialog = ({
       document.documentElement.clientHeight,
       window.visualViewport?.height ?? 0,
     );
-    // 100dvh kan vara högre än window.innerHeight i iOS Safari. Flytta därför
-    // hela den faktiskt uppmätta vyn förbi nederkanten innan den avmonteras.
-    setPullY(Math.max(contentHeight, viewportHeight) + 16);
+    // 100dvh kan vara högre än window.innerHeight i iOS Safari. Flytta hela
+    // vyn förbi nederkanten, med extra marginal, innan den avmonteras.
+    const targetY = Math.max(contentHeight, viewportHeight) + Math.max(24, viewportHeight * 0.08);
+    const remainingDistance = Math.max(0, targetY - startY);
+    // Fast 320 ms kändes "klippt" vid korta drag. Låt återstående sträcka och
+    // släpphastighet styra tempot så vyn får en mjuk, komplett utglidning.
+    const velocityBoost = Math.min(120, Math.abs(velocity) * 120);
+    const duration = Math.round(Math.min(560, Math.max(360, 220 + remainingDistance * 0.38 - velocityBoost)));
+    setDismissDuration(duration);
+    setPullY(targetY);
     dismissTimerRef.current = window.setTimeout(() => {
       dismissTimerRef.current = null;
       onOpenChange(false);
-    }, 520);
-  }, [isDismissing, onOpenChange]);
+    }, duration + 120);
+  }, [isDismissing, onOpenChange, pullY]);
 
   const handleDismissTransitionEnd = useCallback((e: React.TransitionEvent<HTMLDivElement>) => {
     if (!isDismissing || e.propertyName !== 'transform' || e.target !== e.currentTarget) return;
