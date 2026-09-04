@@ -429,7 +429,7 @@ export const CandidateProfileDialog = ({
     const remainingDistance = Math.max(0, targetY - startY);
     // Fast 320 ms kändes "klippt" vid korta drag. Låt återstående sträcka och
     // släpphastighet styra tempot så vyn får en mjuk, komplett utglidning.
-    const velocityBoost = Math.min(120, Math.abs(velocity) * 120);
+    const velocityBoost = Math.min(120, Math.max(0, velocity) * 120);
     const duration = Math.round(Math.min(560, Math.max(360, 220 + remainingDistance * 0.38 - velocityBoost)));
     setDismissDuration(duration);
     setPullY(targetY);
@@ -471,7 +471,8 @@ export const CandidateProfileDialog = ({
       y,
       atTop: !pane || pane.scrollTop <= 0,
     };
-    pullTrackingRef.current = { y, time: performance.now(), velocity: 0 };
+    // Hastigheten mäts i visuell dragsträcka (inte rå skärmposition).
+    pullTrackingRef.current = { y: 0, time: performance.now(), velocity: 0 };
     setIsPulling(false);
   }, [getActivePane, isDismissing]);
 
