@@ -57,7 +57,7 @@ const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
+  const { jobs, stats, isLoading: loading, invalidateJobs, loadMore, hasMore, isLoadingMore } = useJobsData();
   // Server-side truth — exakta totaler även vid 10k+ jobb
   const { data: serverCounts } = useEmployerJobsCounts('personal');
   const { data: serverStats } = useEmployerDashboardStats('personal');
