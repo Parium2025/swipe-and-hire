@@ -508,7 +508,9 @@ export const CandidateProfileDialog = ({
 
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
+    const tracking = pullTrackingRef.current;
     touchGestureRef.current = null;
+    pullTrackingRef.current = null;
     const touch = e.changedTouches[0];
     if (!start || !touch) {
       setPullY(0);
@@ -522,7 +524,7 @@ export const CandidateProfileDialog = ({
     // Nedåtdrag från toppen stänger (vertikalt dominerande).
     const pane = getActivePane();
     if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
-      closeWithMotion();
+      closeWithMotion(Math.min(dy * 0.5, 320), tracking?.velocity ?? 0);
       return;
     }
 
