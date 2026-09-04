@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
+import { safeSetItem, safeReadArrayCache } from '@/lib/safeStorage';
 
 /**
  * Antal ansökningar arbetsgivaren INTE har öppnat ännu, per annons.
