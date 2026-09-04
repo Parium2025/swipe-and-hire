@@ -596,7 +596,7 @@ const JobDetails = () => {
     } catch { /* noop */ }
   }, [jobId, dataLoading, stagesLoading, activeStages, applicationsByStatus, stageSettings]);
 
-  if (!jobId || !user || dataLoading || stagesLoading) {
+  if (!jobId || !user || dataLoading) {
     return <JobDetailsSkeleton jobId={jobId} />;
   }
 

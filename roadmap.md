@@ -25,3 +25,4 @@
 - [x] Dela upp annonshämtningen per status: aktiva strömmas helt, utgångna/utkast hämtas sidvis från servern med en sida i förväg
 - [x] Ta bort äldre obegränsad annonsbakgrundssynk, dubbla realtime-kanaler och onödiga återhämtningar vid sidbyte
 - [x] Förhindra överlappande körningar av annonsstängning och fullskanning av sparade sökningar
+- [x] Ta bort tom blå kallstart och korta den blockerande laddningen när arbetsgivaren öppnar en annons

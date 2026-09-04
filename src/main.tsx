@@ -153,7 +153,13 @@ async function bootstrap() {
 
   // On /auth, wait for logo to be fully decoded before rendering
   if (isAuthRoute) {
-    await authLogoPromise;
+    // En trasig/långsam bilddecode får aldrig blockera hela React-starten och
+    // lämna användaren på en tom blå skärm. HTML-splashen har redan samma logo
+    // och React-versionen använder en inbäddad data-URI som säker fallback.
+    await Promise.race([
+      authLogoPromise,
+      new Promise<void>((resolve) => window.setTimeout(resolve, 300)),
+    ]);
   }
 
   // Service Worker intentionally disabled on published builds.

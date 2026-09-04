@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCachedProfile, readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
+import { readPersistentCache, writePersistentCache } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,20 +84,23 @@ async function fetchJobDetails(jobId: string, userId: string): Promise<JobPostin
   // Don't filter by employer_id — RLS + can_view_job_application handles org-wide access
   const { data, error } = await supabase
     .from('job_postings')
-    .select('*')
+    .select(`
+      *,
+      employer_profile:profiles!job_postings_employer_id_fkey (
+        first_name,
+        last_name,
+        profile_image_url
+      )
+    `)
     .eq('id', jobId)
     .single();
   
   if (error) throw error;
   if (!data) return null;
 
-  // Fetch employer profile
-  const profileData = await fetchCachedProfile(data.employer_id);
-
-  return {
-    ...data,
-    employer_profile: profileData || undefined
-  };
+  // Profilen bäddas in i samma databasfråga. Den tidigare sekventiella
+  // profilhämtningen lade till en hel nätverksrunda på varje kall öppning.
+  return data as JobPosting;
 }
 
 /** Hämta betyg för en uppsättning kandidater — chunkat så `in()` aldrig spricker.
@@ -722,7 +725,10 @@ export function useJobDetailsData(jobId: string | undefined) {
     totalApplications,
     loadedCount,
     isLoadingMore,
-    isLoading: jobQuery.isLoading || applicationsQuery.isLoading,
+    // Rubrik och annonsram kan visas så snart själva annonsen finns. Kandidater
+    // fylls progressivt, i stället för att hålla hela sidan bakom skeleton.
+    isLoading: jobQuery.isLoading,
+    applicationsLoading: applicationsQuery.isLoading,
     isFetching: jobQuery.isFetching || applicationsQuery.isFetching,
     error: jobQuery.error || applicationsQuery.error,
     updateApplicationLocally,
