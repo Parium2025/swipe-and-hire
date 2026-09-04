@@ -263,7 +263,7 @@ const Dashboard = memo(() => {
       positions[window.location.pathname] = { top: 0 };
       writePositions(positions);
     }
-  }, [location.pathname, page]);
+  }, [page]);
 
   // Klick på ett statistikkort → byt flik och glid mjukt ner till listan
   const goToTab = useCallback((tab: JobStatusTab) => {

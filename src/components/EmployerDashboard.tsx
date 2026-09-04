@@ -369,7 +369,7 @@ const EmployerDashboard = memo(() => {
       positions[window.location.pathname] = { top: 0 };
       writePositions(positions);
     }
-  }, [location.pathname, page]);
+  }, [page]);
 
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
