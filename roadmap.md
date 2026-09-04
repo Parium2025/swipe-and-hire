@@ -19,3 +19,4 @@
 - [x] Återställ exakt mobil scrollposition efter stängd annonsdetalj via gemensam snapshot mellan returflöde och KeepAlive
 - [x] Förvärm annonsdata, steg och arbetsgivarsiffror inför kallstart
 - [x] Ta bort konstgjord kallstartsfördröjning och mobil prefetch-race för arbetsgivarannonser
+- [x] Eliminera knappflimmer vid återgång genom att ignorera dolda KeepAlive-noders nollbredd
