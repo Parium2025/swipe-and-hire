@@ -725,10 +725,7 @@ export function useJobDetailsData(jobId: string | undefined) {
     totalApplications,
     loadedCount,
     isLoadingMore,
-    // Rubrik och annonsram kan visas så snart själva annonsen finns. Kandidater
-    // fylls progressivt, i stället för att hålla hela sidan bakom skeleton.
-    isLoading: jobQuery.isLoading,
-    applicationsLoading: applicationsQuery.isLoading,
+    isLoading: jobQuery.isLoading || applicationsQuery.isLoading,
     isFetching: jobQuery.isFetching || applicationsQuery.isFetching,
     error: jobQuery.error || applicationsQuery.error,
     updateApplicationLocally,
