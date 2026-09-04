@@ -20,3 +20,4 @@
 - [x] Förvärm annonsdata, steg och arbetsgivarsiffror inför kallstart
 - [x] Ta bort konstgjord kallstartsfördröjning och mobil prefetch-race för arbetsgivarannonser
 - [x] Eliminera knappflimmer vid återgång genom att ignorera dolda KeepAlive-noders nollbredd
+- [x] Visa arbetsgivardashboardens skeleton i exakt samma scroll-yta och sparade position vid omladdning
