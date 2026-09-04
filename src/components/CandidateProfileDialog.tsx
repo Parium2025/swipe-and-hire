@@ -595,7 +595,7 @@ export const CandidateProfileDialog = ({
           transition: isPulling
             ? 'none'
             : isDismissing
-              ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
+              ? `transform ${dismissDuration}ms cubic-bezier(0.24, 0.82, 0.28, 1)`
               : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
         }}
