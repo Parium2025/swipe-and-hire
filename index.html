@@ -895,12 +895,14 @@
               try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
 
               if (attempts > 5) {
-                // Sista utvägen: visa knapp men fortsätt ändå automatiskt.
+                // Sista utvägen: visa knapp — men automatiken fortsätter ändå,
+                // nu i lugnare takt (var 30:e sekund) så vi aldrig loopar hårt.
                 showManualFallback();
                 recovering = false;
-                setTimeout(function() { if (!isBooted()) { recovering = false; recover(); } }, backoffMs(attempts));
+                setTimeout(function() { if (!isBooted()) hardReload(); }, 30000);
                 return;
               }
+
 
               if (attempts >= 2 && !messageShown) showStatus(false);
               setTimeout(hardReload, backoffMs(attempts));
