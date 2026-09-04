@@ -813,7 +813,7 @@
             var el = root();
             if (!el || isBooted()) return;
             el.innerHTML =
-              '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
+              '<div data-parium-boot-status="1" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
               '<p style="margin:0;font-size:18px;font-weight:600;">Sidan kunde inte laddas</p>' +
               '<p style="margin:0;font-size:15px;line-height:1.5;max-width:320px;">Vi fortsätter försöka i bakgrunden. Du kan också ladda om direkt.</p>' +
               '<button id="parium-boot-retry" style="margin-top:8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);color:#FFFFFF;font-size:16px;font-weight:600;">Ladda om</button>' +
