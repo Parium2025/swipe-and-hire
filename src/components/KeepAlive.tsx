@@ -224,12 +224,12 @@ function KeepAliveCached({
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        setKeepAliveScroll(displayedKey, container.scrollTop);
+        setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
       });
     };
     // Snapshot direkt när användaren rör ett kort: navigeringen kan ske innan
     // nästa rAF hinner köras.
-    const onPointerDown = () => setKeepAliveScroll(displayedKey, container.scrollTop);
+    const onPointerDown = () => setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
     container.addEventListener('scroll', onScroll, { passive: true });
     container.addEventListener('pointerdown', onPointerDown, { passive: true });
     return () => {
