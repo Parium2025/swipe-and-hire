@@ -329,6 +329,7 @@ function KeepAliveCached({
   useEffect(() => {
     if (!cacheRef.current.has(activeKey)) {
       cacheRef.current.set(activeKey, render(activeKey));
+      freshKeysRef.current.add(activeKey);
       mountedKeysRef.current = [...mountedKeysRef.current, activeKey];
       setTick((t) => t + 1);
     }
@@ -338,10 +339,12 @@ function KeepAliveCached({
   // flash an empty frame
   if (!cacheRef.current.has(activeKey)) {
     cacheRef.current.set(activeKey, render(activeKey));
+    if (!isFirstActivationRef.current) freshKeysRef.current.add(activeKey);
     if (!mountedKeysRef.current.includes(activeKey)) {
       mountedKeysRef.current = [...mountedKeysRef.current, activeKey];
     }
   }
+
 
   // Drop cached nodes that are no longer in keepKeys (and not the active one)
   useEffect(() => {
