@@ -41,7 +41,7 @@ import { getImageVersion } from '@/lib/imageTransforms';
 
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
-import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { RepublishJobDialog } from '@/components/RepublishJobDialog';
@@ -530,6 +530,8 @@ const EmployerDashboard = memo(() => {
     if (!job.is_active) {
       handleEditDraft(job);
     } else {
+      // Snapshot listans exakta position synkront så krysset kan återvända dit.
+      saveScrollNow(window.location.pathname);
       navigate(`/job-details/${job.id}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
     }
   };

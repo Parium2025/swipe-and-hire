@@ -11,6 +11,8 @@ import {
   clearFooterRestoreForTarget,
   clearLatestFooterNavigationIfLeavingTarget,
   consumePendingFooterRestore,
+  consumePendingScrollRestore,
+  hasPendingScrollRestore,
   RESTORE_TOLERANCE_PX,
   SCROLL_HEIGHT_TOLERANCE_PX,
   MAX_WAIT_MS,
@@ -171,9 +173,12 @@ export function ScrollRestoration() {
       footerSnapshot?.restoreSource === 'footer' &&
       typeof footerSnapshot.restoreSavedAt === 'number' &&
       Date.now() - footerSnapshot.restoreSavedAt < 30 * 60 * 1000;
+    // Programmatisk återgång (t.ex. krysset i annonsvyn använder `replace`)
+    // ska återställa exakt samma position som när användaren gick in.
+    const hasPendingRestore = hasPendingScrollRestore(location.pathname);
     const shouldForceTop =
       isReload ||
-      (isFreshDocumentEntry && !isReturningFromJobOverlay && !isReturningFromFooterNavigation);
+      (isFreshDocumentEntry && !isReturningFromJobOverlay && !isReturningFromFooterNavigation && !hasPendingRestore);
 
     if (shouldForceTop) {
       clearScrollPosition(location.pathname);
@@ -181,7 +186,10 @@ export function ScrollRestoration() {
     }
 
     const positions = readPositions();
-    const shouldRestore = !shouldForceTop && (navigationType === 'POP' || consumePendingFooterRestore(location.pathname));
+    const shouldRestore = !shouldForceTop
+      && (navigationType === 'POP'
+        || consumePendingFooterRestore(location.pathname)
+        || consumePendingScrollRestore(location.pathname));
     const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;
 

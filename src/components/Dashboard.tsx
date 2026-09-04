@@ -22,7 +22,7 @@ import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
-import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow } from '@/lib/scrollRestoration';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -396,7 +396,7 @@ const Dashboard = memo(() => {
                   activeTab={activeTab as 'active' | 'expired'}
                   collapsible
                   expanded={expandAll}
-                  onClick={(jobId) => navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                  onClick={(jobId) => { saveScrollNow(window.location.pathname); navigate(`/job-details/${jobId}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } }); }}
                   unviewedCount={unviewedByJob.get((job as any).id) ?? 0}
                 />
 
@@ -443,7 +443,7 @@ const Dashboard = memo(() => {
               renderCard={(job) => (
                 <MobileJobCard
                   job={job as any}
-                  onEdit={() => navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } })}
+                  onEdit={() => { saveScrollNow(window.location.pathname); navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } }); }}
                   onDelete={() => {}}
                   collapsible
                   expanded={expandAll}

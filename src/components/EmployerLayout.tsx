@@ -1,6 +1,7 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import { useJobsData } from '@/hooks/useJobsData';
+import { hasPendingScrollRestore } from '@/lib/scrollRestoration';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
@@ -25,6 +26,7 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
   const { invalidateJobs } = useJobsData();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
+  const navigationType = useNavigationType();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
   const device = useDevice();
   const mainScrollRef = useRef<HTMLElement>(null);
@@ -55,11 +57,17 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
   
   // Scroll to top on route change — window.scrollTo doesn't work since
   // content scrolls inside our internal <main> container, not window.
+  // Undantag: när användaren går tillbaka (POP) eller stänger en vy med
+  // krysset (programmatisk återgång) ska den sparade positionen behållas —
+  // annars skriver den här effekten över ScrollRestoration och listan
+  // hamnar alltid högst upp.
   useEffect(() => {
+    if (navigationType === 'POP') return;
+    if (hasPendingScrollRestore(location.pathname)) return;
     if (mainScrollRef.current) {
       mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [location.pathname]);
+  }, [location.pathname, navigationType]);
 
   // Track user activity for "last seen" feature
   useActivityTracker();

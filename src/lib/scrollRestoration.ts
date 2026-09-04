@@ -2,6 +2,7 @@
 
 const SCROLL_STORAGE_KEY = 'parium-scroll-positions';
 const PENDING_FOOTER_RESTORE_KEY = 'parium-pending-footer-restore';
+const PENDING_RESTORE_KEY = 'parium-pending-scroll-restore';
 const LATEST_FOOTER_NAVIGATION_KEY = 'parium-latest-footer-navigation';
 
 export const RESTORE_TOLERANCE_PX = 2;
@@ -292,4 +293,29 @@ export const getAnchorDelta = (
   const containerTop = scrollContainer.getBoundingClientRect().top;
   const actualOffset = anchor.getBoundingClientRect().top - containerTop;
   return actualOffset - expectedOffset;
+};
+
+// ---------------------------------------------------------------------------
+// Generisk "återgå exakt dit du var"-begäran
+// ---------------------------------------------------------------------------
+// Används när vi navigerar tillbaka programmatiskt (t.ex. krysset i en
+// annonsvy använder `replace`, vilket inte är en POP-navigering och därför
+// annars landar överst i listan).
+
+export const requestScrollRestore = (pathname: string) => {
+  try { sessionStorage.setItem(PENDING_RESTORE_KEY, pathname); } catch { /* ignore */ }
+};
+
+export const hasPendingScrollRestore = (pathname: string): boolean => {
+  try { return sessionStorage.getItem(PENDING_RESTORE_KEY) === pathname; } catch { return false; }
+};
+
+export const consumePendingScrollRestore = (pathname: string): boolean => {
+  try {
+    if (sessionStorage.getItem(PENDING_RESTORE_KEY) !== pathname) return false;
+    sessionStorage.removeItem(PENDING_RESTORE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 };
