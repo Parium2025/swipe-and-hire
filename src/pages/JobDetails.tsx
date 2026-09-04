@@ -593,11 +593,12 @@ const JobDetails = () => {
     } catch { /* noop */ }
   }, [jobId, dataLoading, stagesLoading, activeStages, applicationsByStatus, stageSettings]);
 
-  if (dataLoading || stagesLoading) {
+  if (!jobId || !user || dataLoading || stagesLoading) {
     return <JobDetailsSkeleton jobId={jobId} />;
   }
 
   if (!job) {
+
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-white">Jobbet hittades inte</div>
