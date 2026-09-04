@@ -905,7 +905,13 @@
 
 
               if (attempts >= 2 && !messageShown) showStatus(false);
-              setTimeout(hardReload, backoffMs(attempts));
+              // Guard: hinner appen starta under backoffen får vi ALDRIG
+              // rycka undan sidan med en omladdning.
+              setTimeout(function() {
+                if (isBooted()) { booted = true; recovering = false; clearAttempts(); return; }
+                hardReload();
+              }, backoffMs(attempts));
+
             });
           };
 
