@@ -280,10 +280,8 @@ function KeepAliveCached({
       return;
     }
 
-    // 🚀 Om mål-sidan redan är cacheaad (monterad tidigare) → instant swap utan fade.
-    // Användaren upplever annars en "uppdaterar"-känsla vid varje flikbyte mellan
-    // redan besökta sidor. Endast första monteringen av en ny sida ska animeras.
-    if (cacheRef.current.has(activeKey)) {
+    // Redan besökta vyer hanteras synkront i layout-effekten ovan.
+    if (!freshKeysRef.current.has(activeKey)) {
       setDisplayedKey(activeKey);
       setIsEntered(true);
       setIsAnimating(false);
@@ -295,7 +293,9 @@ function KeepAliveCached({
     let safetyTimer = 0;
     const delayTimer = window.setTimeout(() => {
       // 1) Byt synlig nod och sätt start-state (osynlig)
+      freshKeysRef.current.delete(activeKey);
       setDisplayedKey(activeKey);
+
       setIsEntered(false);
       setIsAnimating(true);
 
