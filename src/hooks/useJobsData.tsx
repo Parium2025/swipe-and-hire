@@ -489,6 +489,79 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   // Only show loading if we don't have cached data
   const isLoading = queryLoading && !hasCachedData;
 
+  // 📄 Sidhämtning för Utgångna/Utkast — dessa kan vara 100 000+ per konto och
+  // laddas därför aldrig ner i sin helhet. Första sidan finns redan (förvärmd),
+  // resten hämtas när användaren bläddrar vidare.
+  const streamKey = useMemo(
+    () => JSON.stringify(['jobs', scope, profile?.organization_id, user?.id]),
+    [scope, profile?.organization_id, user?.id],
+  );
+
+  const [archiveVersion, setArchiveVersion] = useState(0);
+  useEffect(() => {
+    const listener = () => setArchiveVersion((v) => v + 1);
+    archiveListeners.add(listener);
+    return () => { archiveListeners.delete(listener); };
+  }, []);
+
+  const hasMore = useMemo(() => ({
+    expired: !readArchive(streamKey, 'expired').done,
+    draft: !readArchive(streamKey, 'draft').done,
+  }), [streamKey, archiveVersion]);
+
+  const isLoadingMore = useMemo(
+    () => readArchive(streamKey, 'expired').loading || readArchive(streamKey, 'draft').loading,
+    [streamKey, archiveVersion],
+  );
+
+  const loadMore = useCallback(async (status: 'expired' | 'draft') => {
+    if (!user) return;
+    const key = archiveKey(streamKey, status);
+    const state = readArchive(streamKey, status);
+    if (state.done || state.loading || !state.cursor) return;
+
+    archiveRegistry.set(key, { ...state, loading: true });
+    notifyArchive();
+
+    try {
+      let employerIds: string[] = [user.id];
+      if (scope === 'organization' && profile?.organization_id) {
+        const { data: orgUsers } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('organization_id', profile.organization_id)
+          .eq('is_active', true);
+        const ids = orgUsers?.map(u => u.user_id) ?? [];
+        if (ids.length > 0) employerIds = ids;
+      }
+
+      const rows = await fetchJobsPage({
+        employerIds,
+        status,
+        cursor: state.cursor,
+        size: ARCHIVE_PAGE_SIZE,
+      });
+
+      const queryKey = ['jobs', scope, profile?.organization_id, user.id];
+      queryClient.setQueryData(queryKey, (prev: JobPosting[] | undefined) => {
+        const byId = new Map((prev ?? []).map((j) => [j.id, j] as const));
+        for (const row of rows) if (!byId.has(row.id)) byId.set(row.id, row);
+        return dropDeleted(sortJobsDesc(Array.from(byId.values())));
+      });
+
+      archiveRegistry.set(key, {
+        cursor: cursorOf(rows) ?? state.cursor,
+        done: rows.length < ARCHIVE_PAGE_SIZE,
+        loading: false,
+      });
+    } catch {
+      archiveRegistry.set(key, { ...readArchive(streamKey, status), loading: false });
+    } finally {
+      notifyArchive();
+    }
+  }, [user, scope, profile?.organization_id, queryClient, streamKey]);
+
+
   // Stable set of laddade job_ids för att SCOPE realtime-listenern.
   // 🔥 HÅL #3: Utan detta får varje arbetsgivare ALLA ansökningar i hela
   // systemet via realtime. Med >1000 samtidiga arbetsgivare = bandbredds-helvete.
