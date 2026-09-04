@@ -12,7 +12,14 @@ export function useCompactWidth(threshold = 320) {
   const ref = useCallback((node: HTMLElement | null) => {
     observerRef.current?.disconnect();
     if (!node) return;
-    const update = (width: number) => setCompact(width > 0 && width < threshold);
+    const update = (width: number) => {
+      // KeepAlive döljer sparade sidor med display:none. ResizeObserver rapporterar
+      // då bredden 0, vilket inte är en riktig layoutbredd och därför aldrig får
+      // växla tillbaka knappen till textläge. Behåll senaste giltiga mätning tills
+      // sidan visas igen så första synliga bildrutan redan har rätt knappgeometri.
+      if (!Number.isFinite(width) || width <= 0) return;
+      setCompact(width < threshold);
+    };
     update(node.getBoundingClientRect().width);
     if (typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver((entries) => {
