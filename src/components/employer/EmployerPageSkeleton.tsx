@@ -7,6 +7,7 @@ import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
 import { useDevice } from '@/hooks/use-device';
+import { getKeepAliveScrollSnapshot } from '@/components/KeepAlive';
 
 /**
  * Hybrid skeleton count: read live from React Query cache first (accurate
@@ -154,6 +155,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
   showDrafts,
   titleWidthClass = 'w-48',
 }: EmployerDashboardSkeletonProps = {}) {
+  const device = useDevice();
   const resolvedShowDrafts = showDrafts ?? (typeof window !== 'undefined' ? window.location.pathname !== '/dashboard' : true);
   // Läs aktiv tab från URL så vi renderar rätt antal kort för den tab
   // användaren faktiskt kommer landa på (matchar EmployerDashboard).
@@ -169,23 +171,28 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
     : SKELETON_COUNT_KEYS.myJobsActive;
   // Sidan paginerar med pageSize=18 — clampa så vi aldrig renderar fler placeholders
   // än vad som faktiskt får plats i första view.
-  const cardCount = useLiveEmployerJobCount(tab, countKey);
+  const cachedCardCount = useLiveEmployerJobCount(tab, countKey);
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/dashboard';
+  const savedViewport = getKeepAliveScrollSnapshot(pathname);
+  // Fullskärmslagret ligger utanför sidans riktiga scroll-container. Flytta
+  // därför dess innehåll till exakt samma vertikala utsnitt som KeepAlive
+  // återställer bakom lagret. Tidigare stod det alltid på 0 och visade toppen.
+  const scrollOffset = Math.max(0, savedViewport.top);
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const estimatedCardHeight = device === 'desktop' ? 350 : 350;
+  const cardsPerRow = device === 'desktop' ? 3 : 1;
+  const cardsNeededAtOffset = Math.ceil((scrollOffset + viewportHeight) / estimatedCardHeight) * cardsPerRow;
+  const cardCount = cachedCardCount === 0
+    ? 0
+    : Math.min(18, Math.max(cachedCardCount, cardsNeededAtOffset));
 
 
   return (
-    <FullscreenSkeletonPortal>
-      <motion.div
-        initial={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
-        style={fullscreenSkeletonStyle}
-      >
-        <SkeletonChrome />
-
-        {/* Mirror EmployerMobileShell <main class="p-3"> + inner responsive-container-wide */}
-        <div className="flex-1 min-h-0 overflow-hidden p-3">
-          <div className="responsive-container-wide space-y-4">
+    // Dashboarden är redan monterad inuti arbetsgivarskalets riktiga scroll-yta.
+    // Ett body-portal/fixed-lager står alltid på viewportens topp och kan därför
+    // aldrig återge en sparad scrollposition korrekt efter reload. In-flow gör
+    // att samma scrollTop styr både skeleton och färdigt innehåll.
+    <div className="responsive-container-wide space-y-4">
           {/* Page title — matches Dashboard / Mina jobbannonser */}
           <div className="flex justify-center items-center mb-6">
             <div className={`h-7 ${titleWidthClass} rounded ${SHAPE}`} />
@@ -334,10 +341,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               </div>
             ))}
           </div>
-          </div>
-        </div>
-      </motion.div>
-    </FullscreenSkeletonPortal>
+    </div>
   );
 });
 

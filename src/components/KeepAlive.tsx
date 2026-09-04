@@ -72,6 +72,10 @@ const getKeepAliveScroll = (key: string) => keepAliveScroll.get(key)?.top ?? 0;
 const getKeepAliveEntry = (key: string): KeepAliveScrollEntry =>
   keepAliveScroll.get(key) ?? { top: 0, height: 0 };
 
+/** Read-only snapshot used by loading views that must mirror the same viewport. */
+export const getKeepAliveScrollSnapshot = (key: string): Readonly<KeepAliveScrollEntry> =>
+  getKeepAliveEntry(key);
+
 interface KeepAliveProps {
 
   activeKey: string;
@@ -329,12 +333,23 @@ function KeepAliveCached({
     // Snapshot direkt när användaren rör ett kort: navigeringen kan ske innan
     // nästa rAF hinner köras.
     const onPointerDown = () => snapshot();
+    const onPageExit = () => snapshot();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') snapshot();
+    };
     container.addEventListener('scroll', onScroll, { passive: true });
     container.addEventListener('pointerdown', onPointerDown, { passive: true });
+    window.addEventListener('pagehide', onPageExit);
+    window.addEventListener('beforeunload', onPageExit);
+    document.addEventListener('visibilitychange', onVisibilityChange);
     return () => {
       container.removeEventListener('scroll', onScroll);
       container.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pagehide', onPageExit);
+      window.removeEventListener('beforeunload', onPageExit);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       if (frame) cancelAnimationFrame(frame);
+      snapshot();
     };
   }, [displayedKey]);
 
