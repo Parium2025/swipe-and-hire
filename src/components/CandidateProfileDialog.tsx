@@ -168,6 +168,7 @@ export const CandidateProfileDialog = ({
   const profilePaneRef = useRef<HTMLDivElement | null>(null);
   const activityPaneRef = useRef<HTMLDivElement | null>(null);
   const commentsPaneRef = useRef<HTMLDivElement | null>(null);
+  const dialogContentRef = useRef<HTMLDivElement | null>(null);
   const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
   const [pullY, setPullY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -412,11 +413,28 @@ export const CandidateProfileDialog = ({
     }
     setIsPulling(false);
     setIsDismissing(true);
-    setPullY(window.innerHeight);
+    const contentHeight = dialogContentRef.current?.getBoundingClientRect().height ?? 0;
+    const viewportHeight = Math.max(
+      window.innerHeight,
+      document.documentElement.clientHeight,
+      window.visualViewport?.height ?? 0,
+    );
+    // 100dvh kan vara högre än window.innerHeight i iOS Safari. Flytta därför
+    // hela den faktiskt uppmätta vyn förbi nederkanten innan den avmonteras.
+    setPullY(Math.max(contentHeight, viewportHeight) + 16);
     dismissTimerRef.current = window.setTimeout(() => {
       dismissTimerRef.current = null;
       onOpenChange(false);
-    }, 320);
+    }, 520);
+  }, [isDismissing, onOpenChange]);
+
+  const handleDismissTransitionEnd = useCallback((e: React.TransitionEvent<HTMLDivElement>) => {
+    if (!isDismissing || e.propertyName !== 'transform' || e.target !== e.currentTarget) return;
+    if (dismissTimerRef.current !== null) {
+      window.clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = null;
+    }
+    onOpenChange(false);
   }, [isDismissing, onOpenChange]);
 
   const handleDialogOpenChange = useCallback((nextOpen: boolean) => {
@@ -429,6 +447,11 @@ export const CandidateProfileDialog = ({
 
   const handleGestureStart = useCallback((e: React.TouchEvent) => {
     if (window.innerWidth >= 768 || isDismissing) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('input, textarea, [contenteditable="true"]')) {
+      touchGestureRef.current = null;
+      return;
+    }
     const pane = getActivePane();
     touchGestureRef.current = {
       x: e.targetTouches[0].clientX,
@@ -459,17 +482,15 @@ export const CandidateProfileDialog = ({
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
     touchGestureRef.current = null;
-    if (!start) {
+    const touch = e.changedTouches[0];
+    if (!start || !touch) {
       setPullY(0);
       setIsPulling(false);
       return;
     }
-    // Gester som börjar i ett inmatningsfält ska aldrig byta flik/stänga.
-    const tag = (e.target as HTMLElement)?.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-    const dx = e.changedTouches[0].clientX - start.x;
-    const dy = e.changedTouches[0].clientY - start.y;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
 
     // Nedåtdrag från toppen stänger (vertikalt dominerande).
     const pane = getActivePane();
@@ -536,6 +557,7 @@ export const CandidateProfileDialog = ({
     <>
       <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContentNoFocus
+        ref={dialogContentRef}
         hideClose
         overlayClassName="bg-transparent md:bg-black/70"
         className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 translate-x-0 translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0"
@@ -548,6 +570,7 @@ export const CandidateProfileDialog = ({
               : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
         }}
+        onTransitionEnd={handleDismissTransitionEnd}
       >
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
@@ -562,9 +585,11 @@ export const CandidateProfileDialog = ({
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
             onClick={closeWithMotion}
             aria-label="Stäng"
-            className={cn(dialogCloseButtonClassName, 'static mr-2 shrink-0')}
+            className="relative mr-1 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full p-0 text-white"
           >
-            <X className={dialogCloseIconClassName} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors active:bg-white/20">
+              <X className="h-[18px] w-[18px] shrink-0 text-white" />
+            </span>
           </button>}
         />
 

@@ -26,3 +26,4 @@
 - [x] Ta bort äldre obegränsad annonsbakgrundssynk, dubbla realtime-kanaler och onödiga återhämtningar vid sidbyte
 - [x] Förhindra överlappande körningar av annonsstängning och fullskanning av sparade sökningar
 - [x] Ta bort tom blå kallstart och korta den blockerande laddningen när arbetsgivaren öppnar en annons
+- [ ] Slutför mobil kandidatstängning hela vägen ut och ge krysset normal storlek utan övriga UI-ändringar
