@@ -4,6 +4,7 @@
  * Extracted for modularity — zero visual changes.
  */
 import { memo, useState, useEffect, useRef } from 'react';
+import { requestScrollRestore } from '@/lib/scrollRestoration';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   X,
