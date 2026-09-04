@@ -1,6 +1,55 @@
 import React, { useRef, useEffect, useLayoutEffect } from 'react';
 
+// ---------------------------------------------------------------------------
+// Scrollminne per KeepAlive-vy — modulnivå + sessionStorage
+// ---------------------------------------------------------------------------
+// Ligger utanför komponenten så positionen överlever remount av hela Index
+// (t.ex. vid rollbyte, auth-refresh eller en snabb omladdning).
+const KEEPALIVE_SCROLL_KEY = 'parium-keepalive-scroll';
+const keepAliveScroll = new Map<string, number>();
+
+try {
+  const raw = sessionStorage.getItem(KEEPALIVE_SCROLL_KEY);
+  if (raw) {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      for (const [key, value] of Object.entries(parsed)) {
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
+          keepAliveScroll.set(key, value);
+        }
+      }
+    }
+  }
+} catch { /* ignorera trasig/otillgänglig sessionStorage */ }
+
+const persistKeepAliveScroll = () => {
+  try {
+    sessionStorage.setItem(
+      KEEPALIVE_SCROLL_KEY,
+      JSON.stringify(Object.fromEntries(keepAliveScroll)),
+    );
+  } catch { /* quota/privat läge — minnet i RAM räcker */ }
+};
+
+const setKeepAliveScroll = (key: string, top: number) => {
+  if (!Number.isFinite(top) || top < 0) return;
+  if (keepAliveScroll.get(key) === top) return;
+  keepAliveScroll.set(key, top);
+  // Detaljvyer (/job-details/:id) skapar en ny nyckel per annons — håll
+  // minnet litet genom att alltid släppa de äldsta.
+  while (keepAliveScroll.size > 50) {
+    const oldest = keepAliveScroll.keys().next().value as string | undefined;
+    if (oldest === undefined) break;
+    keepAliveScroll.delete(oldest);
+  }
+  persistKeepAliveScroll();
+};
+
+
+const getKeepAliveScroll = (key: string) => keepAliveScroll.get(key) ?? 0;
+
 interface KeepAliveProps {
+
   activeKey: string;
   render: (key: string) => React.ReactNode;
   /** Keys to keep alive across navigation. If not provided, only current key is rendered. */
@@ -60,11 +109,16 @@ function KeepAliveCached({
   // Scrollminne per vy
   // -------------------------------------------------------------------------
   // Sidorna ligger kvar i DOM:en men delar EN scroll-container. Utan minne
-  // hamnar man därför alltid högst upp när man kommer tillbaka. Vi sparar
-  // positionen när en vy lämnas och lägger tillbaka den i exakt samma
-  // bildruta som vyn visas igen — inget hopp, ingen blixt, ingen väntan.
-  const scrollByKeyRef = useRef<Map<string, number>>(new Map());
+  // hamnar man därför alltid högst upp när man kommer tillbaka. Positionen
+  // sparas per vy och läggs tillbaka i samma bildruta som vyn visas igen.
+  //
+  // Minnet ligger på modulnivå + sessionStorage. Skälet: en dold vy har
+  // display:none och därmed noll layout — när den visas igen kan listan vara
+  // lägre än den var (bilder/virtualisering hinner inte mäta) och webbläsaren
+  // klipper scrollTop till max. Vi håller därför kvar målet tills höjden
+  // faktiskt räcker till, och tappar aldrig värdet om komponenten remountas.
   const previousDisplayedKeyRef = useRef(activeKey);
+  const settleRef = useRef<{ cancel: () => void } | null>(null);
 
   // Endast skal som uttryckligen lämnat över scrollen till KeepAlive
   // (arbetsgivarens shell) hanteras här. Jobbsökarsidan sköts som tidigare av
@@ -73,6 +127,58 @@ function KeepAliveCached({
     const container = document.querySelector<HTMLElement>('[data-main-scroll-container="true"]');
     if (!container || container.dataset.scrollManaged !== 'keepalive') return null;
     return container;
+  };
+
+  const applyScroll = (container: HTMLElement, target: number) => {
+    const previousBehavior = container.style.scrollBehavior;
+    container.style.scrollBehavior = 'auto';
+    container.scrollTop = target;
+    container.style.scrollBehavior = previousBehavior;
+  };
+
+  // Håll kvar exakt läge tills innehållet vuxit klart (max ~2 s), och släpp
+  // omedelbart om användaren själv rör skärmen.
+  const holdPosition = (container: HTMLElement, target: number) => {
+    settleRef.current?.cancel();
+    if (target <= 0) return;
+
+    const start = performance.now();
+    let frame = 0;
+    let stableFrames = 0;
+    let cancelled = false;
+
+    const release = () => {
+      if (frame) cancelAnimationFrame(frame);
+      container.removeEventListener('touchstart', onGesture);
+      container.removeEventListener('wheel', onGesture);
+      container.removeEventListener('pointerdown', onGesture);
+      settleRef.current = null;
+    };
+
+    function onGesture() {
+      cancelled = true;
+      release();
+    }
+
+    const tick = () => {
+      if (cancelled) return;
+      if (performance.now() - start > 2000) return release();
+
+      if (Math.abs(container.scrollTop - target) <= 1) {
+        stableFrames += 1;
+        if (stableFrames >= 5) return release();
+      } else {
+        stableFrames = 0;
+        applyScroll(container, target);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    container.addEventListener('touchstart', onGesture, { passive: true });
+    container.addEventListener('wheel', onGesture, { passive: true });
+    container.addEventListener('pointerdown', onGesture, { passive: true });
+    settleRef.current = { cancel: () => { cancelled = true; release(); } };
+    frame = requestAnimationFrame(tick);
   };
 
   // Läs av positionen kontinuerligt medan en vy är synlig, så att den senaste
@@ -85,15 +191,34 @@ function KeepAliveCached({
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        scrollByKeyRef.current.set(displayedKey, container.scrollTop);
+        setKeepAliveScroll(displayedKey, container.scrollTop);
       });
     };
+    // Snapshot direkt när användaren rör ett kort: navigeringen kan ske innan
+    // nästa rAF hinner köras.
+    const onPointerDown = () => setKeepAliveScroll(displayedKey, container.scrollTop);
     container.addEventListener('scroll', onScroll, { passive: true });
+    container.addEventListener('pointerdown', onPointerDown, { passive: true });
     return () => {
       container.removeEventListener('scroll', onScroll);
+      container.removeEventListener('pointerdown', onPointerDown);
       if (frame) cancelAnimationFrame(frame);
     };
   }, [displayedKey]);
+
+  // Återställ även vid allra första monteringen (t.ex. efter en omladdning
+  // eller när hela Index remountas) — annars tappas positionen helt.
+  useLayoutEffect(() => {
+    const container = getScrollContainer();
+    if (!container) return;
+    const target = getKeepAliveScroll(displayedKey);
+    if (target > 0) {
+      applyScroll(container, target);
+      holdPosition(container, target);
+    }
+    return () => settleRef.current?.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useLayoutEffect(() => {
     const container = getScrollContainer();
@@ -102,27 +227,13 @@ function KeepAliveCached({
     if (previousKey === displayedKey) return;
     previousDisplayedKeyRef.current = displayedKey;
 
-    scrollByKeyRef.current.set(previousKey, container.scrollTop);
-    const target = scrollByKeyRef.current.get(displayedKey) ?? 0;
-    const previousBehavior = container.style.scrollBehavior;
-    container.style.scrollBehavior = 'auto';
-    container.scrollTop = target;
-    container.style.scrollBehavior = previousBehavior;
-
-    // Innehållet kan växa en bildruta senare (bilder, lazy-sektioner). Håll
-    // kvar exakt läge tills höjden räcker till, men aldrig längre än nödvändigt.
-    if (target > 0 && Math.abs(container.scrollTop - target) > 1) {
-      let attempts = 0;
-      const settle = () => {
-        if (attempts > 30) return;
-        attempts += 1;
-        if (Math.abs(container.scrollTop - target) <= 1) return;
-        container.scrollTop = target;
-        requestAnimationFrame(settle);
-      };
-      requestAnimationFrame(settle);
-    }
+    settleRef.current?.cancel();
+    setKeepAliveScroll(previousKey, container.scrollTop);
+    const target = getKeepAliveScroll(displayedKey);
+    applyScroll(container, target);
+    holdPosition(container, target);
   }, [displayedKey]);
+
 
   useEffect(() => {
     if (isFirstActivationRef.current) {
