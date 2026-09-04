@@ -162,6 +162,14 @@ export const CandidateProfileDialog = ({
   const previousRating = useRef<number | undefined>(undefined);
   const lastResetApplicationIdRef = useRef<string | null>(null);
 
+  // Touch-gester (mobil): horisontell swipe växlar flik, nedåtdrag från
+  // toppen stänger vyn. Spårar aktiv scrollcontainer så stäng-gesten bara
+  // kan utlösas när innehållet faktiskt är högst upp.
+  const profilePaneRef = useRef<HTMLDivElement | null>(null);
+  const activityPaneRef = useRef<HTMLDivElement | null>(null);
+  const commentsPaneRef = useRef<HTMLDivElement | null>(null);
+  const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
+
   const activeApplication = useMemo(() => {
     if (!allApplications || allApplications.length <= 1) return application;
     if (!selectedApplicationId) return application;
@@ -366,6 +374,53 @@ export const CandidateProfileDialog = ({
     return () => ro.disconnect();
   }, [open, activeApplication?.job_title, application?.job_title, allApplications?.length]);
 
+  // === Touch-gester (mobil) ===
+  // Horisontell swipe: Profil <-> Aktivitet <-> Anteckningar.
+  // Nedåtdrag: stänger vyn, men bara när den synliga panelen är högst upp —
+  // annars krockar gesten med vanlig scroll.
+  const getActivePane = useCallback(() => {
+    if (mobileTab === 'activity') return activityPaneRef.current;
+    if (mobileTab === 'comments') return commentsPaneRef.current;
+    return profilePaneRef.current;
+  }, [mobileTab]);
+
+  const handleGestureStart = useCallback((e: React.TouchEvent) => {
+    if (window.innerWidth >= 768) return;
+    const pane = getActivePane();
+    touchGestureRef.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+      atTop: !pane || pane.scrollTop <= 0,
+    };
+  }, [getActivePane]);
+
+  const handleGestureEnd = useCallback((e: React.TouchEvent) => {
+    const start = touchGestureRef.current;
+    touchGestureRef.current = null;
+    if (!start) return;
+    // Gester som börjar i ett inmatningsfält ska aldrig byta flik/stänga.
+    const tag = (e.target as HTMLElement)?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    const dx = e.changedTouches[0].clientX - start.x;
+    const dy = e.changedTouches[0].clientY - start.y;
+
+    // Nedåtdrag från toppen stänger (vertikalt dominerande).
+    const pane = getActivePane();
+    if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
+      onOpenChange(false);
+      return;
+    }
+
+    // Horisontell swipe byter flik (horisontellt dominerande).
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const order: Array<'profile' | 'activity' | 'comments'> = ['profile', 'activity', 'comments'];
+      const idx = order.indexOf(mobileTab);
+      const next = dx < 0 ? order[idx + 1] : order[idx - 1];
+      if (next) setMobileTab(next);
+    }
+  }, [getActivePane, mobileTab, onOpenChange]);
+
 
   if (!application) return null;
 
@@ -431,9 +486,13 @@ export const CandidateProfileDialog = ({
           </button>}
         />
 
-        <div className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]">
+        <div
+          className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]"
+          onTouchStart={handleGestureStart}
+          onTouchEnd={handleGestureEnd}
+        >
           {/* Main content - left side */}
-          <div className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
+          <div ref={profilePaneRef} className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
 
           {/* Candidate navigation bar */}
           {candidateTotal != null && candidateTotal >= 1 && (
@@ -661,14 +720,14 @@ export const CandidateProfileDialog = ({
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
-            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
+            <div ref={activityPaneRef} className="md:hidden flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-4">
               <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
                 <CandidateActivityLog applicantId={application?.applicant_id || null} />
               </SectionErrorBoundary>
             </div>
           )}
           {mobileTab === 'comments' && (
-            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
+            <div ref={commentsPaneRef} className="md:hidden flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-4">
               <SectionErrorBoundary fallbackLabel="Anteckningar">
                 <CandidateNotesPanel {...notesPanelProps} />
               </SectionErrorBoundary>
