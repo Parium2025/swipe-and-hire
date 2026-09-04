@@ -477,6 +477,7 @@ Deno.serve(async (req) => {
 
     console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
 
+    await supabase.rpc('release_job_lock', { _key: 'interview-reminders' });
     return new Response(
       JSON.stringify({
         success: true,
