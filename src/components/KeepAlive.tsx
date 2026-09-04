@@ -249,10 +249,26 @@ function KeepAliveCached({
   }, [displayedKey]);
 
 
+  // 🚀 Synkron växling för redan besökta vyer (t.ex. krysset i en annonsvy →
+  // tillbaka till annonslistan). Tidigare kördes bytet i en `useEffect`, alltså
+  // EFTER att webbläsaren målat en bildruta där routen redan var listan men
+  // annonsvyn fortfarande syntes — det var blixten användaren såg. Nu sker
+  // bytet före paint, så övergången är en enda ren bildruta.
+  useLayoutEffect(() => {
+    if (isFirstActivationRef.current) return;
+    if (activeKey === displayedKey) return;
+    if (freshKeysRef.current.has(activeKey)) return; // ny vy → tona in nedan
+    setDisplayedKey(activeKey);
+    setIsEntered(true);
+    setIsAnimating(false);
+  }, [activeKey, displayedKey]);
+
   useEffect(() => {
     if (isFirstActivationRef.current) {
       isFirstActivationRef.current = false;
       setDisplayedKey(activeKey);
+      freshKeysRef.current.delete(activeKey);
+
       setIsEntered(true);
       setIsAnimating(false);
       return;
