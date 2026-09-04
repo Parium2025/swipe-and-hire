@@ -238,20 +238,26 @@ CloudyEffect.displayName = 'CloudyEffect';
 // ─── Rain: CSS falling drops ────────────────────────────────────────────────
 
 const RainEffect = memo(() => {
-  const drops = useMemo(() =>
-    Array.from({ length: 35 }).map((_, i) => {
+  const drops = useMemo(() => getOrCreateSessionConfig(
+    RAIN_CACHE_KEY,
+    () => Array.from({ length: 35 }).map((_, i) => {
       const duration = 1.2 + Math.random() * 0.6;
-      const staggerDelay = (i / 35) * duration + Math.random() * 0.3;
+      // Negativ delay fördelar dropparna över hela skärmen direkt. När Home
+      // gömms med display:none pausas CSS-klockan, men vid återgång startar
+      // varje droppe mitt i sin egen fas i stället för att alla börjar om uppe
+      // i himlen samtidigt.
+      const phase = -((i / 35) * duration + Math.random() * 0.3);
       return {
         id: i,
         left: (i / 35) * 120 - 10,
         duration,
-        delay: staggerDelay,
+        delay: phase,
         height: 16 + Math.random() * 14,
         opacity: 0.35 + Math.random() * 0.25,
       };
     }),
-  []);
+    isRainConfig,
+  ), []);
 
   return (
     <>
@@ -279,21 +285,25 @@ RainEffect.displayName = 'RainEffect';
 // ─── Snow: CSS falling + sway ───────────────────────────────────────────────
 
 const SnowEffect = memo(() => {
-  const flakes = useMemo(() =>
-    Array.from({ length: 40 }).map((_, i) => {
+  const flakes = useMemo(() => getOrCreateSessionConfig(
+    SNOW_CACHE_KEY,
+    () => Array.from({ length: 40 }).map((_, i) => {
       const duration = 12 + Math.random() * 6;
-      const staggerDelay = (i / 40) * duration * 0.8 + Math.random() * 2;
+      // Samma princip som regnet: inga positiva startfördröjningar, annars ser
+      // det ut som att snön försvinner och "laddar in" på nytt efter sidbyte.
+      const phase = -((i / 40) * duration * 0.8 + Math.random() * 2);
       return {
         id: i,
         left: Math.random() * 100,
-        delay: staggerDelay,
+        delay: phase,
         duration,
         size: 3 + Math.random() * 4,
         opacity: 0.3 + Math.random() * 0.25,
         swayAmount: 10 + Math.random() * 15,
       };
     }),
-  []);
+    isSnowConfig,
+  ), []);
 
   return (
     <>
@@ -323,16 +333,21 @@ SnowEffect.displayName = 'SnowEffect';
 // ─── Thunder: CSS rain + JS lightning flash ─────────────────────────────────
 
 const ThunderEffect = memo(() => {
-  const drops = useMemo(() =>
-    Array.from({ length: 40 }).map((_, i) => ({
-      id: i,
-      left: (i / 40) * 130 - 15,
-      delay: Math.random() * 3,
-      duration: 1.0 + Math.random() * 0.5,
-      height: 15 + Math.random() * 12,
-      opacity: 0.35 + Math.random() * 0.25,
-    })),
-  []);
+  const drops = useMemo(() => getOrCreateSessionConfig(
+    THUNDER_CACHE_KEY,
+    () => Array.from({ length: 40 }).map((_, i) => {
+      const duration = 1.0 + Math.random() * 0.5;
+      return {
+        id: i,
+        left: (i / 40) * 130 - 15,
+        delay: -((i / 40) * duration + Math.random() * 0.35),
+        duration,
+        height: 15 + Math.random() * 12,
+        opacity: 0.35 + Math.random() * 0.25,
+      };
+    }),
+    isRainConfig,
+  ), []);
 
   const [lightningState, setLightningState] = useState({ position: 50, flash: false });
 
