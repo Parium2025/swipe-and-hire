@@ -461,14 +461,17 @@ export const CandidateProfileDialog = ({
     const target = e.target as HTMLElement;
     if (target.closest('input, textarea, [contenteditable="true"]')) {
       touchGestureRef.current = null;
+      pullTrackingRef.current = null;
       return;
     }
     const pane = getActivePane();
+    const y = e.targetTouches[0].clientY;
     touchGestureRef.current = {
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY,
+      y,
       atTop: !pane || pane.scrollTop <= 0,
     };
+    pullTrackingRef.current = { y, time: performance.now(), velocity: 0 };
     setIsPulling(false);
   }, [getActivePane, isDismissing]);
 
@@ -486,8 +489,21 @@ export const CandidateProfileDialog = ({
     }
     const pane = getActivePane();
     if (pane && pane.scrollTop > 0) return;
+    const nextPullY = Math.min(dy * 0.5, 320);
+    const now = performance.now();
+    const previous = pullTrackingRef.current;
+    if (previous) {
+      const elapsed = Math.max(1, now - previous.time);
+      const visualY = e.targetTouches[0].clientY - start.y;
+      const currentVisualY = Math.min(visualY * 0.5, 320);
+      pullTrackingRef.current = {
+        y: currentVisualY,
+        time: now,
+        velocity: (currentVisualY - previous.y) / elapsed,
+      };
+    }
     setIsPulling(true);
-    setPullY(Math.min(dy * 0.5, 320));
+    setPullY(nextPullY);
   }, [getActivePane, isDismissing, isPulling]);
 
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
