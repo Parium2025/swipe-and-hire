@@ -320,12 +320,12 @@ function KeepAliveCached({
       // till — annars skulle vi släppa minHeight medan skelettet fortfarande
       // är kort och positionen klipps igen.
       const realContentReady = saved.height <= 0
-        || container.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE;
+        || container.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE_PX;
       // Containerns scrollHeight inkluderar vår egen minHeight-reserv, så
       // mät den visade vyns faktiska höjd i stället när den finns.
       const displayedNode = nodeRefs.current.get(displayedKey);
       const contentReady = displayedNode
-        ? displayedNode.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE
+        ? displayedNode.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE_PX
         : realContentReady;
 
       if (Math.abs(container.scrollTop - saved.top) > 1) {
