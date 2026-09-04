@@ -252,7 +252,7 @@ function KeepAliveCached({
     if (displayedNode) {
       measuredHeightsRef.current.set(displayedKey, displayedNode.scrollHeight);
     }
-    setKeepAliveScroll(displayedKey, container.scrollTop);
+    setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
 
     // Reservera den inkommande vyns senast uppmätta höjd redan innan den
     // gamla vyn döljs. iOS Safari klipper annars den delade scroll-containern
@@ -269,14 +269,81 @@ function KeepAliveCached({
 
   // Återställ även vid allra första monteringen (t.ex. efter en omladdning
   // eller när hela Index remountas) — annars tappas positionen helt.
+  //
+  // 🚀 Omladdnings-fix: vi reserverar den sparade SIDHÖJDEN innan första
+  // paint. Skelettet är mycket kortare än den riktiga listan, så utan
+  // höjdreserven klipps scrollTop till 0 och användaren ser skelettet
+  // högst upp tills datan laddat — sedan ett synligt hopp ner. Med reserven
+  // är containern lika hög som när positionen sparades, så scrollen landar
+  // exakt rätt direkt och skelettet visas på rätt ställe ("zoomat in").
   useLayoutEffect(() => {
     const container = getScrollContainer();
     if (!container) return;
-    const target = getKeepAliveScroll(displayedKey);
-    if (target > 0) {
-      applyScroll(container, target);
-      holdPosition(container, target);
+    const saved = getKeepAliveEntry(displayedKey);
+    if (saved.top <= 0) return;
+
+    const previousOverflowAnchor = container.style.overflowAnchor;
+    container.style.overflowAnchor = 'none';
+    if (rootRef.current && saved.height > 0) {
+      rootRef.current.style.minHeight = `${saved.height}px`;
     }
+    applyScroll(container, saved.top);
+
+    // Håll positionen tills det riktiga innehållet vuxit till sparad höjd
+    // (max ~6 s — kallstart kan vara långsam), släpp direkt vid egen gest.
+    settleRef.current?.cancel();
+    const start = performance.now();
+    let frame = 0;
+    let stableFrames = 0;
+    let cancelled = false;
+
+    const release = () => {
+      if (frame) cancelAnimationFrame(frame);
+      container.removeEventListener('touchstart', onGesture);
+      container.removeEventListener('wheel', onGesture);
+      container.removeEventListener('pointerdown', onGesture);
+      container.style.overflowAnchor = previousOverflowAnchor;
+      if (rootRef.current) rootRef.current.style.minHeight = '';
+      settleRef.current = null;
+    };
+
+    function onGesture() {
+      cancelled = true;
+      release();
+    }
+
+    const tick = () => {
+      if (cancelled) return;
+      if (performance.now() - start > 6000) return release();
+
+      // Klart först när det riktiga innehållet (inte höjdreserven) räcker
+      // till — annars skulle vi släppa minHeight medan skelettet fortfarande
+      // är kort och positionen klipps igen.
+      const realContentReady = saved.height <= 0
+        || container.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE;
+      // Containerns scrollHeight inkluderar vår egen minHeight-reserv, så
+      // mät den visade vyns faktiska höjd i stället när den finns.
+      const displayedNode = nodeRefs.current.get(displayedKey);
+      const contentReady = displayedNode
+        ? displayedNode.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE
+        : realContentReady;
+
+      if (Math.abs(container.scrollTop - saved.top) > 1) {
+        stableFrames = 0;
+        applyScroll(container, saved.top);
+      } else if (contentReady) {
+        stableFrames += 1;
+        if (stableFrames >= 2) return release();
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    container.addEventListener('touchstart', onGesture, { passive: true });
+    container.addEventListener('wheel', onGesture, { passive: true });
+    container.addEventListener('pointerdown', onGesture, { passive: true });
+    settleRef.current = { cancel: () => { cancelled = true; release(); } };
+    frame = requestAnimationFrame(tick);
+
     return () => settleRef.current?.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
