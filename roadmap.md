@@ -27,5 +27,5 @@
 - [x] Förhindra överlappande körningar av annonsstängning och fullskanning av sparade sökningar
 - [x] Ta bort tom blå kallstart och korta den blockerande laddningen när arbetsgivaren öppnar en annons
 - [x] Slutför mobil kandidatstängning hela vägen ut och ge krysset normal storlek utan övriga UI-ändringar
-- [ ] Visa aktuell CV-sida och totalt antal sidor direkt i mobilens CV-verktygsrad
-- [ ] Bevara regn-, snö- och åskanimationernas fördelning så de känns igång direkt vid återgång till Home
+- [x] Visa aktuell CV-sida och totalt antal sidor direkt i mobilens CV-verktygsrad
+- [x] Bevara regn-, snö- och åskanimationernas fördelning så de känns igång direkt vid återgång till Home
