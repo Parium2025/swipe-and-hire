@@ -170,7 +170,9 @@ export const CandidateProfileDialog = ({
   const commentsPaneRef = useRef<HTMLDivElement | null>(null);
   const dialogContentRef = useRef<HTMLDivElement | null>(null);
   const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
+  const pullTrackingRef = useRef<{ y: number; time: number; velocity: number } | null>(null);
   const [pullY, setPullY] = useState(0);
+  const [dismissDuration, setDismissDuration] = useState(320);
   const [isPulling, setIsPulling] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
   const dismissTimerRef = useRef<number | null>(null);
@@ -291,8 +293,10 @@ export const CandidateProfileDialog = ({
         dismissTimerRef.current = null;
       }
       setPullY(0);
+      setDismissDuration(320);
       setIsPulling(false);
       setIsDismissing(false);
+      pullTrackingRef.current = null;
     }
   }, [open]);
 
@@ -405,7 +409,7 @@ export const CandidateProfileDialog = ({
     return profilePaneRef.current;
   }, [mobileTab]);
 
-  const closeWithMotion = useCallback(() => {
+  const closeWithMotion = useCallback((startY = pullY, velocity = 0) => {
     if (isDismissing) return;
     if (window.innerWidth >= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onOpenChange(false);
@@ -419,14 +423,21 @@ export const CandidateProfileDialog = ({
       document.documentElement.clientHeight,
       window.visualViewport?.height ?? 0,
     );
-    // 100dvh kan vara högre än window.innerHeight i iOS Safari. Flytta därför
-    // hela den faktiskt uppmätta vyn förbi nederkanten innan den avmonteras.
-    setPullY(Math.max(contentHeight, viewportHeight) + 16);
+    // 100dvh kan vara högre än window.innerHeight i iOS Safari. Flytta hela
+    // vyn förbi nederkanten, med extra marginal, innan den avmonteras.
+    const targetY = Math.max(contentHeight, viewportHeight) + Math.max(24, viewportHeight * 0.08);
+    const remainingDistance = Math.max(0, targetY - startY);
+    // Fast 320 ms kändes "klippt" vid korta drag. Låt återstående sträcka och
+    // släpphastighet styra tempot så vyn får en mjuk, komplett utglidning.
+    const velocityBoost = Math.min(120, Math.max(0, velocity) * 120);
+    const duration = Math.round(Math.min(560, Math.max(360, 220 + remainingDistance * 0.38 - velocityBoost)));
+    setDismissDuration(duration);
+    setPullY(targetY);
     dismissTimerRef.current = window.setTimeout(() => {
       dismissTimerRef.current = null;
       onOpenChange(false);
-    }, 520);
-  }, [isDismissing, onOpenChange]);
+    }, duration + 120);
+  }, [isDismissing, onOpenChange, pullY]);
 
   const handleDismissTransitionEnd = useCallback((e: React.TransitionEvent<HTMLDivElement>) => {
     if (!isDismissing || e.propertyName !== 'transform' || e.target !== e.currentTarget) return;
@@ -450,14 +461,18 @@ export const CandidateProfileDialog = ({
     const target = e.target as HTMLElement;
     if (target.closest('input, textarea, [contenteditable="true"]')) {
       touchGestureRef.current = null;
+      pullTrackingRef.current = null;
       return;
     }
     const pane = getActivePane();
+    const y = e.targetTouches[0].clientY;
     touchGestureRef.current = {
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY,
+      y,
       atTop: !pane || pane.scrollTop <= 0,
     };
+    // Hastigheten mäts i visuell dragsträcka (inte rå skärmposition).
+    pullTrackingRef.current = { y: 0, time: performance.now(), velocity: 0 };
     setIsPulling(false);
   }, [getActivePane, isDismissing]);
 
@@ -475,13 +490,28 @@ export const CandidateProfileDialog = ({
     }
     const pane = getActivePane();
     if (pane && pane.scrollTop > 0) return;
+    const nextPullY = Math.min(dy * 0.5, 320);
+    const now = performance.now();
+    const previous = pullTrackingRef.current;
+    if (previous) {
+      const elapsed = Math.max(1, now - previous.time);
+      const visualY = e.targetTouches[0].clientY - start.y;
+      const currentVisualY = Math.min(visualY * 0.5, 320);
+      pullTrackingRef.current = {
+        y: currentVisualY,
+        time: now,
+        velocity: (currentVisualY - previous.y) / elapsed,
+      };
+    }
     setIsPulling(true);
-    setPullY(Math.min(dy * 0.5, 320));
+    setPullY(nextPullY);
   }, [getActivePane, isDismissing, isPulling]);
 
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
+    const tracking = pullTrackingRef.current;
     touchGestureRef.current = null;
+    pullTrackingRef.current = null;
     const touch = e.changedTouches[0];
     if (!start || !touch) {
       setPullY(0);
@@ -495,7 +525,7 @@ export const CandidateProfileDialog = ({
     // Nedåtdrag från toppen stänger (vertikalt dominerande).
     const pane = getActivePane();
     if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
-      closeWithMotion();
+      closeWithMotion(Math.min(dy * 0.5, 320), tracking?.velocity ?? 0);
       return;
     }
 
@@ -566,7 +596,7 @@ export const CandidateProfileDialog = ({
           transition: isPulling
             ? 'none'
             : isDismissing
-              ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
+              ? `transform ${dismissDuration}ms cubic-bezier(0.24, 0.82, 0.28, 1)`
               : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
         }}
@@ -583,7 +613,7 @@ export const CandidateProfileDialog = ({
           setMobileTab={setMobileTab}
           closeButton={<button
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
-            onClick={closeWithMotion}
+            onClick={() => closeWithMotion()}
             aria-label="Stäng"
             className="relative mr-1 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full p-0 text-white"
           >
