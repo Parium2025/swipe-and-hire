@@ -374,6 +374,53 @@ export const CandidateProfileDialog = ({
     return () => ro.disconnect();
   }, [open, activeApplication?.job_title, application?.job_title, allApplications?.length]);
 
+  // === Touch-gester (mobil) ===
+  // Horisontell swipe: Profil <-> Aktivitet <-> Anteckningar.
+  // Nedåtdrag: stänger vyn, men bara när den synliga panelen är högst upp —
+  // annars krockar gesten med vanlig scroll.
+  const getActivePane = useCallback(() => {
+    if (mobileTab === 'activity') return activityPaneRef.current;
+    if (mobileTab === 'comments') return commentsPaneRef.current;
+    return profilePaneRef.current;
+  }, [mobileTab]);
+
+  const handleGestureStart = useCallback((e: React.TouchEvent) => {
+    if (window.innerWidth >= 768) return;
+    const pane = getActivePane();
+    touchGestureRef.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+      atTop: !pane || pane.scrollTop <= 0,
+    };
+  }, [getActivePane]);
+
+  const handleGestureEnd = useCallback((e: React.TouchEvent) => {
+    const start = touchGestureRef.current;
+    touchGestureRef.current = null;
+    if (!start) return;
+    // Gester som börjar i ett inmatningsfält ska aldrig byta flik/stänga.
+    const tag = (e.target as HTMLElement)?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    const dx = e.changedTouches[0].clientX - start.x;
+    const dy = e.changedTouches[0].clientY - start.y;
+
+    // Nedåtdrag från toppen stänger (vertikalt dominerande).
+    const pane = getActivePane();
+    if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
+      onOpenChange(false);
+      return;
+    }
+
+    // Horisontell swipe byter flik (horisontellt dominerande).
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const order: Array<'profile' | 'activity' | 'comments'> = ['profile', 'activity', 'comments'];
+      const idx = order.indexOf(mobileTab);
+      const next = dx < 0 ? order[idx + 1] : order[idx - 1];
+      if (next) setMobileTab(next);
+    }
+  }, [getActivePane, mobileTab, onOpenChange]);
+
 
   if (!application) return null;
 
