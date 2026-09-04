@@ -169,6 +169,10 @@ export const CandidateProfileDialog = ({
   const activityPaneRef = useRef<HTMLDivElement | null>(null);
   const commentsPaneRef = useRef<HTMLDivElement | null>(null);
   const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
+  const [pullY, setPullY] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const dismissTimerRef = useRef<number | null>(null);
 
   const activeApplication = useMemo(() => {
     if (!allApplications || allApplications.length <= 1) return application;
@@ -279,6 +283,22 @@ export const CandidateProfileDialog = ({
     summaryHook.reset();
   }, [application?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (open) {
+      if (dismissTimerRef.current !== null) {
+        window.clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = null;
+      }
+      setPullY(0);
+      setIsPulling(false);
+      setIsDismissing(false);
+    }
+  }, [open]);
+
+  useEffect(() => () => {
+    if (dismissTimerRef.current !== null) window.clearTimeout(dismissTimerRef.current);
+  }, []);
+
   const handleRatingChange = (newRating: number) => {
     if (onRatingChange && application) {
       previousRating.current = newRating;
@@ -384,20 +404,66 @@ export const CandidateProfileDialog = ({
     return profilePaneRef.current;
   }, [mobileTab]);
 
+  const closeWithMotion = useCallback(() => {
+    if (isDismissing) return;
+    if (window.innerWidth >= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onOpenChange(false);
+      return;
+    }
+    setIsPulling(false);
+    setIsDismissing(true);
+    setPullY(window.innerHeight);
+    dismissTimerRef.current = window.setTimeout(() => {
+      dismissTimerRef.current = null;
+      onOpenChange(false);
+    }, 320);
+  }, [isDismissing, onOpenChange]);
+
+  const handleDialogOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen) {
+      onOpenChange(true);
+      return;
+    }
+    closeWithMotion();
+  }, [closeWithMotion, onOpenChange]);
+
   const handleGestureStart = useCallback((e: React.TouchEvent) => {
-    if (window.innerWidth >= 768) return;
+    if (window.innerWidth >= 768 || isDismissing) return;
     const pane = getActivePane();
     touchGestureRef.current = {
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
       atTop: !pane || pane.scrollTop <= 0,
     };
-  }, [getActivePane]);
+    setIsPulling(false);
+  }, [getActivePane, isDismissing]);
+
+  const handleGestureMove = useCallback((e: React.TouchEvent) => {
+    const start = touchGestureRef.current;
+    if (!start || !start.atTop || isDismissing) return;
+    const dx = e.targetTouches[0].clientX - start.x;
+    const dy = e.targetTouches[0].clientY - start.y;
+    if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) {
+      if (isPulling) {
+        setPullY(0);
+        setIsPulling(false);
+      }
+      return;
+    }
+    const pane = getActivePane();
+    if (pane && pane.scrollTop > 0) return;
+    setIsPulling(true);
+    setPullY(Math.min(dy * 0.5, 320));
+  }, [getActivePane, isDismissing, isPulling]);
 
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
     touchGestureRef.current = null;
-    if (!start) return;
+    if (!start) {
+      setPullY(0);
+      setIsPulling(false);
+      return;
+    }
     // Gester som börjar i ett inmatningsfält ska aldrig byta flik/stänga.
     const tag = (e.target as HTMLElement)?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -408,9 +474,12 @@ export const CandidateProfileDialog = ({
     // Nedåtdrag från toppen stänger (vertikalt dominerande).
     const pane = getActivePane();
     if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
-      onOpenChange(false);
+      closeWithMotion();
       return;
     }
+
+    setPullY(0);
+    setIsPulling(false);
 
     // Horisontell swipe byter flik (horisontellt dominerande).
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
@@ -419,7 +488,7 @@ export const CandidateProfileDialog = ({
       const next = dx < 0 ? order[idx + 1] : order[idx - 1];
       if (next) setMobileTab(next);
     }
-  }, [getActivePane, mobileTab, onOpenChange]);
+  }, [closeWithMotion, getActivePane, mobileTab]);
 
 
   if (!application) return null;
@@ -465,8 +534,20 @@ export const CandidateProfileDialog = ({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus hideClose className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0">
+      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      <DialogContentNoFocus
+        hideClose
+        className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0"
+        style={{
+          transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
+          transition: isPulling
+            ? 'none'
+            : isDismissing
+              ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
+              : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
+        }}
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>Kandidatprofil: {displayApp.first_name} {displayApp.last_name}</DialogTitle>
           <DialogDescription>Visa kandidatens profilinformation och ansökan.</DialogDescription>
@@ -478,7 +559,7 @@ export const CandidateProfileDialog = ({
           setMobileTab={setMobileTab}
           closeButton={<button
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
-            onClick={() => onOpenChange(false)}
+            onClick={closeWithMotion}
             aria-label="Stäng"
             className={cn(dialogCloseButtonClassName, 'static mr-2 shrink-0')}
           >
@@ -489,7 +570,9 @@ export const CandidateProfileDialog = ({
         <div
           className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]"
           onTouchStart={handleGestureStart}
+          onTouchMove={handleGestureMove}
           onTouchEnd={handleGestureEnd}
+          onTouchCancel={handleGestureEnd}
         >
           {/* Main content - left side */}
           <div ref={profilePaneRef} className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
