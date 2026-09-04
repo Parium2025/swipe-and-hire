@@ -104,6 +104,9 @@ function KeepAliveCached({
   const [isEntered, setIsEntered] = React.useState(true);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const isFirstActivationRef = React.useRef(true);
+  // Nycklar som monterats i den här renderingen och alltså aldrig visats förut.
+  // Endast de ska tona in; redan besökta vyer byts synkront utan animation.
+  const freshKeysRef = useRef<Set<string>>(new Set());
 
   // -------------------------------------------------------------------------
   // Scrollminne per vy
@@ -246,10 +249,26 @@ function KeepAliveCached({
   }, [displayedKey]);
 
 
+  // 🚀 Synkron växling för redan besökta vyer (t.ex. krysset i en annonsvy →
+  // tillbaka till annonslistan). Tidigare kördes bytet i en `useEffect`, alltså
+  // EFTER att webbläsaren målat en bildruta där routen redan var listan men
+  // annonsvyn fortfarande syntes — det var blixten användaren såg. Nu sker
+  // bytet före paint, så övergången är en enda ren bildruta.
+  useLayoutEffect(() => {
+    if (isFirstActivationRef.current) return;
+    if (activeKey === displayedKey) return;
+    if (freshKeysRef.current.has(activeKey)) return; // ny vy → tona in nedan
+    setDisplayedKey(activeKey);
+    setIsEntered(true);
+    setIsAnimating(false);
+  }, [activeKey, displayedKey]);
+
   useEffect(() => {
     if (isFirstActivationRef.current) {
       isFirstActivationRef.current = false;
       setDisplayedKey(activeKey);
+      freshKeysRef.current.delete(activeKey);
+
       setIsEntered(true);
       setIsAnimating(false);
       return;
@@ -261,10 +280,8 @@ function KeepAliveCached({
       return;
     }
 
-    // 🚀 Om mål-sidan redan är cacheaad (monterad tidigare) → instant swap utan fade.
-    // Användaren upplever annars en "uppdaterar"-känsla vid varje flikbyte mellan
-    // redan besökta sidor. Endast första monteringen av en ny sida ska animeras.
-    if (cacheRef.current.has(activeKey)) {
+    // Redan besökta vyer hanteras synkront i layout-effekten ovan.
+    if (!freshKeysRef.current.has(activeKey)) {
       setDisplayedKey(activeKey);
       setIsEntered(true);
       setIsAnimating(false);
@@ -276,7 +293,9 @@ function KeepAliveCached({
     let safetyTimer = 0;
     const delayTimer = window.setTimeout(() => {
       // 1) Byt synlig nod och sätt start-state (osynlig)
+      freshKeysRef.current.delete(activeKey);
       setDisplayedKey(activeKey);
+
       setIsEntered(false);
       setIsAnimating(true);
 
@@ -310,6 +329,7 @@ function KeepAliveCached({
   useEffect(() => {
     if (!cacheRef.current.has(activeKey)) {
       cacheRef.current.set(activeKey, render(activeKey));
+      freshKeysRef.current.add(activeKey);
       mountedKeysRef.current = [...mountedKeysRef.current, activeKey];
       setTick((t) => t + 1);
     }
@@ -319,10 +339,12 @@ function KeepAliveCached({
   // flash an empty frame
   if (!cacheRef.current.has(activeKey)) {
     cacheRef.current.set(activeKey, render(activeKey));
+    if (!isFirstActivationRef.current) freshKeysRef.current.add(activeKey);
     if (!mountedKeysRef.current.includes(activeKey)) {
       mountedKeysRef.current = [...mountedKeysRef.current, activeKey];
     }
   }
+
 
   // Drop cached nodes that are no longer in keepKeys (and not the active one)
   useEffect(() => {
@@ -331,9 +353,11 @@ function KeepAliveCached({
     for (const key of Array.from(cacheRef.current.keys())) {
       if (!allowed.has(key)) {
         cacheRef.current.delete(key);
+        freshKeysRef.current.delete(key);
         changed = true;
       }
     }
+
     if (changed) {
       mountedKeysRef.current = mountedKeysRef.current.filter((k) => allowed.has(k));
       setTick((t) => t + 1);
