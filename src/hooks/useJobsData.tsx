@@ -760,5 +760,9 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     error,
     refetch,
     invalidateJobs,
+    /** Hämtar nästa sida av Utgångna/Utkast (dessa laddas aldrig ner i sin helhet). */
+    loadMore,
+    hasMore,
+    isLoadingMore,
   };
 };
