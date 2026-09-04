@@ -717,4 +717,17 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
     queryFn: () => fetchStageCounts(jobId),
     staleTime: Infinity,
   });
+  queryClient.prefetchQuery({
+    queryKey: ['job-stage-settings', jobId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('job_stage_settings')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('order_index');
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: Infinity,
+  });
 }
