@@ -54,7 +54,15 @@ import {
 } from '@/components/jobdetails';
 
 const JobDetails = () => {
-  const { jobId } = useParams<{ jobId: string }>();
+  const { jobId: routeJobId } = useParams<{ jobId: string }>();
+  // När man stänger annonsen byter routern path INNAN komponenten avmonteras.
+  // Under den sista renderingen är :jobId borta → queryn stängs av, `job` blir
+  // null och "Jobbet hittades inte" blinkade till i en bildruta. Vi håller kvar
+  // senast kända id så sidan renderar oförändrad tills den faktiskt försvinner.
+  const lastJobIdRef = useRef<string | undefined>(routeJobId);
+  if (routeJobId) lastJobIdRef.current = routeJobId;
+  const jobId = routeJobId ?? lastJobIdRef.current;
+
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -585,11 +593,12 @@ const JobDetails = () => {
     } catch { /* noop */ }
   }, [jobId, dataLoading, stagesLoading, activeStages, applicationsByStatus, stageSettings]);
 
-  if (dataLoading || stagesLoading) {
+  if (!jobId || !user || dataLoading || stagesLoading) {
     return <JobDetailsSkeleton jobId={jobId} />;
   }
 
   if (!job) {
+
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-white">Jobbet hittades inte</div>
