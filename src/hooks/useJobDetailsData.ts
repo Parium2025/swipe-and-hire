@@ -100,34 +100,46 @@ async function fetchJobDetails(jobId: string, userId: string): Promise<JobPostin
   };
 }
 
-/** Hämta betyg för en uppsättning kandidater — chunkat så `in()` aldrig spricker. */
+/** Hämta betyg för en uppsättning kandidater — chunkat så `in()` aldrig spricker.
+ *  Båda tabellerna hämtas parallellt: tidigare kördes de i två sekventiella
+ *  loopar, vilket lade på en extra nätverksrunda innan första kortet kunde
+ *  ritas. Precedensen är oförändrad — candidate_ratings skrivs sist och vinner. */
 async function fetchRatings(userId: string, applicantIds: string[]): Promise<Map<string, number>> {
   const ratings = new Map<string, number>();
   const groups = chunk(applicantIds, IN_CHUNK);
 
-  // Legacy först (my_candidates), canonical sist (candidate_ratings) så den vinner.
-  for (const ids of groups) {
-    const { data } = await supabase
-      .from('my_candidates')
-      .select('applicant_id, rating')
-      .eq('recruiter_id', userId)
-      .in('applicant_id', ids);
-    (data || []).forEach((mc) => {
-      if (mc.rating) ratings.set(mc.applicant_id, mc.rating);
-    });
-  }
+  const [legacyGroups, canonicalGroups] = await Promise.all([
+    Promise.all(
+      groups.map(async (ids) => {
+        const { data } = await supabase
+          .from('my_candidates')
+          .select('applicant_id, rating')
+          .eq('recruiter_id', userId)
+          .in('applicant_id', ids);
+        return data || [];
+      }),
+    ),
+    Promise.all(
+      groups.map(async (ids) => {
+        const { data } = await supabase
+          .from('candidate_ratings')
+          .select('applicant_id, rating')
+          .eq('recruiter_id', userId)
+          .in('applicant_id', ids);
+        return data || [];
+      }),
+    ),
+  ]);
 
-  for (const ids of groups) {
-    const { data } = await supabase
-      .from('candidate_ratings')
-      .select('applicant_id, rating')
-      .eq('recruiter_id', userId)
-      .in('applicant_id', ids);
-    (data || []).forEach((r) => ratings.set(r.applicant_id, r.rating || 0));
-  }
+  // Legacy först (my_candidates), canonical sist (candidate_ratings) så den vinner.
+  legacyGroups.flat().forEach((mc) => {
+    if (mc.rating) ratings.set(mc.applicant_id, mc.rating);
+  });
+  canonicalGroups.flat().forEach((r) => ratings.set(r.applicant_id, r.rating || 0));
 
   return ratings;
 }
+
 
 /**
  * Kriterieresultat för en uppsättning utvärderingar.
