@@ -13,6 +13,7 @@ import {
   consumePendingFooterRestore,
   consumePendingScrollRestore,
   hasPendingScrollRestore,
+  isScrollManagedExternally,
   RESTORE_TOLERANCE_PX,
   SCROLL_HEIGHT_TOLERANCE_PX,
   MAX_WAIT_MS,
@@ -73,6 +74,8 @@ export function ScrollRestoration() {
     // global restore/save mot huvudscrollen — annars hoppar bakgrundslistan till
     // toppen medan detaljsidan ligger ovanpå, vilket skapar blink/hack vid back.
     if (isJobViewOverlayPath) return;
+    // Skalet äger scrollen (arbetsgivarens KeepAlive) → rör ingenting.
+    if (isScrollManagedExternally()) return;
 
     let scrollContainer = getRestorableScrollContainer();
 
@@ -147,6 +150,7 @@ export function ScrollRestoration() {
   const lastRestoredPathRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (isJobViewOverlayPath) return;
+    if (isScrollManagedExternally()) return;
 
     // 🛟 Ignorera rena query-string-ändringar (t.ex. tab-byten via
     // setSearchParams). Pathname är oförändrad → användaren är kvar på

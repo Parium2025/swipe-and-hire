@@ -55,19 +55,10 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
     }
   }, [isKanbanPage, shouldCollapseSidebar]);
   
-  // Scroll to top on route change — window.scrollTo doesn't work since
-  // content scrolls inside our internal <main> container, not window.
-  // Undantag: när användaren går tillbaka (POP) eller stänger en vy med
-  // krysset (programmatisk återgång) ska den sparade positionen behållas —
-  // annars skriver den här effekten över ScrollRestoration och listan
-  // hamnar alltid högst upp.
-  useEffect(() => {
-    if (navigationType === 'POP') return;
-    if (hasPendingScrollRestore(location.pathname)) return;
-    if (mainScrollRef.current) {
-      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }, [location.pathname, navigationType]);
+  // Scrollen ägs numera av KeepAlive: den byter position i exakt samma
+  // bildruta som vyn byts. Tidigare nollställdes den här redan vid
+  // route-ändringen, alltså medan föregående sida fortfarande syntes — det
+  // var hoppet/blixten användaren såg innan annonsvyn tonade in.
 
   // Track user activity for "last seen" feature
   useActivityTracker();
