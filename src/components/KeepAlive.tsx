@@ -313,7 +313,7 @@ function KeepAliveCached({
       // Skriv aldrig över den sparade positionen medan vi själva återställer
       // — då kan ett klippt värde (0) råka bli det nya "senast kända".
       if (isRestoringRef.current) return;
-      setKeepAliveScroll(displayedKey, container.scrollTop, contentHeightOf(container));
+      setKeepAliveScroll(displayedKey, container.scrollTop, measureNaturalHeight(container));
     };
     const onScroll = () => {
       if (frame) return;
@@ -347,7 +347,7 @@ function KeepAliveCached({
     if (displayedNode) {
       measuredHeightsRef.current.set(displayedKey, displayedNode.scrollHeight);
     }
-    setKeepAliveScroll(displayedKey, container.scrollTop, contentHeightOf(container));
+    setKeepAliveScroll(displayedKey, container.scrollTop, measureNaturalHeight(container));
 
     // Reservera den inkommande vyns senast uppmätta höjd redan innan den
     // gamla vyn döljs. iOS Safari klipper annars den delade scroll-containern
