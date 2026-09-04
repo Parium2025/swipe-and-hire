@@ -43,7 +43,29 @@ export const CandidateSlide = memo(function CandidateSlide({
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const swipeLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const slideTabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const tabsBarRef = useRef<HTMLDivElement | null>(null);
   const [slideIndicator, setSlideIndicator] = useState({ left: 0, width: 0 });
+
+  // Vid byte till Aktivitet/Anteckningar ska innehållet börja högst upp.
+  // Profil-fliken är ofta längre än de andra — utan detta klämmer webbläsaren
+  // fast scrollpositionen längst ner i det nya (kortare) innehållet.
+  useEffect(() => {
+    if (activeTab === 'profil') return;
+    const snapToTabs = () => {
+      const el = tabsBarRef.current;
+      const container = el?.closest('.overflow-y-auto') as HTMLElement | null;
+      if (!el || !container) return;
+      const topOffset = 48; // viewer-headern (pt-12) ska inte täcka flikarna
+      const delta = el.getBoundingClientRect().top - container.getBoundingClientRect().top - topOffset;
+      if (Math.abs(delta) > 1) container.scrollTop += delta;
+    };
+    snapToTabs();
+    // Innehållet byts via exit/enter-animation (mode="wait") — höjden ändras
+    // först när den nya fliken monterats, så korrigera igen efter animationen.
+    const t1 = window.setTimeout(snapToTabs, 240);
+    const t2 = window.setTimeout(snapToTabs, 450);
+    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
+  }, [activeTab]);
 
   const measureSlideIndicator = useCallback(() => {
     const idx = TABS.findIndex(t => t.key === activeTab);
@@ -176,7 +198,7 @@ export const CandidateSlide = memo(function CandidateSlide({
         <>
         {/* ── Tabs — sliding indicator ── */}
 
-        <div className="w-full flex items-center border-b border-white/20 relative">
+        <div ref={tabsBarRef} className="w-full flex items-center border-b border-white/20 relative">
           <motion.div
             className="absolute bottom-0 h-0.5 bg-white"
             initial={false}
