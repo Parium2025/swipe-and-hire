@@ -188,6 +188,8 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                 return `${v}%`;
               })()}` }}
               loading={cardIndex < 6 ? 'eager' : 'lazy'}
+              decoding="async"
+              fetchPriority={cardIndex < 3 ? 'high' : 'auto'}
               onError={handleImageError}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
