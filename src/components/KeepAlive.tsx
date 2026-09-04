@@ -231,6 +231,7 @@ function KeepAliveCached({
     isRestoringRef.current = true;
     if (reservedHeight > 0) reserveHeight(container, reservedHeight);
     applyScroll(container, target);
+    console.log('[KA] hold start', target, reservedHeight, container.scrollHeight, container.scrollTop, reserveStateRef.current?.extra);
 
     const start = performance.now();
     let frame = 0;
@@ -247,6 +248,7 @@ function KeepAliveCached({
       clearReserve();
       isRestoringRef.current = false;
       settleRef.current = null;
+      console.log('[KA] release', container.scrollTop, container.scrollHeight, performance.now()-start);
     };
 
     // Rör användaren skärmen slutar vi styra positionen direkt — men höjd-
