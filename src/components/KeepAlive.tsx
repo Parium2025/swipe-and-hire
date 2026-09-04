@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useLayoutEffect } from 'react';
 
 interface KeepAliveProps {
   activeKey: string;
@@ -55,6 +55,68 @@ function KeepAliveCached({
   const [isEntered, setIsEntered] = React.useState(true);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const isFirstActivationRef = React.useRef(true);
+
+  // -------------------------------------------------------------------------
+  // Scrollminne per vy
+  // -------------------------------------------------------------------------
+  // Sidorna ligger kvar i DOM:en men delar EN scroll-container. Utan minne
+  // hamnar man därför alltid högst upp när man kommer tillbaka. Vi sparar
+  // positionen när en vy lämnas och lägger tillbaka den i exakt samma
+  // bildruta som vyn visas igen — inget hopp, ingen blixt, ingen väntan.
+  const scrollByKeyRef = useRef<Map<string, number>>(new Map());
+  const previousDisplayedKeyRef = useRef(activeKey);
+
+  const getScrollContainer = () =>
+    document.querySelector<HTMLElement>('[data-main-scroll-container="true"]');
+
+  // Läs av positionen kontinuerligt medan en vy är synlig, så att den senaste
+  // kända positionen finns även om bytet sker utan layout-effekt-ordning.
+  useEffect(() => {
+    const container = getScrollContainer();
+    if (!container) return;
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        scrollByKeyRef.current.set(displayedKey, container.scrollTop);
+      });
+    };
+    container.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [displayedKey]);
+
+  useLayoutEffect(() => {
+    const container = getScrollContainer();
+    if (!container) return;
+    const previousKey = previousDisplayedKeyRef.current;
+    if (previousKey === displayedKey) return;
+    previousDisplayedKeyRef.current = displayedKey;
+
+    scrollByKeyRef.current.set(previousKey, container.scrollTop);
+    const target = scrollByKeyRef.current.get(displayedKey) ?? 0;
+    const previousBehavior = container.style.scrollBehavior;
+    container.style.scrollBehavior = 'auto';
+    container.scrollTop = target;
+    container.style.scrollBehavior = previousBehavior;
+
+    // Innehållet kan växa en bildruta senare (bilder, lazy-sektioner). Håll
+    // kvar exakt läge tills höjden räcker till, men aldrig längre än nödvändigt.
+    if (target > 0 && Math.abs(container.scrollTop - target) > 1) {
+      let attempts = 0;
+      const settle = () => {
+        if (attempts > 30) return;
+        attempts += 1;
+        if (Math.abs(container.scrollTop - target) <= 1) return;
+        container.scrollTop = target;
+        requestAnimationFrame(settle);
+      };
+      requestAnimationFrame(settle);
+    }
+  }, [displayedKey]);
 
   useEffect(() => {
     if (isFirstActivationRef.current) {
