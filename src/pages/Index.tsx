@@ -59,7 +59,7 @@ import RealtimeStatusPage from '@/components/RealtimeStatusPage';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 import { useDevice } from '@/hooks/use-device';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
-import { EmployerCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { EmployerCandidatesSkeleton, EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
 // 🔥 Persistent-mount routes — these pages stay alive across navigation so that
 // data + DOM is loaded once per session and re-visiting feels instant.
@@ -543,9 +543,16 @@ const Index = () => {
     };
   }, []);
 
-  // Vid logout/inloggning hanteras övergången av AuthSplashScreen - visa bara bakgrund
+  const lastKnownRole = (() => {
+    try { return localStorage.getItem('parium-last-role'); } catch { return null; }
+  })();
+
+  // Vid en kall återladdning ska appytan finnas från första React-bildrutan.
+  // Tidigare ritades bara en tom blå yta under session- och profilhämtningen.
   if (loading && !user && authAction !== 'logout') {
-    return <div className="min-h-screen bg-gradient-parium" />;
+    return lastKnownRole === 'employer'
+      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" />
+      : <div className="min-h-screen bg-gradient-parium" />;
   }
 
   // Om ingen användare: redirecta omedelbart till /auth (säkerhetsnät för mobil)
@@ -553,11 +560,12 @@ const Index = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Vänta på profil men visa bakgrund
+  // Profilen är nästa nätverkssteg efter sessionen. Visa den senast kända
+  // rollens riktiga sidstruktur under tiden i stället för ännu en tom skärm.
   if (!profile) {
-    return (
-      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
-    );
+    return lastKnownRole === 'employer'
+      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" />
+      : <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
 
   const ownerOnlyRoutes = ['/admin', '/status', '/ai-usage'];

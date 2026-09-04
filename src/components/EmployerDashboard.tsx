@@ -548,17 +548,6 @@ const EmployerDashboard = memo(() => {
     }, 150);
   }, [pendingEditJobId]);
 
-  // Handle row click - drafts open wizard, active jobs go to details
-  const handleJobRowClick = (job: JobPosting) => {
-    if (!job.is_active) {
-      handleEditDraft(job);
-    } else {
-      // Snapshot listans exakta position synkront så krysset kan återvända dit.
-      saveScrollNow(window.location.pathname);
-      navigate(`/job-details/${job.id}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
-    }
-  };
-
   const handleOpenJob = useCallback((job: JobPosting) => {
     saveScrollNow(window.location.pathname);
     prefetchNow(job.id, job);
