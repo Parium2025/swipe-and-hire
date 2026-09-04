@@ -26,11 +26,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
-import { useTouchCapable } from '@/hooks/useInputCapability';
+
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
-import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
 
@@ -89,11 +89,8 @@ export function CandidatesTable({
 }: CandidatesTableProps) {
   const deviceType = useDevice();
   const isMobile = deviceType === 'mobile';
-  const isTouchDevice = useTouchCapable();
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
-  const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
   const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
@@ -242,24 +239,9 @@ export function CandidatesTable({
     // ansökningar från samma person ska inte trigga en ny hämtning.
   }, [selectedApplication?.applicant_id, user?.id, dialogOpen, fetchForApplicant, readCache, writeCache]);
 
+  // Alla enheter öppnar samma klassiska profilvy som desktop.
+  // Swipe-läget finns kvar i jobbets kanban och Mina kandidater, men inte här.
   const handleRowClick = useCallback((application: ApplicationData) => {
-    // On touch devices: open TikTok-style swipe viewer
-    if (isTouchDevice) {
-      const idx = applications.findIndex(a => a.id === application.id);
-      setSwipeInitialIndex(idx >= 0 ? idx : 0);
-      setSwipeViewerOpen(true);
-      return;
-    }
-    // Desktop: open dialog as before
-    const cachedApplications = readCache(application.applicant_id);
-    setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
-    setSelectedApplicationId(application.id);
-    setDialogOpen(true);
-  }, [isTouchDevice, applications, readCache]);
-
-  // Handle opening full profile from swipe viewer
-  const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
-    setSwipeViewerOpen(false);
     const cachedApplications = readCache(application.applicant_id);
     setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
     setSelectedApplicationId(application.id);
@@ -1035,21 +1017,6 @@ export function CandidatesTable({
         adjacentMedia={adjacentCandidateMedia}
       />
 
-      {isTouchDevice && (
-        <CandidateSwipeViewer
-          applications={sortedApplications}
-          initialIndex={swipeInitialIndex}
-          open={swipeViewerOpen}
-          onClose={() => setSwipeViewerOpen(false)}
-          onOpenFullProfile={handleSwipeOpenFullProfile}
-          getDisplayRating={getDisplayRating}
-          onLoadMore={onLoadMore}
-          // Direct navigation is an explicit request to continue, so it must not
-          // stop at the table's background-prefetch budget.
-          hasMore={hasMore}
-          isLoadingMore={isLoadingMore}
-        />
-      )}
 
       {selectedApplicationForTeam && (
         <AddToColleagueListDialog
