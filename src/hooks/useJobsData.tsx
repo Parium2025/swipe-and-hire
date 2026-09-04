@@ -3,7 +3,7 @@ import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEmployerJobActive, getEmployerJobStatus } from '@/lib/jobStatus';
 
 export interface JobPosting {
