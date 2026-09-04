@@ -128,7 +128,21 @@ serve(async (req) => {
 
     if (!job_id) {
       // Legacy mode: full scan (called by cron)
-      return await fullScan(supabase);
+      const { data: gotLock, error: lockError } = await supabase.rpc('try_claim_job_lock', {
+        _key: 'saved-searches-full-scan',
+        _ttl_seconds: 55 * 60,
+      });
+      if (lockError) throw lockError;
+      if (!gotLock) {
+        return new Response(JSON.stringify({ success: true, skipped: 'already_running' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      try {
+        return await fullScan(supabase);
+      } finally {
+        await supabase.rpc('release_job_lock', { _key: 'saved-searches-full-scan' });
+      }
     }
 
     // ──────────────────────────────────────────────

@@ -484,7 +484,9 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     enabled: !!user,
     staleTime: 10 * 60 * 1000, // 10 min fallback if realtime drops
     gcTime: Infinity, // Keep in cache permanently during session
-    refetchOnMount: 'always',
+    // Färsk session-cache återanvänds. Ett localStorage-snapshot har timestamp 0
+    // och valideras därför fortfarande direkt efter en riktig kallstart.
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {

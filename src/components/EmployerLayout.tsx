@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useJobsData } from '@/hooks/useJobsData';
+import { useQueryClient } from '@tanstack/react-query';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
@@ -22,7 +22,13 @@ interface EmployerLayoutProps {
 
 // Inner component that uses the KanbanLayout context
 const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) => {
-  const { invalidateJobs } = useJobsData();
+  const queryClient = useQueryClient();
+  const invalidateJobs = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    void queryClient.invalidateQueries({ queryKey: ['employer-jobs-counts'] });
+    void queryClient.invalidateQueries({ queryKey: ['employer-dashboard-stats'] });
+    void queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
+  }, [queryClient]);
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
