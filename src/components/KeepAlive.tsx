@@ -149,6 +149,8 @@ function KeepAliveCached({
   const rootRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
+  const spacerRef = useRef<HTMLDivElement | null>(null);
+  const isRestoringRef = useRef(false);
 
   // Endast skal som uttryckligen lämnat över scrollen till KeepAlive
   // (arbetsgivarens shell) hanteras här. Jobbsökarsidan sköts som tidigare av
@@ -166,12 +168,70 @@ function KeepAliveCached({
     container.style.scrollBehavior = previousBehavior;
   };
 
-  // Håll kvar exakt läge tills innehållet vuxit klart (max ~2 s), och släpp
-  // omedelbart om användaren själv rör skärmen.
-  const holdPosition = (container: HTMLElement, target: number) => {
+  // -------------------------------------------------------------------------
+  // Höjdreserv
+  // -------------------------------------------------------------------------
+  // Skelettet (och en dold vy) är mycket kortare än den riktiga listan. Utan
+  // reserv klipper webbläsaren scrollTop till 0 och användaren ser innehållet
+  // högst upp innan datan laddat — sedan ett synligt hopp ner.
+  //
+  // Reserven läggs i ETT eget spacer-element sist i scroll-containern, inte
+  // som min-height på vår rot. Det är avgörande: rotens min-height skulle få
+  // den visade vyn att sträckas ut, och då mäter vi vår egen reserv som om
+  // det vore riktigt innehåll — reserven släpptes direkt och positionen
+  // klipptes tillbaka till 0. Med ett fristående spacer-element kan vi mäta
+  // det faktiska innehållet (scrollHeight minus reservens höjd) och behålla
+  // reserven exakt tills riktigt innehåll finns.
+  const reserveStateRef = useRef<{ container: HTMLElement; basePadding: number; extra: number } | null>(null);
+
+  const readBasePadding = (container: HTMLElement) =>
+    parseFloat(getComputedStyle(container).paddingBottom) || 0;
+
+  const clearReserve = () => {
+    const state = reserveStateRef.current;
+    if (!state) return;
+    state.container.style.paddingBottom = '';
+    reserveStateRef.current = null;
+  };
+
+  /** Innehållets verkliga höjd = containerns höjd minus vår extra reserv. */
+  const contentHeightOf = (container: HTMLElement) =>
+    container.scrollHeight - (reserveStateRef.current?.extra ?? 0);
+
+  /** Se till att containern är minst `targetHeight` hög. */
+  const reserveHeight = (container: HTMLElement, targetHeight: number) => {
+    if (targetHeight <= 0) return 0;
+    let state = reserveStateRef.current;
+    if (!state || state.container !== container) {
+      clearReserve();
+      state = { container, basePadding: readBasePadding(container), extra: 0 };
+      reserveStateRef.current = state;
+    }
+    const extra = Math.max(0, targetHeight - contentHeightOf(container));
+    if (extra !== state.extra) {
+      state.extra = extra;
+      container.style.paddingBottom = `${state.basePadding + extra}px`;
+    }
+    return extra;
+  };
+
+  // Håll kvar exakt läge tills innehållet vuxit klart, och släpp omedelbart om
+  // användaren själv rör skärmen. `reservedHeight` (valfri) håller containern
+  // lika hög som den var när positionen sparades, så positionen aldrig klipps
+  // medan skelettet fortfarande är kort.
+  const holdPosition = (
+    container: HTMLElement,
+    target: number,
+    options?: { reservedHeight?: number; timeoutMs?: number },
+  ) => {
     settleRef.current?.cancel();
+    const reservedHeight = options?.reservedHeight ?? 0;
+    const timeoutMs = options?.timeoutMs ?? 2000;
     const previousOverflowAnchor = container.style.overflowAnchor;
     container.style.overflowAnchor = 'none';
+    isRestoringRef.current = true;
+    if (reservedHeight > 0) reserveHeight(container, reservedHeight);
+    applyScroll(container, target);
 
     const start = performance.now();
     let frame = 0;
@@ -185,24 +245,45 @@ function KeepAliveCached({
       container.removeEventListener('pointerdown', onGesture);
       container.style.overflowAnchor = previousOverflowAnchor;
       if (rootRef.current) rootRef.current.style.minHeight = '';
+      clearReserve();
+      isRestoringRef.current = false;
       settleRef.current = null;
     };
 
+    // Rör användaren skärmen slutar vi styra positionen direkt — men höjd-
+    // reserven ligger kvar tills det riktiga innehållet finns, annars skulle
+    // sidan krympa under fingret och kasta upp läsaren till toppen.
+    let userTookOver = false;
     function onGesture() {
-      cancelled = true;
-      release();
+      if (reservedHeight <= 0) {
+        cancelled = true;
+        release();
+        return;
+      }
+      userTookOver = true;
     }
 
     const tick = () => {
       if (cancelled) return;
-      if (performance.now() - start > 2000) return release();
+      if (performance.now() - start > timeoutMs) return release();
 
-      if (Math.abs(container.scrollTop - target) <= 1) {
-        stableFrames += 1;
-        if (stableFrames >= 2) return release();
-      } else {
+      // Riktigt innehåll = containerns höjd MINUS vår egen reserv.
+      const contentReady = reservedHeight <= 0
+        || contentHeightOf(container) >= reservedHeight - SCROLL_HEIGHT_TOLERANCE_PX;
+      if (!contentReady) reserveHeight(container, reservedHeight);
+
+      if (userTookOver) {
+        if (contentReady) return release();
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+
+      if (Math.abs(container.scrollTop - target) > 1) {
         stableFrames = 0;
         applyScroll(container, target);
+      } else if (contentReady) {
+        stableFrames += 1;
+        if (stableFrames >= 2) return release();
       }
       frame = requestAnimationFrame(tick);
     };
@@ -220,16 +301,22 @@ function KeepAliveCached({
     const container = getScrollContainer();
     if (!container) return;
     let frame = 0;
+    const snapshot = () => {
+      // Skriv aldrig över den sparade positionen medan vi själva återställer
+      // — då kan ett klippt värde (0) råka bli det nya "senast kända".
+      if (isRestoringRef.current) return;
+      setKeepAliveScroll(displayedKey, container.scrollTop, contentHeightOf(container));
+    };
     const onScroll = () => {
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
+        snapshot();
       });
     };
     // Snapshot direkt när användaren rör ett kort: navigeringen kan ske innan
     // nästa rAF hinner köras.
-    const onPointerDown = () => setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
+    const onPointerDown = () => snapshot();
     container.addEventListener('scroll', onScroll, { passive: true });
     container.addEventListener('pointerdown', onPointerDown, { passive: true });
     return () => {
@@ -252,7 +339,7 @@ function KeepAliveCached({
     if (displayedNode) {
       measuredHeightsRef.current.set(displayedKey, displayedNode.scrollHeight);
     }
-    setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
+    setKeepAliveScroll(displayedKey, container.scrollTop, contentHeightOf(container));
 
     // Reservera den inkommande vyns senast uppmätta höjd redan innan den
     // gamla vyn döljs. iOS Safari klipper annars den delade scroll-containern
@@ -282,67 +369,8 @@ function KeepAliveCached({
     const saved = getKeepAliveEntry(displayedKey);
     if (saved.top <= 0) return;
 
-    const previousOverflowAnchor = container.style.overflowAnchor;
-    container.style.overflowAnchor = 'none';
-    if (rootRef.current && saved.height > 0) {
-      rootRef.current.style.minHeight = `${saved.height}px`;
-    }
-    applyScroll(container, saved.top);
-
-    // Håll positionen tills det riktiga innehållet vuxit till sparad höjd
-    // (max ~6 s — kallstart kan vara långsam), släpp direkt vid egen gest.
-    settleRef.current?.cancel();
-    const start = performance.now();
-    let frame = 0;
-    let stableFrames = 0;
-    let cancelled = false;
-
-    const release = () => {
-      if (frame) cancelAnimationFrame(frame);
-      container.removeEventListener('touchstart', onGesture);
-      container.removeEventListener('wheel', onGesture);
-      container.removeEventListener('pointerdown', onGesture);
-      container.style.overflowAnchor = previousOverflowAnchor;
-      if (rootRef.current) rootRef.current.style.minHeight = '';
-      settleRef.current = null;
-    };
-
-    function onGesture() {
-      cancelled = true;
-      release();
-    }
-
-    const tick = () => {
-      if (cancelled) return;
-      if (performance.now() - start > 6000) return release();
-
-      // Klart först när det riktiga innehållet (inte höjdreserven) räcker
-      // till — annars skulle vi släppa minHeight medan skelettet fortfarande
-      // är kort och positionen klipps igen.
-      const realContentReady = saved.height <= 0
-        || container.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE_PX;
-      // Containerns scrollHeight inkluderar vår egen minHeight-reserv, så
-      // mät den visade vyns faktiska höjd i stället när den finns.
-      const displayedNode = nodeRefs.current.get(displayedKey);
-      const contentReady = displayedNode
-        ? displayedNode.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE_PX
-        : realContentReady;
-
-      if (Math.abs(container.scrollTop - saved.top) > 1) {
-        stableFrames = 0;
-        applyScroll(container, saved.top);
-      } else if (contentReady) {
-        stableFrames += 1;
-        if (stableFrames >= 2) return release();
-      }
-      frame = requestAnimationFrame(tick);
-    };
-
-    container.addEventListener('touchstart', onGesture, { passive: true });
-    container.addEventListener('wheel', onGesture, { passive: true });
-    container.addEventListener('pointerdown', onGesture, { passive: true });
-    settleRef.current = { cancel: () => { cancelled = true; release(); } };
-    frame = requestAnimationFrame(tick);
+    // Kallstart kan vara långsam — håll positionen i upp till 6 s.
+    holdPosition(container, saved.top, { reservedHeight: saved.height, timeoutMs: 6000 });
 
     return () => settleRef.current?.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -366,8 +394,7 @@ function KeepAliveCached({
       ? sharedTarget
       : getKeepAliveScroll(displayedKey);
     if (pendingRestore) setKeepAliveScroll(displayedKey, target);
-    applyScroll(container, target);
-    holdPosition(container, target);
+    holdPosition(container, target, { reservedHeight: getKeepAliveEntry(displayedKey).height });
   }, [displayedKey]);
 
 
