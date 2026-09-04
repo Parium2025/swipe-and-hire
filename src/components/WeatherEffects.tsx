@@ -37,13 +37,84 @@ WeatherEffects.displayName = 'WeatherEffects';
 // ─── Stars: CSS twinkle + JS shooting star ───────────────────────────────────
 
 const STARS_CACHE_KEY = 'parium_stars_config';
+const RAIN_CACHE_KEY = 'parium_rain_config_v2';
+const SNOW_CACHE_KEY = 'parium_snow_config_v2';
+const THUNDER_CACHE_KEY = 'parium_thunder_config_v2';
 
-const getOrCreateStars = () => {
+interface StarConfig {
+  id: number;
+  left: number;
+  top: number;
+  size: number;
+  opacity: number;
+  twinkleDelay: number;
+  twinkleDuration: number;
+}
+
+interface RainDropConfig {
+  id: number;
+  left: number;
+  duration: number;
+  delay: number;
+  height: number;
+  opacity: number;
+}
+
+interface SnowFlakeConfig {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  size: number;
+  opacity: number;
+  swayAmount: number;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const hasNumericFields = (value: unknown, fields: string[]) =>
+  isRecord(value) && fields.every((field) => isFiniteNumber(value[field]));
+
+const getOrCreateSessionConfig = <T,>(
+  key: string,
+  create: () => T,
+  isValid: (value: unknown) => value is T,
+): T => {
   try {
-    const cached = sessionStorage.getItem(STARS_CACHE_KEY);
-    if (cached) return JSON.parse(cached);
+    const cached = sessionStorage.getItem(key);
+    if (cached) {
+      const parsed: unknown = JSON.parse(cached);
+      if (isValid(parsed)) return parsed;
+    }
   } catch {}
-  const stars = Array.from({ length: 50 }).map((_, i) => ({
+
+  const fresh = create();
+  try { sessionStorage.setItem(key, JSON.stringify(fresh)); } catch {}
+  return fresh;
+};
+
+const isStarsConfig = (value: unknown): value is StarConfig[] =>
+  Array.isArray(value) &&
+  value.length === 50 &&
+  value.every((star) => hasNumericFields(star, ['id', 'left', 'top', 'size', 'opacity', 'twinkleDelay', 'twinkleDuration']));
+
+const isRainConfig = (value: unknown): value is RainDropConfig[] =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  value.every((drop) => hasNumericFields(drop, ['id', 'left', 'duration', 'delay', 'height', 'opacity']));
+
+const isSnowConfig = (value: unknown): value is SnowFlakeConfig[] =>
+  Array.isArray(value) &&
+  value.length === 40 &&
+  value.every((flake) => hasNumericFields(flake, ['id', 'left', 'delay', 'duration', 'size', 'opacity', 'swayAmount']));
+
+const getOrCreateStars = () => getOrCreateSessionConfig(
+  STARS_CACHE_KEY,
+  () => Array.from({ length: 50 }).map((_, i) => ({
     id: i,
     left: Math.random() * 100,
     top: Math.random() * 70,
@@ -51,10 +122,9 @@ const getOrCreateStars = () => {
     opacity: 0.3 + Math.random() * 0.5,
     twinkleDelay: Math.random() * 5,
     twinkleDuration: 2 + Math.random() * 3,
-  }));
-  try { sessionStorage.setItem(STARS_CACHE_KEY, JSON.stringify(stars)); } catch {}
-  return stars;
-};
+  })),
+  isStarsConfig,
+);
 
 const StarsEffect = memo(() => {
   const stars = useMemo(() => getOrCreateStars(), []);
