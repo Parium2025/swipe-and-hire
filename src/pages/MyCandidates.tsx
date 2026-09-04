@@ -64,7 +64,7 @@ import { MyCandidatesHeader } from '@/pages/myCandidates/MyCandidatesHeader';
 import { MyCandidatesDesktopActionBar } from '@/pages/myCandidates/MyCandidatesDesktopActionBar';
 import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMobileActionBar';
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
-import { useTouchCapable } from '@/hooks/useInputCapability';
+
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
@@ -73,7 +73,7 @@ const MyCandidates = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const device = useDevice();
-  const isTouchDevice = useTouchCapable();
+  
   const useMobileView = device === 'mobile';
   const { setStageCount } = useKanbanLayout();
 
@@ -505,25 +505,17 @@ const MyCandidates = () => {
     hookMarkAsViewed.mutate(applicationId);
   };
 
+  // Ett tryck på kandidaten öppnar alltid den klassiska profilvyn — på alla
+  // enheter. Swipe-läget startas bara via knappen "Swipe-läge".
   const handleOpenProfile = useCallback((candidate: MyCandidateData) => {
-    if (isTouchDevice) {
-      // Touch: continuous vertical scroll viewer
-      const stageCandidates = filteredCandidatesByStage[candidate.stage] || [];
-      const idx = stageCandidates.findIndex(c => c.id === candidate.id);
-      setSwipeFilteredApps(null);
-      setSwipeStageCandidates(stageCandidates);
-      setSwipeInitialIndex(idx >= 0 ? idx : 0);
-      setSwipeViewerOpen(true);
-    } else {
-      // Mouse: open profile dialog
-      setSelectedCandidate(candidate);
-      setDialogOpen(true);
-    }
+    setSelectedCandidate(candidate);
+    setDialogOpen(true);
 
     if (!candidate.viewed_at) {
       markApplicationAsViewed(candidate.application_id);
     }
-  }, [filteredCandidatesByStage, markApplicationAsViewed, isTouchDevice]);
+  }, [markApplicationAsViewed]);
+
 
   // Prefetching
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {

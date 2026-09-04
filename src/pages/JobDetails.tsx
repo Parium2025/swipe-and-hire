@@ -367,29 +367,20 @@ const JobDetails = () => {
   }, [applicationsByStatus, activeStages]);
 
 
+  // Ett tryck på kandidaten öppnar alltid den klassiska profilvyn — på alla
+  // enheter. Swipe-läget startas bara via knappen "Swipe-läge".
   const handleOpenProfile = useCallback((app: JobApplication) => {
     const stage = resolveStageForApplication(app);
-    const stageApps = applicationsByStatus[stage] || [];
-
-    if (isTouchDevice) {
-      // Touch: continuous vertical scroll viewer
-      const idx = stageApps.findIndex(a => a.id === app.id);
-      setSwipeFilteredApps(null);
-      setSwipeStageApps(stageApps);
-      setSwipeInitialIndex(idx >= 0 ? idx : 0);
-      setSwipeViewerOpen(true);
-    } else {
-      // Mouse: open profile dialog
-      setSelectedApplication(app);
-      setSelectedStage(stage);
-      setDialogOpen(true);
-    }
+    setSelectedApplication(app);
+    setSelectedStage(stage);
+    setDialogOpen(true);
 
     // Mark as viewed
     if (!app.viewed_at) {
       markApplicationAsViewed(app.id);
     }
-  }, [applicationsByStatus, resolveStageForApplication, markApplicationAsViewed, isTouchDevice]);
+  }, [resolveStageForApplication, markApplicationAsViewed]);
+
 
   const swipeApplicationsAsData = useMemo(() => {
     if (swipeFilteredApps) return swipeFilteredApps;
