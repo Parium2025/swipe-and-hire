@@ -66,8 +66,14 @@ function KeepAliveCached({
   const scrollByKeyRef = useRef<Map<string, number>>(new Map());
   const previousDisplayedKeyRef = useRef(activeKey);
 
-  const getScrollContainer = () =>
-    document.querySelector<HTMLElement>('[data-main-scroll-container="true"]');
+  // Endast skal som uttryckligen lämnat över scrollen till KeepAlive
+  // (arbetsgivarens shell) hanteras här. Jobbsökarsidan sköts som tidigare av
+  // den globala ScrollRestoration — vi rör inte den.
+  const getScrollContainer = () => {
+    const container = document.querySelector<HTMLElement>('[data-main-scroll-container="true"]');
+    if (!container || container.dataset.scrollManaged !== 'keepalive') return null;
+    return container;
+  };
 
   // Läs av positionen kontinuerligt medan en vy är synlig, så att den senaste
   // kända positionen finns även om bytet sker utan layout-effekt-ordning.
