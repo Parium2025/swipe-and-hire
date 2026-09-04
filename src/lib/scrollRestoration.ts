@@ -2,6 +2,7 @@
 
 const SCROLL_STORAGE_KEY = 'parium-scroll-positions';
 const PENDING_FOOTER_RESTORE_KEY = 'parium-pending-footer-restore';
+const PENDING_RESTORE_KEY = 'parium-pending-scroll-restore';
 const LATEST_FOOTER_NAVIGATION_KEY = 'parium-latest-footer-navigation';
 
 export const RESTORE_TOLERANCE_PX = 2;
