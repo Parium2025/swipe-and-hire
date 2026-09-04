@@ -170,8 +170,113 @@ export function removeJobsFromJobsCache(userId: string, jobIds: string[]): void 
   }
 }
 
+/**
+ * 🔥 SCALE: hämtningen är UPPDELAD PER STATUS.
+ *
+ * Tidigare strömmade klienten hem varenda icke-raderad annons — med 100 000
+ * historiska annonser i ett konto hade webbläsaren fått ladda ner och hålla
+ * allihop i minnet. Nu gäller:
+ *
+ *  - Aktiva: strömmas hem helt (kan aldrig bli fler än några tusen eftersom
+ *    en annons går ut efter 14 dagar). Sök/filter/sortering sker direkt i
+ *    klienten → 0 ms.
+ *  - Utgångna och Utkast: första sidan hämtas direkt (så tabben är förvärmd
+ *    och känns instant), resten hämtas sidvis när användaren bläddrar.
+ */
+export type JobStatusKey = 'active' | 'expired' | 'draft';
 
+const FIRST_PAGE = 200;
+const ACTIVE_PAGE_SIZE = 1000;
+const ARCHIVE_PAGE_SIZE = 200;
+/** Skyddsnät: aktiva annonser kan i praktiken aldrig nå hit (14 dagars livslängd). */
+const ACTIVE_STREAM_CAP = 20000;
 
+const JOB_SELECT = `
+  *,
+  employer_profile:profiles!job_postings_employer_id_fkey (
+    first_name,
+    last_name
+  )
+`;
+
+interface JobCursor { created_at: string; id: string }
+
+const cursorOf = (rows: JobPosting[]): JobCursor | null => {
+  const last = rows[rows.length - 1];
+  return last ? { created_at: last.created_at, id: last.id } : null;
+};
+
+const sortJobsDesc = (rows: JobPosting[]): JobPosting[] =>
+  rows.sort((a, b) => {
+    if (a.created_at === b.created_at) return a.id < b.id ? 1 : -1;
+    return a.created_at < b.created_at ? 1 : -1;
+  });
+
+/**
+ * Statusreglerna speglar `src/lib/jobStatus.ts` exakt, fast i databasen:
+ *  - utgången  = publicerad OCH utgångsdatum passerat
+ *  - utkast    = inaktiv OCH inte utgången
+ *  - aktiv     = aktiv OCH inte utgången
+ */
+function applyStatusFilter(query: any, status: JobStatusKey, nowIso: string) {
+  if (status === 'expired') {
+    return query.not('published_at', 'is', null).not('expires_at', 'is', null).lt('expires_at', nowIso);
+  }
+  const notExpired = `published_at.is.null,expires_at.is.null,expires_at.gte.${nowIso}`;
+  if (status === 'active') return query.eq('is_active', true).or(notExpired);
+  return query.eq('is_active', false).or(notExpired);
+}
+
+async function fetchJobsPage(params: {
+  employerIds: string[];
+  status: JobStatusKey;
+  cursor: JobCursor | null;
+  size: number;
+}): Promise<JobPosting[]> {
+  const { employerIds, status, cursor, size } = params;
+  const nowIso = new Date().toISOString();
+
+  let query: any = supabase
+    .from('job_postings')
+    .select(JOB_SELECT)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(size);
+
+  query = applyStatusFilter(query, status, nowIso);
+
+  if (cursor) {
+    query = query.or(
+      `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
+    );
+  }
+
+  const { data, error } = employerIds.length > 1
+    ? await query.in('employer_id', employerIds)
+    : await query.eq('employer_id', employerIds[0]);
+
+  if (error) throw error;
+  return (data ?? []) as JobPosting[];
+}
+
+/** Sidläge för Utgångna/Utkast — en post per query-nyckel och status. */
+interface ArchivePageState { cursor: JobCursor | null; done: boolean; loading: boolean }
+const archiveRegistry = new Map<string, ArchivePageState>();
+const archiveListeners = new Set<() => void>();
+const notifyArchive = () => archiveListeners.forEach((l) => l());
+const archiveKey = (streamKey: string, status: JobStatusKey) => `${streamKey}|${status}`;
+
+const readArchive = (streamKey: string, status: JobStatusKey): ArchivePageState =>
+  archiveRegistry.get(archiveKey(streamKey, status)) ?? { cursor: null, done: false, loading: false };
+
+/** Är `a` längre ner i listan (äldre) än `b`? */
+const isDeeper = (a: JobCursor | null, b: JobCursor | null): boolean => {
+  if (!a) return false;
+  if (!b) return true;
+  if (a.created_at !== b.created_at) return a.created_at < b.created_at;
+  return a.id < b.id;
+};
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
