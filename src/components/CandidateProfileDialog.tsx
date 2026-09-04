@@ -486,9 +486,13 @@ export const CandidateProfileDialog = ({
           </button>}
         />
 
-        <div className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]">
+        <div
+          className="flex flex-1 min-h-0 min-w-0 overflow-x-hidden md:max-h-[85vh]"
+          onTouchStart={handleGestureStart}
+          onTouchEnd={handleGestureEnd}
+        >
           {/* Main content - left side */}
-          <div className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
+          <div ref={profilePaneRef} className={`flex-1 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 pt-2 md:p-5 space-y-4 [overflow-wrap:anywhere] [&_a]:break-all [&_p]:break-words [&_span]:break-words ${mobileTab !== 'profile' ? 'hidden md:block' : ''}`} onScroll={() => jobDropdownOpen && setJobDropdownOpen(false)}>
 
           {/* Candidate navigation bar */}
           {candidateTotal != null && candidateTotal >= 1 && (
@@ -716,14 +720,14 @@ export const CandidateProfileDialog = ({
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
-            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
+            <div ref={activityPaneRef} className="md:hidden flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-4">
               <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
                 <CandidateActivityLog applicantId={application?.applicant_id || null} />
               </SectionErrorBoundary>
             </div>
           )}
           {mobileTab === 'comments' && (
-            <div className="md:hidden flex-1 overflow-y-auto overflow-x-hidden p-4">
+            <div ref={commentsPaneRef} className="md:hidden flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-4">
               <SectionErrorBoundary fallbackLabel="Anteckningar">
                 <CandidateNotesPanel {...notesPanelProps} />
               </SectionErrorBoundary>
