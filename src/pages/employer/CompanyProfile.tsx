@@ -9,7 +9,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { ChevronDown, Search, Check, Loader2 } from 'lucide-react';
+import { ChevronDown, Search, Check, Loader2, AlertCircle } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
@@ -36,6 +36,7 @@ const CompanyProfile = () => {
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoProgress, setLogoProgress] = useState(0);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -454,6 +455,7 @@ const CompanyProfile = () => {
           variant: "destructive"
         });
       }
+      setSaveError('Organisationsnummer måste vara exakt 10 siffror eller lämnas tomt.');
       return false;
     }
 
@@ -466,6 +468,7 @@ const CompanyProfile = () => {
           variant: "destructive"
         });
       }
+      setSaveError('Möteslänken är ogiltig. Kontrollera länken.');
       return false;
     }
 
@@ -478,12 +481,14 @@ const CompanyProfile = () => {
             variant: "destructive"
           });
         }
+        setSaveError(`URL:en för ${getPlatformLabel(link.platform)} är ogiltig.`);
         return false;
       }
     }
 
     if (!isOnline) {
       if (!silent) showOfflineToast();
+      setSaveError('Ingen anslutning. Ändringen sparas när du är online igen.');
       return false;
     }
 
@@ -543,6 +548,7 @@ const CompanyProfile = () => {
         console.warn('Failed to clear company profile draft');
       }
 
+      setSaveError(null);
       if (!silent) {
         toast({
           title: "Företagsprofil uppdaterad",
@@ -551,11 +557,14 @@ const CompanyProfile = () => {
       }
       return true;
     } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte uppdatera företagsprofilen.",
-        variant: "destructive"
-      });
+      if (!silent) {
+        toast({
+          title: "Fel",
+          description: "Kunde inte uppdatera företagsprofilen.",
+          variant: "destructive"
+        });
+      }
+      setSaveError('Kunde inte spara ändringen. Försök igen.');
       return false;
     } finally {
       setLoading(false);
@@ -567,36 +576,47 @@ const CompanyProfile = () => {
   // vid lyckad sparning — bara en diskret "Sparat"-indikator.
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Skydd mot omförsöksloop: samma misslyckade data sparas aldrig om och om igen.
-  const failedSignatureRef = useRef<string | null>(null);
+  // Skydd mot omförsöksloop: samma misslyckade data sparas inte om och om igen,
+  // men signaturen nollställs när användaren kommer online eller trycker "Försök igen".
+  const [failedSignature, setFailedSignature] = useState<string | null>(null);
   useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
+  // När nätet kommer tillbaka ska den blockerade ändringen sparas automatiskt.
+  useEffect(() => {
+    if (isOnline) setFailedSignature(null);
+  }, [isOnline]);
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (loading || isUploadingLogo) return;
     const signature = JSON.stringify(formData);
-    if (failedSignatureRef.current === signature) return;
+    if (failedSignature === signature) return;
     const t = setTimeout(async () => {
       if (savedResetRef.current) clearTimeout(savedResetRef.current);
       setSaveStatus('saving');
       try {
         const ok = await saveRef.current({ silent: true });
         if (ok) {
-          failedSignatureRef.current = null;
+          setFailedSignature(null);
           setSaveStatus('saved');
           savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
         } else {
-          failedSignatureRef.current = signature;
-          setSaveStatus('idle');
+          setFailedSignature(signature);
+          setSaveStatus('error');
         }
       } catch {
-        failedSignatureRef.current = signature;
-        setSaveStatus('idle');
+        setFailedSignature(signature);
+        setSaveStatus('error');
       }
     }, 900);
     return () => clearTimeout(t);
-  }, [hasUnsavedChanges, loading, isUploadingLogo, formData]);
+  }, [hasUnsavedChanges, loading, isUploadingLogo, formData, failedSignature, isOnline]);
+
+  // Manuell återförsöksväg så en ändring aldrig kan gå förlorad tyst.
+  const retrySave = useCallback(() => {
+    setFailedSignature(null);
+    setSaveStatus('idle');
+  }, []);
 
 
 
@@ -638,22 +658,36 @@ const CompanyProfile = () => {
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
           <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater.</p>
-          <div className="mt-1 h-4 text-xs text-white/70" aria-live="polite" role="status">
-            <span
-              className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
-            >
-              {saveStatus === 'saving' ? (
-                <>
-                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                  Sparar…
-                </>
-              ) : (
-                <>
-                  <Check className="h-3 w-3" aria-hidden="true" />
-                  Sparat
-                </>
-              )}
-            </span>
+          <div className="mt-1 min-h-4 text-xs text-white/70" aria-live="polite" role="status">
+            {saveStatus === 'error' ? (
+              <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                {saveError || 'Kunde inte spara ändringen.'}
+                <button
+                  type="button"
+                  onClick={retrySave}
+                  className="underline underline-offset-2 text-white"
+                >
+                  Försök igen
+                </button>
+              </span>
+            ) : (
+              <span
+                className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+              >
+                {saveStatus === 'saving' ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Sparar…
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Sparat
+                  </>
+                )}
+              </span>
+            )}
           </div>
         </div>
 
