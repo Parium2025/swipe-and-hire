@@ -4,6 +4,7 @@ import { useSidebarRoutePrefetch } from '@/hooks/useSidebarRoutePrefetch';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { prefetchUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 
 /**
  * ❄️ KALLSTART — ARBETSGIVARENS ANNONSSIDOR
