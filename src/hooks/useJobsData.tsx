@@ -111,7 +111,7 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
  */
 const CACHE_ROWS_PER_STATUS = 54;
 
-function boundedCacheSnapshot(jobs: JobPosting[]): JobPosting[] {
+export function boundedCacheSnapshot(jobs: JobPosting[]): JobPosting[] {
   const kept: JobPosting[] = [];
   const perStatus: Record<string, number> = { active: 0, expired: 0, draft: 0 };
   for (const job of jobs) {
