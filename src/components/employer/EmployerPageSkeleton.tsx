@@ -31,10 +31,12 @@ function useLiveEmployerJobCount(tab: 'active' | 'expired' | 'draft', fallbackKe
       );
       // 0 annonser ⇒ 0 kortskelett. Skelettet ska aldrig låtsas att det finns
       // innehåll som inte finns — annars "blinkar" ett kort förbi på ett tomt konto.
-      return Math.min(6, filtered.length);
+      // Taket följer sidans pageSize (18) så skelettets höjd matchar den riktiga
+      // listan — annars klipps sparad scrollposition vid reload längre ned.
+      return Math.min(18, filtered.length);
     }
   }
-  return readCachedCount(fallbackKey, 3, 6);
+  return readCachedCount(fallbackKey, 3, 18);
 }
 
 
