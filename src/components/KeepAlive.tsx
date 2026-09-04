@@ -204,9 +204,13 @@ function KeepAliveCached({
     const reserved = reservedTargetRef.current;
     const root = rootRef.current;
     if (!reserved || !root) return container.scrollHeight;
+    // Positionen måste sparas: när reserven försvinner klipper webbläsaren
+    // scrollTop direkt, även om vi sätter tillbaka höjden i samma bildruta.
+    const previousTop = container.scrollTop;
     root.style.minHeight = '';
     const natural = container.scrollHeight;
     root.style.minHeight = `${reserved}px`;
+    if (container.scrollTop !== previousTop) applyScroll(container, previousTop);
     return natural;
   };
 
