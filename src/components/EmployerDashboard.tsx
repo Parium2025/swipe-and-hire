@@ -300,9 +300,26 @@ const EmployerDashboard = memo(() => {
   }, [activeTab, searchTerm]);
 
 
+  // 📄 Utgångna/Utkast laddas sidvis från servern (kan vara 100 000+ per konto).
+  // Vi håller alltid minst en sida i förväg hämtad så bläddring känns instant.
+  const isArchiveTab = activeTab === 'expired' || activeTab === 'draft';
+  const archiveHasMore = isArchiveTab && !searchTerm.trim() && hasMore[activeTab];
+
+  useEffect(() => {
+    if (!archiveHasMore || isLoadingMore) return;
+    const loaded = tabFilteredJobs.length;
+    if ((page + 1) * pageSize <= loaded) return;
+    void loadMore(activeTab as 'expired' | 'draft');
+  }, [archiveHasMore, isLoadingMore, tabFilteredJobs.length, page, pageSize, activeTab, loadMore]);
+
   // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
-  // än vad som faktiskt laddats in i klienten.
-  const totalPages = Math.max(1, Math.ceil(tabFilteredJobs.length / pageSize));
+  // än vad som faktiskt laddats in i klienten — utom på arkivtabbarna, där
+  // serverns totalsiffra styr hur många sidor som går att bläddra till.
+  const loadedPages = Math.ceil(tabFilteredJobs.length / pageSize);
+  const totalPages = Math.max(
+    1,
+    archiveHasMore ? Math.max(loadedPages, Math.ceil(activeTabTotalCount / pageSize)) : loadedPages,
+  );
 
   // Klampa sidan när listan krymper (t.ex. massradering av hela sista sidan).
   // Utan detta stod man kvar på en sida som inte längre finns: tom lista och
@@ -310,6 +327,7 @@ const EmployerDashboard = memo(() => {
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
+
 
 
   // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
