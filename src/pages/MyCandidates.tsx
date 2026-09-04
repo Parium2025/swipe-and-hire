@@ -64,7 +64,7 @@ import { MyCandidatesHeader } from '@/pages/myCandidates/MyCandidatesHeader';
 import { MyCandidatesDesktopActionBar } from '@/pages/myCandidates/MyCandidatesDesktopActionBar';
 import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMobileActionBar';
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
-import { useTouchCapable } from '@/hooks/useInputCapability';
+
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
