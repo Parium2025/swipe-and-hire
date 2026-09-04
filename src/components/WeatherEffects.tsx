@@ -37,13 +37,84 @@ WeatherEffects.displayName = 'WeatherEffects';
 // ─── Stars: CSS twinkle + JS shooting star ───────────────────────────────────
 
 const STARS_CACHE_KEY = 'parium_stars_config';
+const RAIN_CACHE_KEY = 'parium_rain_config_v2';
+const SNOW_CACHE_KEY = 'parium_snow_config_v2';
+const THUNDER_CACHE_KEY = 'parium_thunder_config_v2';
 
-const getOrCreateStars = () => {
+interface StarConfig {
+  id: number;
+  left: number;
+  top: number;
+  size: number;
+  opacity: number;
+  twinkleDelay: number;
+  twinkleDuration: number;
+}
+
+interface RainDropConfig {
+  id: number;
+  left: number;
+  duration: number;
+  delay: number;
+  height: number;
+  opacity: number;
+}
+
+interface SnowFlakeConfig {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  size: number;
+  opacity: number;
+  swayAmount: number;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const hasNumericFields = (value: unknown, fields: string[]) =>
+  isRecord(value) && fields.every((field) => isFiniteNumber(value[field]));
+
+const getOrCreateSessionConfig = <T,>(
+  key: string,
+  create: () => T,
+  isValid: (value: unknown) => value is T,
+): T => {
   try {
-    const cached = sessionStorage.getItem(STARS_CACHE_KEY);
-    if (cached) return JSON.parse(cached);
+    const cached = sessionStorage.getItem(key);
+    if (cached) {
+      const parsed: unknown = JSON.parse(cached);
+      if (isValid(parsed)) return parsed;
+    }
   } catch {}
-  const stars = Array.from({ length: 50 }).map((_, i) => ({
+
+  const fresh = create();
+  try { sessionStorage.setItem(key, JSON.stringify(fresh)); } catch {}
+  return fresh;
+};
+
+const isStarsConfig = (value: unknown): value is StarConfig[] =>
+  Array.isArray(value) &&
+  value.length === 50 &&
+  value.every((star) => hasNumericFields(star, ['id', 'left', 'top', 'size', 'opacity', 'twinkleDelay', 'twinkleDuration']));
+
+const isRainConfig = (value: unknown): value is RainDropConfig[] =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  value.every((drop) => hasNumericFields(drop, ['id', 'left', 'duration', 'delay', 'height', 'opacity']));
+
+const isSnowConfig = (value: unknown): value is SnowFlakeConfig[] =>
+  Array.isArray(value) &&
+  value.length === 40 &&
+  value.every((flake) => hasNumericFields(flake, ['id', 'left', 'delay', 'duration', 'size', 'opacity', 'swayAmount']));
+
+const getOrCreateStars = () => getOrCreateSessionConfig(
+  STARS_CACHE_KEY,
+  () => Array.from({ length: 50 }).map((_, i) => ({
     id: i,
     left: Math.random() * 100,
     top: Math.random() * 70,
@@ -51,10 +122,9 @@ const getOrCreateStars = () => {
     opacity: 0.3 + Math.random() * 0.5,
     twinkleDelay: Math.random() * 5,
     twinkleDuration: 2 + Math.random() * 3,
-  }));
-  try { sessionStorage.setItem(STARS_CACHE_KEY, JSON.stringify(stars)); } catch {}
-  return stars;
-};
+  })),
+  isStarsConfig,
+);
 
 const StarsEffect = memo(() => {
   const stars = useMemo(() => getOrCreateStars(), []);
@@ -168,20 +238,26 @@ CloudyEffect.displayName = 'CloudyEffect';
 // ─── Rain: CSS falling drops ────────────────────────────────────────────────
 
 const RainEffect = memo(() => {
-  const drops = useMemo(() =>
-    Array.from({ length: 35 }).map((_, i) => {
+  const drops = useMemo(() => getOrCreateSessionConfig(
+    RAIN_CACHE_KEY,
+    () => Array.from({ length: 35 }).map((_, i) => {
       const duration = 1.2 + Math.random() * 0.6;
-      const staggerDelay = (i / 35) * duration + Math.random() * 0.3;
+      // Negativ delay fördelar dropparna över hela skärmen direkt. När Home
+      // gömms med display:none pausas CSS-klockan, men vid återgång startar
+      // varje droppe mitt i sin egen fas i stället för att alla börjar om uppe
+      // i himlen samtidigt.
+      const phase = -((i / 35) * duration + Math.random() * 0.3);
       return {
         id: i,
         left: (i / 35) * 120 - 10,
         duration,
-        delay: staggerDelay,
+        delay: phase,
         height: 16 + Math.random() * 14,
         opacity: 0.35 + Math.random() * 0.25,
       };
     }),
-  []);
+    isRainConfig,
+  ), []);
 
   return (
     <>
@@ -209,21 +285,25 @@ RainEffect.displayName = 'RainEffect';
 // ─── Snow: CSS falling + sway ───────────────────────────────────────────────
 
 const SnowEffect = memo(() => {
-  const flakes = useMemo(() =>
-    Array.from({ length: 40 }).map((_, i) => {
+  const flakes = useMemo(() => getOrCreateSessionConfig(
+    SNOW_CACHE_KEY,
+    () => Array.from({ length: 40 }).map((_, i) => {
       const duration = 12 + Math.random() * 6;
-      const staggerDelay = (i / 40) * duration * 0.8 + Math.random() * 2;
+      // Samma princip som regnet: inga positiva startfördröjningar, annars ser
+      // det ut som att snön försvinner och "laddar in" på nytt efter sidbyte.
+      const phase = -((i / 40) * duration * 0.8 + Math.random() * 2);
       return {
         id: i,
         left: Math.random() * 100,
-        delay: staggerDelay,
+        delay: phase,
         duration,
         size: 3 + Math.random() * 4,
         opacity: 0.3 + Math.random() * 0.25,
         swayAmount: 10 + Math.random() * 15,
       };
     }),
-  []);
+    isSnowConfig,
+  ), []);
 
   return (
     <>
@@ -253,16 +333,21 @@ SnowEffect.displayName = 'SnowEffect';
 // ─── Thunder: CSS rain + JS lightning flash ─────────────────────────────────
 
 const ThunderEffect = memo(() => {
-  const drops = useMemo(() =>
-    Array.from({ length: 40 }).map((_, i) => ({
-      id: i,
-      left: (i / 40) * 130 - 15,
-      delay: Math.random() * 3,
-      duration: 1.0 + Math.random() * 0.5,
-      height: 15 + Math.random() * 12,
-      opacity: 0.35 + Math.random() * 0.25,
-    })),
-  []);
+  const drops = useMemo(() => getOrCreateSessionConfig(
+    THUNDER_CACHE_KEY,
+    () => Array.from({ length: 40 }).map((_, i) => {
+      const duration = 1.0 + Math.random() * 0.5;
+      return {
+        id: i,
+        left: (i / 40) * 130 - 15,
+        delay: -((i / 40) * duration + Math.random() * 0.35),
+        duration,
+        height: 15 + Math.random() * 12,
+        opacity: 0.35 + Math.random() * 0.25,
+      };
+    }),
+    isRainConfig,
+  ), []);
 
   const [lightningState, setLightningState] = useState({ position: 50, flash: false });
 

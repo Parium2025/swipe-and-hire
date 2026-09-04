@@ -375,7 +375,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
   return (
     <div className="w-full flex flex-col gap-2 md:gap-3">
       {/* Zoom controls */}
-      <div className="flex items-center gap-1 flex-wrap">
+      <div className="relative flex items-center gap-1 flex-wrap">
         <button
           type="button"
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
@@ -402,6 +402,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
         >
           <RotateCcw className="h-3 w-3" />
         </button>
+        {numPages > 0 && (
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-medium leading-none text-white backdrop-blur-sm md:hidden"
+            aria-live="polite"
+          >
+            Sida {currentPage} av {numPages}
+          </div>
+        )}
         <div className="ml-auto flex items-center gap-1">
           {showDownload && resolvedUrl && (
             <button
