@@ -1,6 +1,7 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import { useJobsData } from '@/hooks/useJobsData';
+import { hasPendingScrollRestore } from '@/lib/scrollRestoration';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useDevice } from '@/hooks/use-device';
@@ -25,6 +26,7 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
   const { invalidateJobs } = useJobsData();
   const createJobButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
+  const navigationType = useNavigationType();
   const { shouldCollapseSidebar, stageCount } = useKanbanLayout();
   const device = useDevice();
   const mainScrollRef = useRef<HTMLElement>(null);
