@@ -751,11 +751,15 @@
       // SW disabled in preview - handled by main.tsx in production only
       // This prevents SW from interfering with HMR and causing slow reloads on touch devices
     </script>
-    <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
+    <script type="module" src="/src/main.tsx?v=20251004-1510" onerror="window.__pariumBundleFailed && window.__pariumBundleFailed()"></script>
     <!-- 🩺 BOOT-WATCHDOG: en svart/blank skärm får aldrig bli permanent.
-         Om #root fortfarande är tomt efter 9 sekunder rensas SW/Cache och sidan
-         laddas om en gång med cache-bust. Hjälper det inte visas en synlig
-         fallback med en "Ladda om"-knapp istället för en tom skärm. -->
+         Om #root fortfarande är tomt efter 7 sekunder (eller om själva
+         bundlen misslyckas att laddas) rensas SW/Cache och sidan laddas om
+         med cache-bust. Hjälper det inte visas en synlig fallback med en
+         "Ladda om"-knapp istället för en tom skärm. Kontrollen körs även vid
+         bfcache-återgång (pageshow), när fliken blir synlig igen och när
+         nätet kommer tillbaka — iOS Safari stryper timers i bakgrunden, så
+         en ensam setTimeout räcker inte. -->
     <script>
       (function() {
         try {
@@ -763,15 +767,22 @@
           var attempts = 0;
           try { attempts = parseInt(sessionStorage.getItem(ATTEMPT_KEY) || '0', 10) || 0; } catch (e) {}
 
+          var finished = false;
+
           var clearAttempts = function() {
             try { sessionStorage.removeItem(ATTEMPT_KEY); } catch (e) {}
           };
 
-          var showFallback = function(root) {
+          var showFallback = function(root, offline) {
+            finished = true;
             root.innerHTML =
               '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
-              '<p style="margin:0;font-size:18px;font-weight:600;">Sidan kunde inte laddas</p>' +
-              '<p style="margin:0;font-size:15px;line-height:1.5;max-width:320px;">Något gick fel när Parium startade. Kontrollera din anslutning och försök igen.</p>' +
+              '<p style="margin:0;font-size:18px;font-weight:600;">' + (offline ? 'Ingen anslutning' : 'Sidan kunde inte laddas') + '</p>' +
+              '<p style="margin:0;font-size:15px;line-height:1.5;max-width:320px;">' +
+              (offline
+                ? 'Du verkar vara offline. Kontrollera din anslutning och försök igen.'
+                : 'Något gick fel när Parium startade. Kontrollera din anslutning och försök igen.') +
+              '</p>' +
               '<button id="parium-boot-retry" style="margin-top:8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);color:#FFFFFF;font-size:16px;font-weight:600;">Ladda om</button>' +
               '</div>';
             var btn = document.getElementById('parium-boot-retry');
@@ -790,13 +801,19 @@
           };
 
           var check = function() {
+            if (finished) return;
             var root = document.getElementById('root');
             if (!root) return;
-            if (root.childElementCount > 0) { clearAttempts(); return; }
+            if (root.childElementCount > 0) { finished = true; clearAttempts(); return; }
 
-            if (attempts >= 1) { showFallback(root); return; }
+            // Offline: en omladdning ger bara en ny blank skärm — visa besked direkt.
+            if (navigator.onLine === false) { showFallback(root, true); return; }
 
-            try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts + 1)); } catch (e) {}
+            if (attempts >= 2) { showFallback(root, false); return; }
+
+            attempts += 1;
+            try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
+            finished = true;
 
             var tasks = [];
             try {
@@ -825,10 +842,26 @@
             });
           };
 
-          setTimeout(check, 9000);
+          // Bundlen kunde inte hämtas (404 efter deploy, tappat nät, stale cache)
+          // → vänta inte ut hela timeouten, återhämta direkt.
+          window.__pariumBundleFailed = function() { setTimeout(check, 300); };
+
+          setTimeout(check, 7000);
+
+          // iOS Safari: timers stryps i bakgrunden och bfcache kan återställa
+          // en tom sida. Kontrollera igen så fort sidan faktiskt visas.
+          window.addEventListener('pageshow', function() { setTimeout(check, 1500); });
+          document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') setTimeout(check, 1500);
+          });
+          window.addEventListener('online', function() {
+            var root = document.getElementById('root');
+            if (root && root.childElementCount === 0) { finished = false; setTimeout(check, 300); }
+          });
         } catch (e) { /* noop */ }
       })();
     </script>
+
 
   </body>
 </html>
