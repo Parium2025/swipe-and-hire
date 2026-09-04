@@ -15,8 +15,9 @@ import { supabase } from '@/integrations/supabase/client';
  *
  * Här körs exakt samma prefetch som hover-varianten (samma query-nycklar,
  * samma hämtare, samma spärr mot att skriva över en redan komplett lista) —
- * men i idle direkt efter inloggning, sekventiellt så vi aldrig konkurrerar
- * med kandidatförvärmningen om bandbredd.
+ * men vid första lediga lucka direkt efter inloggning, sekventiellt så vi
+ * aldrig konkurrerar med kandidatförvärmningen om bandbredd. Timeouten är
+ * kort: värmningen ska hinna före ett normalt första tryck i sidomenyn.
  */
 const ROUTES = ['/my-jobs', '/dashboard'];
 const DELAY_BETWEEN_MS = 400;
@@ -76,7 +77,7 @@ export function useEmployerPagePrewarm() {
     const w = window as IdleWindow;
 
     if (typeof w.requestIdleCallback === 'function') {
-      const id = w.requestIdleCallback(() => run(), { timeout: 2500 });
+      const id = w.requestIdleCallback(() => run(), { timeout: 500 });
       return () => {
         cancelled = true;
         w.cancelIdleCallback?.(id);
@@ -84,7 +85,7 @@ export function useEmployerPagePrewarm() {
       };
     }
 
-    const id = window.setTimeout(run, 600);
+    const id = window.setTimeout(run, 100);
     return () => {
       cancelled = true;
       window.clearTimeout(id);
