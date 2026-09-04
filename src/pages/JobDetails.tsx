@@ -89,12 +89,6 @@ const JobDetails = () => {
     }
   }, [location.state, navigate]);
 
-  const { handlers: pullHandlers, style: pullStyle } = usePullToDismiss({
-    wrapperRef: pageRef,
-    onDismiss: handleBack,
-    enabled: useMobileView,
-  });
-  
   const { 
     job, 
     applications, 
@@ -123,6 +117,18 @@ const JobDetails = () => {
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
+
+  // En öppen kandidatdialog/swipe-vy renderas i en React-portal, men
+  // syntetiska touch-events bubblar ändå genom React-trädet upp till
+  // sidans wrapper. Utan spärren skulle en nedåtdragning i dialogen
+  // även trigga sidans pull-to-dismiss och navigera tillbaka till
+  // jobblistan. Därför är sid-gesten avstängd så länge en overlay är öppen.
+  const overlayOpen = dialogOpen || swipeViewerOpen;
+  const { handlers: pullHandlers, style: pullStyle } = usePullToDismiss({
+    wrapperRef: pageRef,
+    onDismiss: handleBack,
+    enabled: useMobileView && !overlayOpen,
+  });
 
   const { stageSettings, orderedStages, isLoading: stagesLoading } = useJobStageSettings(jobId);
   
