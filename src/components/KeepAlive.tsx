@@ -104,6 +104,9 @@ function KeepAliveCached({
   const [isEntered, setIsEntered] = React.useState(true);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const isFirstActivationRef = React.useRef(true);
+  // Nycklar som monterats i den här renderingen och alltså aldrig visats förut.
+  // Endast de ska tona in; redan besökta vyer byts synkront utan animation.
+  const freshKeysRef = useRef<Set<string>>(new Set());
 
   // -------------------------------------------------------------------------
   // Scrollminne per vy
