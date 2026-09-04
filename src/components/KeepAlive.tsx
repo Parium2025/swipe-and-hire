@@ -181,37 +181,33 @@ function KeepAliveCached({
   // element i flex-kolumnen trycker i stället ihop innehållet. Med padding kan
   // vi mäta det verkliga innehållet (scrollHeight minus reserven) och behålla
   // reserven exakt tills riktigt innehåll finns.
-  const reserveStateRef = useRef<{ container: HTMLElement; basePadding: number; extra: number } | null>(null);
+  const reservedTargetRef = useRef(0);
 
-  const readBasePadding = (container: HTMLElement) =>
-    parseFloat(getComputedStyle(container).paddingBottom) || 0;
-
-  const clearReserve = () => {
-    const state = reserveStateRef.current;
-    if (!state) return;
-    state.container.style.paddingBottom = '';
-    reserveStateRef.current = null;
+  /** Sätt/ta bort reserven (min-height på vår rot inuti scroll-containern). */
+  const applyReserve = (height: number) => {
+    const root = rootRef.current;
+    if (!root) return;
+    root.style.minHeight = height > 0 ? `${height}px` : '';
+    reservedTargetRef.current = height > 0 ? height : 0;
   };
 
-  /** Innehållets verkliga höjd = containerns höjd minus vår extra reserv. */
-  const contentHeightOf = (container: HTMLElement) =>
-    container.scrollHeight - (reserveStateRef.current?.extra ?? 0);
+  const clearReserve = () => applyReserve(0);
 
-  /** Se till att containern är minst `targetHeight` hög. */
-  const reserveHeight = (container: HTMLElement, targetHeight: number) => {
-    if (targetHeight <= 0) return 0;
-    let state = reserveStateRef.current;
-    if (!state || state.container !== container) {
-      clearReserve();
-      state = { container, basePadding: readBasePadding(container), extra: 0 };
-      reserveStateRef.current = state;
-    }
-    const extra = Math.max(0, targetHeight - contentHeightOf(container));
-    if (extra !== state.extra) {
-      state.extra = extra;
-      container.style.paddingBottom = `${state.basePadding + extra}px`;
-    }
-    return extra;
+  /**
+   * Innehållets verkliga höjd — mätt UTAN vår reserv. Reserven sträcker ut den
+   * visade vyn, så en vanlig mätning skulle räkna reserven som riktigt
+   * innehåll och släppa positionen direkt (det var buggen). Vi nollar därför
+   * reserven, mäter, och sätter tillbaka den i samma bildruta — ingen paint
+   * sker däremellan, så användaren ser inget hopp.
+   */
+  const measureNaturalHeight = (container: HTMLElement) => {
+    const reserved = reservedTargetRef.current;
+    const root = rootRef.current;
+    if (!reserved || !root) return container.scrollHeight;
+    root.style.minHeight = '';
+    const natural = container.scrollHeight;
+    root.style.minHeight = `${reserved}px`;
+    return natural;
   };
 
   // Håll kvar exakt läge tills innehållet vuxit klart, och släpp omedelbart om
@@ -229,14 +225,20 @@ function KeepAliveCached({
     const previousOverflowAnchor = container.style.overflowAnchor;
     container.style.overflowAnchor = 'none';
     isRestoringRef.current = true;
-    if (reservedHeight > 0) reserveHeight(container, reservedHeight);
+    if (reservedHeight > 0) {
+      applyReserve(reservedHeight);
+      // Tvinga fram layout innan vi sätter scrollTop, annars klipper webbläsaren
+      // mot den gamla (korta) höjden.
+      void container.scrollHeight;
+    }
     applyScroll(container, target);
-    console.log('[KA] hold start', target, reservedHeight, container.scrollHeight, container.scrollTop, reserveStateRef.current?.extra);
 
     const start = performance.now();
     let frame = 0;
     let stableFrames = 0;
     let cancelled = false;
+    let contentReady = reservedHeight <= 0;
+    let lastMeasure = 0;
 
     const release = () => {
       if (frame) cancelAnimationFrame(frame);
@@ -248,7 +250,6 @@ function KeepAliveCached({
       clearReserve();
       isRestoringRef.current = false;
       settleRef.current = null;
-      console.log('[KA] release', container.scrollTop, container.scrollHeight, performance.now()-start);
     };
 
     // Rör användaren skärmen slutar vi styra positionen direkt — men höjd-
@@ -268,10 +269,16 @@ function KeepAliveCached({
       if (cancelled) return;
       if (performance.now() - start > timeoutMs) return release();
 
-      // Riktigt innehåll = containerns höjd MINUS vår egen reserv.
-      const contentReady = reservedHeight <= 0
-        || contentHeightOf(container) >= reservedHeight - SCROLL_HEIGHT_TOLERANCE_PX;
-      if (!contentReady) reserveHeight(container, reservedHeight);
+      // Mät bara ibland — mätningen tvingar fram layout.
+      const now = performance.now();
+      if (reservedHeight > 0 && !contentReady && now - lastMeasure >= 120) {
+        lastMeasure = now;
+        if (measureNaturalHeight(container) >= reservedHeight - SCROLL_HEIGHT_TOLERANCE_PX) {
+          contentReady = true;
+          clearReserve();
+          void container.scrollHeight;
+        }
+      }
 
       if (userTookOver) {
         if (contentReady) return release();
