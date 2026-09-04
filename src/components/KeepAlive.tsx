@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useLayoutEffect } from 'react';
-import { consumePendingScrollRestore, readPositions } from '@/lib/scrollRestoration';
+import { consumePendingScrollRestore, readPositions, SCROLL_HEIGHT_TOLERANCE_PX } from '@/lib/scrollRestoration';
 
 // ---------------------------------------------------------------------------
 // Scrollminne per KeepAlive-vy — modulnivå + sessionStorage
@@ -7,7 +7,15 @@ import { consumePendingScrollRestore, readPositions } from '@/lib/scrollRestorat
 // Ligger utanför komponenten så positionen överlever remount av hela Index
 // (t.ex. vid rollbyte, auth-refresh eller en snabb omladdning).
 const KEEPALIVE_SCROLL_KEY = 'parium-keepalive-scroll';
-const keepAliveScroll = new Map<string, number>();
+
+interface KeepAliveScrollEntry {
+  top: number;
+  /** Sidans höjd när positionen sparades — behövs för att kunna reservera
+   *  platsen redan under skelett-laddningen efter en omladdning. */
+  height: number;
+}
+
+const keepAliveScroll = new Map<string, KeepAliveScrollEntry>();
 
 try {
   const raw = sessionStorage.getItem(KEEPALIVE_SCROLL_KEY);
@@ -15,8 +23,17 @@ try {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       for (const [key, value] of Object.entries(parsed)) {
+        // Bakåtkompatibelt: äldre poster var bara ett tal (top).
         if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
-          keepAliveScroll.set(key, value);
+          keepAliveScroll.set(key, { top: value, height: 0 });
+        } else if (value && typeof value === 'object') {
+          const entry = value as Partial<KeepAliveScrollEntry>;
+          if (typeof entry.top === 'number' && Number.isFinite(entry.top) && entry.top >= 0) {
+            keepAliveScroll.set(key, {
+              top: entry.top,
+              height: typeof entry.height === 'number' && Number.isFinite(entry.height) ? entry.height : 0,
+            });
+          }
         }
       }
     }
@@ -32,10 +49,14 @@ const persistKeepAliveScroll = () => {
   } catch { /* quota/privat läge — minnet i RAM räcker */ }
 };
 
-const setKeepAliveScroll = (key: string, top: number) => {
+const setKeepAliveScroll = (key: string, top: number, height?: number) => {
   if (!Number.isFinite(top) || top < 0) return;
-  if (keepAliveScroll.get(key) === top) return;
-  keepAliveScroll.set(key, top);
+  const existing = keepAliveScroll.get(key);
+  const nextHeight = typeof height === 'number' && Number.isFinite(height) && height > 0
+    ? height
+    : existing?.height ?? 0;
+  if (existing && existing.top === top && existing.height === nextHeight) return;
+  keepAliveScroll.set(key, { top, height: nextHeight });
   // Detaljvyer (/job-details/:id) skapar en ny nyckel per annons — håll
   // minnet litet genom att alltid släppa de äldsta.
   while (keepAliveScroll.size > 50) {
@@ -47,7 +68,9 @@ const setKeepAliveScroll = (key: string, top: number) => {
 };
 
 
-const getKeepAliveScroll = (key: string) => keepAliveScroll.get(key) ?? 0;
+const getKeepAliveScroll = (key: string) => keepAliveScroll.get(key)?.top ?? 0;
+const getKeepAliveEntry = (key: string): KeepAliveScrollEntry =>
+  keepAliveScroll.get(key) ?? { top: 0, height: 0 };
 
 interface KeepAliveProps {
 
@@ -201,12 +224,12 @@ function KeepAliveCached({
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        setKeepAliveScroll(displayedKey, container.scrollTop);
+        setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
       });
     };
     // Snapshot direkt när användaren rör ett kort: navigeringen kan ske innan
     // nästa rAF hinner köras.
-    const onPointerDown = () => setKeepAliveScroll(displayedKey, container.scrollTop);
+    const onPointerDown = () => setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
     container.addEventListener('scroll', onScroll, { passive: true });
     container.addEventListener('pointerdown', onPointerDown, { passive: true });
     return () => {
@@ -229,7 +252,7 @@ function KeepAliveCached({
     if (displayedNode) {
       measuredHeightsRef.current.set(displayedKey, displayedNode.scrollHeight);
     }
-    setKeepAliveScroll(displayedKey, container.scrollTop);
+    setKeepAliveScroll(displayedKey, container.scrollTop, container.scrollHeight);
 
     // Reservera den inkommande vyns senast uppmätta höjd redan innan den
     // gamla vyn döljs. iOS Safari klipper annars den delade scroll-containern
@@ -246,14 +269,81 @@ function KeepAliveCached({
 
   // Återställ även vid allra första monteringen (t.ex. efter en omladdning
   // eller när hela Index remountas) — annars tappas positionen helt.
+  //
+  // 🚀 Omladdnings-fix: vi reserverar den sparade SIDHÖJDEN innan första
+  // paint. Skelettet är mycket kortare än den riktiga listan, så utan
+  // höjdreserven klipps scrollTop till 0 och användaren ser skelettet
+  // högst upp tills datan laddat — sedan ett synligt hopp ner. Med reserven
+  // är containern lika hög som när positionen sparades, så scrollen landar
+  // exakt rätt direkt och skelettet visas på rätt ställe ("zoomat in").
   useLayoutEffect(() => {
     const container = getScrollContainer();
     if (!container) return;
-    const target = getKeepAliveScroll(displayedKey);
-    if (target > 0) {
-      applyScroll(container, target);
-      holdPosition(container, target);
+    const saved = getKeepAliveEntry(displayedKey);
+    if (saved.top <= 0) return;
+
+    const previousOverflowAnchor = container.style.overflowAnchor;
+    container.style.overflowAnchor = 'none';
+    if (rootRef.current && saved.height > 0) {
+      rootRef.current.style.minHeight = `${saved.height}px`;
     }
+    applyScroll(container, saved.top);
+
+    // Håll positionen tills det riktiga innehållet vuxit till sparad höjd
+    // (max ~6 s — kallstart kan vara långsam), släpp direkt vid egen gest.
+    settleRef.current?.cancel();
+    const start = performance.now();
+    let frame = 0;
+    let stableFrames = 0;
+    let cancelled = false;
+
+    const release = () => {
+      if (frame) cancelAnimationFrame(frame);
+      container.removeEventListener('touchstart', onGesture);
+      container.removeEventListener('wheel', onGesture);
+      container.removeEventListener('pointerdown', onGesture);
+      container.style.overflowAnchor = previousOverflowAnchor;
+      if (rootRef.current) rootRef.current.style.minHeight = '';
+      settleRef.current = null;
+    };
+
+    function onGesture() {
+      cancelled = true;
+      release();
+    }
+
+    const tick = () => {
+      if (cancelled) return;
+      if (performance.now() - start > 6000) return release();
+
+      // Klart först när det riktiga innehållet (inte höjdreserven) räcker
+      // till — annars skulle vi släppa minHeight medan skelettet fortfarande
+      // är kort och positionen klipps igen.
+      const realContentReady = saved.height <= 0
+        || container.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE_PX;
+      // Containerns scrollHeight inkluderar vår egen minHeight-reserv, så
+      // mät den visade vyns faktiska höjd i stället när den finns.
+      const displayedNode = nodeRefs.current.get(displayedKey);
+      const contentReady = displayedNode
+        ? displayedNode.scrollHeight >= saved.height - SCROLL_HEIGHT_TOLERANCE_PX
+        : realContentReady;
+
+      if (Math.abs(container.scrollTop - saved.top) > 1) {
+        stableFrames = 0;
+        applyScroll(container, saved.top);
+      } else if (contentReady) {
+        stableFrames += 1;
+        if (stableFrames >= 2) return release();
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    container.addEventListener('touchstart', onGesture, { passive: true });
+    container.addEventListener('wheel', onGesture, { passive: true });
+    container.addEventListener('pointerdown', onGesture, { passive: true });
+    settleRef.current = { cancel: () => { cancelled = true; release(); } };
+    frame = requestAnimationFrame(tick);
+
     return () => settleRef.current?.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
