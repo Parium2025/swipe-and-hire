@@ -100,34 +100,46 @@ async function fetchJobDetails(jobId: string, userId: string): Promise<JobPostin
   };
 }
 
-/** Hämta betyg för en uppsättning kandidater — chunkat så `in()` aldrig spricker. */
+/** Hämta betyg för en uppsättning kandidater — chunkat så `in()` aldrig spricker.
+ *  Båda tabellerna hämtas parallellt: tidigare kördes de i två sekventiella
+ *  loopar, vilket lade på en extra nätverksrunda innan första kortet kunde
+ *  ritas. Precedensen är oförändrad — candidate_ratings skrivs sist och vinner. */
 async function fetchRatings(userId: string, applicantIds: string[]): Promise<Map<string, number>> {
   const ratings = new Map<string, number>();
   const groups = chunk(applicantIds, IN_CHUNK);
 
-  // Legacy först (my_candidates), canonical sist (candidate_ratings) så den vinner.
-  for (const ids of groups) {
-    const { data } = await supabase
-      .from('my_candidates')
-      .select('applicant_id, rating')
-      .eq('recruiter_id', userId)
-      .in('applicant_id', ids);
-    (data || []).forEach((mc) => {
-      if (mc.rating) ratings.set(mc.applicant_id, mc.rating);
-    });
-  }
+  const [legacyGroups, canonicalGroups] = await Promise.all([
+    Promise.all(
+      groups.map(async (ids) => {
+        const { data } = await supabase
+          .from('my_candidates')
+          .select('applicant_id, rating')
+          .eq('recruiter_id', userId)
+          .in('applicant_id', ids);
+        return data || [];
+      }),
+    ),
+    Promise.all(
+      groups.map(async (ids) => {
+        const { data } = await supabase
+          .from('candidate_ratings')
+          .select('applicant_id, rating')
+          .eq('recruiter_id', userId)
+          .in('applicant_id', ids);
+        return data || [];
+      }),
+    ),
+  ]);
 
-  for (const ids of groups) {
-    const { data } = await supabase
-      .from('candidate_ratings')
-      .select('applicant_id, rating')
-      .eq('recruiter_id', userId)
-      .in('applicant_id', ids);
-    (data || []).forEach((r) => ratings.set(r.applicant_id, r.rating || 0));
-  }
+  // Legacy först (my_candidates), canonical sist (candidate_ratings) så den vinner.
+  legacyGroups.flat().forEach((mc) => {
+    if (mc.rating) ratings.set(mc.applicant_id, mc.rating);
+  });
+  canonicalGroups.flat().forEach((r) => ratings.set(r.applicant_id, r.rating || 0));
 
   return ratings;
 }
+
 
 /**
  * Kriterieresultat för en uppsättning utvärderingar.
@@ -141,34 +153,43 @@ async function fetchCriterionResults(
 ): Promise<Map<string, CriterionResult[]>> {
   const byEvaluation = new Map<string, CriterionResult[]>();
 
-  for (const ids of chunk(evaluationIds, IN_CHUNK)) {
-    for (let from = 0; ; from += ROWS_PER_REQUEST) {
-      const { data, error } = await supabase
-        .from('criterion_results')
-        .select('evaluation_id, criterion_id, result, reasoning')
-        .in('evaluation_id', ids)
-        .order('evaluation_id', { ascending: true })
-        .order('criterion_id', { ascending: true })
-        .range(from, from + ROWS_PER_REQUEST - 1);
+  // Chunkarna är oberoende av varandra och körs parallellt; pagineringen inom
+  // varje chunk måste däremot vara sekventiell (offset beror på föregående svar).
+  const groups = await Promise.all(
+    chunk(evaluationIds, IN_CHUNK).map(async (ids) => {
+      const rows: { evaluation_id: string; criterion_id: string; result: string; reasoning: string | null }[] = [];
+      for (let from = 0; ; from += ROWS_PER_REQUEST) {
+        const { data, error } = await supabase
+          .from('criterion_results')
+          .select('evaluation_id, criterion_id, result, reasoning')
+          .in('evaluation_id', ids)
+          .order('evaluation_id', { ascending: true })
+          .order('criterion_id', { ascending: true })
+          .range(from, from + ROWS_PER_REQUEST - 1);
 
-      if (error) break;
-      const rows = data || [];
-      rows.forEach((cr) => {
-        const existing = byEvaluation.get(cr.evaluation_id) || [];
-        existing.push({
-          criterion_id: cr.criterion_id,
-          result: cr.result as 'match' | 'no_match' | 'no_data',
-          reasoning: cr.reasoning || undefined,
-          title: criteriaMap.get(cr.criterion_id) || 'Okänt kriterium',
-        });
-        byEvaluation.set(cr.evaluation_id, existing);
-      });
-      if (rows.length < ROWS_PER_REQUEST) break;
-    }
-  }
+        if (error) break;
+        const page = data || [];
+        rows.push(...(page as typeof rows));
+        if (page.length < ROWS_PER_REQUEST) break;
+      }
+      return rows;
+    }),
+  );
+
+  groups.flat().forEach((cr) => {
+    const existing = byEvaluation.get(cr.evaluation_id) || [];
+    existing.push({
+      criterion_id: cr.criterion_id,
+      result: cr.result as 'match' | 'no_match' | 'no_data',
+      reasoning: cr.reasoning || undefined,
+      title: criteriaMap.get(cr.criterion_id) || 'Okänt kriterium',
+    });
+    byEvaluation.set(cr.evaluation_id, existing);
+  });
 
   return byEvaluation;
 }
+
 
 /** Berika en sida råa ansökningsrader med betyg, media, aktivitet och kriterier. */
 async function hydrateApplications(
@@ -180,20 +201,62 @@ async function hydrateApplications(
 
   const applicantIds = applicationsData.map((a) => a.applicant_id);
 
+  const idGroups = chunk(applicantIds, IN_CHUNK);
+
+  // Media + senaste aktivitet beror INTE på betyg/kriterier/utvärderingar.
+  // Tidigare startade de först efter tre väntande steg, vilket gav en kedja av
+  // nätverksrundor innan kandidatkorten kunde ritas. Nu startar allt samtidigt.
+  const mediaByApplicant = new Map<
+    string,
+    { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }
+  >();
+  const activityByApplicant = new Map<string, { last_active_at: string | null }>();
+
+  const mediaAndActivityPromise = Promise.all(
+    idGroups.map(async (ids) => {
+      const [{ data: batchMediaData }, activityResult] = await Promise.all([
+        measurePerformance('matching', () =>
+          supabase.rpc('get_applicant_profile_media_batch', { p_applicant_ids: ids, p_employer_id: userId }),
+        ),
+        measurePerformance('matching', () =>
+          supabase.rpc('get_applicant_latest_activity', { p_applicant_ids: ids, p_employer_id: userId }),
+        ),
+      ]);
+
+      if (batchMediaData && Array.isArray(batchMediaData)) {
+        batchMediaData.forEach((row: any) => {
+          mediaByApplicant.set(row.applicant_id, {
+            profile_image_url: row.profile_image_url,
+            video_url: row.video_url,
+            is_profile_video: row.is_profile_video,
+            city: row.city || null,
+          });
+        });
+        // Auto-invalidera bildcachen när kandidaten bytt profilbild/video
+        syncProfileMediaVersions(batchMediaData as any);
+      }
+
+      (activityResult.data || []).forEach((a: { applicant_id: string; last_active_at: string | null }) => {
+        activityByApplicant.set(a.applicant_id, { last_active_at: a.last_active_at });
+      });
+    }),
+  );
+
   const [ratingsByApplicant, criteriaResult, evaluationsResult] = await Promise.all([
     fetchRatings(userId, applicantIds),
     supabase.from('job_criteria').select('id, title').eq('job_id', jobId),
     (async () => {
-      const rows: { id: string; applicant_id: string }[] = [];
-      for (const ids of chunk(applicantIds, IN_CHUNK)) {
-        const { data } = await supabase
-          .from('candidate_evaluations')
-          .select('id, applicant_id')
-          .eq('job_id', jobId)
-          .in('applicant_id', ids);
-        rows.push(...((data || []) as { id: string; applicant_id: string }[]));
-      }
-      return rows;
+      const groups = await Promise.all(
+        idGroups.map(async (ids) => {
+          const { data } = await supabase
+            .from('candidate_evaluations')
+            .select('id, applicant_id')
+            .eq('job_id', jobId)
+            .in('applicant_id', ids);
+          return (data || []) as { id: string; applicant_id: string }[];
+        }),
+      );
+      return groups.flat();
     })(),
   ]);
 
@@ -204,45 +267,13 @@ async function hydrateApplications(
   evaluationsResult.forEach((e) => evaluationByApplicant.set(e.applicant_id, e.id));
 
   const evaluationIds = evaluationsResult.map((e) => e.id);
-  const resultsByEvaluation =
+  const [resultsByEvaluation] = await Promise.all([
     evaluationIds.length > 0
-      ? await fetchCriterionResults(evaluationIds, criteriaMap)
-      : new Map<string, CriterionResult[]>();
+      ? fetchCriterionResults(evaluationIds, criteriaMap)
+      : Promise.resolve(new Map<string, CriterionResult[]>()),
+    mediaAndActivityPromise,
+  ]);
 
-  // Media + senaste aktivitet i batch-RPC:er — chunkade så även 1 000 sökande går igenom.
-  const mediaByApplicant = new Map<
-    string,
-    { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }
-  >();
-  const activityByApplicant = new Map<string, { last_active_at: string | null }>();
-
-  for (const ids of chunk(applicantIds, IN_CHUNK)) {
-    const [{ data: batchMediaData }, activityResult] = await Promise.all([
-      measurePerformance('matching', () =>
-        supabase.rpc('get_applicant_profile_media_batch', { p_applicant_ids: ids, p_employer_id: userId }),
-      ),
-      measurePerformance('matching', () =>
-        supabase.rpc('get_applicant_latest_activity', { p_applicant_ids: ids, p_employer_id: userId }),
-      ),
-    ]);
-
-    if (batchMediaData && Array.isArray(batchMediaData)) {
-      batchMediaData.forEach((row: any) => {
-        mediaByApplicant.set(row.applicant_id, {
-          profile_image_url: row.profile_image_url,
-          video_url: row.video_url,
-          is_profile_video: row.is_profile_video,
-          city: row.city || null,
-        });
-      });
-      // Auto-invalidera bildcachen när kandidaten bytt profilbild/video
-      syncProfileMediaVersions(batchMediaData as any);
-    }
-
-    (activityResult.data || []).forEach((a: { applicant_id: string; last_active_at: string | null }) => {
-      activityByApplicant.set(a.applicant_id, { last_active_at: a.last_active_at });
-    });
-  }
 
   return applicationsData.map((app) => {
     const liveMedia =
@@ -730,4 +761,21 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
     },
     staleTime: Infinity,
   });
+  // Urvalskriterierna ritas i kandidatkorten. De saknades i förvärmningen, så
+  // annonsvyn fick vänta på dem efter öppning — samma hämtning som useJobCriteria.
+  queryClient.prefetchQuery({
+    queryKey: ['job-criteria', jobId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('job_criteria')
+        .select('*')
+        .eq('job_id', jobId)
+        .eq('is_active', true)
+        .order('order_index');
+      if (error) throw error;
+      return (data || []).filter((c) => c.title?.trim() && c.prompt?.trim());
+    },
+    staleTime: 30_000,
+  });
 }
+
