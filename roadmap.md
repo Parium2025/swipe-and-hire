@@ -22,3 +22,4 @@
 - [x] Eliminera knappflimmer vid återgång genom att ignorera dolda KeepAlive-noders nollbredd
 - [x] Visa arbetsgivardashboardens skeleton i exakt samma scroll-yta och sparade position vid omladdning
 - [x] Snabbare öppning av annons: betyg, media och aktivitet hämtas parallellt; urvalskriterier förvärms
+- [x] Dela upp annonshämtningen per status: aktiva strömmas helt, utgångna/utkast hämtas sidvis från servern med en sida i förväg
