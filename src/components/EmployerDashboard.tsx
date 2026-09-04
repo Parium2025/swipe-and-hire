@@ -1,5 +1,5 @@
 import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -55,6 +55,7 @@ let __employerDashboardHasMountedOnce = false;
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
   // Server-side truth — exakta totaler även vid 10k+ jobb
@@ -178,7 +179,13 @@ const EmployerDashboard = memo(() => {
   // Utan detta blockerar startTransition indikator-renderingen (låg-prio)
   // och tabben markeras inte förrän nästa interaktion triggar en ny render.
   const [optimisticTab, setOptimisticTab] = useState<JobStatusTab>(urlTab);
-  useEffect(() => { setOptimisticTab(urlTab); }, [urlTab]);
+  // KeepAlive håller sidan monterad även inne på /job-details/:id. Ignorera
+  // detaljvyns tomma query-string, annars byts den dolda listan till "Aktiva",
+  // page nollställs och dess effekt skriver scrollTop=0 innan krysset går tillbaka.
+  useEffect(() => {
+    if (location.pathname !== '/my-jobs') return;
+    setOptimisticTab(urlTab);
+  }, [location.pathname, urlTab]);
 
   const activeTab = optimisticTab;
   // DOM-persistens i VirtualJobGrid gör tab-bytet billigt — inget behov av useDeferredValue.
@@ -348,6 +355,7 @@ const EmployerDashboard = memo(() => {
 
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
+    if (location.pathname !== '/my-jobs') return;
     if (!didMountRef.current) {
       didMountRef.current = true;
       return;
@@ -361,7 +369,7 @@ const EmployerDashboard = memo(() => {
       positions[window.location.pathname] = { top: 0 };
       writePositions(positions);
     }
-  }, [page]);
+  }, [location.pathname, page]);
 
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
