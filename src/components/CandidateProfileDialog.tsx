@@ -162,6 +162,14 @@ export const CandidateProfileDialog = ({
   const previousRating = useRef<number | undefined>(undefined);
   const lastResetApplicationIdRef = useRef<string | null>(null);
 
+  // Touch-gester (mobil): horisontell swipe växlar flik, nedåtdrag från
+  // toppen stänger vyn. Spårar aktiv scrollcontainer så stäng-gesten bara
+  // kan utlösas när innehållet faktiskt är högst upp.
+  const profilePaneRef = useRef<HTMLDivElement | null>(null);
+  const activityPaneRef = useRef<HTMLDivElement | null>(null);
+  const commentsPaneRef = useRef<HTMLDivElement | null>(null);
+  const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
+
   const activeApplication = useMemo(() => {
     if (!allApplications || allApplications.length <= 1) return application;
     if (!selectedApplicationId) return application;
