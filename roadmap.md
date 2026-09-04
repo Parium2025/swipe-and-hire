@@ -16,5 +16,6 @@
 - [ ] Svara på genomgång av React Query-prefetch i hela appen
 - [x] Synka kortrytmen i Dashboard och Mina annonser med jobbsökarvyn
 - [x] Ta bort realtidens beroende av payload.old och lätta WAL-belastningen på job_postings
-- [x] Återställ exakt mobil scrollposition efter stängd annonsdetalj
+- [x] Återställ exakt mobil scrollposition efter stängd annonsdetalj via gemensam snapshot mellan returflöde och KeepAlive
 - [x] Förvärm annonsdata, steg och arbetsgivarsiffror inför kallstart
+- [x] Ta bort konstgjord kallstartsfördröjning och mobil prefetch-race för arbetsgivarannonser

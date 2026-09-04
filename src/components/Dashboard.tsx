@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useRef, useEffect, useCallback, startTransitio
 import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { MobileJobCard } from '@/components/MobileJobCard';
@@ -50,6 +50,7 @@ const Dashboard = memo(() => {
   const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { handleMouseEnter: prefetchJob, prefetchNow } = useJobPrefetch();
   
   const [showContent, setShowContent] = useState(() => !isLoading);
@@ -68,11 +69,8 @@ const Dashboard = memo(() => {
   const [initialLoadDone, setInitialLoadDone] = useState(__employerOrgDashboardHasMountedOnce);
   useEffect(() => {
     if (!isLoading && !initialLoadDone) {
-      const t = setTimeout(() => {
-        setInitialLoadDone(true);
-        __employerOrgDashboardHasMountedOnce = true;
-      }, 150);
-      return () => clearTimeout(t);
+      setInitialLoadDone(true);
+      __employerOrgDashboardHasMountedOnce = true;
     }
   }, [isLoading, initialLoadDone]);
 
@@ -84,7 +82,12 @@ const Dashboard = memo(() => {
   // Optimistic local tab — uppdaterar indikatorn omedelbart vid klick.
   // URL-uppdateringen körs i transition så list-renderingen inte blockerar UI:t.
   const [optimisticTab, setOptimisticTab] = useState<JobStatusTab>(urlTab);
-  useEffect(() => { setOptimisticTab(urlTab); }, [urlTab]);
+  // Dashboarden ligger kvar monterad under /job-details/:id. Låt inte den
+  // detaljvyns query-string ändra den dolda listans flik och sida.
+  useEffect(() => {
+    if (location.pathname !== '/dashboard') return;
+    setOptimisticTab(urlTab);
+  }, [location.pathname, urlTab]);
 
   const activeTab = optimisticTab;
   // Använd samma värde till listan — DOM-persistens i VirtualJobGrid gör tab-bytet billigt.
@@ -246,6 +249,7 @@ const Dashboard = memo(() => {
 
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
+    if (location.pathname !== '/dashboard') return;
     if (!didMountRef.current) {
       didMountRef.current = true;
       return;
@@ -453,6 +457,7 @@ const Dashboard = memo(() => {
                   onEdit={() => {}}
                   onDelete={() => {}}
                   onPrefetch={prefetchJob}
+                  onPrefetchNow={prefetchNow}
                   collapsible
                   expanded={expandAll}
                   hideActions

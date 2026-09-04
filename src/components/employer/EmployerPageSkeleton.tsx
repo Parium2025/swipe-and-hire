@@ -2,6 +2,7 @@ import { memo, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
@@ -14,9 +15,13 @@ import { useDevice } from '@/hooks/use-device';
  */
 function useLiveEmployerJobCount(tab: 'active' | 'expired' | 'draft', fallbackKey: string): number {
   const qc = useQueryClient();
-  // Look for any cached ['jobs', ...] entry with data
+  const { pathname } = useLocation();
+  const expectedScope = pathname === '/dashboard' ? 'organization' : 'personal';
+  // Läs bara cachen för den aktuella sidans scope. Om både Mina annonser och
+  // Företagets annonser är varma får skeletonen annars slumpmässigt fel antal.
   const entries = qc.getQueriesData<any[]>({ queryKey: ['jobs'] });
-  for (const [, data] of entries) {
+  for (const [queryKey, data] of entries) {
+    if (!Array.isArray(queryKey) || queryKey[1] !== expectedScope) continue;
     if (Array.isArray(data)) {
       const filtered = data.filter(j =>
         tab === 'active' ? isEmployerJobActive(j) :
