@@ -27,6 +27,14 @@ export interface ScrollPosition {
 export const getManagedScrollContainer = (): HTMLElement | null =>
   document.querySelector('[data-main-scroll-container="true"]');
 
+// Vissa skal (arbetsgivarens KeepAlive-shell) äger sin egen scroll: sidorna
+// ligger kvar i DOM:en och positionen växlas i exakt samma bildruta som vyn
+// byts. Den globala återställaren måste hålla sig borta där, annars skrollar
+// den den *fortfarande synliga* föregående sidan till toppen 140 ms innan
+// bytet — vilket ser ut som ett hopp/blixt.
+export const isScrollManagedExternally = (): boolean =>
+  getManagedScrollContainer()?.dataset.scrollManaged === 'keepalive';
+
 export const getRestorableScrollContainer = (): HTMLElement | null =>
   getManagedScrollContainer()
   ?? document.querySelector<HTMLElement>('[data-landing-scroll-root]')
