@@ -1,4 +1,3 @@
-import ScrollLab from "@/pages/ScrollLab";
 import { useState, useEffect, useLayoutEffect, lazy, Suspense } from "react";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Toaster } from "@/components/ui/sonner";
@@ -209,7 +208,6 @@ const AnimatedRoutes = () => {
       <ScrollRestoration />
       <Suspense fallback={<LazyFallback />}>
         <Routes>
-          <Route path="/__scrolllab" element={<ScrollLab />} />
           <Route path="/" element={<Landing />} />
           <Route path="/jobbsokare" element={<AudienceLanding key="job_seeker" audience="job_seeker" />} />
           <Route path="/arbetsgivare" element={<AudienceLanding key="employer" audience="employer" />} />
