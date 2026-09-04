@@ -182,5 +182,15 @@ async function bootstrap() {
   }, 0);
 }
 
-void bootstrap();
+// Signalera att JS-bundlen faktiskt laddats och exekverar. Boot-watchdogen
+// använder detta för att skilja "bundlen kom aldrig fram" (→ ladda om) från
+// "bundlen är igång men appen tar tid" (→ vänta, ladda ALDRIG om mitt i).
+(window as unknown as { __pariumMainStarted?: boolean }).__pariumMainStarted = true;
+
+void bootstrap().catch(() => {
+  // Om bootstrap kraschar innan render → appen kommer aldrig upp.
+  // Nollställ flaggan så att watchdogen behandlar det som ett bundle-fel
+  // och går vidare med automatisk omladdning istället för att vänta i evighet.
+  (window as unknown as { __pariumMainStarted?: boolean }).__pariumMainStarted = false;
+});
 
