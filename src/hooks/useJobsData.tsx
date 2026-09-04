@@ -103,17 +103,30 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
   return cached.jobs;
 }
 
+/**
+ * 🔥 SCALE: cachen är ett FÖRSTA-SKÄRM-snapshot, inte hela datasetet.
+ * Arkivet kan vara 100 000+ rader — de får aldrig skrivas till localStorage.
+ * Vi sparar de senaste raderna per status (några sidor) så första bilden efter
+ * kallstart är omedelbar; totalsiffrorna kommer ändå från serverns räknare.
+ */
+const CACHE_ROWS_PER_STATUS = 54;
+
+export function boundedCacheSnapshot(jobs: JobPosting[]): JobPosting[] {
+  const kept: JobPosting[] = [];
+  const perStatus: Record<string, number> = { active: 0, expired: 0, draft: 0 };
+  for (const job of jobs) {
+    const status = getEmployerJobStatus(job);
+    if ((perStatus[status] ?? 0) >= CACHE_ROWS_PER_STATUS) continue;
+    perStatus[status] = (perStatus[status] ?? 0) + 1;
+    kept.push(job);
+  }
+  return kept;
+}
+
 function writeJobsCache(userId: string, scope: string, orgId: string | null, jobs: JobPosting[]): void {
   const key = cacheKeyFor(userId, scope);
-  // 🔥 SCALE: Cachen får ALDRIG innehålla en trunkerad lista — då visar UI:t
-  // "4 av 34". Är datasetet större än vad som ryms i localStorage skippar vi
-  // cachen helt och hämtar färskt istället.
-  if (jobs.length > 500) {
-    try { localStorage.removeItem(key); } catch { /* ignore */ }
-    return;
-  }
   const cached: CachedJobs = {
-    jobs,
+    jobs: boundedCacheSnapshot(jobs),
     scope,
     orgId,
     timestamp: Date.now(),
