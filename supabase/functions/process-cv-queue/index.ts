@@ -25,6 +25,20 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
+    // Single-flight: minutjobbet får aldrig starta en ny körning ovanpå en
+    // pågående. Staplade körningar var en av orsakerna till databasmättnaden.
+    const { data: gotLock } = await supabase.rpc('try_claim_job_lock', {
+      _key: 'process-cv-queue',
+      _ttl_seconds: 110,
+    });
+    if (gotLock !== true) {
+      console.log('Another process-cv-queue run is in progress — skipping');
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, reason: 'run_in_progress' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('Starting CV queue processing...');
 
     // Självläkning: lägg tillbaka CV som saknar analys (t.ex. om AI-tjänsten varit nere)
@@ -49,6 +63,7 @@ serve(async (req) => {
     
     if (!batch || batch.length === 0) {
       console.log('No CVs in queue to process');
+      await supabase.rpc('release_job_lock', { _key: 'process-cv-queue' });
       return new Response(
         JSON.stringify({ success: true, processed: 0, message: 'Queue empty' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -118,6 +133,7 @@ serve(async (req) => {
     
     console.log(`Processed ${batch.length} CVs. ${count || 0} remaining in queue.`);
     
+    await supabase.rpc('release_job_lock', { _key: 'process-cv-queue' });
     return new Response(
       JSON.stringify({
         success: true,
@@ -130,6 +146,7 @@ serve(async (req) => {
     
   } catch (error) {
     console.error('Queue processing error:', error);
+    try { await supabase.rpc('release_job_lock', { _key: 'process-cv-queue' }); } catch { /* ignore */ }
     return new Response(
       JSON.stringify({ 
         success: false, 

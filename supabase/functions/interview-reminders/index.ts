@@ -48,6 +48,20 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Single-flight: om föregående minutkörning fortfarande pågår hoppar vi över
+    // helt. Det hindrar att långsamma körningar staplas på varandra och mättar
+    // databasen (som under nattens överbelastning).
+    const { data: gotLock } = await supabase.rpc('try_claim_job_lock', {
+      _key: 'interview-reminders',
+      _ttl_seconds: 55,
+    });
+    if (gotLock !== true) {
+      console.log('Another interview-reminders run is in progress — skipping');
+      return new Response(JSON.stringify({ skipped: true, reason: 'run_in_progress' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const now = new Date();
 
     const queueInterviewTimelineDispatches = async (trigger: "interview_before" | "interview_after") => {
@@ -463,6 +477,7 @@ Deno.serve(async (req) => {
 
     console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
 
+    await supabase.rpc('release_job_lock', { _key: 'interview-reminders' });
     return new Response(
       JSON.stringify({
         success: true,
