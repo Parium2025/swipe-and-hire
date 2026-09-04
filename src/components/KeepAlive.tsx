@@ -353,9 +353,11 @@ function KeepAliveCached({
     for (const key of Array.from(cacheRef.current.keys())) {
       if (!allowed.has(key)) {
         cacheRef.current.delete(key);
+        freshKeysRef.current.delete(key);
         changed = true;
       }
     }
+
     if (changed) {
       mountedKeysRef.current = mountedKeysRef.current.filter((k) => allowed.has(k));
       setTick((t) => t + 1);
