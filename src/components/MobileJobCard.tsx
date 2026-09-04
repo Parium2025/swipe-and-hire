@@ -22,6 +22,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface MobileJobCardProps {
   job: JobPosting;
+  onOpen?: (job: JobPosting) => void;
   onEdit: (job: JobPosting) => void;
   onDelete: (job: JobPosting) => void;
   onEditDraft?: (job: JobPosting) => void;
@@ -72,7 +73,7 @@ const ActionTip = ({ label, children }: { label: string; children: React.ReactNo
 );
 
 
-export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp, unviewedCount = 0 }: MobileJobCardProps) => {
+export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft, onPrefetch, onRepublish, cardIndex = 0, hideActions = false, collapsible = false, defaultExpanded = false, expanded: expandedProp, unviewedCount = 0 }: MobileJobCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   // Endast annonsens ägare får återpublicera – kollegor får skapa en egen annons istället.
@@ -120,8 +121,12 @@ export const MobileJobCard = memo(({ job, onEdit, onDelete, onEditDraft, onPrefe
       onEditDraft(job);
       return;
     }
+    if (onOpen) {
+      onOpen(job);
+      return;
+    }
     navigate(`/job-details/${job.id}`);
-  }, [isDraft, onEditDraft, job, navigate, readOnly]);
+  }, [isDraft, onEditDraft, onOpen, job, navigate, readOnly]);
 
   const handleMediaClick = (e: MouseEvent) => {
     e.stopPropagation();

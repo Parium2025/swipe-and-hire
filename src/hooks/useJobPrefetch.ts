@@ -13,15 +13,28 @@ export function useJobPrefetch() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefetchedRef = useRef<Set<string>>(new Set());
 
+  const prefetchNow = useCallback((jobId: string, seed?: unknown) => {
+    if (!user) return;
+    if (seed !== undefined) {
+      queryClient.setQueryData(['job-details', jobId], (current: unknown) => current ?? seed);
+      // Fröet gör första renderingen omedelbar, men listkortet innehåller inte
+      // hela detaljprofilen. Markera därför queryn stale så prefetch samtidigt
+      // kompletterar den i bakgrunden.
+      queryClient.invalidateQueries({ queryKey: ['job-details', jobId], exact: true });
+    }
+    if (prefetchedRef.current.has(jobId)) return;
+    prefetchJobDetails(jobId, user.id, queryClient);
+    prefetchedRef.current.add(jobId);
+  }, [user, queryClient]);
+
   const handleMouseEnter = useCallback((jobId: string) => {
     if (!user || prefetchedRef.current.has(jobId)) return;
 
     // Debounce: only prefetch if hover persists for 100ms
     timeoutRef.current = setTimeout(() => {
-      prefetchJobDetails(jobId, user.id, queryClient);
-      prefetchedRef.current.add(jobId);
+      prefetchNow(jobId);
     }, 100);
-  }, [user, queryClient]);
+  }, [user, prefetchNow]);
 
   const handleMouseLeave = useCallback(() => {
     if (timeoutRef.current) {
@@ -30,5 +43,5 @@ export function useJobPrefetch() {
     }
   }, []);
 
-  return { handleMouseEnter, handleMouseLeave };
+  return { handleMouseEnter, handleMouseLeave, prefetchNow };
 }

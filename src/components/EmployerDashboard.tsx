@@ -81,7 +81,7 @@ const EmployerDashboard = memo(() => {
   const { toast } = useToast();
   
   // Prefetch job details on hover for instant navigation
-  const { handleMouseEnter: prefetchJob, handleMouseLeave: cancelPrefetch } = useJobPrefetch();
+  const { handleMouseEnter: prefetchJob, handleMouseLeave: cancelPrefetch, prefetchNow } = useJobPrefetch();
   
   const hasAutoRestoredEdit = useRef(false);
 
@@ -536,6 +536,12 @@ const EmployerDashboard = memo(() => {
     }
   };
 
+  const handleOpenJob = useCallback((job: JobPosting) => {
+    saveScrollNow(window.location.pathname);
+    prefetchNow(job.id, job);
+    navigate(`/job-details/${job.id}`, { state: { fromRoute: '/my-jobs', fromTab: activeTab } });
+  }, [activeTab, navigate, prefetchNow]);
+
   // Count active/expired/draft jobs consistently across employer views
   const activeJobs = useMemo(() => 
     jobs.filter(j => isEmployerJobActive(j)), 
@@ -782,6 +788,7 @@ const EmployerDashboard = memo(() => {
                   <div className="relative">
                     <MobileJobCard
                       job={job}
+                      onOpen={handleOpenJob}
                       onEdit={handleEditJob}
                       onDelete={handleDeleteClick}
                       onEditDraft={handleEditDraft}
@@ -871,6 +878,7 @@ const EmployerDashboard = memo(() => {
                   <div className="relative">
                     <MobileJobCard
                       job={job}
+                      onOpen={handleOpenJob}
                       onEdit={handlePremiumEditOpen}
                       onDelete={handleDeleteClick}
                       onEditDraft={handleEditDraft}

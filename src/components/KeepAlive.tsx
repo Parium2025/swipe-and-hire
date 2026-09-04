@@ -206,6 +206,18 @@ function KeepAliveCached({
     };
   }, [displayedKey]);
 
+  // `activeKey` ändras innan den fördröjda vyväxlingen. Ta därför den säkra
+  // snapshotten här medan den gamla sidan fortfarande har full layout och
+  // exakt scrollTop. Om vi väntar tills `displayedKey` ändras har React redan
+  // satt den gamla, höga listan till display:none; webbläsaren hinner då klippa
+  // den delade scroll-containern till 0 och skriva över rätt position.
+  useLayoutEffect(() => {
+    if (activeKey === displayedKey) return;
+    const container = getScrollContainer();
+    if (!container) return;
+    setKeepAliveScroll(displayedKey, container.scrollTop);
+  }, [activeKey, displayedKey]);
+
   // Återställ även vid allra första monteringen (t.ex. efter en omladdning
   // eller när hela Index remountas) — annars tappas positionen helt.
   useLayoutEffect(() => {
@@ -228,7 +240,6 @@ function KeepAliveCached({
     previousDisplayedKeyRef.current = displayedKey;
 
     settleRef.current?.cancel();
-    setKeepAliveScroll(previousKey, container.scrollTop);
     const target = getKeepAliveScroll(displayedKey);
     applyScroll(container, target);
     holdPosition(container, target);

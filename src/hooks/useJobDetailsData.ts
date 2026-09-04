@@ -705,7 +705,7 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
   queryClient.prefetchQuery({
     queryKey: ['job-details', jobId],
     queryFn: () => fetchJobDetails(jobId, userId),
-    staleTime: Infinity,
+    staleTime: 0,
   });
   queryClient.prefetchQuery({
     queryKey: ['job-applications', jobId],
@@ -715,6 +715,19 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
   queryClient.prefetchQuery({
     queryKey: ['job-stage-counts', jobId],
     queryFn: () => fetchStageCounts(jobId),
+    staleTime: Infinity,
+  });
+  queryClient.prefetchQuery({
+    queryKey: ['job-stage-settings', jobId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('job_stage_settings')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('order_index');
+      if (error) throw error;
+      return data || [];
+    },
     staleTime: Infinity,
   });
 }

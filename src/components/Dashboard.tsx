@@ -23,6 +23,7 @@ import { getImageVersion } from '@/lib/imageTransforms';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow } from '@/lib/scrollRestoration';
+import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -49,6 +50,7 @@ const Dashboard = memo(() => {
   const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
+  const { handleMouseEnter: prefetchJob, prefetchNow } = useJobPrefetch();
   
   const [showContent, setShowContent] = useState(() => !isLoading);
   const dataWasCached = useRef(!isLoading);
@@ -443,8 +445,14 @@ const Dashboard = memo(() => {
               renderCard={(job) => (
                 <MobileJobCard
                   job={job as any}
-                  onEdit={() => { saveScrollNow(window.location.pathname); navigate(`/job-details/${(job as any).id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } }); }}
+                  onOpen={(selectedJob) => {
+                    saveScrollNow(window.location.pathname);
+                    prefetchNow(selectedJob.id, selectedJob);
+                    navigate(`/job-details/${selectedJob.id}`, { state: { fromRoute: '/dashboard', fromTab: activeTab } });
+                  }}
+                  onEdit={() => {}}
                   onDelete={() => {}}
+                  onPrefetch={prefetchJob}
                   collapsible
                   expanded={expandAll}
                   hideActions
