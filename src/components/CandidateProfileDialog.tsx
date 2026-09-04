@@ -594,7 +594,7 @@ export const CandidateProfileDialog = ({
           setMobileTab={setMobileTab}
           closeButton={<button
             style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
-            onClick={closeWithMotion}
+            onClick={() => closeWithMotion()}
             aria-label="Stäng"
             className="relative mr-1 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full p-0 text-white"
           >
