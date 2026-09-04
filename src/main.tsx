@@ -172,6 +172,11 @@ async function bootstrap() {
     </GlobalErrorBoundary>
   );
 
+  // Signal till boot-watchdogen i index.html att appen faktiskt startat.
+  // Utan denna kunde vaktens egen statusruta i #root misstolkas som "startad".
+  (window as unknown as { __pariumBooted?: boolean }).__pariumBooted = true;
+
+
   setTimeout(() => {
     persistBuildSignature();
   }, 0);
