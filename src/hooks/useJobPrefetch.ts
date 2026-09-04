@@ -17,6 +17,10 @@ export function useJobPrefetch() {
     if (!user) return;
     if (seed !== undefined) {
       queryClient.setQueryData(['job-details', jobId], (current: unknown) => current ?? seed);
+      // Fröet gör första renderingen omedelbar, men listkortet innehåller inte
+      // hela detaljprofilen. Markera därför queryn stale så prefetch samtidigt
+      // kompletterar den i bakgrunden.
+      queryClient.invalidateQueries({ queryKey: ['job-details', jobId], exact: true });
     }
     if (prefetchedRef.current.has(jobId)) return;
     prefetchJobDetails(jobId, user.id, queryClient);

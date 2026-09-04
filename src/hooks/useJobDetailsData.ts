@@ -705,7 +705,7 @@ export function prefetchJobDetails(jobId: string, userId: string, queryClient: R
   queryClient.prefetchQuery({
     queryKey: ['job-details', jobId],
     queryFn: () => fetchJobDetails(jobId, userId),
-    staleTime: Infinity,
+    staleTime: 0,
   });
   queryClient.prefetchQuery({
     queryKey: ['job-applications', jobId],
