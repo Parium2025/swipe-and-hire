@@ -77,6 +77,7 @@ const EmployerMobileShell = ({
           <main
             ref={mainScrollRef}
             data-main-scroll-container="true"
+            data-scroll-managed="keepalive"
             className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${isMessages ? 'no-chrome-pad' : 'pb-8'}`}
             style={{
               WebkitOverflowScrolling: 'touch',
