@@ -7,7 +7,15 @@ import { consumePendingScrollRestore, readPositions } from '@/lib/scrollRestorat
 // Ligger utanför komponenten så positionen överlever remount av hela Index
 // (t.ex. vid rollbyte, auth-refresh eller en snabb omladdning).
 const KEEPALIVE_SCROLL_KEY = 'parium-keepalive-scroll';
-const keepAliveScroll = new Map<string, number>();
+
+interface KeepAliveScrollEntry {
+  top: number;
+  /** Sidans höjd när positionen sparades — behövs för att kunna reservera
+   *  platsen redan under skelett-laddningen efter en omladdning. */
+  height: number;
+}
+
+const keepAliveScroll = new Map<string, KeepAliveScrollEntry>();
 
 try {
   const raw = sessionStorage.getItem(KEEPALIVE_SCROLL_KEY);
@@ -15,8 +23,17 @@ try {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       for (const [key, value] of Object.entries(parsed)) {
+        // Bakåtkompatibelt: äldre poster var bara ett tal (top).
         if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
-          keepAliveScroll.set(key, value);
+          keepAliveScroll.set(key, { top: value, height: 0 });
+        } else if (value && typeof value === 'object') {
+          const entry = value as Partial<KeepAliveScrollEntry>;
+          if (typeof entry.top === 'number' && Number.isFinite(entry.top) && entry.top >= 0) {
+            keepAliveScroll.set(key, {
+              top: entry.top,
+              height: typeof entry.height === 'number' && Number.isFinite(entry.height) ? entry.height : 0,
+            });
+          }
         }
       }
     }
@@ -32,10 +49,14 @@ const persistKeepAliveScroll = () => {
   } catch { /* quota/privat läge — minnet i RAM räcker */ }
 };
 
-const setKeepAliveScroll = (key: string, top: number) => {
+const setKeepAliveScroll = (key: string, top: number, height?: number) => {
   if (!Number.isFinite(top) || top < 0) return;
-  if (keepAliveScroll.get(key) === top) return;
-  keepAliveScroll.set(key, top);
+  const existing = keepAliveScroll.get(key);
+  const nextHeight = typeof height === 'number' && Number.isFinite(height) && height > 0
+    ? height
+    : existing?.height ?? 0;
+  if (existing && existing.top === top && existing.height === nextHeight) return;
+  keepAliveScroll.set(key, { top, height: nextHeight });
   // Detaljvyer (/job-details/:id) skapar en ny nyckel per annons — håll
   // minnet litet genom att alltid släppa de äldsta.
   while (keepAliveScroll.size > 50) {
@@ -47,7 +68,9 @@ const setKeepAliveScroll = (key: string, top: number) => {
 };
 
 
-const getKeepAliveScroll = (key: string) => keepAliveScroll.get(key) ?? 0;
+const getKeepAliveScroll = (key: string) => keepAliveScroll.get(key)?.top ?? 0;
+const getKeepAliveEntry = (key: string): KeepAliveScrollEntry =>
+  keepAliveScroll.get(key) ?? { top: 0, height: 0 };
 
 interface KeepAliveProps {
 
