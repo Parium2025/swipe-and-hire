@@ -14,6 +14,44 @@ import { safeSetItem, safeReadArrayCache } from '@/lib/safeStorage';
  */
 export const UNVIEWED_APPLICATIONS_QUERY_KEY = 'employer-unviewed-applications';
 
+export interface UnviewedCountRow { job_id: string; unviewed_count: number }
+
+const STORAGE_PREFIX = 'parium_unviewed_apps_v1_';
+
+/** Läser senast kända siffror från förra sessionen (kallstart utan popp). */
+export function readPersistedUnviewedCounts(userId: string | undefined): UnviewedCountRow[] | null {
+  if (!userId) return null;
+  const rows = safeReadArrayCache<UnviewedCountRow>(`${STORAGE_PREFIX}${userId}`, 'items');
+  if (!rows) return null;
+  return rows.filter((r) => r && typeof r.job_id === 'string');
+}
+
+function persistUnviewedCounts(userId: string | undefined, rows: UnviewedCountRow[]) {
+  if (!userId) return;
+  safeSetItem(`${STORAGE_PREFIX}${userId}`, JSON.stringify({ items: rows, timestamp: Date.now() }));
+}
+
+export async function fetchUnviewedApplicationCounts(userId: string): Promise<UnviewedCountRow[]> {
+  const { data, error } = await supabase.rpc('get_employer_unviewed_application_counts');
+  if (error) throw error;
+  const rows = (data ?? []) as UnviewedCountRow[];
+  persistUnviewedCounts(userId, rows);
+  return rows;
+}
+
+/** Förvärmning: fyller cachen innan någon vy som visar siffran monteras. */
+export function prefetchUnviewedApplicationCounts(queryClient: QueryClient, userId: string) {
+  const persisted = readPersistedUnviewedCounts(userId);
+  if (persisted && !queryClient.getQueryData([UNVIEWED_APPLICATIONS_QUERY_KEY, userId])) {
+    queryClient.setQueryData([UNVIEWED_APPLICATIONS_QUERY_KEY, userId], persisted);
+  }
+  return queryClient.prefetchQuery({
+    queryKey: [UNVIEWED_APPLICATIONS_QUERY_KEY, userId],
+    queryFn: () => fetchUnviewedApplicationCounts(userId),
+    staleTime: 30_000,
+  });
+}
+
 export function useUnviewedApplicationCounts() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -21,12 +59,13 @@ export function useUnviewedApplicationCounts() {
   const { data } = useQuery({
     queryKey: [UNVIEWED_APPLICATIONS_QUERY_KEY, user?.id],
     queryFn: async () => {
-      if (!user?.id) return [] as { job_id: string; unviewed_count: number }[];
-      const { data, error } = await supabase.rpc('get_employer_unviewed_application_counts');
-      if (error) throw error;
-      return (data ?? []) as { job_id: string; unviewed_count: number }[];
+      if (!user?.id) return [] as UnviewedCountRow[];
+      return fetchUnviewedApplicationCounts(user.id);
     },
     enabled: !!user?.id,
+    // Kallstart: visa förra sessionens siffror direkt, uppdatera i bakgrunden.
+    initialData: () => readPersistedUnviewedCounts(user?.id) ?? undefined,
+    initialDataUpdatedAt: 0,
     staleTime: 30_000,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
