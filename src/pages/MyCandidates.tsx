@@ -505,25 +505,17 @@ const MyCandidates = () => {
     hookMarkAsViewed.mutate(applicationId);
   };
 
+  // Ett tryck på kandidaten öppnar alltid den klassiska profilvyn — på alla
+  // enheter. Swipe-läget startas bara via knappen "Swipe-läge".
   const handleOpenProfile = useCallback((candidate: MyCandidateData) => {
-    if (isTouchDevice) {
-      // Touch: continuous vertical scroll viewer
-      const stageCandidates = filteredCandidatesByStage[candidate.stage] || [];
-      const idx = stageCandidates.findIndex(c => c.id === candidate.id);
-      setSwipeFilteredApps(null);
-      setSwipeStageCandidates(stageCandidates);
-      setSwipeInitialIndex(idx >= 0 ? idx : 0);
-      setSwipeViewerOpen(true);
-    } else {
-      // Mouse: open profile dialog
-      setSelectedCandidate(candidate);
-      setDialogOpen(true);
-    }
+    setSelectedCandidate(candidate);
+    setDialogOpen(true);
 
     if (!candidate.viewed_at) {
       markApplicationAsViewed(candidate.application_id);
     }
-  }, [filteredCandidatesByStage, markApplicationAsViewed, isTouchDevice]);
+  }, [markApplicationAsViewed]);
+
 
   // Prefetching
   const handlePrefetchCandidate = useCallback((candidate: MyCandidateData) => {
