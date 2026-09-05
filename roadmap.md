@@ -31,3 +31,5 @@
 - [x] Bevara regn-, snö- och åskanimationernas fördelning så de känns igång direkt vid återgång till Home
 - [x] Lås intervjubokningen till mobilens bredd vid extremt långa annonstitlar och isolera dess gester från kandidatprofilen
 - [x] Granska den rapporterade sporadiska profilblixten mot aktuell öppnings-, cache- och medialogik
+- [x] Visa full jobbtitel i intervjubokningen endast när sammanfattningen trunkeras
+- [x] Ta bort den verkningslösa borttagningsknappen från ansökans kandidatprofil och verifiera datans livscykel

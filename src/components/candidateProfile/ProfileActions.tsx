@@ -18,7 +18,7 @@ interface ProfileActionsProps {
   onSendMessage: () => void;
   onBookInterview: () => void;
   onShare: () => void;
-  onRemove: () => void;
+  onRemove?: () => void;
   currentStage?: string;
   stageOrder?: string[];
   stageConfig?: Record<string, StageSettings>;
@@ -60,10 +60,12 @@ export const ProfileActions = ({
               <span className="truncate">Dela</span>
             </Button>
           )}
-          <Button {...noFocusRingProps} onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
-            <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
-            <span className="truncate">Ta bort</span>
-          </Button>
+          {onRemove && (
+            <Button {...noFocusRingProps} onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+              <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
+              <span className="truncate">Ta bort</span>
+            </Button>
+          )}
         </div>
 
         {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {

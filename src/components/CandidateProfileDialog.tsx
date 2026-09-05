@@ -794,7 +794,7 @@ export const CandidateProfileDialog = ({
             }}
             onBookInterview={() => setBookInterviewOpen(true)}
             onShare={() => setShareDialogOpen(true)}
-            onRemove={() => setRemoveConfirmOpen(true)}
+            onRemove={onRemoveFromList ? () => setRemoveConfirmOpen(true) : undefined}
             currentStage={currentStage}
             stageOrder={stageOrder}
             stageConfig={stageConfig}
@@ -940,17 +940,17 @@ export const CandidateProfileDialog = ({
     )}
 
     {/* Remove from list confirmation */}
-    <RemoveCandidateDialog
-      open={removeConfirmOpen}
-      onOpenChange={setRemoveConfirmOpen}
-      candidateName={`${displayApp?.first_name} ${displayApp?.last_name}`}
-      onConfirm={() => {
-        if (onRemoveFromList) {
+    {onRemoveFromList && (
+      <RemoveCandidateDialog
+        open={removeConfirmOpen}
+        onOpenChange={setRemoveConfirmOpen}
+        candidateName={`${displayApp?.first_name} ${displayApp?.last_name}`}
+        onConfirm={() => {
           onRemoveFromList();
           onOpenChange(false);
-        }
-      }}
-    />
+        }}
+      />
+    )}
     </>
   );
 };
