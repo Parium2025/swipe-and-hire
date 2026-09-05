@@ -36,14 +36,14 @@ export function useEmployerWarmupOrchestrator() {
   // Trappan: hämta upp till 5 sidor (≈250 items) i bakgrunden för
   // "Alla kandidater" och "Mina kandidater"
   useProgressivePagination({
-    queryKey: ['applications', userId, ''],
+    queryKey: ['applications', userId, '', '[]', null, 'applied_at'],
     enabled: !!userId && isEmployer,
     maxPages: 5,
     delayBetweenPages: 800,
   });
 
   useProgressivePagination({
-    queryKey: ['my-candidates', userId, '', getActiveCandidateListId(userId)],
+    queryKey: ['my-candidates', userId, '', getActiveCandidateListId(userId), ''],
     enabled: !!userId && isEmployer,
     maxPages: 5,
     delayBetweenPages: 800,

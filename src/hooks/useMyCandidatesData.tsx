@@ -346,8 +346,12 @@ export function useMyCandidatesData(
       // kallstart tills nätverkssvaret hann i kapp.
       if (isFirstRound(pageParam) && !trimmedSearch) {
         writeMyCandidatesCache(user.id, items, listId);
-        const cachedIds = readMyCandidatesCache(user.id, listId)?.map((item) => item.applicant_id) ?? [];
-        writeApplicantMembershipCache(user.id, cachedIds);
+        // Medlemskapet är globalt för rekryteraren. En listfiltrerad sida får
+        // därför aldrig skriva över cachen med bara sin egen delmängd.
+        if (!listId) {
+          const cachedIds = readMyCandidatesCache(user.id)?.map((item) => item.applicant_id) ?? [];
+          writeApplicantMembershipCache(user.id, cachedIds);
+        }
       }
 
 
