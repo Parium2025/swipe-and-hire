@@ -14,6 +14,11 @@ import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { hydrateMyCandidateRows, type RawMyCandidateRow } from '@/lib/myCandidatesHydration';
+import {
+  addApplicantMembershipCacheEntry,
+  removeApplicantMembershipCacheEntry,
+  writeApplicantMembershipCache,
+} from '@/lib/applicantMembershipCache';
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -341,6 +346,8 @@ export function useMyCandidatesData(
       // kallstart tills nätverkssvaret hann i kapp.
       if (isFirstRound(pageParam) && !trimmedSearch) {
         writeMyCandidatesCache(user.id, items, listId);
+        const cachedIds = readMyCandidatesCache(user.id, listId)?.map((item) => item.applicant_id) ?? [];
+        writeApplicantMembershipCache(user.id, cachedIds);
       }
 
 
@@ -751,7 +758,10 @@ export function useMyCandidatesData(
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (insertedCandidate) => {
+      if (user && insertedCandidate?.applicant_id) {
+        addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
+      }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
       toast.success('Kandidat tillagd i din lista', { route: '/my-candidates' } as Parameters<typeof toast.success>[1]);
     },
@@ -837,7 +847,12 @@ export function useMyCandidatesData(
 
       return { inserted: data?.length || 0, alreadyExisted: existingIds.size };
     },
-    onSuccess: (result) => {
+    onSuccess: (result, requestedCandidates) => {
+      if (user && result.inserted > 0) {
+        for (const candidate of requestedCandidates) {
+          addApplicantMembershipCacheEntry(user.id, candidate.applicantId);
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
       if (result.inserted > 0) {
         toast.success(`${result.inserted} kandidat${result.inserted !== 1 ? 'er' : ''} tillagd${result.inserted !== 1 ? 'a' : ''} i din lista`);
@@ -951,7 +966,12 @@ export function useMyCandidatesData(
       // som spökkort vid nästa instant-load.
       updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id), listId);
 
-      return { previousCandidates };
+      const removedApplicantId = candidates.find((candidate) => candidate.id === id)?.applicant_id;
+      if (user && removedApplicantId) {
+        removeApplicantMembershipCacheEntry(user.id, removedApplicantId);
+      }
+
+      return { previousCandidates, removedApplicantId };
 
     },
     onSuccess: () => {
@@ -976,6 +996,9 @@ export function useMyCandidatesData(
         toast.info('Borttagning köad – synkas automatiskt', { duration: 3000 });
       } else {
         queryClient.setQueryData(queryKey, context?.previousCandidates);
+        if (user && context?.removedApplicantId) {
+          addApplicantMembershipCacheEntry(user.id, context.removedApplicantId);
+        }
         toast.error('Kunde inte ta bort kandidaten');
       }
     },
