@@ -294,12 +294,16 @@ export function EmployerSidebar() {
     // är helt klar — annars byts innehållet bakom drawern halvvägs in i
     // rörelsen, vilket syns som en "blixt".
     if (isMobile) {
+      setPressedUrl(href);
       setOpenMobile(false);
       navTimerRef.current?.();
       navTimerRef.current = navigateAfterSidebarClose(() => {
         startTransition(() => {
           navigate(href);
         });
+        // Behåll highlighten en kort stund in i sidbytet så att ögat hinner
+        // med, släpp sedan. KeepAlive-faden tar vid direkt efteråt.
+        window.setTimeout(() => setPressedUrl(null), 220);
       });
     } else {
       navigate(href);
