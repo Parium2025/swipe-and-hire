@@ -21,6 +21,21 @@ function buildFullName(first: string | null | undefined, last: string | null | u
 }
 
 /**
+ * Ansökningens ögonblicksbild beskriver ALLTID kandidaten.
+ * Den får därför bara användas när motparten är kandidaten (dvs. när
+ * arbetsgivaren tittar). När jobbsökaren tittar är motparten företaget —
+ * då ska bolagsnamn och företagslogga visas, aldrig kandidatens egna namn.
+ */
+function snapshotDescribesCounterpart(
+  snapshot: ApplicationSnapshot | undefined,
+  displayMember: ConversationMember | undefined,
+): boolean {
+  if (!snapshot) return false;
+  return displayMember?.profile?.role !== 'employer';
+}
+
+
+/**
  * Get display name for a conversation, preferring frozen application snapshot data.
  */
 export function getConversationDisplayName(opts: {
