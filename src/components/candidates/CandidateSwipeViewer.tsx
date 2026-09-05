@@ -131,6 +131,13 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           })}
         </div>
 
+        {applications.length === 0 && (
+          <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-8 text-center">
+            <p className="text-white font-semibold">Inga kandidater att svepa igenom</p>
+            <p className="mt-2 text-sm text-white">Lägg till kandidater i din lista eller ändra dina urvalskriterier.</p>
+          </div>
+        )}
+
         {/* Continuous scroll container */}
         <div
           ref={scrollRef}
