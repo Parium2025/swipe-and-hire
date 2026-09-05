@@ -342,8 +342,10 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, []);
 
   /** Långtryck på en trunkerad etikett visar hela namnet (tooltip). */
-  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string, target?: EventTarget | null) => {
     if (pointerType === 'mouse') return;
+    // Trepunktsmenyn har sin egen tunnel – inget långtryck där.
+    if (target instanceof HTMLElement && target.closest('[data-stage-menu]')) return;
     const cfg = stageConfig[stage];
     if (!cfg || cfg.label.length <= 10) return;
 
