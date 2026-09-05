@@ -274,7 +274,9 @@ async function dispatchLog(log: OutreachLog) {
         conversation_id: conversationId,
         sender_id: log.owner_user_id,
         content: body,
-        sender_identity: log.trigger === 'manual_send' ? 'person' : 'company',
+        // En vald mall representerar bolaget även när rekryteraren startar
+        // utskicket manuellt. Endast egen fritext ska bära personidentitet.
+        sender_identity: log.trigger === 'manual_send' && !log.template_id ? 'person' : 'company',
       });
       if (error) throw error;
       await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), conversation_id: conversationId, error_message: null }).eq('id', log.id);
