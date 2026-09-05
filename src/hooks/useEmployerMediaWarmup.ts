@@ -121,8 +121,12 @@ export function useEmployerMediaWarmup() {
     };
 
     // Initial scan av befintlig data
-    const applicationsData = queryClient.getQueryData<InfinitePageData>(['applications', userId, '']);
-    const myCandidatesData = queryClient.getQueryData<InfinitePageData>(['my-candidates', userId, '', getActiveCandidateListId(userId)]);
+    const applicationsData = queryClient.getQueryData<InfinitePageData>(
+      ['applications', userId, '', '[]', null, 'applied_at'],
+    );
+    const myCandidatesData = queryClient.getQueryData<InfinitePageData>(
+      ['my-candidates', userId, '', getActiveCandidateListId(userId), ''],
+    );
     collectAndWarm(applicationsData);
     collectAndWarm(myCandidatesData);
 

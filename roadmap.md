@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Förladda och lagra kandidatmedlemskap vid kallstart så plus/bock är korrekt före sidbesök
+
 - [x] Granska cache och profilbyte för bild, video och cover
 - [x] Granska profilval och snapshotkedjan vid jobbansökan
 - [x] Rätta verifierade buggar och lägga till regressionstester

@@ -5,6 +5,7 @@ import { getIsOnline } from '@/lib/connectivityManager';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
+import { writeApplicantMembershipCache } from '@/lib/applicantMembershipCache';
 
 /**
  * ❄️ KALLSTART — ARBETSGIVARENS ANNONSSIDOR
@@ -22,6 +23,8 @@ import { prefetchUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicatio
  */
 const ROUTES = ['/my-jobs', '/dashboard'];
 const DELAY_BETWEEN_MS = 400;
+const MEMBERSHIP_BATCH_SIZE = 1_000;
+const MEMBERSHIP_CACHE_LIMIT = 5_000;
 
 export function useEmployerPagePrewarm() {
   const { user, userRole, profile } = useAuth();
@@ -36,6 +39,32 @@ export function useEmployerPagePrewarm() {
 
     let cancelled = false;
     const timers: number[] = [];
+
+    const prewarmApplicantMembership = async () => {
+      const applicantIds: string[] = [];
+
+      for (let from = 0; from < MEMBERSHIP_CACHE_LIMIT; from += MEMBERSHIP_BATCH_SIZE) {
+        const { data, error } = await supabase
+          .from('my_candidates')
+          .select('applicant_id')
+          .eq('recruiter_id', userId)
+          .order('id', { ascending: true })
+          .range(from, from + MEMBERSHIP_BATCH_SIZE - 1);
+
+        if (error) throw error;
+        const page = data ?? [];
+        applicantIds.push(...page.map((row) => row.applicant_id));
+        if (page.length < MEMBERSHIP_BATCH_SIZE) break;
+      }
+
+      if (!cancelled) writeApplicantMembershipCache(userId, applicantIds);
+    };
+
+    // Starta direkt när arbetsgivarrollen är klar. Detta är den lilla datamängd
+    // som styr plus/bock på kandidatkort och får inte vänta på idle eller sidbyte.
+    void prewarmApplicantMembership().catch(() => {
+      // Den synliga kandidatsidan gör samma kontroll för sina rader som fallback.
+    });
 
     const run = () => {
       // "X nya"-siffran på jobbkorten: värm direkt så den aldrig poppar in

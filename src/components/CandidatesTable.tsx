@@ -93,13 +93,13 @@ export function CandidatesTable({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
   const [loadingAllCandidateApplications, setLoadingAllCandidateApplications] = useState(false);
-  const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates, isLoading: isMyCandidatesLoading, isMyCandidatesSettling } = useMyCandidatesData();
+  const { isInMyCandidates, isApplicantInMyCandidates, addCandidate, addCandidates } = useMyCandidatesData();
   // Serverkoll för de personer som visas — täcker kandidater som inte är laddade i minnet
   const visibleApplicantIds = useMemo(
     () => applications.map((a) => a.applicant_id).filter(Boolean) as string[],
     [applications]
   );
-  const serverMembership = useApplicantMembership(visibleApplicantIds);
+  const { membership: serverMembership, isLoading: isMembershipLoading } = useApplicantMembership(visibleApplicantIds);
   const isApplicantAdded = useCallback(
     (applicantId: string) => isApplicantInMyCandidates(applicantId) || serverMembership.has(applicantId),
     [isApplicantInMyCandidates, serverMembership]
@@ -728,7 +728,7 @@ export function CandidatesTable({
           applications={sortedApplications}
           selectedIds={selectedIds}
           selectionMode={selectionMode}
-          isMyCandidatesLoading={isMyCandidatesLoading || isMyCandidatesSettling}
+          isMyCandidatesLoading={isMembershipLoading}
           hasTeam={hasTeam}
           getDisplayRating={getDisplayRating}
           getTeamInfo={getTeamInfo}
@@ -909,7 +909,7 @@ export function CandidatesTable({
                       ) : '-'}
                     </TableCell>
                     <TableCell>
-                      {!isMyCandidatesLoading && !isMyCandidatesSettling && (
+                      {!isMembershipLoading && (
                         isAlreadyAdded ? (
                           <Tooltip>
                             <TooltipTrigger asChild>
