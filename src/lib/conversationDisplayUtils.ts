@@ -54,10 +54,11 @@ export function getConversationDisplayName(opts: {
 
   // Snapshot is immutable per application context.
   // If snapshot exists, never leak updated live profile identity into conversation UI.
-  if (snapshot) {
-    const snapshotName = buildFullName(snapshot.first_name, snapshot.last_name);
+  if (snapshotDescribesCounterpart(snapshot, displayMember)) {
+    const snapshotName = buildFullName(snapshot!.first_name, snapshot!.last_name);
     return snapshotName || 'Okänd användare';
   }
+
 
   if (!displayMember?.profile) return 'Okänd användare';
   const p = displayMember.profile;
