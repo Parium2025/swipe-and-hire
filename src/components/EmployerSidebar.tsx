@@ -561,7 +561,7 @@ export function EmployerSidebar() {
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
-                        ${pressedUrl === item.url ? ' !bg-white/25 !text-white' : ''}
+                        ${pressedUrl === '/admin' ? ' !bg-white/25 !text-white' : ''}
                       `}
                     >
                       <button
