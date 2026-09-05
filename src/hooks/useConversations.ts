@@ -758,9 +758,9 @@ export function useConversations() {
                 unread_count: unread,
               };
             });
-            // Håll sessionStorage-fallbacken (topnav/sidebar-badge) i synk direkt.
+            // Håll badge-cachen (topnav/sidebar) i synk direkt.
             const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-              writeUnreadBadgeCache(total);
+            writeUnreadBadgeCache(total);
             return next;
           });
         }
@@ -1098,7 +1098,7 @@ export function useConversationMessages(conversationId: string | null) {
         // Synka sessionStorage-cachen som AppSidebar/TopNav faller tillbaka på
         // vid nästa sidladdning, annars visas gammalt värde innan context hunnit hämta.
         const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-          writeUnreadBadgeCache(total);
+        writeUnreadBadgeCache(total);
         return next;
       }
     );

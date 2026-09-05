@@ -36,7 +36,7 @@ export function useMarkConversationUnread() {
           c.id === conversationId ? { ...c, unread_count: Math.max(1, c.unread_count || 0) } : c
         );
         const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-          writeUnreadBadgeCache(total);
+        writeUnreadBadgeCache(total);
         return next;
       });
 
