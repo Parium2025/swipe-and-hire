@@ -736,6 +736,7 @@ export type Database = {
           id: string
           is_system_message: boolean
           sender_id: string
+          sender_identity: string
           updated_at: string
         }
         Insert: {
@@ -749,6 +750,7 @@ export type Database = {
           id?: string
           is_system_message?: boolean
           sender_id: string
+          sender_identity?: string
           updated_at?: string
         }
         Update: {
@@ -762,6 +764,7 @@ export type Database = {
           id?: string
           is_system_message?: boolean
           sender_id?: string
+          sender_identity?: string
           updated_at?: string
         }
         Relationships: [
