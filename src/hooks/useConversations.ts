@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { writeUnreadBadgeCache } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -758,11 +759,8 @@ export function useConversations() {
               };
             });
             // Håll sessionStorage-fallbacken (topnav/sidebar-badge) i synk direkt.
-            try {
-              const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-              sessionStorage.setItem('parium_job_seeker_unread_messages', String(total));
-              sessionStorage.setItem('parium_unread_messages', String(total));
-            } catch { /* privat läge */ }
+            const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+              writeUnreadBadgeCache(total);
             return next;
           });
         }
@@ -823,10 +821,7 @@ export function useConversations() {
       (c) => typeof c.unread_count === 'number'
     );
     if (!hasComputedUnread && conversationsQuery.data.length > 0) return;
-    try {
-      sessionStorage.setItem('parium_job_seeker_unread_messages', String(totalUnreadCount));
-      sessionStorage.setItem('parium_unread_messages', String(totalUnreadCount));
-    } catch {}
+    writeUnreadBadgeCache(totalUnreadCount);
   }, [totalUnreadCount, conversationsQuery.data, conversationsQuery.isFetching]);
 
   // Ladda nästa fönster (300 till). Anropas när listan scrollas mot slutet.
@@ -1102,11 +1097,8 @@ export function useConversationMessages(conversationId: string | null) {
         );
         // Synka sessionStorage-cachen som AppSidebar/TopNav faller tillbaka på
         // vid nästa sidladdning, annars visas gammalt värde innan context hunnit hämta.
-        try {
-          const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-          sessionStorage.setItem('parium_job_seeker_unread_messages', String(total));
-          sessionStorage.setItem('parium_unread_messages', String(total));
-        } catch {}
+        const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+          writeUnreadBadgeCache(total);
         return next;
       }
     );
