@@ -21,6 +21,21 @@ function buildFullName(first: string | null | undefined, last: string | null | u
 }
 
 /**
+ * Ansökningens ögonblicksbild beskriver ALLTID kandidaten.
+ * Den får därför bara användas när motparten är kandidaten (dvs. när
+ * arbetsgivaren tittar). När jobbsökaren tittar är motparten företaget —
+ * då ska bolagsnamn och företagslogga visas, aldrig kandidatens egna namn.
+ */
+function snapshotDescribesCounterpart(
+  snapshot: ApplicationSnapshot | undefined,
+  displayMember: ConversationMember | undefined,
+): boolean {
+  if (!snapshot) return false;
+  return displayMember?.profile?.role !== 'employer';
+}
+
+
+/**
  * Get display name for a conversation, preferring frozen application snapshot data.
  */
 export function getConversationDisplayName(opts: {
@@ -39,10 +54,11 @@ export function getConversationDisplayName(opts: {
 
   // Snapshot is immutable per application context.
   // If snapshot exists, never leak updated live profile identity into conversation UI.
-  if (snapshot) {
-    const snapshotName = buildFullName(snapshot.first_name, snapshot.last_name);
+  if (snapshotDescribesCounterpart(snapshot, displayMember)) {
+    const snapshotName = buildFullName(snapshot!.first_name, snapshot!.last_name);
     return snapshotName || 'Okänd användare';
   }
+
 
   if (!displayMember?.profile) return 'Okänd användare';
   const p = displayMember.profile;
@@ -66,20 +82,21 @@ export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
 ): ProfileLike | undefined {
-  if (snapshot) {
+  if (snapshotDescribesCounterpart(snapshot, displayMember)) {
     const liveProfile = displayMember?.profile;
     const liveImage =
       liveProfile && liveProfile.role !== 'employer' ? liveProfile.profile_image_url || null : null;
     return {
       role: 'job_seeker' as const,
-      first_name: snapshot.first_name,
-      last_name: snapshot.last_name,
+      first_name: snapshot!.first_name,
+      last_name: snapshot!.last_name,
       company_name: null,
-      profile_image_url: resolveCandidateMedia(snapshot, { profile_image_url: liveImage })
+      profile_image_url: resolveCandidateMedia(snapshot!, { profile_image_url: liveImage })
         .profile_image_url,
       company_logo_url: null,
     };
   }
+
 
 
   // No snapshot — use live profile
