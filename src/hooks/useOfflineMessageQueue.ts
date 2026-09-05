@@ -151,6 +151,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
           sender_id: message.sender_id,
           content: message.content,
           created_at: message.created_at, // client-genererad → idempotensnyckel
+          sender_identity: 'person',
         });
 
       if (error) {
