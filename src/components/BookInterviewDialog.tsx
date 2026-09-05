@@ -69,6 +69,19 @@ export const BookInterviewDialog = ({
   const prefilledInterviewIdRef = useRef<string | null>(null);
   const invitationSummaryRef = useRef<HTMLParagraphElement | null>(null);
   const [invitationSummaryTruncated, setInvitationSummaryTruncated] = useState(false);
+  const [summaryTooltipOpen, setSummaryTooltipOpen] = useState(false);
+
+  // Touch-enheter har ingen hover: stäng tooltipen vid tryck utanför (samma mönster som rekryterar-tooltipen)
+  useEffect(() => {
+    if (!summaryTooltipOpen) return;
+    const handler = (event: PointerEvent) => {
+      if (invitationSummaryRef.current && !invitationSummaryRef.current.contains(event.target as Node)) {
+        setSummaryTooltipOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handler, true);
+    return () => document.removeEventListener('pointerdown', handler, true);
+  }, [summaryTooltipOpen]);
 
   
   // Get employer's settings from profile FIRST (before using in state initialization)
