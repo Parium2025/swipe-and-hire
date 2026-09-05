@@ -3,8 +3,6 @@ import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import {
   getConversationDisplayName,
   getConversationAvatarProfile,
-  getMessageSenderAvatarProfile,
-  getMessageSenderName,
   resolveDisplayMember,
 } from '@/lib/conversationDisplayUtils';
 import { Briefcase, BellOff } from 'lucide-react';
@@ -40,18 +38,8 @@ export function ConversationItem({
     isSelf,
   });
 
-  const conversationAvatarProfile = getConversationAvatarProfile(snapshot, displayMember);
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
   const lastMsg = conversation.last_message;
-  const latestMessageUsesPersonalEmployerIdentity =
-    lastMsg?.sender_identity === 'person' &&
-    lastMsg.sender_profile?.role === 'employer' &&
-    (lastMsg.sender_id === displayMember?.user_id || isSelf);
-  const listDisplayName = latestMessageUsesPersonalEmployerIdentity
-    ? getMessageSenderName(lastMsg.sender_profile)
-    : displayName;
-  const avatarProfile = latestMessageUsesPersonalEmployerIdentity
-    ? getMessageSenderAvatarProfile(lastMsg.sender_profile)
-    : conversationAvatarProfile;
 
   const formatTime = (dateStr: string | null) => {
     if (!dateStr) return '';
@@ -66,7 +54,7 @@ export function ConversationItem({
     : 'Inga meddelanden ännu';
   const isOwnMessage = conversation.last_message?.sender_id === currentUserId;
 
-  const identityUnknown = listDisplayName === 'Okänd användare' || listDisplayName === 'Okänd';
+  const identityUnknown = displayName === 'Okänd användare';
 
   // Render entire row as skeleton when identity is unknown to prevent partial data flash
   if (identityUnknown) {
@@ -129,7 +117,7 @@ export function ConversationItem({
               conversation.unread_count > 0 && "font-semibold"
             )}
           >
-            {listDisplayName}
+            {displayName}
           </span>
           <span className="text-pure-white text-xs flex-shrink-0 flex items-center gap-1">
             {conversation.is_muted && <BellOff className="h-3 w-3" aria-label="Tystad" />}
