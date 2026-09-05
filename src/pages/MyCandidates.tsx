@@ -722,17 +722,20 @@ const MyCandidates = () => {
     rating: c.rating,
   }), []);
 
-  // Applications for the swipe viewer
-  const swipeApplicationsData = useMemo(() => {
-    if (swipeFilteredApps) return swipeFilteredApps;
-    return swipeStageCandidates.map(mapCandidateToAppData);
-  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData]);
-
   // Alla visade kandidater som underlag för swipe-läget
   const allCandidatesAsAppData = useMemo(
     () => displayedCandidates.map(mapCandidateToAppData),
     [displayedCandidates, mapCandidateToAppData],
   );
+
+  // Applications for the swipe viewer.
+  // Utan urvalskriterier (knappen "Swipe-läge") visas alla kandidater i listan —
+  // stage-listan fylls bara när swipen startas från en enskild kolumn.
+  const swipeApplicationsData = useMemo(() => {
+    if (swipeFilteredApps) return swipeFilteredApps;
+    if (swipeStageCandidates.length > 0) return swipeStageCandidates.map(mapCandidateToAppData);
+    return allCandidatesAsAppData;
+  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData]);
 
   // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
   const singleSwipeJobId = useMemo(() => {
