@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
-import { Button } from '@/components/ui/button';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { Layers } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';

@@ -13,7 +13,6 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
-import { Button } from '@/components/ui/button';
 import { Layers } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
