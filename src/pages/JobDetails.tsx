@@ -13,7 +13,6 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
-import { Button } from '@/components/ui/button';
 import { Layers } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -629,14 +628,14 @@ const JobDetails = () => {
         {/* Swipe-läge — mobil/touch */}
         {useMobileView && applications.length > 0 && (
           <div className="flex justify-center pb-3">
-            <Button
-              variant="outline"
-              className="min-h-11"
+            <button
+              type="button"
               onClick={() => setSwipeFilterOpen(true)}
+              className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
             >
               <Layers className="h-4 w-4" />
               <span>Swipe-läge</span>
-            </Button>
+            </button>
           </div>
         )}
 

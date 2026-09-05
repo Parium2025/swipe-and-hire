@@ -69,6 +69,19 @@ export const BookInterviewDialog = ({
   const prefilledInterviewIdRef = useRef<string | null>(null);
   const invitationSummaryRef = useRef<HTMLParagraphElement | null>(null);
   const [invitationSummaryTruncated, setInvitationSummaryTruncated] = useState(false);
+  const [summaryTooltipOpen, setSummaryTooltipOpen] = useState(false);
+
+  // Touch-enheter har ingen hover: stäng tooltipen vid tryck utanför (samma mönster som rekryterar-tooltipen)
+  useEffect(() => {
+    if (!summaryTooltipOpen) return;
+    const handler = (event: PointerEvent) => {
+      if (invitationSummaryRef.current && !invitationSummaryRef.current.contains(event.target as Node)) {
+        setSummaryTooltipOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handler, true);
+    return () => document.removeEventListener('pointerdown', handler, true);
+  }, [summaryTooltipOpen]);
 
   
   // Get employer's settings from profile FIRST (before using in state initialization)
@@ -501,11 +514,14 @@ export const BookInterviewDialog = ({
 
           <div className="flex-1 min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-auto overscroll-contain p-5 space-y-4">
             <TooltipProvider delayDuration={200}>
-              <Tooltip open={invitationSummaryTruncated ? undefined : false}>
+              <Tooltip open={summaryTooltipOpen} onOpenChange={setSummaryTooltipOpen}>
                 <TooltipTrigger asChild>
                   <p
                     ref={invitationSummaryRef}
-                    className="max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4"
+                    onClick={() => {
+                      if (invitationSummaryTruncated) setSummaryTooltipOpen((prev) => !prev);
+                    }}
+                    className={`max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4 ${invitationSummaryTruncated ? 'cursor-pointer touch-manipulation' : ''}`}
                   >
                     {isReschedule
                       ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
