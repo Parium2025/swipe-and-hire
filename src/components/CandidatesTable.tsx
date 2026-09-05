@@ -388,7 +388,9 @@ export function CandidatesTable({
             conversation_id: conversationId,
             sender_id: user.id,
             content: trimmedContent,
-            sender_identity: 'person',
+            // Massutskick representerar bolaget, även när en rekryterare
+            // startar utskicket manuellt.
+            sender_identity: 'company',
           });
 
         if (msgError) throw msgError;

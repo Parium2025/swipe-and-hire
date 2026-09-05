@@ -113,7 +113,8 @@ export function useBulkMessageSync() {
                 conversation_id: convId,
                 sender_id: user.id,
                 content: item.content,
-                sender_identity: 'person',
+                // Köade massutskick behåller bolagsidentiteten efter återanslutning.
+                sender_identity: 'company',
               });
 
             if (error) throw error;
