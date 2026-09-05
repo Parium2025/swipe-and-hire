@@ -84,7 +84,7 @@ const SAVED_JOBS_CACHE_KEY = 'parium_saved_jobs';
 const UNIQUE_COMPANIES_CACHE_KEY = 'parium_unique_companies';
 const NEW_THIS_WEEK_CACHE_KEY = 'parium_new_this_week';
 // Employer stats cache keys
-import { readEmployerCountsMirror, writeEmployerCountsMirrorEntry } from '@/lib/employerCountsCache';
+import { readEmployerCountsMirror, writeEmployerCountsMirrorEntry, clearEmployerCountsMirror } from '@/lib/employerCountsCache';
 
 const EMPLOYER_MY_JOBS_CACHE_KEY = 'parium_employer_my_jobs';
 const EMPLOYER_ACTIVE_JOBS_CACHE_KEY = 'parium_employer_active_jobs';
@@ -1462,6 +1462,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Rensa UI-state direkt så att utloggningen känns omedelbar.
       clearAllDrafts();
       clearAllAppCaches();
+      clearEmployerCountsMirror();
       try { queryClient.clear(); } catch {}
       clearLocalState();
 
@@ -1497,6 +1498,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Även vid oväntat fel: rensa lokalt så användaren inte fastnar
       clearAllDrafts();
       clearAllAppCaches();
+      clearEmployerCountsMirror();
       try { queryClient.clear(); } catch {}
       clearSessionToken();
       authStorage.clear();
