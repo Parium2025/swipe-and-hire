@@ -470,10 +470,11 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 data-stage-tab
                 tabIndex={0}
                 onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
+                onPointerUp={clearLongPress}
+                onPointerCancel={clearLongPress}
+                onPointerMove={clearLongPress}
                 onClick={() => handleStageClick(stage)}
-                onDoubleClick={() => {
-                  if (!isReadOnly) setOpenStageMenu(stage);
-                }}
+                onContextMenu={(e) => { if (isTouchCapable) e.preventDefault(); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
                   isActive ? 'shadow-lg border-white/50' : 'border-transparent'
