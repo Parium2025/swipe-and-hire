@@ -143,6 +143,11 @@ export function EmployerSidebar() {
   const navTimerRef = useRef<(() => void) | null>(null);
   useEffect(() => () => { navTimerRef.current?.(); }, []);
 
+  // Tryckfeedback på mobil: raden som trycks lyser upp medan drawern glider
+  // ut, och släpper först när navigeringen är klar. Ger en mjuk, iOS-lik
+  // känsla vid sektionsbyte istället för att raden "gör inget" vid tryck.
+  const [pressedUrl, setPressedUrl] = useState<string | null>(null);
+
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
@@ -289,12 +294,16 @@ export function EmployerSidebar() {
     // är helt klar — annars byts innehållet bakom drawern halvvägs in i
     // rörelsen, vilket syns som en "blixt".
     if (isMobile) {
+      setPressedUrl(href);
       setOpenMobile(false);
       navTimerRef.current?.();
       navTimerRef.current = navigateAfterSidebarClose(() => {
         startTransition(() => {
           navigate(href);
         });
+        // Behåll highlighten en kort stund in i sidbytet så att ögat hinner
+        // med, släpp sedan. KeepAlive-faden tar vid direkt efteråt.
+        window.setTimeout(() => setPressedUrl(null), 220);
       });
     } else {
       navigate(href);
@@ -392,6 +401,7 @@ export function EmployerSidebar() {
                         ? 'bg-white/20 text-white [&_svg]:text-white' 
                         : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                       }
+                      ${pressedUrl === item.url ? ' !bg-white/25 !text-white' : ''}
                     `}
                   >
                     <button
@@ -457,6 +467,7 @@ export function EmployerSidebar() {
                         ? 'bg-white/20 text-white [&_svg]:text-white' 
                         : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                       }
+                      ${pressedUrl === item.url ? ' !bg-white/25 !text-white' : ''}
                     `}
                   >
                     <button
@@ -494,6 +505,7 @@ export function EmployerSidebar() {
                         ? 'bg-white/20 text-white [&_svg]:text-white' 
                         : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                       }
+                      ${pressedUrl === item.url ? ' !bg-white/25 !text-white' : ''}
                     `}
                   >
                     <button
@@ -549,6 +561,7 @@ export function EmployerSidebar() {
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
+                        ${pressedUrl === '/admin' ? ' !bg-white/25 !text-white' : ''}
                       `}
                     >
                       <button
