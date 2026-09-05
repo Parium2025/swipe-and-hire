@@ -4182,6 +4182,7 @@ export type Database = {
           last_message_created_at: string
           last_message_is_system: boolean
           last_message_sender_id: string
+          last_message_sender_identity: string
           unread_count: number
         }[]
       }
