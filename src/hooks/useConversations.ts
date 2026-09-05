@@ -520,6 +520,7 @@ export function useConversations() {
             content: s.last_message_content,
             created_at: s.last_message_created_at,
             is_system_message: s.last_message_is_system || false,
+            sender_identity: s.last_message_sender_identity === 'company' ? 'company' : 'person',
             sender_profile: profileMap.get(s.last_message_sender_id) || undefined,
           });
         }
@@ -1199,10 +1200,15 @@ export function useConversationMessages(conversationId: string | null) {
 
       if (error) throw error;
 
+      const savedMessage = {
+        ...data,
+        sender_identity: data.sender_identity === 'company' ? 'company' as const : 'person' as const,
+      };
+
       // Replace temp message with real one
       queryClient.setQueryData<ConversationMessage[]>(
         ['conversation-messages', conversationId],
-        (old) => old?.map(m => m.id === tempId ? { ...data, sender_profile: optimisticMessage.sender_profile } : m) || []
+        (old) => old?.map(m => m.id === tempId ? { ...savedMessage, sender_profile: optimisticMessage.sender_profile } : m) || []
       );
 
       // Update last read
