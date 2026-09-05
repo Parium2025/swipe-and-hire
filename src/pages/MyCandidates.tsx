@@ -8,7 +8,7 @@ import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
-import { Layers } from 'lucide-react';
+import { Layers, SlidersHorizontal } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -809,16 +809,25 @@ const MyCandidates = () => {
         </Card>
       ) : useMobileView ? (
         <>
-        <div className="flex justify-center pb-3">
+        <div className="flex flex-wrap justify-center gap-2 pb-3">
           <button
             type="button"
-            onClick={() => setSwipeFilterOpen(true)}
+            onClick={() => { setSwipeFilteredApps(null); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
             className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
           >
             <Layers className="h-4 w-4" />
             <span>Swipe-läge</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setSwipeFilterOpen(true)}
+            className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            <span>Urvalskriterier</span>
+          </button>
         </div>
+
         <MobileMyCandidatesView
           candidates={displayedCandidates}
           stages={activeStageOrder}

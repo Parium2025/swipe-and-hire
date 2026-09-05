@@ -71,17 +71,8 @@ export const BookInterviewDialog = ({
   const [invitationSummaryTruncated, setInvitationSummaryTruncated] = useState(false);
   const [summaryTooltipOpen, setSummaryTooltipOpen] = useState(false);
 
-  // Touch-enheter har ingen hover: stäng tooltipen vid tryck utanför (samma mönster som rekryterar-tooltipen)
-  useEffect(() => {
-    if (!summaryTooltipOpen) return;
-    const handler = (event: PointerEvent) => {
-      if (invitationSummaryRef.current && !invitationSummaryRef.current.contains(event.target as Node)) {
-        setSummaryTooltipOpen(false);
-      }
-    };
-    document.addEventListener('pointerdown', handler, true);
-    return () => document.removeEventListener('pointerdown', handler, true);
-  }, [summaryTooltipOpen]);
+
+
 
   
   // Get employer's settings from profile FIRST (before using in state initialization)
@@ -513,28 +504,32 @@ export const BookInterviewDialog = ({
           </div>
 
           <div className="flex-1 min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-auto overscroll-contain p-5 space-y-4">
-            <TooltipProvider delayDuration={200}>
-              <Tooltip open={summaryTooltipOpen} onOpenChange={setSummaryTooltipOpen}>
-                <TooltipTrigger asChild>
-                  <p
-                    ref={invitationSummaryRef}
-                    onClick={() => {
-                      if (invitationSummaryTruncated) setSummaryTooltipOpen((prev) => !prev);
-                    }}
-                    className={`max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4 ${invitationSummaryTruncated ? 'cursor-pointer touch-manipulation' : ''}`}
-                  >
-                    {isReschedule
-                      ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
-                      : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
-                  </p>
-                </TooltipTrigger>
-                {invitationSummaryTruncated && (
-                  <TooltipContent side="bottom" className="max-w-[min(22rem,80vw)] whitespace-normal break-words [overflow-wrap:anywhere] leading-snug">
-                    {jobTitle}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            <Popover open={summaryTooltipOpen} onOpenChange={setSummaryTooltipOpen}>
+              <PopoverTrigger asChild>
+                <p
+                  ref={invitationSummaryRef}
+                  onClick={() => {
+                    if (!invitationSummaryTruncated) setSummaryTooltipOpen(false);
+                  }}
+                  className={`max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4 ${invitationSummaryTruncated ? 'cursor-pointer touch-manipulation' : 'pointer-events-none'}`}
+                >
+                  {isReschedule
+                    ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
+                    : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
+                </p>
+              </PopoverTrigger>
+              {invitationSummaryTruncated && (
+                <PopoverContent
+                  side="bottom"
+                  align="center"
+                  collisionPadding={16}
+                  className="z-[999999] w-[min(22rem,86vw)] whitespace-normal break-words [overflow-wrap:anywhere] text-sm leading-snug text-white"
+                >
+                  {jobTitle}
+                </PopoverContent>
+              )}
+            </Popover>
+
 
           {/* Date picker */}
           <div className="space-y-2">
