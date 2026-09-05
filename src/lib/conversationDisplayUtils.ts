@@ -82,20 +82,21 @@ export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
 ): ProfileLike | undefined {
-  if (snapshot) {
+  if (snapshotDescribesCounterpart(snapshot, displayMember)) {
     const liveProfile = displayMember?.profile;
     const liveImage =
       liveProfile && liveProfile.role !== 'employer' ? liveProfile.profile_image_url || null : null;
     return {
       role: 'job_seeker' as const,
-      first_name: snapshot.first_name,
-      last_name: snapshot.last_name,
+      first_name: snapshot!.first_name,
+      last_name: snapshot!.last_name,
       company_name: null,
-      profile_image_url: resolveCandidateMedia(snapshot, { profile_image_url: liveImage })
+      profile_image_url: resolveCandidateMedia(snapshot!, { profile_image_url: liveImage })
         .profile_image_url,
       company_logo_url: null,
     };
   }
+
 
 
   // No snapshot — use live profile
