@@ -454,7 +454,11 @@ export const BookInterviewDialog = ({
       <DialogContentNoFocus 
         hideClose
         elevated={elevated}
-        className="parium-panel max-w-none w-[min(92vw,500px)] max-h-[85vh] bg-parium-gradient text-white border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden p-0 flex flex-col"
+        className="parium-panel max-w-none min-w-0 w-[min(92vw,500px)] max-h-[85vh] bg-parium-gradient text-white border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden p-0 flex flex-col"
+        onTouchStart={(event) => event.stopPropagation()}
+        onTouchMove={(event) => event.stopPropagation()}
+        onTouchEnd={(event) => event.stopPropagation()}
+        onTouchCancel={(event) => event.stopPropagation()}
       >
         <DialogHeader className="sr-only">
           <DialogTitle className="sr-only">{isReschedule ? 'Boka om intervju' : 'Boka intervju'}</DialogTitle>
@@ -462,7 +466,7 @@ export const BookInterviewDialog = ({
         </DialogHeader>
         <AnimatedBackground showBubbles={false} />
 
-        <div className="relative z-10 flex flex-col max-h-[85vh]">
+        <div className="relative z-10 flex min-w-0 max-w-full flex-col max-h-[85vh] overflow-x-hidden">
           <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <h2 className="text-white text-lg font-semibold flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
@@ -476,8 +480,8 @@ export const BookInterviewDialog = ({
               </button>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
-            <p className="text-white text-center text-sm leading-snug">
+          <div className="flex-1 min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-auto overscroll-contain p-5 space-y-4">
+            <p className="max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere]">
               {isReschedule
                 ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
                 : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
@@ -518,8 +522,8 @@ export const BookInterviewDialog = ({
           </div>
 
           {/* Time and duration */}
-          <div className="grid grid-cols-[minmax(0,1fr)_7.25rem] sm:grid-cols-[minmax(0,1fr)_8rem] gap-3 items-end">
-            <div className="space-y-2">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7.25rem] sm:grid-cols-[minmax(0,1fr)_8rem] gap-3 items-end">
+            <div className="min-w-0 space-y-2">
               <Label className="text-white">Tid</Label>
               <Select value={time} onValueChange={setTime}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
@@ -541,7 +545,7 @@ export const BookInterviewDialog = ({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2 w-full shrink-0">
+            <div className="min-w-0 space-y-2 w-full shrink-0">
               <Label className="text-white">Längd</Label>
               <Select value={duration} onValueChange={setDuration}>
                 <SelectTrigger className="w-full min-w-0 bg-white/10 border-white/20 text-white [&>svg]:text-white text-sm whitespace-nowrap pr-8">
@@ -565,9 +569,9 @@ export const BookInterviewDialog = ({
           )}
 
           {/* Location type */}
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <Label className="text-white">Plats</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid min-w-0 grid-cols-2 gap-2">
               <button
                 type="button"
                 className={cn(
@@ -603,11 +607,11 @@ export const BookInterviewDialog = ({
 
           {/* Video link input */}
           {locationType === 'video' && (
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <Label className="text-white">Videolänk</Label>
 
               {trimmedVideoLink && !videoLinkEditing ? (
-                <div className="rounded-md border border-white/20 bg-white/10 px-3 py-2.5 flex items-center gap-2.5">
+                <div className="min-w-0 max-w-full rounded-md border border-white/20 bg-white/10 px-3 py-2.5 flex items-center gap-2.5 overflow-hidden">
                   {videoLinkIsValid ? (
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-green-400" />
                   ) : (
@@ -692,8 +696,8 @@ export const BookInterviewDialog = ({
 
           {/* Location details - Address and Instructions */}
           {locationType === 'office' && (
-            <div className="space-y-3">
-              <div className="space-y-2">
+            <div className="min-w-0 space-y-3">
+              <div className="min-w-0 space-y-2">
                 <Label className="text-white">Adress</Label>
                 <Input
                   value={editableAddress}
@@ -712,25 +716,25 @@ export const BookInterviewDialog = ({
           )}
 
           {/* Subject */}
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <Label className="text-white">Ämnesrad</Label>
             <Input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Ämne för intervjukallelsen"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              className="min-w-0 max-w-full bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
           </div>
 
           {/* Message */}
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <Label className="text-white">Meddelande till kandidaten</Label>
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Skriv ett personligt meddelande..."
               rows={4}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              className="min-w-0 max-w-full bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
             </div>
 

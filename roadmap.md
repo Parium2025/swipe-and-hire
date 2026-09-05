@@ -29,3 +29,5 @@
 - [x] Slutför mobil kandidatstängning hela vägen ut och ge krysset normal storlek utan övriga UI-ändringar
 - [x] Visa aktuell CV-sida och totalt antal sidor direkt i mobilens CV-verktygsrad
 - [x] Bevara regn-, snö- och åskanimationernas fördelning så de känns igång direkt vid återgång till Home
+- [x] Lås intervjubokningen till mobilens bredd vid extremt långa annonstitlar och isolera dess gester från kandidatprofilen
+- [x] Granska den rapporterade sporadiska profilblixten mot aktuell öppnings-, cache- och medialogik
