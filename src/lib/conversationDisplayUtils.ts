@@ -112,8 +112,11 @@ export function getConversationAvatarProfile(
  * visas som företaget (rubrik/lista) ska själva bubblan visa vem som skrev den —
  * därför föredras personens namn framför bolagsnamnet här.
  */
-export function getMessageSenderName(profile: ProfileLike | undefined): string {
+export function getMessageSenderName(profile: ProfileLike | undefined, useCompanyIdentity = false): string {
   if (!profile) return 'Okänd';
+  if (useCompanyIdentity && profile.role === 'employer' && hasText(profile.company_name)) {
+    return profile.company_name!;
+  }
   const personName = buildFullName(profile.first_name, profile.last_name);
   if (hasText(personName)) return personName;
   if (profile.role === 'employer' && hasText(profile.company_name)) return profile.company_name!;
@@ -127,9 +130,12 @@ export function getMessageSenderName(profile: ProfileLike | undefined): string {
  * ska visa personen som skrev det. Därför rensas bolagsfälten här så att
  * ConversationAvatar faller tillbaka på personens profilbild och initialer.
  */
-export function getMessageSenderAvatarProfile(profile: ProfileLike | undefined): ProfileLike | undefined {
+export function getMessageSenderAvatarProfile(
+  profile: ProfileLike | undefined,
+  useCompanyIdentity = false,
+): ProfileLike | undefined {
   if (!profile) return undefined;
-  if (profile.role !== 'employer') return profile;
+  if (profile.role !== 'employer' || useCompanyIdentity) return profile;
   return { ...profile, company_name: null, company_logo_url: null };
 }
 

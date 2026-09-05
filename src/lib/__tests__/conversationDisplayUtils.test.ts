@@ -277,6 +277,15 @@ describe('getMessageSenderName', () => {
     })).toBe('TechCo AB');
   });
 
+  it('uses company name for an automated company message', () => {
+    expect(getMessageSenderName({
+      role: 'employer',
+      first_name: 'CEO',
+      last_name: 'Person',
+      company_name: 'TechCo AB',
+    }, true)).toBe('TechCo AB');
+  });
+
   it('returns "Okänd" for undefined profile', () => {
     expect(getMessageSenderName(undefined)).toBe('Okänd');
   });

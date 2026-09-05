@@ -282,6 +282,7 @@ const handler = async (req: Request): Promise<Response> => {
               conversation_id: conversationId,
               sender_id: job.employer_id,
               content: messageContent,
+              sender_identity: "company",
             });
 
           if (msgError) {

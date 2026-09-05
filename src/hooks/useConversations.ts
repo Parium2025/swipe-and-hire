@@ -50,6 +50,7 @@ export interface ConversationMessage {
   updated_at?: string;
   edited_at?: string | null;
   is_system_message: boolean;
+  sender_identity: 'person' | 'company';
   attachment_url?: string | null;
   attachment_type?: string | null;
   attachment_name?: string | null;
@@ -241,6 +242,7 @@ export interface IncomingRealtimeMessage {
   content: string;
   created_at: string;
   is_system_message?: boolean;
+  sender_identity?: 'person' | 'company';
   attachment_url?: string | null;
   attachment_type?: string | null;
   attachment_name?: string | null;
@@ -289,6 +291,7 @@ export function applyIncomingMessageToConversations(
       content: msg.content,
       created_at: msg.created_at,
       is_system_message: msg.is_system_message ?? false,
+      sender_identity: msg.sender_identity ?? 'person',
       attachment_url: msg.attachment_url ?? null,
       attachment_type: msg.attachment_type ?? null,
       attachment_name: msg.attachment_name ?? null,
@@ -1000,6 +1003,7 @@ export function useConversationMessages(conversationId: string | null) {
             content: string;
             created_at: string;
             is_system_message: boolean;
+            sender_identity: 'person' | 'company';
           };
 
           // For own messages: check if it was already added optimistically.
@@ -1164,6 +1168,7 @@ export function useConversationMessages(conversationId: string | null) {
       content: content.trim(),
       created_at: new Date().toISOString(),
       is_system_message: false,
+      sender_identity: 'person',
       attachment_url: attachment?.url || null,
       attachment_type: attachment?.type || null,
       attachment_name: attachment?.name || null,
