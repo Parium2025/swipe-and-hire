@@ -722,17 +722,20 @@ const MyCandidates = () => {
     rating: c.rating,
   }), []);
 
-  // Applications for the swipe viewer
-  const swipeApplicationsData = useMemo(() => {
-    if (swipeFilteredApps) return swipeFilteredApps;
-    return swipeStageCandidates.map(mapCandidateToAppData);
-  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData]);
-
   // Alla visade kandidater som underlag för swipe-läget
   const allCandidatesAsAppData = useMemo(
     () => displayedCandidates.map(mapCandidateToAppData),
     [displayedCandidates, mapCandidateToAppData],
   );
+
+  // Applications for the swipe viewer.
+  // Utan urvalskriterier (knappen "Swipe-läge") visas alla kandidater i listan —
+  // stage-listan fylls bara när swipen startas från en enskild kolumn.
+  const swipeApplicationsData = useMemo(() => {
+    if (swipeFilteredApps) return swipeFilteredApps;
+    if (swipeStageCandidates.length > 0) return swipeStageCandidates.map(mapCandidateToAppData);
+    return allCandidatesAsAppData;
+  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData]);
 
   // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
   const singleSwipeJobId = useMemo(() => {
@@ -812,7 +815,7 @@ const MyCandidates = () => {
         <div className="flex flex-wrap justify-center gap-2 pb-3">
           <button
             type="button"
-            onClick={() => { setSwipeFilteredApps(null); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
+            onClick={() => { setSwipeFilteredApps(null); setSwipeStageCandidates([]); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
             className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
           >
             <Layers className="h-4 w-4" />

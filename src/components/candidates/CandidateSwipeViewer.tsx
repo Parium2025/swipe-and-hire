@@ -107,7 +107,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
-              {currentIndex + 1} / {applications.length}
+              {applications.length === 0 ? '0 / 0' : `${Math.min(currentIndex + 1, applications.length)} / ${applications.length}`}
             </span>
           </div>
           <button onClick={onClose} className="flex h-11 w-11 items-center justify-center touch-manipulation" aria-label="Stäng">
@@ -130,6 +130,13 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             );
           })}
         </div>
+
+        {applications.length === 0 && (
+          <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-8 text-center">
+            <p className="text-white font-semibold">Inga kandidater att svepa igenom</p>
+            <p className="mt-2 text-sm text-white">Lägg till kandidater i din lista eller ändra dina urvalskriterier.</p>
+          </div>
+        )}
 
         {/* Continuous scroll container */}
         <div
