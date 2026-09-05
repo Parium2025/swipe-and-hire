@@ -160,7 +160,7 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
   const orgId = profile?.organization_id || null;
   useEmployerStatsLiveSync(user?.id);
 
-  return useQuery<EmployerJobsCounts>({
+  const query = useQuery<EmployerJobsCounts>({
     queryKey: ['employer-jobs-counts', scope, orgId, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_jobs_counts', { p_scope: scope });
@@ -182,6 +182,12 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
       return readCache<EmployerJobsCounts>(COUNTS_CACHE_KEY, user.id, scope, orgId);
     },
   });
+
+  // 🛡️ Vid nätverksglapp/fel blir query.data undefined och sidorna föll då
+  // tillbaka på den lokalt laddade listan — siffrorna kunde plötsligt visa 0.
+  // Senast kända servervärde är alltid sannare än ingenting.
+  const fallback = user ? readCache<EmployerJobsCounts>(COUNTS_CACHE_KEY, user.id, scope, orgId) : undefined;
+  return { ...query, data: query.data ?? fallback } as typeof query;
 };
 
 /**
@@ -193,7 +199,7 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
   const orgId = profile?.organization_id || null;
   useEmployerStatsLiveSync(user?.id);
 
-  return useQuery<EmployerDashboardStats>({
+  const query = useQuery<EmployerDashboardStats>({
     queryKey: ['employer-dashboard-stats', scope, orgId, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_dashboard_stats', { p_scope: scope });
@@ -215,4 +221,7 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
       return readCache<EmployerDashboardStats>(STATS_CACHE_KEY, user.id, scope, orgId);
     },
   });
+
+  const fallback = user ? readCache<EmployerDashboardStats>(STATS_CACHE_KEY, user.id, scope, orgId) : undefined;
+  return { ...query, data: query.data ?? fallback } as typeof query;
 };
