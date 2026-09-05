@@ -259,22 +259,22 @@ describe('getMessageSenderName', () => {
     })).toBe('Erik Karlsson');
   });
 
-  it('returns company name for employers', () => {
+  it('returns the person name for employers — the message is written by a person', () => {
     expect(getMessageSenderName({
       role: 'employer',
       first_name: 'CEO',
       last_name: 'Person',
       company_name: 'TechCo AB',
-    })).toBe('TechCo AB');
+    })).toBe('CEO Person');
   });
 
-  it('falls back to personal name when employer has no company_name', () => {
+  it('falls back to company name when employer has no personal name', () => {
     expect(getMessageSenderName({
       role: 'employer',
-      first_name: 'Solo',
-      last_name: 'Entrepreneur',
-      company_name: null,
-    })).toBe('Solo Entrepreneur');
+      first_name: null,
+      last_name: null,
+      company_name: 'TechCo AB',
+    })).toBe('TechCo AB');
   });
 
   it('returns "Okänd" for undefined profile', () => {

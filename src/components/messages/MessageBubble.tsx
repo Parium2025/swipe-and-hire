@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
 import { AttachmentImageViewer } from '@/components/messages/AttachmentImageViewer';
-import { getMessageSenderName } from '@/lib/conversationDisplayUtils';
+import { getMessageSenderAvatarProfile, getMessageSenderName } from '@/lib/conversationDisplayUtils';
 import { Briefcase, Check, CheckCheck, Paperclip, FileText, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -45,6 +45,10 @@ export function MessageBubble({
   onEdit,
 }: MessageBubbleProps) {
   const senderName = getMessageSenderName(message.sender_profile);
+  // Ett meddelande skrivs av en person — visa personens bild/initialer även när
+  // konversationen som helhet representeras av företaget.
+  const senderAvatarProfile = getMessageSenderAvatarProfile(message.sender_profile);
+  const isEmployerSender = message.sender_profile?.role === 'employer';
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
   const lastTapRef = useRef(0);
@@ -243,7 +247,7 @@ export function MessageBubble({
         <div className="w-8 flex-shrink-0">
           {showAvatar && !isOwn && (
             <ConversationAvatar
-              profile={message.sender_profile}
+              profile={senderAvatarProfile}
               size="sm"
             />
           )}
@@ -254,8 +258,9 @@ export function MessageBubble({
           "min-w-0 max-w-[70%] flex flex-col",
           isOwn ? "items-end" : "items-start"
         )}>
-          {/* Sender name for group chats */}
-          {isGroup && showAvatar && !isOwn && senderName !== 'Okänd' && (
+          {/* Sender name — group chats, plus employer messages so the job seeker
+              sees which person at the company actually wrote */}
+          {(isGroup || isEmployerSender) && showAvatar && !isOwn && senderName !== 'Okänd' && (
             <span className="block max-w-full truncate text-pure-white text-xs mb-1 ml-1">
               {senderName}
             </span>
