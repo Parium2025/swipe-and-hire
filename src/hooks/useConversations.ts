@@ -765,6 +765,41 @@ export function useConversations() {
           });
         }
       )
+      // 👀 Läskvitton: motpartens last_read_at måste nå oss direkt, annars
+      //    uppdateras aldrig de blå dubbelbockarna förrän nästa omhämtning.
+      //    RLS begränsar redan raderna till konversationer vi är med i.
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversation_members',
+        },
+        (payload) => {
+          const row = payload.new as {
+            conversation_id?: string;
+            user_id?: string;
+            last_read_at?: string | null;
+          };
+          if (!row?.conversation_id || !row.user_id || row.user_id === user.id) return;
+
+          queryClient.setQueryData<Conversation[]>(['conversations', user.id], (prev) => {
+            if (!prev) return prev;
+            let changed = false;
+            const next = prev.map((conv) => {
+              if (conv.id !== row.conversation_id) return conv;
+              const members = (conv.members || []).map((member) => {
+                if (member.user_id !== row.user_id) return member;
+                if (member.last_read_at === row.last_read_at) return member;
+                changed = true;
+                return { ...member, last_read_at: row.last_read_at ?? null };
+              });
+              return changed ? { ...conv, members } : conv;
+            });
+            return changed ? next : prev;
+          });
+        }
+      )
       .on(
         'postgres_changes',
         {
