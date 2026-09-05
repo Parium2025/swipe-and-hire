@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
+import { memo, useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -75,6 +75,14 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
     };
   }, [updateIndicator, activeCount, expiredCount, draftCount, showDrafts]);
 
+  // Så fort vi har en giltig första mätning får fjädern ta över — men först
+  // efter att den mätningen redan renderats utan animation.
+  useEffect(() => {
+    if (!hasMeasured) return;
+    const t = setTimeout(() => { hasSnappedRef.current = true; }, 0);
+    return () => clearTimeout(t);
+  }, [hasMeasured]);
+
   return (
     <div className="dashboard-tabs-viewport mx-auto">
       <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
@@ -89,7 +97,6 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
           }}
           initial={false}
           animate={{ x: indicatorStyle.x }}
-          onUpdate={() => { hasSnappedRef.current = true; }}
           transition={
             hasSnappedRef.current
               ? { type: "spring", stiffness: 380, damping: 34, mass: 0.6 }
