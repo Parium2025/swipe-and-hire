@@ -2134,6 +2134,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  // Återfyll siffrorna direkt från den kontoskopade spegeln (localStorage) innan
+  // servern hunnit svara — annars renderas menyn utan siffror vid kallstart/ny flik.
+  useEffect(() => {
+    if (!user?.id) return;
+    const mirror = readEmployerCountsMirror(user.id);
+    if (!Object.keys(mirror).length) return;
+    const apply = (key: string, setter: (updater: (prev: number) => number) => void) => {
+      const value = mirror[key];
+      if (typeof value !== 'number' || value <= 0) return;
+      setter((prev) => (prev > 0 ? prev : value));
+      try { sessionStorage.setItem(key, String(value)); } catch { /* noop */ }
+    };
+    apply(EMPLOYER_MY_JOBS_CACHE_KEY, setPreloadedEmployerMyJobs);
+    apply(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, setPreloadedEmployerActiveJobs);
+    apply(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, setPreloadedEmployerDashboardJobs);
+    apply(EMPLOYER_TOTAL_VIEWS_CACHE_KEY, setPreloadedEmployerTotalViews);
+    apply(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, setPreloadedEmployerTotalApplications);
+    apply(EMPLOYER_CANDIDATES_CACHE_KEY, setPreloadedEmployerCandidates);
+    apply(COMPANY_REVIEWS_COUNT_CACHE_KEY, setPreloadedCompanyReviewsCount);
+    apply(MY_CANDIDATES_CACHE_KEY, setPreloadedMyCandidates);
+  }, [user?.id]);
+
   // Ladda räknare vid inloggning
   useEffect(() => {
     if (user && !loading) {
