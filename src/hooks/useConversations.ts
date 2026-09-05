@@ -95,7 +95,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 11; // v11: hide self-conversations (provutskick) from inbox
+const CACHE_VERSION = 12; // v12: distinguish personal employer messages from company automations
 
 interface CachedConversations {
   userId: string;
