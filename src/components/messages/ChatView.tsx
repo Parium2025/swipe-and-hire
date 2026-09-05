@@ -1042,7 +1042,11 @@ export function ChatView({
                         <MessageBubble
                           message={resolvedMessage}
                           isOwn={isOwnMsg}
-                          showAvatar={idx === 0 || msgs[idx - 1]?.sender_id !== msg.sender_id}
+                          showAvatar={
+                            idx === 0 ||
+                            msgs[idx - 1]?.sender_id !== msg.sender_id ||
+                            msgs[idx - 1]?.sender_identity !== msg.sender_identity
+                          }
                           isGroup={conversation.is_group}
                           currentUserRole={currentUserRole}
                           isRead={isRead}
