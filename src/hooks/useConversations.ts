@@ -50,6 +50,7 @@ export interface ConversationMessage {
   updated_at?: string;
   edited_at?: string | null;
   is_system_message: boolean;
+  sender_identity: 'person' | 'company';
   attachment_url?: string | null;
   attachment_type?: string | null;
   attachment_name?: string | null;
@@ -94,7 +95,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 11; // v11: hide self-conversations (provutskick) from inbox
+const CACHE_VERSION = 12; // v12: distinguish personal employer messages from company automations
 
 interface CachedConversations {
   userId: string;
@@ -241,6 +242,7 @@ export interface IncomingRealtimeMessage {
   content: string;
   created_at: string;
   is_system_message?: boolean;
+  sender_identity?: 'person' | 'company';
   attachment_url?: string | null;
   attachment_type?: string | null;
   attachment_name?: string | null;
@@ -289,6 +291,7 @@ export function applyIncomingMessageToConversations(
       content: msg.content,
       created_at: msg.created_at,
       is_system_message: msg.is_system_message ?? false,
+      sender_identity: msg.sender_identity ?? 'person',
       attachment_url: msg.attachment_url ?? null,
       attachment_type: msg.attachment_type ?? null,
       attachment_name: msg.attachment_name ?? null,
@@ -517,6 +520,7 @@ export function useConversations() {
             content: s.last_message_content,
             created_at: s.last_message_created_at,
             is_system_message: s.last_message_is_system || false,
+            sender_identity: s.last_message_sender_identity === 'company' ? 'company' : 'person',
             sender_profile: profileMap.get(s.last_message_sender_id) || undefined,
           });
         }
@@ -1000,6 +1004,7 @@ export function useConversationMessages(conversationId: string | null) {
             content: string;
             created_at: string;
             is_system_message: boolean;
+            sender_identity: 'person' | 'company';
           };
 
           // For own messages: check if it was already added optimistically.
@@ -1164,6 +1169,7 @@ export function useConversationMessages(conversationId: string | null) {
       content: content.trim(),
       created_at: new Date().toISOString(),
       is_system_message: false,
+      sender_identity: 'person',
       attachment_url: attachment?.url || null,
       attachment_type: attachment?.type || null,
       attachment_name: attachment?.name || null,
@@ -1194,10 +1200,15 @@ export function useConversationMessages(conversationId: string | null) {
 
       if (error) throw error;
 
+      const savedMessage = {
+        ...data,
+        sender_identity: data.sender_identity === 'company' ? 'company' as const : 'person' as const,
+      };
+
       // Replace temp message with real one
       queryClient.setQueryData<ConversationMessage[]>(
         ['conversation-messages', conversationId],
-        (old) => old?.map(m => m.id === tempId ? { ...data, sender_profile: optimisticMessage.sender_profile } : m) || []
+        (old) => old?.map(m => m.id === tempId ? { ...savedMessage, sender_profile: optimisticMessage.sender_profile } : m) || []
       );
 
       // Update last read

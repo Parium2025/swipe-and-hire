@@ -44,10 +44,11 @@ export function MessageBubble({
   onToggleReaction,
   onEdit,
 }: MessageBubbleProps) {
-  const senderName = getMessageSenderName(message.sender_profile);
-  // Ett meddelande skrivs av en person — visa personens bild/initialer även när
-  // konversationen som helhet representeras av företaget.
-  const senderAvatarProfile = getMessageSenderAvatarProfile(message.sender_profile);
+  const isCompanyMessage = message.sender_identity === 'company';
+  const senderName = getMessageSenderName(message.sender_profile, isCompanyMessage);
+  // Automatiska utskick representerar bolaget. Manuella meddelanden visar
+  // personen som faktiskt skrev dem.
+  const senderAvatarProfile = getMessageSenderAvatarProfile(message.sender_profile, isCompanyMessage);
   const isEmployerSender = message.sender_profile?.role === 'employer';
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);

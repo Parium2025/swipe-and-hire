@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getConversationDisplayName,
   getConversationAvatarProfile,
+  getMessageSenderAvatarProfile,
   getMessageSenderName,
 } from '@/lib/conversationDisplayUtils';
 import type { ApplicationSnapshot, ConversationMember } from '@/hooks/useConversations';
@@ -277,6 +278,15 @@ describe('getMessageSenderName', () => {
     })).toBe('TechCo AB');
   });
 
+  it('uses company name for an automated company message', () => {
+    expect(getMessageSenderName({
+      role: 'employer',
+      first_name: 'CEO',
+      last_name: 'Person',
+      company_name: 'TechCo AB',
+    }, true)).toBe('TechCo AB');
+  });
+
   it('returns "Okänd" for undefined profile', () => {
     expect(getMessageSenderName(undefined)).toBe('Okänd');
   });
@@ -312,5 +322,28 @@ describe('getMessageSenderName', () => {
       last_name: 'Doe',
       company_name: '   ',
     })).toBe('John Doe');
+  });
+});
+
+describe('getMessageSenderAvatarProfile', () => {
+  const employer = {
+    role: 'employer' as const,
+    first_name: 'CEO',
+    last_name: 'Person',
+    company_name: 'TechCo AB',
+    profile_image_url: 'profiles/ceo.jpg',
+    company_logo_url: 'logos/techco.jpg',
+  };
+
+  it('uses the personal profile for a manually written employer message', () => {
+    expect(getMessageSenderAvatarProfile(employer)).toEqual({
+      ...employer,
+      company_name: null,
+      company_logo_url: null,
+    });
+  });
+
+  it('keeps the company profile for an automated company message', () => {
+    expect(getMessageSenderAvatarProfile(employer, true)).toEqual(employer);
   });
 });
