@@ -471,7 +471,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 ref={(el) => { tabRefs.current[stage] = el; }}
                 data-stage-tab
                 tabIndex={0}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType, e.target)}
                 onPointerUp={clearLongPress}
                 onPointerCancel={clearLongPress}
                 onPointerMove={clearLongPress}
@@ -510,6 +510,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
                   <span
+                    data-stage-menu
                     onPointerDown={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
