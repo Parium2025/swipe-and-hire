@@ -253,8 +253,16 @@ async function dispatchLog(log: OutreachLog) {
     message: context.message,
   };
 
-  const subject = renderTemplate(template?.subject ?? String(log.payload?.custom_subject ?? ''), data);
-  const body = renderTemplate(template?.body ?? String(log.payload?.custom_body ?? ''), data);
+  const payload = getPayloadObject(log.payload);
+  const customBody = typeof payload.custom_body === 'string' ? payload.custom_body.trim() : '';
+  const renderedTemplateBody = template ? renderTemplate(template.body, data) : '';
+  // Äldre/öppna klienter kan skicka med ett kvarhängande template_id trots att
+  // rekryteraren har skrivit över texten. Innehållet är facit: exakt malltext är
+  // bolaget, ändrad/egen text är personen och får aldrig ersättas av mallen.
+  const isUnchangedChatTemplate = Boolean(template && customBody && customBody === renderedTemplateBody.trim());
+  const isPersonalManualChat = log.trigger === 'manual_send' && Boolean(customBody) && !isUnchangedChatTemplate;
+  const subject = renderTemplate(template?.subject ?? String(payload.custom_subject ?? ''), data);
+  const body = isPersonalManualChat ? customBody : (renderedTemplateBody || customBody);
 
   if (!body.trim()) {
     // Utan innehåll finns inget att skicka — markera raden som hoppad så att den
@@ -276,7 +284,7 @@ async function dispatchLog(log: OutreachLog) {
         content: body,
         // En vald mall representerar bolaget även när rekryteraren startar
         // utskicket manuellt. Endast egen fritext ska bära personidentitet.
-        sender_identity: log.trigger === 'manual_send' && !log.template_id ? 'person' : 'company',
+        sender_identity: isPersonalManualChat ? 'person' : 'company',
       });
       if (error) throw error;
       await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), conversation_id: conversationId, error_message: null }).eq('id', log.id);

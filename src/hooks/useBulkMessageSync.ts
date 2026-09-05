@@ -109,7 +109,12 @@ export function useBulkMessageSync() {
 
             const { error } = await supabase
               .from('conversation_messages')
-              .insert({ conversation_id: convId, sender_id: user.id, content: item.content });
+              .insert({
+                conversation_id: convId,
+                sender_id: user.id,
+                content: item.content,
+                sender_identity: 'person',
+              });
 
             if (error) throw error;
             sent++;

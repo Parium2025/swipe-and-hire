@@ -96,7 +96,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 12; // v12: distinguish personal employer messages from company automations
+const CACHE_VERSION = 13; // v13: refresh sender profiles after personal/company identity correction
 
 interface CachedConversations {
   userId: string;
@@ -1181,6 +1181,7 @@ export function useConversationMessages(conversationId: string | null) {
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
+          sender_identity: 'person',
           ...(attachment ? {
             attachment_url: attachment.url,
             attachment_type: attachment.type,
@@ -1426,6 +1427,7 @@ export function useCreateConversation() {
             conversation_id: conversationId,
             sender_id: user.id,
             content: initialMessage,
+             sender_identity: 'person',
           });
       }
 

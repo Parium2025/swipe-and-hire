@@ -150,6 +150,29 @@ export function SendMessageDialog({
     setSelectedChannels((prev) => prev.includes(channel) ? (prev.length === 1 ? prev : prev.filter((item) => item !== channel)) : [...prev, channel]);
   };
 
+  const handleMessageChange = (value: string) => {
+    setMessage(value);
+
+    // Om en rekryterare ändrar en vald chatmall är texten inte längre ett
+    // bolagsutskick. Släpp mallkopplingen direkt så fritext alltid skickas som
+    // personen som faktiskt skriver, medan orörda mallar fortsätter som bolaget.
+    const selectedChatTemplate = templatesByChannel.chat.find(
+      (template) => template.id === selectedTemplateIds.chat,
+    );
+    if (!selectedChatTemplate) return;
+
+    const renderedTemplate = renderOutreachText(selectedChatTemplate.body, {
+      ...templateContext,
+      message: value.trim(),
+    });
+    if (value !== renderedTemplate) {
+      setSelectedTemplateIds((prev) => {
+        const { chat: _chat, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+
   const handleSend = async () => {
     if (!user) return;
 
@@ -372,7 +395,7 @@ export function SendMessageDialog({
                 </div>
               <Textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => handleMessageChange(e.target.value)}
                   placeholder="Skriv ditt meddelande..."
                   className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 focus:border-white/20 text-white placeholder:text-white/50 resize-y text-base outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 transition-none"
               />

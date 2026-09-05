@@ -388,6 +388,7 @@ export function CandidatesTable({
             conversation_id: conversationId,
             sender_id: user.id,
             content: trimmedContent,
+            sender_identity: 'person',
           });
 
         if (msgError) throw msgError;

@@ -17,7 +17,7 @@ type ProfileLite = {
   role: 'job_seeker' | 'employer';
 };
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const PROFILE_TTL_MS = 15 * 60 * 1000;
 const memoryCache = new Map<string, { data: unknown; timestamp: number }>();
 const inFlight = new Map<string, Promise<unknown>>();
@@ -160,7 +160,7 @@ export async function fetchCachedProfiles(userIds: string[]): Promise<Map<string
   const missing: string[] = [];
 
   uniqueIds.forEach((userId) => {
-    const cached = readPersistentCache<ProfileLite>(`parium_profile_lite_v1_${userId}`, PROFILE_TTL_MS, isProfileLite);
+    const cached = readPersistentCache<ProfileLite>(`parium_profile_lite_v2_${userId}`, PROFILE_TTL_MS, isProfileLite);
     if (cached) result.set(userId, cached);
     else missing.push(userId);
   });
@@ -170,7 +170,7 @@ export async function fetchCachedProfiles(userIds: string[]): Promise<Map<string
   const store = (profile: unknown) => {
     if (!isProfileLite(profile)) return;
     result.set(profile.user_id, profile);
-    writePersistentCache(`parium_profile_lite_v1_${profile.user_id}`, profile);
+    writePersistentCache(`parium_profile_lite_v2_${profile.user_id}`, profile);
   };
 
   const { data, error } = await rateLimited('profiles-batch-read', 100, async () => supabase
