@@ -1,6 +1,7 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CountBadge } from '@/components/ui/count-badge';
 import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
@@ -501,14 +502,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
         aria-label="Notifikationer"
       >
         <Bell className="h-5 w-5" />
-        {displayCount > 0 && (
-          <span
-            key={popKey}
-            className="parium-badge-pop absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[10px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 tabular-nums"
-          >
-            {displayCount > 9 ? '9+' : displayCount}
-          </span>
-        )}
+        <CountBadge count={displayCount} popKey={popKey} />
 
       </button>
 
