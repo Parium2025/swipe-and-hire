@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
+import { readUnreadBadgeCache, writeUnreadBadgeCache, UNREAD_MESSAGES_CACHE_KEY, JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,8 +90,7 @@ const EMPLOYER_DASHBOARD_JOBS_CACHE_KEY = 'parium_employer_dashboard_jobs';
 const EMPLOYER_TOTAL_VIEWS_CACHE_KEY = 'parium_employer_total_views';
 const EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY = 'parium_employer_total_applications';
 const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
-const UNREAD_MESSAGES_CACHE_KEY = 'parium_unread_messages';
-const JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY = 'parium_job_seeker_unread_messages';
+// Badge-cachen delas med useConversations (session + localStorage).
 const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 const MY_APPLICATIONS_CACHE_KEY = 'parium_my_applications';
@@ -274,14 +274,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [preloadedUnreadMessages, setPreloadedUnreadMessages] = useState<number>(() => {
     try {
-      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(UNREAD_MESSAGES_CACHE_KEY) : null;
-      return cached ? parseInt(cached, 10) : 0;
+      return readUnreadBadgeCache(UNREAD_MESSAGES_CACHE_KEY);
     } catch { return 0; }
   });
   const [preloadedJobSeekerUnreadMessages, setPreloadedJobSeekerUnreadMessages] = useState<number>(() => {
     try {
-      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY) : null;
-      return cached ? parseInt(cached, 10) : 0;
+      return readUnreadBadgeCache(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);
     } catch { return 0; }
   });
   const [preloadedCompanyReviewsCount, setPreloadedCompanyReviewsCount] = useState<number>(() => {
@@ -2001,7 +1999,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Tyst fel — behåller tidigare värde
         }
         setPreloadedJobSeekerUnreadMessages(jsUnread);
-        try { sessionStorage.setItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY, String(jsUnread)); } catch {}
+        writeUnreadBadgeCache(jsUnread);
 
         // Hämta antal ansökningar för jobbsökare
         const { count: myApplications } = await supabase
@@ -2103,7 +2101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setPreloadedUnreadMessages(unread);
-      try { sessionStorage.setItem(UNREAD_MESSAGES_CACHE_KEY, String(unread)); } catch {}
+      writeUnreadBadgeCache(unread);
 
       // Hämta antal company reviews för denna employer
       const { count: reviewsCount } = await supabase

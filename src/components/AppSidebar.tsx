@@ -1,4 +1,5 @@
 import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
+import { CountBadge } from '@/components/ui/count-badge';
 import { useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
@@ -301,9 +302,7 @@ export function AppSidebar() {
                             <>
                               {item.title}
                               {item.count > 0 && (
-                                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                  {item.count}
-                                </span>
+                                <CountBadge count={item.count} className="static shrink-0" />
                               )}
                             </>
                           ) : item.count !== undefined ? (

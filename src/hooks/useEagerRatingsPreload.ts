@@ -91,12 +91,15 @@ const clearAllAppCachesSync = () => {
     'parium_company_data_cache_v3',
     'parium_company_logo_url',
     'parium_cached_profile',
+    'parium_unread_messages',
+    'parium_job_seeker_unread_messages',
   ];
   
   try {
     // Rensa exakta nycklar
     exactKeysToRemove.forEach((key) => {
       localStorage.removeItem(key);
+      try { sessionStorage.removeItem(key); } catch { /* privat läge */ }
     });
     
     // Rensa prefix-baserade nycklar

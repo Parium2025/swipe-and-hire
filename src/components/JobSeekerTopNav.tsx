@@ -5,6 +5,7 @@ import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { CountBadge } from "@/components/ui/count-badge";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
@@ -268,11 +269,7 @@ function JobSeekerTopNav() {
             />
             <MessageCircle className="h-4 w-4 relative z-10" />
             <span className="relative z-10">Chattar</span>
-            {jobSeekerUnreadMessages > 0 && (
-              <span className="absolute -top-0.5 -right-1 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
-                {jobSeekerUnreadMessages > 9 ? '9+' : jobSeekerUnreadMessages}
-              </span>
-            )}
+            <CountBadge count={jobSeekerUnreadMessages} />
           </button>
 
           {/* Ekonomi Dropdown */}
