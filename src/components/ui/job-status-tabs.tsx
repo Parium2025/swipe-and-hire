@@ -25,6 +25,10 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   const draftRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
   const [hasMeasured, setHasMeasured] = useState(false);
+  // Första mätningen ska SNAPPA på plats. Tidigare animerade fjädern från x=0
+  // vid varje mount (och när siffrorna hydrerade), vilket syntes som en liten
+  // "studs" varje gång man gick in på sidan.
+  const hasSnappedRef = useRef(false);
 
   const updateIndicator = useCallback(() => {
     const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
@@ -85,12 +89,12 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
           }}
           initial={false}
           animate={{ x: indicatorStyle.x }}
-          transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 34,
-            mass: 0.6,
-          }}
+          onUpdate={() => { hasSnappedRef.current = true; }}
+          transition={
+            hasSnappedRef.current
+              ? { type: "spring", stiffness: 380, damping: 34, mass: 0.6 }
+              : { duration: 0 }
+          }
         />
         {/* Buttons */}
         <button
