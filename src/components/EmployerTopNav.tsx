@@ -1,4 +1,5 @@
 import React, { memo, useEffect, useState } from "react";
+import { CountBadge } from '@/components/ui/count-badge';
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -298,9 +299,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                     <span className="flex-1">{item.title}</span>
                     {count && <span className="text-white text-xs">({count})</span>}
                     {isMessages && unreadMessages > 0 && (
-                      <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                        {unreadMessages}
-                      </span>
+                      <CountBadge count={unreadMessages} className="static shrink-0" />
                     )}
                   </DropdownMenuItem>
                 );
@@ -309,11 +308,6 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
           </DropdownMenu>
 
           <div className="flex items-center gap-2">
-            {unreadMessages > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0">
-                {unreadMessages}
-              </span>
-            )}
             {/* Chattar Button */}
             <button
               onClick={() => handleNavigation('/messages')}
@@ -326,6 +320,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
               />
               <MessageCircle className="h-4 w-4 relative z-10" />
               <span className="relative z-10">Chattar</span>
+              <CountBadge count={unreadMessages} />
             </button>
           </div>
 

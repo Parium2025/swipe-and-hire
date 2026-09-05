@@ -5,6 +5,7 @@ import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { CountBadge } from "@/components/ui/count-badge";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileVideo from "@/components/ProfileVideo";
