@@ -36,9 +36,10 @@ export function ConversationItem({
     snapshot,
     displayMember,
     isSelf,
+    lastMessage: conversation.last_message,
   });
 
-  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember, conversation.last_message);
   const lastMsg = conversation.last_message;
 
   const formatTime = (dateStr: string | null) => {

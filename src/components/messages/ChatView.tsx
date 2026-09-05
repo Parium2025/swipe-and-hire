@@ -154,7 +154,7 @@ export function ChatView({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
   };
 
-  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember);
+  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember, conversation.last_message);
 
   // Read receipts: determine the other member's last_read_at
   const otherMemberLastRead = otherMembers[0]?.last_read_at
@@ -682,6 +682,7 @@ export function ChatView({
     snapshot,
     displayMember,
     isSelf: isSelfConversation,
+    lastMessage: conversation.last_message,
   });
 
   // Group messages by date

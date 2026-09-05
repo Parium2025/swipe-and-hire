@@ -380,6 +380,7 @@ export default function Messages() {
                       snapshot: conv.applicationSnapshot,
                       displayMember,
                       isSelf,
+                      lastMessage: conv.last_message,
                     });
 
                     return (
