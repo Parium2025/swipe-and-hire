@@ -67,6 +67,8 @@ export const BookInterviewDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const skipNextMessageResetRef = useRef(false);
   const prefilledInterviewIdRef = useRef<string | null>(null);
+  const invitationSummaryRef = useRef<HTMLParagraphElement | null>(null);
+  const [invitationSummaryTruncated, setInvitationSummaryTruncated] = useState(false);
 
   
   // Get employer's settings from profile FIRST (before using in state initialization)
@@ -152,6 +154,23 @@ export const BookInterviewDialog = ({
   });
 
   const isReschedule = !!existingInterview;
+
+  useEffect(() => {
+    if (!open) {
+      setInvitationSummaryTruncated(false);
+      return;
+    }
+
+    const element = invitationSummaryRef.current;
+    if (!element) return;
+    const measure = () => {
+      setInvitationSummaryTruncated(element.scrollHeight > element.clientHeight + 1);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [open, candidateName, jobTitle, isReschedule]);
 
   // Set default values when dialog OPENS (transition false → true).
   // Får aldrig köra om på profil-refetch — då skulle en bakgrundsuppdatering
@@ -481,11 +500,25 @@ export const BookInterviewDialog = ({
           </div>
 
           <div className="flex-1 min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-auto overscroll-contain p-5 space-y-4">
-            <p className="max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere]">
-              {isReschedule
-                ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
-                : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
-            </p>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip open={invitationSummaryTruncated ? undefined : false}>
+                <TooltipTrigger asChild>
+                  <p
+                    ref={invitationSummaryRef}
+                    className="max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4"
+                  >
+                    {isReschedule
+                      ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
+                      : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
+                  </p>
+                </TooltipTrigger>
+                {invitationSummaryTruncated && (
+                  <TooltipContent side="bottom" className="max-w-[min(22rem,80vw)] whitespace-normal break-words [overflow-wrap:anywhere] leading-snug">
+                    {jobTitle}
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
 
           {/* Date picker */}
           <div className="space-y-2">
