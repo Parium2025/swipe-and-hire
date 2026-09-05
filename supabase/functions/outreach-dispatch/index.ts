@@ -259,8 +259,10 @@ async function dispatchLog(log: OutreachLog) {
   // Äldre/öppna klienter kan skicka med ett kvarhängande template_id trots att
   // rekryteraren har skrivit över texten. Innehållet är facit: exakt malltext är
   // bolaget, ändrad/egen text är personen och får aldrig ersättas av mallen.
-  const isUnchangedChatTemplate = Boolean(template && customBody && customBody === renderedTemplateBody.trim());
-  const isPersonalManualChat = log.trigger === 'manual_send' && Boolean(customBody) && !isUnchangedChatTemplate;
+  // Källan avgör avsändaren — inte en textjämförelse som kan ändras av
+  // platshållare eller whitespace. Vald mall/manuellt utskick = bolaget.
+  // Ren fritext utan mall = personen som skriver.
+  const isPersonalManualChat = log.trigger === 'manual_send' && !template && Boolean(customBody);
   const subject = renderTemplate(template?.subject ?? String(payload.custom_subject ?? ''), data);
   const body = isPersonalManualChat ? customBody : (renderedTemplateBody || customBody);
 
