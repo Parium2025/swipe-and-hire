@@ -161,11 +161,12 @@ export const useEmployerBackgroundSync = () => {
       
       // Synka React Query-cachen — bevara extra sidor som
       // useProgressivePagination kan ha laddat (sida 2-5)
-      const existingMc: any = queryClient.getQueryData(['my-candidates', userId, '', listId]);
+      const myCandidatesQueryKey = ['my-candidates', userId, '', listId, ''];
+      const existingMc: any = queryClient.getQueryData(myCandidatesQueryKey);
       const existingMcPages = existingMc?.pages ?? [];
       const existingMcParams = existingMc?.pageParams ?? [null];
       const newFirstMcPage = { items, nextCursor: items.length >= INITIAL_PAGE_SIZE ? items[items.length - 1]?.updated_at ?? null : null };
-      queryClient.setQueryData(['my-candidates', userId, '', listId], {
+      queryClient.setQueryData(myCandidatesQueryKey, {
         pages: existingMcPages.length > 1
           ? [newFirstMcPage, ...existingMcPages.slice(1)]
           : [newFirstMcPage],

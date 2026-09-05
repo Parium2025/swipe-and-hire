@@ -123,7 +123,7 @@ export const useCandidateBackgroundSync = (enabled = true) => {
  * Synka "Alla kandidater" data (job_applications)
  */
 async function syncApplicationsData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
-  const queryKey = ['applications', userId, ''];
+  const queryKey = ['applications', userId, '', '[]', null, 'applied_at'];
   const PAGE_SIZE = 50;
 
   // Hämta första sidan med kandidater
@@ -291,7 +291,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
 async function syncMyCandidatesData(userId: string, queryClient: ReturnType<typeof useQueryClient>) {
   // Synka den lista användaren senast tittade på — samma nyckel som vyn läser.
   const listId = getActiveCandidateListId(userId);
-  const queryKey = ['my-candidates', userId, '', listId];
+  const queryKey = ['my-candidates', userId, '', listId, ''];
   const PAGE_SIZE = 50;
 
   // Hämta första sidan med mina kandidater
