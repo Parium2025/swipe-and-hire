@@ -143,6 +143,11 @@ export function EmployerSidebar() {
   const navTimerRef = useRef<(() => void) | null>(null);
   useEffect(() => () => { navTimerRef.current?.(); }, []);
 
+  // Tryckfeedback på mobil: raden som trycks lyser upp medan drawern glider
+  // ut, och släpper först när navigeringen är klar. Ger en mjuk, iOS-lik
+  // känsla vid sektionsbyte istället för att raden "gör inget" vid tryck.
+  const [pressedUrl, setPressedUrl] = useState<string | null>(null);
+
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
