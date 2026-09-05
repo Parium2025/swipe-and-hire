@@ -162,10 +162,11 @@ export function ChatView({
     : null;
 
   // Mark as read when opening
+  // Alltid markera som läst när chatten öppnas – även när unread_count redan
+  // är 0 lokalt. Annars uppdateras aldrig vårt last_read_at och motparten får
+  // inga blå dubbelbockar.
   useEffect(() => {
-    if (conversation.unread_count > 0) {
-      markAsRead();
-    }
+    markAsRead();
   }, [conversation.id, conversation.unread_count, markAsRead]);
 
   // Reset scroll tracking when switching conversation

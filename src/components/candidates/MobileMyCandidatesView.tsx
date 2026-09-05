@@ -299,7 +299,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const [previewStage, setPreviewStage] = useState<string | null>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
-  const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
+  const longPressFiredRef = useRef(false);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -323,62 +323,47 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, [activeTab, stages]);
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
+  /** Ett tryck = byt steg direkt. Inga dubbeltryck, ingen fördröjning. */
   const handleStageClick = useCallback((stage: string) => {
-    const cfg = stageConfig[stage];
-    const isLongLabel = cfg && cfg.label.length > 10;
-
-    // Touch + long label → tap-to-preview with double-tap detection
-    if (isTouchCapable && isLongLabel) {
-      if (previewStage === stage) {
-        // Already previewing → select
-        setPreviewStage(null);
-        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-        if (previewDelayRef.current) clearTimeout(previewDelayRef.current);
-        setActiveTab(stage);
-      } else if (previewDelayRef.current) {
-        // Second tap arrived before delay fired → skip tooltip, select directly
-        clearTimeout(previewDelayRef.current);
-        previewDelayRef.current = undefined;
-        setPreviewStage(null);
-        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-        setActiveTab(stage);
-      } else {
-        // First tap → wait briefly to see if a double-tap follows
-        previewDelayRef.current = setTimeout(() => {
-          previewDelayRef.current = undefined;
-          setPreviewStage(stage);
-          if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-          previewTimerRef.current = setTimeout(() => setPreviewStage(null), 1800);
-        }, 280);
-        return; // Don't switch tab yet
-      }
-    } else {
-      setActiveTab(stage);
-    }
-    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
-  }, [isTouchCapable, previewStage, stageConfig]);
-
-  const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
-    // Mouse: handled by onClick. Touch/pen: only track double-tap for settings menu.
-    // Do NOT switch activeTab here — let onClick handle it after scroll gesture resolves.
-    if (pointerType === 'mouse') return;
-
-    if (isReadOnly) return;
-
-    const now = Date.now();
-    const lastTap = lastTouchTapRef.current;
-    const isDoubleTap = !!lastTap && lastTap.stage === stage && now - lastTap.time <= 320;
-
-    if (isDoubleTap) {
-      setOpenStageMenu(stage);
-      lastTouchTapRef.current = null;
+    if (longPressFiredRef.current) {
+      longPressFiredRef.current = false;
       return;
     }
+    setPreviewStage(null);
+    setActiveTab(stage);
+    setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
+  }, []);
 
-    lastTouchTapRef.current = { stage, time: now };
-  }, [isReadOnly]);
+  const clearLongPress = useCallback(() => {
+    if (previewDelayRef.current) {
+      clearTimeout(previewDelayRef.current);
+      previewDelayRef.current = undefined;
+    }
+  }, []);
 
-  // Instantly dismiss tooltip when tapping anywhere outside stage tabs
+  /** Långtryck på en trunkerad etikett visar hela namnet (tooltip). */
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string, target?: EventTarget | null) => {
+    if (pointerType === 'mouse') return;
+    // Trepunktsmenyn har sin egen tunnel – inget långtryck där.
+    if (target instanceof HTMLElement && target.closest('[data-stage-menu]')) return;
+    const cfg = stageConfig[stage];
+    if (!cfg || cfg.label.length <= 10) return;
+
+    longPressFiredRef.current = false;
+    clearLongPress();
+    previewDelayRef.current = setTimeout(() => {
+      previewDelayRef.current = undefined;
+      longPressFiredRef.current = true;
+      setPreviewStage(stage);
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+      previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2200);
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try { navigator.vibrate?.(8); } catch { /* ignorera */ }
+      }
+    }, 420);
+  }, [stageConfig, clearLongPress]);
+
+  // Stäng tooltip direkt när man trycker någon annanstans
   useEffect(() => {
     if (!previewStage) return;
     const dismiss = (e: TouchEvent) => {
@@ -386,12 +371,17 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       if (!target.closest('[data-stage-tab]')) {
         setPreviewStage(null);
         if (previewTimerRef.current) { clearTimeout(previewTimerRef.current); previewTimerRef.current = undefined; }
-        if (previewDelayRef.current) { clearTimeout(previewDelayRef.current); previewDelayRef.current = undefined; }
+        clearLongPress();
       }
     };
     document.addEventListener('touchstart', dismiss, { passive: true });
     return () => document.removeEventListener('touchstart', dismiss);
-  }, [previewStage]);
+  }, [previewStage, clearLongPress]);
+
+  useEffect(() => () => {
+    if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+    if (previewDelayRef.current) clearTimeout(previewDelayRef.current);
+  }, []);
 
   useEffect(() => {
     if (stages.length === 0) return;
@@ -481,11 +471,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 ref={(el) => { tabRefs.current[stage] = el; }}
                 data-stage-tab
                 tabIndex={0}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType)}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType, e.target)}
+                onPointerUp={clearLongPress}
+                onPointerCancel={clearLongPress}
+                onPointerMove={clearLongPress}
                 onClick={() => handleStageClick(stage)}
-                onDoubleClick={() => {
-                  if (!isReadOnly) setOpenStageMenu(stage);
-                }}
+                onContextMenu={(e) => { if (isTouchCapable) e.preventDefault(); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
                   isActive ? 'shadow-lg border-white/50' : 'border-transparent'
@@ -519,6 +510,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 {/* Stage settings menu (3-dot) */}
                 {!isReadOnly && (
                   <span
+                    data-stage-menu
                     onPointerDown={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
@@ -531,7 +523,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       targetStageLabel={targetStageLabel}
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
-                      disableTouchTrigger={isTouchCapable}
+                      disableTouchTrigger={false}
                       onTriggerPointerDown={() => setActiveTab(stage)}
                       open={openStageMenu === stage}
                       onOpenChange={(nextOpen) => {

@@ -254,7 +254,7 @@ export default function Messages() {
 
   if (!showContentFade) {
     return (
-      <div className="flex-1 min-h-0 flex flex-col opacity-0 responsive-container-wide">
+      <div className="flex-1 min-h-0 flex flex-col opacity-0 messages-container overflow-x-hidden">
         {/* Invisible placeholder to prevent layout shift */}
       </div>
     );
@@ -369,7 +369,7 @@ export default function Messages() {
               </div>
             ) : (
               <ScrollArea className="h-full w-full min-w-0 max-w-full overflow-x-hidden no-chrome-pad [&_[data-radix-scroll-area-viewport]]:overflow-x-hidden [&_[data-radix-scroll-area-viewport]>div]:!block [&_[data-radix-scroll-area-viewport]>div]:!w-full [&_[data-radix-scroll-area-viewport]>div]:!min-w-0 [&_[data-radix-scroll-area-viewport]>div]:!max-w-full">
-                <div className="w-full min-w-0 overflow-hidden p-2">
+                <div className="w-full min-w-0 overflow-hidden p-2 pb-[max(var(--chrome-strip-pad),0.5rem)]">
                   {filteredConversations.map((conv, index) => {
                     const isLast = index === filteredConversations.length - 1;
                     const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
