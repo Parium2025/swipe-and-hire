@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo, useRef, useState, useLayoutEffect, useCallback } from 'react';
+import { memo, useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -25,6 +25,10 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   const draftRef = useRef<HTMLButtonElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ x: 0, width: 0 });
   const [hasMeasured, setHasMeasured] = useState(false);
+  // Första mätningen ska SNAPPA på plats. Tidigare animerade fjädern från x=0
+  // vid varje mount (och när siffrorna hydrerade), vilket syntes som en liten
+  // "studs" varje gång man gick in på sidan.
+  const hasSnappedRef = useRef(false);
 
   const updateIndicator = useCallback(() => {
     const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
@@ -71,6 +75,14 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
     };
   }, [updateIndicator, activeCount, expiredCount, draftCount, showDrafts]);
 
+  // Så fort vi har en giltig första mätning får fjädern ta över — men först
+  // efter att den mätningen redan renderats utan animation.
+  useEffect(() => {
+    if (!hasMeasured) return;
+    const t = setTimeout(() => { hasSnappedRef.current = true; }, 0);
+    return () => clearTimeout(t);
+  }, [hasMeasured]);
+
   return (
     <div className="dashboard-tabs-viewport mx-auto">
       <div ref={railRef} className="dashboard-tabs-rail relative bg-white/5 border border-white/10 mx-auto">
@@ -85,12 +97,11 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
           }}
           initial={false}
           animate={{ x: indicatorStyle.x }}
-          transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 34,
-            mass: 0.6,
-          }}
+          transition={
+            hasSnappedRef.current
+              ? { type: "spring", stiffness: 380, damping: 34, mass: 0.6 }
+              : { duration: 0 }
+          }
         />
         {/* Buttons */}
         <button
