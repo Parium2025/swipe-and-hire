@@ -22,7 +22,7 @@ export function CountBadge({ count, popKey, className }: CountBadgeProps) {
       aria-hidden="true"
       className={cn(
         'parium-badge-pop pointer-events-none select-none absolute -top-1 -right-1 z-20',
-        'flex h-[18px] min-w-[18px] shrink-0 aspect-square items-center justify-center',
+        'flex h-[18px] min-w-[18px] shrink-0 items-center justify-center',
         'rounded-full px-[3px] box-border',
         'bg-gradient-to-br from-red-400 to-red-600 text-white',
         'text-[10px] font-semibold leading-none tabular-nums',
