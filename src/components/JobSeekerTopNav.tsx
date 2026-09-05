@@ -206,7 +206,7 @@ function JobSeekerTopNav() {
           <DropdownMenu open={jobsOpen} onOpenChange={setJobsOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
@@ -260,7 +260,7 @@ function JobSeekerTopNav() {
           {/* Chattar Button */}
           <button
             onClick={() => handleNavigation('/messages')}
-            className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+            className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
           >
             <span 
               className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
@@ -276,7 +276,7 @@ function JobSeekerTopNav() {
           <DropdownMenu open={economyOpen} onOpenChange={setEconomyOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
@@ -311,7 +311,7 @@ function JobSeekerTopNav() {
           <DropdownMenu open={supportOpen} onOpenChange={setSupportOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
@@ -370,7 +370,7 @@ function JobSeekerTopNav() {
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-white group"
+                className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
                   className={`absolute inset-0 rounded-lg bg-white transition-opacity duration-150 ${
