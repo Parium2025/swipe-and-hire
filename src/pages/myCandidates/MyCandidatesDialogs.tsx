@@ -30,7 +30,7 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
             <AlertTriangle className="h-4 w-4 text-white" />
           </div>
           <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
-            Ta bort kandidat
+            Ta bort från listan
           </AlertDialogTitle>
         </div>
         <AlertDialogDescription className="text-white text-sm leading-relaxed">
@@ -38,7 +38,7 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
           <span className="font-semibold text-white break-words">
             "{candidate?.first_name} {candidate?.last_name}"
           </span>
-          ? Denna åtgärd går inte att ångra.
+          från listan? Ansökan och kandidatens historik finns kvar.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
@@ -54,7 +54,7 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
           className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
         >
           <Trash2 className="h-4 w-4 mr-1.5" />
-          Ta bort
+          Ta bort från listan
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContentNoFocus>
