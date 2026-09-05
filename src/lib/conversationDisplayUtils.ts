@@ -1,5 +1,9 @@
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
-import type { ApplicationSnapshot, ConversationMember } from '@/hooks/useConversations';
+import type { ApplicationSnapshot, ConversationMember, ConversationMessage } from '@/hooks/useConversations';
+
+type LastMessageIdentity = Pick<ConversationMessage, 'sender_id' | 'sender_identity' | 'is_system_message'> & {
+  sender_profile?: ConversationMessage['sender_profile'];
+};
 import type { ConversationProfileData as ProfileLike } from '@/types/conversation';
 
 /**
@@ -36,6 +40,26 @@ function snapshotDescribesCounterpart(
 
 
 /**
+ * När en arbetsgivarmotpart senast skrev ett personligt meddelande (fritext)
+ * ska listan och rubriken visa rekryteraren som person — namn och profilbild —
+ * i stället för bolaget. Mallar/automatiska utskick fortsätter som bolaget.
+ */
+function counterpartPersonProfile(
+  displayMember: ConversationMember | undefined,
+  lastMessage: LastMessageIdentity | undefined,
+): ProfileLike | undefined {
+  if (!lastMessage || lastMessage.sender_identity !== 'person') return undefined;
+  if (lastMessage.is_system_message) return undefined;
+  if (!displayMember || displayMember.profile?.role !== 'employer') return undefined;
+  if (lastMessage.sender_id !== displayMember.user_id) return undefined;
+  const senderProfile = lastMessage.sender_profile ?? displayMember.profile;
+  if (!senderProfile) return undefined;
+  const personName = buildFullName(senderProfile.first_name, senderProfile.last_name);
+  if (!hasText(personName)) return undefined;
+  return { ...senderProfile, role: 'employer', company_name: null, company_logo_url: null };
+}
+
+/**
  * Get display name for a conversation, preferring frozen application snapshot data.
  */
 export function getConversationDisplayName(opts: {
@@ -44,8 +68,9 @@ export function getConversationDisplayName(opts: {
   snapshot: ApplicationSnapshot | undefined;
   displayMember: ConversationMember | undefined;
   isSelf?: boolean;
+  lastMessage?: LastMessageIdentity;
 }): string {
-  const { isGroup, groupName, snapshot, displayMember, isSelf } = opts;
+  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage } = opts;
 
   if (isGroup && groupName) return groupName;
 
@@ -59,6 +84,9 @@ export function getConversationDisplayName(opts: {
     return snapshotName || 'Okänd användare';
   }
 
+
+  const personProfile = counterpartPersonProfile(displayMember, lastMessage);
+  if (personProfile) return buildFullName(personProfile.first_name, personProfile.last_name);
 
   if (!displayMember?.profile) return 'Okänd användare';
   const p = displayMember.profile;
@@ -81,6 +109,7 @@ export function getConversationDisplayName(opts: {
 export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
+  lastMessage?: LastMessageIdentity,
 ): ProfileLike | undefined {
   if (snapshotDescribesCounterpart(snapshot, displayMember)) {
     const liveProfile = displayMember?.profile;
@@ -98,6 +127,9 @@ export function getConversationAvatarProfile(
   }
 
 
+
+  const personProfile = counterpartPersonProfile(displayMember, lastMessage);
+  if (personProfile) return personProfile;
 
   // No snapshot — use live profile
   if (displayMember?.profile) return displayMember.profile;
