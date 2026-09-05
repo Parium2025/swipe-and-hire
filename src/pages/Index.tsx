@@ -551,7 +551,7 @@ const Index = () => {
   // Tidigare ritades bara en tom blå yta under session- och profilhämtningen.
   if (loading && !user && authAction !== 'logout') {
     return lastKnownRole === 'employer'
-      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" />
+      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" standalone />
       : <div className="min-h-screen bg-gradient-parium" />;
   }
 
@@ -564,7 +564,7 @@ const Index = () => {
   // rollens riktiga sidstruktur under tiden i stället för ännu en tom skärm.
   if (!profile) {
     return lastKnownRole === 'employer'
-      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" />
+      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" standalone />
       : <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
 

@@ -151,11 +151,13 @@ const SkeletonChrome = memo(function SkeletonChrome() {
 interface EmployerDashboardSkeletonProps {
   showDrafts?: boolean;
   titleWidthClass?: string;
+  standalone?: boolean;
 }
 
 export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton({
   showDrafts,
   titleWidthClass = 'w-48',
+  standalone = false,
 }: EmployerDashboardSkeletonProps = {}) {
   const device = useDevice();
   const resolvedShowDrafts = showDrafts ?? (typeof window !== 'undefined' ? window.location.pathname !== '/dashboard' : true);
@@ -189,7 +191,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
     : Math.min(18, Math.max(cachedCardCount, cardsNeededAtOffset));
 
 
-  return (
+  const content = (
     // Dashboarden är redan monterad inuti arbetsgivarskalets riktiga scroll-yta.
     // Ett body-portal/fixed-lager står alltid på viewportens topp och kan därför
     // aldrig återge en sparad scrollposition korrekt efter reload. In-flow gör
@@ -344,6 +346,25 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
             ))}
           </div>
     </div>
+  );
+
+  if (!standalone) return content;
+
+  return (
+    <FullscreenSkeletonPortal>
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
+        style={fullscreenSkeletonStyle}
+      >
+        <SkeletonChrome />
+        <div className="flex-1 min-h-0 overflow-hidden p-3">
+          {content}
+        </div>
+      </motion.div>
+    </FullscreenSkeletonPortal>
   );
 });
 
