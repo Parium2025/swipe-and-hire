@@ -141,23 +141,21 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
           {/* Avatar/video — nedflyttad för mindre dött space upptill */}
           <div
-            className="relative z-10 mt-12 mx-auto w-[165px] h-[165px]"
+            className="relative z-10 mt-12 mx-auto w-[165px]"
             style={{ cursor: onOpen ? 'pointer' : 'default' }}
             onClick={(e) => {
               if (showVideo) e.stopPropagation();
             }}
           >
             {showVideo ? (
-              <ProfileVideo
+              <ProfileVideoCircle
                 videoUrl={videoUrl as string}
                 coverImageUrl={coverImageUrl || profileImageUrl || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
-                alt="Profilbild"
-                className="w-full h-full rounded-full"
-                countdownVariant="circle"
-                showCountdown={true}
-                disablePlayback={false}
+                alt="Profilvideo"
+                circleClassName="w-[165px] h-[165px] overflow-hidden rounded-full"
+                barClassName="w-[165px]"
               />
             ) : (
               <Avatar className="w-[165px] h-[165px] border-2 border-white/40 shadow-2xl">
@@ -172,6 +170,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
               </Avatar>
             )}
           </div>
+
 
           {/* Text direkt under profilbilden */}
           {showVideo && (
