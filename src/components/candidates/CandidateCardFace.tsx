@@ -30,9 +30,12 @@ export interface CandidateCardFaceProps {
   fullBleed?: boolean;
   /** Extra bottenutrymme i helskärmsläget (t.ex. när knappraden ligger i kortet). */
   contentBottomClassName?: string;
+  /** Urvalskriterier med AI-resultat — visas som märken under namnet. */
+  criteria?: { criterion_id: string; title: string; result: 'match' | 'no_match' | 'no_data' }[];
   onOpen?: () => void;
 
 }
+
 
 /**
  * Delad kortfront för kandidater — används både i jobbsökarens
