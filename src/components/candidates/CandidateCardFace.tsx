@@ -51,7 +51,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   ctaLabel = 'Tryck för mer info',
   minNameFontPx = 13,
   fullBleed = false,
+  contentBottomClassName = 'pb-6',
   onOpen,
+
 }: CandidateCardFaceProps) {
   const fullName = `${firstName || ''} ${lastName || ''}`.trim();
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
