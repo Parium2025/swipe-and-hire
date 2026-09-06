@@ -561,6 +561,10 @@ const MyCandidates = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    if (returnToSwipe) {
+      setReturnToSwipe(false);
+      setSwipeViewerOpen(true);
+    }
     setTimeout(() => setSelectedCandidate(null), 300);
   };
 
