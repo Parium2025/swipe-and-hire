@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
@@ -702,9 +702,14 @@ export const CandidateProfileDialog = ({
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             <div className="relative">
               {isProfileVideo && videoUrl ? (
-                <div className="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
-                  <ProfileVideo videoUrl={videoUrl} coverImageUrl={profileImageUrl || profileThumbUrl || undefined} userInitials={initials} className="w-full h-full" showCountdown={true} countdownVariant="circle" showProgressBar={false} />
-                </div>
+                <ProfileVideoCircle
+                  videoUrl={videoUrl}
+                  coverImageUrl={profileImageUrl || profileThumbUrl || undefined}
+                  userInitials={initials}
+                  circleClassName="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl"
+                  barClassName="w-24 md:w-48"
+                />
+
               ) : mediaPending ? (
                 // Kandidaten HAR media men URL:en är inte klar ännu. Visa aldrig
                 // initialer här — då hinner man se "FA" innan porträttet/videon

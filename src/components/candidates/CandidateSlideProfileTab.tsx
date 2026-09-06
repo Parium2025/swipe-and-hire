@@ -4,7 +4,7 @@ import { Star, Mail, Phone, MapPin, Calendar, Briefcase, FileText, User, Chevron
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { noFocusRingProps } from '@/lib/noFocusRing';
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { formatTimeAgo } from '@/lib/date';
 import { CandidateSummarySection } from '@/components/candidateProfile/CandidateSummarySection';
 import { SectionErrorBoundary } from '@/components/candidateProfile';
@@ -71,18 +71,15 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
       {/* Avatar / Video */}
       <div className="relative">
         {isProfileVideo && videoUrl ? (
-          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-xl">
-            <ProfileVideo
-              videoUrl={videoUrl}
-              coverImageUrl={coverImageUrl || profileImageUrl || undefined}
-              userInitials={initials}
-              className="w-full h-full"
-              showCountdown={true}
-              countdownVariant="circle"
-              showProgressBar={false}
-            />
-          </div>
+          <ProfileVideoCircle
+            videoUrl={videoUrl}
+            coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+            userInitials={initials}
+            circleClassName="w-28 h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-xl"
+            barClassName="w-28"
+          />
         ) : (
+
           <Avatar className="w-28 h-28 border-4 border-white/20 shadow-xl">
             <AvatarImage src={profileImageUrl || ''} alt={`${application.first_name} ${application.last_name}`} className="object-cover" />
             <AvatarFallback className="bg-white/10 text-white text-3xl font-semibold">{initials}</AvatarFallback>

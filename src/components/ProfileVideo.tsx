@@ -26,9 +26,14 @@ interface ProfileVideoProps {
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
   disablePlayback?: boolean; // When true, clicking does nothing (just shows thumbnail)
   forceTouchMode?: boolean; // Force touch-style controls even on mouse devices (used in previews)
+  /** Rapporterar position/längd så en extern scrub-bar kan visas under videon. */
+  onTimeChange?: (current: number, duration: number) => void;
+  /** Fylls med en seek-funktion så externa kontroller kan spola i videon. */
+  seekRef?: React.MutableRefObject<((seconds: number) => void) | null>;
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onRemainingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onRemainingChange, onClick, disablePlayback = false, forceTouchMode = false, onTimeChange, seekRef }: ProfileVideoProps) => {
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -176,18 +181,42 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
   const handleTimeUpdate = () => {
     if (videoRef.current && !isDragging) {
       setProgress(videoRef.current.currentTime);
+      onTimeChange?.(videoRef.current.currentTime, videoRef.current.duration || 0);
     }
   };
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
+      onTimeChange?.(videoRef.current.currentTime, videoRef.current.duration || 0);
     }
   };
+
+  // Låt externa kontroller (scrub-bar under cirkeln) spola i videon.
+  useEffect(() => {
+    if (!seekRef) return;
+    seekRef.current = (seconds: number) => {
+      const el = videoRef.current;
+      if (!el || !Number.isFinite(seconds)) return;
+      try {
+        if (el.readyState >= 1) {
+          el.currentTime = Math.max(0, Math.min(seconds, el.duration || seconds));
+          setProgress(el.currentTime);
+          onTimeChange?.(el.currentTime, el.duration || 0);
+        }
+      } catch {
+        // ignorera – elementet kan sakna metadata
+      }
+    };
+    return () => {
+      seekRef.current = null;
+    };
+  }, [seekRef, onTimeChange]);
 
   const handleVideoError = () => {
     console.error('Video playback error');
   };
+
 
   // Sökning sker via Pointer Events så att mus, touch och penna beter sig
   // identiskt (mouse-only gjorde progressbaren odragbar på iOS/Android).
