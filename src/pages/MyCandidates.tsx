@@ -740,8 +740,13 @@ const MyCandidates = () => {
   const swipeApplicationsData = useMemo(() => {
     if (swipeFilteredApps) return swipeFilteredApps;
     if (swipeStageCandidates.length > 0) return swipeStageCandidates.map(mapCandidateToAppData);
+    if (swipeCriteriaEnabled && swipeCriteriaFilter) {
+      return allCandidatesAsAppData.filter(a =>
+        swipeCriteriaFilter.keep.has(`${a.job_id}-${a.applicant_id}`),
+      );
+    }
     return allCandidatesAsAppData;
-  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData]);
+  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData, swipeCriteriaEnabled, swipeCriteriaFilter]);
 
   // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och låst.
   const swipeSavedApplicantIds = useMemo(
