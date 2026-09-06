@@ -1,11 +1,13 @@
-import { useState, useRef, useEffect, memo, useCallback } from 'react';
+import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
+import { useCriteriaResultsForCandidates } from '@/hooks/useCriteriaResults';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
+
 
 interface CandidateSwipeViewerProps {
   applications: ApplicationData[];
