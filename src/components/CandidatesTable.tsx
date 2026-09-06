@@ -261,6 +261,15 @@ export function CandidatesTable({
   // svepvyn istället för att stänga den.
   const [swipeIndex, setSwipeIndex] = useState(0);
   const [returnToSwipe, setReturnToSwipe] = useState(false);
+  // Kandidater som redan ligger i en lista — spara-knappen visas ifylld.
+  const swipeSavedApplicantIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const app of applications) {
+      if (app.applicant_id && isApplicantAdded(app.applicant_id)) ids.add(app.applicant_id);
+    }
+    return ids;
+  }, [applications, isApplicantAdded]);
+
 
   useEffect(() => {
     if (!swipeOpen) {
