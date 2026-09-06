@@ -246,8 +246,8 @@ export function CandidatesTable({
     // ansökningar från samma person ska inte trigga en ny hämtning.
   }, [selectedApplication?.applicant_id, user?.id, dialogOpen, fetchForApplicant, readCache, writeCache]);
 
-  // Alla enheter öppnar samma klassiska profilvy som desktop.
-  // Swipe-läget finns kvar i jobbets kanban och Mina kandidater, men inte här.
+  // Vid klick i listan öppnas den klassiska profilvyn. Swipe-läget startas
+  // separat via knappen ovanför listan och visar samma filtrerade urval.
   const handleRowClick = useCallback((application: ApplicationData) => {
     const cachedApplications = readCache(application.applicant_id);
     setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
@@ -255,10 +255,24 @@ export function CandidatesTable({
     setDialogOpen(true);
   }, [readCache]);
 
+  // Swipe-läge: index + "återvänd till swipe" så profilen läggs ovanpå
+  // svepvyn istället för att stänga den.
+  const [swipeIndex, setSwipeIndex] = useState(0);
+  const [returnToSwipe, setReturnToSwipe] = useState(false);
+
+  useEffect(() => {
+    if (!swipeOpen) {
+      setSwipeIndex(0);
+      setReturnToSwipe(false);
+    }
+  }, [swipeOpen]);
+
   const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
+    setReturnToSwipe(false);
     setTimeout(() => setSelectedApplicationId(null), 300);
   }, []);
+
 
   // --- Bulk selection handlers ---
   const toggleSelectAll = useCallback(() => {
