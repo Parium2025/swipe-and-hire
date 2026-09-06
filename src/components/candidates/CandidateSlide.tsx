@@ -266,7 +266,7 @@ export const CandidateSlide = memo(function CandidateSlide({
             />
 
             <motion.div
-              className="fixed inset-x-0 bottom-0 z-[120] max-h-[88dvh] h-[88dvh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
+              className="fixed inset-x-0 bottom-0 z-[120] h-[100dvh] max-h-[100dvh] bg-parium-gradient overflow-hidden flex flex-col will-change-transform"
               initial={{ y: '100%' }}
               animate={sheetControls}
               exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
@@ -277,12 +277,13 @@ export const CandidateSlide = memo(function CandidateSlide({
             >
               {/* Draghandtag */}
               <div
-                className="flex justify-center pt-3 pb-2 shrink-0 cursor-grab active:cursor-grabbing"
+                className="flex justify-center pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-2 shrink-0 cursor-grab active:cursor-grabbing"
                 onTouchStart={handleHandleTouchStart}
                 onTouchMove={handleSheetTouchMove}
                 onTouchEnd={handleSheetTouchEnd}
               >
                 <div className="w-10 h-1.5 rounded-full bg-white/30" />
+
               </div>
 
               {/* Stäng */}
