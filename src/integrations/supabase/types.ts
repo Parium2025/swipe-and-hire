@@ -4525,6 +4525,7 @@ export type Database = {
         }[]
       }
       normalize_job_text: { Args: { t: string }; Returns: string }
+      parium_answer_tokens: { Args: { _answers: Json }; Returns: string[] }
       parium_norm: { Args: { t: string }; Returns: string }
       parium_synonyms: { Args: { _tok: string }; Returns: string[] }
       pause_criteria_eval_run: {
