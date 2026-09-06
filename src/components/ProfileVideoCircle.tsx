@@ -58,7 +58,6 @@ export function ProfileVideoCircle({
           alt={alt}
           className="h-full w-full rounded-full"
           countdownVariant="circle"
-          // Listen under cirkeln visar tiden — ingen dubbel tidvisning.
           showCountdown={false}
           showProgressBar={false}
           disablePlayback={disablePlayback}
@@ -70,7 +69,7 @@ export function ProfileVideoCircle({
 
       <div
         className={`mt-2 transition-opacity duration-200 ${barClassName} ${
-          isPlaying && time.duration > 0 ? 'opacity-100' : 'pointer-events-none opacity-0'
+          showCountdown && isPlaying && time.duration > 0 ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
         <VideoScrubBar current={time.current} duration={time.duration} onSeek={handleSeek} />
