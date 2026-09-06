@@ -2,7 +2,6 @@ import { memo } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import ProfileVideo from '@/components/ProfileVideo';
 import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/criteria/CriteriaBadges';
 
@@ -68,7 +67,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   const showVideo = Boolean(hasVideo && videoUrl);
   const stillImage = profileImageUrl || coverImageUrl || '';
 
-  // Helskärmsläge: media fyller hela kortet, precis som jobbsökarens svepkort.
+  // Helskärmsläge: bild, video och initialer använder samma cirkulära medieyta.
+  // Det gör att samma kandidat aldrig byter kortstruktur beroende på vilken
+  // ansökans snapshot som råkar vara den aktuella i vyn.
   if (fullBleed) {
     const circleClass =
       'h-[min(56vw,14rem)] w-[min(56vw,14rem)] overflow-hidden rounded-full border-4 border-white/30 shadow-2xl';
@@ -80,17 +81,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         onDragStart={(e) => e.preventDefault()}
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
-        {stillImage && !showVideo ? (
-          <img
-            src={stillImage}
-            alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
-            className="absolute inset-0 w-full h-full object-cover"
-            decoding="async"
-            loading="eager"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-parium-gradient" />
-        )}
+        <div className="absolute inset-0 bg-parium-gradient" />
 
         {/* Mediazon — cirkeln lever i eget flödesutrymme och kan aldrig nå namnet */}
         <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-6 pt-10 pb-4">
@@ -104,12 +95,22 @@ export const CandidateCardFace = memo(function CandidateCardFace({
               circleClassName={`${circleClass} bg-white/10 backdrop-blur-sm`}
               barClassName="w-[min(56vw,14rem)]"
             />
-          ) : !stillImage ? (
-
+          ) : stillImage ? (
+            <Avatar className={`${circleClass} bg-white/10 backdrop-blur-sm`}>
+              <AvatarImage
+                src={stillImage}
+                alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
+                className="object-cover"
+              />
+              <AvatarFallback className="bg-white/10 text-5xl font-bold text-white">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
             <div className="flex h-[min(56vw,14rem)] w-[min(56vw,14rem)] items-center justify-center overflow-hidden rounded-full border-4 border-white/30 bg-white/10 shadow-2xl backdrop-blur-sm">
               <span className="text-5xl font-bold text-white">{initials}</span>
             </div>
-          ) : null}
+          )}
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
