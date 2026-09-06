@@ -12,7 +12,6 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
-import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
 import { AddToColleagueListDialog } from '@/components/AddToColleagueListDialog';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Layers, SlidersHorizontal } from 'lucide-react';
@@ -114,7 +113,6 @@ const JobDetails = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
-  const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   // Spara-knappen i svepläget öppnar listväljaren för just den kandidaten.
   const [swipeSaveCandidate, setSwipeSaveCandidate] = useState<ApplicationData | null>(null);
@@ -655,7 +653,7 @@ const JobDetails = () => {
             </button>
             <button
               type="button"
-              onClick={() => setSwipeFilterOpen(true)}
+              onClick={() => setCriteriaDialogOpen(true)}
               className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
             >
               <SlidersHorizontal className="h-4 w-4" />
@@ -822,18 +820,6 @@ const JobDetails = () => {
           />
         )}
 
-        {/* Urvalskriterier innan swipe-läget startar */}
-        <CandidateSwipeFilterSheet
-          open={swipeFilterOpen}
-          onOpenChange={setSwipeFilterOpen}
-          candidates={allApplicationsAsData}
-          criteria={(jobCriteria || []).map(c => ({ id: c.id, title: c.title }))}
-          onStart={(filtered) => {
-            setSwipeFilteredApps(filtered);
-            setSwipeInitialIndex(0);
-            setSwipeViewerOpen(true);
-          }}
-        />
 
         {/* Listväljare från svepläget */}
         <AddToColleagueListDialog
