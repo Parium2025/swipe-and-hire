@@ -481,6 +481,80 @@ export type Database = {
           },
         ]
       }
+      candidate_search_index: {
+        Row: {
+          account_deleted: boolean
+          answer_tokens: string[] | null
+          answers_vector: unknown
+          applicant_id: string
+          application_id: string
+          applied_at: string
+          cv_vector: unknown
+          employer_id: string
+          job_id: string
+          notes_text: string | null
+          organization_id: string | null
+          phone_digits: string | null
+          profile_vector: unknown
+          raw_text: string | null
+          search_text: string | null
+          search_vector: unknown
+          status: string | null
+          summary_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_deleted?: boolean
+          answer_tokens?: string[] | null
+          answers_vector?: unknown
+          applicant_id: string
+          application_id: string
+          applied_at: string
+          cv_vector?: unknown
+          employer_id: string
+          job_id: string
+          notes_text?: string | null
+          organization_id?: string | null
+          phone_digits?: string | null
+          profile_vector?: unknown
+          raw_text?: string | null
+          search_text?: string | null
+          search_vector?: unknown
+          status?: string | null
+          summary_text?: string | null
+          updated_at: string
+        }
+        Update: {
+          account_deleted?: boolean
+          answer_tokens?: string[] | null
+          answers_vector?: unknown
+          applicant_id?: string
+          application_id?: string
+          applied_at?: string
+          cv_vector?: unknown
+          employer_id?: string
+          job_id?: string
+          notes_text?: string | null
+          organization_id?: string | null
+          phone_digits?: string | null
+          profile_vector?: unknown
+          raw_text?: string | null
+          search_text?: string | null
+          search_vector?: unknown
+          status?: string | null
+          summary_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_search_index_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_summaries: {
         Row: {
           applicant_id: string
@@ -4581,6 +4655,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      refresh_candidate_search_index: {
+        Args: { _application_id: string }
+        Returns: undefined
+      }
       register_session: {
         Args: {
           p_device_label: string
@@ -4877,6 +4955,37 @@ export type Database = {
       sync_owned_job_questions: {
         Args: { p_job_id: string; p_questions: Json }
         Returns: undefined
+      }
+      test_search_employer_candidates: {
+        Args: never
+        Returns: {
+          account_deleted: boolean
+          age: number
+          applicant_id: string
+          applied_at: string
+          availability: string
+          bio: string
+          custom_answers: Json
+          cv_url: string
+          email: string
+          employment_status: string
+          first_name: string
+          id: string
+          job_id: string
+          job_occupation: string
+          job_title: string
+          last_name: string
+          location: string
+          match_source: string
+          phone: string
+          questions_snapshot: Json
+          rating: number
+          status: string
+          total_count: number
+          updated_at: string
+          viewed_at: string
+          work_schedule: string
+        }[]
       }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_cron_health_watchdog: { Args: never; Returns: undefined }
