@@ -19,6 +19,8 @@ interface CandidateSlideProps {
   saved?: boolean;
   onSave?: () => void;
   onSkip?: () => void;
+  /** Urvalskriterier med AI-resultat för kandidaten. */
+  criteria?: { criterion_id: string; title: string; result: 'match' | 'no_match' | 'no_data' }[];
 }
 
 export const CandidateSlide = memo(function CandidateSlide({
@@ -30,7 +32,9 @@ export const CandidateSlide = memo(function CandidateSlide({
   saved = false,
   onSave,
   onSkip,
+  criteria,
 }: CandidateSlideProps) {
+
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
   const videoUrl = useMediaUrl(application.video_url, 'profile-video');
   const coverImageUrl = useMediaUrl(application.cover_image_url, 'profile-image');
