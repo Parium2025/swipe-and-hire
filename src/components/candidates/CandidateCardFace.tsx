@@ -71,10 +71,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
       >
         {showVideo ? (
           <div className="absolute inset-0 bg-parium-gradient">
-            <div
-              className="absolute left-1/2 top-[42%] h-[min(64vw,17rem)] w-[min(64vw,17rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-4 border-white/30 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="absolute left-1/2 top-[42%] h-[min(64vw,17rem)] w-[min(64vw,17rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-4 border-white/30 shadow-2xl">
               <ProfileVideo
                 videoUrl={videoUrl as string}
                 coverImageUrl={coverImageUrl || profileImageUrl || undefined}
@@ -85,7 +82,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                 countdownVariant="circle"
                 showCountdown={true}
                 showProgressBar={false}
-                disablePlayback={false}
+                disablePlayback={Boolean(onOpen)}
               />
             </div>
           </div>
@@ -98,7 +95,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             loading="eager"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(215,85%,26%)] via-[hsl(215,85%,18%)] to-[hsl(215,85%,12%)]">
+          <div className="absolute inset-0 bg-parium-gradient">
             <div className="absolute inset-0 flex items-center justify-center">
               <span
                 className="font-black tracking-tight text-white/10 leading-none"
@@ -108,10 +105,8 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                 {initials}
               </span>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-40 w-40 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-sm shadow-2xl">
-                <span className="text-5xl font-bold text-white">{initials}</span>
-              </div>
+            <div className="absolute left-1/2 top-[42%] flex h-[min(64vw,17rem)] w-[min(64vw,17rem)] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm shadow-2xl">
+              <span className="text-6xl font-bold text-white">{initials}</span>
             </div>
           </div>
         )}
