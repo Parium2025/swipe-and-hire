@@ -1,17 +1,20 @@
 import { useState, memo, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronDown, ChevronLeft } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { CandidateNotesPanel } from '@/components/candidateProfile/CandidateNotesPanel';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
+import { useSheetDragDismiss } from '@/components/swipe/hooks/useSheetDragDismiss';
 import { TABS, type TabKey } from './CandidateSlideConstants';
 import { CandidateSlideProfileTab } from './CandidateSlideProfileTab';
 import { CandidateCardFace } from './CandidateCardFace';
+import { CandidateSlideActions } from './CandidateSlideActions';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
+
 
 interface CandidateSlideProps {
   application: ApplicationData;
