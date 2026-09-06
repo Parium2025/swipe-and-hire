@@ -209,6 +209,8 @@ const MyCandidates = () => {
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
   const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
+  // Profilen öppnad från svepläget → nedsvep/stäng ska ta oss tillbaka dit.
+  const [returnToSwipe, setReturnToSwipe] = useState(false);
 
   // ── Centralized application fetching ─────────────────
   const candidateFallback = useMemo(() => selectedCandidate ? {
@@ -559,6 +561,10 @@ const MyCandidates = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    if (returnToSwipe) {
+      setReturnToSwipe(false);
+      setSwipeViewerOpen(true);
+    }
     setTimeout(() => setSelectedCandidate(null), 300);
   };
 
@@ -753,13 +759,16 @@ const MyCandidates = () => {
 
   // When user taps "open full profile" from swipe viewer → open dialog
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
+    const idx = swipeApplicationsData.findIndex(a => a.id === application.id);
+    if (idx >= 0) setSwipeInitialIndex(idx);
     setSwipeViewerOpen(false);
+    setReturnToSwipe(true);
     const original = displayedCandidates.find(c => c.application_id === application.id);
     if (original) {
       setSelectedCandidate(original);
       setDialogOpen(true);
     }
-  }, [displayedCandidates]);
+  }, [displayedCandidates, swipeApplicationsData]);
 
   const getDisplayRating = useCallback((app: ApplicationData) => app.rating || 0, []);
 
