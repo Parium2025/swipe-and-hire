@@ -138,6 +138,26 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [currentIndex, goToIndex]);
 
 
+  // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
+  const lastHapticIndex = useRef<number | null>(null);
+  useEffect(() => {
+    if (!open) {
+      lastHapticIndex.current = null;
+      return;
+    }
+    if (lastHapticIndex.current === null) {
+      lastHapticIndex.current = currentIndex;
+      return;
+    }
+    if (lastHapticIndex.current === currentIndex) return;
+    lastHapticIndex.current = currentIndex;
+    try {
+      navigator.vibrate?.(8);
+    } catch {
+      // Vissa webbläsare blockerar vibration — ignorera tyst.
+    }
+  }, [open, currentIndex]);
+
   // Lock body scroll when open
   useEffect(() => {
     if (open) {
