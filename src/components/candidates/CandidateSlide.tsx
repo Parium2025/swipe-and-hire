@@ -1,7 +1,7 @@
 import { useState, memo, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronLeft } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
@@ -46,26 +46,12 @@ export const CandidateSlide = memo(function CandidateSlide({
   const tabsBarRef = useRef<HTMLDivElement | null>(null);
   const [slideIndicator, setSlideIndicator] = useState({ left: 0, width: 0 });
 
-  // Vid byte till Aktivitet/Anteckningar ska innehållet börja högst upp.
-  // Profil-fliken är ofta längre än de andra — utan detta klämmer webbläsaren
-  // fast scrollpositionen längst ner i det nya (kortare) innehållet.
+  // Info-steget har egen scroll — varje flikbyte ska börja högst upp.
+  const detailsScrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (activeTab === 'profil') return;
-    const snapToTabs = () => {
-      const el = tabsBarRef.current;
-      const container = el?.closest('.overflow-y-auto') as HTMLElement | null;
-      if (!el || !container) return;
-      const topOffset = 48; // viewer-headern (pt-12) ska inte täcka flikarna
-      const delta = el.getBoundingClientRect().top - container.getBoundingClientRect().top - topOffset;
-      if (Math.abs(delta) > 1) container.scrollTop += delta;
-    };
-    snapToTabs();
-    // Innehållet byts via exit/enter-animation (mode="wait") — höjden ändras
-    // först när den nya fliken monterats, så korrigera igen efter animationen.
-    const t1 = window.setTimeout(snapToTabs, 240);
-    const t2 = window.setTimeout(snapToTabs, 450);
-    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
-  }, [activeTab]);
+    detailsScrollRef.current?.scrollTo({ top: 0 });
+  }, [activeTab, detailsOpen]);
+
 
   const measureSlideIndicator = useCallback(() => {
     const idx = TABS.findIndex(t => t.key === activeTab);
@@ -81,10 +67,18 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [activeTab]);
 
   useEffect(() => {
+    // Mätning måste ske efter att info-steget monterats/animerat in.
     measureSlideIndicator();
+    const raf = requestAnimationFrame(measureSlideIndicator);
+    const t = window.setTimeout(measureSlideIndicator, 320);
     window.addEventListener('resize', measureSlideIndicator);
-    return () => window.removeEventListener('resize', measureSlideIndicator);
-  }, [measureSlideIndicator]);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+      window.removeEventListener('resize', measureSlideIndicator);
+    };
+  }, [measureSlideIndicator, detailsOpen]);
+
 
   const handleTabSwipe = useCallback((deltaX: number) => {
     const currentIdx = TABS.findIndex(t => t.key === activeTab);
@@ -175,11 +169,11 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [startEditing]);
 
   return (
-    <div className="w-full flex flex-col items-center px-6 py-8">
-      <div className="w-full max-w-sm flex flex-col items-center gap-5">
+    <div className="w-full h-full flex flex-col items-center px-6 pt-12 pb-4">
+      <div className="w-full max-w-sm flex-1 min-h-0 flex flex-col items-center gap-3">
 
         {/* ── Kortfront — identisk med jobbsökarens förhandsgranskning ── */}
-        <div className="w-full h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="w-full flex-1 min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
           <CandidateCardFace
             firstName={application.first_name}
             lastName={application.last_name}
@@ -189,134 +183,154 @@ export const CandidateSlide = memo(function CandidateSlide({
             coverImageUrl={coverImageUrl}
             videoUrl={videoUrl}
             hasVideo={!!isProfileVideo}
-            ctaLabel={detailsOpen ? 'Dölj info' : 'Tryck för mer info'}
-            onOpen={() => setDetailsOpen(v => !v)}
+            ctaLabel="Tryck för mer info"
+            onOpen={() => setDetailsOpen(true)}
           />
         </div>
 
-        {detailsOpen && (
-        <>
-        {/* ── Tabs — sliding indicator ── */}
-
-        <div ref={tabsBarRef} className="w-full flex items-center border-b border-white/20 relative">
-          <motion.div
-            className="absolute bottom-0 h-0.5 bg-white"
-            initial={false}
-            animate={{ left: slideIndicator.left, width: slideIndicator.width }}
-            transition={{ type: "spring", stiffness: 300, damping: 35, mass: 0.8 }}
-          />
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                ref={(el) => { slideTabRefs.current[TABS.indexOf(tab)] = el; }}
-                onClick={() => {
-                  const fromIdx = TABS.findIndex(t => t.key === activeTab);
-                  const toIdx = TABS.findIndex(t => t.key === tab.key);
-                  setSwipeDirection(toIdx > fromIdx ? 1 : -1);
-                  setActiveTab(tab.key);
-                }}
-                className={`flex-1 px-1 py-2.5 text-xs font-medium transition-colors min-w-0 ${
-                  isActive ? 'text-white' : 'text-white/50'
-                }`}
-              >
-                <div data-tab-content className="flex items-center justify-center gap-1 whitespace-nowrap w-fit mx-auto">
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="leading-snug">{tab.label}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Swipeable tab content ── */}
-        <div
-          className="w-full overflow-hidden"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
-            <motion.div
-              key={activeTab}
-              custom={swipeDirection}
-              initial={{ x: swipeDirection * 60, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: swipeDirection * -60, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="w-full min-w-0 overflow-hidden flex flex-col items-center gap-5"
-            >
-              {/* ── PROFIL TAB ── */}
-              {activeTab === 'profil' && (
-                <CandidateSlideProfileTab
-                  application={application}
-                  rating={rating}
-                  profileImageUrl={profileImageUrl}
-                  videoUrl={videoUrl}
-                  coverImageUrl={coverImageUrl}
-                  signedCvUrl={signedCvUrl}
-                  isProfileVideo={!!isProfileVideo}
-                  initials={initials}
-                  summaryHook={summaryHook}
-                  onOpenFullProfile={onOpenFullProfile}
-                  onRemoveFromList={onRemoveFromList}
-                />
-              )}
-
-              {/* ── AKTIVITET TAB ── */}
-              {activeTab === 'aktivitet' && (
-                <div className="w-full">
-                  <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
-                    <CandidateActivityLog applicantId={application.applicant_id} />
-                  </SectionErrorBoundary>
-                </div>
-              )}
-
-              {/* ── ANTECKNINGAR TAB ── */}
-              {activeTab === 'anteckningar' && (
-                <div className="w-full">
-                  <SectionErrorBoundary fallbackLabel="Anteckningar">
-                    <CandidateNotesPanel
-                      notes={notesHook.notes}
-                      loadingNotes={notesHook.loadingNotes}
-                      newNote={newNote}
-                      onNewNoteChange={setNewNote}
-                      onSaveNote={handleSaveNote}
-                      savingNote={notesHook.savingNote}
-                      currentUserId={user?.id}
-                      onStartEditing={handleStartEditing}
-                      onConfirmDelete={notesHook.deleteNote}
-                      editingNoteId={notesHook.editingNoteId}
-                      editingNoteText={notesHook.editingNoteText}
-                      originalNoteText={notesHook.originalNoteText}
-                      onEditingNoteTextChange={notesHook.setEditingNoteText}
-                      onUpdateNote={notesHook.updateNote}
-                      onCancelEditing={notesHook.cancelEditing}
-                    />
-                  </SectionErrorBoundary>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        </>
-        )}
-
-
-
-        {/* Separator / next hint */}
+        {/* Nästa-kandidat-hint längst ner i helskärmskortet */}
         {!isLast && (
-          <div className="w-full pt-6 pb-2">
-            <div className="w-full h-px bg-white/10" />
-            <div className="flex flex-col items-center gap-1 pt-4">
-              <ChevronDown className="h-4 w-4 text-white fill-white animate-bounce" />
-              <span className="text-[10px] text-white font-medium">Nästa kandidat</span>
-            </div>
+          <div className="flex flex-col items-center gap-0.5 pt-1 shrink-0">
+            <ChevronDown className="h-4 w-4 text-white fill-white animate-bounce" />
+            <span className="text-[10px] text-white font-medium">Nästa kandidat</span>
           </div>
         )}
       </div>
+
+      {/* ── Steg 2: helskärms-info ── */}
+      <AnimatePresence>
+        {detailsOpen && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 34, mass: 0.9 }}
+            className="fixed inset-0 z-[120] bg-card-parium flex flex-col"
+          >
+            {/* Header */}
+            <div className="shrink-0 flex items-center gap-2 px-3 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2">
+              <button
+                onClick={() => setDetailsOpen(false)}
+                aria-label="Tillbaka"
+                className="flex h-11 w-11 items-center justify-center touch-manipulation"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 active:bg-white/20 transition-colors">
+                  <ChevronLeft className="h-5 w-5 text-white" />
+                </div>
+              </button>
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">
+                {`${application.first_name || ''} ${application.last_name || ''}`.trim()}
+              </span>
+            </div>
+
+            {/* Tabs */}
+            <div ref={tabsBarRef} className="shrink-0 mx-6 flex items-center border-b border-white/20 relative">
+              <motion.div
+                className="absolute bottom-0 h-0.5 bg-white"
+                initial={false}
+                animate={{ left: slideIndicator.left, width: slideIndicator.width }}
+                transition={{ type: 'spring', stiffness: 300, damping: 35, mass: 0.8 }}
+              />
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    ref={(el) => { slideTabRefs.current[TABS.indexOf(tab)] = el; }}
+                    onClick={() => {
+                      const fromIdx = TABS.findIndex(t => t.key === activeTab);
+                      const toIdx = TABS.findIndex(t => t.key === tab.key);
+                      setSwipeDirection(toIdx > fromIdx ? 1 : -1);
+                      setActiveTab(tab.key);
+                    }}
+                    className={`flex-1 px-1 py-2.5 text-xs font-medium transition-colors min-w-0 ${
+                      isActive ? 'text-white' : 'text-white/50'
+                    }`}
+                  >
+                    <div data-tab-content className="flex items-center justify-center gap-1 whitespace-nowrap w-fit mx-auto">
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <span className="leading-snug">{tab.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Innehåll */}
+            <div
+              ref={detailsScrollRef}
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-5 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)]"
+
+              style={{ WebkitOverflowScrolling: 'touch' }}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
+              <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
+                <motion.div
+                  key={activeTab}
+                  custom={swipeDirection}
+                  initial={{ x: swipeDirection * 60, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: swipeDirection * -60, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="w-full min-w-0 mx-auto max-w-sm flex flex-col items-center gap-5"
+                >
+                  {activeTab === 'profil' && (
+                    <CandidateSlideProfileTab
+                      application={application}
+                      rating={rating}
+                      profileImageUrl={profileImageUrl}
+                      videoUrl={videoUrl}
+                      coverImageUrl={coverImageUrl}
+                      signedCvUrl={signedCvUrl}
+                      isProfileVideo={!!isProfileVideo}
+                      initials={initials}
+                      summaryHook={summaryHook}
+                      onOpenFullProfile={onOpenFullProfile}
+                      onRemoveFromList={onRemoveFromList}
+                    />
+                  )}
+
+                  {activeTab === 'aktivitet' && (
+                    <div className="w-full">
+                      <SectionErrorBoundary fallbackLabel="Aktivitetslogg">
+                        <CandidateActivityLog applicantId={application.applicant_id} />
+                      </SectionErrorBoundary>
+                    </div>
+                  )}
+
+                  {activeTab === 'anteckningar' && (
+                    <div className="w-full">
+                      <SectionErrorBoundary fallbackLabel="Anteckningar">
+                        <CandidateNotesPanel
+                          notes={notesHook.notes}
+                          loadingNotes={notesHook.loadingNotes}
+                          newNote={newNote}
+                          onNewNoteChange={setNewNote}
+                          onSaveNote={handleSaveNote}
+                          savingNote={notesHook.savingNote}
+                          currentUserId={user?.id}
+                          onStartEditing={handleStartEditing}
+                          onConfirmDelete={notesHook.deleteNote}
+                          editingNoteId={notesHook.editingNoteId}
+                          editingNoteText={notesHook.editingNoteText}
+                          originalNoteText={notesHook.originalNoteText}
+                          onEditingNoteTextChange={notesHook.setEditingNoteText}
+                          onUpdateNote={notesHook.updateNote}
+                          onCancelEditing={notesHook.cancelEditing}
+                        />
+                      </SectionErrorBoundary>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 });
+

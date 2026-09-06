@@ -35,13 +35,41 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  // Helskärmssvep: varje kandidat är exakt en viewport hög.
+  const [slideHeight, setSlideHeight] = useState(() =>
+    typeof window === 'undefined' ? 800 : window.innerHeight
+  );
+
+  useEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+    const el = scrollRef.current;
+    const apply = () => {
+      const h = el?.clientHeight || window.innerHeight;
+      setSlideHeight(prev => (Math.abs(prev - h) > 1 ? h : prev));
+    };
+    apply();
+    const ro = el ? new ResizeObserver(apply) : null;
+    if (el && ro) ro.observe(el);
+    window.addEventListener('resize', apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', apply);
+    };
+  }, [open]);
+
   const virtualizer = useVirtualizer({
     count: applications.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 980,
+    estimateSize: () => slideHeight,
     overscan: 2,
     getItemKey: (index) => applications[index]?.id || index,
   });
+
+  // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
+  useEffect(() => {
+    virtualizer.measure();
+  }, [slideHeight, virtualizer]);
+
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
   useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
@@ -138,11 +166,16 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </div>
         )}
 
-        {/* Continuous scroll container */}
+        {/* Helskärmssvep — en kandidat per skärm, med snapp */}
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain pt-12"
-          style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
+          className="h-full w-full overflow-y-auto overscroll-contain"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            willChange: 'scroll-position',
+            contain: 'layout style',
+            scrollSnapType: 'y mandatory',
+          }}
         >
           <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((item) => {
@@ -151,10 +184,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             return (
             <div
               key={app.id}
-              ref={virtualizer.measureElement}
               data-index={item.index}
               className="absolute left-0 top-0 w-full"
-              style={{ transform: `translateY(${item.start}px)` }}
+              style={{ transform: `translateY(${item.start}px)`, height: `${slideHeight}px`, scrollSnapAlign: 'start' }}
             >
               <CandidateSlide
                 application={app}
@@ -168,8 +200,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             );
           })}
           </div>
-          <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
+
       </motion.div>
     </AnimatePresence>,
     document.body
