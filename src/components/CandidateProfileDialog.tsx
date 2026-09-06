@@ -173,11 +173,36 @@ export const CandidateProfileDialog = ({
   const dialogContentRef = useRef<HTMLDivElement | null>(null);
   const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
   const pullTrackingRef = useRef<{ y: number; time: number; velocity: number } | null>(null);
-  const [pullY, setPullY] = useState(0);
-  const [dismissDuration, setDismissDuration] = useState(320);
-  const [isPulling, setIsPulling] = useState(false);
+  // Dragrörelsen skrivs direkt till DOM (som jobbsökarens svepläge) — ingen
+  // React-rendering per touchmove, annars känns nedåtdraget hackigt.
+  const pullYRef = useRef(0);
+  const pullFrameRef = useRef<number | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
   const dismissTimerRef = useRef<number | null>(null);
+
+  const writePull = useCallback((y: number, transition: string | null) => {
+    const el = dialogContentRef.current;
+    if (!el) return;
+    el.style.transition = transition ?? 'none';
+    el.style.transform = y > 0 ? `translate3d(0, ${y}px, 0)` : '';
+    el.style.willChange = y > 0 ? 'transform' : '';
+  }, []);
+
+  const schedulePull = useCallback((y: number) => {
+    pullYRef.current = y;
+    if (pullFrameRef.current !== null) return;
+    pullFrameRef.current = requestAnimationFrame(() => {
+      pullFrameRef.current = null;
+      writePull(pullYRef.current, null);
+    });
+  }, [writePull]);
+
+  useEffect(() => {
+    return () => {
+      if (pullFrameRef.current !== null) cancelAnimationFrame(pullFrameRef.current);
+    };
+  }, []);
+
 
   const activeApplication = useMemo(() => {
     if (!allApplications || allApplications.length <= 1) return application;
