@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ProfileVideo from '@/components/ProfileVideo';
 import ProfileVideoCircle from '@/components/ProfileVideoCircle';
+import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/criteria/CriteriaBadges';
 
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
@@ -30,9 +31,12 @@ export interface CandidateCardFaceProps {
   fullBleed?: boolean;
   /** Extra bottenutrymme i helskärmsläget (t.ex. när knappraden ligger i kortet). */
   contentBottomClassName?: string;
+  /** Urvalskriterier med AI-resultat — visas som märken under namnet. */
+  criteria?: { criterion_id: string; title: string; result: 'match' | 'no_match' | 'no_data' }[];
   onOpen?: () => void;
 
 }
+
 
 /**
  * Delad kortfront för kandidater — används både i jobbsökarens
@@ -54,7 +58,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   minNameFontPx = 13,
   fullBleed = false,
   contentBottomClassName = 'pb-6',
+  criteria,
   onOpen,
+
 
 }: CandidateCardFaceProps) {
   const fullName = `${firstName || ''} ${lastName || ''}`.trim();
@@ -121,6 +127,21 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             {showAge && age && residence ? <span className="text-white/60">•</span> : null}
             {residence ? <span>Bor i {residence}</span> : null}
           </div>
+
+          {criteria && criteria.length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              <CriteriaSummaryPill results={criteria} totalCriteria={criteria.length} />
+              {criteria.slice(0, 4).map((c) => (
+                <CriterionIconBadge key={c.criterion_id} result={c.result} title={c.title} />
+              ))}
+              {criteria.length > 4 && (
+                <span className="rounded px-1.5 py-0.5 text-[10px] text-white/80 ring-1 ring-inset ring-white/20">
+                  +{criteria.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     );
