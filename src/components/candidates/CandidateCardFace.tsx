@@ -70,18 +70,24 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
         {showVideo ? (
-          <div className="absolute inset-0" onClick={(e) => e.stopPropagation()}>
-            <ProfileVideo
-              videoUrl={videoUrl as string}
-              coverImageUrl={coverImageUrl || profileImageUrl || undefined}
-              posterUrl={posterUrl || undefined}
-              userInitials={initials}
-              alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
-              className="w-full h-full rounded-none"
-              countdownVariant="default"
-              showCountdown={true}
-              disablePlayback={false}
-            />
+          <div className="absolute inset-0 bg-parium-gradient">
+            <div
+              className="absolute left-1/2 top-[42%] h-[min(64vw,17rem)] w-[min(64vw,17rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-4 border-white/30 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ProfileVideo
+                videoUrl={videoUrl as string}
+                coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+                posterUrl={posterUrl || undefined}
+                userInitials={initials}
+                alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
+                className="h-full w-full rounded-full"
+                countdownVariant="circle"
+                showCountdown={true}
+                showProgressBar={false}
+                disablePlayback={false}
+              />
+            </div>
           </div>
         ) : stillImage ? (
           <img

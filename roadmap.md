@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Återställ rund profilvideo i arbetsgivarens svepläge och använd den befintliga kandidatprofilens stabila flik- och geststruktur för info
+
 - [x] Förladda och lagra kandidatmedlemskap vid kallstart så plus/bock är korrekt före sidbesök
 
 - [x] Granska cache och profilbyte för bild, video och cover
