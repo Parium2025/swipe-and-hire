@@ -20,6 +20,12 @@ export interface CandidateCardFaceProps {
   showAge?: boolean;
   ctaLabel?: string;
   minNameFontPx?: number;
+  /**
+   * Helskärmsläge (arbetsgivarens svepvy): bilden fyller hela kortet och
+   * saknad bild ersätts av ett stort monogram. Jobbsökarens förhandsvisning
+   * påverkas inte.
+   */
+  fullBleed?: boolean;
   onOpen?: () => void;
 }
 
