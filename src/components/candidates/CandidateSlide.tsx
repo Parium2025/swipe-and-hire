@@ -76,7 +76,9 @@ export const CandidateSlide = memo(function CandidateSlide({
             hasVideo={Boolean(isProfileVideo)}
             ctaLabel="Tryck för mer info"
             contentBottomClassName={showActions ? 'pb-24' : 'pb-6'}
+            criteria={criteria}
             onOpen={onOpenFullProfile}
+
           />
 
           {showActions && (
