@@ -18,6 +18,10 @@ interface CandidateSwipeViewerProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  /** Kandidater som redan finns i en lista — spara-knappen visas ifylld och låst. */
+  savedApplicantIds?: Set<string>;
+  /** Öppnar listväljaren för kandidaten. */
+  onSaveCandidate?: (application: ApplicationData) => void;
 }
 
 /* ── Main Viewer ────────────────────────────────── */
@@ -32,7 +36,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  savedApplicantIds,
+  onSaveCandidate,
 }: CandidateSwipeViewerProps) {
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
