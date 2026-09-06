@@ -65,6 +65,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     getItemKey: (index) => applications[index]?.id || index,
   });
 
+  // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
+  useEffect(() => {
+    virtualizer.measure();
+  }, [slideHeight, virtualizer]);
+
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
   useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
