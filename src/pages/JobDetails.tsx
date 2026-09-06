@@ -414,7 +414,7 @@ const JobDetails = () => {
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
     const idx = swipeApplicationsAsData.findIndex(a => a.id === application.id);
     if (idx >= 0) setSwipeInitialIndex(idx);
-    setSwipeViewerOpen(false);
+    // Swipe-vyn ligger kvar bakom profilen så listan aldrig hinner synas.
     setReturnToSwipe(true);
     const original = applications.find(a => a.id === application.id);
     if (original) {
@@ -779,7 +779,6 @@ const JobDetails = () => {
             if (!open) {
               if (returnToSwipe) {
                 setReturnToSwipe(false);
-                setSwipeViewerOpen(true);
               }
               setTimeout(() => {
                 setSelectedApplication(null);
@@ -808,6 +807,7 @@ const JobDetails = () => {
             applications={swipeApplicationsAsData}
             initialIndex={swipeInitialIndex}
             open={swipeViewerOpen}
+            behind={dialogOpen && returnToSwipe}
             onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
             onOpenFullProfile={handleSwipeOpenFullProfile}
             getDisplayRating={getDisplayRating}
