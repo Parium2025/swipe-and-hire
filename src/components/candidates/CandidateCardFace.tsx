@@ -62,16 +62,35 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
   // Helskärmsläge: media fyller hela kortet, precis som jobbsökarens svepkort.
   if (fullBleed) {
+    const circleClass =
+      'h-[min(56vw,14rem)] w-[min(56vw,14rem)] overflow-hidden rounded-full border-4 border-white/30 shadow-2xl';
+
     return (
       <div
-        className="w-full h-full relative overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
+        className="w-full h-full relative overflow-hidden select-none flex flex-col [-webkit-tap-highlight-color:transparent]"
         onClick={onOpen}
         onDragStart={(e) => e.preventDefault()}
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
-        {showVideo ? (
-          <div className="absolute inset-0 bg-parium-gradient">
-            <div className="absolute left-1/2 top-[42%] h-[min(64vw,17rem)] w-[min(64vw,17rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-4 border-white/30 shadow-2xl">
+        {stillImage && !showVideo ? (
+          <img
+            src={stillImage}
+            alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
+            className="absolute inset-0 w-full h-full object-cover"
+            decoding="async"
+            loading="eager"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-parium-gradient" />
+        )}
+
+        {/* Mediazon — cirkeln lever i eget flödesutrymme och kan aldrig nå namnet */}
+        <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-6 pt-10 pb-4">
+          {showVideo ? (
+            <div
+              className={`${circleClass} bg-white/10 backdrop-blur-sm`}
+              onClick={(e) => e.stopPropagation()}
+            >
               <ProfileVideo
                 videoUrl={videoUrl as string}
                 coverImageUrl={coverImageUrl || profileImageUrl || undefined}
@@ -82,39 +101,19 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                 countdownVariant="circle"
                 showCountdown={true}
                 showProgressBar={false}
-                disablePlayback={Boolean(onOpen)}
+                disablePlayback={false}
               />
             </div>
-          </div>
-        ) : stillImage ? (
-          <img
-            src={stillImage}
-            alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
-            className="absolute inset-0 w-full h-full object-cover"
-            decoding="async"
-            loading="eager"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-parium-gradient">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span
-                className="font-black tracking-tight text-white/10 leading-none"
-                style={{ fontSize: 'min(46vw, 15rem)' }}
-                aria-hidden="true"
-              >
-                {initials}
-              </span>
-            </div>
-            <div className="absolute left-1/2 top-[42%] flex h-[min(64vw,17rem)] w-[min(64vw,17rem)] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm shadow-2xl">
+          ) : !stillImage ? (
+            <div className={`${circleClass} flex items-center justify-center bg-white/10 backdrop-blur-sm`}>
               <span className="text-6xl font-bold text-white">{initials}</span>
             </div>
-          </div>
-        )}
+          ) : null}
+        </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
 
-        <div className={`absolute inset-x-0 bottom-0 z-10 px-5 text-left pointer-events-none ${contentBottomClassName}`}>
-
+        <div className={`relative z-10 shrink-0 px-5 text-left pointer-events-none ${contentBottomClassName}`}>
           <TruncatedText text={fullName} className="two-line-ellipsis two-line-ellipsis-nopad block w-full">
             <NameAutoFit
               text={fullName}
@@ -127,13 +126,6 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             {showAge && age && residence ? <span className="text-white/60">•</span> : null}
             {residence ? <span>Bor i {residence}</span> : null}
           </div>
-
-          {onOpen && (
-            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-4 py-2 backdrop-blur-sm">
-              <span className="text-sm font-medium text-white">{ctaLabel}</span>
-              <ArrowRight className="h-4 w-4 text-white" />
-            </div>
-          )}
         </div>
       </div>
     );
