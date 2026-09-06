@@ -759,13 +759,16 @@ const MyCandidates = () => {
 
   // When user taps "open full profile" from swipe viewer → open dialog
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
+    const idx = swipeApplicationsData.findIndex(a => a.id === application.id);
+    if (idx >= 0) setSwipeInitialIndex(idx);
     setSwipeViewerOpen(false);
+    setReturnToSwipe(true);
     const original = displayedCandidates.find(c => c.application_id === application.id);
     if (original) {
       setSelectedCandidate(original);
       setDialogOpen(true);
     }
-  }, [displayedCandidates]);
+  }, [displayedCandidates, swipeApplicationsData]);
 
   const getDisplayRating = useCallback((app: ApplicationData) => app.rating || 0, []);
 
