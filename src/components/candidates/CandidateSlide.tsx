@@ -46,26 +46,12 @@ export const CandidateSlide = memo(function CandidateSlide({
   const tabsBarRef = useRef<HTMLDivElement | null>(null);
   const [slideIndicator, setSlideIndicator] = useState({ left: 0, width: 0 });
 
-  // Vid byte till Aktivitet/Anteckningar ska innehållet börja högst upp.
-  // Profil-fliken är ofta längre än de andra — utan detta klämmer webbläsaren
-  // fast scrollpositionen längst ner i det nya (kortare) innehållet.
+  // Info-steget har egen scroll — varje flikbyte ska börja högst upp.
+  const detailsScrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (activeTab === 'profil') return;
-    const snapToTabs = () => {
-      const el = tabsBarRef.current;
-      const container = el?.closest('.overflow-y-auto') as HTMLElement | null;
-      if (!el || !container) return;
-      const topOffset = 48; // viewer-headern (pt-12) ska inte täcka flikarna
-      const delta = el.getBoundingClientRect().top - container.getBoundingClientRect().top - topOffset;
-      if (Math.abs(delta) > 1) container.scrollTop += delta;
-    };
-    snapToTabs();
-    // Innehållet byts via exit/enter-animation (mode="wait") — höjden ändras
-    // först när den nya fliken monterats, så korrigera igen efter animationen.
-    const t1 = window.setTimeout(snapToTabs, 240);
-    const t2 = window.setTimeout(snapToTabs, 450);
-    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
-  }, [activeTab]);
+    detailsScrollRef.current?.scrollTo({ top: 0 });
+  }, [activeTab, detailsOpen]);
+
 
   const measureSlideIndicator = useCallback(() => {
     const idx = TABS.findIndex(t => t.key === activeTab);
