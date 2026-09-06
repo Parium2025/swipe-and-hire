@@ -353,7 +353,12 @@ export const CandidateSlide = memo(function CandidateSlide({
                 }
                 handleSheetTouchMove(e);
               }}
-              onTouchEnd={(e) => { onTouchEnd(e); if (swipeLockedRef.current !== 'horizontal') handleSheetTouchEnd(); }}
+              onTouchEnd={(e) => {
+                const wasHorizontal = swipeLockedRef.current === 'horizontal';
+                onTouchEnd(e);
+                if (!wasHorizontal) handleSheetTouchEnd();
+              }}
+
               onTouchCancel={() => handleSheetTouchEnd()}
 
             >
