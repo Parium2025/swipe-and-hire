@@ -3,7 +3,7 @@ import { Sparkles, Play } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useCriteriaResultsForCandidates } from '@/hooks/useCriteriaResults';
+import { useCriteriaMatchFilter } from '@/hooks/useCriteriaMatchFilter';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
 interface JobCriterion {
@@ -33,27 +33,30 @@ export function CandidateSwipeFilterSheet({
 }: CandidateSwipeFilterSheetProps) {
   const [selected, setSelected] = useState<string[]>([]);
 
-  const pairs = useMemo(
-    () => candidates.map(c => ({ applicant_id: c.applicant_id, job_id: c.job_id })),
+  const jobIds = useMemo(
+    () => [...new Set(candidates.map(c => c.job_id).filter(Boolean) as string[])],
     [candidates],
   );
-  const { data: resultMap } = useCriteriaResultsForCandidates(open ? pairs : []);
+
+  // Urvalet görs i databasen — klienten matchar bara mot returnerade nycklar.
+  const { data: filter, isLoading: filterLoading } = useCriteriaMatchFilter(
+    jobIds,
+    selected,
+    open && selected.length > 0,
+  );
 
   const { matching, pending } = useMemo(() => {
     if (selected.length === 0) return { matching: candidates, pending: 0 };
+    if (!filter) return { matching: [], pending: 0 };
     let pendingCount = 0;
     const kept = candidates.filter((candidate) => {
-      const entry = resultMap?.[`${candidate.job_id}-${candidate.applicant_id}`];
-      if (!entry || entry.status !== 'completed') {
-        pendingCount += 1;
-        return true;
-      }
-      return selected.every(criterionId =>
-        entry.results.some(r => r.criterion_id === criterionId && r.result === 'match'),
-      );
+      const key = `${candidate.job_id}-${candidate.applicant_id}`;
+      if (!filter.keep.has(key)) return false;
+      if (filter.pending.has(key)) pendingCount += 1;
+      return true;
     });
     return { matching: kept, pending: pendingCount };
-  }, [candidates, resultMap, selected]);
+  }, [candidates, filter, selected]);
 
   const toggle = (id: string) => {
     setSelected(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
@@ -94,7 +97,9 @@ export function CandidateSwipeFilterSheet({
 
         <div className="mt-5 space-y-2">
           <p className="text-sm text-muted-foreground">
-            {matching.length} av {candidates.length} kandidater matchar ditt urval.
+            {selected.length > 0 && filterLoading
+              ? 'Räknar ut matchningar…'
+              : `${matching.length} av ${candidates.length} kandidater matchar ditt urval.`}
           </p>
           {pending > 0 && (
             <p className="text-sm text-muted-foreground">
@@ -103,7 +108,7 @@ export function CandidateSwipeFilterSheet({
           )}
           <Button
             className="w-full min-h-11"
-            disabled={matching.length === 0}
+            disabled={matching.length === 0 || (selected.length > 0 && filterLoading)}
             onClick={() => {
               onOpenChange(false);
               onStart(matching);
