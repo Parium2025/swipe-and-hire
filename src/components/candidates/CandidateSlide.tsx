@@ -1,7 +1,7 @@
 import { useState, memo, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronLeft } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { SectionErrorBoundary } from '@/components/candidateProfile';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
