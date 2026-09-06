@@ -4704,6 +4704,8 @@ export type Database = {
         Returns: number
       }
       run_data_retention: { Args: never; Returns: undefined }
+      run_five_minute_maintenance: { Args: never; Returns: undefined }
+      run_minutely_maintenance: { Args: never; Returns: undefined }
       same_organization: {
         Args: { p_user_id_1: string; p_user_id_2: string }
         Returns: boolean
