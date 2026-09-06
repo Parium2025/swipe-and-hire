@@ -734,6 +734,26 @@ const MyCandidates = () => {
     [displayedCandidates, mapCandidateToAppData],
   );
 
+  // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
+  const singleSwipeJobId = useMemo(() => {
+    const ids = new Set(displayedCandidates.map(c => c.job_id).filter(Boolean));
+    return ids.size === 1 ? (Array.from(ids)[0] as string) : null;
+  }, [displayedCandidates]);
+  const { data: swipeJobCriteria } = useJobCriteria(singleSwipeJobId);
+
+  // Aktiva urvalskriterier styr swipe-läget: bara matchande kandidater
+  // (plus de som väntar på AI-granskning) visas. Urvalet sker i databasen.
+  const activeSwipeCriteriaIds = useMemo(
+    () => (swipeJobCriteria || []).map(c => c.id),
+    [swipeJobCriteria],
+  );
+  const swipeCriteriaEnabled = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const { data: swipeCriteriaFilter, isLoading: swipeCriteriaLoading } = useCriteriaMatchFilter(
+    singleSwipeJobId ? [singleSwipeJobId] : [],
+    activeSwipeCriteriaIds,
+    swipeCriteriaEnabled,
+  );
+
   // Applications for the swipe viewer.
   // Utan urvalskriterier (knappen "Swipe-läge") visas alla kandidater i listan —
   // stage-listan fylls bara när swipen startas från en enskild kolumn.
