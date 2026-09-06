@@ -209,7 +209,7 @@ export const CandidateSlide = memo(function CandidateSlide({
       <div className="w-full flex-1 min-h-0 flex flex-col items-center gap-3">
 
         {/* ── Kortfront — helskärm, samma känsla som jobbsökarens svepkort ── */}
-        <div className="w-full flex-1 min-h-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)]">
+        <div className="relative w-full flex-1 min-h-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)]">
           <CandidateCardFace
             fullBleed
             firstName={application.first_name}
@@ -221,23 +221,25 @@ export const CandidateSlide = memo(function CandidateSlide({
             videoUrl={videoUrl}
             hasVideo={!!isProfileVideo}
             ctaLabel="Tryck för mer info"
+            contentBottomClassName={showActions ? 'pb-24' : 'pb-6'}
             onOpen={() => setDetailsOpen(true)}
           />
+
+          {/* Åtgärder — ligger i kortet, precis som jobbsökarens swipe-läge */}
+          {showActions && (
+            <div className="absolute inset-x-0 bottom-4 z-20 flex justify-center">
+              <CandidateSlideActions
+                saved={saved}
+                canUndo={canUndo}
+                onUndo={onUndo}
+                onSave={() => onSave?.()}
+                onSkip={() => onSkip?.()}
+                onOpenInfo={() => setDetailsOpen(true)}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Åtgärder — samma knappar som jobbsökarens swipe-läge */}
-        {showActions && (
-          <div className="shrink-0 pt-1">
-            <CandidateSlideActions
-              saved={saved}
-              canUndo={canUndo}
-              onUndo={onUndo}
-              onSave={() => onSave?.()}
-              onSkip={() => onSkip?.()}
-              onOpenInfo={() => setDetailsOpen(true)}
-            />
-          </div>
-        )}
 
         {/* Nästa-kandidat-hint längst ner i helskärmskortet */}
         {!isLast && (
@@ -264,7 +266,7 @@ export const CandidateSlide = memo(function CandidateSlide({
             />
 
             <motion.div
-              className="fixed inset-x-0 bottom-0 z-[120] max-h-[88dvh] h-[88dvh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
+              className="fixed inset-x-0 bottom-0 z-[120] h-[100dvh] max-h-[100dvh] bg-parium-gradient overflow-hidden flex flex-col will-change-transform"
               initial={{ y: '100%' }}
               animate={sheetControls}
               exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
@@ -275,18 +277,19 @@ export const CandidateSlide = memo(function CandidateSlide({
             >
               {/* Draghandtag */}
               <div
-                className="flex justify-center pt-3 pb-2 shrink-0 cursor-grab active:cursor-grabbing"
+                className="flex justify-center pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-2 shrink-0 cursor-grab active:cursor-grabbing"
                 onTouchStart={handleHandleTouchStart}
                 onTouchMove={handleSheetTouchMove}
                 onTouchEnd={handleSheetTouchEnd}
               >
                 <div className="w-10 h-1.5 rounded-full bg-white/30" />
+
               </div>
 
               {/* Stäng */}
               <button
                 onClick={animatedClose}
-                className="absolute top-3 right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
+                className="absolute top-[calc(env(safe-area-inset-top,0px)+0.5rem)] right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
                 aria-label="Stäng"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90 [@media(hover:hover)]:hover:bg-white/20">
@@ -340,9 +343,24 @@ export const CandidateSlide = memo(function CandidateSlide({
               className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-5 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] touch-pan-y"
               style={{ WebkitOverflowScrolling: 'touch' }}
               onTouchStart={(e) => { onTouchStart(e); handleSheetTouchStart(e); }}
-              onTouchMove={(e) => { onTouchMove(e); handleSheetTouchMove(e); }}
-              onTouchEnd={(e) => { onTouchEnd(e); handleSheetTouchEnd(); }}
+              onTouchMove={(e) => {
+                onTouchMove(e);
+                // Endast rena nedåtdrag får stänga panelen — flikbyten (horisontella
+                // svep) ska aldrig tolkas som "dra ner för att stänga".
+                if (swipeLockedRef.current === 'horizontal') {
+                  handleSheetTouchEnd();
+                  return;
+                }
+                handleSheetTouchMove(e);
+              }}
+              onTouchEnd={(e) => {
+                const wasHorizontal = swipeLockedRef.current === 'horizontal';
+                onTouchEnd(e);
+                if (!wasHorizontal) handleSheetTouchEnd();
+              }}
+
               onTouchCancel={() => handleSheetTouchEnd()}
+
             >
 
               <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>

@@ -26,7 +26,10 @@ export interface CandidateCardFaceProps {
    * påverkas inte.
    */
   fullBleed?: boolean;
+  /** Extra bottenutrymme i helskärmsläget (t.ex. när knappraden ligger i kortet). */
+  contentBottomClassName?: string;
   onOpen?: () => void;
+
 }
 
 /**
@@ -48,15 +51,17 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   ctaLabel = 'Tryck för mer info',
   minNameFontPx = 13,
   fullBleed = false,
+  contentBottomClassName = 'pb-6',
   onOpen,
+
 }: CandidateCardFaceProps) {
   const fullName = `${firstName || ''} ${lastName || ''}`.trim();
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const showVideo = Boolean(hasVideo && videoUrl);
   const stillImage = profileImageUrl || coverImageUrl || '';
 
-  // Helskärmsläge: bilden fyller hela kortet, precis som jobbsökarens svepkort.
-  if (fullBleed && !showVideo) {
+  // Helskärmsläge: media fyller hela kortet, precis som jobbsökarens svepkort.
+  if (fullBleed) {
     return (
       <div
         className="w-full h-full relative overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
@@ -64,7 +69,21 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         onDragStart={(e) => e.preventDefault()}
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
-        {stillImage ? (
+        {showVideo ? (
+          <div className="absolute inset-0" onClick={(e) => e.stopPropagation()}>
+            <ProfileVideo
+              videoUrl={videoUrl as string}
+              coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+              posterUrl={posterUrl || undefined}
+              userInitials={initials}
+              alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
+              className="w-full h-full rounded-none"
+              countdownVariant="default"
+              showCountdown={true}
+              disablePlayback={false}
+            />
+          </div>
+        ) : stillImage ? (
           <img
             src={stillImage}
             alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
@@ -93,7 +112,8 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
 
-        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-6 text-left">
+        <div className={`absolute inset-x-0 bottom-0 z-10 px-5 text-left pointer-events-none ${contentBottomClassName}`}>
+
           <TruncatedText text={fullName} className="two-line-ellipsis two-line-ellipsis-nopad block w-full">
             <NameAutoFit
               text={fullName}
@@ -158,7 +178,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                   alt="Profilbild"
                   className="object-cover"
                 />
-                <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold" delayMs={200}>
+                <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>

@@ -85,7 +85,7 @@ export const CandidateSlideProfileTab = memo(function CandidateSlideProfileTab({
         ) : (
           <Avatar className="w-28 h-28 border-4 border-white/20 shadow-xl">
             <AvatarImage src={profileImageUrl || ''} alt={`${application.first_name} ${application.last_name}`} className="object-cover" />
-            <AvatarFallback className="bg-white/10 text-white text-3xl font-semibold" delayMs={200}>{initials}</AvatarFallback>
+            <AvatarFallback className="bg-white/10 text-white text-3xl font-semibold">{initials}</AvatarFallback>
           </Avatar>
         )}
       </div>
