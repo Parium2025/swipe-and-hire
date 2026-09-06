@@ -1024,7 +1024,29 @@ export function CandidatesTable({
         </div>
       )}
 
+      {/* Swipe-läge — samma filtrerade urval som listan visar */}
+      <CandidateSwipeViewer
+        applications={sortedApplications}
+        initialIndex={swipeIndex}
+        open={swipeOpen}
+        behind={dialogOpen && returnToSwipe}
+        onClose={() => onSwipeOpenChange?.(false)}
+        onOpenFullProfile={(app) => {
+          const idx = sortedApplications.findIndex(a => a.id === app.id);
+          if (idx >= 0) setSwipeIndex(idx);
+          setReturnToSwipe(true);
+          handleRowClick(app);
+        }}
+        getDisplayRating={getDisplayRating}
+        savedApplicantIds={swipeSavedApplicantIds}
+        onSaveCandidate={handleMobileAddCandidate}
+        onLoadMore={onLoadMore}
+        hasMore={hasMore && !hasReachedLimit}
+        isLoadingMore={isLoadingMore}
+      />
+
       <CandidateProfileDialog
+
         application={selectedApplication}
         open={dialogOpen}
         onOpenChange={handleDialogClose}
