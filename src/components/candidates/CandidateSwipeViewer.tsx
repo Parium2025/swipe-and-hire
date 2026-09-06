@@ -257,7 +257,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onSkip={handleSkip}
 
               />
-
+              </motion.div>
             </div>
             );
           })}
