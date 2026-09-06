@@ -481,6 +481,80 @@ export type Database = {
           },
         ]
       }
+      candidate_search_index: {
+        Row: {
+          account_deleted: boolean
+          answer_tokens: string[] | null
+          answers_vector: unknown
+          applicant_id: string
+          application_id: string
+          applied_at: string
+          cv_vector: unknown
+          employer_id: string
+          job_id: string
+          notes_text: string | null
+          organization_id: string | null
+          phone_digits: string | null
+          profile_vector: unknown
+          raw_text: string | null
+          search_text: string | null
+          search_vector: unknown
+          status: string | null
+          summary_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_deleted?: boolean
+          answer_tokens?: string[] | null
+          answers_vector?: unknown
+          applicant_id: string
+          application_id: string
+          applied_at: string
+          cv_vector?: unknown
+          employer_id: string
+          job_id: string
+          notes_text?: string | null
+          organization_id?: string | null
+          phone_digits?: string | null
+          profile_vector?: unknown
+          raw_text?: string | null
+          search_text?: string | null
+          search_vector?: unknown
+          status?: string | null
+          summary_text?: string | null
+          updated_at: string
+        }
+        Update: {
+          account_deleted?: boolean
+          answer_tokens?: string[] | null
+          answers_vector?: unknown
+          applicant_id?: string
+          application_id?: string
+          applied_at?: string
+          cv_vector?: unknown
+          employer_id?: string
+          job_id?: string
+          notes_text?: string | null
+          organization_id?: string | null
+          phone_digits?: string | null
+          profile_vector?: unknown
+          raw_text?: string | null
+          search_text?: string | null
+          search_vector?: unknown
+          status?: string | null
+          summary_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_search_index_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_summaries: {
         Row: {
           applicant_id: string
@@ -4580,6 +4654,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: boolean
+      }
+      refresh_candidate_search_index: {
+        Args: { _application_id: string }
+        Returns: undefined
       }
       register_session: {
         Args: {
