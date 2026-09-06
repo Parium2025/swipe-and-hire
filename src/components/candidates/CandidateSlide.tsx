@@ -223,40 +223,80 @@ export const CandidateSlide = memo(function CandidateSlide({
           />
         </div>
 
+        {/* Åtgärder — samma knappar som jobbsökarens swipe-läge */}
+        {showActions && (
+          <div className="shrink-0 pt-1">
+            <CandidateSlideActions
+              saved={saved}
+              canUndo={canUndo}
+              onUndo={onUndo}
+              onSave={() => onSave?.()}
+              onSkip={() => onSkip?.()}
+              onOpenInfo={() => setDetailsOpen(true)}
+            />
+          </div>
+        )}
+
         {/* Nästa-kandidat-hint längst ner i helskärmskortet */}
         {!isLast && (
-          <div className="flex flex-col items-center gap-0.5 pt-1 shrink-0">
+          <div className="flex flex-col items-center gap-0.5 shrink-0">
             <ChevronDown className="h-4 w-4 text-white fill-white animate-bounce" />
             <span className="text-[10px] text-white font-medium">Nästa kandidat</span>
           </div>
         )}
       </div>
 
-      {/* ── Steg 2: helskärms-info ── */}
+      {/* ── Steg 2: infopanel — samma panel som jobbannonsen (dra ner eller kryss) ── */}
       <AnimatePresence>
         {detailsOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 320, damping: 34, mass: 0.9 }}
-            className="fixed inset-0 z-[120] bg-card-parium flex flex-col"
-          >
-            {/* Header */}
-            <div className="shrink-0 flex items-center gap-2 px-3 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2">
-              <button
-                onClick={() => setDetailsOpen(false)}
-                aria-label="Tillbaka"
-                className="flex h-11 w-11 items-center justify-center touch-manipulation"
+          <>
+            <motion.div
+              className="fixed inset-0 z-[115] bg-black/60"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              style={isAnimatingIn ? undefined : { opacity: backdropOpacity }}
+              onPointerDown={handleBackdropDismiss}
+              onClick={handleBackdropDismiss}
+            />
+
+            <motion.div
+              className="fixed inset-x-0 bottom-0 z-[120] max-h-[88dvh] h-[88dvh] bg-parium-gradient rounded-t-3xl overflow-hidden flex flex-col will-change-transform"
+              initial={{ y: '100%' }}
+              animate={sheetControls}
+              exit={{ y: '100%', transition: { type: 'spring', damping: 34, stiffness: 400, mass: 0.8 } }}
+              transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
+              style={isAnimatingIn ? undefined : { y: dragY }}
+              onPointerDown={stopSheetPropagation}
+              onClick={stopSheetPropagation}
+            >
+              {/* Draghandtag */}
+              <div
+                className="flex justify-center pt-3 pb-2 shrink-0 cursor-grab active:cursor-grabbing"
+                onTouchStart={handleHandleTouchStart}
+                onTouchMove={handleSheetTouchMove}
+                onTouchEnd={handleSheetTouchEnd}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 active:bg-white/20 transition-colors">
-                  <ChevronLeft className="h-5 w-5 text-white" />
+                <div className="w-10 h-1.5 rounded-full bg-white/30" />
+              </div>
+
+              {/* Stäng */}
+              <button
+                onClick={animatedClose}
+                className="absolute top-3 right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
+                aria-label="Stäng"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90 [@media(hover:hover)]:hover:bg-white/20">
+                  <X className="h-5 w-5 text-white" />
                 </div>
               </button>
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">
-                {`${application.first_name || ''} ${application.last_name || ''}`.trim()}
-              </span>
-            </div>
+
+              <div className="shrink-0 px-5 pr-16 pb-2">
+                <span className="block truncate text-base font-bold text-white">
+                  {`${application.first_name || ''} ${application.last_name || ''}`.trim()}
+                </span>
+              </div>
 
             {/* Tabs */}
             <div ref={tabsBarRef} className="shrink-0 mx-6 flex items-center border-b border-white/20 relative">
@@ -295,13 +335,14 @@ export const CandidateSlide = memo(function CandidateSlide({
             {/* Innehåll */}
             <div
               ref={detailsScrollRef}
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-5 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)]"
-
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-5 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] touch-pan-y"
               style={{ WebkitOverflowScrolling: 'touch' }}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
+              onTouchStart={(e) => { onTouchStart(e); handleSheetTouchStart(e); }}
+              onTouchMove={(e) => { onTouchMove(e); handleSheetTouchMove(e); }}
+              onTouchEnd={(e) => { onTouchEnd(e); handleSheetTouchEnd(); }}
+              onTouchCancel={() => handleSheetTouchEnd()}
             >
+
               <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
                 <motion.div
                   key={activeTab}
