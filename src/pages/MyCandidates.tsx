@@ -972,6 +972,7 @@ const MyCandidates = () => {
         onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
         onOpenFullProfile={handleSwipeOpenFullProfile}
         getDisplayRating={getDisplayRating}
+        savedApplicantIds={swipeSavedApplicantIds}
         onLoadMore={() => {
           const stage = swipeStageCandidates[swipeInitialIndex]?.stage;
           if (stage) loadMoreStage(stage);
