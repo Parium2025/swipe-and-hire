@@ -106,8 +106,8 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             />
           ) : !stillImage ? (
 
-            <div className={`${circleClass} flex items-center justify-center bg-white/10 backdrop-blur-sm`}>
-              <span className="text-6xl font-bold text-white">{initials}</span>
+            <div className="flex h-[min(38vw,9.5rem)] w-[min(38vw,9.5rem)] items-center justify-center overflow-hidden rounded-full border-4 border-white/30 bg-white/10 shadow-2xl backdrop-blur-sm">
+              <span className="text-4xl font-bold text-white">{initials}</span>
             </div>
           ) : null}
         </div>
