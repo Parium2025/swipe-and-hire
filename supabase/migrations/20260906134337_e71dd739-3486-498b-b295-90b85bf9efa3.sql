@@ -1,0 +1,1 @@
+ALTER FUNCTION public.parium_answer_tokens(jsonb) SET search_path = public, pg_catalog;
