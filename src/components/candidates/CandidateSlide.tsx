@@ -209,7 +209,7 @@ export const CandidateSlide = memo(function CandidateSlide({
       <div className="w-full flex-1 min-h-0 flex flex-col items-center gap-3">
 
         {/* ── Kortfront — helskärm, samma känsla som jobbsökarens svepkort ── */}
-        <div className="w-full flex-1 min-h-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)]">
+        <div className="relative w-full flex-1 min-h-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)]">
           <CandidateCardFace
             fullBleed
             firstName={application.first_name}
@@ -221,23 +221,25 @@ export const CandidateSlide = memo(function CandidateSlide({
             videoUrl={videoUrl}
             hasVideo={!!isProfileVideo}
             ctaLabel="Tryck för mer info"
+            contentBottomClassName={showActions ? 'pb-24' : 'pb-6'}
             onOpen={() => setDetailsOpen(true)}
           />
+
+          {/* Åtgärder — ligger i kortet, precis som jobbsökarens swipe-läge */}
+          {showActions && (
+            <div className="absolute inset-x-0 bottom-4 z-20 flex justify-center">
+              <CandidateSlideActions
+                saved={saved}
+                canUndo={canUndo}
+                onUndo={onUndo}
+                onSave={() => onSave?.()}
+                onSkip={() => onSkip?.()}
+                onOpenInfo={() => setDetailsOpen(true)}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Åtgärder — samma knappar som jobbsökarens swipe-läge */}
-        {showActions && (
-          <div className="shrink-0 pt-1">
-            <CandidateSlideActions
-              saved={saved}
-              canUndo={canUndo}
-              onUndo={onUndo}
-              onSave={() => onSave?.()}
-              onSkip={() => onSkip?.()}
-              onOpenInfo={() => setDetailsOpen(true)}
-            />
-          </div>
-        )}
 
         {/* Nästa-kandidat-hint längst ner i helskärmskortet */}
         {!isLast && (
