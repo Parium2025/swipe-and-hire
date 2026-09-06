@@ -412,7 +412,7 @@ const JobDetails = () => {
   );
 
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
-    const idx = swipeApplicationsData.findIndex(a => a.id === application.id);
+    const idx = swipeApplicationsAsData.findIndex(a => a.id === application.id);
     if (idx >= 0) setSwipeInitialIndex(idx);
     setSwipeViewerOpen(false);
     setReturnToSwipe(true);
@@ -423,7 +423,7 @@ const JobDetails = () => {
       setSelectedStage(resolvedStage);
       setDialogOpen(true);
     }
-  }, [applications, resolveStageForApplication]);
+  }, [applications, resolveStageForApplication, swipeApplicationsAsData]);
 
   const currentNavigationStage = useMemo(() => {
     if (!selectedApplication) return undefined;
