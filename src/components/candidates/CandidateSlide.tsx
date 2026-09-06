@@ -403,9 +403,11 @@ export const CandidateSlide = memo(function CandidateSlide({
                 </motion.div>
               </AnimatePresence>
             </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
+
     </div>
   );
 });
