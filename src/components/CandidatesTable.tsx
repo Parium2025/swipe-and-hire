@@ -30,6 +30,8 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
+import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+
 
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
