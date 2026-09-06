@@ -118,6 +118,8 @@ const JobDetails = () => {
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   // Spara-knappen i svepläget öppnar listväljaren för just den kandidaten.
   const [swipeSaveCandidate, setSwipeSaveCandidate] = useState<ApplicationData | null>(null);
+  // Profilen öppnad från svepläget → nedsvep/stäng ska ta oss tillbaka dit.
+  const [returnToSwipe, setReturnToSwipe] = useState(false);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
@@ -410,7 +412,10 @@ const JobDetails = () => {
   );
 
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
+    const idx = swipeApplicationsData.findIndex(a => a.id === application.id);
+    if (idx >= 0) setSwipeInitialIndex(idx);
     setSwipeViewerOpen(false);
+    setReturnToSwipe(true);
     const original = applications.find(a => a.id === application.id);
     if (original) {
       const resolvedStage = resolveStageForApplication(original);
@@ -772,6 +777,10 @@ const JobDetails = () => {
           onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) {
+              if (returnToSwipe) {
+                setReturnToSwipe(false);
+                setSwipeViewerOpen(true);
+              }
               setTimeout(() => {
                 setSelectedApplication(null);
                 setSelectedStage(null);
