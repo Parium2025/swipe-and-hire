@@ -57,7 +57,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   minNameFontPx = 13,
   fullBleed = false,
   contentBottomClassName = 'pb-6',
+  criteria,
   onOpen,
+
 
 }: CandidateCardFaceProps) {
   const fullName = `${firstName || ''} ${lastName || ''}`.trim();
