@@ -1072,6 +1072,8 @@ export function CandidatesTable({
         candidateRating={selectedApplication ? getDisplayRating(selectedApplication) : undefined}
         onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
         adjacentMedia={adjacentCandidateMedia}
+        fromSwipe={returnToSwipe}
+
       />
 
 
