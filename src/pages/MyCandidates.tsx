@@ -737,6 +737,13 @@ const MyCandidates = () => {
     return allCandidatesAsAppData;
   }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData]);
 
+  // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och låst.
+  const swipeSavedApplicantIds = useMemo(
+    () => new Set(swipeApplicationsData.map(a => a.applicant_id)),
+    [swipeApplicationsData],
+  );
+
+
   // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
   const singleSwipeJobId = useMemo(() => {
     const ids = new Set(displayedCandidates.map(c => c.job_id).filter(Boolean));
