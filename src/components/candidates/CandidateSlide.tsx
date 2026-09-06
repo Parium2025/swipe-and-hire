@@ -289,7 +289,7 @@ export const CandidateSlide = memo(function CandidateSlide({
               {/* Stäng */}
               <button
                 onClick={animatedClose}
-                className="absolute top-3 right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
+                className="absolute top-[calc(env(safe-area-inset-top,0px)+0.5rem)] right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
                 aria-label="Stäng"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90 [@media(hover:hover)]:hover:bg-white/20">
