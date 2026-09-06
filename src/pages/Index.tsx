@@ -359,8 +359,11 @@ const CandidatesContent = () => {
               loadedCount={loadedCount}
               onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
               onServerSortChange={setSortBy}
+              swipeOpen={swipeOpen}
+              onSwipeOpenChange={setSwipeOpen}
             />
           </div>
+
         )}
 
       </div>
