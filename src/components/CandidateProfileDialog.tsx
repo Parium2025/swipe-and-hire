@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
