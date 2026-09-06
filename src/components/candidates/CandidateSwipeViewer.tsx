@@ -5,7 +5,6 @@ import { X } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
-import { useCriteriaResultsForCandidates } from '@/hooks/useCriteriaResults';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
 
@@ -86,30 +85,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
   useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
 
-  // Urvalskriterier: hämtas bara för fönstret runt aktuell kandidat, så vyn
-  // fungerar lika snabbt med 10 som med 10 000 kandidater.
-  const criteriaWindow = useMemo(() => {
-    if (!open) return [];
-    const start = Math.max(0, currentIndex - 3);
-    return applications
-      .slice(start, start + 15)
-      .map(a => ({ applicant_id: a.applicant_id, job_id: a.job_id }));
-  }, [open, applications, currentIndex]);
-
-  const { data: criteriaMap } = useCriteriaResultsForCandidates(criteriaWindow);
-
-  const criteriaFor = useCallback(
-    (app: ApplicationData) => {
-      const entry = criteriaMap?.[`${app.job_id}-${app.applicant_id}`];
-      if (!entry || entry.status !== 'completed' || entry.results.length === 0) return undefined;
-      return entry.results.map(r => ({
-        criterion_id: r.criterion_id,
-        title: r.criterion_title || 'Kriterium',
-        result: r.result,
-      }));
-    },
-    [criteriaMap],
-  );
 
 
   // Scroll to initial candidate on open
@@ -251,7 +226,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}
                 onSave={onSaveCandidate ? () => onSaveCandidate(app) : undefined}
                 onSkip={handleSkip}
-                criteria={criteriaFor(app)}
 
               />
 

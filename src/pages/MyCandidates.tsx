@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
-import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { Layers, SlidersHorizontal } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -207,7 +207,7 @@ const MyCandidates = () => {
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
-  const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
+  const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   // Profilen öppnad från svepläget → nedsvep/stäng ska ta oss tillbaka dit.
   const [returnToSwipe, setReturnToSwipe] = useState(false);
@@ -837,14 +837,16 @@ const MyCandidates = () => {
             <Layers className="h-4 w-4" />
             <span>Swipe-läge</span>
           </button>
-          <button
-            type="button"
-            onClick={() => setSwipeFilterOpen(true)}
-            className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            <span>Urvalskriterier</span>
-          </button>
+          {singleSwipeJobId && (
+            <button
+              type="button"
+              onClick={() => setCriteriaDialogOpen(true)}
+              className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Urvalskriterier</span>
+            </button>
+          )}
         </div>
 
         <MobileMyCandidatesView
@@ -967,18 +969,17 @@ const MyCandidates = () => {
         </DndContext>
       )}
 
-      {/* Urvalskriterier innan swipe-läget startar */}
-      <CandidateSwipeFilterSheet
-        open={swipeFilterOpen}
-        onOpenChange={setSwipeFilterOpen}
-        candidates={allCandidatesAsAppData}
-        criteria={(swipeJobCriteria || []).map(c => ({ id: c.id, title: c.title }))}
-        onStart={(filtered) => {
-          setSwipeFilteredApps(filtered);
-          setSwipeInitialIndex(0);
-          setSwipeViewerOpen(true);
-        }}
-      />
+      {/* Urvalskriterier — samma dialog som på datorn */}
+      {singleSwipeJobId && (
+        <SelectionCriteriaDialog
+          open={criteriaDialogOpen}
+          onOpenChange={setCriteriaDialogOpen}
+          jobId={singleSwipeJobId}
+          candidates={displayedCandidates
+            .filter(c => c.job_id === singleSwipeJobId)
+            .map(c => ({ applicant_id: c.applicant_id, application_id: c.application_id }))}
+        />
+      )}
 
       {/* Swipe Viewer — continuous scroll navigation */}
       <CandidateSwipeViewer
