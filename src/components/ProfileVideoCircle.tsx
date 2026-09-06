@@ -58,7 +58,7 @@ export function ProfileVideoCircle({
           alt={alt}
           className="h-full w-full rounded-full"
           countdownVariant="circle"
-          {/* Listen under cirkeln visar tiden — ingen dubbel tidvisning. */}
+          // Listen under cirkeln visar tiden — ingen dubbel tidvisning.
           showCountdown={false}
           showProgressBar={false}
           disablePlayback={disablePlayback}
