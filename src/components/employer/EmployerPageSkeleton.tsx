@@ -424,6 +424,7 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
  */
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
   const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
+  const isDesktop = useDevice() === 'desktop';
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -451,6 +452,12 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                 <div key={i} className={`h-9 w-${w} rounded-full ${SHAPE}`} style={{ width: `${w * 4}px` }} />
               ))}
             </div>
+            {/* Swipe-läge-knappen (mobilvyn) — samma plats som i den riktiga sidan */}
+            {!isDesktop && (
+              <div className="flex justify-center pb-3">
+                <div className={`h-11 w-40 rounded-full ${SHAPE}`} />
+              </div>
+            )}
             {/* Candidate cards */}
             <div className="space-y-3">
               {Array.from({ length: candidateCount }).map((_, i) => (
@@ -498,6 +505,10 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
               <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
               <div className="flex justify-center gap-2">
                 <div className={`h-9 w-40 rounded-full ${SHAPE}`} />
+                <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
+              </div>
+              {/* Swipe-läge-knappen ligger på egen rad under filtren */}
+              <div className="flex justify-center">
                 <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
               </div>
             </div>
