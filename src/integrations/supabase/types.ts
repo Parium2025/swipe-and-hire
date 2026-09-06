@@ -4956,37 +4956,6 @@ export type Database = {
         Args: { p_job_id: string; p_questions: Json }
         Returns: undefined
       }
-      test_search_employer_candidates: {
-        Args: never
-        Returns: {
-          account_deleted: boolean
-          age: number
-          applicant_id: string
-          applied_at: string
-          availability: string
-          bio: string
-          custom_answers: Json
-          cv_url: string
-          email: string
-          employment_status: string
-          first_name: string
-          id: string
-          job_id: string
-          job_occupation: string
-          job_title: string
-          last_name: string
-          location: string
-          match_source: string
-          phone: string
-          questions_snapshot: Json
-          rating: number
-          status: string
-          total_count: number
-          updated_at: string
-          viewed_at: string
-          work_schedule: string
-        }[]
-      }
       trigger_career_tips_fetch: { Args: never; Returns: undefined }
       trigger_cron_health_watchdog: { Args: never; Returns: undefined }
       trigger_hr_news_fetch: { Args: never; Returns: undefined }

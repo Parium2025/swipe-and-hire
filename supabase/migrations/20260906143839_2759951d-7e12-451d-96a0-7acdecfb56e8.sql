@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.test_search_employer_candidates();
