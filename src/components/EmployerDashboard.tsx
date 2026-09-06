@@ -871,6 +871,10 @@ const EmployerDashboard = memo(() => {
               </div>
             ))}
           </div>
+        ) : isFetchingJumpPage ? (
+          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
+            <span>Hämtar sida {page}…</span>
+          </div>
         ) : tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
             <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
