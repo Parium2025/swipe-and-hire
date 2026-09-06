@@ -123,7 +123,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [open, handleScroll]);
 
-  // Hoppa över = nästa kandidat, Ångra = tillbaka till föregående.
+  // Hoppa över = nästa kandidat.
   const goToIndex = useCallback((idx: number) => {
     if (idx < 0 || idx >= applications.length) return;
     setCurrentIndex(idx);
@@ -132,10 +132,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   const handleSkip = useCallback(() => {
     goToIndex(currentIndex + 1);
-  }, [currentIndex, goToIndex]);
-
-  const handleUndo = useCallback(() => {
-    goToIndex(currentIndex - 1);
   }, [currentIndex, goToIndex]);
 
 
@@ -225,10 +221,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 showActions
                 saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}
-                canUndo={item.index > 0}
                 onSave={onSaveCandidate ? () => onSaveCandidate(app) : undefined}
                 onSkip={handleSkip}
-                onUndo={handleUndo}
               />
 
             </div>
