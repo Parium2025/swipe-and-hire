@@ -563,7 +563,6 @@ const MyCandidates = () => {
     setDialogOpen(false);
     if (returnToSwipe) {
       setReturnToSwipe(false);
-      setSwipeViewerOpen(true);
     }
     setTimeout(() => setSelectedCandidate(null), 300);
   };
@@ -761,7 +760,8 @@ const MyCandidates = () => {
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
     const idx = swipeApplicationsData.findIndex(a => a.id === application.id);
     if (idx >= 0) setSwipeInitialIndex(idx);
-    setSwipeViewerOpen(false);
+    // Swipe-vyn stannar kvar monterad bakom profilen — annars hinner listan
+    // blixtra fram mellan vyerna.
     setReturnToSwipe(true);
     const original = displayedCandidates.find(c => c.application_id === application.id);
     if (original) {
@@ -985,6 +985,7 @@ const MyCandidates = () => {
         applications={swipeApplicationsData}
         initialIndex={swipeInitialIndex}
         open={swipeViewerOpen}
+        behind={dialogOpen && returnToSwipe}
         onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
         onOpenFullProfile={handleSwipeOpenFullProfile}
         getDisplayRating={getDisplayRating}

@@ -86,6 +86,7 @@ interface CandidateProfileDialogProps {
   adjacentMedia?: Array<{ profile_image_url?: string | null; video_url?: string | null } | null | undefined>;
 }
 
+
 function getQuestionSnapshot(
   app: ApplicationData | null | undefined
 ): Record<string, { text: string; order: number }> | null {
@@ -121,6 +122,7 @@ export const CandidateProfileDialog = ({
   candidateIndex,
   candidateTotal,
   adjacentMedia,
+
 
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();

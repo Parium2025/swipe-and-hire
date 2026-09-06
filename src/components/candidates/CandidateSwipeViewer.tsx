@@ -22,6 +22,8 @@ interface CandidateSwipeViewerProps {
   savedApplicantIds?: Set<string>;
   /** Öppnar listväljaren för kandidaten. */
   onSaveCandidate?: (application: ApplicationData) => void;
+  /** Kvar monterad bakom kandidatprofilen — inget blixtrar fram och positionen bevaras. */
+  behind?: boolean;
 }
 
 /* ── Main Viewer ────────────────────────────────── */
@@ -38,6 +40,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   isLoadingMore = false,
   savedApplicantIds,
   onSaveCandidate,
+  behind = false,
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -83,11 +86,12 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   // Scroll to initial candidate on open
   useEffect(() => {
+    if (behind) return;
     if (open && applications[initialIndex]) {
       setCurrentIndex(initialIndex);
       requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
     }
-  }, [open, initialIndex, applications, virtualizer]);
+  }, [open, behind, initialIndex, applications, virtualizer]);
 
   // Track current candidate via scroll position — simple & reliable
   const handleScroll = useCallback(() => {
@@ -152,7 +156,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-[100] bg-card-parium"
+        className={`fixed inset-0 bg-card-parium ${behind ? 'z-[40] pointer-events-none' : 'z-[100]'}`}
+        aria-hidden={behind || undefined}
       >
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
