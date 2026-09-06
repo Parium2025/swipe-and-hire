@@ -87,24 +87,17 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         {/* Mediazon — cirkeln lever i eget flödesutrymme och kan aldrig nå namnet */}
         <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-6 pt-10 pb-4">
           {showVideo ? (
-            <div
-              className={`${circleClass} bg-white/10 backdrop-blur-sm`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ProfileVideo
-                videoUrl={videoUrl as string}
-                coverImageUrl={coverImageUrl || profileImageUrl || undefined}
-                posterUrl={posterUrl || undefined}
-                userInitials={initials}
-                alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
-                className="h-full w-full rounded-full"
-                countdownVariant="circle"
-                showCountdown={true}
-                showProgressBar={false}
-                disablePlayback={false}
-              />
-            </div>
+            <ProfileVideoCircle
+              videoUrl={videoUrl as string}
+              coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+              posterUrl={posterUrl || undefined}
+              userInitials={initials}
+              alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
+              circleClassName={`${circleClass} bg-white/10 backdrop-blur-sm`}
+              barClassName="w-[min(56vw,14rem)]"
+            />
           ) : !stillImage ? (
+
             <div className={`${circleClass} flex items-center justify-center bg-white/10 backdrop-blur-sm`}>
               <span className="text-6xl font-bold text-white">{initials}</span>
             </div>
