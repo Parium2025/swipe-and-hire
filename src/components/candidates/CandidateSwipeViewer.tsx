@@ -161,11 +161,16 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </div>
         )}
 
-        {/* Continuous scroll container */}
+        {/* Helskärmssvep — en kandidat per skärm, med snapp */}
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain pt-12"
-          style={{ WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', contain: 'layout style' }}
+          className="h-full w-full overflow-y-auto overscroll-contain"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            willChange: 'scroll-position',
+            contain: 'layout style',
+            scrollSnapType: 'y mandatory',
+          }}
         >
           <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((item) => {
@@ -174,10 +179,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             return (
             <div
               key={app.id}
-              ref={virtualizer.measureElement}
               data-index={item.index}
               className="absolute left-0 top-0 w-full"
-              style={{ transform: `translateY(${item.start}px)` }}
+              style={{ transform: `translateY(${item.start}px)`, height: `${slideHeight}px`, scrollSnapAlign: 'start' }}
             >
               <CandidateSlide
                 application={app}
@@ -191,8 +195,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             );
           })}
           </div>
-          <div className="h-[env(safe-area-inset-bottom,2rem)]" />
         </div>
+
       </motion.div>
     </AnimatePresence>,
     document.body
