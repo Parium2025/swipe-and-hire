@@ -190,6 +190,14 @@ const JobDetails = () => {
     },
   });
 
+  // Kandidater som redan ligger i en lista — spara-knappen i svepläget låses då.
+  const savedApplicantIds = useMemo(
+    () => new Set(Array.from(myCandidatesMap.keys())),
+    [myCandidatesMap],
+  );
+
+  const { teamMembers } = useTeamMembers();
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -809,6 +817,22 @@ const JobDetails = () => {
             setSwipeFilteredApps(filtered);
             setSwipeInitialIndex(0);
             setSwipeViewerOpen(true);
+          }}
+        />
+
+        {/* Listväljare från svepläget */}
+        <AddToColleagueListDialog
+          open={!!swipeSaveCandidate}
+          onOpenChange={(o) => { if (!o) setSwipeSaveCandidate(null); }}
+          teamMembers={teamMembers}
+          applicationId={swipeSaveCandidate?.id}
+          applicantId={swipeSaveCandidate?.applicant_id}
+          jobId={jobId}
+          elevated
+          candidateName={`${swipeSaveCandidate?.first_name || ''} ${swipeSaveCandidate?.last_name || ''}`.trim()}
+          onAdded={() => {
+            setSwipeSaveCandidate(null);
+            queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] });
           }}
         />
 
