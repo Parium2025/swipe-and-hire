@@ -13,6 +13,8 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { AddToColleagueListDialog } from '@/components/AddToColleagueListDialog';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Layers, SlidersHorizontal } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -114,6 +116,8 @@ const JobDetails = () => {
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
   const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
+  // Spara-knappen i svepläget öppnar listväljaren för just den kandidaten.
+  const [swipeSaveCandidate, setSwipeSaveCandidate] = useState<ApplicationData | null>(null);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
@@ -790,6 +794,8 @@ const JobDetails = () => {
             onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
             onOpenFullProfile={handleSwipeOpenFullProfile}
             getDisplayRating={getDisplayRating}
+            savedApplicantIds={savedApplicantIds}
+            onSaveCandidate={(app) => setSwipeSaveCandidate(app)}
           />
         )}
 
