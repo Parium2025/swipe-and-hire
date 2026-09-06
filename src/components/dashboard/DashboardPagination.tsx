@@ -78,14 +78,51 @@ export const DashboardPagination = memo(({ page, totalPages, onPageChange, compa
           pageNumberBaseClasses,
           isActive
             ? 'font-semibold relative after:content-[""] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[2px] after:w-4 after:rounded-full after:bg-white'
-
             : 'opacity-70 hover:opacity-100'
         )}
       >
         {p}
       </button>
     );
+
+    if (!isActive) return numberButton;
+
+    return (
+      <Popover open={jumpOpen} onOpenChange={setJumpOpen}>
+        <PopoverTrigger asChild>{numberButton}</PopoverTrigger>
+        <PopoverContent
+          align="center"
+          sideOffset={8}
+          className="w-auto border-white/20 p-3"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <p className="text-xs text-white mb-2">Gå till sida (1–{totalPages})</p>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={totalPages}
+              value={jumpValue}
+              onChange={(e) => setJumpValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  submitJump();
+                }
+              }}
+              aria-label="Sidnummer"
+              className="h-10 w-24 text-base bg-white/5 border-white/20 text-white"
+            />
+            <Button type="button" onClick={submitJump} className={cn(nextButtonClasses, 'px-5')}>
+              Gå
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
   };
+
 
   const PrevBtn = (
     <Button
