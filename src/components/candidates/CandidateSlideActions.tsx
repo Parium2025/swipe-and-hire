@@ -1,11 +1,9 @@
 import { memo } from 'react';
-import { Bookmark, Info, Undo2, X } from 'lucide-react';
+import { Bookmark, Info, X } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
 
 interface CandidateSlideActionsProps {
   saved: boolean;
-  canUndo?: boolean;
-  onUndo?: () => void;
   onSave: () => void;
   onSkip: () => void;
   onOpenInfo: () => void;
@@ -14,20 +12,16 @@ interface CandidateSlideActionsProps {
 /**
  * Åtgärdsrad i arbetsgivarens swipe-läge — samma form, storlek och känsla som
  * jobbsökarens [✕] [🔖] [❤] [↺], men med kandidatens åtgärder:
- * hoppa över, spara i lista, visa all info och ångra.
+ * hoppa över, spara i lista och visa all info.
  *
- * Alla fyra knappar är alltid monterade så raden aldrig hoppar.
+ * Knapparna är alltid monterade så raden aldrig hoppar.
  */
 export const CandidateSlideActions = memo(function CandidateSlideActions({
   saved,
-  canUndo,
-  onUndo,
   onSave,
   onSkip,
   onOpenInfo,
 }: CandidateSlideActionsProps) {
-  const undoActive = Boolean(canUndo && onUndo);
-
   return (
     <div className="flex items-center justify-center gap-4">
       <button
@@ -81,23 +75,6 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         <Info className="w-6 h-6 text-white" strokeWidth={2.25} />
       </button>
 
-      <button
-        type="button"
-        aria-label="Ångra senaste åtgärd"
-        aria-disabled={!undoActive}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          if (undoActive) onUndo!();
-        }}
-        onClick={(e) => e.preventDefault()}
-        data-swipe-action-button
-        className="w-[52px] h-[52px] rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation"
-      >
-        <Undo2
-          className={`w-6 h-6 text-white transition-opacity duration-200 ${undoActive ? 'opacity-100' : 'opacity-40'}`}
-          strokeWidth={2.25}
-        />
-      </button>
     </div>
   );
 });

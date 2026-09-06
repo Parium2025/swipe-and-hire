@@ -17,10 +17,8 @@ interface CandidateSlideProps {
   /** Åtgärdsraden visas bara när svepvyn kan hantera åtgärderna. */
   showActions?: boolean;
   saved?: boolean;
-  canUndo?: boolean;
   onSave?: () => void;
   onSkip?: () => void;
-  onUndo?: () => void;
 }
 
 export const CandidateSlide = memo(function CandidateSlide({
@@ -30,10 +28,8 @@ export const CandidateSlide = memo(function CandidateSlide({
   isVisible,
   showActions = false,
   saved = false,
-  canUndo = false,
   onSave,
   onSkip,
-  onUndo,
 }: CandidateSlideProps) {
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
   const videoUrl = useMediaUrl(application.video_url, 'profile-video');
@@ -83,8 +79,6 @@ export const CandidateSlide = memo(function CandidateSlide({
             <div className="absolute inset-x-0 bottom-4 z-20 flex justify-center">
               <CandidateSlideActions
                 saved={saved}
-                canUndo={canUndo}
-                onUndo={onUndo}
                 onSave={() => onSave?.()}
                 onSkip={() => onSkip?.()}
                 onOpenInfo={onOpenFullProfile}
