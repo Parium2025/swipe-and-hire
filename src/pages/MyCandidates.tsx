@@ -8,6 +8,7 @@ import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
+import { useCriteriaMatchFilter } from '@/hooks/useCriteriaMatchFilter';
 import { Layers, SlidersHorizontal } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
@@ -733,14 +734,39 @@ const MyCandidates = () => {
     [displayedCandidates, mapCandidateToAppData],
   );
 
+  // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
+  const singleSwipeJobId = useMemo(() => {
+    const ids = new Set(displayedCandidates.map(c => c.job_id).filter(Boolean));
+    return ids.size === 1 ? (Array.from(ids)[0] as string) : null;
+  }, [displayedCandidates]);
+  const { data: swipeJobCriteria } = useJobCriteria(singleSwipeJobId);
+
+  // Aktiva urvalskriterier styr swipe-läget: bara matchande kandidater
+  // (plus de som väntar på AI-granskning) visas. Urvalet sker i databasen.
+  const activeSwipeCriteriaIds = useMemo(
+    () => (swipeJobCriteria || []).map(c => c.id),
+    [swipeJobCriteria],
+  );
+  const swipeCriteriaEnabled = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const { data: swipeCriteriaFilter, isLoading: swipeCriteriaLoading } = useCriteriaMatchFilter(
+    singleSwipeJobId ? [singleSwipeJobId] : [],
+    activeSwipeCriteriaIds,
+    swipeCriteriaEnabled,
+  );
+
   // Applications for the swipe viewer.
   // Utan urvalskriterier (knappen "Swipe-läge") visas alla kandidater i listan —
   // stage-listan fylls bara när swipen startas från en enskild kolumn.
   const swipeApplicationsData = useMemo(() => {
     if (swipeFilteredApps) return swipeFilteredApps;
     if (swipeStageCandidates.length > 0) return swipeStageCandidates.map(mapCandidateToAppData);
+    if (swipeCriteriaEnabled && swipeCriteriaFilter) {
+      return allCandidatesAsAppData.filter(a =>
+        swipeCriteriaFilter.keep.has(`${a.job_id}-${a.applicant_id}`),
+      );
+    }
     return allCandidatesAsAppData;
-  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData]);
+  }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData, swipeCriteriaEnabled, swipeCriteriaFilter]);
 
   // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och låst.
   const swipeSavedApplicantIds = useMemo(
@@ -748,13 +774,6 @@ const MyCandidates = () => {
     [swipeApplicationsData],
   );
 
-
-  // Urvalskriterier kan bara filtreras när alla kandidater hör till samma annons
-  const singleSwipeJobId = useMemo(() => {
-    const ids = new Set(displayedCandidates.map(c => c.job_id).filter(Boolean));
-    return ids.size === 1 ? (Array.from(ids)[0] as string) : null;
-  }, [displayedCandidates]);
-  const { data: swipeJobCriteria } = useJobCriteria(singleSwipeJobId);
 
   // When user taps "open full profile" from swipe viewer → open dialog
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
@@ -831,11 +850,18 @@ const MyCandidates = () => {
         <div className="flex flex-wrap justify-center gap-2 pb-3">
           <button
             type="button"
+            disabled={swipeCriteriaEnabled && swipeCriteriaLoading}
             onClick={() => { setSwipeFilteredApps(null); setSwipeStageCandidates([]); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
-            className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
+            className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation disabled:opacity-60"
           >
             <Layers className="h-4 w-4" />
-            <span>Swipe-läge</span>
+            <span>
+              {swipeCriteriaEnabled && swipeCriteriaLoading
+                ? 'Räknar ut matchningar…'
+                : swipeCriteriaEnabled && swipeCriteriaFilter
+                  ? `Swipe-läge · ${swipeApplicationsData.length}`
+                  : 'Swipe-läge'}
+            </span>
           </button>
           {singleSwipeJobId && (
             <button
