@@ -500,6 +500,10 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
                 <div className={`h-9 w-40 rounded-full ${SHAPE}`} />
                 <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
               </div>
+              {/* Swipe-läge-knappen ligger på egen rad under filtren */}
+              <div className="flex justify-center">
+                <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
+              </div>
             </div>
             <div className="space-y-3">
               {Array.from({ length: candidateCount }).map((_, index) => (
