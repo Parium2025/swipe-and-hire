@@ -444,13 +444,12 @@ export const CandidateProfileDialog = ({
     return profilePaneRef.current;
   }, [mobileTab]);
 
-  const closeWithMotion = useCallback((startY = pullY, velocity = 0) => {
+  const closeWithMotion = useCallback((startY = pullYRef.current, velocity = 0) => {
     if (isDismissing) return;
     if (window.innerWidth >= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onOpenChange(false);
       return;
     }
-    setIsPulling(false);
     setIsDismissing(true);
     const contentHeight = dialogContentRef.current?.getBoundingClientRect().height ?? 0;
     const viewportHeight = Math.max(
@@ -462,17 +461,25 @@ export const CandidateProfileDialog = ({
     // vyn förbi nederkanten, med extra marginal, innan den avmonteras.
     const targetY = Math.max(contentHeight, viewportHeight) + Math.max(24, viewportHeight * 0.08);
     const remainingDistance = Math.max(0, targetY - startY);
-    // Fast 320 ms kändes "klippt" vid korta drag. Låt återstående sträcka och
-    // släpphastighet styra tempot så vyn får en mjuk, komplett utglidning.
-    const velocityBoost = Math.min(120, Math.max(0, velocity) * 120);
-    const duration = Math.round(Math.min(560, Math.max(360, 220 + remainingDistance * 0.38 - velocityBoost)));
-    setDismissDuration(duration);
-    setPullY(targetY);
+    // Släpphastighet och återstående sträcka styr tempot så vyn glider ut mjukt.
+    const velocityBoost = Math.min(160, Math.max(0, velocity) * 160);
+    const duration = Math.round(Math.min(460, Math.max(260, 180 + remainingDistance * 0.3 - velocityBoost)));
+    if (pullFrameRef.current !== null) {
+      cancelAnimationFrame(pullFrameRef.current);
+      pullFrameRef.current = null;
+    }
+    pullYRef.current = targetY;
+    // Starta från nuvarande position i samma frame, animera i nästa.
+    writePull(startY, null);
+    requestAnimationFrame(() => {
+      writePull(targetY, `transform ${duration}ms cubic-bezier(0.24, 0.82, 0.28, 1)`);
+    });
     dismissTimerRef.current = window.setTimeout(() => {
       dismissTimerRef.current = null;
       onOpenChange(false);
     }, duration + 120);
-  }, [isDismissing, onOpenChange, pullY]);
+  }, [isDismissing, onOpenChange, writePull]);
+
 
   const handleDismissTransitionEnd = useCallback((e: React.TransitionEvent<HTMLDivElement>) => {
     if (!isDismissing || e.propertyName !== 'transform' || e.target !== e.currentTarget) return;
