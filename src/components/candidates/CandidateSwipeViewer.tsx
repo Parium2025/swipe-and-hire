@@ -35,13 +35,36 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  // Helskärmssvep: varje kandidat är exakt en viewport hög.
+  const [slideHeight, setSlideHeight] = useState(() =>
+    typeof window === 'undefined' ? 800 : window.innerHeight
+  );
+
+  useEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+    const el = scrollRef.current;
+    const apply = () => {
+      const h = el?.clientHeight || window.innerHeight;
+      setSlideHeight(prev => (Math.abs(prev - h) > 1 ? h : prev));
+    };
+    apply();
+    const ro = el ? new ResizeObserver(apply) : null;
+    if (el && ro) ro.observe(el);
+    window.addEventListener('resize', apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', apply);
+    };
+  }, [open]);
+
   const virtualizer = useVirtualizer({
     count: applications.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 980,
+    estimateSize: () => slideHeight,
     overscan: 2,
     getItemKey: (index) => applications[index]?.id || index,
   });
+
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
   useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
