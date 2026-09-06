@@ -23,6 +23,13 @@ interface CandidateSlideProps {
   onRemoveFromList?: () => void;
   isLast: boolean;
   isVisible: boolean;
+  /** Åtgärdsraden visas bara när svepvyn kan hantera åtgärderna. */
+  showActions?: boolean;
+  saved?: boolean;
+  canUndo?: boolean;
+  onSave?: () => void;
+  onSkip?: () => void;
+  onUndo?: () => void;
 }
 
 export const CandidateSlide = memo(function CandidateSlide({
@@ -32,6 +39,12 @@ export const CandidateSlide = memo(function CandidateSlide({
   onRemoveFromList,
   isLast,
   isVisible,
+  showActions = false,
+  saved = false,
+  canUndo = false,
+  onSave,
+  onSkip,
+  onUndo,
 }: CandidateSlideProps) {
   const { user } = useAuth();
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
@@ -49,11 +62,30 @@ export const CandidateSlide = memo(function CandidateSlide({
   const tabsBarRef = useRef<HTMLDivElement | null>(null);
   const [slideIndicator, setSlideIndicator] = useState({ left: 0, width: 0 });
 
-  // Info-steget har egen scroll — varje flikbyte ska börja högst upp.
-  const detailsScrollRef = useRef<HTMLDivElement | null>(null);
+  const closeDetails = useCallback(() => setDetailsOpen(false), []);
+
+  // Infopanelen öppnas och stängs precis som jobbannonsens panel:
+  // dra ner med fingret eller tryck på krysset.
+  const {
+    dragY,
+    sheetControls,
+    backdropOpacity,
+    scrollRef: detailsScrollRef,
+    isAnimatingIn,
+    animatedClose,
+    handleBackdropDismiss,
+    stopSheetPropagation,
+    handleTouchStart: handleSheetTouchStart,
+    handleTouchMove: handleSheetTouchMove,
+    handleTouchEnd: handleSheetTouchEnd,
+    handleHandleTouchStart,
+  } = useSheetDragDismiss(detailsOpen, closeDetails);
+
+  // Varje flikbyte ska börja högst upp i infopanelen.
   useEffect(() => {
     detailsScrollRef.current?.scrollTo({ top: 0 });
-  }, [activeTab, detailsOpen]);
+  }, [activeTab, detailsOpen, detailsScrollRef]);
+
 
 
   const measureSlideIndicator = useCallback(() => {
