@@ -4069,6 +4069,14 @@ export type Database = {
         Args: { p_owner_id: string }
         Returns: string
       }
+      filter_candidates_by_criteria: {
+        Args: { _criterion_ids: string[]; _job_ids: string[] }
+        Returns: {
+          applicant_id: string
+          job_id: string
+          match_state: string
+        }[]
+      }
       finalize_email_confirmation_token: {
         Args: {
           _confirmation_id: string
