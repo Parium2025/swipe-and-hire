@@ -365,6 +365,10 @@ const EmployerDashboard = memo(() => {
   }, [page]);
 
   const pageJobs = useMemo(() => sliceToPage(tabFilteredJobs), [sliceToPage, tabFilteredJobs]);
+  // Hoppar man direkt till en sida längre fram i arkivet hinner den sidan inte
+  // vara hämtad än — visa "hämtar" istället för en tom yta.
+  const isFetchingJumpPage = pageJobs.length === 0 && archiveHasMore;
+
   const pagedBuckets = useMemo(() => ({
     active: sliceToPage(tabBuckets.active),
     expired: sliceToPage(tabBuckets.expired),
