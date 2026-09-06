@@ -259,7 +259,9 @@ export const CandidateSlide = memo(function CandidateSlide({
 
             {/* Innehåll */}
             <div
+              ref={detailsScrollRef}
               className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-5 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)]"
+
               style={{ WebkitOverflowScrolling: 'touch' }}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
