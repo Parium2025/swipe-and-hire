@@ -343,9 +343,19 @@ export const CandidateSlide = memo(function CandidateSlide({
               className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pt-5 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] touch-pan-y"
               style={{ WebkitOverflowScrolling: 'touch' }}
               onTouchStart={(e) => { onTouchStart(e); handleSheetTouchStart(e); }}
-              onTouchMove={(e) => { onTouchMove(e); handleSheetTouchMove(e); }}
-              onTouchEnd={(e) => { onTouchEnd(e); handleSheetTouchEnd(); }}
+              onTouchMove={(e) => {
+                onTouchMove(e);
+                // Endast rena nedåtdrag får stänga panelen — flikbyten (horisontella
+                // svep) ska aldrig tolkas som "dra ner för att stänga".
+                if (swipeLockedRef.current === 'horizontal') {
+                  handleSheetTouchEnd();
+                  return;
+                }
+                handleSheetTouchMove(e);
+              }}
+              onTouchEnd={(e) => { onTouchEnd(e); if (swipeLockedRef.current !== 'horizontal') handleSheetTouchEnd(); }}
               onTouchCancel={() => handleSheetTouchEnd()}
+
             >
 
               <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
