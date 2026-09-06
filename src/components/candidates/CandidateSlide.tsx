@@ -188,9 +188,10 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const [newNote, setNewNote] = useState('');
 
-  // Fetch notes when tab is active
+  // Förvärm anteckningarna redan när kandidaten är i närheten, så infosteget
+  // är fyllt direkt när man trycker på mer info.
   useEffect(() => {
-    if (activeTab === 'anteckningar' && isVisible) {
+    if (isVisible) {
       fetchNotes();
     }
   }, [activeTab, isVisible, fetchNotes]);
@@ -204,12 +205,13 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [startEditing]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center px-6 pt-12 pb-4">
-      <div className="w-full max-w-sm flex-1 min-h-0 flex flex-col items-center gap-3">
+    <div className="w-full h-full flex flex-col items-center px-3 pt-[calc(env(safe-area-inset-top,0px)+3.25rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+      <div className="w-full flex-1 min-h-0 flex flex-col items-center gap-3">
 
-        {/* ── Kortfront — identisk med jobbsökarens förhandsgranskning ── */}
-        <div className="w-full flex-1 min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        {/* ── Kortfront — helskärm, samma känsla som jobbsökarens svepkort ── */}
+        <div className="w-full flex-1 min-h-0 overflow-hidden rounded-2xl bg-[hsl(215,85%,15%)] shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)]">
           <CandidateCardFace
+            fullBleed
             firstName={application.first_name}
             lastName={application.last_name}
             age={application.age}

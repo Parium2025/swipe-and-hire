@@ -20,6 +20,12 @@ export interface CandidateCardFaceProps {
   showAge?: boolean;
   ctaLabel?: string;
   minNameFontPx?: number;
+  /**
+   * Helskärmsläge (arbetsgivarens svepvy): bilden fyller hela kortet och
+   * saknad bild ersätts av ett stort monogram. Jobbsökarens förhandsvisning
+   * påverkas inte.
+   */
+  fullBleed?: boolean;
   onOpen?: () => void;
 }
 
@@ -41,11 +47,77 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   showAge = true,
   ctaLabel = 'Tryck för mer info',
   minNameFontPx = 13,
+  fullBleed = false,
   onOpen,
 }: CandidateCardFaceProps) {
   const fullName = `${firstName || ''} ${lastName || ''}`.trim();
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const showVideo = Boolean(hasVideo && videoUrl);
+  const stillImage = profileImageUrl || coverImageUrl || '';
+
+  // Helskärmsläge: bilden fyller hela kortet, precis som jobbsökarens svepkort.
+  if (fullBleed && !showVideo) {
+    return (
+      <div
+        className="w-full h-full relative overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
+        onClick={onOpen}
+        onDragStart={(e) => e.preventDefault()}
+        style={{ cursor: onOpen ? 'pointer' : 'default' }}
+      >
+        {stillImage ? (
+          <img
+            src={stillImage}
+            alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
+            className="absolute inset-0 w-full h-full object-cover"
+            decoding="async"
+            loading="eager"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(215,85%,26%)] via-[hsl(215,85%,18%)] to-[hsl(215,85%,12%)]">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span
+                className="font-black tracking-tight text-white/10 leading-none"
+                style={{ fontSize: 'min(46vw, 15rem)' }}
+                aria-hidden="true"
+              >
+                {initials}
+              </span>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex h-40 w-40 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-sm shadow-2xl">
+                <span className="text-5xl font-bold text-white">{initials}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
+
+        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-6 text-left">
+          <TruncatedText text={fullName} className="two-line-ellipsis two-line-ellipsis-nopad block w-full">
+            <NameAutoFit
+              text={fullName}
+              className="text-2xl font-bold break-words w-full text-white"
+              minFontPx={minNameFontPx}
+            />
+          </TruncatedText>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-white">
+            {showAge && age ? <span>{age} år</span> : null}
+            {showAge && age && residence ? <span className="text-white/60">•</span> : null}
+            {residence ? <span>Bor i {residence}</span> : null}
+          </div>
+
+          {onOpen && (
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-4 py-2 backdrop-blur-sm">
+              <span className="text-sm font-medium text-white">{ctaLabel}</span>
+              <ArrowRight className="h-4 w-4 text-white" />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="w-full h-full relative">
