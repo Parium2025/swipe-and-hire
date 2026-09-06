@@ -309,7 +309,11 @@ async function dispatchLog(log: OutreachLog) {
       // Skickar via Lovable Emails — samma domän (notify.parium.se) som övriga
       // mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
       await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
-        idempotencyKey: `outreach-${log.id}`,
+        // Nyckeln måste inkludera försöksnumret. Med en fast nyckel svarar
+        // mejltjänsten 409 "already failed – send again with a new idempotency
+        // key" på varje omförsök, vilket gör att ett tillfälligt fel blir
+        // permanent och meddelandet aldrig når kandidaten.
+        idempotencyKey: `outreach-${log.id}-a${(log.attempt_count ?? 0) + 1}`,
         templateData: {
           body,
           company_name: context.companyName,
