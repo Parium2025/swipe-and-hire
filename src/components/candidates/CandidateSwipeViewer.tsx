@@ -251,6 +251,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}
                 onSave={onSaveCandidate ? () => onSaveCandidate(app) : undefined}
                 onSkip={handleSkip}
+                criteria={criteriaFor(app)}
+
               />
 
             </div>
