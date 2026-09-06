@@ -222,9 +222,11 @@ export const CandidateProfileDialog = ({
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
 
-  // Öppnas alltid på Profil — fliken ska aldrig minnas var man var sist.
-  useEffect(() => {
-    if (open) setMobileTab('profile');
+  // Öppnas alltid på Profil — fliken återställs redan när vyn stängs, och
+  // synkront innan öppningen målas, så man aldrig ser den byta från
+  // Anteckningar till Profil.
+  useLayoutEffect(() => {
+    setMobileTab('profile');
   }, [open]);
 
 
