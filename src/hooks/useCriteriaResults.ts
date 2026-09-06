@@ -43,45 +43,62 @@ export function useCriteriaResultsForCandidates(candidates: { applicant_id: stri
     queryFn: async () => {
       if (pairs.length === 0) return {};
 
-      // Fetch all evaluations for these candidates/jobs
-      const { data: evaluations, error: evalError } = await supabase
-        .from('candidate_evaluations')
-        .select(`
-          id,
-          job_id,
-          applicant_id,
-          status
-        `)
-        .in('job_id', jobIds);
+      // Server-side filtering: ask the DB only for the exact applicants in
+      // this view, in chunks, so huge ads (10k–150k ansökningar) never push
+      // thousands of irrelevant rows to the client. The DB does the sifting.
+      const applicantIds = [...new Set(pairs.map(p => p.applicant_id))];
+      const CHUNK = 200;
+      const chunks: string[][] = [];
+      for (let i = 0; i < applicantIds.length; i += CHUNK) {
+        chunks.push(applicantIds.slice(i, i + CHUNK));
+      }
 
-      if (evalError) throw evalError;
-      if (!evaluations || evaluations.length === 0) return {};
-
-      // Filter to only the pairs we care about
-      const relevantEvals = evaluations.filter(e => 
-        pairs.some(p => p.job_id === e.job_id && p.applicant_id === e.applicant_id)
+      const evalResponses = await Promise.all(
+        chunks.map(chunk =>
+          supabase
+            .from('candidate_evaluations')
+            .select('id, job_id, applicant_id, status')
+            .in('job_id', jobIds)
+            .in('applicant_id', chunk),
+        ),
       );
+
+      const pairKeys = new Set(pairs.map(p => `${p.job_id}-${p.applicant_id}`));
+      const relevantEvals = evalResponses.flatMap(({ data, error }) => {
+        if (error) throw error;
+        return (data || []).filter(e => pairKeys.has(`${e.job_id}-${e.applicant_id}`));
+      });
 
       if (relevantEvals.length === 0) return {};
 
-      // Fetch all criterion results for these evaluations
+      // Fetch criterion results only for the relevant evaluations, chunked.
       const evalIds = relevantEvals.map(e => e.id);
-      const { data: results, error: resultsError } = await supabase
-        .from('criterion_results')
-        .select(`
-          id,
-          criterion_id,
-          evaluation_id,
-          result,
-          confidence,
-          reasoning,
-          source,
-          created_at,
-          job_criteria!inner(title)
-        `)
-        .in('evaluation_id', evalIds);
-
-      if (resultsError) throw resultsError;
+      const evalChunks: string[][] = [];
+      for (let i = 0; i < evalIds.length; i += CHUNK) {
+        evalChunks.push(evalIds.slice(i, i + CHUNK));
+      }
+      const resultResponses = await Promise.all(
+        evalChunks.map(chunk =>
+          supabase
+            .from('criterion_results')
+            .select(`
+              id,
+              criterion_id,
+              evaluation_id,
+              result,
+              confidence,
+              reasoning,
+              source,
+              created_at,
+              job_criteria!inner(title)
+            `)
+            .in('evaluation_id', chunk),
+        ),
+      );
+      const results = resultResponses.flatMap(({ data, error }) => {
+        if (error) throw error;
+        return data || [];
+      });
 
       // Group results by applicant_id
       const resultMap: Record<string, CandidateCriteriaResults> = {};
