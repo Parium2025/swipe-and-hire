@@ -188,9 +188,10 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const [newNote, setNewNote] = useState('');
 
-  // Fetch notes when tab is active
+  // Förvärm anteckningarna redan när kandidaten är i närheten, så infosteget
+  // är fyllt direkt när man trycker på mer info.
   useEffect(() => {
-    if (activeTab === 'anteckningar' && isVisible) {
+    if (isVisible) {
       fetchNotes();
     }
   }, [activeTab, isVisible, fetchNotes]);
