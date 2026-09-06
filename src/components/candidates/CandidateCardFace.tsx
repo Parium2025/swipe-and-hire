@@ -178,7 +178,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                   alt="Profilbild"
                   className="object-cover"
                 />
-                <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold" delayMs={200}>
+                <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
