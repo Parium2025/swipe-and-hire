@@ -78,6 +78,10 @@ interface CandidateProfileDialogProps {
   stageConfig?: Record<string, StageSettings>;
   onStageChange?: (newStage: string) => void;
   onRemoveFromList?: () => void;
+  /** Öppnad från svepläget — borttagning göms där, den hör hemma i listvyn. */
+  fromSwipe?: boolean;
+  /** Visas när kandidaten ännu inte ligger i någon lista. */
+  onAddToList?: () => void;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   candidateIndex?: number;
@@ -117,6 +121,8 @@ export const CandidateProfileDialog = ({
   stageConfig,
   onStageChange,
   onRemoveFromList,
+  fromSwipe = false,
+  onAddToList,
   onNavigatePrev,
   onNavigateNext,
   candidateIndex,
@@ -173,11 +179,36 @@ export const CandidateProfileDialog = ({
   const dialogContentRef = useRef<HTMLDivElement | null>(null);
   const touchGestureRef = useRef<{ x: number; y: number; atTop: boolean } | null>(null);
   const pullTrackingRef = useRef<{ y: number; time: number; velocity: number } | null>(null);
-  const [pullY, setPullY] = useState(0);
-  const [dismissDuration, setDismissDuration] = useState(320);
-  const [isPulling, setIsPulling] = useState(false);
+  // Dragrörelsen skrivs direkt till DOM (som jobbsökarens svepläge) — ingen
+  // React-rendering per touchmove, annars känns nedåtdraget hackigt.
+  const pullYRef = useRef(0);
+  const pullFrameRef = useRef<number | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
   const dismissTimerRef = useRef<number | null>(null);
+
+  const writePull = useCallback((y: number, transition: string | null) => {
+    const el = dialogContentRef.current;
+    if (!el) return;
+    el.style.transition = transition ?? 'none';
+    el.style.transform = y > 0 ? `translate3d(0, ${y}px, 0)` : '';
+    el.style.willChange = y > 0 ? 'transform' : '';
+  }, []);
+
+  const schedulePull = useCallback((y: number) => {
+    pullYRef.current = y;
+    if (pullFrameRef.current !== null) return;
+    pullFrameRef.current = requestAnimationFrame(() => {
+      pullFrameRef.current = null;
+      writePull(pullYRef.current, null);
+    });
+  }, [writePull]);
+
+  useEffect(() => {
+    return () => {
+      if (pullFrameRef.current !== null) cancelAnimationFrame(pullFrameRef.current);
+    };
+  }, []);
+
 
   const activeApplication = useMemo(() => {
     if (!allApplications || allApplications.length <= 1) return application;
@@ -302,9 +333,9 @@ export const CandidateProfileDialog = ({
         window.clearTimeout(dismissTimerRef.current);
         dismissTimerRef.current = null;
       }
-      setPullY(0);
-      setDismissDuration(320);
-      setIsPulling(false);
+      pullYRef.current = 0;
+      writePull(0, null);
+
       setIsDismissing(false);
       pullTrackingRef.current = null;
     }
@@ -419,13 +450,12 @@ export const CandidateProfileDialog = ({
     return profilePaneRef.current;
   }, [mobileTab]);
 
-  const closeWithMotion = useCallback((startY = pullY, velocity = 0) => {
+  const closeWithMotion = useCallback((startY = pullYRef.current, velocity = 0) => {
     if (isDismissing) return;
     if (window.innerWidth >= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onOpenChange(false);
       return;
     }
-    setIsPulling(false);
     setIsDismissing(true);
     const contentHeight = dialogContentRef.current?.getBoundingClientRect().height ?? 0;
     const viewportHeight = Math.max(
@@ -437,17 +467,25 @@ export const CandidateProfileDialog = ({
     // vyn förbi nederkanten, med extra marginal, innan den avmonteras.
     const targetY = Math.max(contentHeight, viewportHeight) + Math.max(24, viewportHeight * 0.08);
     const remainingDistance = Math.max(0, targetY - startY);
-    // Fast 320 ms kändes "klippt" vid korta drag. Låt återstående sträcka och
-    // släpphastighet styra tempot så vyn får en mjuk, komplett utglidning.
-    const velocityBoost = Math.min(120, Math.max(0, velocity) * 120);
-    const duration = Math.round(Math.min(560, Math.max(360, 220 + remainingDistance * 0.38 - velocityBoost)));
-    setDismissDuration(duration);
-    setPullY(targetY);
+    // Släpphastighet och återstående sträcka styr tempot så vyn glider ut mjukt.
+    const velocityBoost = Math.min(160, Math.max(0, velocity) * 160);
+    const duration = Math.round(Math.min(460, Math.max(260, 180 + remainingDistance * 0.3 - velocityBoost)));
+    if (pullFrameRef.current !== null) {
+      cancelAnimationFrame(pullFrameRef.current);
+      pullFrameRef.current = null;
+    }
+    pullYRef.current = targetY;
+    // Starta från nuvarande position i samma frame, animera i nästa.
+    writePull(startY, null);
+    requestAnimationFrame(() => {
+      writePull(targetY, `transform ${duration}ms cubic-bezier(0.24, 0.82, 0.28, 1)`);
+    });
     dismissTimerRef.current = window.setTimeout(() => {
       dismissTimerRef.current = null;
       onOpenChange(false);
     }, duration + 120);
-  }, [isDismissing, onOpenChange, pullY]);
+  }, [isDismissing, onOpenChange, writePull]);
+
 
   const handleDismissTransitionEnd = useCallback((e: React.TransitionEvent<HTMLDivElement>) => {
     if (!isDismissing || e.propertyName !== 'transform' || e.target !== e.currentTarget) return;
@@ -483,8 +521,18 @@ export const CandidateProfileDialog = ({
     };
     // Hastigheten mäts i visuell dragsträcka (inte rå skärmposition).
     pullTrackingRef.current = { y: 0, time: performance.now(), velocity: 0 };
-    setIsPulling(false);
+    pullYRef.current = 0;
   }, [getActivePane, isDismissing]);
+
+  const snapBack = useCallback(() => {
+    if (pullFrameRef.current !== null) {
+      cancelAnimationFrame(pullFrameRef.current);
+      pullFrameRef.current = null;
+    }
+    if (pullYRef.current === 0) return;
+    pullYRef.current = 0;
+    writePull(0, 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)');
+  }, [writePull]);
 
   const handleGestureMove = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
@@ -492,10 +540,7 @@ export const CandidateProfileDialog = ({
     const dx = e.targetTouches[0].clientX - start.x;
     const dy = e.targetTouches[0].clientY - start.y;
     if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) {
-      if (isPulling) {
-        setPullY(0);
-        setIsPulling(false);
-      }
+      snapBack();
       return;
     }
     const pane = getActivePane();
@@ -505,17 +550,14 @@ export const CandidateProfileDialog = ({
     const previous = pullTrackingRef.current;
     if (previous) {
       const elapsed = Math.max(1, now - previous.time);
-      const visualY = e.targetTouches[0].clientY - start.y;
-      const currentVisualY = Math.min(visualY * 0.5, 320);
       pullTrackingRef.current = {
-        y: currentVisualY,
+        y: nextPullY,
         time: now,
-        velocity: (currentVisualY - previous.y) / elapsed,
+        velocity: (nextPullY - previous.y) / elapsed,
       };
     }
-    setIsPulling(true);
-    setPullY(nextPullY);
-  }, [getActivePane, isDismissing, isPulling]);
+    schedulePull(nextPullY);
+  }, [getActivePane, isDismissing, schedulePull, snapBack]);
 
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
@@ -524,23 +566,27 @@ export const CandidateProfileDialog = ({
     pullTrackingRef.current = null;
     const touch = e.changedTouches[0];
     if (!start || !touch) {
-      setPullY(0);
-      setIsPulling(false);
+      snapBack();
       return;
     }
 
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
 
-    // Nedåtdrag från toppen stänger (vertikalt dominerande).
+    // Nedåtdrag från toppen stänger (vertikalt dominerande) — samma tröskel och
+    // "flick"-känsla som jobbsökarens svepläge: kort drag med fart räcker.
     const pane = getActivePane();
-    if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
-      closeWithMotion(Math.min(dy * 0.5, 320), tracking?.velocity ?? 0);
+    const velocity = tracking?.velocity ?? 0;
+    const visualY = Math.min(dy * 0.5, 320);
+    const verticalDominant = dy > 0 && Math.abs(dy) > Math.abs(dx) * 1.5;
+    const shouldDismiss = verticalDominant && (visualY > 100 || (visualY > 40 && velocity > 0.5));
+    if (shouldDismiss && start.atTop && (!pane || pane.scrollTop <= 0)) {
+      closeWithMotion(visualY, velocity);
       return;
     }
 
-    setPullY(0);
-    setIsPulling(false);
+    snapBack();
+
 
     // Horisontell swipe byter flik (horisontellt dominerande).
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
@@ -601,15 +647,9 @@ export const CandidateProfileDialog = ({
         hideClose
         overlayClassName="bg-transparent md:bg-black/70"
         className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 translate-x-0 translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0"
-        style={{
-          transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
-          transition: isPulling
-            ? 'none'
-            : isDismissing
-              ? `transform ${dismissDuration}ms cubic-bezier(0.24, 0.82, 0.28, 1)`
-              : 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
-          willChange: pullY > 0 || isDismissing ? 'transform' : undefined,
-        }}
+        // Dragrörelsen skrivs direkt på elementet (se writePull) — inga
+        // React-renderingar per touchmove, vilket håller draget mjukt.
+
         onTransitionEnd={handleDismissTransitionEnd}
       >
         <DialogHeader className="sr-only">
@@ -804,7 +844,8 @@ export const CandidateProfileDialog = ({
             }}
             onBookInterview={() => setBookInterviewOpen(true)}
             onShare={() => setShareDialogOpen(true)}
-            onRemove={onRemoveFromList ? () => setRemoveConfirmOpen(true) : undefined}
+            onRemove={onRemoveFromList && !fromSwipe ? () => setRemoveConfirmOpen(true) : undefined}
+            onAddToList={onAddToList}
             currentStage={currentStage}
             stageOrder={stageOrder}
             stageConfig={stageConfig}
@@ -950,7 +991,7 @@ export const CandidateProfileDialog = ({
     )}
 
     {/* Remove from list confirmation */}
-    {onRemoveFromList && (
+    {onRemoveFromList && !fromSwipe && (
       <RemoveCandidateDialog
         open={removeConfirmOpen}
         onOpenChange={setRemoveConfirmOpen}

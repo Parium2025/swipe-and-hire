@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { MessageSquare, CalendarPlus, Users, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MessageSquare, CalendarPlus, Users, Trash2, ListPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 import type { ButtonProps } from '@/components/ui/button';
@@ -19,6 +19,8 @@ interface ProfileActionsProps {
   onBookInterview: () => void;
   onShare: () => void;
   onRemove?: () => void;
+  /** Visas i stället för borttagning när kandidaten ännu inte ligger i en lista. */
+  onAddToList?: () => void;
   currentStage?: string;
   stageOrder?: string[];
   stageConfig?: Record<string, StageSettings>;
@@ -33,6 +35,7 @@ export const ProfileActions = ({
   onBookInterview,
   onShare,
   onRemove,
+  onAddToList,
   currentStage,
   stageOrder,
   stageConfig,
@@ -58,6 +61,12 @@ export const ProfileActions = ({
             <Button {...noFocusRingProps} onClick={onShare} variant="glassAmber" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
               <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
               <span className="truncate">Dela</span>
+            </Button>
+          )}
+          {onAddToList && (
+            <Button {...noFocusRingProps} onClick={onAddToList} variant="glassGreen" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
+              <ListPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
+              <span className="truncate">Lägg till i lista</span>
             </Button>
           )}
           {onRemove && (
@@ -124,6 +133,12 @@ export const ProfileActions = ({
           <CalendarPlus className="h-4 w-4 mr-1.5" />
           Boka möte
         </Button>
+        {onAddToList && (
+          <Button {...noFocusRingProps} onClick={onAddToList} variant="glassGreen" size="default">
+            <ListPlus className="h-4 w-4 mr-1.5" />
+            Lägg till i lista
+          </Button>
+        )}
       </div>
     </div>
   );
