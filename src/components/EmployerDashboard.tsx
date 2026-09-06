@@ -777,7 +777,11 @@ const EmployerDashboard = memo(() => {
 
       {/* Desktop: Card grid — virtualiserad + DOM-persistent över tabbar */}
       <div className="hidden md:block">
-        {tabFilteredJobs.length === 0 ? (
+        {isFetchingJumpPage ? (
+          <div className="text-center text-white py-12 font-medium text-sm">
+            Hämtar sida {page}…
+          </div>
+        ) : tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
             <div className="text-center text-white py-12 font-medium text-sm">
               Inga annonser stämde med din sökning.
