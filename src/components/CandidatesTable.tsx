@@ -89,6 +89,9 @@ export function CandidatesTable({
   loadedCount = 0,
   onRatingUpdate,
   onServerSortChange,
+  swipeOpen = false,
+  onSwipeOpenChange,
+
 
 }: CandidatesTableProps) {
   const deviceType = useDevice();
