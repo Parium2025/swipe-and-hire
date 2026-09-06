@@ -11,7 +11,7 @@ interface VideoScrubBarProps {
 }
 
 const format = (s: number) => {
-  const safe = Number.isFinite(s) && s > 0 ? Math.floor(s) : 0;
+  const safe = Number.isFinite(s) && s > 0 ? Math.round(s) : 0;
   const m = Math.floor(safe / 60);
   const sec = safe % 60;
   return `${m}:${sec.toString().padStart(2, '0')}`;
@@ -106,7 +106,7 @@ export const VideoScrubBar = memo(function VideoScrubBar({
         />
       </div>
       <div className="flex items-center justify-between text-[11px] font-medium tabular-nums leading-none text-white">
-        <span>{format(current)}</span>
+        <span>{format(Math.min(current, duration))}</span>
         <span>{format(duration)}</span>
       </div>
     </div>
