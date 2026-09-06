@@ -126,6 +126,21 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             {showAge && age && residence ? <span className="text-white/60">•</span> : null}
             {residence ? <span>Bor i {residence}</span> : null}
           </div>
+
+          {criteria && criteria.length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              <CriteriaSummaryPill results={criteria} totalCriteria={criteria.length} />
+              {criteria.slice(0, 4).map((c) => (
+                <CriterionIconBadge key={c.criterion_id} result={c.result} title={c.title} />
+              ))}
+              {criteria.length > 4 && (
+                <span className="rounded px-1.5 py-0.5 text-[10px] text-white/80 ring-1 ring-inset ring-white/20">
+                  +{criteria.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     );
