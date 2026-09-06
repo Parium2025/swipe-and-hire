@@ -365,6 +365,10 @@ const EmployerDashboard = memo(() => {
   }, [page]);
 
   const pageJobs = useMemo(() => sliceToPage(tabFilteredJobs), [sliceToPage, tabFilteredJobs]);
+  // Hoppar man direkt till en sida längre fram i arkivet hinner den sidan inte
+  // vara hämtad än — visa "hämtar" istället för en tom yta.
+  const isFetchingJumpPage = pageJobs.length === 0 && archiveHasMore;
+
   const pagedBuckets = useMemo(() => ({
     active: sliceToPage(tabBuckets.active),
     expired: sliceToPage(tabBuckets.expired),
@@ -773,7 +777,11 @@ const EmployerDashboard = memo(() => {
 
       {/* Desktop: Card grid — virtualiserad + DOM-persistent över tabbar */}
       <div className="hidden md:block">
-        {tabFilteredJobs.length === 0 ? (
+        {isFetchingJumpPage ? (
+          <div className="text-center text-white py-12 font-medium text-sm">
+            Hämtar sida {page}…
+          </div>
+        ) : tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
             <div className="text-center text-white py-12 font-medium text-sm">
               Inga annonser stämde med din sökning.
@@ -862,6 +870,10 @@ const EmployerDashboard = memo(() => {
                 </div>
               </div>
             ))}
+          </div>
+        ) : isFetchingJumpPage ? (
+          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
+            <span>Hämtar sida {page}…</span>
           </div>
         ) : tabFilteredJobs.length === 0 ? (
           searchTerm.trim() ? (
