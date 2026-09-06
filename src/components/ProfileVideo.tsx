@@ -26,9 +26,14 @@ interface ProfileVideoProps {
   onClick?: (e: React.MouseEvent) => void; // Custom click handler (bypasses default play behavior)
   disablePlayback?: boolean; // When true, clicking does nothing (just shows thumbnail)
   forceTouchMode?: boolean; // Force touch-style controls even on mouse devices (used in previews)
+  /** Rapporterar position/längd så en extern scrub-bar kan visas under videon. */
+  onTimeChange?: (current: number, duration: number) => void;
+  /** Fylls med en seek-funktion så externa kontroller kan spola i videon. */
+  seekRef?: React.MutableRefObject<((seconds: number) => void) | null>;
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onRemainingChange, onClick, disablePlayback = false, forceTouchMode = false }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true, countdownVariant = 'default', onPlayingChange, onRemainingChange, onClick, disablePlayback = false, forceTouchMode = false, onTimeChange, seekRef }: ProfileVideoProps) => {
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
