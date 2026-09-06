@@ -327,9 +327,9 @@ export const CandidateProfileDialog = ({
         window.clearTimeout(dismissTimerRef.current);
         dismissTimerRef.current = null;
       }
-      setPullY(0);
-      setDismissDuration(320);
-      setIsPulling(false);
+      pullYRef.current = 0;
+      writePull(0, null);
+
       setIsDismissing(false);
       pullTrackingRef.current = null;
     }
