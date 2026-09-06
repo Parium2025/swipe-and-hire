@@ -26,7 +26,10 @@ export interface CandidateCardFaceProps {
    * påverkas inte.
    */
   fullBleed?: boolean;
+  /** Extra bottenutrymme i helskärmsläget (t.ex. när knappraden ligger i kortet). */
+  contentBottomClassName?: string;
   onOpen?: () => void;
+
 }
 
 /**
