@@ -35,6 +35,8 @@ interface AddToColleagueListDialogProps {
   /** Bulk: flera kandidater samtidigt. Har företräde framför fälten ovan. */
   candidates?: CandidateToAdd[];
   onAdded?: () => void;
+  /** Höjer dialogen ovanför svepvyn (z-[110]). */
+  elevated?: boolean;
 }
 
 export function AddToColleagueListDialog({
@@ -47,6 +49,7 @@ export function AddToColleagueListDialog({
   candidateName,
   candidates,
   onAdded,
+  elevated,
 }: AddToColleagueListDialogProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -176,7 +179,7 @@ export function AddToColleagueListDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="bg-card-parium border-white/20 max-w-sm">
+      <DialogContentNoFocus elevated={elevated} className="bg-card-parium border-white/20 max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Users className="h-5 w-5" />

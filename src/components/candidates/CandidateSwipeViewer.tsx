@@ -18,6 +18,10 @@ interface CandidateSwipeViewerProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  /** Kandidater som redan finns i en lista — spara-knappen visas ifylld och låst. */
+  savedApplicantIds?: Set<string>;
+  /** Öppnar listväljaren för kandidaten. */
+  onSaveCandidate?: (application: ApplicationData) => void;
 }
 
 /* ── Main Viewer ────────────────────────────────── */
@@ -32,7 +36,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  savedApplicantIds,
+  onSaveCandidate,
 }: CandidateSwipeViewerProps) {
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
@@ -111,6 +118,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
   }, [open, handleScroll]);
+
+  // Hoppa över = nästa kandidat, Ångra = tillbaka till föregående.
+  const goToIndex = useCallback((idx: number) => {
+    if (idx < 0 || idx >= applications.length) return;
+    setCurrentIndex(idx);
+    virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+  }, [applications.length, virtualizer]);
+
+  const handleSkip = useCallback(() => {
+    goToIndex(currentIndex + 1);
+  }, [currentIndex, goToIndex]);
+
+  const handleUndo = useCallback(() => {
+    goToIndex(currentIndex - 1);
+  }, [currentIndex, goToIndex]);
+
 
   // Lock body scroll when open
   useEffect(() => {
@@ -195,7 +218,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isLast={item.index === applications.length - 1}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
+                showActions
+                saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}
+                canUndo={item.index > 0}
+                onSave={onSaveCandidate ? () => onSaveCandidate(app) : undefined}
+                onSkip={handleSkip}
+                onUndo={handleUndo}
               />
+
             </div>
             );
           })}

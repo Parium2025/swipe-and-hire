@@ -13,6 +13,8 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { CandidateSwipeFilterSheet } from '@/components/candidates/CandidateSwipeFilterSheet';
+import { AddToColleagueListDialog } from '@/components/AddToColleagueListDialog';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Layers, SlidersHorizontal } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -114,6 +116,8 @@ const JobDetails = () => {
   const [swipeStageApps, setSwipeStageApps] = useState<JobApplication[]>([]);
   const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
+  // Spara-knappen i svepläget öppnar listväljaren för just den kandidaten.
+  const [swipeSaveCandidate, setSwipeSaveCandidate] = useState<ApplicationData | null>(null);
   
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
@@ -185,6 +189,14 @@ const JobDetails = () => {
       return map;
     },
   });
+
+  // Kandidater som redan ligger i en lista — spara-knappen i svepläget låses då.
+  const savedApplicantIds = useMemo(
+    () => new Set(Array.from(myCandidatesMap.keys())),
+    [myCandidatesMap],
+  );
+
+  const { teamMembers } = useTeamMembers();
 
 
   const sensors = useSensors(
@@ -790,6 +802,8 @@ const JobDetails = () => {
             onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
             onOpenFullProfile={handleSwipeOpenFullProfile}
             getDisplayRating={getDisplayRating}
+            savedApplicantIds={savedApplicantIds}
+            onSaveCandidate={(app) => setSwipeSaveCandidate(app)}
           />
         )}
 
@@ -803,6 +817,22 @@ const JobDetails = () => {
             setSwipeFilteredApps(filtered);
             setSwipeInitialIndex(0);
             setSwipeViewerOpen(true);
+          }}
+        />
+
+        {/* Listväljare från svepläget */}
+        <AddToColleagueListDialog
+          open={!!swipeSaveCandidate}
+          onOpenChange={(o) => { if (!o) setSwipeSaveCandidate(null); }}
+          teamMembers={teamMembers}
+          applicationId={swipeSaveCandidate?.id}
+          applicantId={swipeSaveCandidate?.applicant_id}
+          jobId={jobId}
+          elevated
+          candidateName={`${swipeSaveCandidate?.first_name || ''} ${swipeSaveCandidate?.last_name || ''}`.trim()}
+          onAdded={() => {
+            setSwipeSaveCandidate(null);
+            queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] });
           }}
         />
 
