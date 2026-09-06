@@ -8,6 +8,7 @@ import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
+import { useCriteriaMatchFilter } from '@/hooks/useCriteriaMatchFilter';
 import { Layers, SlidersHorizontal } from 'lucide-react';
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { supabase } from '@/integrations/supabase/client';
