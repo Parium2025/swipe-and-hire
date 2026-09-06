@@ -98,6 +98,10 @@ const CandidatesContent = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
+  // Swipe-läge på Alla kandidater — visar exakt de kandidater som sökningen
+  // och frågefiltren gett, i samma ordning som listan.
+  const [swipeOpen, setSwipeOpen] = useState(false);
+
   // Debounce search: 300ms delay before hitting the database
   // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
   useEffect(() => {
