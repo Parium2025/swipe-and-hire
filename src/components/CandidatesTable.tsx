@@ -30,6 +30,8 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
+import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+
 
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
@@ -62,6 +64,10 @@ interface CandidatesTableProps {
   onRatingUpdate?: (applicantId: string, rating: number) => void;
   /** Serversidig sortering — utan denna sorteras bara de sidor som redan hämtats */
   onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'name_desc' | 'rating' | 'rating_asc' | 'last_active' | 'last_active_oldest') => void;
+  /** Swipe-läge styrs av sidan ovanför (knappen bredvid filtren) */
+  swipeOpen?: boolean;
+  onSwipeOpenChange?: (open: boolean) => void;
+
 }
 
 
@@ -85,6 +91,9 @@ export function CandidatesTable({
   loadedCount = 0,
   onRatingUpdate,
   onServerSortChange,
+  swipeOpen = false,
+  onSwipeOpenChange,
+
 
 }: CandidatesTableProps) {
   const deviceType = useDevice();
@@ -239,8 +248,8 @@ export function CandidatesTable({
     // ansökningar från samma person ska inte trigga en ny hämtning.
   }, [selectedApplication?.applicant_id, user?.id, dialogOpen, fetchForApplicant, readCache, writeCache]);
 
-  // Alla enheter öppnar samma klassiska profilvy som desktop.
-  // Swipe-läget finns kvar i jobbets kanban och Mina kandidater, men inte här.
+  // Vid klick i listan öppnas den klassiska profilvyn. Swipe-läget startas
+  // separat via knappen ovanför listan och visar samma filtrerade urval.
   const handleRowClick = useCallback((application: ApplicationData) => {
     const cachedApplications = readCache(application.applicant_id);
     setAllCandidateApplications(cachedApplications?.length ? cachedApplications : [application]);
@@ -248,10 +257,33 @@ export function CandidatesTable({
     setDialogOpen(true);
   }, [readCache]);
 
+  // Swipe-läge: index + "återvänd till swipe" så profilen läggs ovanpå
+  // svepvyn istället för att stänga den.
+  const [swipeIndex, setSwipeIndex] = useState(0);
+  const [returnToSwipe, setReturnToSwipe] = useState(false);
+  // Kandidater som redan ligger i en lista — spara-knappen visas ifylld.
+  const swipeSavedApplicantIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const app of applications) {
+      if (app.applicant_id && isApplicantAdded(app.applicant_id)) ids.add(app.applicant_id);
+    }
+    return ids;
+  }, [applications, isApplicantAdded]);
+
+
+  useEffect(() => {
+    if (!swipeOpen) {
+      setSwipeIndex(0);
+      setReturnToSwipe(false);
+    }
+  }, [swipeOpen]);
+
   const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
+    setReturnToSwipe(false);
     setTimeout(() => setSelectedApplicationId(null), 300);
   }, []);
+
 
   // --- Bulk selection handlers ---
   const toggleSelectAll = useCallback(() => {
@@ -1003,7 +1035,29 @@ export function CandidatesTable({
         </div>
       )}
 
+      {/* Swipe-läge — samma filtrerade urval som listan visar */}
+      <CandidateSwipeViewer
+        applications={sortedApplications}
+        initialIndex={swipeIndex}
+        open={swipeOpen}
+        behind={dialogOpen && returnToSwipe}
+        onClose={() => onSwipeOpenChange?.(false)}
+        onOpenFullProfile={(app) => {
+          const idx = sortedApplications.findIndex(a => a.id === app.id);
+          if (idx >= 0) setSwipeIndex(idx);
+          setReturnToSwipe(true);
+          handleRowClick(app);
+        }}
+        getDisplayRating={getDisplayRating}
+        savedApplicantIds={swipeSavedApplicantIds}
+        onSaveCandidate={handleMobileAddCandidate}
+        onLoadMore={onLoadMore}
+        hasMore={hasMore && !hasReachedLimit}
+        isLoadingMore={isLoadingMore}
+      />
+
       <CandidateProfileDialog
+
         application={selectedApplication}
         open={dialogOpen}
         onOpenChange={handleDialogClose}
@@ -1018,6 +1072,8 @@ export function CandidatesTable({
         candidateRating={selectedApplication ? getDisplayRating(selectedApplication) : undefined}
         onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
         adjacentMedia={adjacentCandidateMedia}
+        fromSwipe={returnToSwipe}
+
       />
 
 

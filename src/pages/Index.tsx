@@ -44,7 +44,7 @@ import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search } from 'lucide-react';
+import { ArrowRightLeft, Layers, Search } from 'lucide-react';
 
 
 import KeepAlive from '@/components/KeepAlive';
@@ -98,6 +98,10 @@ const CandidatesContent = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [questionFilters, setQuestionFilters] = useState<QuestionFilterValue[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
+  // Swipe-läge på Alla kandidater — visar exakt de kandidater som sökningen
+  // och frågefiltren gett, i samma ordning som listan.
+  const [swipeOpen, setSwipeOpen] = useState(false);
+
   // Debounce search: 300ms delay before hitting the database
   // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
   useEffect(() => {
@@ -242,7 +246,7 @@ const CandidatesContent = () => {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
                 <QuestionFilter 
                   value={questionFilters}
                   onChange={setQuestionFilters}
@@ -266,7 +270,18 @@ const CandidatesContent = () => {
                     <span>Välj kandidater</span>
                   )}
                 </button>
+                {safeApplications.length > 0 && (
+                  <button
+                    onClick={() => setSwipeOpen(true)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50"
+                  >
+                    <Layers className="h-4 w-4" />
+                    <span>Swipe-läge</span>
+                  </button>
+                )}
               </div>
+
               {/* Filter chips below */}
               {questionFilters.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
@@ -359,8 +374,11 @@ const CandidatesContent = () => {
               loadedCount={loadedCount}
               onRatingUpdate={(applicantId, rating) => updateRating.mutate({ applicantId, rating })}
               onServerSortChange={setSortBy}
+              swipeOpen={swipeOpen}
+              onSwipeOpenChange={setSwipeOpen}
             />
           </div>
+
         )}
 
       </div>
