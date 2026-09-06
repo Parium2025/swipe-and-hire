@@ -138,6 +138,26 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [currentIndex, goToIndex]);
 
 
+  // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
+  const lastHapticIndex = useRef<number | null>(null);
+  useEffect(() => {
+    if (!open) {
+      lastHapticIndex.current = null;
+      return;
+    }
+    if (lastHapticIndex.current === null) {
+      lastHapticIndex.current = currentIndex;
+      return;
+    }
+    if (lastHapticIndex.current === currentIndex) return;
+    lastHapticIndex.current = currentIndex;
+    try {
+      navigator.vibrate?.(8);
+    } catch {
+      // Vissa webbläsare blockerar vibration — ignorera tyst.
+    }
+  }, [open, currentIndex]);
+
   // Lock body scroll when open
   useEffect(() => {
     if (open) {
@@ -215,6 +235,15 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
               className="absolute left-0 top-0 w-full"
               style={{ transform: `translateY(${item.start}px)`, height: `${slideHeight}px`, scrollSnapAlign: 'start' }}
             >
+              <motion.div
+                className="h-full w-full"
+                animate={{
+                  scale: item.index === currentIndex ? 1 : 0.965,
+                  opacity: item.index === currentIndex ? 1 : 0.75,
+                }}
+                transition={{ type: 'spring', stiffness: 260, damping: 30, mass: 0.7 }}
+                style={{ willChange: 'transform' }}
+              >
               <CandidateSlide
                 application={app}
                 rating={getDisplayRating(app)}
@@ -228,7 +257,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onSkip={handleSkip}
 
               />
-
+              </motion.div>
             </div>
             );
           })}
