@@ -44,7 +44,7 @@ import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import EmployerAnalytics from '@/components/EmployerAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search } from 'lucide-react';
+import { ArrowRightLeft, Layers, Search } from 'lucide-react';
 
 
 import KeepAlive from '@/components/KeepAlive';
