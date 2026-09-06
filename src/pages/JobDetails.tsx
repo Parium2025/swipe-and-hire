@@ -795,6 +795,12 @@ const JobDetails = () => {
               updateCandidateRating(selectedApplication.applicant_id, rating);
             }
           }}
+          fromSwipe={returnToSwipe}
+          onAddToList={
+            selectedApplication && !savedApplicantIds.has(selectedApplication.applicant_id)
+              ? () => setSwipeSaveCandidate(mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb'))
+              : undefined
+          }
           onNavigatePrev={handleNavigatePrev}
           onNavigateNext={handleNavigateNext}
           candidateIndex={candidateNavIndex}

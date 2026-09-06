@@ -78,6 +78,10 @@ interface CandidateProfileDialogProps {
   stageConfig?: Record<string, StageSettings>;
   onStageChange?: (newStage: string) => void;
   onRemoveFromList?: () => void;
+  /** Öppnad från svepläget — borttagning göms där, den hör hemma i listvyn. */
+  fromSwipe?: boolean;
+  /** Visas när kandidaten ännu inte ligger i någon lista. */
+  onAddToList?: () => void;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   candidateIndex?: number;
@@ -117,6 +121,8 @@ export const CandidateProfileDialog = ({
   stageConfig,
   onStageChange,
   onRemoveFromList,
+  fromSwipe = false,
+  onAddToList,
   onNavigatePrev,
   onNavigateNext,
   candidateIndex,
@@ -838,7 +844,8 @@ export const CandidateProfileDialog = ({
             }}
             onBookInterview={() => setBookInterviewOpen(true)}
             onShare={() => setShareDialogOpen(true)}
-            onRemove={onRemoveFromList ? () => setRemoveConfirmOpen(true) : undefined}
+            onRemove={onRemoveFromList && !fromSwipe ? () => setRemoveConfirmOpen(true) : undefined}
+            onAddToList={onAddToList}
             currentStage={currentStage}
             stageOrder={stageOrder}
             stageConfig={stageConfig}
@@ -984,7 +991,7 @@ export const CandidateProfileDialog = ({
     )}
 
     {/* Remove from list confirmation */}
-    {onRemoveFromList && (
+    {onRemoveFromList && !fromSwipe && (
       <RemoveCandidateDialog
         open={removeConfirmOpen}
         onOpenChange={setRemoveConfirmOpen}

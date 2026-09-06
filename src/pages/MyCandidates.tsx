@@ -1037,6 +1037,7 @@ const MyCandidates = () => {
             });
           }
         }}
+        fromSwipe={returnToSwipe}
         onRemoveFromList={() => {
           if (selectedCandidate) {
             const candidateToDelete = selectedCandidate;
