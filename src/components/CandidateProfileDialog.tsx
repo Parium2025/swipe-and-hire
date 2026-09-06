@@ -515,8 +515,18 @@ export const CandidateProfileDialog = ({
     };
     // Hastigheten mäts i visuell dragsträcka (inte rå skärmposition).
     pullTrackingRef.current = { y: 0, time: performance.now(), velocity: 0 };
-    setIsPulling(false);
+    pullYRef.current = 0;
   }, [getActivePane, isDismissing]);
+
+  const snapBack = useCallback(() => {
+    if (pullFrameRef.current !== null) {
+      cancelAnimationFrame(pullFrameRef.current);
+      pullFrameRef.current = null;
+    }
+    if (pullYRef.current === 0) return;
+    pullYRef.current = 0;
+    writePull(0, 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)');
+  }, [writePull]);
 
   const handleGestureMove = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
@@ -524,10 +534,7 @@ export const CandidateProfileDialog = ({
     const dx = e.targetTouches[0].clientX - start.x;
     const dy = e.targetTouches[0].clientY - start.y;
     if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) {
-      if (isPulling) {
-        setPullY(0);
-        setIsPulling(false);
-      }
+      snapBack();
       return;
     }
     const pane = getActivePane();
@@ -537,17 +544,14 @@ export const CandidateProfileDialog = ({
     const previous = pullTrackingRef.current;
     if (previous) {
       const elapsed = Math.max(1, now - previous.time);
-      const visualY = e.targetTouches[0].clientY - start.y;
-      const currentVisualY = Math.min(visualY * 0.5, 320);
       pullTrackingRef.current = {
-        y: currentVisualY,
+        y: nextPullY,
         time: now,
-        velocity: (currentVisualY - previous.y) / elapsed,
+        velocity: (nextPullY - previous.y) / elapsed,
       };
     }
-    setIsPulling(true);
-    setPullY(nextPullY);
-  }, [getActivePane, isDismissing, isPulling]);
+    schedulePull(nextPullY);
+  }, [getActivePane, isDismissing, schedulePull, snapBack]);
 
   const handleGestureEnd = useCallback((e: React.TouchEvent) => {
     const start = touchGestureRef.current;
@@ -556,23 +560,27 @@ export const CandidateProfileDialog = ({
     pullTrackingRef.current = null;
     const touch = e.changedTouches[0];
     if (!start || !touch) {
-      setPullY(0);
-      setIsPulling(false);
+      snapBack();
       return;
     }
 
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
 
-    // Nedåtdrag från toppen stänger (vertikalt dominerande).
+    // Nedåtdrag från toppen stänger (vertikalt dominerande) — samma tröskel och
+    // "flick"-känsla som jobbsökarens svepläge: kort drag med fart räcker.
     const pane = getActivePane();
-    if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5 && start.atTop && (!pane || pane.scrollTop <= 0)) {
-      closeWithMotion(Math.min(dy * 0.5, 320), tracking?.velocity ?? 0);
+    const velocity = tracking?.velocity ?? 0;
+    const visualY = Math.min(dy * 0.5, 320);
+    const verticalDominant = dy > 0 && Math.abs(dy) > Math.abs(dx) * 1.5;
+    const shouldDismiss = verticalDominant && (visualY > 100 || (visualY > 40 && velocity > 0.5));
+    if (shouldDismiss && start.atTop && (!pane || pane.scrollTop <= 0)) {
+      closeWithMotion(visualY, velocity);
       return;
     }
 
-    setPullY(0);
-    setIsPulling(false);
+    snapBack();
+
 
     // Horisontell swipe byter flik (horisontellt dominerande).
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
