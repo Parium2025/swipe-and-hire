@@ -1020,23 +1020,16 @@ const MyCandidates = () => {
         stageOrder={activeStageOrder}
         stageConfig={activeStageConfig}
         onStageChange={(newStage) => {
-          const stageColor = activeStageConfig[newStage]?.color || '#22c55e';
-          const stageLabel = activeStageConfig[newStage]?.label || newStage;
-          
+          // Ingen toast här — steget syns direkt i "Flytta kandidat" nere i vyn.
           if (selectedCandidate && !isViewingColleague) {
             handleMoveCandidate(selectedCandidate.id, newStage);
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
-            toast.success(`Flyttade till ${stageLabel}`, {
-              icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
-            });
           } else if (selectedCandidate && isViewingColleague) {
             moveCandidateInColleagueList(selectedCandidate.id, newStage);
             setSelectedCandidate(prev => prev ? { ...prev, stage: newStage } : null);
-            toast.success(`Flyttade till ${stageLabel}`, {
-              icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
-            });
           }
         }}
+
         fromSwipe={returnToSwipe}
         onRemoveFromList={() => {
           if (selectedCandidate) {
