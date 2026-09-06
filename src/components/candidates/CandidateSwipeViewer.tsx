@@ -218,7 +218,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isLast={item.index === applications.length - 1}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
+                showActions
+                saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}
+                canUndo={item.index > 0}
+                onSave={onSaveCandidate ? () => onSaveCandidate(app) : undefined}
+                onSkip={handleSkip}
+                onUndo={handleUndo}
               />
+
             </div>
             );
           })}
