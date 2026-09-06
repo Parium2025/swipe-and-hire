@@ -23,6 +23,11 @@ export const MobileProfileTabs = memo(function MobileProfileTabs({
 }: MobileProfileTabsProps) {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  // Markören ska bara animera vid ett avsiktligt flikbyte — aldrig när vyn
+  // öppnas eller mäts om, då ska den ligga på plats direkt.
+  const prevTabRef = useRef<MobileTabKey>(mobileTab);
+  const prevWidthRef = useRef(0);
+  const [animateIndicator, setAnimateIndicator] = useState(false);
 
   const measure = useCallback(() => {
     const idx = TABS.findIndex(t => t.key === mobileTab);
@@ -35,6 +40,10 @@ export const MobileProfileTabs = memo(function MobileProfileTabs({
     if (!parent) return;
     const parentRect = parent.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
+    const tabChanged = prevTabRef.current !== mobileTab;
+    setAnimateIndicator(tabChanged && prevWidthRef.current > 0 && targetRect.width > 0);
+    prevTabRef.current = mobileTab;
+    prevWidthRef.current = targetRect.width;
     setIndicator({
       left: targetRect.left - parentRect.left,
       width: targetRect.width,
@@ -54,8 +63,13 @@ export const MobileProfileTabs = memo(function MobileProfileTabs({
         className="absolute bottom-0 h-0.5 bg-white"
         initial={false}
         animate={{ left: indicator.left, width: indicator.width }}
-        transition={{ type: 'spring', stiffness: 300, damping: 35, mass: 0.8 }}
+        transition={
+          animateIndicator
+            ? { type: 'spring', stiffness: 300, damping: 35, mass: 0.8 }
+            : { duration: 0 }
+        }
       />
+
       {TABS.map((tab, i) => {
         const Icon = tab.icon;
         const isActive = mobileTab === tab.key;
