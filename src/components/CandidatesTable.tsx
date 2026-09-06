@@ -62,6 +62,10 @@ interface CandidatesTableProps {
   onRatingUpdate?: (applicantId: string, rating: number) => void;
   /** Serversidig sortering — utan denna sorteras bara de sidor som redan hämtats */
   onServerSortChange?: (sort: 'applied_at' | 'oldest' | 'name' | 'name_desc' | 'rating' | 'rating_asc' | 'last_active' | 'last_active_oldest') => void;
+  /** Swipe-läge styrs av sidan ovanför (knappen bredvid filtren) */
+  swipeOpen?: boolean;
+  onSwipeOpenChange?: (open: boolean) => void;
+
 }
 
 
