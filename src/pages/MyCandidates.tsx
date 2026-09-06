@@ -209,6 +209,8 @@ const MyCandidates = () => {
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
   const [swipeFilterOpen, setSwipeFilterOpen] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
+  // Profilen öppnad från svepläget → nedsvep/stäng ska ta oss tillbaka dit.
+  const [returnToSwipe, setReturnToSwipe] = useState(false);
 
   // ── Centralized application fetching ─────────────────
   const candidateFallback = useMemo(() => selectedCandidate ? {
