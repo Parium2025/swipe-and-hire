@@ -757,6 +757,19 @@ const MyCandidates = () => {
   }, [displayedCandidates]);
   const { data: swipeJobCriteria } = useJobCriteria(singleSwipeJobId);
 
+  // Aktiva urvalskriterier styr swipe-läget: bara matchande kandidater
+  // (plus de som väntar på AI-granskning) visas. Urvalet sker i databasen.
+  const activeSwipeCriteriaIds = useMemo(
+    () => (swipeJobCriteria || []).map(c => c.id),
+    [swipeJobCriteria],
+  );
+  const swipeCriteriaEnabled = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const { data: swipeCriteriaFilter, isLoading: swipeCriteriaLoading } = useCriteriaMatchFilter(
+    singleSwipeJobId ? [singleSwipeJobId] : [],
+    activeSwipeCriteriaIds,
+    swipeCriteriaEnabled,
+  );
+
   // When user taps "open full profile" from swipe viewer → open dialog
   const handleSwipeOpenFullProfile = useCallback((application: ApplicationData) => {
     const idx = swipeApplicationsData.findIndex(a => a.id === application.id);
