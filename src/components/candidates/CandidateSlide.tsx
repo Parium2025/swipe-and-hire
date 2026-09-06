@@ -67,10 +67,18 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [activeTab]);
 
   useEffect(() => {
+    // Mätning måste ske efter att info-steget monterats/animerat in.
     measureSlideIndicator();
+    const raf = requestAnimationFrame(measureSlideIndicator);
+    const t = window.setTimeout(measureSlideIndicator, 320);
     window.addEventListener('resize', measureSlideIndicator);
-    return () => window.removeEventListener('resize', measureSlideIndicator);
-  }, [measureSlideIndicator]);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+      window.removeEventListener('resize', measureSlideIndicator);
+    };
+  }, [measureSlideIndicator, detailsOpen]);
+
 
   const handleTabSwipe = useCallback((deltaX: number) => {
     const currentIdx = TABS.findIndex(t => t.key === activeTab);
