@@ -119,6 +119,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [open, handleScroll]);
 
+  // Hoppa över = nästa kandidat, Ångra = tillbaka till föregående.
+  const goToIndex = useCallback((idx: number) => {
+    if (idx < 0 || idx >= applications.length) return;
+    setCurrentIndex(idx);
+    virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+  }, [applications.length, virtualizer]);
+
+  const handleSkip = useCallback(() => {
+    goToIndex(currentIndex + 1);
+  }, [currentIndex, goToIndex]);
+
+  const handleUndo = useCallback(() => {
+    goToIndex(currentIndex - 1);
+  }, [currentIndex, goToIndex]);
+
+
   // Lock body scroll when open
   useEffect(() => {
     if (open) {
