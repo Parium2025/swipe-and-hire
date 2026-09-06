@@ -773,6 +773,7 @@
           var booted = false;      // React har mountat
           var recovering = false;  // en återhämtning pågår just nu
           var messageShown = false;
+          var mainStartedWaits = 0; // hur länge vi väntat på en bundle som "startat"
 
           var clearAttempts = function() {
             try { sessionStorage.removeItem(ATTEMPT_KEY); } catch (e) {}
@@ -892,10 +893,13 @@
               }
 
               // Bundlen HAR laddats och kör — appen är på väg upp men tar tid
-              // (tung första laddning, långsam enhet). Att ladda om nu skulle
-              // bara avbryta en fungerande start och kunna loopa i all framtid.
-              // Vänta istället och kontrollera igen.
-              if (window.__pariumMainStarted === true) {
+              // (tung första laddning, långsam enhet). Vi visar ALLTID en synlig
+              // status så användaren aldrig möts av en tom blå skärm, och efter
+              // ett tag ger vi upp väntan och laddar om ändå — annars kunde en
+              // krasch i uppstarten låsa oss i en tyst evighetsloop.
+              if (window.__pariumMainStarted === true && mainStartedWaits < 3) {
+                mainStartedWaits += 1;
+                showStatus(false);
                 recovering = false;
                 setTimeout(function() { if (!isBooted()) recover(); }, 5000);
                 return;
@@ -932,6 +936,12 @@
 
           // Bundlen kunde inte hämtas → vänta inte ut hela timeouten.
           window.__pariumBundleFailed = function() { setTimeout(check, 300); };
+
+          // Synlig laddstatus redan efter 4 s — en tom blå skärm får aldrig
+          // vara det enda användaren ser medan appen startar.
+          setTimeout(function() {
+            if (!isBooted()) showStatus(navigator.onLine === false);
+          }, 4000);
 
           setTimeout(check, 7000);
 

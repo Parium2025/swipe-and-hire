@@ -109,20 +109,26 @@ async function bootstrap() {
   const redirected = redirectAuthTokensIfNeeded();
   if (redirected) return;
 
-  // 🧹 Nuke stale caches from before the "single tunnel" architecture.
-  // Runs once per cache version bump — instant, no network calls.
-  nukeStaleCaches();
+  // Inget av stegen nedan får kunna stoppa själva appstarten. Kastar något
+  // här (t.ex. blockerad Cache Storage i privat läge på iOS) hamnade
+  // användaren tidigare på en helt tom blå skärm.
+  try {
+    // 🧹 Nuke stale caches from before the "single tunnel" architecture.
+    nukeStaleCaches();
 
-  // 🔁 Engångs-tvångsrensning av gammal Service Worker + Cache Storage på
-  // publicerade domäner (parium.se / parium-ab.lovable.app). Säkerställer att
-  // användare som var på en gammal SW automatiskt får senaste bundle.
-  forceServiceWorkerReset();
+    // 🔁 Engångs-tvångsrensning av gammal Service Worker + Cache Storage på
+    // publicerade domäner (parium.se / parium-ab.lovable.app).
+    forceServiceWorkerReset();
 
-  // 🛡️ Installera bfcache-guard (iOS Safari back/forward cache → silent reload vid stale bundle)
-  installBfcacheGuard();
+    // 🛡️ bfcache-guard (iOS Safari back/forward cache → silent reload vid stale bundle)
+    installBfcacheGuard();
 
-  // 🔄 Spotify-style version watcher: visibility-check + 5min heartbeat → silent deferred reload
-  installVersionWatcher();
+    // 🔄 Version watcher: visibility-check + 5min heartbeat → silent deferred reload
+    installVersionWatcher();
+  } catch {
+    /* aldrig blockera starten */
+  }
+
 
   const isPreviewHost = (() => {
     try {
@@ -167,7 +173,7 @@ async function bootstrap() {
   // Existing SW installs are removed by index.html + swForceReset + public/sw.js kill-switch.
   
   // Initialize the offline sync engine (works without SW; background sync is best-effort only)
-  initSyncEngine();
+  try { initSyncEngine(); } catch { /* aldrig blockera starten */ }
 
   const root = createRoot(document.getElementById('root')!);
   root.render(
