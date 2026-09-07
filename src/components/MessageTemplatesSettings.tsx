@@ -1684,7 +1684,7 @@ export function MessageTemplatesSettings() {
 
 
             {missingDefaultTemplates.length > 0 && (
-            <div className="mb-3 grid gap-2 rounded-2xl border border-white/[0.12] bg-white/5 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="mb-4 grid gap-2 rounded-2xl border border-white/[0.15] bg-gradient-to-b from-white/[0.10] to-white/[0.04] p-4 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.07)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-white">Parium-standard</Label>
