@@ -14,7 +14,7 @@ import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInacti
 import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
-import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
+import { triggerBackgroundSync, clearAllAppCaches, cancelPendingCacheClear } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, normalizeAuthSplashRole } from '@/lib/authSplashEvents';
 import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { useSessionManager, clearSessionToken, beginSignOutTracking, endSignOutTracking } from '@/hooks/useSessionManager';
@@ -573,6 +573,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
 
+        // 🛡️ Kontoväxling: en cachad profil/roll från föregående konto får
+        // ALDRIG rendera fel gränssnitt medan den nya profilen hämtas.
+        if (session?.user) {
+          const activeUserId = session.user.id;
+          let cachedBelongsToOther = false;
+          try {
+            const raw = typeof window !== 'undefined' ? localStorage.getItem(CACHED_PROFILE_KEY) : null;
+            if (raw) {
+              const cached = JSON.parse(raw);
+              if (cached?.user_id && cached.user_id !== activeUserId) {
+                cachedBelongsToOther = true;
+                localStorage.removeItem(CACHED_PROFILE_KEY);
+                localStorage.removeItem('parium-last-role');
+              }
+            }
+          } catch { /* ignorera */ }
+
+          setProfile((prev) => {
+            const prevUserId = (prev as any)?.user_id;
+            if (prevUserId && prevUserId !== activeUserId) return null;
+            return prev;
+          });
+
+          if (cachedBelongsToOther) {
+            setUserRole(null);
+            setOrganization(null);
+            profileLoadedRef.current = false;
+          }
+        }
+
+
         // 🧹 Reset transient flags on a fresh successful sign-in so future
         // unexpected sign-outs (network blips etc.) trigger recovery as expected.
         // OBS: endast vid SIGNED_IN — ett TOKEN_REFRESHED får aldrig häva en
@@ -584,6 +615,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isRecoveringSessionRef.current = false;
           isSigningOutRef.current = false;
           endSignOutTracking();
+          // En uppskjuten cache-rensning från förra utloggningen får inte
+          // radera det nya kontots färska data efter inloggningen.
+          try { cancelPendingCacheClear(); } catch {}
           // Detta konto äger nu "Håll mig inloggad"-snapshoten. Förhindrar att
           // en äldre flik med ett annat konto återställs vid nästa uppstart.
           try { claimAuthSnapshotOwnership(newUserId); } catch {}
