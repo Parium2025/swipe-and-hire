@@ -26,7 +26,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   Bot,
+  ChevronDown,
   Info,
+
 
   Loader2,
   Pencil,
@@ -600,6 +602,8 @@ export function MessageTemplatesSettings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
   const [expandedTemplateIds, setExpandedTemplateIds] = useState<Set<string>>(new Set());
+  const [openStandardChannels, setOpenStandardChannels] = useState<Set<string>>(new Set());
+
 
   
 
@@ -1365,27 +1369,56 @@ export function MessageTemplatesSettings() {
   // (isStandardTemplate är definierad på modulnivå, se ovan)
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
-  // Kanaler där arbetsgivaren har en egen aktiv mall SOM ÄR KOPPLAD till en påslagen regel.
-  // Först då ersätter den egna mallen Parium-standarden. Inaktiverar eller tar du bort
-  // mallen – eller stänger av regeln – kommer standardmallen tillbaka automatiskt.
-  const activeRuleTemplateIds = new Set(
-    automations.filter((automation) => automation.is_enabled).map((automation) => automation.template_id),
+
+  // Kanal + händelse som är påslagna under Automatiska utskick. Stänger du av en kanal
+  // för en händelse försvinner motsvarande Parium-standard ur listan.
+  const enabledEventChannels = new Set(
+    automations
+      .filter((automation) => automation.is_enabled)
+      .map((automation) => `${automation.trigger}::${automation.channel}`),
   );
-  const coveredChannels = new Set(
+  const enabledChannels = new Set(
+    automations.filter((automation) => automation.is_enabled).map((automation) => automation.channel),
+  );
+  // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
+  // Övriga standardmallar ligger kvar tills du täckt även dem.
+  const coveredEventChannels = new Set(
     customTemplates
-      .filter((template) => template.is_active && activeRuleTemplateIds.has(template.id))
-      .map((template) => template.channel),
+      .filter((template) => template.is_active && template.trigger)
+      .map((template) => `${template.trigger}::${template.channel}`),
+  );
+  const standardTriggerByKey = new Map<string, string>(
+    AUTO_RULE_EVENTS.flatMap((event) =>
+      (Object.entries(event.templates) as Array<[string, { name: string }]>).map(
+        ([channel, config]) => [`${config.name}::${channel}`, event.trigger] as [string, string],
+      ),
+    ),
   );
   const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
   const standardTemplates = templates
-    .filter((template) => isStandardTemplate(template) && !coveredChannels.has(template.channel))
+    .filter((template) => {
+      if (!isStandardTemplate(template)) return false;
+      const trigger =
+        standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
+      if (trigger) {
+        if (!enabledEventChannels.has(`${trigger}::${template.channel}`)) return false;
+        if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
+        return true;
+      }
+      // Fria biblioteksmallar (manuella utskick) följer om kanalen används alls.
+      return enabledChannels.has(template.channel);
+    })
     .sort((a, b) => {
       const channelDiff =
         STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
       if (channelDiff !== 0) return channelDiff;
       return a.name.localeCompare(b.name, 'sv');
     });
-  const orderedTemplates = [...customTemplates, ...standardTemplates];
+  const standardByChannel = STANDARD_CHANNEL_ORDER.map((channel) => ({
+    channel,
+    items: standardTemplates.filter((template) => template.channel === channel),
+  })).filter((group) => group.items.length > 0);
+
 
 
 
@@ -1760,30 +1793,12 @@ export function MessageTemplatesSettings() {
                     </div>
                   </div>
                 )}
-                {orderedTemplates.map((template, index) => {
+                {(() => {
+                  const renderTemplateCard = (template: OutreachTemplate) => {
                   const isStandard = isStandardTemplate(template);
-                  const showStandardHeading = isStandard && index === customTemplates.length;
-                  const previous = orderedTemplates[index - 1];
-                  const showChannelHeading =
-                    isStandard && (showStandardHeading || !previous || previous.channel !== template.channel);
-                  const channelCount = standardTemplates.filter((item) => item.channel === template.channel).length;
                   return (
-                    <div key={template.id} className="contents">
-                    {showStandardHeading && (
-                      <div className="px-1 pb-3 pt-10">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Parium-standard ({standardTemplates.length})</p>
-                        <p className="mt-2 text-[11px] text-white md:text-xs">Låsta originalmallar. De läggs till automatiskt när du slår på en kanal under Automatiska utskick – de är alltså inga nya egna mallar.</p>
-                      </div>
-                    )}
-                    {showChannelHeading && (
-                      <div className={`flex items-center gap-2 px-1 ${showStandardHeading ? 'pt-2' : 'pt-8'}`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
-                          {getOutreachChannelLabel(template.channel)} ({channelCount})
-                        </p>
-                        <span className="h-px flex-1 bg-white/10" />
-                      </div>
-                    )}
-                    <div className="rounded-2xl border border-white/[0.15] bg-gradient-to-b from-white/[0.10] to-white/[0.04] p-4 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.07)]">
+                    <div key={template.id} className="rounded-2xl border border-white/[0.15] bg-gradient-to-b from-white/[0.10] to-white/[0.04] p-4 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.07)]">
+
 
 
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
@@ -1919,10 +1934,63 @@ export function MessageTemplatesSettings() {
                       </div>
                     </div>
                   </div>
-                  </div>
                   );
+                  };
 
-                })}
+                  return (
+                    <>
+                      {customTemplates.map((template) => renderTemplateCard(template))}
+
+                      {standardByChannel.length > 0 && (
+                        <div className="px-1 pb-1 pt-10">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                            Parium-standard ({standardTemplates.length})
+                          </p>
+                          <p className="mt-2 text-[11px] text-white md:text-xs">
+                            Låsta originalmallar. De visas bara för de kanaler och händelser du har påslagna under Automatiska utskick — och försvinner när du skapat en egen mall för samma händelse och kanal.
+                          </p>
+                        </div>
+                      )}
+
+                      {standardByChannel.map((group) => {
+                        const isOpen = openStandardChannels.has(group.channel);
+                        return (
+                          <div
+                            key={group.channel}
+                            className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+                          >
+                            <button
+                              type="button"
+                              aria-expanded={isOpen}
+                              onClick={() =>
+                                setOpenStandardChannels((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(group.channel)) next.delete(group.channel);
+                                  else next.add(group.channel);
+                                  return next;
+                                })
+                              }
+                              className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-white/[0.06]"
+                            >
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                                {getOutreachChannelLabel(group.channel)} ({group.items.length})
+                              </span>
+                              <ChevronDown
+                                className={`h-4 w-4 shrink-0 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                              />
+                            </button>
+                            {isOpen && (
+                              <div className="space-y-4 p-2 pt-3">
+                                {group.items.map((template) => renderTemplateCard(template))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
+
               </div>
             )}
 
