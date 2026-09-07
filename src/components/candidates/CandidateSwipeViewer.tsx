@@ -87,14 +87,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
 
 
-  // Scroll to initial candidate on open
+  // Scrolla till startkandidaten EN gång per öppning — aldrig igen när listan
+  // uppdateras (kallstart/efterladdning byter arrayidentitet, vilket tidigare
+  // kastade tillbaka användaren till första kandidaten mitt i bläddringen).
+  const didInitialScrollRef = useRef(false);
   useEffect(() => {
-    if (behind) return;
-    if (open && applications[initialIndex]) {
-      setCurrentIndex(initialIndex);
-      requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
+    if (!open) {
+      didInitialScrollRef.current = false;
+      return;
     }
+    if (behind || didInitialScrollRef.current) return;
+    if (!applications[initialIndex]) return;
+    didInitialScrollRef.current = true;
+    setCurrentIndex(initialIndex);
+    requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
   }, [open, behind, initialIndex, applications, virtualizer]);
+
 
   // Track current candidate via scroll position — simple & reliable
   const handleScroll = useCallback(() => {
