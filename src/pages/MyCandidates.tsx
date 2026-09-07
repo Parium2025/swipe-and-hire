@@ -209,6 +209,8 @@ const MyCandidates = () => {
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
+  // Urvalskriterier filtrerar swipe-läget endast när användaren själv slår på det.
+  const [swipeCriteriaOn, setSwipeCriteriaOn] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   // Profilen öppnad från svepläget → nedsvep/stäng ska ta oss tillbaka dit.
   const [returnToSwipe, setReturnToSwipe] = useState(false);
