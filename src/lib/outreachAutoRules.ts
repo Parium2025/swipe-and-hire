@@ -3,7 +3,10 @@ import type { OutreachTrigger } from '@/lib/outreachTypes';
 export type AutoRuleChannel = 'chat' | 'email' | 'push';
 
 export type AutoRuleEvent = {
-  trigger: Extract<OutreachTrigger, 'application_received' | 'job_closed' | 'interview_before' | 'interview_after'>;
+  trigger: Extract<
+    OutreachTrigger,
+    'application_received' | 'interview_scheduled' | 'job_closed' | 'interview_before' | 'interview_after'
+  >;
   title: string;
   description: string;
   delayLabel: string;
@@ -39,6 +42,35 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
         name: 'Ansökan inkommen · chat',
         subject: null,
         body: 'Hej {first_name}! Tack för din ansökan till {job_title}. Vi återkommer så snart vi kan.',
+      },
+    },
+  },
+  {
+    trigger: 'interview_scheduled',
+    title: 'Intervjun bokas',
+    description: 'Bekräftelse till kandidaten så fort du bokar eller bokar om en intervju.',
+    delayLabel: 'Skickas',
+    defaultDelay: 0,
+    delayOptions: [
+      { value: 0, label: 'Direkt' },
+      { value: 10, label: 'Efter 10 minuter' },
+      { value: 60, label: 'Efter 1 timme' },
+    ],
+    templates: {
+      email: {
+        name: 'Intervju bokad · professionellt mejl',
+        subject: 'Din intervju för {job_title} är bokad',
+        body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} är nu bokad.\nDatum: {scheduled_date}\nTid: {scheduled_time}\nTyp: {location_type}\nPlats/länk: {location_details}\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
+      },
+      push: {
+        name: 'Intervju bokad · push',
+        subject: 'Intervju bokad',
+        body: '{job_title} · {scheduled_date} {scheduled_time}',
+      },
+      chat: {
+        name: 'Intervju bokad · chat',
+        subject: null,
+        body: 'Hej {first_name}! Din intervju för {job_title} är bokad den {scheduled_date} kl. {scheduled_time}. {message}',
       },
     },
   },

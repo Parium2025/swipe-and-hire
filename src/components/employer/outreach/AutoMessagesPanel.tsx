@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import SettingsPanel from '@/components/employer/settings/SettingsPanel';
 import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel, type AutoRuleEvent } from '@/lib/outreachAutoRules';
-import { seedDefaultAutoRules } from '@/lib/outreachSeedDefaults';
+import { backfillMissingAutoRuleEvents, seedDefaultAutoRules } from '@/lib/outreachSeedDefaults';
 import { notifyOutreachStudioUpdated, OUTREACH_STUDIO_UPDATED_EVENT } from '@/lib/outreachStudioCache';
 
 import type { OutreachAutomation, OutreachTemplate } from '@/lib/outreachTypes';
@@ -141,6 +141,9 @@ export function AutoMessagesPanel() {
       // Standard: allt påslaget för nya arbetsgivare. Har de redan egna
       // inställningar rör vi dem aldrig – av är av.
       const seeded = await seedDefaultAutoRules(user.id, organizationId);
+      if (cancelled) return;
+      // Nya standardhändelser läggs till även för redan seedade arbetsgivare.
+      if (!seeded) await backfillMissingAutoRuleEvents(user.id, organizationId);
       if (cancelled) return;
       await fetchData();
       if (seeded && !cancelled) {

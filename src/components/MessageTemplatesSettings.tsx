@@ -1405,30 +1405,50 @@ export function MessageTemplatesSettings() {
     ),
   );
   const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
-  const standardTemplates = templates
+  // Triggers som styrs av reglagen under Automatiska utskick.
+  const AUTO_TRIGGERS = new Set(AUTO_RULE_EVENTS.map((event) => event.trigger as string));
+  const sortByChannelThenName = (a: OutreachTemplate, b: OutreachTemplate) => {
+    const channelDiff =
+      STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
+    if (channelDiff !== 0) return channelDiff;
+    return a.name.localeCompare(b.name, 'sv');
+  };
+  const allStandardTemplates = templates.filter((template) => isStandardTemplate(template));
+  const triggerOf = (template: OutreachTemplate) =>
+    standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
+
+  // Automatiska standardmallar: syns bara när händelsen + kanalen är påslagen
+  // och inte redan täcks av en egen mall.
+  const standardAutoTemplates = allStandardTemplates
     .filter((template) => {
-      if (!isStandardTemplate(template)) return false;
-      const trigger =
-        standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
-      if (trigger) {
-        if (!enabledEventChannels.has(`${trigger}::${template.channel}`)) return false;
-        if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
-        return true;
-      }
-      // Gå vidare och Avslag skickas manuellt från kandidatprofilen och påverkas
-      // därför inte av reglagen för automatiska utskick.
+      const trigger = triggerOf(template);
+      if (!trigger || !AUTO_TRIGGERS.has(trigger)) return false;
+      if (!enabledEventChannels.has(`${trigger}::${template.channel}`)) return false;
+      if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
       return true;
     })
-    .sort((a, b) => {
-      const channelDiff =
-        STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
-      if (channelDiff !== 0) return channelDiff;
-      return a.name.localeCompare(b.name, 'sv');
-    });
-  const standardByChannel = STANDARD_CHANNEL_ORDER.map((channel) => ({
-    channel,
-    items: standardTemplates.filter((template) => template.channel === channel),
-  })).filter((group) => group.items.length > 0);
+    .sort(sortByChannelThenName);
+
+  // Manuella standardmallar (Gå vidare, Avslag m.fl.) skickas från kandidatprofilen
+  // och ligger alltid kvar – utom när en egen mall täcker samma händelse och kanal.
+  const standardManualTemplates = allStandardTemplates
+    .filter((template) => {
+      const trigger = triggerOf(template);
+      if (trigger && AUTO_TRIGGERS.has(trigger)) return false;
+      if (trigger && coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
+      return true;
+    })
+    .sort(sortByChannelThenName);
+
+  const standardTemplates = [...standardAutoTemplates, ...standardManualTemplates];
+  const groupByChannel = (items: OutreachTemplate[]) =>
+    STANDARD_CHANNEL_ORDER.map((channel) => ({
+      channel,
+      items: items.filter((template) => template.channel === channel),
+    })).filter((group) => group.items.length > 0);
+  const standardAutoByChannel = groupByChannel(standardAutoTemplates);
+  const standardManualByChannel = groupByChannel(standardManualTemplates);
+  const standardByChannel = standardAutoByChannel;
 
 
 
@@ -1949,56 +1969,77 @@ export function MessageTemplatesSettings() {
                   );
                   };
 
+                  const renderChannelGroup = (
+                    group: { channel: OutreachChannel; items: OutreachTemplate[] },
+                    section: string,
+                  ) => {
+                    const key = `${section}:${group.channel}`;
+                    const isOpen = openStandardChannels.has(key);
+                    return (
+                      <div
+                        key={key}
+                        className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+                      >
+                        <button
+                          type="button"
+                          aria-expanded={isOpen}
+                          onClick={() =>
+                            setOpenStandardChannels((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(key)) next.delete(key);
+                              else next.add(key);
+                              return next;
+                            })
+                          }
+                          className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-white/[0.06]"
+                        >
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                            {getOutreachChannelLabel(group.channel)} ({group.items.length})
+                          </span>
+                          <ChevronDown
+                            className={`h-4 w-4 shrink-0 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+                        {isOpen && (
+                          <div className="space-y-4 p-2 pt-3">
+                            {group.items.map((template) => renderTemplateCard(template))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  };
+
                   return (
                     <>
                       {customTemplates.map((template) => renderTemplateCard(template))}
 
-                      {standardByChannel.length > 0 && (
-                        <div className="px-1 pb-1 pt-10">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-                            Parium-standard ({standardTemplates.length})
-                          </p>
-                          <p className="mt-2 text-[11px] text-white md:text-xs">
-                            Automatiska mallar följer reglagen ovan direkt. Gå vidare och Avslag är manuella mallar från kandidatprofilen och ligger alltid kvar. En egen mall ersätter originalet för samma händelse och kanal.
-                          </p>
-                        </div>
+                      {standardAutoByChannel.length > 0 && (
+                        <>
+                          <div className="px-1 pb-1 pt-10">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                              Automatiska standardmallar ({standardAutoTemplates.length})
+                            </p>
+                            <p className="mt-2 text-[11px] text-white md:text-xs">
+                              Skickas av sig själva när en händelse inträffar — ansökan, bokad intervju, före och efter intervjun samt avslutad annons. Listan följer reglagen ovan direkt. En egen mall ersätter originalet för samma händelse och kanal.
+                            </p>
+                          </div>
+                          {standardAutoByChannel.map((group) => renderChannelGroup(group, 'auto'))}
+                        </>
                       )}
 
-                      {standardByChannel.map((group) => {
-                        const isOpen = openStandardChannels.has(group.channel);
-                        return (
-                          <div
-                            key={group.channel}
-                            className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
-                          >
-                            <button
-                              type="button"
-                              aria-expanded={isOpen}
-                              onClick={() =>
-                                setOpenStandardChannels((prev) => {
-                                  const next = new Set(prev);
-                                  if (next.has(group.channel)) next.delete(group.channel);
-                                  else next.add(group.channel);
-                                  return next;
-                                })
-                              }
-                              className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-white/[0.06]"
-                            >
-                              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-                                {getOutreachChannelLabel(group.channel)} ({group.items.length})
-                              </span>
-                              <ChevronDown
-                                className={`h-4 w-4 shrink-0 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                              />
-                            </button>
-                            {isOpen && (
-                              <div className="space-y-4 p-2 pt-3">
-                                {group.items.map((template) => renderTemplateCard(template))}
-                              </div>
-                            )}
+                      {standardManualByChannel.length > 0 && (
+                        <>
+                          <div className="px-1 pb-1 pt-10">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                              Manuella standardmallar ({standardManualTemplates.length})
+                            </p>
+                            <p className="mt-2 text-[11px] text-white md:text-xs">
+                              Skickas bara när du själv trycker på Gå vidare eller Avslag i kandidatprofilen. De ligger alltid kvar och påverkas inte av reglagen ovan.
+                            </p>
                           </div>
-                        );
-                      })}
+                          {standardManualByChannel.map((group) => renderChannelGroup(group, 'manual'))}
+                        </>
+                      )}
                     </>
                   );
                 })()}

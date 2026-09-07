@@ -86,7 +86,7 @@
     "cobe": "^2.0.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
-    "framer-motion": "^12.23.22",
+    "framer-motion": "12.23.22",
     "gsap": "^3.15.0",
     "input-otp": "^1.2.4",
     "jsdom": "^20.0.3",

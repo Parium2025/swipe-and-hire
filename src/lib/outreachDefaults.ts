@@ -105,6 +105,27 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     body: 'Tjänsten {job_title} är avslutad. Tack för ditt intresse — sök gärna igen när nya tjänster dyker upp.',
     is_active: true,
   },
+  {
+    name: 'Intervju bokad · professionellt mejl',
+    channel: 'email',
+    subject: 'Din intervju för {job_title} är bokad',
+    body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} är nu bokad.\nDatum: {scheduled_date}\nTid: {scheduled_time}\nTyp: {location_type}\nPlats/länk: {location_details}\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
+    is_active: true,
+  },
+  {
+    name: 'Intervju bokad · push',
+    channel: 'push',
+    subject: 'Intervju bokad',
+    body: '{job_title} · {scheduled_date} {scheduled_time}',
+    is_active: true,
+  },
+  {
+    name: 'Intervju bokad · chat',
+    channel: 'chat',
+    subject: null,
+    body: 'Hej {first_name}! Din intervju för {job_title} är bokad den {scheduled_date} kl. {scheduled_time}. {message}',
+    is_active: true,
+  },
 ];
 
 export const DEFAULT_OUTREACH_AUTOMATIONS: Array<{
