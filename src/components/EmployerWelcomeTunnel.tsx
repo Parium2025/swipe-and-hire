@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
