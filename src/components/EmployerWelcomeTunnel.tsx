@@ -4,10 +4,11 @@ import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
@@ -57,6 +58,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [formData, setFormData] = useState({
     companyLogoUrl: (profile as any)?.company_logo_url || '',
     interviewVideoLink: (profile as any)?.interview_video_link || '',
+    interviewVideoDefaultMessage: (profile as any)?.interview_video_default_message || '',
+    interviewOfficeDefaultMessage: (profile as any)?.interview_default_message || '',
   });
 
   const draftKey = employerDraftKey(user?.id);
@@ -74,7 +77,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             setFormData((prev) => ({ ...prev, ...parsed.formData }));
           }
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 2));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 3));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -103,7 +106,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     if (!draftRestored) return;
     
     // Check if there's any content to save
-    const hasContent = formData.companyLogoUrl || formData.interviewVideoLink || currentStep > 0;
+    const hasContent = formData.companyLogoUrl || formData.interviewVideoLink
+      || formData.interviewVideoDefaultMessage || formData.interviewOfficeDefaultMessage
+      || currentStep > 0;
     
     if (hasContent) {
       try {
@@ -119,7 +124,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   }, [formData, currentStep, draftRestored, draftKey]);
 
 
-  const totalSteps = 3; // Logga, Möteslänk, Slutför
+  const totalSteps = 4; // Logga, Möteslänk, Standardmeddelanden, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
@@ -241,6 +246,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         interview_video_link: formData.interviewVideoLink
           ? normalizeMeetingLink(formData.interviewVideoLink)
           : '',
+        interview_video_default_message: formData.interviewVideoDefaultMessage.trim(),
+        interview_default_message: formData.interviewOfficeDefaultMessage.trim(),
         onboarding_completed: true
       } as any);
 
@@ -415,6 +422,58 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       case 2:
         return (
+          <div className="space-y-8 py-8">
+            <div className="text-center space-y-4">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
+                <MessageSquare className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white">Standardmeddelanden</h2>
+              <p className="text-white max-w-md mx-auto leading-relaxed break-words">
+                Texten fylls i automatiskt när ni bokar en intervju. Ni kan ändra den vid varje bokning.
+              </p>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="welcome-video-message" className="text-white font-medium block">
+                  Videointervju
+                </label>
+                <Textarea
+                  id="welcome-video-message"
+                  value={formData.interviewVideoDefaultMessage}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, interviewVideoDefaultMessage: e.target.value }))}
+                  placeholder={'Hej!\n\nTack för din ansökan. Vi vill gärna träffa dig på en videointervju.\n\nVänliga hälsningar'}
+                  rows={4}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/70 resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="welcome-office-message" className="text-white font-medium block">
+                  Intervju på kontoret
+                </label>
+                <Textarea
+                  id="welcome-office-message"
+                  value={formData.interviewOfficeDefaultMessage}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, interviewOfficeDefaultMessage: e.target.value }))}
+                  placeholder={'Hej!\n\nTack för din ansökan. Vi vill gärna träffa dig på vårt kontor.\n\nVänliga hälsningar'}
+                  rows={4}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/70 resize-none"
+                />
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <p className="text-sm text-white break-words">
+                  <strong>Tips:</strong> Ni kan hoppa över det här och fylla i senare under
+                  Företag → Företagsprofil → Intervjuinställningar.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
@@ -461,7 +520,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-6"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka – ändra möteslänk
+                Tillbaka – ändra meddelanden
               </Button>
             </div>
           </div>
