@@ -749,7 +749,8 @@ const MyCandidates = () => {
     () => (swipeJobCriteria || []).map(c => c.id),
     [swipeJobCriteria],
   );
-  const swipeCriteriaEnabled = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const hasSwipeCriteria = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const swipeCriteriaEnabled = hasSwipeCriteria && swipeCriteriaOn;
   const { data: swipeCriteriaFilter, isLoading: swipeCriteriaLoading } = useCriteriaMatchFilter(
     singleSwipeJobId ? [singleSwipeJobId] : [],
     activeSwipeCriteriaIds,
