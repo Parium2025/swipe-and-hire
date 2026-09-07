@@ -876,7 +876,23 @@ const MyCandidates = () => {
               <span>Urvalskriterier</span>
             </button>
           )}
+          {hasSwipeCriteria && (
+            <button
+              type="button"
+              aria-pressed={swipeCriteriaOn}
+              onClick={() => setSwipeCriteriaOn(v => !v)}
+              className={`h-11 px-6 inline-flex items-center gap-2 rounded-full border text-white text-sm font-medium shadow-lg shadow-black/20 transition-all active:scale-[0.97] touch-manipulation ${
+                swipeCriteriaOn
+                  ? 'border-secondary/40 bg-secondary hover:bg-secondary/90'
+                  : 'border-white/25 bg-white/10 hover:bg-white/15'
+              }`}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>{swipeCriteriaOn ? 'Endast matchande: på' : 'Endast matchande: av'}</span>
+            </button>
+          )}
         </div>
+
 
         <MobileMyCandidatesView
           candidates={displayedCandidates}
