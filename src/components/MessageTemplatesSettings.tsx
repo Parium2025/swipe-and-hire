@@ -1399,44 +1399,6 @@ export function MessageTemplatesSettings() {
 
 
 
-  const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
-    (defaultTemplate) =>
-      !templates.some(
-        (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
-      ),
-  );
-
-  const restoreTargetName = missingDefaultTemplates.some((item) => item.name === selectedDefaultTemplateName)
-    ? selectedDefaultTemplateName
-    : missingDefaultTemplates[0]?.name ?? '';
-
-
-
-  const handleRestoreAllDefaultTemplates = async () => {
-    if (!user || missingDefaultTemplates.length === 0) return;
-    setRestoringDefault(true);
-
-    const toInsert = missingDefaultTemplates.map((defaultTemplate) => ({
-      name: defaultTemplate.name,
-      channel: defaultTemplate.channel,
-      subject: defaultTemplate.subject,
-      body: defaultTemplate.body,
-      is_active: defaultTemplate.is_active,
-      is_default: true,
-      owner_user_id: user.id,
-      organization_id: organizationId,
-    }));
-
-    const { error } = await supabase.from('outreach_templates').insert(toInsert);
-
-    if (error) {
-      toast.error('Kunde inte lägga tillbaka Parium-mallarna');
-    } else {
-      toast.success(`${toInsert.length} Parium-mallar lades tillbaka`);
-    }
-    await fetchStudio({ silent: true });
-    setRestoringDefault(false);
-  };
 
 
 
