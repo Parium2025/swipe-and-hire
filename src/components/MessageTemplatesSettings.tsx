@@ -1711,7 +1711,7 @@ export function MessageTemplatesSettings() {
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
-                          {!isStandard && template.trigger && (
+                          {template.trigger && (
                             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">
                               {AUTO_RULE_EVENTS.find((event) => event.trigger === template.trigger)?.title ?? getOutreachTriggerLabel(template.trigger)}
                             </span>
