@@ -1429,16 +1429,9 @@ export function MessageTemplatesSettings() {
     })
     .sort(sortByChannelThenName);
 
-  // Manuella standardmallar (Gå vidare, Avslag m.fl.) skickas från kandidatprofilen
-  // och ligger alltid kvar – utom när en egen mall täcker samma händelse och kanal.
-  const standardManualTemplates = allStandardTemplates
-    .filter((template) => {
-      const trigger = triggerOf(template);
-      if (trigger && AUTO_TRIGGERS.has(trigger)) return false;
-      if (trigger && coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
-      return true;
-    })
-    .sort(sortByChannelThenName);
+  // Manuella utskick (Gå vidare, Avslag) styrs från kandidatprofilen och visas
+  // inte som standardmallar här – bara egna mallar och automatiska standardmallar listas.
+  const standardManualTemplates: OutreachTemplate[] = [];
 
   const standardTemplates = [...standardAutoTemplates, ...standardManualTemplates];
   const groupByChannel = (items: OutreachTemplate[]) =>

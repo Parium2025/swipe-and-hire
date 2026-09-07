@@ -5,7 +5,12 @@ export type AutoRuleChannel = 'chat' | 'email' | 'push';
 export type AutoRuleEvent = {
   trigger: Extract<
     OutreachTrigger,
-    'application_received' | 'interview_scheduled' | 'job_closed' | 'interview_before' | 'interview_after'
+    | 'application_received'
+    | 'interview_scheduled'
+    | 'interview_before'
+    | 'interview_after'
+    | 'interview_cancelled'
+    | 'job_closed'
   >;
   title: string;
   description: string;
@@ -75,36 +80,6 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
     },
   },
   {
-    trigger: 'job_closed',
-    title: 'Annonsen avslutas eller utgår',
-    description: 'Alla som sökt får besked om att processen är avslutad.',
-    delayLabel: 'Skickas',
-    defaultDelay: 10,
-    delayOptions: [
-      { value: 0, label: 'Direkt' },
-      { value: 10, label: 'Efter 10 minuter' },
-      { value: 60, label: 'Efter 1 timme' },
-      { value: 1440, label: 'Efter 1 dygn' },
-    ],
-    templates: {
-      email: {
-        name: 'Jobb avslutat · professionellt mejl',
-        subject: 'Uppdatering kring {job_title}',
-        body: 'Hej {candidate_name},\n\nTjänsten {job_title} hos {company_name} är nu avslutad. Tack för ditt intresse och för att du sökte till oss. Vi har valt att gå vidare med andra kandidater i den här processen.\n\nVi hoppas att du söker igen så snart nya tjänster dyker upp hos oss.\n\nVänliga hälsningar,\n{company_name}',
-      },
-      push: {
-        name: 'Jobb avslutat · push',
-        subject: '{company_name}',
-        body: 'Tjänsten {job_title} är avslutad. Tack för ditt intresse — sök gärna igen när nya tjänster dyker upp.',
-      },
-      chat: {
-        name: 'Jobb avslutat · chat',
-        subject: null,
-        body: 'Hej {first_name}! Tjänsten {job_title} är nu avslutad och vi har gått vidare med andra kandidater. Tack för ditt intresse — vi hoppas att du söker igen när nya tjänster dyker upp.',
-      },
-    },
-  },
-  {
     trigger: 'interview_before',
     title: 'Före intervjun',
     description: 'Påminnelse till kandidaten innan bokad intervju.',
@@ -163,7 +138,67 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
       },
     },
   },
+  {
+    trigger: 'interview_cancelled',
+    title: 'Intervjun avbokas',
+    description: 'Besked till kandidaten när du eller kandidaten avbokar en bokad intervju.',
+    delayLabel: 'Skickas',
+    defaultDelay: 0,
+    delayOptions: [
+      { value: 0, label: 'Direkt' },
+      { value: 10, label: 'Efter 10 minuter' },
+      { value: 60, label: 'Efter 1 timme' },
+    ],
+    templates: {
+      email: {
+        name: 'Intervju avbokad · professionellt mejl',
+        subject: 'Din intervju för {job_title} är avbokad',
+        body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} den {scheduled_date} kl. {scheduled_time} är tyvärr avbokad.\n\nVi återkommer om en ny tid.\n\nVänliga hälsningar,\n{company_name}',
+      },
+      push: {
+        name: 'Intervju avbokad · push',
+        subject: 'Intervju avbokad',
+        body: '{job_title} · {scheduled_date} {scheduled_time} är avbokad.',
+      },
+      chat: {
+        name: 'Intervju avbokad · chat',
+        subject: null,
+        body: 'Hej {first_name}! Din intervju för {job_title} den {scheduled_date} kl. {scheduled_time} är avbokad. Vi återkommer om en ny tid.',
+      },
+    },
+  },
+  {
+    trigger: 'job_closed',
+    title: 'Annonsen avslutas eller utgår',
+    description: 'Alla som fortfarande är kvar i processen får besked om att den är avslutad. Kandidater du markerat som Anställd eller Avslag hoppas över.',
+    delayLabel: 'Skickas',
+    defaultDelay: 10,
+    delayOptions: [
+      { value: 0, label: 'Direkt' },
+      { value: 10, label: 'Efter 10 minuter' },
+      { value: 60, label: 'Efter 1 timme' },
+      { value: 1440, label: 'Efter 1 dygn' },
+    ],
+    templates: {
+      email: {
+        name: 'Jobb avslutat · professionellt mejl',
+        subject: 'Uppdatering kring {job_title}',
+        body: 'Hej {candidate_name},\n\nTjänsten {job_title} hos {company_name} är nu avslutad. Tack för ditt intresse och för att du sökte till oss. Vi har valt att gå vidare med andra kandidater i den här processen.\n\nVi hoppas att du söker igen så snart nya tjänster dyker upp hos oss.\n\nVänliga hälsningar,\n{company_name}',
+      },
+      push: {
+        name: 'Jobb avslutat · push',
+        subject: '{company_name}',
+        body: 'Tjänsten {job_title} är avslutad. Tack för ditt intresse — sök gärna igen när nya tjänster dyker upp.',
+      },
+      chat: {
+        name: 'Jobb avslutat · chat',
+        subject: null,
+        body: 'Hej {first_name}! Tjänsten {job_title} är nu avslutad och vi har gått vidare med andra kandidater. Tack för ditt intresse — vi hoppas att du söker igen när nya tjänster dyker upp.',
+      },
+    },
+  },
 ];
+
 
 export const AUTO_RULE_CHANNELS: { value: AutoRuleChannel; label: string }[] = [
   { value: 'chat', label: 'Chatt' },
