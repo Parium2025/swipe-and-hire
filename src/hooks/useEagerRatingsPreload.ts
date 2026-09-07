@@ -74,6 +74,16 @@ export const triggerBackgroundSync = async () => {
 /**
  * Internal sync implementation of cache clearing
  */
+// Varje anrop får ett generationsnummer. En uppskjuten rensning som hunnit bli
+// inaktuell (t.ex. ny inloggning direkt efter utloggning) hoppas över så att
+// den aldrig raderar det nya kontots färska cache.
+let cacheClearGeneration = 0;
+
+/** Avbryt en uppskjuten cache-rensning (anropas vid ny inloggning). */
+export const cancelPendingCacheClear = () => {
+  cacheClearGeneration++;
+};
+
 const clearAllAppCachesSync = () => {
   const prefixesToClear = [
     RATINGS_CACHE_PREFIX,
