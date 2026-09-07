@@ -4,7 +4,7 @@ import { sendLoggedTemplateEmail } from '../_shared/transactional-email-template
 // Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (hanterad e-postleverans).
 
 type OutreachChannel = 'chat' | 'email' | 'push';
-type OutreachTrigger = 'application_received' | 'application_no_response_14d' | 'interview_before' | 'interview_after' | 'job_closed' | 'interview_scheduled' | 'manual_send';
+type OutreachTrigger = 'application_received' | 'application_no_response_14d' | 'interview_before' | 'interview_after' | 'job_closed' | 'interview_scheduled' | 'interview_cancelled' | 'manual_send';
 
 type OutreachTemplate = {
   id: string;
@@ -165,6 +165,7 @@ const PREF_TYPE_BY_TRIGGER: Record<OutreachTrigger, string> = {
   interview_before: 'interview_scheduled',
   interview_after: 'interview_scheduled',
   interview_scheduled: 'interview_scheduled',
+  interview_cancelled: 'interview_scheduled',
   job_closed: 'job_closed',
   manual_send: 'new_message',
 };
@@ -223,7 +224,8 @@ async function dispatchLog(log: OutreachLog) {
   }
 
   // En avbokad eller avböjd intervju får aldrig generera "din intervju börjar snart".
-  if (log.interview_id) {
+  // Undantag: själva avbokningsbeskedet ska förstås skickas.
+  if (log.interview_id && log.trigger !== 'interview_cancelled') {
     const { data: interviewRow } = await admin
       .from('interviews')
       .select('status')
@@ -409,6 +411,7 @@ const DELAY_APPLIES_AT_DISPATCH: Record<OutreachTrigger, boolean> = {
   application_no_response_14d: true,
   job_closed: true,
   interview_scheduled: true,
+  interview_cancelled: true,
   manual_send: false,
   interview_before: false,
   interview_after: false,

@@ -4997,6 +4997,7 @@ export type Database = {
         | "interview_after"
         | "candidate_progress"
         | "candidate_rejection"
+        | "interview_cancelled"
       plan_billing_period: "monthly" | "one_time"
       plan_source: "stripe" | "manual" | "trial"
       plan_status: "active" | "expired" | "cancelled" | "pending"
@@ -5143,6 +5144,7 @@ export const Constants = {
         "interview_after",
         "candidate_progress",
         "candidate_rejection",
+        "interview_cancelled",
       ],
       plan_billing_period: ["monthly", "one_time"],
       plan_source: ["stripe", "manual", "trial"],

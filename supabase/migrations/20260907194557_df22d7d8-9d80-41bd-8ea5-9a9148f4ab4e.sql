@@ -1,0 +1,1 @@
+ALTER TYPE public.outreach_trigger ADD VALUE IF NOT EXISTS 'interview_cancelled';

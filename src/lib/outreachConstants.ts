@@ -21,14 +21,12 @@ export const OUTREACH_CHANNEL_OPTIONS: { value: OutreachChannel; label: string }
 
 export const OUTREACH_TRIGGER_OPTIONS: { value: OutreachTrigger; label: string }[] = [
   { value: 'application_received', label: 'Ansökan inkommen' },
-  { value: 'application_no_response_14d', label: 'Annons avslutas' },
+  { value: 'interview_scheduled', label: 'Intervju bokas' },
   { value: 'interview_before', label: 'Före intervju' },
   { value: 'interview_after', label: 'Efter intervju' },
+  { value: 'interview_cancelled', label: 'Intervju avbokad' },
   { value: 'job_closed', label: 'Annons avslutas' },
-  { value: 'interview_scheduled', label: 'Intervju bokas' },
   { value: 'manual_send', label: 'Manuellt utskick' },
-  { value: 'candidate_progress', label: 'Gå vidare' },
-  { value: 'candidate_rejection', label: 'Avslag' },
 ];
 
 export const OUTREACH_RECIPIENT_OPTIONS: { value: OutreachRecipient; label: string }[] = [
