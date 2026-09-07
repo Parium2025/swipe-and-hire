@@ -77,7 +77,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             setFormData((prev) => ({ ...prev, ...parsed.formData }));
           }
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 2));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 3));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
