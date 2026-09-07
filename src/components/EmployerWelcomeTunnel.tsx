@@ -4,6 +4,7 @@ import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
