@@ -1375,9 +1375,15 @@ export function MessageTemplatesSettings() {
       .filter((template) => template.is_active && activeRuleTemplateIds.has(template.id))
       .map((template) => template.channel),
   );
-  const standardTemplates = templates.filter(
-    (template) => isStandardTemplate(template) && !coveredChannels.has(template.channel),
-  );
+  const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
+  const standardTemplates = templates
+    .filter((template) => isStandardTemplate(template) && !coveredChannels.has(template.channel))
+    .sort((a, b) => {
+      const channelDiff =
+        STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
+      if (channelDiff !== 0) return channelDiff;
+      return a.name.localeCompare(b.name, 'sv');
+    });
   const orderedTemplates = [...customTemplates, ...standardTemplates];
 
 
