@@ -1343,11 +1343,21 @@ export function MessageTemplatesSettings() {
       errorMessage: 'Kunde inte ta bort de markerade mallarna',
     });
   };
+  const customTemplates = templates.filter((template) => !isStandardTemplate(template));
 
-
-  const allStandardTemplates = templates.filter((template) => isStandardTemplate(template));
-  const triggerOf = (template: OutreachTemplate) =>
-    standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
+  // Kanal + händelse som är påslagna under Automatiska utskick.
+  const enabledEventChannels = new Set(
+    automations
+      .filter((automation) => automation.is_enabled)
+      .map((automation) => `${automation.trigger}::${automation.channel}`),
+  );
+  // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
+  const coveredEventChannels = new Set(
+    customTemplates
+      .filter((template) => template.is_active && template.trigger)
+      .map((template) => `${template.trigger}::${template.channel}`),
+  );
+  const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
 
   // Parium-standardmallarna kommer alltid från koden, aldrig från databasen. Då kan de
   // varken saknas, raderas eller hamna i fel ordning – listan följer alltid tidslinjen
@@ -1371,29 +1381,7 @@ export function MessageTemplatesSettings() {
     }),
   );
 
-    const channelDiff =
-      STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
-    if (channelDiff !== 0) return channelDiff;
-    return a.name.localeCompare(b.name, 'sv');
-  };
-  const allStandardTemplates = templates.filter((template) => isStandardTemplate(template));
-  const triggerOf = (template: OutreachTemplate) =>
-    standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
-
-  // Automatiska standardmallar: syns bara när händelsen + kanalen är påslagen
-  // och inte redan täcks av en egen mall.
-  const standardAutoTemplates = allStandardTemplates
-    .filter((template) => {
-      const trigger = triggerOf(template);
-      if (!trigger || !AUTO_TRIGGERS.has(trigger)) return false;
-      if (!enabledEventChannels.has(`${trigger}::${template.channel}`)) return false;
-      if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
-      return true;
-    })
-    .sort(sortByChannelThenName);
-
-  // Manuella utskick (Gå vidare, Avslag) styrs från kandidatprofilen och visas
-  // inte som standardmallar här – bara egna mallar och automatiska standardmallar listas.
+  // Manuella utskick (Gå vidare, Avslag) styrs från kandidatprofilen och visas inte här.
   const standardManualTemplates: OutreachTemplate[] = [];
 
   const standardTemplates = [...standardAutoTemplates, ...standardManualTemplates];
@@ -1405,6 +1393,7 @@ export function MessageTemplatesSettings() {
   const standardAutoByChannel = groupByChannel(standardAutoTemplates);
   const standardManualByChannel = groupByChannel(standardManualTemplates);
   const standardByChannel = standardAutoByChannel;
+
 
 
 
