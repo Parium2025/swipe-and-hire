@@ -4995,6 +4995,8 @@ export type Database = {
         | "application_no_response_14d"
         | "interview_before"
         | "interview_after"
+        | "candidate_progress"
+        | "candidate_rejection"
       plan_billing_period: "monthly" | "one_time"
       plan_source: "stripe" | "manual" | "trial"
       plan_status: "active" | "expired" | "cancelled" | "pending"
@@ -5139,6 +5141,8 @@ export const Constants = {
         "application_no_response_14d",
         "interview_before",
         "interview_after",
+        "candidate_progress",
+        "candidate_rejection",
       ],
       plan_billing_period: ["monthly", "one_time"],
       plan_source: ["stripe", "manual", "trial"],

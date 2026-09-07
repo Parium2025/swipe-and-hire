@@ -54,7 +54,7 @@ import {
   type OutreachTemplate,
   type OutreachTrigger,
 } from '@/lib/outreach';
-import { readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
+import { notifyOutreachStudioUpdated, OUTREACH_STUDIO_UPDATED_EVENT, readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { AUTO_RULE_EVENTS } from '@/lib/outreachAutoRules';
 
@@ -842,6 +842,16 @@ export function MessageTemplatesSettings() {
 
   useEffect(() => {
     if (!user) return;
+    const handleLocalUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<{ userId?: string }>).detail;
+      if (detail?.userId === user.id) void fetchStudio({ silent: true });
+    };
+    window.addEventListener(OUTREACH_STUDIO_UPDATED_EVENT, handleLocalUpdate);
+    return () => window.removeEventListener(OUTREACH_STUDIO_UPDATED_EVENT, handleLocalUpdate);
+  }, [user, fetchStudio]);
+
+  useEffect(() => {
+    if (!user) return;
 
     const channel = createRealtimeChannel(`outreach-studio-${user.id}`)
       .on(
@@ -1058,6 +1068,7 @@ export function MessageTemplatesSettings() {
     resetTemplateEditor();
 
     await fetchStudio({ silent: true });
+      notifyOutreachStudioUpdated(user.id);
     goToStudioTab('automations');
     toast.success('Mall sparad — steg 2: välj när den ska skickas');
 
@@ -1218,6 +1229,7 @@ export function MessageTemplatesSettings() {
         setAutomationForm(EMPTY_AUTOMATION_FORM);
       }
       await fetchStudio({ silent: true });
+      notifyOutreachStudioUpdated(user.id);
     }
 
 
@@ -1362,6 +1374,7 @@ export function MessageTemplatesSettings() {
     } else {
       toast.success(existingTemplate ? 'Parium-mallen återställd' : 'Parium-mallen tillagd');
       await fetchStudio({ silent: true });
+      notifyOutreachStudioUpdated(user.id);
     }
     setRestoringDefault(false);
   };
@@ -1376,9 +1389,6 @@ export function MessageTemplatesSettings() {
     automations
       .filter((automation) => automation.is_enabled)
       .map((automation) => `${automation.trigger}::${automation.channel}`),
-  );
-  const enabledChannels = new Set(
-    automations.filter((automation) => automation.is_enabled).map((automation) => automation.channel),
   );
   // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
   // Övriga standardmallar ligger kvar tills du täckt även dem.
@@ -1405,8 +1415,9 @@ export function MessageTemplatesSettings() {
         if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
         return true;
       }
-      // Fria biblioteksmallar (manuella utskick) följer om kanalen används alls.
-      return enabledChannels.has(template.channel);
+      // Gå vidare och Avslag skickas manuellt från kandidatprofilen och påverkas
+      // därför inte av reglagen för automatiska utskick.
+      return true;
     })
     .sort((a, b) => {
       const channelDiff =
@@ -1505,6 +1516,7 @@ export function MessageTemplatesSettings() {
       return;
     }
     setAutomations((prev) => prev.map((item) => (group.automations.some((automation) => automation.id === item.id) ? { ...item, is_enabled: enabled } : item)));
+    if (user) notifyOutreachStudioUpdated(user.id);
   };
 
   const handleSendTest = async () => {
@@ -1947,7 +1959,7 @@ export function MessageTemplatesSettings() {
                             Parium-standard ({standardTemplates.length})
                           </p>
                           <p className="mt-2 text-[11px] text-white md:text-xs">
-                            Låsta originalmallar. De visas bara för de kanaler och händelser du har påslagna under Automatiska utskick — och försvinner när du skapat en egen mall för samma händelse och kanal.
+                            Automatiska mallar följer reglagen ovan direkt. Gå vidare och Avslag är manuella mallar från kandidatprofilen och ligger alltid kvar. En egen mall ersätter originalet för samma händelse och kanal.
                           </p>
                         </div>
                       )}

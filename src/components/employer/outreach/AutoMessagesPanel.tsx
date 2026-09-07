@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import SettingsPanel from '@/components/employer/settings/SettingsPanel';
 import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel, type AutoRuleEvent } from '@/lib/outreachAutoRules';
 import { seedDefaultAutoRules } from '@/lib/outreachSeedDefaults';
+import { notifyOutreachStudioUpdated, OUTREACH_STUDIO_UPDATED_EVENT } from '@/lib/outreachStudioCache';
 
 import type { OutreachAutomation, OutreachTemplate } from '@/lib/outreachTypes';
 
@@ -156,8 +157,15 @@ export function AutoMessagesPanel() {
     if (!user) return;
     const channel = createRealtimeChannel(`auto-rules-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'outreach_automations' }, () => void fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'outreach_templates' }, () => void fetchData())
       .subscribe();
+    const handleLocalUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<{ userId?: string }>).detail;
+      if (detail?.userId === user.id) void fetchData();
+    };
+    window.addEventListener(OUTREACH_STUDIO_UPDATED_EVENT, handleLocalUpdate);
     return () => {
+      window.removeEventListener(OUTREACH_STUDIO_UPDATED_EVENT, handleLocalUpdate);
       supabase.removeChannel(channel);
     };
   }, [user, fetchData]);
@@ -212,6 +220,7 @@ export function AutoMessagesPanel() {
         channel,
         subject: config.subject,
         body: config.body,
+        trigger: event.trigger,
         is_active: true,
         is_default: true,
       })
@@ -233,6 +242,7 @@ export function AutoMessagesPanel() {
       const existing = getRow(event, channel);
 
       if (existing) {
+        setAutomations((prev) => prev.map((item) => item.id === existing.id ? { ...item, is_enabled: enabled } : item));
         const { error } = await supabase
           .from('outreach_automations')
           .update({ is_enabled: enabled })
@@ -264,6 +274,7 @@ export function AutoMessagesPanel() {
       }
 
       await fetchData();
+      notifyOutreachStudioUpdated(user.id);
       toast.success(enabled ? 'Automatiskt utskick påslaget' : 'Automatiskt utskick pausat');
     } catch {
       toast.error('Kunde inte spara ändringen');
@@ -290,6 +301,7 @@ export function AutoMessagesPanel() {
       return;
     }
     await fetchData();
+    if (user) notifyOutreachStudioUpdated(user.id);
   };
 
   return (

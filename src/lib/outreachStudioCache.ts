@@ -4,6 +4,7 @@ import type { OutreachAutomation, OutreachDispatchLog, OutreachTemplate } from '
 const OUTREACH_STUDIO_CACHE_VERSION = 1;
 const OUTREACH_STUDIO_CACHE_PREFIX = 'outreach-studio-cache:';
 const OUTREACH_TEMPLATES_CACHE_PREFIX = 'outreach-templates-cache:';
+export const OUTREACH_STUDIO_UPDATED_EVENT = 'parium:outreach-studio-updated';
 
 type CachedEnvelope<T> = {
   version: number;
@@ -78,4 +79,8 @@ export const readCachedOutreachTemplates = (userId: string): OutreachTemplate[] 
 
 export const writeCachedOutreachTemplates = (userId: string, templates: OutreachTemplate[]) => {
   writeCache(`${OUTREACH_TEMPLATES_CACHE_PREFIX}${userId}`, userId, templates);
+};
+
+export const notifyOutreachStudioUpdated = (userId: string) => {
+  window.dispatchEvent(new CustomEvent(OUTREACH_STUDIO_UPDATED_EVENT, { detail: { userId } }));
 };
