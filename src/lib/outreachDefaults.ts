@@ -50,27 +50,6 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     is_active: true,
   },
   {
-    name: 'Chat · varm uppdatering',
-    channel: 'chat',
-    subject: null,
-    body: 'Hej {first_name}! {message}',
-    is_active: true,
-  },
-  {
-    name: 'E-post · professionell uppdatering',
-    channel: 'email',
-    subject: 'Uppdatering från {company_name}',
-    body: 'Hej {candidate_name},\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
-    is_active: true,
-  },
-  {
-    name: 'Push · kort uppdatering',
-    channel: 'push',
-    subject: '{company_name}',
-    body: '{message}',
-    is_active: true,
-  },
-  {
     name: 'Gå vidare · chat',
     channel: 'chat',
     subject: null,
@@ -110,20 +89,6 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     channel: 'push',
     subject: '{company_name}',
     body: 'Tack för din ansökan till {job_title}. Vi har gått vidare med andra kandidater.',
-    is_active: true,
-  },
-  {
-    name: 'Intervju · premiummejl',
-    channel: 'email',
-    subject: 'Intervju bokad för {job_title}',
-    body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} är bokad till {scheduled_date} kl. {scheduled_time}.\nPlats: {location_details}\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
-    is_active: true,
-  },
-  {
-    name: 'Intervju · premiumpush',
-    channel: 'push',
-    subject: 'Intervju bokad',
-    body: '{job_title} · {scheduled_date} {scheduled_time}',
     is_active: true,
   },
   {
