@@ -246,6 +246,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         interview_video_link: formData.interviewVideoLink
           ? normalizeMeetingLink(formData.interviewVideoLink)
           : '',
+        interview_video_default_message: formData.interviewVideoDefaultMessage.trim(),
+        interview_default_message: formData.interviewOfficeDefaultMessage.trim(),
         onboarding_completed: true
       } as any);
 
