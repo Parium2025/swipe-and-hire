@@ -1011,6 +1011,11 @@ export function useConversationMessages(conversationId: string | null) {
   }, [conversationId, hasMore, queryClient]);
 
 
+  // The realtime handler is created before markAsRead below. Keep the latest
+  // callback in a ref so an incoming message can be acknowledged immediately
+  // while this conversation is visibly open.
+  const markAsReadRef = useRef<(() => Promise<void>) | null>(null);
+
   // Subscribe to realtime messages for this conversation - instant cache update
   useEffect(() => {
     if (!conversationId || !user) return;
@@ -1080,6 +1085,13 @@ export function useConversationMessages(conversationId: string | null) {
           });
           if (!patched) {
             queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          }
+
+          // A message received while the open chat is visible has actually been
+          // seen. Persist that read state immediately instead of waiting for the
+          // user to leave and reopen the conversation.
+          if (newMessage.sender_id !== user.id && document.visibilityState === 'visible') {
+            void markAsReadRef.current?.();
           }
         }
       )
@@ -1170,6 +1182,22 @@ export function useConversationMessages(conversationId: string | null) {
 
     console.warn('markAsRead failed after retries:', lastError);
   }, [conversationId, user, queryClient]);
+
+  markAsReadRef.current = markAsRead;
+
+  // If a message arrived while the tab was hidden, acknowledge it as soon as
+  // the user returns to the still-open conversation.
+  useEffect(() => {
+    const markVisibleConversationRead = () => {
+      if (document.visibilityState === 'visible') void markAsReadRef.current?.();
+    };
+    document.addEventListener('visibilitychange', markVisibleConversationRead);
+    window.addEventListener('focus', markVisibleConversationRead);
+    return () => {
+      document.removeEventListener('visibilitychange', markVisibleConversationRead);
+      window.removeEventListener('focus', markVisibleConversationRead);
+    };
+  }, [conversationId]);
 
   // Edit an existing message
   const editMessage = useCallback(async (messageId: string, newContent: string) => {

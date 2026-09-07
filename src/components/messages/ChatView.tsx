@@ -134,16 +134,7 @@ export function ChatView({
 
   const snapshot = conversation.applicationSnapshot;
 
-  // Build a frozen sender profile for the candidate based on snapshot
   const candidateUserId = conversation.candidate_id;
-  const snapshotSenderProfile = snapshot && candidateUserId ? {
-    first_name: snapshot.first_name,
-    last_name: snapshot.last_name,
-    company_name: null,
-    profile_image_url: snapshot.profile_image_snapshot_url,
-    company_logo_url: null,
-    role: 'job_seeker' as const,
-  } : null;
 
   // Get current user's display name for typing indicator
   const getCurrentUserName = () => {
@@ -155,6 +146,20 @@ export function ChatView({
   };
 
   const avatarProfile = getConversationAvatarProfile(snapshot, displayMember, conversation.last_message);
+
+  // Use the exact same resolved candidate identity in message bubbles as in
+  // the conversation header/list. This preserves frozen application media and
+  // the legacy live-profile fallback instead of incorrectly showing initials.
+  const snapshotSenderProfile = snapshot && candidateUserId && avatarProfile?.role === 'job_seeker'
+    ? {
+        first_name: avatarProfile.first_name ?? null,
+        last_name: avatarProfile.last_name ?? null,
+        company_name: avatarProfile.company_name ?? null,
+        profile_image_url: avatarProfile.profile_image_url ?? null,
+        company_logo_url: avatarProfile.company_logo_url ?? null,
+        role: avatarProfile.role,
+      }
+    : null;
 
   // Read receipts: determine the other member's last_read_at
   const otherMemberLastRead = otherMembers[0]?.last_read_at
