@@ -1344,40 +1344,6 @@ export function MessageTemplatesSettings() {
     });
   };
 
-  const handleRestoreDefaultTemplate = async (defaultName = selectedDefaultTemplateName) => {
-    if (!user) return;
-    const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find((template) => template.name === defaultName);
-    if (!defaultTemplate) return;
-
-    setRestoringDefault(true);
-    const existingTemplate = templates.find(
-      (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
-    );
-    const payload = {
-      name: defaultTemplate.name,
-      channel: defaultTemplate.channel,
-      subject: defaultTemplate.subject,
-      body: defaultTemplate.body,
-      is_active: defaultTemplate.is_active,
-      is_default: true,
-    };
-    const result = existingTemplate
-      ? await supabase.from('outreach_templates').update(payload).eq('id', existingTemplate.id)
-      : await supabase.from('outreach_templates').insert({
-          ...payload,
-          owner_user_id: user.id,
-          organization_id: organizationId,
-        });
-
-    if (result.error) {
-      toast.error('Kunde inte återställa Parium-mallen');
-    } else {
-      toast.success(existingTemplate ? 'Parium-mallen återställd' : 'Parium-mallen tillagd');
-      await fetchStudio({ silent: true });
-      notifyOutreachStudioUpdated(user.id);
-    }
-    setRestoringDefault(false);
-  };
 
   // (isStandardTemplate är definierad på modulnivå, se ovan)
 
