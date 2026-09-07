@@ -80,6 +80,8 @@
         "lodash": "^4.18.1",
         "lodash-es": "^4.18.1",
         "lucide-react": "^0.462.0",
+        "motion-dom": "12.23.21",
+        "motion-utils": "12.23.6",
         "mp4-muxer": "^5.2.2",
         "mp4box": "^2.4.1",
         "next-themes": "^0.3.0",

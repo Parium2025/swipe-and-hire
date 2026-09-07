@@ -68,20 +68,47 @@ export async function registerForPushNotifications(): Promise<string | null> {
   }
 
   return new Promise((resolve) => {
-    // Listen for registration success
-    PushNotifications.addListener('registration', (token: Token) => {
-      console.log('Push registration success, token:', token.value);
-      resolve(token.value);
+    let settled = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let removeRegistrationListener: (() => void) | undefined;
+    let removeErrorListener: (() => void) | undefined;
+
+    const finish = (token: string | null) => {
+      if (settled) return;
+      settled = true;
+      if (timeout) clearTimeout(timeout);
+      removeRegistrationListener?.();
+      removeErrorListener?.();
+      resolve(token);
+    };
+
+    void PushNotifications.addListener('registration', (token: Token) => {
+      console.log('Push registration success');
+      finish(token.value);
+    }).then((handle) => {
+      removeRegistrationListener = () => void handle.remove();
+      if (settled) removeRegistrationListener();
     });
 
-    // Listen for registration errors
-    PushNotifications.addListener('registrationError', (error) => {
+    void PushNotifications.addListener('registrationError', (error) => {
       console.error('Push registration error:', error);
-      resolve(null);
+      finish(null);
+    }).then((handle) => {
+      removeErrorListener = () => void handle.remove();
+      if (settled) removeErrorListener();
     });
 
-    // Start the registration process
-    PushNotifications.register();
+    // iOS/Android ska normalt svara direkt. En timeout hindrar en trasig native-
+    // registrering från att lämna initieringen hängande under hela sessionen.
+    timeout = setTimeout(() => {
+      console.warn('Push registration timed out');
+      finish(null);
+    }, 10_000);
+
+    void PushNotifications.register().catch((error) => {
+      console.error('Could not start push registration:', error);
+      finish(null);
+    });
   });
 }
 

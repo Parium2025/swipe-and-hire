@@ -1140,18 +1140,35 @@ export function useConversationMessages(conversationId: string | null) {
 
     if (!getIsOnline()) return; // Silent fail for mark as read - non-critical
 
-    try {
-      await supabase
-        .from('conversation_members')
-        .update({ last_read_at: new Date().toISOString(), manually_unread: false } as never)
-        .eq('conversation_id', conversationId)
-        .eq('user_id', user.id);
+    const readAt = new Date().toISOString();
+    let lastError: unknown = null;
 
-      queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
-    } catch (err) {
-      // Non-critical: log but don't block UX
-      console.warn('markAsRead failed:', err);
+    // Lässtatus är liten men viktig data. Databasklienten returnerar ofta fel i
+    // resultatet i stället för att kasta, så kontrollera uttryckligen och gör
+    // korta, begränsade omförsök vid tillfälliga mobil-/nätverksavbrott.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const { error } = await supabase
+          .from('conversation_members')
+          .update({ last_read_at: readAt, manually_unread: false } as never)
+          .eq('conversation_id', conversationId)
+          .eq('user_id', user.id);
+
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          return;
+        }
+        lastError = error;
+      } catch (error) {
+        lastError = error;
+      }
+
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+      }
     }
+
+    console.warn('markAsRead failed after retries:', lastError);
   }, [conversationId, user, queryClient]);
 
   // Edit an existing message
