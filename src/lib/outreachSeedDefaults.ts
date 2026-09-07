@@ -136,3 +136,101 @@ export async function seedDefaultAutoRules(userId: string, organizationId: strin
   inFlight.set(userId, promise);
   return promise;
 }
+
+/**
+ * Nya standardhändelser (t.ex. "Intervjun bokas") ska dyka upp även för
+ * arbetsgivare som redan är seedade. Vi lägger bara till händelser som helt
+ * saknar rader – befintliga val rörs aldrig.
+ */
+const backfillInFlight = new Map<string, Promise<boolean>>();
+
+async function runBackfill(userId: string, organizationId: string | null): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('outreach_automations')
+    .select('trigger')
+    .eq('owner_user_id', userId);
+
+  if (error || !data || data.length === 0) return false;
+
+  const existingTriggers = new Set((data as { trigger: string }[]).map((row) => row.trigger));
+  const missing = AUTO_RULE_EVENTS.filter((event) => !existingTriggers.has(event.trigger));
+  if (missing.length === 0) return false;
+
+  const { data: templateRows } = await supabase
+    .from('outreach_templates')
+    .select('id, name, channel')
+    .eq('owner_user_id', userId);
+
+  const cache: { id: string; name: string; channel: string }[] = (templateRows ?? []).map((t) => ({
+    id: t.id as string,
+    name: t.name as string,
+    channel: t.channel as string,
+  }));
+
+  const rows: Record<string, unknown>[] = [];
+
+  for (const event of missing) {
+    const groupId =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${event.trigger}`;
+
+    for (const { value: channel } of AUTO_RULE_CHANNELS) {
+      const config = event.templates[channel];
+      if (!config) continue;
+
+      let templateId = cache.find((t) => t.name === config.name && t.channel === channel)?.id ?? null;
+      if (!templateId) {
+        const { data: inserted } = await supabase
+          .from('outreach_templates')
+          .insert({
+            owner_user_id: userId,
+            organization_id: organizationId,
+            name: config.name,
+            channel,
+            subject: config.subject,
+            body: config.body,
+            trigger: event.trigger,
+            is_active: true,
+            is_default: true,
+          })
+          .select('id, name, channel')
+          .single();
+        if (!inserted) continue;
+        templateId = inserted.id as string;
+        cache.push({ id: templateId, name: inserted.name as string, channel: inserted.channel as string });
+      }
+
+      rows.push({
+        owner_user_id: userId,
+        organization_id: organizationId,
+        name: event.title,
+        trigger: event.trigger,
+        channel,
+        recipient_type: 'candidate',
+        template_id: templateId,
+        delay_minutes: event.defaultDelay,
+        filters: { group_id: groupId },
+        is_enabled: channel !== 'chat',
+      });
+    }
+  }
+
+  if (rows.length === 0) return false;
+
+  const { error: insertError } = await supabase.from('outreach_automations').insert(rows as never);
+  return !insertError;
+}
+
+export async function backfillMissingAutoRuleEvents(
+  userId: string,
+  organizationId: string | null,
+): Promise<boolean> {
+  const existing = backfillInFlight.get(userId);
+  if (existing) return existing;
+  const promise = runBackfill(userId, organizationId).finally(() => {
+    backfillInFlight.delete(userId);
+  });
+  backfillInFlight.set(userId, promise);
+  return promise;
+}
