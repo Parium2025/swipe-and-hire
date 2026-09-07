@@ -106,7 +106,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     if (!draftRestored) return;
     
     // Check if there's any content to save
-    const hasContent = formData.companyLogoUrl || formData.interviewVideoLink || currentStep > 0;
+    const hasContent = formData.companyLogoUrl || formData.interviewVideoLink
+      || formData.interviewVideoDefaultMessage || formData.interviewOfficeDefaultMessage
+      || currentStep > 0;
     
     if (hasContent) {
       try {
