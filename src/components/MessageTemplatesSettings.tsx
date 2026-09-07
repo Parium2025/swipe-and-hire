@@ -68,10 +68,11 @@ const STANDARD_TEMPLATE_KEYS = new Set<string>([
   ),
 ]);
 
-// Alla Parium-original: både biblioteksmallarna och de som Automatiska utskick
-// skapar när en kanal slås på. Dessa är låsta och räknas aldrig som "egna mallar".
-function isStandardTemplate(template: { name: string; channel: string }) {
-  return STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
+// Alla Parium-original: biblioteksmallarna, de som Automatiska utskick skapar och de
+// manuella originalen (Gå vidare/Avslag) som styrs från kandidatprofilen. Dessa är låsta
+// och räknas aldrig som "egna mallar" – bara det du själv skapar hamnar i Egna mallar.
+function isStandardTemplate(template: { name: string; channel: string; is_default?: boolean | null }) {
+  return template.is_default === true || STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 }
 
 const TEMPLATE_DRAFT_PREFIX = 'outreach-template-draft:';
@@ -1364,7 +1365,6 @@ export function MessageTemplatesSettings() {
     STANDARD_CHANNEL_ORDER.flatMap((channel) => {
       const config = event.templates[channel as 'email' | 'push' | 'chat'];
       if (!config) return [];
-      if (!enabledEventChannels.has(`${event.trigger}::${channel}`)) return [];
       if (coveredEventChannels.has(`${event.trigger}::${channel}`)) return [];
       return [{
         id: `standard:${event.trigger}:${channel}`,
@@ -1372,7 +1372,7 @@ export function MessageTemplatesSettings() {
         channel,
         subject: config.subject,
         body: config.body,
-        is_active: true,
+        is_active: enabledEventChannels.has(`${event.trigger}::${channel}`),
         is_default: true,
         trigger: event.trigger,
       } as unknown as OutreachTemplate];
