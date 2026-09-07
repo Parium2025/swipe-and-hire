@@ -1736,11 +1736,11 @@ export function MessageTemplatesSettings() {
             ) : templates.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
-                <div className="space-y-4 sm:space-y-5">
+                <div className="space-y-6 px-1 sm:space-y-7">
                 {customTemplates.length > 0 && (
-                  <>
-                    <p className="px-1 pb-2 pt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Egna mallar ({customTemplates.length})</p>
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                  <div className="space-y-3">
+                    <p className="px-1 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Egna mallar ({customTemplates.length})</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/[0.12] bg-white/[0.04] p-3">
                       <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-white">
                         <Checkbox
                           checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
@@ -1758,7 +1758,7 @@ export function MessageTemplatesSettings() {
                         </PillButton>
                       )}
                     </div>
-                  </>
+                  </div>
                 )}
                 {orderedTemplates.map((template, index) => {
                   const isStandard = isStandardTemplate(template);
