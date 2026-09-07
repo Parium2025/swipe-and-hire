@@ -645,7 +645,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
+    // 🛡️ Hängande backend får ALDRIG låsa appen i evig laddning.
+    // Om sessionshämtningen inte svarat inom 3,5 s släpper vi fram appen ändå
+    // (utloggat läge). Svarar backend senare tar onAuthStateChange över och
+    // sätter rätt session — användaren märker ingen skillnad utom att hen
+    // slipper stirra på en tom skärm.
+    const SESSION_TIMEOUT_MS = 3500;
+    let sessionTimedOut = false;
+    const sessionTimeoutId = window.setTimeout(() => {
+      if (!mounted || sessionInitialized) return;
+      sessionTimedOut = true;
+      finishInitialization();
+      setLoading(false);
+    }, SESSION_TIMEOUT_MS);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      window.clearTimeout(sessionTimeoutId);
       if (!mounted || sessionInitialized) return;
       sessionInitialized = true;
       finishInitialization();
@@ -672,12 +687,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setLoading(false);
               setAuthAction(null);
             }
-          }, 1100);
+          }, sessionTimedOut ? 0 : 1100);
         });
       } else {
         setLoading(false);
       }
+    }).catch(() => {
+      window.clearTimeout(sessionTimeoutId);
+      if (!mounted || sessionInitialized) return;
+      finishInitialization();
+      setLoading(false);
     });
+
 
     const removeConnectivityRecoveryListener = onConnectivityChange((online) => {
       if (online) {
@@ -694,6 +715,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
+      window.clearTimeout(sessionTimeoutId);
       removeConnectivityRecoveryListener();
       document.removeEventListener('visibilitychange', handleDeferredRecoveryVisibility);
       subscription.unsubscribe();

@@ -897,13 +897,14 @@
               // status så användaren aldrig möts av en tom blå skärm, och efter
               // ett tag ger vi upp väntan och laddar om ändå — annars kunde en
               // krasch i uppstarten låsa oss i en tyst evighetsloop.
-              if (window.__pariumMainStarted === true && mainStartedWaits < 3) {
+              if (window.__pariumMainStarted === true && mainStartedWaits < 2) {
                 mainStartedWaits += 1;
                 showStatus(false);
                 recovering = false;
-                setTimeout(function() { if (!isBooted()) recover(); }, 5000);
+                setTimeout(function() { if (!isBooted()) recover(); }, 2500);
                 return;
               }
+
 
               attempts += 1;
               try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
@@ -937,13 +938,13 @@
           // Bundlen kunde inte hämtas → vänta inte ut hela timeouten.
           window.__pariumBundleFailed = function() { setTimeout(check, 300); };
 
-          // Synlig laddstatus redan efter 4 s — en tom blå skärm får aldrig
+          // Synlig laddstatus redan efter 1,5 s — en tom blå skärm får aldrig
           // vara det enda användaren ser medan appen startar.
           setTimeout(function() {
             if (!isBooted()) showStatus(navigator.onLine === false);
-          }, 4000);
+          }, 1500);
 
-          setTimeout(check, 7000);
+          setTimeout(check, 3500);
 
           window.addEventListener('pageshow', function() { setTimeout(check, 1500); });
           document.addEventListener('visibilitychange', function() {
