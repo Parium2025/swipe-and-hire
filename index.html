@@ -897,13 +897,14 @@
               // status så användaren aldrig möts av en tom blå skärm, och efter
               // ett tag ger vi upp väntan och laddar om ändå — annars kunde en
               // krasch i uppstarten låsa oss i en tyst evighetsloop.
-              if (window.__pariumMainStarted === true && mainStartedWaits < 3) {
+              if (window.__pariumMainStarted === true && mainStartedWaits < 2) {
                 mainStartedWaits += 1;
                 showStatus(false);
                 recovering = false;
-                setTimeout(function() { if (!isBooted()) recover(); }, 5000);
+                setTimeout(function() { if (!isBooted()) recover(); }, 2500);
                 return;
               }
+
 
               attempts += 1;
               try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
