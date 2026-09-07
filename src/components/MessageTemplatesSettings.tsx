@@ -1932,10 +1932,63 @@ export function MessageTemplatesSettings() {
                       </div>
                     </div>
                   </div>
-                  </div>
                   );
+                  };
 
-                })}
+                  return (
+                    <>
+                      {customTemplates.map((template) => renderTemplateCard(template))}
+
+                      {standardByChannel.length > 0 && (
+                        <div className="px-1 pb-1 pt-10">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                            Parium-standard ({standardTemplates.length})
+                          </p>
+                          <p className="mt-2 text-[11px] text-white md:text-xs">
+                            Låsta originalmallar. De visas bara för de kanaler och händelser du har påslagna under Automatiska utskick — och försvinner när du skapat en egen mall för samma händelse och kanal.
+                          </p>
+                        </div>
+                      )}
+
+                      {standardByChannel.map((group) => {
+                        const isOpen = openStandardChannels.has(group.channel);
+                        return (
+                          <div
+                            key={group.channel}
+                            className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+                          >
+                            <button
+                              type="button"
+                              aria-expanded={isOpen}
+                              onClick={() =>
+                                setOpenStandardChannels((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(group.channel)) next.delete(group.channel);
+                                  else next.add(group.channel);
+                                  return next;
+                                })
+                              }
+                              className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-white/[0.06]"
+                            >
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                                {getOutreachChannelLabel(group.channel)} ({group.items.length})
+                              </span>
+                              <ChevronDown
+                                className={`h-4 w-4 shrink-0 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                              />
+                            </button>
+                            {isOpen && (
+                              <div className="space-y-4 p-2 pt-3">
+                                {group.items.map((template) => renderTemplateCard(template))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
+
               </div>
             )}
 
