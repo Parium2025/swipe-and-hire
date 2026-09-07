@@ -937,13 +937,13 @@
           // Bundlen kunde inte hämtas → vänta inte ut hela timeouten.
           window.__pariumBundleFailed = function() { setTimeout(check, 300); };
 
-          // Synlig laddstatus redan efter 4 s — en tom blå skärm får aldrig
+          // Synlig laddstatus redan efter 1,5 s — en tom blå skärm får aldrig
           // vara det enda användaren ser medan appen startar.
           setTimeout(function() {
             if (!isBooted()) showStatus(navigator.onLine === false);
-          }, 4000);
+          }, 1500);
 
-          setTimeout(check, 7000);
+          setTimeout(check, 3500);
 
           window.addEventListener('pageshow', function() { setTimeout(check, 1500); });
           document.addEventListener('visibilitychange', function() {
