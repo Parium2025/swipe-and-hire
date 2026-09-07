@@ -40,6 +40,9 @@ const JobbCityYrke = () => {
 
   const jobCount = getJobCount(counts, { citySlug: city.slug, occupationSlug: occ.slug });
   const hasJobs = jobCount > 0;
+  // Soft 404-skydd: sidor utan aktiva annonser ska inte indexeras, men länkarna
+  // ska fortsatt följas. Så fort det finns jobb blir sidan indexerbar igen.
+  const shouldNoindex = counts !== undefined && !hasJobs;
   const secondaryLabel = hasJobs
     ? jobCount === 1
       ? 'Se 1 jobb'
@@ -124,6 +127,7 @@ const JobbCityYrke = () => {
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={canonical} />
+        {shouldNoindex && <meta name="robots" content="noindex,follow" />}
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
