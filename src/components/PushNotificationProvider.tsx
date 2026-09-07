@@ -18,7 +18,7 @@ export function PushNotificationProvider() {
       navigate(data.route || '/my-applications');
     } else if (data?.job_id) {
       navigate(`/job-details/${data.job_id}`);
-    } else if (data?.type === 'message') {
+    } else if (data?.type === 'message' || data?.type === 'new_message' || data?.type === 'chat_message') {
       navigate('/messages');
     } else if (data?.type === 'application') {
       navigate('/candidates');
