@@ -715,6 +715,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
+      window.clearTimeout(sessionTimeoutId);
       removeConnectivityRecoveryListener();
       document.removeEventListener('visibilitychange', handleDeferredRecoveryVisibility);
       subscription.unsubscribe();
