@@ -1791,30 +1791,12 @@ export function MessageTemplatesSettings() {
                     </div>
                   </div>
                 )}
-                {orderedTemplates.map((template, index) => {
+                {(() => {
+                  const renderTemplateCard = (template: OutreachTemplate) => {
                   const isStandard = isStandardTemplate(template);
-                  const showStandardHeading = isStandard && index === customTemplates.length;
-                  const previous = orderedTemplates[index - 1];
-                  const showChannelHeading =
-                    isStandard && (showStandardHeading || !previous || previous.channel !== template.channel);
-                  const channelCount = standardTemplates.filter((item) => item.channel === template.channel).length;
                   return (
-                    <div key={template.id} className="contents">
-                    {showStandardHeading && (
-                      <div className="px-1 pb-3 pt-10">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Parium-standard ({standardTemplates.length})</p>
-                        <p className="mt-2 text-[11px] text-white md:text-xs">Låsta originalmallar. De läggs till automatiskt när du slår på en kanal under Automatiska utskick – de är alltså inga nya egna mallar.</p>
-                      </div>
-                    )}
-                    {showChannelHeading && (
-                      <div className={`flex items-center gap-2 px-1 ${showStandardHeading ? 'pt-2' : 'pt-8'}`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
-                          {getOutreachChannelLabel(template.channel)} ({channelCount})
-                        </p>
-                        <span className="h-px flex-1 bg-white/10" />
-                      </div>
-                    )}
-                    <div className="rounded-2xl border border-white/[0.15] bg-gradient-to-b from-white/[0.10] to-white/[0.04] p-4 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.07)]">
+                    <div key={template.id} className="rounded-2xl border border-white/[0.15] bg-gradient-to-b from-white/[0.10] to-white/[0.04] p-4 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.07)]">
+
 
 
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
