@@ -422,6 +422,58 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       case 2:
         return (
+          <div className="space-y-8 py-8">
+            <div className="text-center space-y-4">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
+                <MessageSquare className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white">Standardmeddelanden</h2>
+              <p className="text-white max-w-md mx-auto leading-relaxed break-words">
+                Texten fylls i automatiskt när ni bokar en intervju. Ni kan ändra den vid varje bokning.
+              </p>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="welcome-video-message" className="text-white font-medium block">
+                  Videointervju
+                </label>
+                <Textarea
+                  id="welcome-video-message"
+                  value={formData.interviewVideoDefaultMessage}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, interviewVideoDefaultMessage: e.target.value }))}
+                  placeholder={'Hej!\n\nTack för din ansökan. Vi vill gärna träffa dig på en videointervju.\n\nVänliga hälsningar'}
+                  rows={4}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/70 resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="welcome-office-message" className="text-white font-medium block">
+                  Intervju på kontoret
+                </label>
+                <Textarea
+                  id="welcome-office-message"
+                  value={formData.interviewOfficeDefaultMessage}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, interviewOfficeDefaultMessage: e.target.value }))}
+                  placeholder={'Hej!\n\nTack för din ansökan. Vi vill gärna träffa dig på vårt kontor.\n\nVänliga hälsningar'}
+                  rows={4}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/70 resize-none"
+                />
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <p className="text-sm text-white break-words">
+                  <strong>Tips:</strong> Ni kan hoppa över det här och fylla i senare under
+                  Företag → Företagsprofil → Intervjuinställningar.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
