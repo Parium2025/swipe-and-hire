@@ -34,7 +34,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  RotateCcw,
+  
   ScrollText,
   Send,
   Trash2,
@@ -608,8 +608,6 @@ export function MessageTemplatesSettings() {
   
 
   const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
-  const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
-  const [restoringDefault, setRestoringDefault] = useState(false);
   const fetchRequestIdRef = useRef(0);
   // Utkastet kan inte hydreras vid första render eftersom `user` sätts asynkront.
   // Vi hydrerar när nyckeln finns och blockerar autospar innan dess, annars
@@ -1343,94 +1341,45 @@ export function MessageTemplatesSettings() {
       errorMessage: 'Kunde inte ta bort de markerade mallarna',
     });
   };
-
-  const handleRestoreDefaultTemplate = async (defaultName = selectedDefaultTemplateName) => {
-    if (!user) return;
-    const defaultTemplate = DEFAULT_OUTREACH_TEMPLATES.find((template) => template.name === defaultName);
-    if (!defaultTemplate) return;
-
-    setRestoringDefault(true);
-    const existingTemplate = templates.find(
-      (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
-    );
-    const payload = {
-      name: defaultTemplate.name,
-      channel: defaultTemplate.channel,
-      subject: defaultTemplate.subject,
-      body: defaultTemplate.body,
-      is_active: defaultTemplate.is_active,
-      is_default: true,
-    };
-    const result = existingTemplate
-      ? await supabase.from('outreach_templates').update(payload).eq('id', existingTemplate.id)
-      : await supabase.from('outreach_templates').insert({
-          ...payload,
-          owner_user_id: user.id,
-          organization_id: organizationId,
-        });
-
-    if (result.error) {
-      toast.error('Kunde inte återställa Parium-mallen');
-    } else {
-      toast.success(existingTemplate ? 'Parium-mallen återställd' : 'Parium-mallen tillagd');
-      await fetchStudio({ silent: true });
-      notifyOutreachStudioUpdated(user.id);
-    }
-    setRestoringDefault(false);
-  };
-
-  // (isStandardTemplate är definierad på modulnivå, se ovan)
-
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
 
-  // Kanal + händelse som är påslagna under Automatiska utskick. Stänger du av en kanal
-  // för en händelse försvinner motsvarande Parium-standard ur listan.
+  // Kanal + händelse som är påslagna under Automatiska utskick.
   const enabledEventChannels = new Set(
     automations
       .filter((automation) => automation.is_enabled)
       .map((automation) => `${automation.trigger}::${automation.channel}`),
   );
   // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
-  // Övriga standardmallar ligger kvar tills du täckt även dem.
   const coveredEventChannels = new Set(
     customTemplates
       .filter((template) => template.is_active && template.trigger)
       .map((template) => `${template.trigger}::${template.channel}`),
   );
-  const standardTriggerByKey = new Map<string, string>(
-    AUTO_RULE_EVENTS.flatMap((event) =>
-      (Object.entries(event.templates) as Array<[string, { name: string }]>).map(
-        ([channel, config]) => [`${config.name}::${channel}`, event.trigger] as [string, string],
-      ),
-    ),
-  );
   const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
-  // Triggers som styrs av reglagen under Automatiska utskick.
-  const AUTO_TRIGGERS = new Set(AUTO_RULE_EVENTS.map((event) => event.trigger as string));
-  const sortByChannelThenName = (a: OutreachTemplate, b: OutreachTemplate) => {
-    const channelDiff =
-      STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
-    if (channelDiff !== 0) return channelDiff;
-    return a.name.localeCompare(b.name, 'sv');
-  };
-  const allStandardTemplates = templates.filter((template) => isStandardTemplate(template));
-  const triggerOf = (template: OutreachTemplate) =>
-    standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
 
-  // Automatiska standardmallar: syns bara när händelsen + kanalen är påslagen
-  // och inte redan täcks av en egen mall.
-  const standardAutoTemplates = allStandardTemplates
-    .filter((template) => {
-      const trigger = triggerOf(template);
-      if (!trigger || !AUTO_TRIGGERS.has(trigger)) return false;
-      if (!enabledEventChannels.has(`${trigger}::${template.channel}`)) return false;
-      if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
-      return true;
-    })
-    .sort(sortByChannelThenName);
+  // Parium-standardmallarna kommer alltid från koden, aldrig från databasen. Då kan de
+  // varken saknas, raderas eller hamna i fel ordning – listan följer alltid tidslinjen
+  // ansökan → intervju bokad → före → efter → avbokad → jobb avslutat.
+  const standardAutoTemplates: OutreachTemplate[] = AUTO_RULE_EVENTS.flatMap((event) =>
+    STANDARD_CHANNEL_ORDER.flatMap((channel) => {
+      const config = event.templates[channel as 'email' | 'push' | 'chat'];
+      if (!config) return [];
+      if (!enabledEventChannels.has(`${event.trigger}::${channel}`)) return [];
+      if (coveredEventChannels.has(`${event.trigger}::${channel}`)) return [];
+      return [{
+        id: `standard:${event.trigger}:${channel}`,
+        name: config.name,
+        channel,
+        subject: config.subject,
+        body: config.body,
+        is_active: true,
+        is_default: true,
+        trigger: event.trigger,
+      } as unknown as OutreachTemplate];
+    }),
+  );
 
-  // Manuella utskick (Gå vidare, Avslag) styrs från kandidatprofilen och visas
-  // inte som standardmallar här – bara egna mallar och automatiska standardmallar listas.
+  // Manuella utskick (Gå vidare, Avslag) styrs från kandidatprofilen och visas inte här.
   const standardManualTemplates: OutreachTemplate[] = [];
 
   const standardTemplates = [...standardAutoTemplates, ...standardManualTemplates];
@@ -1447,44 +1396,7 @@ export function MessageTemplatesSettings() {
 
 
 
-  const missingDefaultTemplates = DEFAULT_OUTREACH_TEMPLATES.filter(
-    (defaultTemplate) =>
-      !templates.some(
-        (template) => template.name === defaultTemplate.name && template.channel === defaultTemplate.channel,
-      ),
-  );
 
-  const restoreTargetName = missingDefaultTemplates.some((item) => item.name === selectedDefaultTemplateName)
-    ? selectedDefaultTemplateName
-    : missingDefaultTemplates[0]?.name ?? '';
-
-
-
-  const handleRestoreAllDefaultTemplates = async () => {
-    if (!user || missingDefaultTemplates.length === 0) return;
-    setRestoringDefault(true);
-
-    const toInsert = missingDefaultTemplates.map((defaultTemplate) => ({
-      name: defaultTemplate.name,
-      channel: defaultTemplate.channel,
-      subject: defaultTemplate.subject,
-      body: defaultTemplate.body,
-      is_active: defaultTemplate.is_active,
-      is_default: true,
-      owner_user_id: user.id,
-      organization_id: organizationId,
-    }));
-
-    const { error } = await supabase.from('outreach_templates').insert(toInsert);
-
-    if (error) {
-      toast.error('Kunde inte lägga tillbaka Parium-mallarna');
-    } else {
-      toast.success(`${toInsert.length} Parium-mallar lades tillbaka`);
-    }
-    await fetchStudio({ silent: true });
-    setRestoringDefault(false);
-  };
 
 
 
@@ -1741,58 +1653,11 @@ export function MessageTemplatesSettings() {
 
 
 
-            {missingDefaultTemplates.length > 0 && (
-            <div className="mb-4 grid gap-2 rounded-2xl border border-white/[0.15] bg-gradient-to-b from-white/[0.10] to-white/[0.04] p-4 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.07)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-white">Parium-standard</Label>
-                  <InfoHint text="Parium-standarden finns alltid kvar i koden. Saknas någon originalmall kan du lägga tillbaka den här. När alla finns på plats försvinner rutan. Egna mallar påverkas aldrig." />
-                </div>
-                <p className="text-xs text-white">
-                  {`${missingDefaultTemplates.length} av ${DEFAULT_OUTREACH_TEMPLATES.length} Parium-mallar saknas i biblioteket.`}
-                </p>
-                <Select
-                  value={restoreTargetName}
-                  onValueChange={setSelectedDefaultTemplateName}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white [&>svg]:text-white">
-                    <SelectValue placeholder="Välj Parium-mall" />
-                  </SelectTrigger>
-                  <SelectContent className="border-white/20 [&_[role=option]+[role=option]]:border-t [&_[role=option]+[role=option]]:border-white/15">
-                    {missingDefaultTemplates.map((template) => (
-                      <SelectItem key={`${template.channel}-${template.name}`} value={template.name}>{template.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <PillButton
-                  className="px-4 disabled:opacity-50"
-                  disabled={restoringDefault || !restoreTargetName}
-                  onClick={() => void handleRestoreDefaultTemplate(restoreTargetName)}
-                >
-                  {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                  Lägg tillbaka vald
-                </PillButton>
-                {missingDefaultTemplates.length > 1 && (
-                  <PillButton
-                    className="px-4 disabled:opacity-50"
-                    disabled={restoringDefault}
-                    onClick={() => void handleRestoreAllDefaultTemplates()}
-                  >
-                    {restoringDefault ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                    Lägg tillbaka alla ({missingDefaultTemplates.length})
-                  </PillButton>
-                )}
-              </div>
-            </div>
-            )}
-
-
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
-            ) : templates.length === 0 ? (
+            ) : customTemplates.length === 0 && standardAutoTemplates.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
+
             ) : (
                 <div className="space-y-6 px-1 sm:space-y-7">
                 {customTemplates.length > 0 && (
@@ -1846,7 +1711,7 @@ export function MessageTemplatesSettings() {
                           <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">{getOutreachChannelLabel(template.channel)}</span>
                           {isStandard && <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Parium-standard</span>}
                           {!template.is_active && <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">Inaktiv</span>}
-                          {!isStandard && template.trigger && (
+                          {template.trigger && (
                             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white">
                               {AUTO_RULE_EVENTS.find((event) => event.trigger === template.trigger)?.title ?? getOutreachTriggerLabel(template.trigger)}
                             </span>
