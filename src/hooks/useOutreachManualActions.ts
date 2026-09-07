@@ -50,7 +50,9 @@ export function useOutreachManualActions(enabled = true) {
 
   const groups = useMemo(() => getManualOutreachTemplateGroups(templates), [templates]);
 
-  const hasAction = (action: ManualOutreachActionKey) => groups[action].channels.length > 0;
+  // Gå vidare och Avslag är manuella åtgärder som alltid ska gå att välja –
+  // finns ingen mall skickas fritext i chatten i stället.
+  const hasAction = (_action: ManualOutreachActionKey) => true;
 
   return {
     loading,
