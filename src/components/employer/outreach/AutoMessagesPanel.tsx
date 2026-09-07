@@ -220,6 +220,7 @@ export function AutoMessagesPanel() {
         channel,
         subject: config.subject,
         body: config.body,
+        trigger: event.trigger,
         is_active: true,
         is_default: true,
       })

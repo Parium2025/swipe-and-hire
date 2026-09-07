@@ -27,6 +27,8 @@ export const OUTREACH_TRIGGER_OPTIONS: { value: OutreachTrigger; label: string }
   { value: 'job_closed', label: 'Annons avslutas' },
   { value: 'interview_scheduled', label: 'Intervju bokas' },
   { value: 'manual_send', label: 'Manuellt utskick' },
+  { value: 'candidate_progress', label: 'Gå vidare' },
+  { value: 'candidate_rejection', label: 'Avslag' },
 ];
 
 export const OUTREACH_RECIPIENT_OPTIONS: { value: OutreachRecipient; label: string }[] = [

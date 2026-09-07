@@ -1374,6 +1374,7 @@ export function MessageTemplatesSettings() {
     } else {
       toast.success(existingTemplate ? 'Parium-mallen återställd' : 'Parium-mallen tillagd');
       await fetchStudio({ silent: true });
+      notifyOutreachStudioUpdated(user.id);
     }
     setRestoringDefault(false);
   };
