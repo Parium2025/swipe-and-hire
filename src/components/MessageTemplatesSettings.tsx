@@ -1736,11 +1736,11 @@ export function MessageTemplatesSettings() {
             ) : templates.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-5 py-10 text-center text-sm text-white">Inga mallar ännu.</div>
             ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                 {customTemplates.length > 0 && (
                   <>
-                    <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Egna mallar ({customTemplates.length})</p>
-                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2">
+                    <p className="px-1 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Egna mallar ({customTemplates.length})</p>
+                    <div className="mb-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 p-2.5">
                       <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-white">
                         <Checkbox
                           checked={selectedTemplateIds.length === customTemplates.length && customTemplates.length > 0}
@@ -1763,15 +1763,28 @@ export function MessageTemplatesSettings() {
                 {orderedTemplates.map((template, index) => {
                   const isStandard = isStandardTemplate(template);
                   const showStandardHeading = isStandard && index === customTemplates.length;
+                  const previous = orderedTemplates[index - 1];
+                  const showChannelHeading =
+                    isStandard && (showStandardHeading || !previous || previous.channel !== template.channel);
+                  const channelCount = standardTemplates.filter((item) => item.channel === template.channel).length;
                   return (
                     <div key={template.id} className="contents">
                     {showStandardHeading && (
-                      <div className="px-1 pt-2">
+                      <div className="px-1 pb-1 pt-6">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">Parium-standard ({standardTemplates.length})</p>
-                        <p className="mt-1 text-[11px] text-white md:text-xs">Låsta originalmallar. De läggs till automatiskt när du slår på en kanal under Automatiska utskick – de är alltså inga nya egna mallar.</p>
+                        <p className="mt-1.5 text-[11px] text-white md:text-xs">Låsta originalmallar. De läggs till automatiskt när du slår på en kanal under Automatiska utskick – de är alltså inga nya egna mallar.</p>
                       </div>
                     )}
-                    <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2">
+                    {showChannelHeading && (
+                      <div className={`flex items-center gap-2 px-1 ${showStandardHeading ? 'pt-1' : 'pt-4'}`}>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
+                          {getOutreachChannelLabel(template.channel)} ({channelCount})
+                        </p>
+                        <span className="h-px flex-1 bg-white/10" />
+                      </div>
+                    )}
+                    <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-2.5">
+
 
                     <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0 space-y-1.5">
