@@ -47,6 +47,7 @@ import {
   OUTREACH_TRIGGER_OPTIONS,
   OUTREACH_VARIABLES,
   type OutreachAutomation,
+  type OutreachChannel,
   type OutreachDispatchLog,
   type OutreachTemplate,
   type OutreachTrigger,
