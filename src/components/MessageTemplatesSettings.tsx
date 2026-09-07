@@ -34,7 +34,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  RotateCcw,
+  
   ScrollText,
   Send,
   Trash2,
@@ -608,8 +608,6 @@ export function MessageTemplatesSettings() {
   
 
   const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
-  const [selectedDefaultTemplateName, setSelectedDefaultTemplateName] = useState(DEFAULT_OUTREACH_TEMPLATES[0]?.name ?? '');
-  const [restoringDefault, setRestoringDefault] = useState(false);
   const fetchRequestIdRef = useRef(0);
   // Utkastet kan inte hydreras vid första render eftersom `user` sätts asynkront.
   // Vi hydrerar när nyckeln finns och blockerar autospar innan dess, annars
