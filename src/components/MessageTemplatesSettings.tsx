@@ -1365,27 +1365,56 @@ export function MessageTemplatesSettings() {
   // (isStandardTemplate är definierad på modulnivå, se ovan)
 
   const customTemplates = templates.filter((template) => !isStandardTemplate(template));
-  // Kanaler där arbetsgivaren har en egen aktiv mall SOM ÄR KOPPLAD till en påslagen regel.
-  // Först då ersätter den egna mallen Parium-standarden. Inaktiverar eller tar du bort
-  // mallen – eller stänger av regeln – kommer standardmallen tillbaka automatiskt.
-  const activeRuleTemplateIds = new Set(
-    automations.filter((automation) => automation.is_enabled).map((automation) => automation.template_id),
+
+  // Kanal + händelse som är påslagna under Automatiska utskick. Stänger du av en kanal
+  // för en händelse försvinner motsvarande Parium-standard ur listan.
+  const enabledEventChannels = new Set(
+    automations
+      .filter((automation) => automation.is_enabled)
+      .map((automation) => `${automation.trigger}::${automation.channel}`),
   );
-  const coveredChannels = new Set(
+  const enabledChannels = new Set(
+    automations.filter((automation) => automation.is_enabled).map((automation) => automation.channel),
+  );
+  // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
+  // Övriga standardmallar ligger kvar tills du täckt även dem.
+  const coveredEventChannels = new Set(
     customTemplates
-      .filter((template) => template.is_active && activeRuleTemplateIds.has(template.id))
-      .map((template) => template.channel),
+      .filter((template) => template.is_active && template.trigger)
+      .map((template) => `${template.trigger}::${template.channel}`),
+  );
+  const standardTriggerByKey = new Map<string, string>(
+    AUTO_RULE_EVENTS.flatMap((event) =>
+      (Object.entries(event.templates) as Array<[string, { name: string }]>).map(
+        ([channel, config]) => [`${config.name}::${channel}`, event.trigger] as [string, string],
+      ),
+    ),
   );
   const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
   const standardTemplates = templates
-    .filter((template) => isStandardTemplate(template) && !coveredChannels.has(template.channel))
+    .filter((template) => {
+      if (!isStandardTemplate(template)) return false;
+      const trigger =
+        standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
+      if (trigger) {
+        if (!enabledEventChannels.has(`${trigger}::${template.channel}`)) return false;
+        if (coveredEventChannels.has(`${trigger}::${template.channel}`)) return false;
+        return true;
+      }
+      // Fria biblioteksmallar (manuella utskick) följer om kanalen används alls.
+      return enabledChannels.has(template.channel);
+    })
     .sort((a, b) => {
       const channelDiff =
         STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
       if (channelDiff !== 0) return channelDiff;
       return a.name.localeCompare(b.name, 'sv');
     });
-  const orderedTemplates = [...customTemplates, ...standardTemplates];
+  const standardByChannel = STANDARD_CHANNEL_ORDER.map((channel) => ({
+    channel,
+    items: standardTemplates.filter((template) => template.channel === channel),
+  })).filter((group) => group.items.length > 0);
+
 
 
 
