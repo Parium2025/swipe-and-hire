@@ -151,7 +151,14 @@ export function ChatView({
   // the conversation header/list. This preserves frozen application media and
   // the legacy live-profile fallback instead of incorrectly showing initials.
   const snapshotSenderProfile = snapshot && candidateUserId && avatarProfile?.role === 'job_seeker'
-    ? avatarProfile
+    ? {
+        first_name: avatarProfile.first_name ?? null,
+        last_name: avatarProfile.last_name ?? null,
+        company_name: avatarProfile.company_name ?? null,
+        profile_image_url: avatarProfile.profile_image_url ?? null,
+        company_logo_url: avatarProfile.company_logo_url ?? null,
+        role: avatarProfile.role,
+      }
     : null;
 
   // Read receipts: determine the other member's last_read_at
