@@ -14,7 +14,7 @@ import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInacti
 import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
-import { triggerBackgroundSync, clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
+import { triggerBackgroundSync, clearAllAppCaches, cancelPendingCacheClear } from '@/hooks/useEagerRatingsPreload';
 import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, normalizeAuthSplashRole } from '@/lib/authSplashEvents';
 import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { useSessionManager, clearSessionToken, beginSignOutTracking, endSignOutTracking } from '@/hooks/useSessionManager';
