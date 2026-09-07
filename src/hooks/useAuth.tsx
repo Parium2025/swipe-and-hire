@@ -615,6 +615,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isRecoveringSessionRef.current = false;
           isSigningOutRef.current = false;
           endSignOutTracking();
+          // En uppskjuten cache-rensning från förra utloggningen får inte
+          // radera det nya kontots färska data efter inloggningen.
+          try { cancelPendingCacheClear(); } catch {}
           // Detta konto äger nu "Håll mig inloggad"-snapshoten. Förhindrar att
           // en äldre flik med ett annat konto återställs vid nästa uppstart.
           try { claimAuthSnapshotOwnership(newUserId); } catch {}
