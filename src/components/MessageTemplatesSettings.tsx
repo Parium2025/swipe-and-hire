@@ -600,6 +600,8 @@ export function MessageTemplatesSettings() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
   const [expandedTemplateIds, setExpandedTemplateIds] = useState<Set<string>>(new Set());
+  const [openStandardChannels, setOpenStandardChannels] = useState<Set<string>>(new Set());
+
 
   
 
