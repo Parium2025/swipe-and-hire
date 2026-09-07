@@ -1345,35 +1345,32 @@ export function MessageTemplatesSettings() {
   };
 
 
-  // (isStandardTemplate är definierad på modulnivå, se ovan)
+  const allStandardTemplates = templates.filter((template) => isStandardTemplate(template));
+  const triggerOf = (template: OutreachTemplate) =>
+    standardTriggerByKey.get(`${template.name}::${template.channel}`) ?? template.trigger ?? null;
 
-  const customTemplates = templates.filter((template) => !isStandardTemplate(template));
+  // Parium-standardmallarna kommer alltid från koden, aldrig från databasen. Då kan de
+  // varken saknas, raderas eller hamna i fel ordning – listan följer alltid tidslinjen
+  // ansökan → intervju bokad → före → efter → avbokad → jobb avslutat.
+  const standardAutoTemplates: OutreachTemplate[] = AUTO_RULE_EVENTS.flatMap((event) =>
+    STANDARD_CHANNEL_ORDER.flatMap((channel) => {
+      const config = event.templates[channel as 'email' | 'push' | 'chat'];
+      if (!config) return [];
+      if (!enabledEventChannels.has(`${event.trigger}::${channel}`)) return [];
+      if (coveredEventChannels.has(`${event.trigger}::${channel}`)) return [];
+      return [{
+        id: `standard:${event.trigger}:${channel}`,
+        name: config.name,
+        channel,
+        subject: config.subject,
+        body: config.body,
+        is_active: true,
+        is_default: true,
+        trigger: event.trigger,
+      } as unknown as OutreachTemplate];
+    }),
+  );
 
-  // Kanal + händelse som är påslagna under Automatiska utskick. Stänger du av en kanal
-  // för en händelse försvinner motsvarande Parium-standard ur listan.
-  const enabledEventChannels = new Set(
-    automations
-      .filter((automation) => automation.is_enabled)
-      .map((automation) => `${automation.trigger}::${automation.channel}`),
-  );
-  // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
-  // Övriga standardmallar ligger kvar tills du täckt även dem.
-  const coveredEventChannels = new Set(
-    customTemplates
-      .filter((template) => template.is_active && template.trigger)
-      .map((template) => `${template.trigger}::${template.channel}`),
-  );
-  const standardTriggerByKey = new Map<string, string>(
-    AUTO_RULE_EVENTS.flatMap((event) =>
-      (Object.entries(event.templates) as Array<[string, { name: string }]>).map(
-        ([channel, config]) => [`${config.name}::${channel}`, event.trigger] as [string, string],
-      ),
-    ),
-  );
-  const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
-  // Triggers som styrs av reglagen under Automatiska utskick.
-  const AUTO_TRIGGERS = new Set(AUTO_RULE_EVENTS.map((event) => event.trigger as string));
-  const sortByChannelThenName = (a: OutreachTemplate, b: OutreachTemplate) => {
     const channelDiff =
       STANDARD_CHANNEL_ORDER.indexOf(a.channel) - STANDARD_CHANNEL_ORDER.indexOf(b.channel);
     if (channelDiff !== 0) return channelDiff;
