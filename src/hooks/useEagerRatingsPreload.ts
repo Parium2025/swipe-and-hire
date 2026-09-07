@@ -153,13 +153,19 @@ export const clearAllAppCaches = () => {
     && (document.documentElement.dataset.authTransition === 'true' || document.body.dataset.authTransition === 'true');
 
   if (isAuthRoute || isAuthTransition) {
+    const generation = ++cacheClearGeneration;
+    const runIfCurrent = () => {
+      if (generation !== cacheClearGeneration) return;
+      clearAllAppCachesSync();
+    };
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => clearAllAppCachesSync(), { timeout: 3000 });
+      (window as any).requestIdleCallback(runIfCurrent, { timeout: 3000 });
     } else {
-      setTimeout(clearAllAppCachesSync, 100);
+      setTimeout(runIfCurrent, 100);
     }
   } else {
     // On other pages, run immediately (they're already responsive)
+    cacheClearGeneration++;
     clearAllAppCachesSync();
   }
 };
