@@ -209,6 +209,8 @@ const MyCandidates = () => {
   const [swipeInitialIndex, setSwipeInitialIndex] = useState(0);
   const [swipeStageCandidates, setSwipeStageCandidates] = useState<MyCandidateData[]>([]);
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
+  // Urvalskriterier filtrerar swipe-läget endast när användaren själv slår på det.
+  const [swipeCriteriaOn, setSwipeCriteriaOn] = useState(false);
   const [swipeFilteredApps, setSwipeFilteredApps] = useState<ApplicationData[] | null>(null);
   // Profilen öppnad från svepläget → nedsvep/stäng ska ta oss tillbaka dit.
   const [returnToSwipe, setReturnToSwipe] = useState(false);
@@ -747,7 +749,8 @@ const MyCandidates = () => {
     () => (swipeJobCriteria || []).map(c => c.id),
     [swipeJobCriteria],
   );
-  const swipeCriteriaEnabled = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const hasSwipeCriteria = !!singleSwipeJobId && activeSwipeCriteriaIds.length > 0;
+  const swipeCriteriaEnabled = hasSwipeCriteria && swipeCriteriaOn;
   const { data: swipeCriteriaFilter, isLoading: swipeCriteriaLoading } = useCriteriaMatchFilter(
     singleSwipeJobId ? [singleSwipeJobId] : [],
     activeSwipeCriteriaIds,
@@ -873,7 +876,23 @@ const MyCandidates = () => {
               <span>Urvalskriterier</span>
             </button>
           )}
+          {hasSwipeCriteria && (
+            <button
+              type="button"
+              aria-pressed={swipeCriteriaOn}
+              onClick={() => setSwipeCriteriaOn(v => !v)}
+              className={`h-11 px-6 inline-flex items-center gap-2 rounded-full border text-white text-sm font-medium shadow-lg shadow-black/20 transition-all active:scale-[0.97] touch-manipulation ${
+                swipeCriteriaOn
+                  ? 'border-secondary/40 bg-secondary hover:bg-secondary/90'
+                  : 'border-white/25 bg-white/10 hover:bg-white/15'
+              }`}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>{swipeCriteriaOn ? 'Endast matchande: på' : 'Endast matchande: av'}</span>
+            </button>
+          )}
         </div>
+
 
         <MobileMyCandidatesView
           candidates={displayedCandidates}
