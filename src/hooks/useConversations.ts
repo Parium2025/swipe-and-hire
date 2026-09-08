@@ -12,6 +12,7 @@ import { prefetchMediaUrl } from './useMediaUrl';
 import { CHAT_AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { toast } from 'sonner';
 import { chunk } from '@/lib/fetchAllPages';
+import { extractAttachmentPath } from '@/lib/attachmentUrl';
 
 
 export interface ConversationMember {
@@ -945,6 +946,18 @@ export function useConversationMessages(
   const loadingOlderRef = useRef(false);
   const prevConversationIdRef = useRef(conversationId);
 
+  // Modulens synlighets-/manuell-oläst-status får aldrig följa med till ett
+  // annat konto i samma flik.
+  useEffect(() => {
+    return () => {
+      if (activeConversationId === conversationId) {
+        activeConversationId = null;
+        activeConversationVisible = null;
+      }
+      if (conversationId) autoReadSuppressed.delete(conversationId);
+    };
+  }, [conversationId, user?.id]);
+
 
   // Reset hasMore synchronously when conversation changes (before render)
   if (conversationId !== prevConversationIdRef.current) {
@@ -1135,7 +1148,7 @@ export function useConversationMessages(
 
               // For own messages: replace temp placeholder if it exists
               if (newMessage.sender_id === user.id) {
-                const tempIdx = old.findIndex(m => m.id.startsWith('temp-') && m.content === newMessage.content);
+               const tempIdx = old.findIndex(m => m.id === `temp-${newMessage.id}`);
                 if (tempIdx !== -1) {
                   const updated = [...old];
                   updated[tempIdx] = { ...newMessage, sender_profile: senderProfile || undefined };
@@ -1232,7 +1245,12 @@ export function useConversationMessages(
 
     if (!getIsOnline()) return; // Silent fail for mark as read - non-critical
 
-    const readAt = new Date().toISOString();
+    // Kvittera exakt det senaste meddelande som faktiskt fanns på skärmen när
+    // läsningen startade. Ett nytt meddelande under retry-loopen ska förbli oläst.
+    const visibleMessages = queryClient.getQueryData<ConversationMessage[]>(
+      ['conversation-messages', conversationId],
+    );
+    const readAt = visibleMessages?.[visibleMessages.length - 1]?.created_at ?? new Date().toISOString();
     let lastError: unknown = null;
 
     // Lässtatus är liten men viktig data. Databasklienten returnerar ofta fel i
@@ -1327,8 +1345,10 @@ export function useConversationMessages(
   ) => {
     if (!conversationId || !user || (!content.trim() && !attachment)) return;
 
-    // Slumpad suffix: två sändningar inom samma millisekund får aldrig samma id.
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    // Ett klientgenererat riktigt id gör sändningen idempotent även när nätet
+    // dör efter databasens write men före svaret.
+    const messageId = crypto.randomUUID();
+    const tempId = `temp-${messageId}`;
     const optimisticMessage: ConversationMessage = {
       id: tempId,
       conversation_id: conversationId,
@@ -1353,6 +1373,7 @@ export function useConversationMessages(
       const { data, error } = await rateLimited(`send-message-${conversationId}-${user.id}`, 350, async () => measurePerformance('chat', () => supabase
         .from('conversation_messages')
         .insert({
+           id: messageId,
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
@@ -1383,6 +1404,31 @@ export function useConversationMessages(
       // sparat meddelande om kvitteringen misslyckas.
       void Promise.resolve(markAsRead()).catch(() => undefined);
     } catch (error) {
+      // Ett avbrutet svar betyder inte säkert att skrivningen misslyckades.
+      // Kontrollera det idempotenta id:t innan den optimistiska bubblan tas bort.
+      const { data: persisted, error: verifyError } = await supabase
+        .from('conversation_messages')
+        .select('*')
+        .eq('id', messageId)
+        .eq('sender_id', user.id)
+        .maybeSingle();
+      if (persisted) {
+        queryClient.setQueryData<ConversationMessage[]>(
+          ['conversation-messages', conversationId],
+          (old) => old?.map((m) => m.id === tempId
+            ? { ...persisted, sender_identity: persisted.sender_identity === 'company' ? 'company' : 'person' }
+            : m) || [],
+        );
+        return;
+      }
+      // Städa bara när databasen bekräftat att raden saknas. Vid ett tvetydigt
+      // nätverksfel behålls filen så en faktiskt sparad rad aldrig bryts.
+      if (!verifyError && attachment) {
+        const path = extractAttachmentPath(attachment.url);
+        if (path) {
+          await supabase.storage.from('message-attachments').remove([path]).catch(() => undefined);
+        }
+      }
       // Rollback on error
       queryClient.setQueryData<ConversationMessage[]>(
         ['conversation-messages', conversationId],

@@ -116,7 +116,7 @@ export default function Messages() {
       /* privat läge — ignorera */
     }
   };
-  const deepLinkHandled = useRef(false);
+  const handledDeepLinkRef = useRef<string | null>(null);
   const tabSwipeStartX = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
@@ -140,12 +140,16 @@ export default function Messages() {
   // Handle deep-link: /messages?conversation=<id>
   useEffect(() => {
     const conversationParam = searchParams.get('conversation');
-    if (conversationParam && conversations.length > 0 && !deepLinkHandled.current) {
+    if (!conversationParam) {
+      handledDeepLinkRef.current = null;
+      return;
+    }
+    if (conversationParam && conversations.length > 0 && handledDeepLinkRef.current !== conversationParam) {
       const exists = conversations.some(c => c.id === conversationParam);
       if (exists) {
         setSelectedConversationId(conversationParam);
         setShowMobileChat(true);
-        deepLinkHandled.current = true;
+        handledDeepLinkRef.current = conversationParam;
         setSearchParams({}, { replace: true });
       }
     }

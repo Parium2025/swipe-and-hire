@@ -27,9 +27,10 @@ export function useMessageReactions(conversationId: string | null) {
   // We depend on the messages query being loaded first to get message IDs
   const messagesData = queryClient.getQueryData<any[]>(['conversation-messages', conversationId]);
   const messageIds = messagesData?.map((m: any) => m.id).filter((id: string) => !id.startsWith('temp-')) || [];
+  const messageIdsKey = messageIds.join(',');
 
   const reactionsQuery = useQuery({
-    queryKey: ['message-reactions', conversationId, messageIds.length],
+    queryKey: ['message-reactions', conversationId, messageIdsKey],
     queryFn: async () => {
       if (!conversationId || messageIds.length === 0) return [];
 
@@ -81,32 +82,42 @@ export function useMessageReactions(conversationId: string | null) {
       if (!user) throw new Error('Not authenticated');
 
       // Check if reaction already exists
-      const { data: existing } = await supabase
+      const { data: existing, error: lookupError } = await supabase
         .from('conversation_message_reactions')
         .select('id')
         .eq('message_id', messageId)
         .eq('user_id', user.id)
         .eq('emoji', emoji)
         .maybeSingle();
+      if (lookupError) throw lookupError;
 
       if (existing) {
         // Remove reaction
-        await supabase
+        const { data, error } = await supabase
           .from('conversation_message_reactions')
           .delete()
-          .eq('id', existing.id);
+          .eq('id', existing.id)
+          .eq('user_id', user.id)
+          .select('id');
+        if (error) throw error;
+        if (!data || data.length === 0) throw new Error('Reaktionen kunde inte tas bort');
       } else {
         // Add reaction
-        await supabase
+        const { error } = await supabase
           .from('conversation_message_reactions')
           .insert({
             message_id: messageId,
             user_id: user.id,
             emoji,
           });
+        // Två samtidiga tryck kan mötas i det unika indexet; slutläget är redan rätt.
+        if (error && error.code !== '23505') throw error;
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['message-reactions', conversationId] });
+    },
+    onError: () => {
       queryClient.invalidateQueries({ queryKey: ['message-reactions', conversationId] });
     },
   });

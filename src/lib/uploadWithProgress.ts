@@ -68,18 +68,17 @@ export class UploadServerError extends Error {
 /**
  * En enskild uppladdningsförsök via XHR. Inga retries här — det görs av wrappern.
  */
-export function uploadOnce(opts: UploadOptions): Promise<void> {
-  return new Promise(async (resolve, reject) => {
-    const { bucket, path, file, signal } = opts;
+export async function uploadOnce(opts: UploadOptions): Promise<void> {
+  const { bucket, path, file, signal } = opts;
+  if (signal?.aborted) throw new UploadAbortedError();
 
-    if (signal?.aborted) {
-      reject(new UploadAbortedError());
-      return;
-    }
+  // En async Promise-executor fångar inte avvisade await-anrop. Hämta därför
+  // sessionen först så ett authfel aldrig lämnar uppladdningen permanent väntande.
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  const accessToken = session?.access_token ?? SUPABASE_KEY;
 
-    // Hämta auth-token för Authorization-header
-    const { data: { session } } = await supabase.auth.getSession();
-    const accessToken = session?.access_token ?? SUPABASE_KEY;
+  return new Promise((resolve, reject) => {
 
     const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${encodeURI(path)}`;
     const xhr = new XMLHttpRequest();
@@ -132,6 +131,8 @@ export function uploadOnce(opts: UploadOptions): Promise<void> {
     }
 
     xhr.open('POST', url, true);
+    // Mobila nätverksstackar kan annars lämna XHR i vänteläge utan onerror.
+    xhr.timeout = 120_000;
     xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
     xhr.setRequestHeader('apikey', SUPABASE_KEY);
     xhr.setRequestHeader('x-upsert', String(opts.upsert ?? true));

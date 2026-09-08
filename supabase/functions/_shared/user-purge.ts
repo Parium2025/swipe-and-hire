@@ -371,6 +371,8 @@ export async function purgeUserData(
   await del(admin, 'conversation_messages', 'sender_id', userId);
   await del(admin, 'conversation_message_reactions', 'user_id', userId);
   await del(admin, 'conversation_members', 'user_id', userId);
+  await del(admin, 'conversation_blocks', 'blocker_id', userId);
+  await del(admin, 'conversation_blocks', 'blocked_id', userId);
 
   // 5. Kvarvarande AI-bedömningar om/av användaren (kan finnas utan ansökan kvar)
   await purgeCriterionResults(admin, 'applicant_id', [userId]);
