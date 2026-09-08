@@ -67,6 +67,9 @@ const CandidateRow = memo(function CandidateRow({
   const criterionResults = app.criterionResults || [];
   const hasResults = criterionResults.length > 0;
   const needsEvaluation = criteriaCount > 0 && !hasResults;
+  // Avslag är en markering per annons — kandidaten ligger kvar i sitt steg
+  // och kan flyttas som vanligt, men får tydlig etikett och inga avslutsutskick.
+  const isRejected = !!app.rejected_at || app.status === 'rejected';
 
   const rowRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -152,6 +155,12 @@ const CandidateRow = memo(function CandidateRow({
         <div className="flex items-center gap-2 mt-0.5 text-white text-[11px]">
           {appliedTime && (
             <span>{appliedTime === 'nu' ? 'Ansökte idag' : `Ansökte för ${appliedTime} sedan`}</span>
+          )}
+          {isRejected && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/15 ring-1 ring-inset ring-red-400/30 text-red-300 text-[9px] font-medium">
+              <XCircle className="h-2.5 w-2.5 flex-shrink-0" />
+              Avslagen
+            </span>
           )}
           {/* AI results appear silently when ready — no "waiting" indicator */}
         </div>
@@ -244,7 +253,7 @@ const CandidateRow = memo(function CandidateRow({
                 </TooltipProvider>
               );
             })}
-            {onReject && app.status !== 'rejected' && (
+            {onReject && !isRejected && (
               <>
                 <DropdownMenuSeparator className="bg-white/15" />
                 <DropdownMenuItem

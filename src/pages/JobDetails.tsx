@@ -312,11 +312,14 @@ const JobDetails = () => {
   const applicationsByStatus = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
     activeStages.forEach(stage => { result[stage] = []; });
-    result['rejected'] = [];
-    
+
     applications.forEach(app => {
-      if (result[app.status]) {
-        result[app.status].push(app);
+      // Äldre avslag sparades som status 'rejected' och har ingen egen kolumn —
+      // visa dem i första steget med sin "Avslagen"-markering i stället för att
+      // låta dem försvinna ur vyn. Nya avslag rör aldrig statusen (rejected_at).
+      const bucket = app.status === 'rejected' ? activeStages[0] : app.status;
+      if (bucket && result[bucket]) {
+        result[bucket].push(app);
       } else {
         const firstStage = activeStages[0];
         if (firstStage) {
@@ -328,11 +331,11 @@ const JobDetails = () => {
   }, [applications, activeStages]);
 
   // Serverns totaler är nycklade på rå status. Kort med en status som inte
-  // längre finns som steg visas i första kolumnen — då måste deras total
-  // följa med dit, annars visar kolumnen färre än antalet kort.
+  // längre finns som steg (inkl. äldre 'rejected') visas i första kolumnen —
+  // då måste deras total följa med dit, annars visar kolumnen färre än antalet kort.
   const normalizedStageTotals = useMemo(() => {
     if (!stageTotals) return null;
-    const known = new Set([...activeStages, 'rejected']);
+    const known = new Set(activeStages);
     const out: Record<string, number> = {};
     const firstStage = activeStages[0];
     Object.entries(stageTotals).forEach(([status, count]) => {
@@ -530,20 +533,23 @@ const JobDetails = () => {
     }
   }, [updateApplicationLocally, stageSettings, refetch]);
 
-  // Avslaget gäller bara den här ansökan/annonsen. Kandidatens andra
-  // ansökningar påverkas inte, och avslagna utesluts när annonsen stängs.
+  // Avslaget är en markering per ansökan/annons — kandidaten ligger kvar i
+  // sitt steg med en "Avslagen"-etikett, kan fortfarande flyttas/swipas och
+  // påverkar inte kandidatens andra ansökningar. Avslagna utesluts från de
+  // automatiska utskicken när annonsen stängs (rejected_at i stängningstriggern).
   const confirmReject = useCallback(async () => {
     const ids = rejectTargetIds ?? [];
     setRejectTargetIds(null);
     if (ids.length === 0) return;
 
-    ids.forEach(id => updateApplicationLocally(id, { status: 'rejected' as JobApplication['status'] }));
+    const rejectedAt = new Date().toISOString();
+    ids.forEach(id => updateApplicationLocally(id, { rejected_at: rejectedAt }));
     if (isSelectionMode) exitSelectionMode();
 
     try {
       const { error } = await supabase
         .from('job_applications')
-        .update({ status: 'rejected' })
+        .update({ rejected_at: rejectedAt })
         .in('id', ids);
       if (error) throw error;
       toast.success(ids.length === 1 ? 'Avslag registrerat' : `${ids.length} kandidater fick avslag`);
@@ -883,7 +889,7 @@ const JobDetails = () => {
                 {rejectTargetIds && rejectTargetIds.length > 1 ? `Ge avslag till ${rejectTargetIds.length} kandidater` : 'Ge avslag'}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                Avslaget gäller bara den här annonsen. Kandidatens andra ansökningar påverkas inte, och avslagna kandidater får inget besked igen när annonsen stängs.
+                Avslaget gäller bara den här annonsen. Kandidaten ligger kvar i sitt steg med en avslagsmarkering och kan flyttas som vanligt, men andra ansökningar påverkas inte och avslagna kandidater får inget besked igen när annonsen stängs.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
