@@ -118,17 +118,31 @@ export function useBulkMessageSync() {
 
             await ensureConversationMemberships(convId, user.id, item.applicant_id);
 
-            const { error } = await supabase
+            // 🛡️ Idempotensskydd: om en tidigare retry redan skrev meddelandet
+            // (nätet dog efter DB-write men före response) finns raden redan
+            // med exakt samma client-genererade created_at.
+            const { data: existing } = await supabase
               .from('conversation_messages')
-              .insert({
-                conversation_id: convId,
-                sender_id: user.id,
-                content: item.content,
-                // Köade massutskick behåller bolagsidentiteten efter återanslutning.
-                sender_identity: 'company',
-              });
+              .select('id')
+              .eq('conversation_id', convId)
+              .eq('sender_id', user.id)
+              .eq('created_at', item.created_at)
+              .maybeSingle();
 
-            if (error) throw error;
+            if (!existing?.id) {
+              const { error } = await supabase
+                .from('conversation_messages')
+                .insert({
+                  conversation_id: convId,
+                  sender_id: user.id,
+                  content: item.content,
+                  created_at: item.created_at, // idempotensnyckel vid retry
+                  // Köade massutskick behåller bolagsidentiteten efter återanslutning.
+                  sender_identity: 'company',
+                });
+
+              if (error && error.code !== '23505') throw error;
+            }
             sent++;
           } catch (e) {
             console.error('Failed to sync bulk queued message:', e);

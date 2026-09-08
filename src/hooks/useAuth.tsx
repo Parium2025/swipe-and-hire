@@ -22,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { unregisterCurrentDeviceToken } from '@/lib/pushNotificationService';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -771,13 +772,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchUserData = async (userId: string) => {
+    // 🛡️ Kontobyte: en långsam hämtning för konto A får aldrig skriva över
+    // state som redan hunnit laddas för konto B.
+    const isStale = () =>
+      currentUserIdRef.current !== null && currentUserIdRef.current !== userId;
     try {
       // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
       // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
       // the `authenticated` role to prevent cross-row leakage.
       const { data: profileRows, error: profileError } = await supabase
         .rpc('get_my_profile');
+      if (isStale()) return;
       const profileData = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
+
 
  
       if (profileError) {
@@ -1013,6 +1020,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         rolePromise,
         orgPromise
       ]);
+      if (isStale()) return;
+
 
       const { data: roleData, error: roleError } = roleResult;
       const profileRole = profileData?.role as UserRole | undefined;
@@ -1056,6 +1065,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .select('*')
           .eq('id', membershipOrgId)
           .maybeSingle();
+        if (isStale()) return;
+
 
         if (orgError) {
           console.error('Error fetching organization:', orgError);
@@ -1496,6 +1507,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // knappen ibland behövde tryckas två gånger).
     if (isSigningOutRef.current) return;
     isSigningOutRef.current = true;
+
+    // 🔕 Koppla bort DENNA enhets pushtoken så att nästa konto på samma
+    // telefon aldrig får det förra kontots notiser. Andra enheter påverkas ej.
+    const signingOutUserId = currentUserIdRef.current;
+    if (signingOutUserId) {
+      void unregisterCurrentDeviceToken(signingOutUserId).catch(() => undefined);
+    }
 
     // Markera manuell utloggning. Flaggan nollställs INTE på tid — den lever
     // tills en ny inloggning sker (SIGNED_IN/TOKEN_REFRESHED). Tidigare
