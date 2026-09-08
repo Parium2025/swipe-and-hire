@@ -75,6 +75,11 @@ const EmployerDashboard = memo(() => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  // Antal kandidater som automatiskt får besked när annonsen avslutas.
+  // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
+  // samma regel som databasens utskickstrigger använder.
+  const [autoNotifyCount, setAutoNotifyCount] = useState<number | null>(null);
+
 
   const [editRepublishMode, setEditRepublishMode] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
@@ -466,6 +471,32 @@ const EmployerDashboard = memo(() => {
       setBulkDeleting(false);
     }
   };
+
+  /**
+   * 📣 Informationsruta vid borttagning: räknar hur många kandidater som
+   * automatiskt får besked om att tjänsten är avslutad. Spegling av
+   * `enqueue_outreach_dispatch` — anställda och redan avslagna hoppas över.
+   * Rent informativt; arbetsgivaren behöver aldrig välja något.
+   */
+  useEffect(() => {
+    const jobId = jobToDelete?.id;
+    if (!deleteDialogOpen || !jobId) {
+      setAutoNotifyCount(null);
+      return;
+    }
+    let cancelled = false;
+    setAutoNotifyCount(null);
+    (async () => {
+      const { count, error } = await supabase
+        .from('job_applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('job_id', jobId)
+        .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
+      if (cancelled) return;
+      setAutoNotifyCount(error ? null : (count ?? 0));
+    })();
+    return () => { cancelled = true; };
+  }, [deleteDialogOpen, jobToDelete?.id]);
 
 
   const handleRepublishClick = (job: JobPosting) => {
@@ -968,7 +999,16 @@ const EmployerDashboard = memo(() => {
                 </>
               )}
             </AlertDialogDescription>
+            {autoNotifyCount !== null && autoNotifyCount > 0 && (
+              <div className="mt-4 rounded-xl border border-white/20 bg-white/10 p-3 text-left">
+                <p className="text-white text-sm leading-relaxed break-words">
+                  <span className="font-semibold">{autoNotifyCount}</span>{' '}
+                  {autoNotifyCount === 1 ? 'kandidat får' : 'kandidater får'} automatiskt besked om att tjänsten är avslutad. Anställda och kandidater som redan fått avslag på den här annonsen kontaktas inte.
+                </p>
+              </div>
+            )}
           </div>
+
           <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
             <AlertDialogCancel 
               onClick={() => {
