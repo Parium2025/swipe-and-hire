@@ -74,6 +74,9 @@ export const ApplicationCardContent = memo(({
   onToggleSelect?: () => void;
 }) => {
   const isUnread = !application.viewed_at;
+  // Avslag är en markering per annons — kortet ligger kvar i sin kolumn
+  // och kan dras vidare, men får tydlig etikett och inga avslutsutskick.
+  const isRejected = !!application.rejected_at || application.status === 'rejected';
   const appliedTime = formatCompactTime(application.applied_at);
   const lastActiveTime = formatCompactTime(application.last_active_at);
   const criterionResults = application.criterionResults || [];
@@ -141,6 +144,12 @@ export const ApplicationCardContent = memo(({
             </Tooltip>
           </TooltipProvider>
           <StarRating rating={application.rating} />
+          {isRejected && (
+            <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded-full bg-red-500/15 ring-1 ring-inset ring-red-400/30 text-red-300 text-[9px] font-medium w-fit">
+              <XCircle className="h-2.5 w-2.5 flex-shrink-0" />
+              Avslagen
+            </span>
+          )}
           {(appliedTime || lastActiveTime) && (
             <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[9px] leading-snug">
               {appliedTime && (
