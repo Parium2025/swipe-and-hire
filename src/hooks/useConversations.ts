@@ -1230,12 +1230,14 @@ export function useConversationMessages(
       if (!isViewOnScreen()) return;
       void markAsReadRef.current?.();
     };
-
+    document.addEventListener('visibilitychange', markVisibleConversationRead);
+    window.addEventListener('focus', markVisibleConversationRead);
     return () => {
       document.removeEventListener('visibilitychange', markVisibleConversationRead);
       window.removeEventListener('focus', markVisibleConversationRead);
     };
-  }, [conversationId]);
+  }, [conversationId, isViewOnScreen]);
+
 
   // Edit an existing message
   const editMessage = useCallback(async (messageId: string, newContent: string) => {
