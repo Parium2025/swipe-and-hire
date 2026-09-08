@@ -2661,55 +2661,21 @@ const Profile = () => {
                     {employmentStatus && (
                       <div className="space-y-2 md:space-y-1.5">
                         <Label htmlFor="availability" className="text-white text-sm">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
-                        <DropdownMenu modal={false}>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                            >
-                              <span className="truncate">
-                                {availability ? (
-                                  ({
-                                    omgaende: 'Omgående',
-                                    'inom-1-manad': 'Inom 1 månad',  
-                                    'inom-3-manader': 'Inom 3 månader',
-                                    'inom-6-manader': 'Inom 6 månader',
-                                    'ej-aktuellt': 'Inte aktuellt just nu',
-                                    osaker: 'Osäker',
-                                  } as Record<string, string>)[availability]
-                                ) : 'Välj din tillgänglighet'}
-                              </span>
-                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
-                           side="bottom"
-                           align="center"
-                           alignOffset={0}
-                           sideOffset={6}
-                           avoidCollisions={true}
-                          >
-                            <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Omgående
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inom 1 månad
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inom 3 månader
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inom 6 månader
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inte aktuellt just nu
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Osäker
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <InlineSelect
+                          id="availability"
+                          placeholder="Välj din tillgänglighet"
+                          value={availability}
+                          onChange={setAvailability}
+                          options={[
+                            { value: 'omgaende', label: 'Omgående' },
+                            { value: 'inom-1-manad', label: 'Inom 1 månad' },
+                            { value: 'inom-3-manader', label: 'Inom 3 månader' },
+                            { value: 'inom-6-manader', label: 'Inom 6 månader' },
+                            { value: 'ej-aktuellt', label: 'Inte aktuellt just nu' },
+                            { value: 'osaker', label: 'Osäker' },
+                          ]}
+                        />
+
                       </div>
                     )}
 
