@@ -96,6 +96,25 @@ const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
 const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 const MY_APPLICATIONS_CACHE_KEY = 'parium_my_applications';
+// 🧊 Kallstart: sessionStorage töms när fliken/appen stängs. Vi speglar därför
+// siffran i localStorage också (samma mönster som chatt-badgen), så sidomenyn
+// visar rätt antal direkt vid kallstart i stället för 0.
+const MY_APPLICATIONS_PERSIST_KEY = 'parium_my_applications_persist';
+
+function readMyApplicationsCache(): number {
+  try {
+    if (typeof window === 'undefined') return 0;
+    const session = sessionStorage.getItem(MY_APPLICATIONS_CACHE_KEY);
+    const raw = session ?? localStorage.getItem(MY_APPLICATIONS_PERSIST_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  } catch { return 0; }
+}
+
+function writeMyApplicationsCache(count: number): void {
+  try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(count)); } catch { /* ignore */ }
+  try { localStorage.setItem(MY_APPLICATIONS_PERSIST_KEY, String(count)); } catch { /* ignore */ }
+}
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates';
 
 interface AuthContextType {
