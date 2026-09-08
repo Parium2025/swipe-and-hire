@@ -57,11 +57,22 @@ function counterpartPersonProfile(
     !lastMessage.is_system_message &&
     lastMessage.sender_id === displayMember.user_id;
 
+  // Ett nyare mall-/systemutskick från motparten representerar bolaget —
+  // då ska raden växla tillbaka till företagsidentiteten.
+  const lastFromCounterpartCompany =
+    !!lastMessage &&
+    lastMessage.sender_id === displayMember.user_id &&
+    (lastMessage.sender_identity === 'company' || !!lastMessage.is_system_message);
+
   // Även när DU skrev senast ska motparten fortsätta visas som personen som
   // senast skrev personligt — identiteten får inte flippa fram och tillbaka.
-  const stickyPerson = !!counterpartPersonSenderId && counterpartPersonSenderId === displayMember.user_id;
+  const stickyPerson =
+    !lastFromCounterpartCompany &&
+    !!counterpartPersonSenderId &&
+    counterpartPersonSenderId === displayMember.user_id;
 
   if (!lastFromCounterpartPerson && !stickyPerson) return undefined;
+
 
   const senderProfile = (lastFromCounterpartPerson ? lastMessage!.sender_profile : undefined) ?? displayMember.profile;
   if (!senderProfile) return undefined;
