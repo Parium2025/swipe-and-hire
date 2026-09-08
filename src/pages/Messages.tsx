@@ -381,6 +381,7 @@ export default function Messages() {
                       displayMember,
                       isSelf,
                       lastMessage: conv.last_message,
+                      counterpartPersonSenderId: conv.counterpart_person_sender_id,
                     });
 
                     return (
