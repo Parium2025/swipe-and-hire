@@ -905,7 +905,17 @@ export function useConversations() {
 
 const MESSAGES_PAGE_SIZE = 200;
 
-export function useConversationMessages(conversationId: string | null) {
+export function useConversationMessages(
+  conversationId: string | null,
+  options?: { isVisible?: () => boolean },
+) {
+  const isVisibleRef = useRef(options?.isVisible);
+  isVisibleRef.current = options?.isVisible;
+  const isViewOnScreen = useCallback(
+    () => (isVisibleRef.current ? isVisibleRef.current() : true),
+    [],
+  );
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [hasMore, setHasMore] = useState(false);
