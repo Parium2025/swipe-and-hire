@@ -9,7 +9,7 @@ import type { JobStageSettings } from '@/hooks/useJobStageSettings';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { formatCompactTime } from '@/lib/date';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
-import { Star, Sparkles, ChevronRight, Square, CheckSquare, Check, X } from 'lucide-react';
+import { Star, Sparkles, ChevronRight, Square, CheckSquare, Check, X, XCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
