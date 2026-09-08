@@ -309,12 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
-  const [preloadedMyApplications, setPreloadedMyApplications] = useState<number>(() => {
-    try {
-      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_APPLICATIONS_CACHE_KEY) : null;
-      return cached ? parseInt(cached, 10) : 0;
-    } catch { return 0; }
-  });
+  const [preloadedMyApplications, setPreloadedMyApplications] = useState<number>(() => readMyApplicationsCache());
   const [preloadedMyCandidates, setPreloadedMyCandidates] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_CANDIDATES_CACHE_KEY) : null;
