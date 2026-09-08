@@ -376,7 +376,7 @@ const JobDetails = () => {
     const stageColor = stageSettings[targetStage]?.color || '#22c55e';
     
     idsToMove.forEach(id => {
-      updateApplicationLocally(id, { status: targetStage as JobApplication['status'] });
+      updateApplicationLocally(id, stagePatch(targetStage));
     });
     exitSelectionMode();
     
@@ -522,7 +522,7 @@ const JobDetails = () => {
   }, [user, queryClient]);
 
   const handleMobileMove = useCallback(async (applicationId: string, newStage: string) => {
-    updateApplicationLocally(applicationId, { status: newStage as JobApplication['status'] });
+    updateApplicationLocally(applicationId, stagePatch(newStage));
     const stageLabel = stageSettings[newStage]?.label || newStage;
     try {
       const { data, error } = await supabase
@@ -572,7 +572,7 @@ const JobDetails = () => {
   const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
     // Uppdatera de inlästa korten direkt (känns omedelbart) …
     const apps = applicationsByStatus[stageKey] || [];
-    apps.forEach(a => updateApplicationLocally(a.id, { status: targetKey as JobApplication['status'] }));
+    apps.forEach(a => updateApplicationLocally(a.id, stagePatch(targetKey)));
 
     // … men flytta ALLA i steget på servern. Vid stora annonser är bara en
     // del av ansökningarna inlästa; utan detta blev resten kvar med en status
