@@ -214,6 +214,22 @@ export const SelectionActionBar = ({
               );
             })}
           </TooltipProvider>
+
+          {onReject && (
+            <>
+              <DropdownMenuSeparator className="bg-white/15" />
+              <DropdownMenuItem
+                onSelect={() => {
+                  setOpenTooltipStage(null);
+                  onReject();
+                }}
+                className="text-red-300 focus:text-red-200 cursor-pointer min-h-[44px]"
+              >
+                <XCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate min-w-0">Ge avslag</span>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
