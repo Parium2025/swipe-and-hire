@@ -249,6 +249,7 @@ export async function initializePushNotifications(
 
   const platform = getPlatform();
   const registered = await registerTokenWithBackend(token, platform, deviceName);
+  if (registered) lastRegisteredToken = token;
   
   return { success: registered, token };
 }
