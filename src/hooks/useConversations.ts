@@ -1112,7 +1112,11 @@ export function useConversationMessages(
 
           // Also update conversation list to show new last message (utan refetch)
           const patched = applyIncomingMessageToConversations(queryClient, user.id, newMessage, {
-            incrementUnread: false,
+            // Både den globala kanalen och den öppna konversationens egen kanal
+            // kan få samma event först. Räkna därför oläst även här när den
+            // varmhållna chatten är dold, annars hinner denna patch lägga in
+            // meddelande-id:t och den globala kanalen avfärdar det som dubblett.
+            incrementUnread: !isConversationActivelyViewed(conversationId),
           });
           if (!patched) {
             queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
