@@ -12,9 +12,34 @@ export function useTypingIndicator(conversationId: string | null) {
   const userId = user?.id;
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelReadyRef = useRef(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const remoteTypingTimeoutsRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const localTypingRef = useRef({ isTyping: false, name: '' });
+
+  const broadcastTyping = useCallback(async (
+    channel: ReturnType<typeof supabase.channel>,
+    payload: { user_id: string; is_typing: boolean; name: string },
+  ) => {
+    // Mobile Safari can fire the first input events while the websocket is
+    // still connecting. Use the socket only when it is confirmed ready and
+    // otherwise send through Realtime's explicit HTTP transport. This avoids
+    // the deprecated implicit fallback which could silently lose the signal.
+    if (!channelReadyRef.current) {
+      await channel.httpSend('typing', payload, { timeout: 2500 });
+      return;
+    }
+
+    const result = await channel.send({
+      type: 'broadcast',
+      event: 'typing',
+      payload,
+    });
+
+    if (result !== 'ok') {
+      await channel.httpSend('typing', payload, { timeout: 2500 });
+    }
+  }, []);
 
   const setRemoteTyping = useCallback((remoteUser: TypingUser, isTyping: boolean) => {
     const existingTimeout = remoteTypingTimeoutsRef.current.get(remoteUser.id);
@@ -42,6 +67,9 @@ export function useTypingIndicator(conversationId: string | null) {
     // Presence requires the shared conversation topic across different clients.
     const channel = supabase.channel(`typing-${conversationId}`, {
       config: {
+        broadcast: {
+          ack: true,
+        },
         presence: {
           key: userId,
         },
@@ -85,6 +113,7 @@ export function useTypingIndicator(conversationId: string | null) {
         });
       })
       .subscribe(async (status) => {
+        channelReadyRef.current = status === 'SUBSCRIBED';
         if (status === 'SUBSCRIBED') {
           const localTyping = localTypingRef.current;
           await channel.track({
@@ -94,10 +123,10 @@ export function useTypingIndicator(conversationId: string | null) {
           // Typing can begin during a cold connection. Re-send the current
           // state as soon as the channel is ready so the first keystrokes count.
           if (localTyping.isTyping) {
-            await channel.send({
-              type: 'broadcast',
-              event: 'typing',
-              payload: { user_id: userId, is_typing: true, name: localTyping.name },
+            await broadcastTyping(channel, {
+              user_id: userId,
+              is_typing: true,
+              name: localTyping.name,
             });
           }
         }
@@ -112,10 +141,11 @@ export function useTypingIndicator(conversationId: string | null) {
       remoteTypingTimeoutsRef.current.forEach(clearTimeout);
       remoteTypingTimeoutsRef.current.clear();
       setTypingUsers([]);
+      channelReadyRef.current = false;
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [conversationId, setRemoteTyping, userId]);
+  }, [broadcastTyping, conversationId, setRemoteTyping, userId]);
 
   // Start typing indicator
   const startTyping = useCallback(async (userName: string) => {
@@ -128,30 +158,38 @@ export function useTypingIndicator(conversationId: string | null) {
     }
 
     // Send immediately to the other open chat, with presence as reconnect fallback.
-    await Promise.allSettled([
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'typing',
-        payload: { user_id: userId, is_typing: true, name: userName },
+    const channel = channelRef.current;
+    const tasks: Promise<unknown>[] = [
+      broadcastTyping(channel, {
+        user_id: userId,
+        is_typing: true,
+        name: userName,
       }),
-      channelRef.current.track({ is_typing: true, name: userName }),
-    ]);
+    ];
+    if (channelReadyRef.current) {
+      tasks.push(channel.track({ is_typing: true, name: userName }));
+    }
+    await Promise.allSettled(tasks);
 
     // Auto-stop typing after 3 seconds of inactivity
     typingTimeoutRef.current = setTimeout(async () => {
       localTypingRef.current = { isTyping: false, name: userName };
       if (channelRef.current) {
-        await Promise.allSettled([
-          channelRef.current.send({
-            type: 'broadcast',
-            event: 'typing',
-            payload: { user_id: userId, is_typing: false, name: userName },
+        const channel = channelRef.current;
+        const tasks: Promise<unknown>[] = [
+          broadcastTyping(channel, {
+            user_id: userId,
+            is_typing: false,
+            name: userName,
           }),
-          channelRef.current.track({ is_typing: false, name: userName }),
-        ]);
+        ];
+        if (channelReadyRef.current) {
+          tasks.push(channel.track({ is_typing: false, name: userName }));
+        }
+        await Promise.allSettled(tasks);
       }
     }, 3000);
-  }, [userId]);
+  }, [broadcastTyping, userId]);
 
   // Stop typing indicator
   const stopTyping = useCallback(async (userName: string) => {
@@ -162,15 +200,19 @@ export function useTypingIndicator(conversationId: string | null) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    await Promise.allSettled([
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'typing',
-        payload: { user_id: userId, is_typing: false, name: userName },
+    const channel = channelRef.current;
+    const tasks: Promise<unknown>[] = [
+      broadcastTyping(channel, {
+        user_id: userId,
+        is_typing: false,
+        name: userName,
       }),
-      channelRef.current.track({ is_typing: false, name: userName }),
-    ]);
-  }, [userId]);
+    ];
+    if (channelReadyRef.current) {
+      tasks.push(channel.track({ is_typing: false, name: userName }));
+    }
+    await Promise.allSettled(tasks);
+  }, [broadcastTyping, userId]);
 
   return {
     typingUsers,
