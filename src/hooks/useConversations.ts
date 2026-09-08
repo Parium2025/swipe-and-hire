@@ -1328,8 +1328,9 @@ export function useConversationMessages(
         (old) => old?.map(m => m.id === tempId ? { ...savedMessage, sender_profile: optimisticMessage.sender_profile } : m) || []
       );
 
-      // Update last read
-      await markAsRead();
+      // Update last read – får aldrig blockera eller rulla tillbaka ett redan
+      // sparat meddelande om kvitteringen misslyckas.
+      void Promise.resolve(markAsRead()).catch(() => undefined);
     } catch (error) {
       // Rollback on error
       queryClient.setQueryData<ConversationMessage[]>(
