@@ -120,6 +120,7 @@ export function ChatView({
 
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
