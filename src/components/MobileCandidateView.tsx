@@ -244,6 +244,21 @@ const CandidateRow = memo(function CandidateRow({
                 </TooltipProvider>
               );
             })}
+            {onReject && app.status !== 'rejected' && (
+              <>
+                <DropdownMenuSeparator className="bg-white/15" />
+                <DropdownMenuItem
+                  onClick={e => {
+                    e.stopPropagation();
+                    onReject(app.id);
+                  }}
+                  className="gap-2 min-h-[44px] min-w-0 text-red-300 focus:text-red-200"
+                >
+                  <XCircle className="h-4 w-4 shrink-0" />
+                  <span className="truncate min-w-0">Ge avslag</span>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
