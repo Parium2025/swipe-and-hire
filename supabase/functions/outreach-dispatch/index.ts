@@ -204,6 +204,36 @@ const isTransientError = (message: string) => {
   return TRANSIENT_PATTERNS.some((pattern) => lower.includes(pattern));
 };
 
+// Stabilt UUID härlett ur loggradens id. Används som primärnyckel för
+// chattmeddelandet så att ett omförsök efter en lyckad insert kolliderar
+// (unik nyckel) i stället för att skapa ett dubblettmeddelande.
+async function deterministicMessageId(logId: string): Promise<string> {
+  const digest = new Uint8Array(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`outreach-chat:${logId}`)),
+  );
+  const bytes = digest.slice(0, 16);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+// Meddelandet är redan levererat när vi når hit. Ett tillfälligt fel på just
+// statusuppdateringen får därför aldrig leda till ett nytt utskick — vi
+// försöker uppdatera flera gånger och markerar annars raden som permanent
+// fel (ingen retry), så kandidaten inte får samma meddelande två gånger.
+async function markSent(logId: string, patch: Record<string, unknown>) {
+  let lastError = '';
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { error } = await admin.from('outreach_dispatch_logs').update(patch).eq('id', logId);
+    if (!error) return;
+    lastError = error.message;
+    await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
+  }
+  throw new Error(`Meddelandet skickades men kunde inte bokföras: ${lastError}`);
+}
+
+
 async function dispatchLog(log: OutreachLog) {
 
   // Arbetsgivarens val väger alltid tyngst: har regeln stängts av (eller tagits
