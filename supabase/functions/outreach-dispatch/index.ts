@@ -427,7 +427,27 @@ const isDue = (row: OutreachLog, now: number) => {
 };
 
 
-async function processPending(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {}) {
+// Kapacitet: ett jobbavslut med tusentals kandidater köar tusentals rader på en
+// gång. Därför plockas rader i stora batchar, skickas parallellt (men aldrig två
+// rader för samma mottagare samtidigt) och körningen fortsätter tills kön är tom
+// eller tidsbudgeten tar slut — då startas nästa svep automatiskt.
+const CLAIM_BATCH_SIZE = 120;
+const SEND_CONCURRENCY = 12;
+const RUN_BUDGET_MS = 50_000;
+const MAX_SELF_CONTINUATIONS = 60;
+
+async function runWithConcurrency<T>(items: T[], limit: number, worker: (item: T) => Promise<void>) {
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor++;
+      await worker(items[index]);
+    }
+  });
+  await Promise.all(runners);
+}
+
+async function claimBatch(filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null }, limit: number) {
   // Atomiskt "claim": databasen låser raderna (FOR UPDATE SKIP LOCKED) och sätter
   // locked_until, så två samtidiga körningar (cron + manuell knapp) aldrig kan
   // plocka och skicka samma rad två gånger.
@@ -435,53 +455,100 @@ async function processPending(filters: { ownerUserId?: string; trigger?: Outreac
     p_owner_user_id: filters.ownerUserId ?? null,
     p_trigger: filters.trigger ?? null,
     p_interview_id: filters.interviewId ?? null,
-    p_limit: 30,
+    p_limit: limit,
   });
 
-  let due: OutreachLog[];
-  if (claimError) {
-    // Skulle låsfunktionen inte gå att köra faller vi tillbaka på ett enkelt
-    // svep — utskicken ska aldrig stanna av.
-    console.error('claim_outreach_dispatch misslyckades, faller tillbaka', claimError);
-    let fallback = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(200);
-    if (filters.ownerUserId) fallback = fallback.eq('owner_user_id', filters.ownerUserId);
-    if (filters.trigger) fallback = fallback.eq('trigger', filters.trigger);
-    if (filters.interviewId) fallback = fallback.eq('interview_id', filters.interviewId);
-    const { data, error } = await fallback;
-    if (error) throw error;
-    const now = Date.now();
-    due = ((data ?? []) as OutreachLog[]).filter((row) => isDue(row, now)).slice(0, 30);
-  } else {
-    due = (claimed ?? []) as OutreachLog[];
-  }
+  if (!claimError) return (claimed ?? []) as OutreachLog[];
 
+  // Skulle låsfunktionen inte gå att köra faller vi tillbaka på ett enkelt
+  // svep — utskicken ska aldrig stanna av.
+  console.error('claim_outreach_dispatch misslyckades, faller tillbaka', claimError);
+  let fallback = admin.from('outreach_dispatch_logs').select('*').in('status', ['pending', 'retrying']).order('created_at', { ascending: true }).limit(limit * 3);
+  if (filters.ownerUserId) fallback = fallback.eq('owner_user_id', filters.ownerUserId);
+  if (filters.trigger) fallback = fallback.eq('trigger', filters.trigger);
+  if (filters.interviewId) fallback = fallback.eq('interview_id', filters.interviewId);
+  const { data, error } = await fallback;
+  if (error) throw error;
+  const now = Date.now();
+  return ((data ?? []) as OutreachLog[]).filter((row) => isDue(row, now)).slice(0, limit);
+}
 
-
+async function processPending(
+  filters: { ownerUserId?: string; trigger?: OutreachTrigger; interviewId?: string | null } = {},
+  options: { drain?: boolean; batchSize?: number } = {},
+) {
+  const batchSize = options.batchSize ?? CLAIM_BATCH_SIZE;
+  const startedAt = Date.now();
 
   let processedCount = 0;
   let chatConversationId: string | null = null;
+  let batches = 0;
+  let queueMayHaveMore = false;
   const results: Array<{ channel: OutreachChannel; status: 'sent' | 'failed' | 'skipped' | 'retrying'; error?: string }> = [];
-  for (const row of due) {
-    const result = await dispatchLog(row);
-    if ('skipped' in result) {
-      results.push({ channel: row.channel, status: 'skipped' });
-    } else if ('retrying' in result && result.retrying) {
-      // Tyst omförsök — inget syns för användaren, bara i Logg.
-      results.push({ channel: row.channel, status: 'retrying', error: result.error });
-    } else if ('error' in result && result.error) {
-      processedCount += 1;
-      results.push({ channel: row.channel, status: 'failed', error: result.error });
-    } else {
-      processedCount += 1;
-      results.push({ channel: row.channel, status: 'sent' });
+
+  while (true) {
+    const due = await claimBatch(filters, batchSize);
+    if (due.length === 0) break;
+    batches += 1;
+
+    // Rader till samma mottagare körs i ordning (chat får aldrig skapa två
+    // konversationer parallellt); olika mottagare körs parallellt.
+    const byRecipient = new Map<string, OutreachLog[]>();
+    for (const row of due) {
+      const key = row.recipient_user_id ?? `row:${row.id}`;
+      const group = byRecipient.get(key);
+      if (group) group.push(row); else byRecipient.set(key, [row]);
     }
-    if ('conversationId' in result && result.conversationId) chatConversationId = result.conversationId;
+
+    await runWithConcurrency([...byRecipient.values()], SEND_CONCURRENCY, async (group) => {
+      for (const row of group) {
+        let result: Awaited<ReturnType<typeof dispatchLog>>;
+        try {
+          result = await dispatchLog(row);
+        } catch (error) {
+          // En oväntad krasch får aldrig stoppa hela batchen.
+          const message = error instanceof Error ? error.message : 'Okänt fel';
+          await admin.from('outreach_dispatch_logs').update({ status: 'failed', error_message: message, locked_until: null }).eq('id', row.id);
+          results.push({ channel: row.channel, status: 'failed', error: message });
+          processedCount += 1;
+          continue;
+        }
+        if ('skipped' in result) {
+          results.push({ channel: row.channel, status: 'skipped' });
+        } else if ('retrying' in result && result.retrying) {
+          // Tyst omförsök — inget syns för användaren, bara i Logg.
+          results.push({ channel: row.channel, status: 'retrying', error: result.error });
+        } else if ('error' in result && result.error) {
+          processedCount += 1;
+          results.push({ channel: row.channel, status: 'failed', error: result.error });
+        } else {
+          processedCount += 1;
+          results.push({ channel: row.channel, status: 'sent' });
+        }
+        if ('conversationId' in result && result.conversationId) chatConversationId = result.conversationId;
+      }
+    });
+
+    if (due.length < batchSize) break;
+    if (!options.drain) { queueMayHaveMore = true; break; }
+    if (Date.now() - startedAt > RUN_BUDGET_MS) { queueMayHaveMore = true; break; }
   }
 
   const sentCount = results.filter((r) => r.status === 'sent').length;
   const failedCount = results.filter((r) => r.status === 'failed').length;
 
-  return { processedCount, sentCount, failedCount, results, chatConversationId };
+  return { processedCount, sentCount, failedCount, batches, queueMayHaveMore, results, chatConversationId };
+}
+
+// Kön kan vara mycket större än en körning hinner med. Starta då nästa svep
+// direkt i stället för att vänta på nästa cron-tick (5 min).
+function continueDraining(hop: number) {
+  if (hop >= MAX_SELF_CONTINUATIONS) return;
+  fetch(`${supabaseUrl}/functions/v1/outreach-dispatch`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
+    body: JSON.stringify({ hop: hop + 1, source: 'self-continue' }),
+  }).catch((error) => console.error('Kunde inte starta nästa utskickssvep', error));
 }
 
 
@@ -571,7 +638,7 @@ Deno.serve(async (request) => {
         });
       }
 
-      const result = await processPending({ ownerUserId: user.id, trigger: 'manual_send' });
+      const result = await processPending({ ownerUserId: user.id, trigger: 'manual_send' }, { batchSize: 30 });
       return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -581,14 +648,22 @@ Deno.serve(async (request) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const result = await processPending({
-      // service_role callers may process any pending log; authenticated users are
-      // strictly scoped to their own owner_user_id — never unscoped.
-      ownerUserId: serviceRole ? undefined : user!.id,
-      trigger: (body as { trigger?: OutreachTrigger }).trigger,
-      interviewId: (body as { interviewId?: string | null }).interviewId ?? null,
-    });
-    return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const hop = Number((body as { hop?: number }).hop ?? 0) || 0;
+    const result = await processPending(
+      {
+        // service_role callers may process any pending log; authenticated users are
+        // strictly scoped to their own owner_user_id — never unscoped.
+        ownerUserId: serviceRole ? undefined : user!.id,
+        trigger: (body as { trigger?: OutreachTrigger }).trigger,
+        interviewId: (body as { interviewId?: string | null }).interviewId ?? null,
+      },
+      // Bara bakgrundskörningar (cron/self-continue) tömmer hela kön.
+      { drain: serviceRole },
+    );
+
+    if (serviceRole && result.queueMayHaveMore) continueDraining(hop);
+
+    return new Response(JSON.stringify({ ...result, hop }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unexpected error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
