@@ -1119,12 +1119,14 @@ export function useConversationMessages(
           }
 
           // A message received while the open chat is visible has actually been
-          // seen. Persist that read state immediately instead of waiting for the
-          // user to leave and reopen the conversation.
-          if (newMessage.sender_id !== user.id && document.visibilityState === 'visible') {
+          // Ett meddelande som kommer in medan chatten faktiskt syns på skärmen
+          // är sett — kvittera direkt. Ligger vyn dold bakom en annan sida ska
+          // det däremot räknas som oläst så notisen kommer fram.
+          if (newMessage.sender_id !== user.id && isConversationActivelyViewed(conversationId)) {
             void markAsReadRef.current?.();
           }
         }
+
       )
       .on(
         'postgres_changes',
