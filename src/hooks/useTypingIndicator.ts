@@ -29,6 +29,7 @@ export function useTypingIndicator(conversationId: string | null) {
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
+        console.log('[typing-debug] sync', JSON.stringify(state), 'me:', user.id);
         const typing: TypingUser[] = [];
         
         Object.entries(state).forEach(([userId, presences]) => {
