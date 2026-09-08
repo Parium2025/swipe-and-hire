@@ -14,20 +14,29 @@ export function useResolvedAvatarUrl(
   profile: ProfileLike | null | undefined,
   transform?: ImageTransformOptions
 ): string | null {
-  const isEmployerWithLogo = profile?.role === 'employer' && profile?.company_logo_url;
-  
-  // Company logos are public URLs - use directly
-  // Profile images are storage paths - need resolution
-  const storagePath = isEmployerWithLogo ? null : (profile?.profile_image_url || null);
-  
-  const resolvedProfileImageUrl = useMediaUrl(storagePath, 'profile-image', 86400, transform);
-  
-  if (isEmployerWithLogo) {
-    return profile.company_logo_url ?? null;
-  }
-  
-  return resolvedProfileImageUrl;
+  const companyLogo =
+    profile?.role === 'employer' && profile?.company_logo_url ? profile.company_logo_url : null;
+
+  // Företagsloggan går genom SAMMA väg som profilbilder (cache i minne +
+  // blob-cache + förladdning). Tidigare returnerades den råa publika URL:en
+  // direkt, vilket gjorde att loggan alltid laddades om vid kallstart medan
+  // profilbilder redan låg varma i cachen.
+  const storagePath = companyLogo ?? profile?.profile_image_url ?? null;
+  const mediaType = companyLogo ? 'company-logo' : 'profile-image';
+
+  // Loggor prefetchas utan transform → dela exakt samma cache-nyckel.
+  const resolvedUrl = useMediaUrl(
+    storagePath,
+    mediaType,
+    86400,
+    companyLogo ? undefined : transform
+  );
+
+  if (companyLogo) return resolvedUrl ?? companyLogo;
+
+  return resolvedUrl;
 }
+
 
 /**
  * Hook for resolving a team member's profile image URL.
