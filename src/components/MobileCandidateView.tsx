@@ -253,7 +253,7 @@ const CandidateRow = memo(function CandidateRow({
                 </TooltipProvider>
               );
             })}
-            {onReject && app.status !== 'rejected' && (
+            {onReject && !isRejected && (
               <>
                 <DropdownMenuSeparator className="bg-white/15" />
                 <DropdownMenuItem
