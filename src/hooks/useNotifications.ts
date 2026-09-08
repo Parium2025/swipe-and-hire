@@ -46,7 +46,9 @@ export function useNotifications() {
   const { user } = useAuth();
   // Kontospecifikt lokalt notisarkiv — två flikar med olika konton på samma
   // enhet får aldrig dela lokala toaster.
-  if (typeof window !== 'undefined') setToastArchiveUser(user?.id ?? null);
+  useEffect(() => {
+    setToastArchiveUser(user?.id ?? null);
+  }, [user?.id]);
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     if (user) return getCached(user.id) || [];
     return [];
