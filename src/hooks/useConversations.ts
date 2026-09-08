@@ -1013,14 +1013,31 @@ export function useConversationMessages(
       if (error) throw error;
 
       const existingIds = new Set(currentMessages.map((m) => m.id));
-      const fresh = (olderMessages || []).filter((m) => !existingIds.has(m.id));
+      let rawOlder = olderMessages || [];
+      let fresh = rawOlder.filter((m) => !existingIds.has(m.id));
+
+      // Om hela sidan bestod av redan laddade meddelanden (många delar exakt
+      // samma tidsstämpel) finns äldre historik kvar bakom gränsen. Hämta då
+      // strikt äldre än gränsen i stället för att felaktigt säga "inget mer".
+      if (fresh.length === 0 && rawOlder.length >= MESSAGES_PAGE_SIZE + 1) {
+        const { data: strictlyOlder, error: strictError } = await supabase
+          .from('conversation_messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .lt('created_at', oldestTimestamp)
+          .order('created_at', { ascending: false })
+          .limit(MESSAGES_PAGE_SIZE + 1);
+        if (strictError) throw strictError;
+        rawOlder = strictlyOlder || [];
+        fresh = rawOlder.filter((m) => !existingIds.has(m.id));
+      }
 
       if (fresh.length === 0) {
         setHasMore(false);
         return;
       }
 
-      setHasMore((olderMessages?.length || 0) >= MESSAGES_PAGE_SIZE + 1);
+      setHasMore(rawOlder.length >= MESSAGES_PAGE_SIZE + 1);
 
       // Reverse to chronological order
       fresh.reverse();
