@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.filter_candidates_by_criteria(uuid[], uuid[]) FROM anon;
