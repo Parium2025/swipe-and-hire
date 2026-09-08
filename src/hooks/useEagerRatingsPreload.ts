@@ -93,6 +93,7 @@ const clearAllAppCachesSync = () => {
     CONVERSATIONS_CACHE_KEY,
     INTERVIEWS_CACHE_KEY,
     JOB_TEMPLATES_CACHE_KEY,
+    'parium_candidate_counts_v1_',
   ];
   
   const exactKeysToRemove = [
