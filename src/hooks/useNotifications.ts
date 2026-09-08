@@ -23,10 +23,9 @@ const CACHE_KEY = 'parium_notifications_cache';
 // användaren scrollar ner i klockan.
 const PAGE_SIZE = 200;
 
-// Chattmeddelanden ska både ge en oläst-markering i chattlistan och en
-// klickbar notis i klockan. De två ytorna fyller olika funktioner: badgen visar
-// antal olästa chattar medan klockan visar vad som faktiskt hände.
-const HIDDEN_TYPES = new Set<string>();
+// Chattmeddelanden hör hemma i Chattar-badgen och chattlistan. Att även lägga
+// varje meddelande i klockan skapar dubbla, röriga indikatorer.
+const HIDDEN_TYPES = new Set(['message', 'new_message', 'chat_message']);
 const isHiddenType = (type: string) => HIDDEN_TYPES.has(type);
 
 
