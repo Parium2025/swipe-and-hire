@@ -82,6 +82,8 @@ export interface Conversation {
   last_message_at: string | null;
   members: ConversationMember[];
   last_message?: ConversationMessage;
+  /** Senaste motpart som skrev ett personligt (icke-mall) meddelande — håller identiteten stabil. */
+  counterpart_person_sender_id?: string | null;
   unread_count: number;
   /** True när den inloggade användaren har tystat konversationen (inga notiser, men den syns i inkorgen). */
   is_muted?: boolean;
@@ -507,6 +509,7 @@ export function useConversations() {
       }
 
       const lastMessageMap = new Map<string, ConversationMessage>();
+      const counterpartPersonMap = new Map<string, string>();
       const unreadCounts = new Map<string, number>();
 
       // Initialize unread counts
@@ -524,6 +527,9 @@ export function useConversations() {
             sender_identity: s.last_message_sender_identity === 'company' ? 'company' : 'person',
             sender_profile: profileMap.get(s.last_message_sender_id) || undefined,
           });
+        }
+        if (s.counterpart_person_sender_id) {
+          counterpartPersonMap.set(s.conversation_id, s.counterpart_person_sender_id);
         }
         unreadCounts.set(s.conversation_id, Number(s.unread_count) || 0);
       });
@@ -562,6 +568,7 @@ export function useConversations() {
           ...conv,
           members,
           last_message: lastMessageMap.get(conv.id),
+          counterpart_person_sender_id: counterpartPersonMap.get(conv.id) ?? null,
           unread_count: unreadCounts.get(conv.id) || 0,
           is_muted: mutedIds.has(conv.id),
 

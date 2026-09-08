@@ -689,6 +689,7 @@ export function ChatView({
     displayMember,
     isSelf: isSelfConversation,
     lastMessage: conversation.last_message,
+    counterpartPersonSenderId: conversation.counterpart_person_sender_id,
   });
 
   // Group messages by date
