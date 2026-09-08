@@ -81,8 +81,9 @@ export function getConversationDisplayName(opts: {
   displayMember: ConversationMember | undefined;
   isSelf?: boolean;
   lastMessage?: LastMessageIdentity;
+  counterpartPersonSenderId?: string | null;
 }): string {
-  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage } = opts;
+  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage, counterpartPersonSenderId } = opts;
 
   if (isGroup && groupName) return groupName;
 
