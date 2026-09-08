@@ -1692,6 +1692,7 @@ export type Database = {
           phone: string | null
           profile_image_snapshot_url: string | null
           questions_snapshot: Json | null
+          rejected_at: string | null
           search_vector: unknown
           status: string
           updated_at: string
@@ -1723,6 +1724,7 @@ export type Database = {
           phone?: string | null
           profile_image_snapshot_url?: string | null
           questions_snapshot?: Json | null
+          rejected_at?: string | null
           search_vector?: unknown
           status?: string
           updated_at?: string
@@ -1754,6 +1756,7 @@ export type Database = {
           phone?: string | null
           profile_image_snapshot_url?: string | null
           questions_snapshot?: Json | null
+          rejected_at?: string | null
           search_vector?: unknown
           status?: string
           updated_at?: string
