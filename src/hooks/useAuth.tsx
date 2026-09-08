@@ -1508,6 +1508,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isSigningOutRef.current) return;
     isSigningOutRef.current = true;
 
+    // 🔕 Koppla bort DENNA enhets pushtoken så att nästa konto på samma
+    // telefon aldrig får det förra kontots notiser. Andra enheter påverkas ej.
+    const signingOutUserId = currentUserIdRef.current;
+    if (signingOutUserId) {
+      void unregisterCurrentDeviceToken(signingOutUserId).catch(() => undefined);
+    }
+
     // Markera manuell utloggning. Flaggan nollställs INTE på tid — den lever
     // tills en ny inloggning sker (SIGNED_IN/TOKEN_REFRESHED). Tidigare
     // 500 ms-timeout kunde släppa flaggan innan Supabase hann sända
