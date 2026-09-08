@@ -53,6 +53,7 @@ const CandidateRow = memo(function CandidateRow({
   app,
   onOpen,
   onMoveToStage,
+  onReject,
   stages,
   stageSettings,
   criteriaCount,
