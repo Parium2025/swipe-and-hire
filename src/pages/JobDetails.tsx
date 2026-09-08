@@ -520,6 +520,30 @@ const JobDetails = () => {
     }
   }, [updateApplicationLocally, stageSettings, refetch]);
 
+  // Avslaget gäller bara den här ansökan/annonsen. Kandidatens andra
+  // ansökningar påverkas inte, och avslagna utesluts när annonsen stängs.
+  const confirmReject = useCallback(async () => {
+    const ids = rejectTargetIds ?? [];
+    setRejectTargetIds(null);
+    if (ids.length === 0) return;
+
+    ids.forEach(id => updateApplicationLocally(id, { status: 'rejected' as JobApplication['status'] }));
+    if (isSelectionMode) exitSelectionMode();
+
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .update({ status: 'rejected' })
+        .in('id', ids);
+      if (error) throw error;
+      toast.success(ids.length === 1 ? 'Avslag registrerat' : `${ids.length} kandidater fick avslag`);
+    } catch {
+      refetch();
+      toast.error('Kunde inte registrera avslaget');
+    }
+  }, [rejectTargetIds, updateApplicationLocally, isSelectionMode, exitSelectionMode, refetch]);
+
+
   const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
     // Uppdatera de inlästa korten direkt (känns omedelbart) …
     const apps = applicationsByStatus[stageKey] || [];
