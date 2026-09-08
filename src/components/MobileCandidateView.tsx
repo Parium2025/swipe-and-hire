@@ -39,6 +39,7 @@ interface CandidateRowProps {
   app: JobApplication;
   onOpen: () => void;
   onMoveToStage: (appId: string, stage: string) => void;
+  onReject?: (appId: string) => void;
   stages: string[];
   stageSettings: Record<string, { label: string; color: string; iconName: string; isCustom: boolean }>;
   criteriaCount: number;
