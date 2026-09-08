@@ -1226,10 +1226,11 @@ export function useConversationMessages(
   // the user returns to the still-open conversation.
   useEffect(() => {
     const markVisibleConversationRead = () => {
-      if (document.visibilityState === 'visible') void markAsReadRef.current?.();
+      if (document.visibilityState !== 'visible') return;
+      if (!isViewOnScreen()) return;
+      void markAsReadRef.current?.();
     };
-    document.addEventListener('visibilitychange', markVisibleConversationRead);
-    window.addEventListener('focus', markVisibleConversationRead);
+
     return () => {
       document.removeEventListener('visibilitychange', markVisibleConversationRead);
       window.removeEventListener('focus', markVisibleConversationRead);
