@@ -1118,7 +1118,7 @@ export function useConversationMessages(
             queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
           }
 
-          // A message received while the open chat is visible has actually been
+          
           // Ett meddelande som kommer in medan chatten faktiskt syns på skärmen
           // är sett — kvittera direkt. Ligger vyn dold bakom en annan sida ska
           // det däremot räknas som oläst så notisen kommer fram.
