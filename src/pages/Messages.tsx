@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { type Conversation } from '@/hooks/useConversations';
+import { clearAutoReadSuppression, type Conversation } from '@/hooks/useConversations';
 import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
