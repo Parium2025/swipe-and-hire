@@ -13,6 +13,8 @@ import { ProfileFormSkeleton } from '@/components/profile/ProfileFormSkeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { InlineSelect } from '@/components/ui/inline-select';
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -2590,63 +2592,23 @@ const Profile = () => {
                         <Label htmlFor="employmentStatus" className="text-white text-sm">
                           Anställningsstatus? <span className="text-white">*</span>
                         </Label>
-                        <DropdownMenu modal={false}>
-                          <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outlineNeutral"
-                            className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                          >
-                              <span className="truncate">
-                                {employmentStatus ? (
-                                  ({
-                                    tillsvidareanställning: 'Fast anställning',
-                                    visstidsanställning: 'Visstidsanställning',
-                                    provanställning: 'Provanställning',
-                                    interim: 'Interim anställning',
-                                    bemanningsanställning: 'Bemanningsanställning',
-                                    egenforetagare: 'Egenföretagare / Frilans',
-                                    arbetssokande: 'Arbetssökande',
-                                    annat: 'Annat',
-                                  } as Record<string, string>)[employmentStatus]
-                                ) : 'Välj din nuvarande situation'}
-                              </span>
-                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
-                            side="bottom"
-                            align="center"
-                            alignOffset={0}
-                            sideOffset={6}
-                            avoidCollisions={true}
-                          >
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Fast anställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Visstidsanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Provanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Interim anställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Bemanningsanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Egenföretagare / Frilans
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Arbetssökande
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Annat
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <InlineSelect
+                          id="employmentStatus"
+                          placeholder="Välj din nuvarande situation"
+                          value={employmentStatus}
+                          onChange={setEmploymentStatus}
+                          options={[
+                            { value: 'tillsvidareanställning', label: 'Fast anställning' },
+                            { value: 'visstidsanställning', label: 'Visstidsanställning' },
+                            { value: 'provanställning', label: 'Provanställning' },
+                            { value: 'interim', label: 'Interim anställning' },
+                            { value: 'bemanningsanställning', label: 'Bemanningsanställning' },
+                            { value: 'egenforetagare', label: 'Egenföretagare / Frilans' },
+                            { value: 'arbetssokande', label: 'Arbetssökande' },
+                            { value: 'annat', label: 'Annat' },
+                          ]}
+                        />
+
                         {errors.employmentStatus && <p className="text-sm text-red-300">{errors.employmentStatus}</p>}
                       </div>
 
@@ -2654,43 +2616,18 @@ const Profile = () => {
                       {employmentStatus && employmentStatus !== 'arbetssokande' && (
                         <div className="space-y-2 md:space-y-1.5">
                           <Label htmlFor="workingHours" className="text-white text-sm">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
-                          <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                              >
-                                <span className="truncate">
-                                  {workingHours ? (
-                                    ({
-                                      heltid: 'Heltid',
-                                      deltid: 'Deltid',
-                                      varierande: 'Varierande / Flexibelt',
-                                    } as Record<string, string>)[workingHours]
-                                  ) : 'Välj arbetstid/omfattning'}
-                                </span>
-                                <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                             <DropdownMenuContent 
-                               className="w-72 max-h-80 overflow-y-auto glass-panel z-50 rounded-md text-white"
-                              side="bottom"
-                              align="center"
-                              alignOffset={0}
-                              sideOffset={6}
-                              avoidCollisions={true}
-                            >
-                              <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                                Heltid
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                                Deltid
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                                Varierande / Flexibelt
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <InlineSelect
+                            id="workingHours"
+                            placeholder="Välj arbetstid/omfattning"
+                            value={workingHours}
+                            onChange={setWorkingHours}
+                            options={[
+                              { value: 'heltid', label: 'Heltid' },
+                              { value: 'deltid', label: 'Deltid' },
+                              { value: 'varierande', label: 'Varierande / Flexibelt' },
+                            ]}
+                          />
+
                         </div>
                       )}
                     </div>
@@ -2701,55 +2638,21 @@ const Profile = () => {
                     {employmentStatus && (
                       <div className="space-y-2 md:space-y-1.5">
                         <Label htmlFor="availability" className="text-white text-sm">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
-                        <DropdownMenu modal={false}>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                            >
-                              <span className="truncate">
-                                {availability ? (
-                                  ({
-                                    omgaende: 'Omgående',
-                                    'inom-1-manad': 'Inom 1 månad',  
-                                    'inom-3-manader': 'Inom 3 månader',
-                                    'inom-6-manader': 'Inom 6 månader',
-                                    'ej-aktuellt': 'Inte aktuellt just nu',
-                                    osaker: 'Osäker',
-                                  } as Record<string, string>)[availability]
-                                ) : 'Välj din tillgänglighet'}
-                              </span>
-                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
-                           side="bottom"
-                           align="center"
-                           alignOffset={0}
-                           sideOffset={6}
-                           avoidCollisions={true}
-                          >
-                            <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Omgående
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inom 1 månad
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inom 3 månader
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inom 6 månader
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Inte aktuellt just nu
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Osäker
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <InlineSelect
+                          id="availability"
+                          placeholder="Välj din tillgänglighet"
+                          value={availability}
+                          onChange={setAvailability}
+                          options={[
+                            { value: 'omgaende', label: 'Omgående' },
+                            { value: 'inom-1-manad', label: 'Inom 1 månad' },
+                            { value: 'inom-3-manader', label: 'Inom 3 månader' },
+                            { value: 'inom-6-manader', label: 'Inom 6 månader' },
+                            { value: 'ej-aktuellt', label: 'Inte aktuellt just nu' },
+                            { value: 'osaker', label: 'Osäker' },
+                          ]}
+                        />
+
                       </div>
                     )}
 
