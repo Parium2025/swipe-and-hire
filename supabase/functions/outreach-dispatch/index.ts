@@ -313,6 +313,7 @@ async function dispatchLog(log: OutreachLog) {
       if (!log.recipient_user_id) throw new Error('Saknar mottagare för chat');
       const conversationId = await ensureConversation(log.owner_user_id, log.recipient_user_id, log.job_id, context.applicationId);
       const { error } = await admin.from('conversation_messages').insert({
+        id: await deterministicMessageId(log.id),
         conversation_id: conversationId,
         sender_id: log.owner_user_id,
         content: body,
@@ -320,9 +321,12 @@ async function dispatchLog(log: OutreachLog) {
         // utskicket manuellt. Endast egen fritext ska bära personidentitet.
         sender_identity: isPersonalManualChat ? 'person' : 'company',
       });
-      if (error) throw error;
-      await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), conversation_id: conversationId, error_message: null }).eq('id', log.id);
+      // 23505 = raden finns redan från ett tidigare försök: meddelandet är
+      // levererat, så vi bokför det som skickat i stället för att skicka igen.
+      if (error && error.code !== '23505') throw error;
+      await markSent(log.id, { status: 'sent', sent_at: new Date().toISOString(), conversation_id: conversationId, error_message: null });
       return { conversationId };
+
     }
 
     if (log.channel === 'email') {
