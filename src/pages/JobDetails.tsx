@@ -886,7 +886,7 @@ const JobDetails = () => {
                 {rejectTargetIds && rejectTargetIds.length > 1 ? `Ge avslag till ${rejectTargetIds.length} kandidater` : 'Ge avslag'}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                Avslaget gäller bara den här annonsen. Kandidatens andra ansökningar påverkas inte, och avslagna kandidater får inget besked igen när annonsen stängs.
+                Avslaget gäller bara den här annonsen. Kandidaten ligger kvar i sitt steg med en avslagsmarkering och kan flyttas som vanligt, men andra ansökningar påverkas inte och avslagna kandidater får inget besked igen när annonsen stängs.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
