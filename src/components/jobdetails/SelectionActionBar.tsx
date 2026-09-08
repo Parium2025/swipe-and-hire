@@ -21,6 +21,8 @@ interface SelectionActionBarProps {
   stages: string[];
   stageSettings: Record<string, { label?: string; color?: string; iconName?: string }>;
   onMoveToStage: (stage: string) => void;
+  /** Ger avslag på de valda ansökningarna (endast den här annonsen). */
+  onReject?: () => void;
 }
 
 export const SelectionActionBar = ({
