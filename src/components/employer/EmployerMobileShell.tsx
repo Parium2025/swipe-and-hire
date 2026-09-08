@@ -1,5 +1,6 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import EmployerSidebar from '@/components/EmployerSidebar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
