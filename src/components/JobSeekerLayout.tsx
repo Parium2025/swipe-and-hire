@@ -229,17 +229,17 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
           
           <main
             data-main-scroll-container="true"
-            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${location.pathname === '/messages' ? 'no-chrome-pad' : 'pb-8'}`}
+            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${isMessagesChrome ? 'no-chrome-pad' : 'pb-8'}`}
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',
-              paddingBottom: location.pathname === '/messages'
+              paddingBottom: isMessagesChrome
                 ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
                 : undefined,
             }}
           >
             {children}
-            <div aria-hidden="true" style={{ flexShrink: 0, height: location.pathname === '/messages' ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
+            <div aria-hidden="true" style={{ flexShrink: 0, height: isMessagesChrome ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
 
           </main>
           {overlay}
