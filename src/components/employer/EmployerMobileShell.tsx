@@ -28,8 +28,8 @@ const EmployerMobileShell = ({
 }: EmployerMobileShellProps) => {
   const navigate = useNavigate();
   // Chattsidan är en fullhöjdsvy — extra bottenutrymme skulle lämna en tom yta.
-  const { pathname } = useLocation();
-  const isMessages = pathname.startsWith('/messages');
+  // Flaggan släpps först när vybytet är klart, annars klipps chatten mitt i övergången.
+  const isMessages = useMessagesChrome();
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
