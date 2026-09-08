@@ -1633,7 +1633,7 @@ export function MessageTemplatesSettings() {
         </div>
 
         <TabsContent value="library" className="mt-0 min-w-0">
-          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
+          <div className="min-w-0 overflow-hidden">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Mallbibliotek</h4>
@@ -2086,7 +2086,7 @@ export function MessageTemplatesSettings() {
         </TabsContent>
 
         <TabsContent value="automations" className="mt-0 grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
-          <div className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
+          <div className="min-w-0 overflow-hidden">
             <div className="mb-3 space-y-3">
               <div>
                 <h4 className="text-sm font-semibold text-white md:text-base">Steg 2 · Bestäm när mallen ska skickas</h4>
@@ -2316,7 +2316,7 @@ export function MessageTemplatesSettings() {
           </div>
         </TabsContent>
 
-        <TabsContent value="logs" className="mt-0 min-w-0 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
+        <TabsContent value="logs" className="mt-0 min-w-0">
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="h-5 w-5 animate-spin text-white/50" /></div>
           ) : logs.length === 0 ? (
