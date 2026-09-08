@@ -340,6 +340,15 @@ export function ChatView({
     }
   }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading]);
 
+  // Skyddsnät: konversationen får aldrig se tom ut. Skulle mätningen av någon
+  // anledning inte bli klar avslöjas innehållet ändå strax efteråt.
+  useEffect(() => {
+    if (isInitialScrollReady || messages.length === 0) return;
+    const timer = setTimeout(() => setIsInitialScrollReady(true), 1200);
+    return () => clearTimeout(timer);
+  }, [isInitialScrollReady, messages.length]);
+
+
   // Bilagor, systemmeddelanden och font/layout-ändringar kan öka innehållets
   // höjd efter första renderingen. Behåll bottenankaret så länge användaren inte
   // själv har scrollat uppåt.
