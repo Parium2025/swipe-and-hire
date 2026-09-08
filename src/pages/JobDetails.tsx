@@ -28,6 +28,16 @@ import { useKanbanLayout } from '@/hooks/useKanbanLayout';
 import { useSelectionMode } from '@/hooks/useSelectionMode';
 import { Plus } from 'lucide-react';
 import { SectionErrorBoundary } from '@/components/candidateProfile';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import {
   DndContext,
@@ -702,6 +712,7 @@ const JobDetails = () => {
             criteriaCount={criteriaCount}
             onOpenProfile={handleOpenProfile}
             onMoveToStage={handleMobileMove}
+            onReject={(applicationId) => setRejectTargetIds([applicationId])}
             onMarkAsViewed={markApplicationAsViewed}
             onOpenCriteriaDialog={() => setCriteriaDialogOpen(true)}
             isSelectionMode={isSelectionMode}
@@ -718,6 +729,7 @@ const JobDetails = () => {
                   stages={activeStages}
                   stageSettings={stageSettings}
                   onMoveToStage={bulkMoveToStage}
+                  onReject={() => setRejectTargetIds(Array.from(selectedApplicationIds))}
                 />
               </div>
             ) : undefined}
@@ -863,6 +875,29 @@ const JobDetails = () => {
           }}
         />
 
+        {/* Bekräfta avslag */}
+        <AlertDialog open={!!rejectTargetIds} onOpenChange={(open) => { if (!open) setRejectTargetIds(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {rejectTargetIds && rejectTargetIds.length > 1 ? `Ge avslag till ${rejectTargetIds.length} kandidater` : 'Ge avslag'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Avslaget gäller bara den här annonsen. Kandidatens andra ansökningar påverkas inte, och avslagna kandidater får inget besked igen när annonsen stängs.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Avbryt</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmReject}
+                className="bg-red-500 text-white hover:bg-red-600"
+              >
+                Ge avslag
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Selection Criteria Dialog */}
         {jobId && (
           <SelectionCriteriaDialog
@@ -891,6 +926,7 @@ const JobDetails = () => {
               stages={activeStages}
               stageSettings={stageSettings}
               onMoveToStage={bulkMoveToStage}
+              onReject={() => setRejectTargetIds(Array.from(selectedApplicationIds))}
             />
           </div>
         )}
