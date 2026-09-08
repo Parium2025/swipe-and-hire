@@ -156,6 +156,12 @@ const CandidateRow = memo(function CandidateRow({
           {appliedTime && (
             <span>{appliedTime === 'nu' ? 'Ansökte idag' : `Ansökte för ${appliedTime} sedan`}</span>
           )}
+          {isRejected && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/15 ring-1 ring-inset ring-red-400/30 text-red-300 text-[9px] font-medium">
+              <XCircle className="h-2.5 w-2.5 flex-shrink-0" />
+              Avslagen
+            </span>
+          )}
           {/* AI results appear silently when ready — no "waiting" indicator */}
         </div>
         {/* Criterion badges */}
