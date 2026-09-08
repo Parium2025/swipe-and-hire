@@ -97,6 +97,19 @@ export function ChatView({
 
   const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id, { isVisible: isChatVisible });
 
+  // Kommer man tillbaka till chatten (vyn var dold bakom en annan sida) räknas
+  // den som sedd först nu — då kvitteras den och badgen nollas.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) void markAsRead();
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [markAsRead]);
+
+
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
