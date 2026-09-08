@@ -674,43 +674,54 @@ export function ChatView({
     }
 
     stopTyping(getCurrentUserName());
+
+    // Töm fältet direkt – meddelandebubblan visas optimistiskt, så inget ska
+    // ligga kvar och "hänga" i skrivrutan medan nätverket jobbar.
+    const outgoingText = newMessage.trim();
+    const outgoingFile = pendingFile;
+    setNewMessage('');
+    setPendingFile(null);
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+    textareaRef.current?.focus();
     setSending(true);
 
+    const restoreComposer = () => {
+      setNewMessage((current) => (current.trim() ? current : outgoingText));
+      setPendingFile((current) => current ?? outgoingFile);
+      requestAnimationFrame(autoResizeTextarea);
+    };
+
     try {
-      if (!getIsOnline() && !pendingFile) {
+      if (!getIsOnline() && !outgoingFile) {
         queueMessage({
           recipient_id: candidateUserId || otherMembers[0]?.user_id || '',
-          content: newMessage.trim(),
+          content: outgoingText,
           job_id: conversation.job_id,
           application_id: conversation.application_id,
         });
         toast.info('Meddelandet skickas när du är online igen');
-        setNewMessage('');
-        if (textareaRef.current) textareaRef.current.style.height = 'auto';
       } else {
         // Upload file if pending
         let attachment: { url: string; type: string; name: string } | null = null;
-        if (pendingFile) {
+        if (outgoingFile) {
           setUploadingFile(true);
-          attachment = await uploadFile(pendingFile);
+          attachment = await uploadFile(outgoingFile);
           setUploadingFile(false);
           if (!attachment) {
+            restoreComposer();
             setSending(false);
             return;
           }
         }
 
         await sendMessage(
-          newMessage.trim() || (pendingFile ? `📎 ${pendingFile.name}` : ''),
+          outgoingText || (outgoingFile ? `📎 ${outgoingFile.name}` : ''),
           attachment ? { url: attachment.url, type: attachment.type, name: attachment.name } : undefined,
         );
-        setNewMessage('');
-        setPendingFile(null);
-        if (textareaRef.current) textareaRef.current.style.height = 'auto';
       }
-      textareaRef.current?.focus();
     } catch (error) {
       console.error('Error sending message:', error);
+      restoreComposer();
       toast.error('Kunde inte skicka meddelande');
     } finally {
       setSending(false);
