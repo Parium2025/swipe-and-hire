@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline } from '@/lib/connectivityManager';
-import type { Conversation } from '@/hooks/useConversations';
+import { suppressAutoRead, type Conversation } from '@/hooks/useConversations';
 
 /**
  * Markera en konversation som oläst igen.
@@ -28,6 +28,8 @@ export function useMarkConversationUnread() {
 
       // 1 sekund före senaste meddelandet -> exakt ett oläst
       const newLastRead = new Date(new Date(lastAt).getTime() - 1000).toISOString();
+
+      suppressAutoRead(conversationId);
 
       // Optimistisk uppdatering
       queryClient.setQueryData<Conversation[]>(['conversations', user.id], (prev) => {

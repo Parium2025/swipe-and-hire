@@ -242,6 +242,18 @@ let activeConversationId: string | null = null;
 // tystas notiser för meddelanden man aldrig ser.
 let activeConversationVisible: (() => boolean) | null = null;
 
+// Konversationer som användaren själv markerat som olästa får inte kvitteras
+// automatiskt av en öppen/varmhållen vy — bara av ett medvetet öppnande.
+const autoReadSuppressed = new Set<string>();
+
+export function suppressAutoRead(conversationId: string) {
+  autoReadSuppressed.add(conversationId);
+}
+
+export function clearAutoReadSuppression(conversationId: string) {
+  autoReadSuppressed.delete(conversationId);
+}
+
 function isConversationActivelyViewed(id: string): boolean {
   if (id !== activeConversationId) return false;
   if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return false;
@@ -1127,7 +1139,7 @@ export function useConversationMessages(
           // är sett — kvittera direkt. Ligger vyn dold bakom en annan sida ska
           // det däremot räknas som oläst så notisen kommer fram.
           if (newMessage.sender_id !== user.id && isConversationActivelyViewed(conversationId)) {
-            void markAsReadRef.current?.();
+            void markAsReadRef.current?.({ auto: true });
           }
         }
 
@@ -1171,8 +1183,10 @@ export function useConversationMessages(
 
 
   // Mark conversation as read (optimistic — badge nollställs direkt)
-  const markAsRead = useCallback(async () => {
+  const markAsRead = useCallback(async (options?: { auto?: boolean }) => {
     if (!conversationId || !user) return;
+    // Automatiska kvitton respekterar en manuell "markera som oläst".
+    if (options?.auto && autoReadSuppressed.has(conversationId)) return;
 
     // Optimistisk uppdatering: nollställ unread_count för denna konversation
     // i cache så badgar i sidebar/topnav/Messages uppdateras omedelbart.
@@ -1232,7 +1246,7 @@ export function useConversationMessages(
     const markVisibleConversationRead = () => {
       if (document.visibilityState !== 'visible') return;
       if (!isViewOnScreen()) return;
-      void markAsReadRef.current?.();
+      void markAsReadRef.current?.({ auto: true });
     };
     document.addEventListener('visibilitychange', markVisibleConversationRead);
     window.addEventListener('focus', markVisibleConversationRead);

@@ -21,6 +21,7 @@ import { useOfflineProfileQueue } from '@/hooks/useOfflineProfileQueue';
 import { useOfflineSavedJobsQueue } from '@/hooks/useOfflineSavedJobsQueue';
 import { useOfflineApplicationHideQueue } from '@/hooks/useOfflineApplicationHideQueue';
 import { useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
+import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
 
 export function OfflineQueueRunner() {
   const { user } = useAuth();
@@ -39,6 +40,9 @@ export function OfflineQueueRunner() {
 
   // Arbetsgivarsidan: flytt/betyg/anteckning/borttagning av kandidater
   useCandidateOperationQueue(userId);
+
+  // Massutskick i chatt — måste flushas globalt, inte bara på kandidatsidan.
+  useBulkMessageSync();
 
 
   return null;

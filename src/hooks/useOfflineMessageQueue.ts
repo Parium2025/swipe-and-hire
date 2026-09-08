@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
@@ -63,10 +63,14 @@ function saveQueuedMessages(messages: QueuedMessage[]): boolean {
   return saved;
 }
 
+// Hooken kan vara monterad flera gånger samtidigt (global runner + öppen chatt).
+// Låset måste därför vara delat, annars kan två synkar köra samma kö parallellt
+// och skicka samma meddelande två gånger.
+const syncInProgress = { current: false };
+
 export function useOfflineMessageQueue(userId: string | undefined) {
   const [queue, setQueue] = useState<QueuedMessage[]>([]);
   const [syncing, setSyncing] = useState(false);
-  const syncInProgress = useRef(false);
 
   useEffect(() => {
     if (userId) {

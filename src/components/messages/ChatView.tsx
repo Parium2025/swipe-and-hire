@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useMemo, useEffect, useLayoutEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { prefetchAttachmentImages } from '@/lib/attachmentUrl';
 import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
@@ -103,7 +103,7 @@ export function ChatView({
     const el = rootRef.current;
     if (!el) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) void markAsRead();
+      if (entries.some((e) => e.isIntersecting)) void markAsRead({ auto: true });
     });
     observer.observe(el);
     return () => observer.disconnect();
@@ -199,7 +199,7 @@ export function ChatView({
   // ändring av unread_count får då aldrig kvittera meddelandet i bakgrunden.
   // IntersectionObserver-effekten ovan sköter kvittot när vyn blir synlig igen.
   useEffect(() => {
-    if (isChatVisible()) void markAsRead();
+    if (isChatVisible()) void markAsRead({ auto: true });
   }, [conversation.id, conversation.unread_count, isChatVisible, markAsRead]);
 
   // Reset scroll tracking when switching conversation
@@ -755,12 +755,14 @@ export function ChatView({
     );
   }, [messages]);
 
-  const groupedMessages = messages.reduce((groups, msg) => {
+  // Memoiserad gruppering — annars räknas hela tråden om vid varje tangenttryck
+  // i skrivrutan, vilket ger hack på svagare mobiler i långa konversationer.
+  const groupedMessages = useMemo(() => messages.reduce((groups, msg) => {
     const date = format(new Date(msg.created_at), 'yyyy-MM-dd');
     if (!groups[date]) groups[date] = [];
     groups[date].push(msg);
     return groups;
-  }, {} as Record<string, ConversationMessage[]>);
+  }, {} as Record<string, ConversationMessage[]>), [messages]);
 
   const formatDateHeader = (dateStr: string) => {
     const date = new Date(dateStr);
