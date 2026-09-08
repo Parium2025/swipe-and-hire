@@ -771,13 +771,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchUserData = async (userId: string) => {
+    // 🛡️ Kontobyte: en långsam hämtning för konto A får aldrig skriva över
+    // state som redan hunnit laddas för konto B.
+    const isStale = () =>
+      currentUserIdRef.current !== null && currentUserIdRef.current !== userId;
     try {
       // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
       // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
       // the `authenticated` role to prevent cross-row leakage.
       const { data: profileRows, error: profileError } = await supabase
         .rpc('get_my_profile');
+      if (isStale()) return;
       const profileData = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
+
 
  
       if (profileError) {
