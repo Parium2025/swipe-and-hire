@@ -319,14 +319,21 @@ export function useNotifications() {
     });
     setUnreadCount(0);
 
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false);
 
+    // Gick skrivningen inte igenom ska listan hämtas om i stället för att
+    // visa allt som läst och sprida det till andra enheter.
+    if (error) {
+      await fetchNotifications();
+      return;
+    }
+
     void broadcastRef.current?.send({ type: 'broadcast', event: 'local_read_all', payload: {} });
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   const clearAll = useCallback(async () => {
     if (!user) return;
