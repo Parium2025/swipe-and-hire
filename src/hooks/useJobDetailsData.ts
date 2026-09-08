@@ -34,6 +34,8 @@ export interface JobApplication {
   availability: string;
   applied_at: string;
   status: 'pending' | 'reviewing' | 'interview' | 'offered' | 'hired' | 'rejected';
+  /** Avslagsmarkering per ansökan — kandidaten ligger kvar i sitt steg. */
+  rejected_at: string | null;
   custom_answers: any;
   questions_snapshot?: any;
   viewed_at: string | null;
