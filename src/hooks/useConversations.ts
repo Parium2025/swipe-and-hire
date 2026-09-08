@@ -1050,6 +1050,8 @@ export function useConversationMessages(
     if (!conversationId || !user) return;
 
     activeConversationId = conversationId;
+    activeConversationVisible = isViewOnScreen;
+
 
     const channel = createRealtimeChannel(`messages-${conversationId}`)
       .on(
