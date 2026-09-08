@@ -4,7 +4,7 @@ import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/criteria/C
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCompactTime } from '@/lib/date';
-import { ArrowDown, Clock, Star } from 'lucide-react';
+import { ArrowDown, Clock, Star, XCircle } from 'lucide-react';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
