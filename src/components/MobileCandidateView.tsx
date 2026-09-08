@@ -567,6 +567,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   app={app}
                   onOpen={() => onOpenProfile(app)}
                   onMoveToStage={onMoveToStage}
+                  onReject={onReject}
                   stages={stages}
                   stageSettings={stageSettings}
                   criteriaCount={criteriaCount}
