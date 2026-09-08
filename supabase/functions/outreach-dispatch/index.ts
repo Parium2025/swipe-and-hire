@@ -360,7 +360,7 @@ async function dispatchLog(log: OutreachLog) {
 
       const emailMessageId = null;
 
-      await admin.from('outreach_dispatch_logs').update({
+      await markSent(log.id, {
         status: 'sent',
         sent_at: new Date().toISOString(),
         recipient_email: context.recipientEmail,
@@ -370,7 +370,7 @@ async function dispatchLog(log: OutreachLog) {
           email_message_id: emailMessageId,
         },
         error_message: null,
-      }).eq('id', log.id);
+      });
       return {};
     }
 
