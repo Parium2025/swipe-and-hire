@@ -335,10 +335,16 @@ export function useNotifications() {
     setUnreadCount(0);
     setCache(user.id, []);
 
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .delete()
       .eq('user_id', user.id);
+
+    // Rensningen får inte spridas till andra enheter om den aldrig gick igenom.
+    if (error) {
+      await fetchNotifications();
+      return;
+    }
 
     void broadcastRef.current?.send({ type: 'broadcast', event: 'local_clear', payload: {} });
   }, [user]);

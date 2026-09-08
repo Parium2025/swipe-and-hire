@@ -1055,7 +1055,7 @@ export function useConversationMessages(
   // The realtime handler is created before markAsRead below. Keep the latest
   // callback in a ref so an incoming message can be acknowledged immediately
   // while this conversation is visibly open.
-  const markAsReadRef = useRef<(() => Promise<void>) | null>(null);
+  const markAsReadRef = useRef<((options?: { auto?: boolean }) => Promise<void>) | null>(null);
 
   // Subscribe to realtime messages for this conversation - instant cache update
   useEffect(() => {
