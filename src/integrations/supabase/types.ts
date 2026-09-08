@@ -4260,6 +4260,7 @@ export type Database = {
         Args: { p_conversation_ids?: string[]; p_user_id: string }
         Returns: {
           conversation_id: string
+          counterpart_person_sender_id: string
           last_message_content: string
           last_message_created_at: string
           last_message_is_system: boolean
