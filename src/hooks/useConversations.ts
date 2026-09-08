@@ -98,7 +98,7 @@ export interface Conversation {
 // 🔥 localStorage cache for instant-load
 const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Bump this version when cache structure changes or when we need to invalidate old data
-const CACHE_VERSION = 14; // v14: refresh corrected historical company-message identities
+const CACHE_VERSION = 15; // v15: stabil motpartsidentitet (senaste personliga avsändare)
 
 interface CachedConversations {
   userId: string;

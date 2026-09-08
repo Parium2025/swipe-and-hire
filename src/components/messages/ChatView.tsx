@@ -145,7 +145,12 @@ export function ChatView({
     return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
   };
 
-  const avatarProfile = getConversationAvatarProfile(snapshot, displayMember, conversation.last_message);
+  const avatarProfile = getConversationAvatarProfile(
+    snapshot,
+    displayMember,
+    conversation.last_message,
+    conversation.counterpart_person_sender_id,
+  );
 
   // Use the exact same resolved candidate identity in message bubbles as in
   // the conversation header/list. This preserves frozen application media and
