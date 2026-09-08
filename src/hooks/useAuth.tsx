@@ -1730,6 +1730,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             'job_seeker_applications_',
             'job_seeker_interviews_',
             'parium_my_applications_cache_v2',
+            MY_APPLICATIONS_PERSIST_KEY,
             'parium_conversations_cache',
             'parium_company_logo_url',
             'parium_company_data_cache_v2',
