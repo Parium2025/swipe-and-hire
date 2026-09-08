@@ -19,6 +19,7 @@ import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useJobSeekerWarmupOrchestrator } from '@/hooks/useJobSeekerWarmupOrchestrator';
 import { useSecondaryPagesPrewarm } from '@/hooks/useSecondaryPagesPrewarm';
 import { useDevice } from '@/hooks/use-device';
+import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 
 
 interface JobSeekerLayoutProps {
