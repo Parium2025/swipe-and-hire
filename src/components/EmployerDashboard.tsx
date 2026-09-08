@@ -472,6 +472,32 @@ const EmployerDashboard = memo(() => {
     }
   };
 
+  /**
+   * 📣 Informationsruta vid borttagning: räknar hur många kandidater som
+   * automatiskt får besked om att tjänsten är avslutad. Spegling av
+   * `enqueue_outreach_dispatch` — anställda och redan avslagna hoppas över.
+   * Rent informativt; arbetsgivaren behöver aldrig välja något.
+   */
+  useEffect(() => {
+    const jobId = jobToDelete?.id;
+    if (!deleteDialogOpen || !jobId) {
+      setAutoNotifyCount(null);
+      return;
+    }
+    let cancelled = false;
+    setAutoNotifyCount(null);
+    (async () => {
+      const { count, error } = await supabase
+        .from('job_applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('job_id', jobId)
+        .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
+      if (cancelled) return;
+      setAutoNotifyCount(error ? null : (count ?? 0));
+    })();
+    return () => { cancelled = true; };
+  }, [deleteDialogOpen, jobToDelete?.id]);
+
 
   const handleRepublishClick = (job: JobPosting) => {
     setRepublishJob(job);
