@@ -801,25 +801,15 @@ export default function ProfilePreview() {
               <div className="relative w-[340px] sm:w-[520px] md:w-[700px] max-w-[90vw] rounded-t-xl bg-black p-2 sm:p-3 shadow-2xl">
                 {/* Screen bezel - höjd krympt ~12 % för tajtare proportioner */}
                 <div className="relative w-full h-[176px] sm:h-[264px] md:h-[368px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
-                  {/* Innehållet renderas i en riktig dator-bredd och skalas ned till ramen,
-                      så att man ser hela datorvyn – inte bara profilbilden. */}
-                  <div
-                    className="absolute inset-0 overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
+                  {/* Innehåll med exakt samma preview-struktur som mobilvyn */}
+                  <div 
+                    className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
+                    style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
                   >
-                    <div
-                      className="origin-top-left scale-[0.426] sm:scale-[0.652] md:scale-[0.889]"
-                      style={{ width: 760, height: 412 }}
-                    >
-                      <div
-                        className="h-full w-full overflow-y-auto overflow-x-hidden custom-scrollbar p-5"
-                        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-                      >
-                        <DesktopListView />
-                      </div>
+                    <div className="h-full p-4">
+                      <DesktopListView />
                     </div>
                   </div>
-
                 </div>
               </div>
               
