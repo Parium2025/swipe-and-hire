@@ -736,6 +736,7 @@ export function ChatView({
     } finally {
       setSending(false);
       setUploadingFile(false);
+      sendingRef.current = false;
     }
   };
 
