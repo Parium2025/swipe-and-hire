@@ -303,12 +303,16 @@ export function ChatView({
       let attempts = 0;
 
       const pinBeforeReveal = () => {
-        attempts += 1;
         const currentViewport = getViewportEl();
+        // Vyn kan ligga dold (KeepAlive) — då finns ingen höjd att mäta.
+        // Vänta vidare utan att förbruka försök, annars skulle innehållet
+        // kunna bli permanent osynligt när användaren kommer tillbaka.
         if (!currentViewport || currentViewport.clientHeight === 0) {
-          if (attempts < 30) initialScrollFrameRef.current = requestAnimationFrame(pinBeforeReveal);
+          initialScrollFrameRef.current = requestAnimationFrame(pinBeforeReveal);
           return;
         }
+        attempts += 1;
+
 
         currentViewport.scrollTop = currentViewport.scrollHeight;
         const currentHeight = currentViewport.scrollHeight;
