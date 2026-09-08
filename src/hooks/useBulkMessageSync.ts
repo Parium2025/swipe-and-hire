@@ -65,6 +65,7 @@ function saveBulkQueue(items: QueuedMessage[]) {
  */
 // Delat lås: hooken kan vara monterad både globalt och på kandidatsidan.
 let bulkSyncInProgress = false;
+let retryTimerRef: ReturnType<typeof setTimeout> | null = null;
 
 export function useBulkMessageSync() {
   const { user } = useAuth();
