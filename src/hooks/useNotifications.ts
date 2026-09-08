@@ -290,11 +290,22 @@ export function useNotifications() {
     });
     setUnreadCount(prev => Math.max(0, prev - 1));
 
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('id', notificationId)
       .eq('user_id', user.id);
+
+    // Misslyckas skrivningen (offline/fel) får vyn inte ljuga om att notisen
+    // är läst — återställ den optimistiska ändringen.
+    if (error) {
+      setNotifications(prev => {
+        const reverted = prev.map(n => n.id === notificationId ? { ...n, is_read: false } : n);
+        setCache(user.id, reverted);
+        return reverted;
+      });
+      setUnreadCount(prev => prev + 1);
+    }
   }, [user]);
 
   const markAllAsRead = useCallback(async () => {
