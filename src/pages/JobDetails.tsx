@@ -106,6 +106,8 @@ const JobDetails = () => {
   const [overId, setOverId] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // Avslag per ansökan — bekräftas alltid innan det skickas.
+  const [rejectTargetIds, setRejectTargetIds] = useState<string[] | null>(null);
   
 
   const [criteriaDialogOpen, setCriteriaDialogOpen] = useState(false);
