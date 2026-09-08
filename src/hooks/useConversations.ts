@@ -296,12 +296,20 @@ export function applyIncomingMessageToConversations(
 
   const existing = current[idx];
 
-  // Ignorera out-of-order/duplicerade events
+  // Ignorera duplicerade events
   if (existing.last_message?.id === msg.id) return true;
-  if (
-    existing.last_message_at &&
-    new Date(msg.created_at).getTime() < new Date(existing.last_message_at).getTime()
-  ) {
+
+  // Ett äldre (försenat/offline-köat) meddelande får inte skriva över senaste
+  // meddelandet — men det ska fortfarande räknas som oläst.
+  const isStale =
+    !!existing.last_message_at &&
+    new Date(msg.created_at).getTime() < new Date(existing.last_message_at).getTime();
+  if (isStale) {
+    if (options.incrementUnread && msg.sender_id !== userId) {
+      const bumped = [...current];
+      bumped[idx] = { ...existing, unread_count: (existing.unread_count || 0) + 1 };
+      queryClient.setQueryData<Conversation[]>(key, bumped);
+    }
     return true;
   }
 
