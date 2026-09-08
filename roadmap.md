@@ -6,4 +6,4 @@
 - [x] Granska notiser, push, badges och bakgrundslägen
 - [x] Granska databasregler, funktioner, index och dataintegritet
 - [x] Granska närliggande kritiska flöden utanför chatten
-- [ ] Fixa och verifiera alla bekräftade fel
+- [x] Fixa och verifiera alla bekräftade fel

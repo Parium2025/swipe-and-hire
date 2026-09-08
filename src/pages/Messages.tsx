@@ -140,6 +140,10 @@ export default function Messages() {
   // Handle deep-link: /messages?conversation=<id>
   useEffect(() => {
     const conversationParam = searchParams.get('conversation');
+    if (!conversationParam) {
+      handledDeepLinkRef.current = null;
+      return;
+    }
     if (conversationParam && conversations.length > 0 && handledDeepLinkRef.current !== conversationParam) {
       const exists = conversations.some(c => c.id === conversationParam);
       if (exists) {

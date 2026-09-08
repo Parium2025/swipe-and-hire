@@ -1406,7 +1406,7 @@ export function useConversationMessages(
     } catch (error) {
       // Ett avbrutet svar betyder inte säkert att skrivningen misslyckades.
       // Kontrollera det idempotenta id:t innan den optimistiska bubblan tas bort.
-      const { data: persisted } = await supabase
+      const { data: persisted, error: verifyError } = await supabase
         .from('conversation_messages')
         .select('*')
         .eq('id', messageId)
@@ -1421,7 +1421,9 @@ export function useConversationMessages(
         );
         return;
       }
-      if (attachment) {
+      // Städa bara när databasen bekräftat att raden saknas. Vid ett tvetydigt
+      // nätverksfel behålls filen så en faktiskt sparad rad aldrig bryts.
+      if (!verifyError && attachment) {
         const path = extractAttachmentPath(attachment.url);
         if (path) {
           await supabase.storage.from('message-attachments').remove([path]).catch(() => undefined);
