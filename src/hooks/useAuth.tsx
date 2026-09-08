@@ -1019,6 +1019,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         rolePromise,
         orgPromise
       ]);
+      if (isStale()) return;
+
 
       const { data: roleData, error: roleError } = roleResult;
       const profileRole = profileData?.role as UserRole | undefined;
@@ -1062,6 +1064,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .select('*')
           .eq('id', membershipOrgId)
           .maybeSingle();
+        if (isStale()) return;
+
 
         if (orgError) {
           console.error('Error fetching organization:', orgError);
