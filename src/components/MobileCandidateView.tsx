@@ -277,6 +277,7 @@ interface MobileCandidateViewProps {
   criteriaCount: number;
   onOpenProfile: (app: JobApplication) => void;
   onMoveToStage: (appId: string, stage: string) => void;
+  onReject?: (appId: string) => void;
   onMarkAsViewed: (id: string) => void;
   onOpenCriteriaDialog?: () => void;
   isSelectionMode?: boolean;
