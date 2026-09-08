@@ -707,7 +707,7 @@ export function useConversations() {
           //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
           //    istället för en full omhämtning.
           const patched = applyIncomingMessageToConversations(queryClient, user.id, msg, {
-            incrementUnread: msg.conversation_id !== activeConversationId,
+            incrementUnread: !isConversationActivelyViewed(msg.conversation_id),
           });
 
           if (patched) return;
