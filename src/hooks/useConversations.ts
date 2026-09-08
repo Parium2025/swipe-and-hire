@@ -237,6 +237,18 @@ function mergeConversationsWithLastKnownIdentity(
 // mellan den globala kanalen och konversationskanalen).
 let activeConversationId: string | null = null;
 
+// Chatten kan ligga kvar monterad men dold (t.ex. när man bytt sida). Då är
+// den inte sedd — därför måste "aktiv" betyda synlig på skärmen, annars
+// tystas notiser för meddelanden man aldrig ser.
+let activeConversationVisible: (() => boolean) | null = null;
+
+function isConversationActivelyViewed(id: string): boolean {
+  if (id !== activeConversationId) return false;
+  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return false;
+  return activeConversationVisible ? activeConversationVisible() : true;
+}
+
+
 // Minimal shape of a realtime INSERT on conversation_messages
 export interface IncomingRealtimeMessage {
   id: string;
