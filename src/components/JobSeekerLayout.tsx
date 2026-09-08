@@ -96,6 +96,8 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const device = useDevice();
+  // Chattens fullhöjdsläge släpps först när vybytet är klart (annars klipps chatten).
+  const isMessagesChrome = useMessagesChrome();
   
   // Desktop uses top nav, mobile/tablet uses sidebar
   const isDesktop = device === 'desktop';
