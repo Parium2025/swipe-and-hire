@@ -312,11 +312,14 @@ const JobDetails = () => {
   const applicationsByStatus = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
     activeStages.forEach(stage => { result[stage] = []; });
-    result['rejected'] = [];
-    
+
     applications.forEach(app => {
-      if (result[app.status]) {
-        result[app.status].push(app);
+      // Äldre avslag sparades som status 'rejected' och har ingen egen kolumn —
+      // visa dem i första steget med sin "Avslagen"-markering i stället för att
+      // låta dem försvinna ur vyn. Nya avslag rör aldrig statusen (rejected_at).
+      const bucket = app.status === 'rejected' ? activeStages[0] : app.status;
+      if (bucket && result[bucket]) {
+        result[bucket].push(app);
       } else {
         const firstStage = activeStages[0];
         if (firstStage) {
@@ -328,11 +331,11 @@ const JobDetails = () => {
   }, [applications, activeStages]);
 
   // Serverns totaler är nycklade på rå status. Kort med en status som inte
-  // längre finns som steg visas i första kolumnen — då måste deras total
-  // följa med dit, annars visar kolumnen färre än antalet kort.
+  // längre finns som steg (inkl. äldre 'rejected') visas i första kolumnen —
+  // då måste deras total följa med dit, annars visar kolumnen färre än antalet kort.
   const normalizedStageTotals = useMemo(() => {
     if (!stageTotals) return null;
-    const known = new Set([...activeStages, 'rejected']);
+    const known = new Set(activeStages);
     const out: Record<string, number> = {};
     const firstStage = activeStages[0];
     Object.entries(stageTotals).forEach(([status, count]) => {
