@@ -67,6 +67,9 @@ const CandidateRow = memo(function CandidateRow({
   const criterionResults = app.criterionResults || [];
   const hasResults = criterionResults.length > 0;
   const needsEvaluation = criteriaCount > 0 && !hasResults;
+  // Avslag är en markering per annons — kandidaten ligger kvar i sitt steg
+  // och kan flyttas som vanligt, men får tydlig etikett och inga avslutsutskick.
+  const isRejected = !!app.rejected_at || app.status === 'rejected';
 
   const rowRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
