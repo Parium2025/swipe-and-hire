@@ -402,7 +402,7 @@ async function dispatchLog(log: OutreachLog) {
       });
 
       if (!response.ok) throw new Error(await response.text());
-      await admin.from('outreach_dispatch_logs').update({ status: 'sent', sent_at: new Date().toISOString(), error_message: null }).eq('id', log.id);
+      await markSent(log.id, { status: 'sent', sent_at: new Date().toISOString(), error_message: null });
       return {};
     }
   } catch (error) {
