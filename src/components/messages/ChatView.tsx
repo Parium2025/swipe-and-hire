@@ -746,11 +746,7 @@ export function ChatView({
             size="md"
             className={cn(
               "border-2",
-              conversation.is_group
-                ? ""
-                : category === 'candidates'
-                  ? "border-emerald-500/50"
-                  : "border-blue-500/50"
+              !conversation.is_group && "border-white/40"
             )}
           />
         )}
