@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { readCandidateCounts, writeCandidateCounts } from '@/lib/candidateCountsCache';
 
 /**
  * Sanna antal per steg (kolumn) i "Mina kandidater".
@@ -9,15 +10,19 @@ import { useAuth } from '@/hooks/useAuth';
  * vilket kröp uppåt medan sidorna trillade in. Den här hooken hämtar det
  * verkliga antalet i ETT anrop så badgen är korrekt från första sekunden —
  * oavsett om kolumnen innehåller 3 eller 3 000 kandidater.
+ *
+ * Senast kända siffror sparas lokalt så de syns direkt vid kallstart.
  */
 export function useMyCandidateStageCounts(listId: string | null, enabled = true) {
   const { user } = useAuth();
+  const scope = `stages_${listId ?? 'all'}`;
 
   const { data } = useQuery({
     queryKey: ['my-candidates-stage-counts', user?.id, listId],
     enabled: !!user && enabled,
     staleTime: 30_000,
     gcTime: 10 * 60_000,
+    placeholderData: () => readCandidateCounts(scope, user?.id) ?? undefined,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('count_my_candidates_per_stage', {
         p_list_id: listId,
@@ -27,6 +32,7 @@ export function useMyCandidateStageCounts(listId: string | null, enabled = true)
       for (const row of (data || []) as Array<{ stage: string; candidate_count: number }>) {
         counts[row.stage] = Number(row.candidate_count) || 0;
       }
+      writeCandidateCounts(scope, user?.id, counts);
       return counts;
     },
   });
