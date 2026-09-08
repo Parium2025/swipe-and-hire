@@ -98,7 +98,7 @@ export function getConversationDisplayName(opts: {
   }
 
 
-  const personProfile = counterpartPersonProfile(displayMember, lastMessage);
+  const personProfile = counterpartPersonProfile(displayMember, lastMessage, counterpartPersonSenderId);
   if (personProfile) return buildFullName(personProfile.first_name, personProfile.last_name);
 
   if (!displayMember?.profile) return 'Okänd användare';
@@ -123,6 +123,7 @@ export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
   lastMessage?: LastMessageIdentity,
+  counterpartPersonSenderId?: string | null,
 ): ProfileLike | undefined {
   if (snapshotDescribesCounterpart(snapshot, displayMember)) {
     const liveProfile = displayMember?.profile;
@@ -141,7 +142,7 @@ export function getConversationAvatarProfile(
 
 
 
-  const personProfile = counterpartPersonProfile(displayMember, lastMessage);
+  const personProfile = counterpartPersonProfile(displayMember, lastMessage, counterpartPersonSenderId);
   if (personProfile) return personProfile;
 
   // No snapshot — use live profile
