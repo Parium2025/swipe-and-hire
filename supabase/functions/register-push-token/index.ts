@@ -60,6 +60,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Samma fysiska enhet får aldrig ligga kvar aktiv på ett tidigare konto —
+    // annars fortsätter förra användaren få notiser för den nya inloggningen.
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (serviceKey) {
+      const admin = createClient(supabaseUrl, serviceKey);
+      const { error: deactivateError } = await admin
+        .from("device_push_tokens")
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq("token", token)
+        .neq("user_id", user.id)
+        .eq("is_active", true);
+      if (deactivateError) {
+        console.error("Failed to deactivate token on other accounts:", deactivateError);
+      }
+    }
+
     // Upsert the token (update if exists, insert if not)
     const { data, error } = await supabase
       .from("device_push_tokens")
