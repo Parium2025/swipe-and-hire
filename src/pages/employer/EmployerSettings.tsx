@@ -1,5 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
@@ -32,6 +32,12 @@ const EmployerSettings = () => {
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
   const [openSection, setOpenSection] = useState<string>('');
+  // Dragspelet monteras om när sidan lämnas. Sidan ligger kvar i minnet
+  // (KeepAlive), så utan detta ligger en öppen sektion kvar och "blixtrar"
+  // fram när man kommer tillbaka. Nyckelbytet sker medan vyn är dold, före
+  // paint, så återkomsten alltid är ett rent, hopfällt läge utan animation.
+  const [accordionKey, setAccordionKey] = useState(0);
+  const wasAwayRef = useRef(false);
 
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
   // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
@@ -39,13 +45,16 @@ const EmployerSettings = () => {
     prewarmEmployerSettings(user?.id);
   }, [user?.id]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (location.pathname !== '/settings') {
+      wasAwayRef.current = true;
       setOpenSection('');
+      setAccordionKey((key) => key + 1);
       return;
     }
 
     if (location.hash === '#notifications') {
+      wasAwayRef.current = false;
       setOpenSection('notifications');
       const frame = requestAnimationFrame(() => {
         notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -53,7 +62,10 @@ const EmployerSettings = () => {
       return () => cancelAnimationFrame(frame);
     }
 
-    setOpenSection('');
+    if (wasAwayRef.current) {
+      wasAwayRef.current = false;
+      setOpenSection('');
+    }
   }, [location.pathname, location.hash]);
 
 
@@ -190,6 +202,7 @@ const EmployerSettings = () => {
       </div>
 
       <Accordion
+        key={accordionKey}
         type="single"
         collapsible
         value={openSection}

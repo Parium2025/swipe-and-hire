@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import SettingsPanel from '@/components/employer/settings/SettingsPanel';
+
 import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel, type AutoRuleEvent } from '@/lib/outreachAutoRules';
 import { backfillMissingAutoRuleEvents, seedDefaultAutoRules } from '@/lib/outreachSeedDefaults';
 import { notifyOutreachStudioUpdated, OUTREACH_STUDIO_UPDATED_EVENT } from '@/lib/outreachStudioCache';
@@ -308,7 +308,7 @@ export function AutoMessagesPanel() {
   };
 
   return (
-    <SettingsPanel>
+    <div>
       <div className="space-y-5 md:space-y-4">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-white" />
@@ -431,7 +431,7 @@ export function AutoMessagesPanel() {
           </div>
         )}
       </div>
-    </SettingsPanel>
+    </div>
   );
 }
 
