@@ -30,16 +30,20 @@ export function useTypingIndicator(conversationId: string | null) {
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
         const typing: TypingUser[] = [];
-        
+
         Object.entries(state).forEach(([userId, presences]) => {
-          if (userId !== user.id && Array.isArray(presences) && presences.length > 0) {
-            const presence = presences[0] as { is_typing?: boolean; name?: string };
-            if (presence.is_typing) {
-              typing.push({
-                id: userId,
-                name: presence.name || 'Någon',
-              });
-            }
+          if (userId === user.id || !Array.isArray(presences)) return;
+          // Samma användare kan vara inloggad på flera enheter/flikar samtidigt.
+          // Varje session lägger en egen meta i listan — den första kan vara en
+          // passiv session (is_typing=false). Kolla ALLA metas, annars missas
+          // skrivandet när en passiv flik råkar ligga först.
+          const typingMeta = (presences as { is_typing?: boolean; name?: string }[])
+            .find(p => p.is_typing);
+          if (typingMeta) {
+            typing.push({
+              id: userId,
+              name: typingMeta.name || 'Någon',
+            });
           }
         });
         
