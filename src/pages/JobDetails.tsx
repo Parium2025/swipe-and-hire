@@ -229,8 +229,17 @@ const JobDetails = () => {
     [activeStages]
   );
 
+  // Avslag och "Anställd" kan aldrig gälla samtidigt. Databasen rensar
+  // avslagsmarkeringen automatiskt vid anställning — här speglar vi det
+  // direkt lokalt så kortet aldrig visar "Avslagen" i Anställd-kolumnen.
+  const stagePatch = useCallback((stage: string): Partial<JobApplication> => (
+    stage === 'hired'
+      ? { status: stage as JobApplication['status'], rejected_at: null }
+      : { status: stage as JobApplication['status'] }
+  ), []);
+
   const updateApplicationStatus = useCallback(async (applicationId: string, newStatus: string) => {
-    updateApplicationLocally(applicationId, { status: newStatus as JobApplication['status'] });
+    updateApplicationLocally(applicationId, stagePatch(newStatus));
 
     try {
       const { data, error } = await supabase
