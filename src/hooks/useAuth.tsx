@@ -22,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { unregisterCurrentDeviceToken } from '@/lib/pushNotificationService';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
