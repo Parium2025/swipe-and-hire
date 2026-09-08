@@ -86,7 +86,17 @@ export function ChatView({
   currentUserRole,
   category,
 }: ChatViewProps) {
-  const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
+  // Chatten hålls monterad även när man går till en annan sida (KeepAlive döljer
+  // den med display:none). Då är den INTE sedd — läskvitton och notiser måste
+  // därför styras av om vyn faktiskt syns på skärmen, inte av att den finns.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const isChatVisible = useCallback(
+    () => !!rootRef.current && rootRef.current.offsetParent !== null,
+    [],
+  );
+
+  const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id, { isVisible: isChatVisible });
+
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
