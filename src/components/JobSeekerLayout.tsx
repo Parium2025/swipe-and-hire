@@ -19,6 +19,7 @@ import { useJobSeekerBackgroundSync } from '@/hooks/useJobSeekerBackgroundSync';
 import { useJobSeekerWarmupOrchestrator } from '@/hooks/useJobSeekerWarmupOrchestrator';
 import { useSecondaryPagesPrewarm } from '@/hooks/useSecondaryPagesPrewarm';
 import { useDevice } from '@/hooks/use-device';
+import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 
 
 interface JobSeekerLayoutProps {
@@ -95,6 +96,8 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const device = useDevice();
+  // Chattens fullhöjdsläge släpps först när vybytet är klart (annars klipps chatten).
+  const isMessagesChrome = useMessagesChrome();
   
   // Desktop uses top nav, mobile/tablet uses sidebar
   const isDesktop = device === 'desktop';
@@ -229,17 +232,17 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
           
           <main
             data-main-scroll-container="true"
-            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${location.pathname === '/messages' ? 'no-chrome-pad' : 'pb-8'}`}
+            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${isMessagesChrome ? 'no-chrome-pad' : 'pb-8'}`}
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',
-              paddingBottom: location.pathname === '/messages'
+              paddingBottom: isMessagesChrome
                 ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
                 : undefined,
             }}
           >
             {children}
-            <div aria-hidden="true" style={{ flexShrink: 0, height: location.pathname === '/messages' ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
+            <div aria-hidden="true" style={{ flexShrink: 0, height: isMessagesChrome ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
 
           </main>
           {overlay}

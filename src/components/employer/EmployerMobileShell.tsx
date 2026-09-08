@@ -1,5 +1,6 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import EmployerSidebar from '@/components/EmployerSidebar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -28,8 +29,8 @@ const EmployerMobileShell = ({
 }: EmployerMobileShellProps) => {
   const navigate = useNavigate();
   // Chattsidan är en fullhöjdsvy — extra bottenutrymme skulle lämna en tom yta.
-  const { pathname } = useLocation();
-  const isMessages = pathname.startsWith('/messages');
+  // Flaggan släpps först när vybytet är klart, annars klipps chatten mitt i övergången.
+  const isMessages = useMessagesChrome();
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
