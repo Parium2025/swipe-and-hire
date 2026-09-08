@@ -945,6 +945,18 @@ export function useConversationMessages(
   const loadingOlderRef = useRef(false);
   const prevConversationIdRef = useRef(conversationId);
 
+  // Modulens synlighets-/manuell-oläst-status får aldrig följa med till ett
+  // annat konto i samma flik.
+  useEffect(() => {
+    return () => {
+      if (activeConversationId === conversationId) {
+        activeConversationId = null;
+        activeConversationVisible = null;
+      }
+      if (conversationId) autoReadSuppressed.delete(conversationId);
+    };
+  }, [conversationId, user?.id]);
+
 
   // Reset hasMore synchronously when conversation changes (before render)
   if (conversationId !== prevConversationIdRef.current) {
@@ -1232,7 +1244,12 @@ export function useConversationMessages(
 
     if (!getIsOnline()) return; // Silent fail for mark as read - non-critical
 
-    const readAt = new Date().toISOString();
+    // Kvittera exakt det senaste meddelande som faktiskt fanns på skärmen när
+    // läsningen startade. Ett nytt meddelande under retry-loopen ska förbli oläst.
+    const visibleMessages = queryClient.getQueryData<ConversationMessage[]>(
+      ['conversation-messages', conversationId],
+    );
+    const readAt = visibleMessages?.[visibleMessages.length - 1]?.created_at ?? new Date().toISOString();
     let lastError: unknown = null;
 
     // Lässtatus är liten men viktig data. Databasklienten returnerar ofta fel i

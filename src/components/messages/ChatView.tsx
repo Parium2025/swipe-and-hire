@@ -69,8 +69,6 @@ import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const MESSAGES_PAGE_SIZE = 200;
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-
 interface ChatViewProps {
   conversation: Conversation;
   currentUserId: string;
@@ -678,6 +676,15 @@ export function ChatView({
     // ligga kvar och "hänga" i skrivrutan medan nätverket jobbar.
     const outgoingText = newMessage.trim();
     const outgoingFile = pendingFile;
+
+    // Bilageblobbar kan inte lagras säkert i textkön. Behåll fil och text i
+    // kompositören i stället för att ge sken av att den har köats offline.
+    if (!getIsOnline() && outgoingFile) {
+      toast.info('Anslut till internet för att skicka bilagan');
+      sendingRef.current = false;
+      return;
+    }
+
     setNewMessage('');
     setPendingFile(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';

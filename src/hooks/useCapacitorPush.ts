@@ -6,7 +6,7 @@ import {
   getPlatform,
   initializePushNotifications,
   setupPushListeners,
-  unregisterAllTokens,
+  unregisterCurrentDeviceToken,
 } from '@/lib/pushNotificationService';
 
 interface UseCapacitorPushOptions {
@@ -67,7 +67,7 @@ export function useCapacitorPush(options: UseCapacitorPushOptions = {}) {
    */
   const cleanup = useCallback(async () => {
     if (user?.id) {
-      await unregisterAllTokens(user.id);
+      await unregisterCurrentDeviceToken(user.id);
     }
     if (cleanupRef.current) {
       cleanupRef.current();

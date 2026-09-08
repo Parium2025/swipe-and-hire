@@ -27,9 +27,10 @@ export function useMessageReactions(conversationId: string | null) {
   // We depend on the messages query being loaded first to get message IDs
   const messagesData = queryClient.getQueryData<any[]>(['conversation-messages', conversationId]);
   const messageIds = messagesData?.map((m: any) => m.id).filter((id: string) => !id.startsWith('temp-')) || [];
+  const messageIdsKey = messageIds.join(',');
 
   const reactionsQuery = useQuery({
-    queryKey: ['message-reactions', conversationId, messageIds.length],
+    queryKey: ['message-reactions', conversationId, messageIdsKey],
     queryFn: async () => {
       if (!conversationId || messageIds.length === 0) return [];
 
