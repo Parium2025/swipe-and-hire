@@ -96,6 +96,25 @@ const EMPLOYER_CANDIDATES_CACHE_KEY = 'parium_employer_candidates';
 const COMPANY_REVIEWS_COUNT_CACHE_KEY = 'parium_company_reviews_count';
 const COMPANY_LOGO_CACHE_KEY = 'parium_company_logo_url';
 const MY_APPLICATIONS_CACHE_KEY = 'parium_my_applications';
+// 🧊 Kallstart: sessionStorage töms när fliken/appen stängs. Vi speglar därför
+// siffran i localStorage också (samma mönster som chatt-badgen), så sidomenyn
+// visar rätt antal direkt vid kallstart i stället för 0.
+const MY_APPLICATIONS_PERSIST_KEY = 'parium_my_applications_persist';
+
+function readMyApplicationsCache(): number {
+  try {
+    if (typeof window === 'undefined') return 0;
+    const session = sessionStorage.getItem(MY_APPLICATIONS_CACHE_KEY);
+    const raw = session ?? localStorage.getItem(MY_APPLICATIONS_PERSIST_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  } catch { return 0; }
+}
+
+function writeMyApplicationsCache(count: number): void {
+  try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(count)); } catch { /* ignore */ }
+  try { localStorage.setItem(MY_APPLICATIONS_PERSIST_KEY, String(count)); } catch { /* ignore */ }
+}
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates';
 
 interface AuthContextType {
@@ -290,12 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
-  const [preloadedMyApplications, setPreloadedMyApplications] = useState<number>(() => {
-    try {
-      const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_APPLICATIONS_CACHE_KEY) : null;
-      return cached ? parseInt(cached, 10) : 0;
-    } catch { return 0; }
-  });
+  const [preloadedMyApplications, setPreloadedMyApplications] = useState<number>(() => readMyApplicationsCache());
   const [preloadedMyCandidates, setPreloadedMyCandidates] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(MY_CANDIDATES_CACHE_KEY) : null;
@@ -1716,6 +1730,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             'job_seeker_applications_',
             'job_seeker_interviews_',
             'parium_my_applications_cache_v2',
+            MY_APPLICATIONS_PERSIST_KEY,
             'parium_conversations_cache',
             'parium_company_logo_url',
             'parium_company_data_cache_v2',
@@ -2061,15 +2076,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         writeUnreadBadgeCache(jsUnread);
 
-        // Hämta antal ansökningar för jobbsökare
+        // Hämta antal ansökningar för jobbsökare.
+        // 🔗 Exakt samma filtrering som listan (dolda ansökningar räknas inte),
+        // annars visade sidomenyn ett högre tal än sidan själv.
         const { count: myApplications } = await supabase
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
-          .eq('applicant_id', user.id);
-        
+          .eq('applicant_id', user.id)
+          .is('hidden_by_applicant_at', null);
+
         const appCount = myApplications || 0;
         setPreloadedMyApplications(appCount);
-        try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
+        writeMyApplicationsCache(appCount);
       }
     } catch (err) {
       // Silent error handling
@@ -2089,6 +2107,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener('parium:saved-jobs-count', handler);
     return () => window.removeEventListener('parium:saved-jobs-count', handler);
+  }, []);
+
+  // 🔗 Samma spegling för Mina ansökningar → sidomenyns siffra uppdateras direkt
+  // när man söker eller döljer en ansökan, utan att vänta på en ny count-query.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const count = (e as CustomEvent<{ count?: number }>).detail?.count;
+      if (typeof count !== 'number' || !Number.isFinite(count) || count < 0) return;
+      setPreloadedMyApplications(count);
+      writeMyApplicationsCache(count);
+    };
+    window.addEventListener('parium:my-applications-count', handler);
+    return () => window.removeEventListener('parium:my-applications-count', handler);
   }, []);
 
   // Funktion för att uppdatera employer stats (används av realtime + initial load)

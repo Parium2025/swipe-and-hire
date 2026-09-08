@@ -154,6 +154,15 @@ export function useMyApplicationsCache() {
   // Only show loading if we have no data at all (no placeholder, no fetched data)
   const isLoading = queryLoading && applications.length === 0;
 
+  // 🔢 Håll sidomenyns siffra exakt i takt med listan (även optimistiska ändringar),
+  // samma mönster som sparade jobb. Utan detta kunde badgen visa ett gammalt tal.
+  useEffect(() => {
+    if (!user?.id || queryLoading) return;
+    window.dispatchEvent(
+      new CustomEvent('parium:my-applications-count', { detail: { count: applications.length } }),
+    );
+  }, [user?.id, queryLoading, applications.length]);
+
   // 🖼️ Preload job images (mobile + desktop variants) into the blob cache
   // as soon as data is available. Guarantees both tabs — "Under granskning"
   // AND "Utgångna" — render instantly, no blink when switching tabs.
