@@ -194,13 +194,13 @@ export function ChatView({
     ? new Date(otherMembers[0].last_read_at)
     : null;
 
-  // Mark as read when opening
-  // Alltid markera som läst när chatten öppnas – även när unread_count redan
-  // är 0 lokalt. Annars uppdateras aldrig vårt last_read_at och motparten får
-  // inga blå dubbelbockar.
+  // Markera bara som läst när chatten faktiskt syns. KeepAlive låter den valda
+  // konversationen vara monterad efter att användaren lämnat /messages; en
+  // ändring av unread_count får då aldrig kvittera meddelandet i bakgrunden.
+  // IntersectionObserver-effekten ovan sköter kvittot när vyn blir synlig igen.
   useEffect(() => {
-    markAsRead();
-  }, [conversation.id, conversation.unread_count, markAsRead]);
+    if (isChatVisible()) void markAsRead();
+  }, [conversation.id, conversation.unread_count, isChatVisible, markAsRead]);
 
   // Reset scroll tracking when switching conversation
   /** Stänger sökfältet och nollställer alla träffar. */
