@@ -75,6 +75,11 @@ const EmployerDashboard = memo(() => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  // Antal kandidater som automatiskt får besked när annonsen avslutas.
+  // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
+  // samma regel som databasens utskickstrigger använder.
+  const [autoNotifyCount, setAutoNotifyCount] = useState<number | null>(null);
+
 
   const [editRepublishMode, setEditRepublishMode] = useState(false);
   const [pendingEditJobId, setPendingEditJobId] = useState<string | null>(null);
