@@ -290,11 +290,22 @@ export function useNotifications() {
     });
     setUnreadCount(prev => Math.max(0, prev - 1));
 
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('id', notificationId)
       .eq('user_id', user.id);
+
+    // Misslyckas skrivningen (offline/fel) får vyn inte ljuga om att notisen
+    // är läst — återställ den optimistiska ändringen.
+    if (error) {
+      setNotifications(prev => {
+        const reverted = prev.map(n => n.id === notificationId ? { ...n, is_read: false } : n);
+        setCache(user.id, reverted);
+        return reverted;
+      });
+      setUnreadCount(prev => prev + 1);
+    }
   }, [user]);
 
   const markAllAsRead = useCallback(async () => {
@@ -308,14 +319,21 @@ export function useNotifications() {
     });
     setUnreadCount(0);
 
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false);
 
+    // Gick skrivningen inte igenom ska listan hämtas om i stället för att
+    // visa allt som läst och sprida det till andra enheter.
+    if (error) {
+      await fetchNotifications();
+      return;
+    }
+
     void broadcastRef.current?.send({ type: 'broadcast', event: 'local_read_all', payload: {} });
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   const clearAll = useCallback(async () => {
     if (!user) return;
@@ -324,13 +342,19 @@ export function useNotifications() {
     setUnreadCount(0);
     setCache(user.id, []);
 
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .delete()
       .eq('user_id', user.id);
 
+    // Rensningen får inte spridas till andra enheter om den aldrig gick igenom.
+    if (error) {
+      await fetchNotifications();
+      return;
+    }
+
     void broadcastRef.current?.send({ type: 'broadcast', event: 'local_clear', payload: {} });
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   return {
     notifications,

@@ -194,6 +194,9 @@ export function useTypingIndicator(conversationId: string | null) {
     channelRef.current = channel;
 
     return () => {
+      // Skrivstatus hör till EN konversation. Utan nollställning här skickas
+      // "skriver…" vidare till nästa chatt så fort dess kanal blir redo.
+      localTypingRef.current = { isTyping: false, name: localTypingRef.current.name };
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
