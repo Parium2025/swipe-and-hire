@@ -86,7 +86,30 @@ export function ChatView({
   currentUserRole,
   category,
 }: ChatViewProps) {
-  const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id);
+  // Chatten hålls monterad även när man går till en annan sida (KeepAlive döljer
+  // den med display:none). Då är den INTE sedd — läskvitton och notiser måste
+  // därför styras av om vyn faktiskt syns på skärmen, inte av att den finns.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const isChatVisible = useCallback(
+    () => !!rootRef.current && rootRef.current.offsetParent !== null,
+    [],
+  );
+
+  const { messages, isLoading, isError, refetch, sendMessage, editMessage, markAsRead, fetchOlderMessages, hasMore, loadingOlder } = useConversationMessages(conversation.id, { isVisible: isChatVisible });
+
+  // Kommer man tillbaka till chatten (vyn var dold bakom en annan sida) räknas
+  // den som sedd först nu — då kvitteras den och badgen nollas.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) void markAsRead();
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [markAsRead]);
+
+
   const { getReactionsForMessage, toggleReaction } = useMessageReactions(conversation.id);
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator(conversation.id);
   const { queueMessage } = useOfflineMessageQueue(currentUserId || undefined);
@@ -725,7 +748,8 @@ export function ChatView({
   const currentSearchMatchId = searchMatchIds[searchIndex] || null;
 
   return (
-    <div className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
+    <div ref={rootRef} className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
+
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/20 flex-shrink-0">
         <button

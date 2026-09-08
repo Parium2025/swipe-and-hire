@@ -237,6 +237,18 @@ function mergeConversationsWithLastKnownIdentity(
 // mellan den globala kanalen och konversationskanalen).
 let activeConversationId: string | null = null;
 
+// Chatten kan ligga kvar monterad men dold (t.ex. när man bytt sida). Då är
+// den inte sedd — därför måste "aktiv" betyda synlig på skärmen, annars
+// tystas notiser för meddelanden man aldrig ser.
+let activeConversationVisible: (() => boolean) | null = null;
+
+function isConversationActivelyViewed(id: string): boolean {
+  if (id !== activeConversationId) return false;
+  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return false;
+  return activeConversationVisible ? activeConversationVisible() : true;
+}
+
+
 // Minimal shape of a realtime INSERT on conversation_messages
 export interface IncomingRealtimeMessage {
   id: string;
@@ -695,7 +707,7 @@ export function useConversations() {
           //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
           //    istället för en full omhämtning.
           const patched = applyIncomingMessageToConversations(queryClient, user.id, msg, {
-            incrementUnread: msg.conversation_id !== activeConversationId,
+            incrementUnread: !isConversationActivelyViewed(msg.conversation_id),
           });
 
           if (patched) return;
@@ -893,7 +905,17 @@ export function useConversations() {
 
 const MESSAGES_PAGE_SIZE = 200;
 
-export function useConversationMessages(conversationId: string | null) {
+export function useConversationMessages(
+  conversationId: string | null,
+  options?: { isVisible?: () => boolean },
+) {
+  const isVisibleRef = useRef(options?.isVisible);
+  isVisibleRef.current = options?.isVisible;
+  const isViewOnScreen = useCallback(
+    () => (isVisibleRef.current ? isVisibleRef.current() : true),
+    [],
+  );
+
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [hasMore, setHasMore] = useState(false);
@@ -1028,6 +1050,8 @@ export function useConversationMessages(conversationId: string | null) {
     if (!conversationId || !user) return;
 
     activeConversationId = conversationId;
+    activeConversationVisible = isViewOnScreen;
+
 
     const channel = createRealtimeChannel(`messages-${conversationId}`)
       .on(
@@ -1094,13 +1118,15 @@ export function useConversationMessages(conversationId: string | null) {
             queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
           }
 
-          // A message received while the open chat is visible has actually been
-          // seen. Persist that read state immediately instead of waiting for the
-          // user to leave and reopen the conversation.
-          if (newMessage.sender_id !== user.id && document.visibilityState === 'visible') {
+          
+          // Ett meddelande som kommer in medan chatten faktiskt syns på skärmen
+          // är sett — kvittera direkt. Ligger vyn dold bakom en annan sida ska
+          // det däremot räknas som oläst så notisen kommer fram.
+          if (newMessage.sender_id !== user.id && isConversationActivelyViewed(conversationId)) {
             void markAsReadRef.current?.();
           }
         }
+
       )
       .on(
         'postgres_changes',
@@ -1131,10 +1157,14 @@ export function useConversationMessages(conversationId: string | null) {
       .subscribe();
 
     return () => {
-      if (activeConversationId === conversationId) activeConversationId = null;
+      if (activeConversationId === conversationId) {
+        activeConversationId = null;
+        activeConversationVisible = null;
+      }
       supabase.removeChannel(channel);
     };
-  }, [conversationId, user, queryClient]);
+  }, [conversationId, user, queryClient, isViewOnScreen]);
+
 
   // Mark conversation as read (optimistic — badge nollställs direkt)
   const markAsRead = useCallback(async () => {
@@ -1196,7 +1226,9 @@ export function useConversationMessages(conversationId: string | null) {
   // the user returns to the still-open conversation.
   useEffect(() => {
     const markVisibleConversationRead = () => {
-      if (document.visibilityState === 'visible') void markAsReadRef.current?.();
+      if (document.visibilityState !== 'visible') return;
+      if (!isViewOnScreen()) return;
+      void markAsReadRef.current?.();
     };
     document.addEventListener('visibilitychange', markVisibleConversationRead);
     window.addEventListener('focus', markVisibleConversationRead);
@@ -1204,7 +1236,8 @@ export function useConversationMessages(conversationId: string | null) {
       document.removeEventListener('visibilitychange', markVisibleConversationRead);
       window.removeEventListener('focus', markVisibleConversationRead);
     };
-  }, [conversationId]);
+  }, [conversationId, isViewOnScreen]);
+
 
   // Edit an existing message
   const editMessage = useCallback(async (messageId: string, newContent: string) => {
