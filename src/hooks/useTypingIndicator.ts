@@ -14,6 +14,7 @@ export function useTypingIndicator(conversationId: string | null) {
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const remoteTypingTimeoutsRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const localTypingRef = useRef({ isTyping: false, name: '' });
 
   const setRemoteTyping = useCallback((remoteUser: TypingUser, isTyping: boolean) => {
     const existingTimeout = remoteTypingTimeoutsRef.current.get(remoteUser.id);
@@ -65,24 +66,40 @@ export function useTypingIndicator(conversationId: string | null) {
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
 
-        Object.entries(state).forEach(([userId, presences]) => {
-          if (userId === user.id || !Array.isArray(presences)) return;
+        Object.entries(state).forEach(([remoteUserId, presences]) => {
+          if (remoteUserId === userId || !Array.isArray(presences)) return;
           // Samma användare kan vara inloggad på flera enheter/flikar samtidigt.
           // Varje session lägger en egen meta i listan — den första kan vara en
           // passiv session (is_typing=false). Kolla ALLA metas, annars missas
           // skrivandet när en passiv flik råkar ligga först.
           const typingMeta = (presences as { is_typing?: boolean; name?: string }[])
             .find(p => p.is_typing);
-          setRemoteTyping(
-            { id: userId, name: typingMeta?.name || 'Någon' },
-            Boolean(typingMeta),
-          );
+          // A stale passive presence must not cancel a newer broadcast. Active
+          // presence can restore the indicator; broadcast/timeout clears it.
+          if (typingMeta) {
+            setRemoteTyping(
+              { id: remoteUserId, name: typingMeta.name || 'Någon' },
+              true,
+            );
+          }
         });
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Track initial presence (not typing)
-          await channel.track({ is_typing: false, name: '' });
+          const localTyping = localTypingRef.current;
+          await channel.track({
+            is_typing: localTyping.isTyping,
+            name: localTyping.name,
+          });
+          // Typing can begin during a cold connection. Re-send the current
+          // state as soon as the channel is ready so the first keystrokes count.
+          if (localTyping.isTyping) {
+            await channel.send({
+              type: 'broadcast',
+              event: 'typing',
+              payload: { user_id: userId, is_typing: true, name: localTyping.name },
+            });
+          }
         }
       });
 
@@ -102,6 +119,7 @@ export function useTypingIndicator(conversationId: string | null) {
 
   // Start typing indicator
   const startTyping = useCallback(async (userName: string) => {
+    localTypingRef.current = { isTyping: true, name: userName };
     if (!channelRef.current || !userId) return;
 
     // Clear existing timeout
@@ -121,6 +139,7 @@ export function useTypingIndicator(conversationId: string | null) {
 
     // Auto-stop typing after 3 seconds of inactivity
     typingTimeoutRef.current = setTimeout(async () => {
+      localTypingRef.current = { isTyping: false, name: userName };
       if (channelRef.current) {
         await Promise.allSettled([
           channelRef.current.send({
@@ -136,6 +155,7 @@ export function useTypingIndicator(conversationId: string | null) {
 
   // Stop typing indicator
   const stopTyping = useCallback(async (userName: string) => {
+    localTypingRef.current = { isTyping: false, name: userName };
     if (!channelRef.current || !userId) return;
 
     if (typingTimeoutRef.current) {
