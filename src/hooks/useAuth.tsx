@@ -2075,15 +2075,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPreloadedJobSeekerUnreadMessages(jsUnread);
         writeUnreadBadgeCache(jsUnread);
 
-        // Hämta antal ansökningar för jobbsökare
+        // Hämta antal ansökningar för jobbsökare.
+        // 🔗 Exakt samma filtrering som listan (dolda ansökningar räknas inte),
+        // annars visade sidomenyn ett högre tal än sidan själv.
         const { count: myApplications } = await supabase
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
-          .eq('applicant_id', user.id);
-        
+          .eq('applicant_id', user.id)
+          .is('hidden_by_applicant_at', null);
+
         const appCount = myApplications || 0;
         setPreloadedMyApplications(appCount);
-        try { sessionStorage.setItem(MY_APPLICATIONS_CACHE_KEY, String(appCount)); } catch {}
+        writeMyApplicationsCache(appCount);
       }
     } catch (err) {
       // Silent error handling
