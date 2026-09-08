@@ -2590,63 +2590,23 @@ const Profile = () => {
                         <Label htmlFor="employmentStatus" className="text-white text-sm">
                           Anställningsstatus? <span className="text-white">*</span>
                         </Label>
-                        <DropdownMenu modal={false}>
-                          <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outlineNeutral"
-                            className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                          >
-                              <span className="truncate">
-                                {employmentStatus ? (
-                                  ({
-                                    tillsvidareanställning: 'Fast anställning',
-                                    visstidsanställning: 'Visstidsanställning',
-                                    provanställning: 'Provanställning',
-                                    interim: 'Interim anställning',
-                                    bemanningsanställning: 'Bemanningsanställning',
-                                    egenforetagare: 'Egenföretagare / Frilans',
-                                    arbetssokande: 'Arbetssökande',
-                                    annat: 'Annat',
-                                  } as Record<string, string>)[employmentStatus]
-                                ) : 'Välj din nuvarande situation'}
-                              </span>
-                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            className="w-72 glass-panel z-50 rounded-md text-white overflow-visible"
-                            side="bottom"
-                            align="center"
-                            alignOffset={0}
-                            sideOffset={6}
-                            avoidCollisions={true}
-                          >
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Fast anställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Visstidsanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Provanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Interim anställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Bemanningsanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Egenföretagare / Frilans
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Arbetssökande
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                              Annat
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <InlineSelect
+                          id="employmentStatus"
+                          placeholder="Välj din nuvarande situation"
+                          value={employmentStatus}
+                          onChange={setEmploymentStatus}
+                          options={[
+                            { value: 'tillsvidareanställning', label: 'Fast anställning' },
+                            { value: 'visstidsanställning', label: 'Visstidsanställning' },
+                            { value: 'provanställning', label: 'Provanställning' },
+                            { value: 'interim', label: 'Interim anställning' },
+                            { value: 'bemanningsanställning', label: 'Bemanningsanställning' },
+                            { value: 'egenforetagare', label: 'Egenföretagare / Frilans' },
+                            { value: 'arbetssokande', label: 'Arbetssökande' },
+                            { value: 'annat', label: 'Annat' },
+                          ]}
+                        />
+
                         {errors.employmentStatus && <p className="text-sm text-red-300">{errors.employmentStatus}</p>}
                       </div>
 
