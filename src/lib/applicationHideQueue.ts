@@ -71,13 +71,15 @@ export function dequeueHide(applicationId: string, userId: string): void {
 /** Skickar en dölj-åtgärd till servern. Kastar aldrig — returnerar bool. */
 export async function pushHide(applicationId: string, userId: string, hiddenAt: number): Promise<boolean> {
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('job_applications')
       .update({ hidden_by_applicant_at: new Date(hiddenAt).toISOString() })
       .eq('id', applicationId)
-      .eq('applicant_id', userId);
+      .eq('applicant_id', userId)
+      .select('id');
     if (error) throw error;
-    return true;
+    // Noll rader = inget doldes på servern. Behåll åtgärden i kön.
+    return !!data && data.length > 0;
   } catch (err) {
     console.error('[HideQueue] Kunde inte dölja ansökan:', err);
     return false;

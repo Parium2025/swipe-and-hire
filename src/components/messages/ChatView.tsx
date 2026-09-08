@@ -655,12 +655,17 @@ export function ChatView({
 
   const handleSend = async () => {
     if ((!newMessage.trim() && !pendingFile) || sending) return;
+    // Snabba dubbeltryck hinner före Reacts state-uppdatering — ref:en stoppar
+    // dem synkront så samma meddelande aldrig skickas två gånger.
+    if (sendingRef.current) return;
+    sendingRef.current = true;
 
     // Handle edit submission
     if (editingMessageId) {
       if (newMessage.trim() === editOriginalContent) {
         // No changes, just cancel
         handleCancelEdit();
+        sendingRef.current = false;
         return;
       }
       setSending(true);
@@ -672,6 +677,7 @@ export function ChatView({
         toast.error('Kunde inte redigera meddelandet');
       } finally {
         setSending(false);
+        sendingRef.current = false;
       }
       return;
     }

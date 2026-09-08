@@ -1157,13 +1157,24 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         // Explicitly do NOT set is_active, created_at, or expires_at — keep as draft
       };
 
-      const { error } = await supabase
+      const { data: savedDraft, error } = await supabase
         .from('job_postings')
         .update(payload as never)
-        .eq('id', job.id);
+        .eq('id', job.id)
+        .select('id');
 
       if (error) {
         toast({ title: 'Fel vid sparning', description: error.message, variant: 'destructive' });
+        return;
+      }
+      // Noll rader = ändringen sparades aldrig (t.ex. annonsen ägs inte längre
+      // av dig). Rapportera aldrig en sparning som inte skedde.
+      if (!savedDraft || savedDraft.length === 0) {
+        toast({
+          title: 'Kunde inte spara',
+          description: 'Annonsen kunde inte uppdateras. Ladda om sidan och försök igen.',
+          variant: 'destructive',
+        });
         return;
       }
 
