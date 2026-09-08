@@ -999,7 +999,16 @@ const EmployerDashboard = memo(() => {
                 </>
               )}
             </AlertDialogDescription>
+            {autoNotifyCount !== null && autoNotifyCount > 0 && (
+              <div className="mt-4 rounded-xl border border-white/20 bg-white/10 p-3 text-left">
+                <p className="text-white text-sm leading-relaxed break-words">
+                  <span className="font-semibold">{autoNotifyCount}</span>{' '}
+                  {autoNotifyCount === 1 ? 'kandidat får' : 'kandidater får'} automatiskt besked om att tjänsten är avslutad. Anställda och kandidater som redan fått avslag på den här annonsen kontaktas inte.
+                </p>
+              </div>
+            )}
           </div>
+
           <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
             <AlertDialogCancel 
               onClick={() => {
