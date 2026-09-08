@@ -354,7 +354,7 @@ export function useNotifications() {
     }
 
     void broadcastRef.current?.send({ type: 'broadcast', event: 'local_clear', payload: {} });
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   return {
     notifications,
