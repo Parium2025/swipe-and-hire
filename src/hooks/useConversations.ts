@@ -1260,7 +1260,10 @@ export function useConversationMessages(
       }
     }
 
+    // Misslyckad kvittering får inte lämna badgen på 0 när servern har kvar
+    // olästa — hämta sanningen från databasen igen.
     console.warn('markAsRead failed after retries:', lastError);
+    queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
   }, [conversationId, user, queryClient]);
 
   markAsReadRef.current = markAsRead;
