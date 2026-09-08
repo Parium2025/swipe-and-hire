@@ -202,6 +202,7 @@ const EmployerSettings = () => {
       </div>
 
       <Accordion
+        key={accordionKey}
         type="single"
         collapsible
         value={openSection}
