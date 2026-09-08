@@ -47,17 +47,29 @@ function snapshotDescribesCounterpart(
 function counterpartPersonProfile(
   displayMember: ConversationMember | undefined,
   lastMessage: LastMessageIdentity | undefined,
+  counterpartPersonSenderId?: string | null,
 ): ProfileLike | undefined {
-  if (!lastMessage || lastMessage.sender_identity !== 'person') return undefined;
-  if (lastMessage.is_system_message) return undefined;
   if (!displayMember || displayMember.profile?.role !== 'employer') return undefined;
-  if (lastMessage.sender_id !== displayMember.user_id) return undefined;
-  const senderProfile = lastMessage.sender_profile ?? displayMember.profile;
+
+  const lastFromCounterpartPerson =
+    !!lastMessage &&
+    lastMessage.sender_identity === 'person' &&
+    !lastMessage.is_system_message &&
+    lastMessage.sender_id === displayMember.user_id;
+
+  // Även när DU skrev senast ska motparten fortsätta visas som personen som
+  // senast skrev personligt — identiteten får inte flippa fram och tillbaka.
+  const stickyPerson = !!counterpartPersonSenderId && counterpartPersonSenderId === displayMember.user_id;
+
+  if (!lastFromCounterpartPerson && !stickyPerson) return undefined;
+
+  const senderProfile = (lastFromCounterpartPerson ? lastMessage!.sender_profile : undefined) ?? displayMember.profile;
   if (!senderProfile) return undefined;
   const personName = buildFullName(senderProfile.first_name, senderProfile.last_name);
   if (!hasText(personName)) return undefined;
   return { ...senderProfile, role: 'employer', company_name: null, company_logo_url: null };
 }
+
 
 /**
  * Get display name for a conversation, preferring frozen application snapshot data.
@@ -69,8 +81,9 @@ export function getConversationDisplayName(opts: {
   displayMember: ConversationMember | undefined;
   isSelf?: boolean;
   lastMessage?: LastMessageIdentity;
+  counterpartPersonSenderId?: string | null;
 }): string {
-  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage } = opts;
+  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage, counterpartPersonSenderId } = opts;
 
   if (isGroup && groupName) return groupName;
 
@@ -85,7 +98,7 @@ export function getConversationDisplayName(opts: {
   }
 
 
-  const personProfile = counterpartPersonProfile(displayMember, lastMessage);
+  const personProfile = counterpartPersonProfile(displayMember, lastMessage, counterpartPersonSenderId);
   if (personProfile) return buildFullName(personProfile.first_name, personProfile.last_name);
 
   if (!displayMember?.profile) return 'Okänd användare';
@@ -110,6 +123,7 @@ export function getConversationAvatarProfile(
   snapshot: ApplicationSnapshot | undefined,
   displayMember: ConversationMember | undefined,
   lastMessage?: LastMessageIdentity,
+  counterpartPersonSenderId?: string | null,
 ): ProfileLike | undefined {
   if (snapshotDescribesCounterpart(snapshot, displayMember)) {
     const liveProfile = displayMember?.profile;
@@ -128,7 +142,7 @@ export function getConversationAvatarProfile(
 
 
 
-  const personProfile = counterpartPersonProfile(displayMember, lastMessage);
+  const personProfile = counterpartPersonProfile(displayMember, lastMessage, counterpartPersonSenderId);
   if (personProfile) return personProfile;
 
   // No snapshot — use live profile
