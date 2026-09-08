@@ -161,12 +161,19 @@ export const useInterviews = () => {
     }) => {
       if (!getIsOnline()) throw new Error('Du är offline');
       
-      const { error } = await supabase
+      // Filtrera även på ägaren och läs tillbaka raden: annars kan en ändring
+      // som blockeras av behörighetsreglerna se ut att lyckas (0 rader, inget
+      // fel) och gränssnittet visa fel status.
+      const { data, error } = await supabase
         .from('interviews')
         .update({ status })
-        .eq('id', interviewId);
+        .eq('id', interviewId)
+        .eq('employer_id', user?.id ?? '')
+        .select('id')
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Kunde inte uppdatera intervjun');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
@@ -178,14 +185,19 @@ export const useInterviews = () => {
   const cancelInterview = useMutation({
     mutationFn: async (interviewId: string) => {
       if (!getIsOnline()) throw new Error('Du är offline');
-      
-      const { error } = await supabase
+
+      const { data, error } = await supabase
         .from('interviews')
         .update({ status: 'cancelled' })
-        .eq('id', interviewId);
+        .eq('id', interviewId)
+        .eq('employer_id', user?.id ?? '')
+        .select('id')
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Kunde inte avboka intervjun');
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
       queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
