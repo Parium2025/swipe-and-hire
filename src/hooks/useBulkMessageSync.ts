@@ -63,6 +63,9 @@ function saveBulkQueue(items: QueuedMessage[]) {
 /**
  * Syncs queued bulk messages when connectivity is restored.
  */
+// Delat lås: hooken kan vara monterad både globalt och på kandidatsidan.
+let bulkSyncInProgress = false;
+
 export function useBulkMessageSync() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -70,10 +73,8 @@ export function useBulkMessageSync() {
   useEffect(() => {
     if (!user) return;
 
-    let syncInProgress = false;
-
     const syncBulkQueue = async () => {
-      if (syncInProgress) return;
+      if (bulkSyncInProgress) return;
 
       const items = getBulkQueue();
       if (items.length === 0) return;
@@ -81,7 +82,7 @@ export function useBulkMessageSync() {
       const myItems = items.filter((i) => i.sender_id === user.id);
       if (myItems.length === 0) return;
 
-      syncInProgress = true;
+      bulkSyncInProgress = true;
       try {
         let sent = 0;
         const remaining = items.filter((i) => i.sender_id !== user.id);
@@ -140,7 +141,7 @@ export function useBulkMessageSync() {
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
         }
       } finally {
-        syncInProgress = false;
+        bulkSyncInProgress = false;
       }
     };
 
