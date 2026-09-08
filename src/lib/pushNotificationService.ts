@@ -198,6 +198,41 @@ export async function unregisterAllTokens(userId: string): Promise<boolean> {
 }
 
 /**
+ * Senast registrerade token på DENNA enhet. Används vid utloggning så att
+ * bara den här enheten kopplas bort — övriga enheter behåller sina notiser.
+ */
+let lastRegisteredToken: string | null = null;
+
+export function getLastRegisteredToken(): string | null {
+  return lastRegisteredToken;
+}
+
+/**
+ * Avaktivera endast den här enhetens token (anropas vid utloggning).
+ */
+export async function unregisterCurrentDeviceToken(userId: string): Promise<boolean> {
+  const token = lastRegisteredToken;
+  if (!token) return false;
+  try {
+    const { error } = await supabase
+      .from('device_push_tokens')
+      .update({ is_active: false })
+      .eq('user_id', userId)
+      .eq('token', token);
+
+    if (error) {
+      console.error('Failed to unregister device push token:', error);
+      return false;
+    }
+    lastRegisteredToken = null;
+    return true;
+  } catch (err) {
+    console.error('Error unregistering device push token:', err);
+    return false;
+  }
+}
+
+/**
  * Full initialization: request permission, get token, register with backend
  */
 export async function initializePushNotifications(
