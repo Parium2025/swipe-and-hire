@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useMemo, useEffect, useLayoutEffect, useCallback } from 'react';
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { prefetchAttachmentImages } from '@/lib/attachmentUrl';
 import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
