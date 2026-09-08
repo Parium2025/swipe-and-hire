@@ -3,13 +3,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { useDevice } from '@/hooks/use-device';
 import { useTouchCapable } from '@/hooks/useInputCapability';
-import { ArrowDown, CheckSquare, Square } from 'lucide-react';
+import { ArrowDown, CheckSquare, Square, XCircle } from 'lucide-react';
 
 interface SelectionActionBarProps {
   selectedCount: number;
@@ -20,6 +21,8 @@ interface SelectionActionBarProps {
   stages: string[];
   stageSettings: Record<string, { label?: string; color?: string; iconName?: string }>;
   onMoveToStage: (stage: string) => void;
+  /** Ger avslag på de valda ansökningarna (endast den här annonsen). */
+  onReject?: () => void;
 }
 
 export const SelectionActionBar = ({
@@ -31,6 +34,7 @@ export const SelectionActionBar = ({
   stages,
   stageSettings: settings,
   onMoveToStage,
+  onReject,
 }: SelectionActionBarProps) => {
   const device = useDevice();
   const touchCapable = useTouchCapable();
@@ -210,6 +214,22 @@ export const SelectionActionBar = ({
               );
             })}
           </TooltipProvider>
+
+          {onReject && (
+            <>
+              <DropdownMenuSeparator className="bg-white/15" />
+              <DropdownMenuItem
+                onSelect={() => {
+                  setOpenTooltipStage(null);
+                  onReject();
+                }}
+                className="text-red-300 focus:text-red-200 cursor-pointer min-h-[44px]"
+              >
+                <XCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate min-w-0">Ge avslag</span>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

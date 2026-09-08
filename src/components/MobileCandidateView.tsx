@@ -9,7 +9,7 @@ import type { JobStageSettings } from '@/hooks/useJobStageSettings';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
 import { formatCompactTime } from '@/lib/date';
 import { wasViewedInSession } from '@/lib/viewedApplicationsSession';
-import { Star, Sparkles, ChevronRight, Square, CheckSquare, Check, X } from 'lucide-react';
+import { Star, Sparkles, ChevronRight, Square, CheckSquare, Check, X, XCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDragScroll } from '@/hooks/useDragScroll';
@@ -18,6 +18,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -38,6 +39,7 @@ interface CandidateRowProps {
   app: JobApplication;
   onOpen: () => void;
   onMoveToStage: (appId: string, stage: string) => void;
+  onReject?: (appId: string) => void;
   stages: string[];
   stageSettings: Record<string, { label: string; color: string; iconName: string; isCustom: boolean }>;
   criteriaCount: number;
@@ -51,6 +53,7 @@ const CandidateRow = memo(function CandidateRow({
   app,
   onOpen,
   onMoveToStage,
+  onReject,
   stages,
   stageSettings,
   criteriaCount,
@@ -241,6 +244,21 @@ const CandidateRow = memo(function CandidateRow({
                 </TooltipProvider>
               );
             })}
+            {onReject && app.status !== 'rejected' && (
+              <>
+                <DropdownMenuSeparator className="bg-white/15" />
+                <DropdownMenuItem
+                  onClick={e => {
+                    e.stopPropagation();
+                    onReject(app.id);
+                  }}
+                  className="gap-2 min-h-[44px] min-w-0 text-red-300 focus:text-red-200"
+                >
+                  <XCircle className="h-4 w-4 shrink-0" />
+                  <span className="truncate min-w-0">Ge avslag</span>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
@@ -259,6 +277,7 @@ interface MobileCandidateViewProps {
   criteriaCount: number;
   onOpenProfile: (app: JobApplication) => void;
   onMoveToStage: (appId: string, stage: string) => void;
+  onReject?: (appId: string) => void;
   onMarkAsViewed: (id: string) => void;
   onOpenCriteriaDialog?: () => void;
   isSelectionMode?: boolean;
@@ -276,6 +295,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   criteriaCount,
   onOpenProfile,
   onMoveToStage,
+  onReject,
   onMarkAsViewed,
   onOpenCriteriaDialog,
   isSelectionMode,
@@ -547,6 +567,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
                   app={app}
                   onOpen={() => onOpenProfile(app)}
                   onMoveToStage={onMoveToStage}
+                  onReject={onReject}
                   stages={stages}
                   stageSettings={stageSettings}
                   criteriaCount={criteriaCount}
