@@ -1135,7 +1135,7 @@ export function useConversationMessages(
 
               // For own messages: replace temp placeholder if it exists
               if (newMessage.sender_id === user.id) {
-                const tempIdx = old.findIndex(m => m.id.startsWith('temp-') && m.content === newMessage.content);
+               const tempIdx = old.findIndex(m => m.id === `temp-${newMessage.id}`);
                 if (tempIdx !== -1) {
                   const updated = [...old];
                   updated[tempIdx] = { ...newMessage, sender_profile: senderProfile || undefined };
@@ -1327,8 +1327,10 @@ export function useConversationMessages(
   ) => {
     if (!conversationId || !user || (!content.trim() && !attachment)) return;
 
-    // Slumpad suffix: två sändningar inom samma millisekund får aldrig samma id.
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    // Ett klientgenererat riktigt id gör sändningen idempotent även när nätet
+    // dör efter databasens write men före svaret.
+    const messageId = crypto.randomUUID();
+    const tempId = `temp-${messageId}`;
     const optimisticMessage: ConversationMessage = {
       id: tempId,
       conversation_id: conversationId,
@@ -1353,6 +1355,7 @@ export function useConversationMessages(
       const { data, error } = await rateLimited(`send-message-${conversationId}-${user.id}`, 350, async () => measurePerformance('chat', () => supabase
         .from('conversation_messages')
         .insert({
+           id: messageId,
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
@@ -1383,6 +1386,23 @@ export function useConversationMessages(
       // sparat meddelande om kvitteringen misslyckas.
       void Promise.resolve(markAsRead()).catch(() => undefined);
     } catch (error) {
+      // Ett avbrutet svar betyder inte säkert att skrivningen misslyckades.
+      // Kontrollera det idempotenta id:t innan den optimistiska bubblan tas bort.
+      const { data: persisted } = await supabase
+        .from('conversation_messages')
+        .select('*')
+        .eq('id', messageId)
+        .eq('sender_id', user.id)
+        .maybeSingle();
+      if (persisted) {
+        queryClient.setQueryData<ConversationMessage[]>(
+          ['conversation-messages', conversationId],
+          (old) => old?.map((m) => m.id === tempId
+            ? { ...persisted, sender_identity: persisted.sender_identity === 'company' ? 'company' : 'person' }
+            : m) || [],
+        );
+        return;
+      }
       // Rollback on error
       queryClient.setQueryData<ConversationMessage[]>(
         ['conversation-messages', conversationId],

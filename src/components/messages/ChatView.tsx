@@ -609,21 +609,10 @@ export function ChatView({
       return null;
     }
 
-    // Get signed URL (private bucket)
-    const { data: signedData, error: signedError } = await supabase.storage
-      .from('message-attachments')
-      .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
-
-    if (signedError || !signedData?.signedUrl) {
-      console.error('Signed URL error:', signedError);
-      // Filen ligger redan i lagringen men kan inte användas — städa bort den.
-      await supabase.storage.from('message-attachments').remove([path]).catch(() => {});
-      toast.error('Kunde inte skapa länk till filen');
-      return null;
-    }
-
+    // Lagra endast privat objekt-sökväg. Mottagaren skapar en signerad länk med
+    // sin egen session när bilagan visas; permanenta delningslänkar sparas inte.
     return {
-      url: signedData.signedUrl,
+      url: path,
       type: contentType,
       name: file.name,
     };

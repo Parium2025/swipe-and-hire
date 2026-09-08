@@ -9,6 +9,7 @@ const RENEW_BEFORE_MS = 7 * 24 * 60 * 60 * 1000;
 /** Plockar ut lagringssökvägen ur en signerad Supabase-URL. */
 export function extractAttachmentPath(url: string | null | undefined): string | null {
   if (!url) return null;
+  if (!url.includes('://') && !url.startsWith('/')) return url;
   const match = url.match(new RegExp(`/object/(?:sign|public)/${BUCKET}/([^?]+)`));
   if (!match) return null;
   try {
@@ -23,7 +24,11 @@ function readExpiry(url: string): number | null {
   try {
     const token = new URL(url, window.location.origin).searchParams.get('token');
     if (!token) return null;
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const segment = token.split('.')[1];
+    if (!segment) return null;
+    const normalized = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const payload = JSON.parse(atob(padded));
     return typeof payload?.exp === 'number' ? payload.exp * 1000 : null;
   } catch {
     return null;
@@ -47,7 +52,8 @@ export function prefetchAttachmentImages(
   for (const a of attachments) {
     if (!a.url || !a.type?.startsWith('image/')) continue;
     const path = extractAttachmentPath(a.url);
-    const src = (path && cache.get(path)) || a.url;
+    const src = path ? cache.get(path) : a.url;
+    if (!src) continue;
     if (prefetched.has(src)) continue;
     prefetched.add(src);
     const img = new Image();
@@ -62,7 +68,8 @@ export function useAttachmentUrl(storedUrl: string | null | undefined): string |
   const [url, setUrl] = useState<string | null>(() => {
     // Läs cachen redan i render → aldrig en tom ruta först.
     const path = extractAttachmentPath(storedUrl);
-    return (path && cache.get(path)) || storedUrl || null;
+    if (!path) return storedUrl || null;
+    return cache.get(path) || (storedUrl?.includes('://') ? storedUrl : null);
   });
 
   useEffect(() => {
@@ -84,14 +91,15 @@ export function useAttachmentUrl(storedUrl: string | null | undefined): string |
     }
 
     const expiry = readExpiry(storedUrl);
-    const needsRenewal = expiry !== null && expiry - Date.now() < RENEW_BEFORE_MS;
+    const isStoragePath = !storedUrl.includes('://') && !storedUrl.startsWith('/');
+    const needsRenewal = isStoragePath || expiry === null || expiry - Date.now() < RENEW_BEFORE_MS;
     if (!needsRenewal) {
       setUrl(storedUrl);
       return;
     }
 
     let cancelled = false;
-    setUrl(storedUrl);
+    setUrl(isStoragePath ? null : storedUrl);
     void supabase.storage
       .from(BUCKET)
       .createSignedUrl(path, SIGN_SECONDS)

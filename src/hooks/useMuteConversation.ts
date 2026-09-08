@@ -22,13 +22,15 @@ export function useMuteConversation() {
     mutationFn: async ({ conversationId, muted }: { conversationId: string; muted: boolean }) => {
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('conversation_members')
         .update({ muted_at: muted ? new Date().toISOString() : null })
         .eq('conversation_id', conversationId)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('conversation_id');
 
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Konversationen kunde inte uppdateras');
       return { conversationId, muted };
     },
     onMutate: async ({ conversationId, muted }) => {

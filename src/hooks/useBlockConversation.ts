@@ -17,10 +17,9 @@ export interface BlockedUser {
  * Skillnad mot "Radera chatt" (useDeleteConversation):
  *  - Radera chatt  → tar bort konversationen ur DIN inkorg. Motparten kan
  *                    fortfarande skriva och chatten dyker upp igen.
- *  - Blockera      → databasspärren (trigger `enforce_conversation_block`)
- *                    hindrar att meddelanden ens SPARAS mellan er. Inget når
- *                    fram — varken chatt, notis eller push — förrän du häver
- *                    blockeringen. Gäller åt båda hållen.
+ *  - Blockera      → meddelanden sparas tyst för historiken men chatten döljs
+ *                    och inga notiser eller push når blockeraren. När spärren
+ *                    hävs visas historiken igen.
  */
 export function useBlockedUsers() {
   const { user } = useAuth();
@@ -75,12 +74,14 @@ export function useBlockConversation() {
       // Tyst spärr: du stannar kvar som medlem (så historiken finns kvar när du
       // häver blockeringen), men konversationen döljs i inkorgen och tystas så
       // att inga notiser eller push kan nå dig under tiden.
-      const { error: muteError } = await supabase
+      const { data: mutedRows, error: muteError } = await supabase
         .from('conversation_members')
         .update({ muted_at: new Date().toISOString() })
         .eq('conversation_id', conversationId)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('conversation_id');
       if (muteError) throw muteError;
+      if (!mutedRows || mutedRows.length === 0) throw new Error('Konversationen kunde inte blockeras');
 
       return conversationId;
     },
@@ -102,13 +103,27 @@ export function useBlockConversation() {
       if (!user) throw new Error('Not authenticated');
       // Behåll raden med släpptidpunkt — då kan vi märka ut vad som skrevs
       // medan blockeringen var aktiv.
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('conversation_blocks')
         .update({ released_at: new Date().toISOString() })
         .eq('blocker_id', user.id)
         .eq('blocked_id', blockedId)
-        .is('released_at', null);
+        .is('released_at', null)
+        .select('conversation_id');
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Ingen aktiv blockering hittades');
+
+      const conversationIds = data
+        .map((row) => row.conversation_id)
+        .filter((id): id is string => typeof id === 'string');
+      if (conversationIds.length > 0) {
+        const { error: unmuteError } = await supabase
+          .from('conversation_members')
+          .update({ muted_at: null })
+          .eq('user_id', user.id)
+          .in('conversation_id', conversationIds);
+        if (unmuteError) throw unmuteError;
+      }
       return blockedId;
     },
     onSuccess: () => {
