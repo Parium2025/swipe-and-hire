@@ -1157,10 +1157,14 @@ export function useConversationMessages(
       .subscribe();
 
     return () => {
-      if (activeConversationId === conversationId) activeConversationId = null;
+      if (activeConversationId === conversationId) {
+        activeConversationId = null;
+        activeConversationVisible = null;
+      }
       supabase.removeChannel(channel);
     };
-  }, [conversationId, user, queryClient]);
+  }, [conversationId, user, queryClient, isViewOnScreen]);
+
 
   // Mark conversation as read (optimistic — badge nollställs direkt)
   const markAsRead = useCallback(async () => {
