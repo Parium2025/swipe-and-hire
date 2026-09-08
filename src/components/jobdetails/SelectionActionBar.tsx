@@ -34,6 +34,7 @@ export const SelectionActionBar = ({
   stages,
   stageSettings: settings,
   onMoveToStage,
+  onReject,
 }: SelectionActionBarProps) => {
   const device = useDevice();
   const touchCapable = useTouchCapable();
