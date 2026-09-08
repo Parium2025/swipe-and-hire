@@ -638,7 +638,7 @@ Deno.serve(async (request) => {
         });
       }
 
-      const result = await processPending({ ownerUserId: user.id, trigger: 'manual_send' });
+      const result = await processPending({ ownerUserId: user.id, trigger: 'manual_send' }, { batchSize: 30 });
       return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -648,14 +648,22 @@ Deno.serve(async (request) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const result = await processPending({
-      // service_role callers may process any pending log; authenticated users are
-      // strictly scoped to their own owner_user_id — never unscoped.
-      ownerUserId: serviceRole ? undefined : user!.id,
-      trigger: (body as { trigger?: OutreachTrigger }).trigger,
-      interviewId: (body as { interviewId?: string | null }).interviewId ?? null,
-    });
-    return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const hop = Number((body as { hop?: number }).hop ?? 0) || 0;
+    const result = await processPending(
+      {
+        // service_role callers may process any pending log; authenticated users are
+        // strictly scoped to their own owner_user_id — never unscoped.
+        ownerUserId: serviceRole ? undefined : user!.id,
+        trigger: (body as { trigger?: OutreachTrigger }).trigger,
+        interviewId: (body as { interviewId?: string | null }).interviewId ?? null,
+      },
+      // Bara bakgrundskörningar (cron/self-continue) tömmer hela kön.
+      { drain: serviceRole },
+    );
+
+    if (serviceRole && result.queueMayHaveMore) continueDraining(hop);
+
+    return new Response(JSON.stringify({ ...result, hop }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unexpected error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
