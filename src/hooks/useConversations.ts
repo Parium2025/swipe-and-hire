@@ -12,6 +12,7 @@ import { prefetchMediaUrl } from './useMediaUrl';
 import { CHAT_AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { toast } from 'sonner';
 import { chunk } from '@/lib/fetchAllPages';
+import { extractAttachmentPath } from '@/lib/attachmentUrl';
 
 
 export interface ConversationMember {
@@ -1419,6 +1420,12 @@ export function useConversationMessages(
             : m) || [],
         );
         return;
+      }
+      if (attachment) {
+        const path = extractAttachmentPath(attachment.url);
+        if (path) {
+          await supabase.storage.from('message-attachments').remove([path]).catch(() => undefined);
+        }
       }
       // Rollback on error
       queryClient.setQueryData<ConversationMessage[]>(

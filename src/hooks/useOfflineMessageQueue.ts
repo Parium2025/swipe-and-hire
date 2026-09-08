@@ -88,7 +88,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     if (!userId) return null;
 
     const queuedMessage: QueuedMessage = {
-      id: `offline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: crypto.randomUUID(),
       sender_id: userId,
       recipient_id: message.recipient_id,
       content: message.content,
@@ -132,15 +132,15 @@ export function useOfflineMessageQueue(userId: string | undefined) {
         message.recipient_id
       );
 
-      // 🛡️ Idempotensskydd: om en tidigare retry redan skrev meddelandet
-      // (nätet dog efter DB-write men före response), finns det med exakt
-      // samma client-genererade created_at. Behandla då som lyckat.
+      // Nya köposter använder sitt UUID som meddelande-id. Tidsstämpelkontrollen
+      // finns kvar endast för äldre köposter från före migreringen.
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(message.id);
       const { data: existing } = await supabase
         .from('conversation_messages')
         .select('id')
-        .eq('conversation_id', conversationId)
+        .eq(isUuid ? 'id' : 'conversation_id', isUuid ? message.id : conversationId)
         .eq('sender_id', message.sender_id)
-        .eq('created_at', message.created_at)
+        .eq(isUuid ? 'id' : 'created_at', isUuid ? message.id : message.created_at)
         .maybeSingle();
 
       if (existing?.id) {
@@ -151,6 +151,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       const { error } = await supabase
         .from('conversation_messages')
         .insert({
+          ...(isUuid ? { id: message.id } : {}),
           conversation_id: conversationId,
           sender_id: message.sender_id,
           content: message.content,
