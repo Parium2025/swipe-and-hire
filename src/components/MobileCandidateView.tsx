@@ -295,6 +295,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   criteriaCount,
   onOpenProfile,
   onMoveToStage,
+  onReject,
   onMarkAsViewed,
   onOpenCriteriaDialog,
   isSelectionMode,
