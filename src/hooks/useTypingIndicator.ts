@@ -95,6 +95,8 @@ export function useTypingIndicator(conversationId: string | null) {
       const timeout = setTimeout(() => {
         setTypingUsers(current => current.filter(item => item.id !== remoteUser.id));
         remoteTypingTimeoutsRef.current.delete(remoteUser.id);
+        // Släpp sekvensminnet också, annars växer kartan i långa sessioner.
+        remoteSequenceRef.current.delete(remoteUser.id);
       }, 4000);
       remoteTypingTimeoutsRef.current.set(remoteUser.id, timeout);
     }

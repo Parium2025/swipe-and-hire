@@ -65,6 +65,7 @@ function saveBulkQueue(items: QueuedMessage[]) {
  */
 // Delat lås: hooken kan vara monterad både globalt och på kandidatsidan.
 let bulkSyncInProgress = false;
+let retryTimerRef: ReturnType<typeof setTimeout> | null = null;
 
 export function useBulkMessageSync() {
   const { user } = useAuth();
@@ -74,7 +75,16 @@ export function useBulkMessageSync() {
     if (!user) return;
 
     const syncBulkQueue = async () => {
-      if (bulkSyncInProgress) return;
+      if (bulkSyncInProgress) {
+        // Försök igen strax: annars kan en blockerad körning tappas helt.
+        if (!retryTimerRef) {
+          retryTimerRef = setTimeout(() => {
+            retryTimerRef = null;
+            void syncBulkQueue();
+          }, 3000);
+        }
+        return;
+      }
 
       const items = getBulkQueue();
       if (items.length === 0) return;
@@ -134,7 +144,13 @@ export function useBulkMessageSync() {
           }
         }
 
-        saveBulkQueue(remaining);
+        // Läs kön igen: en annan flik kan ha lagt till poster medan vi skickade.
+        const processedIds = new Set(myItems.map((i) => i.id));
+        const latest = getBulkQueue().filter(
+          (i) => i.sender_id !== user.id || !processedIds.has(i.id)
+        );
+        const merged = [...remaining.filter((i) => processedIds.has(i.id)), ...latest];
+        saveBulkQueue(merged);
 
         if (sent > 0) {
           toast.success(`${sent} köat meddelande${sent !== 1 ? 'n' : ''} skickat`, { route: '/messages' } as Parameters<typeof toast.success>[1]);

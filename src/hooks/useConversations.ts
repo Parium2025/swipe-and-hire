@@ -1291,7 +1291,8 @@ export function useConversationMessages(
   ) => {
     if (!conversationId || !user || (!content.trim() && !attachment)) return;
 
-    const tempId = `temp-${Date.now()}`;
+    // Slumpad suffix: två sändningar inom samma millisekund får aldrig samma id.
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     const optimisticMessage: ConversationMessage = {
       id: tempId,
       conversation_id: conversationId,
