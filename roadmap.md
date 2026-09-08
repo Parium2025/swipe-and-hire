@@ -1,39 +1,9 @@
 # Roadmap
 
-- [x] Återställ rund profilvideo i arbetsgivarens svepläge och använd den befintliga kandidatprofilens stabila flik- och geststruktur för info
-
-- [x] Förladda och lagra kandidatmedlemskap vid kallstart så plus/bock är korrekt före sidbesök
-
-- [x] Granska cache och profilbyte för bild, video och cover
-- [x] Granska profilval och snapshotkedjan vid jobbansökan
-- [x] Rätta verifierade buggar och lägga till regressionstester
-- [x] Verifiera frontend/backend och sätt separata betyg
-- [x] Dokumentera fem avsiktligt låsta interna tabeller
-- [x] Begränsa anonym databasåtkomst till avsedd SEO-förhandsvisning
-- [ ] Revidera alla anropbara SECURITY DEFINER-funktioner och åtgärda verifierade luckor
-- [x] Bedöm databastillägg i public och flytta endast med säker beroendeplan
-- [ ] Åtgärda verifierade kapacitetsrisker för 250 000 användare och miljontals konton
-- [ ] Verifiera säkerhet, funktion, tester och kapacitetsantaganden efter ändringarna
-- [x] Rätta sökjobb-skeleton så antal och geometri speglar den faktiska jobblistan, även vid en annons
-- [x] Eliminera blinkning vid profilbyte genom atomiskt byte och full pre-warm av bild, video, cover och status
-- [x] Stabilisera hero-telefonens storlek mot in-app-webbläsares dynamiska viewport (Snapchat)
-- [ ] Svara på genomgång av React Query-prefetch i hela appen
-- [x] Synka kortrytmen i Dashboard och Mina annonser med jobbsökarvyn
-- [x] Ta bort realtidens beroende av payload.old och lätta WAL-belastningen på job_postings
-- [x] Återställ exakt mobil scrollposition efter stängd annonsdetalj via gemensam snapshot mellan returflöde och KeepAlive
-- [x] Förvärm annonsdata, steg och arbetsgivarsiffror inför kallstart
-- [x] Ta bort konstgjord kallstartsfördröjning och mobil prefetch-race för arbetsgivarannonser
-- [x] Eliminera knappflimmer vid återgång genom att ignorera dolda KeepAlive-noders nollbredd
-- [x] Visa arbetsgivardashboardens skeleton i exakt samma scroll-yta och sparade position vid omladdning
-- [x] Snabbare öppning av annons: betyg, media och aktivitet hämtas parallellt; urvalskriterier förvärms
-- [x] Dela upp annonshämtningen per status: aktiva strömmas helt, utgångna/utkast hämtas sidvis från servern med en sida i förväg
-- [x] Ta bort äldre obegränsad annonsbakgrundssynk, dubbla realtime-kanaler och onödiga återhämtningar vid sidbyte
-- [x] Förhindra överlappande körningar av annonsstängning och fullskanning av sparade sökningar
-- [x] Ta bort tom blå kallstart och korta den blockerande laddningen när arbetsgivaren öppnar en annons
-- [x] Slutför mobil kandidatstängning hela vägen ut och ge krysset normal storlek utan övriga UI-ändringar
-- [x] Visa aktuell CV-sida och totalt antal sidor direkt i mobilens CV-verktygsrad
-- [x] Bevara regn-, snö- och åskanimationernas fördelning så de känns igång direkt vid återgång till Home
-- [x] Lås intervjubokningen till mobilens bredd vid extremt långa annonstitlar och isolera dess gester från kandidatprofilen
-- [x] Granska den rapporterade sporadiska profilblixten mot aktuell öppnings-, cache- och medialogik
-- [x] Visa full jobbtitel i intervjubokningen endast när sammanfattningen trunkeras
-- [x] Ta bort den verkningslösa borttagningsknappen från ansökans kandidatprofil och verifiera datans livscykel
+- [ ] Granska hela chattflödet: realtid, lässtatus, identitet och KeepAlive
+- [ ] Granska offlineköer, samtidighet, återanslutning och kontobyten
+- [ ] Granska bilagor, uppladdning, lagring, hämtning och felhantering
+- [ ] Granska notiser, push, badges och bakgrundslägen
+- [ ] Granska databasregler, funktioner, index och dataintegritet
+- [ ] Granska närliggande kritiska flöden utanför chatten
+- [ ] Fixa och verifiera alla bekräftade fel
