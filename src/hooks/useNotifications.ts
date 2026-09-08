@@ -30,9 +30,10 @@ const isHiddenType = (type: string) => HIDDEN_TYPES.has(type);
 
 
 const getCached = (userId: string): AppNotification[] | null => {
-  return safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
+  const cached = safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
     return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
   });
+  return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
 };
 
 const setCache = (userId: string, items: AppNotification[]) => {
