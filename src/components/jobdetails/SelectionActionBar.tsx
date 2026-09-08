@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { useDevice } from '@/hooks/use-device';
 import { useTouchCapable } from '@/hooks/useInputCapability';
-import { ArrowDown, CheckSquare, Square } from 'lucide-react';
+import { ArrowDown, CheckSquare, Square, XCircle } from 'lucide-react';
 
 interface SelectionActionBarProps {
   selectedCount: number;
