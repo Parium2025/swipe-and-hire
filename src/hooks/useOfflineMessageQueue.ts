@@ -181,37 +181,44 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     const remaining: QueuedMessage[] = [];
     let syncedCount = 0;
 
-    for (let i = 0; i < currentQueue.length; i++) {
-      const message = currentQueue[i];
-      // Exponential backoff for retried messages
-      if (message.attempts > 0) {
-        const delay = Math.min(1000 * Math.pow(2, message.attempts - 1), 30000);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-      const success = await syncMessage(message);
-      if (success) {
-        syncedCount++;
-      } else {
-        const updatedMessage = { ...message, attempts: message.attempts + 1 };
-        if (updatedMessage.attempts < MAX_ATTEMPTS) {
-          remaining.push(updatedMessage);
+    try {
+      for (let i = 0; i < currentQueue.length; i++) {
+        const message = currentQueue[i];
+        // Exponential backoff for retried messages
+        if (message.attempts > 0) {
+          const delay = Math.min(1000 * Math.pow(2, message.attempts - 1), 30000);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        const success = await syncMessage(message);
+        if (success) {
+          syncedCount++;
         } else {
-          console.warn('Message exceeded max attempts, dropping:', message.id);
-          toast.error('Ett meddelande kunde inte skickas', {
-            description: 'Vänligen försök skicka det igen manuellt.',
-            duration: 8000,
-          });
+          const updatedMessage = { ...message, attempts: message.attempts + 1 };
+          if (updatedMessage.attempts < MAX_ATTEMPTS) {
+            remaining.push(updatedMessage);
+          } else {
+            console.warn('Message exceeded max attempts, dropping:', message.id);
+            toast.error('Ett meddelande kunde inte skickas', {
+              description: 'Vänligen försök skicka det igen manuellt.',
+              duration: 8000,
+            });
+          }
         }
       }
+    } finally {
+      // Meddelanden som köats MEDAN synken pågick får aldrig skrivas över.
+      const processedIds = new Set(currentQueue.map(m => m.id));
+      const fullQueue = getQueuedMessages();
+      const otherUserMessages = fullQueue.filter(m => m.sender_id !== userId);
+      const queuedDuringSync = fullQueue.filter(
+        m => m.sender_id === userId && !processedIds.has(m.id)
+      );
+      const nextOwn = [...remaining, ...queuedDuringSync];
+      saveQueuedMessages([...otherUserMessages, ...nextOwn]);
+      setQueue(nextOwn);
+      setSyncing(false);
+      syncInProgress.current = false;
     }
-
-    // Re-read and keep other users' messages untouched
-    const fullQueue = getQueuedMessages();
-    const otherUserMessages = fullQueue.filter(m => m.sender_id !== userId);
-    saveQueuedMessages([...otherUserMessages, ...remaining]);
-    setQueue(remaining);
-    setSyncing(false);
-    syncInProgress.current = false;
 
     if (syncedCount > 0) {
       toast.success(`${syncedCount} ${syncedCount === 1 ? 'meddelande skickat' : 'meddelanden skickade'}`, { route: '/messages' } as Parameters<typeof toast.success>[1]);

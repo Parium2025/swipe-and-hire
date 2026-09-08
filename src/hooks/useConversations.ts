@@ -296,12 +296,20 @@ export function applyIncomingMessageToConversations(
 
   const existing = current[idx];
 
-  // Ignorera out-of-order/duplicerade events
+  // Ignorera duplicerade events
   if (existing.last_message?.id === msg.id) return true;
-  if (
-    existing.last_message_at &&
-    new Date(msg.created_at).getTime() < new Date(existing.last_message_at).getTime()
-  ) {
+
+  // Ett äldre (försenat/offline-köat) meddelande får inte skriva över senaste
+  // meddelandet — men det ska fortfarande räknas som oläst.
+  const isStale =
+    !!existing.last_message_at &&
+    new Date(msg.created_at).getTime() < new Date(existing.last_message_at).getTime();
+  if (isStale) {
+    if (options.incrementUnread && msg.sender_id !== userId) {
+      const bumped = [...current];
+      bumped[idx] = { ...existing, unread_count: (existing.unread_count || 0) + 1 };
+      queryClient.setQueryData<Conversation[]>(key, bumped);
+    }
     return true;
   }
 
@@ -1013,14 +1021,31 @@ export function useConversationMessages(
       if (error) throw error;
 
       const existingIds = new Set(currentMessages.map((m) => m.id));
-      const fresh = (olderMessages || []).filter((m) => !existingIds.has(m.id));
+      let rawOlder = olderMessages || [];
+      let fresh = rawOlder.filter((m) => !existingIds.has(m.id));
+
+      // Om hela sidan bestod av redan laddade meddelanden (många delar exakt
+      // samma tidsstämpel) finns äldre historik kvar bakom gränsen. Hämta då
+      // strikt äldre än gränsen i stället för att felaktigt säga "inget mer".
+      if (fresh.length === 0 && rawOlder.length >= MESSAGES_PAGE_SIZE + 1) {
+        const { data: strictlyOlder, error: strictError } = await supabase
+          .from('conversation_messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .lt('created_at', oldestTimestamp)
+          .order('created_at', { ascending: false })
+          .limit(MESSAGES_PAGE_SIZE + 1);
+        if (strictError) throw strictError;
+        rawOlder = strictlyOlder || [];
+        fresh = rawOlder.filter((m) => !existingIds.has(m.id));
+      }
 
       if (fresh.length === 0) {
         setHasMore(false);
         return;
       }
 
-      setHasMore((olderMessages?.length || 0) >= MESSAGES_PAGE_SIZE + 1);
+      setHasMore(rawOlder.length >= MESSAGES_PAGE_SIZE + 1);
 
       // Reverse to chronological order
       fresh.reverse();
@@ -1235,7 +1260,10 @@ export function useConversationMessages(
       }
     }
 
+    // Misslyckad kvittering får inte lämna badgen på 0 när servern har kvar
+    // olästa — hämta sanningen från databasen igen.
     console.warn('markAsRead failed after retries:', lastError);
+    queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
   }, [conversationId, user, queryClient]);
 
   markAsReadRef.current = markAsRead;

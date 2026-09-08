@@ -15,13 +15,19 @@ export function useDeleteConversation() {
     mutationFn: async (conversationId: string) => {
       if (!user) throw new Error('Not authenticated');
       // Remove own membership from conversation (effectively "deleting" it for this user)
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('conversation_members')
         .delete()
         .eq('conversation_id', conversationId)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('conversation_id');
 
       if (error) throw error;
+      // Noll rader = behörighetsregel stoppade raderingen. Rapportera aldrig
+      // en lyckad radering som inte skedde.
+      if (!data || data.length === 0) {
+        throw new Error('Konversationen kunde inte raderas');
+      }
       return conversationId;
     },
     onSuccess: () => {
