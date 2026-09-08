@@ -2614,43 +2614,18 @@ const Profile = () => {
                       {employmentStatus && employmentStatus !== 'arbetssokande' && (
                         <div className="space-y-2 md:space-y-1.5">
                           <Label htmlFor="workingHours" className="text-white text-sm">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
-                          <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                              >
-                                <span className="truncate">
-                                  {workingHours ? (
-                                    ({
-                                      heltid: 'Heltid',
-                                      deltid: 'Deltid',
-                                      varierande: 'Varierande / Flexibelt',
-                                    } as Record<string, string>)[workingHours]
-                                  ) : 'Välj arbetstid/omfattning'}
-                                </span>
-                                <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                             <DropdownMenuContent 
-                               className="w-72 max-h-80 overflow-y-auto glass-panel z-50 rounded-md text-white"
-                              side="bottom"
-                              align="center"
-                              alignOffset={0}
-                              sideOffset={6}
-                              avoidCollisions={true}
-                            >
-                              <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                                Heltid
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                                Deltid
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
-                                Varierande / Flexibelt
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <InlineSelect
+                            id="workingHours"
+                            placeholder="Välj arbetstid/omfattning"
+                            value={workingHours}
+                            onChange={setWorkingHours}
+                            options={[
+                              { value: 'heltid', label: 'Heltid' },
+                              { value: 'deltid', label: 'Deltid' },
+                              { value: 'varierande', label: 'Varierande / Flexibelt' },
+                            ]}
+                          />
+
                         </div>
                       )}
                     </div>
