@@ -1240,17 +1240,20 @@ export function useConversationMessages(
     // korta, begränsade omförsök vid tillfälliga mobil-/nätverksavbrott.
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('conversation_members')
           .update({ last_read_at: readAt, manually_unread: false } as never)
           .eq('conversation_id', conversationId)
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .select('user_id');
 
-        if (!error) {
+        // Noll rader = kvitteringen skrevs aldrig. Behandla det som ett fel,
+        // annars visas "läst" trots att servern har kvar olästa.
+        if (!error && data && data.length > 0) {
           queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
           return;
         }
-        lastError = error;
+        lastError = error ?? new Error('Ingen medlemsrad uppdaterades');
       } catch (error) {
         lastError = error;
       }
@@ -1298,13 +1301,18 @@ export function useConversationMessages(
     );
 
     try {
-      const { error } = await (supabase
+      const { data, error } = await (supabase
         .from('conversation_messages') as any)
         .update({ content: trimmed, edited_at: new Date().toISOString() })
         .eq('id', messageId)
-        .eq('sender_id', user.id); // Security: only own messages
+        .eq('sender_id', user.id) // Security: only own messages
+        .select('id');
 
       if (error) throw error;
+      // Noll rader = ändringen sparades aldrig (behörighet/raderat meddelande).
+      if (!data || data.length === 0) {
+        throw new Error('Meddelandet kunde inte redigeras');
+      }
     } catch (error) {
       // Rollback: refetch from DB
       queryClient.invalidateQueries({ queryKey: ['conversation-messages', conversationId] });

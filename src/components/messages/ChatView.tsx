@@ -120,6 +120,7 @@ export function ChatView({
 
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -609,11 +610,14 @@ export function ChatView({
     }
 
     // Get signed URL (private bucket)
-    const { data: signedData } = await supabase.storage
+    const { data: signedData, error: signedError } = await supabase.storage
       .from('message-attachments')
       .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
 
-    if (!signedData?.signedUrl) {
+    if (signedError || !signedData?.signedUrl) {
+      console.error('Signed URL error:', signedError);
+      // Filen ligger redan i lagringen men kan inte användas — städa bort den.
+      await supabase.storage.from('message-attachments').remove([path]).catch(() => {});
       toast.error('Kunde inte skapa länk till filen');
       return null;
     }
@@ -652,12 +656,17 @@ export function ChatView({
 
   const handleSend = async () => {
     if ((!newMessage.trim() && !pendingFile) || sending) return;
+    // Snabba dubbeltryck hinner före Reacts state-uppdatering — ref:en stoppar
+    // dem synkront så samma meddelande aldrig skickas två gånger.
+    if (sendingRef.current) return;
+    sendingRef.current = true;
 
     // Handle edit submission
     if (editingMessageId) {
       if (newMessage.trim() === editOriginalContent) {
         // No changes, just cancel
         handleCancelEdit();
+        sendingRef.current = false;
         return;
       }
       setSending(true);
@@ -669,6 +678,7 @@ export function ChatView({
         toast.error('Kunde inte redigera meddelandet');
       } finally {
         setSending(false);
+        sendingRef.current = false;
       }
       return;
     }
@@ -726,6 +736,7 @@ export function ChatView({
     } finally {
       setSending(false);
       setUploadingFile(false);
+      sendingRef.current = false;
     }
   };
 

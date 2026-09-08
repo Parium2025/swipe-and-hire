@@ -186,7 +186,14 @@ export function useBulkMessageSync() {
       void syncBulkQueue();
     }
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      // Ett schemalagt omförsök får aldrig köras efter utloggning/kontobyte.
+      if (retryTimerRef) {
+        clearTimeout(retryTimerRef);
+        retryTimerRef = null;
+      }
+    };
   }, [user, queryClient]);
 }
 
