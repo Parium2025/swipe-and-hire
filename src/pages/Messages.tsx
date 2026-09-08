@@ -239,6 +239,7 @@ export default function Messages() {
   const showEmptyChatState = !selectedConversation;
 
   const handleSelectConversation = (convId: string) => {
+    clearAutoReadSuppression(convId);
     setSelectedConversationId(convId);
     setShowMobileChat(true);
   };
