@@ -2,7 +2,7 @@ import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
-import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -30,6 +30,7 @@ const typeIcons: Record<string, typeof Bell> = {
   job_expired: Briefcase,
   saved_search_match: Bell,
   candidate_deleted: UserX,
+  message_reaction: ThumbsUp,
 };
 
 
@@ -43,6 +44,7 @@ const typeColors: Record<string, string> = {
   job_expired: 'text-white',
   saved_search_match: 'text-white',
   candidate_deleted: 'text-white',
+  message_reaction: 'text-white',
 };
 
 
@@ -362,6 +364,7 @@ const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
   interview_reminder: 'interview_scheduled',
   message: 'new_message',
   new_message: 'new_message',
+  message_reaction: 'new_message',
   job_expired: 'job_closed',
   job_closed: 'job_closed',
   saved_search_match: 'saved_search_match',
