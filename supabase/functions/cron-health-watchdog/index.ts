@@ -54,35 +54,21 @@ const CRITICAL_JOBS: Array<{ name: string; maxAgeHours: number; why: string }> =
     why: "Aviseringar till arbetsgivare om annonser som går ut.",
   },
   {
-    name: "process-cv-queue-every-minute",
+    name: "minutely-maintenance",
     maxAgeHours: 2,
-    why: "Bearbetning av uppladdade CV:n.",
+    why: "Bearbetning av CV, intervjupåminnelser och alla automatiska utskick (mejl, chatt, push).",
   },
   {
-    name: "interview-reminders-every-minute",
+    name: "five-minute-maintenance",
     maxAgeHours: 2,
-    why: "Påminnelser om bokade intervjuer.",
-  },
-  {
-    name: "outreach-dispatch-sweeper",
-    maxAgeHours: 2,
-    why: "Alla automatiska utskick (mejl, chatt, push) från mallar och regler.",
-  },
-  {
-    name: "criteria-eval-worker-sweeper",
-    maxAgeHours: 2,
-    why: "AI-utvärdering av urvalskriterier för nya kandidater.",
-  },
-  {
-    name: "process-account-deletions",
-    maxAgeHours: 2,
-    why: "Genomförande av begärda kontoraderingar (GDPR art. 17).",
+    why: "AI-utvärdering av urvalskriterier och genomförande av begärda kontoraderingar (GDPR art. 17).",
   },
   {
     name: "cleanup-stale-sessions",
     maxAgeHours: 2,
     why: "Städning av gamla inloggningssessioner.",
   },
+
   {
     name: "saved-job-expiration-reminders",
     maxAgeHours: 12,
