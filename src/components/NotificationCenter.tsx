@@ -30,6 +30,7 @@ const typeIcons: Record<string, typeof Bell> = {
   job_expired: Briefcase,
   saved_search_match: Bell,
   candidate_deleted: UserX,
+  message_reaction: ThumbsUp,
 };
 
 
