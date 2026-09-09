@@ -44,6 +44,7 @@ const typeColors: Record<string, string> = {
   job_expired: 'text-white',
   saved_search_match: 'text-white',
   candidate_deleted: 'text-white',
+  message_reaction: 'text-white',
 };
 
 
