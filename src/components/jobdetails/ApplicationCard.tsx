@@ -76,7 +76,10 @@ export const ApplicationCardContent = memo(({
   const isUnread = !application.viewed_at;
   // Avslag är en markering per annons — kortet ligger kvar i sin kolumn
   // och kan dras vidare, men får tydlig etikett och inga avslutsutskick.
-  const isRejected = !!application.rejected_at || application.status === 'rejected';
+  // Avslaget ligger kvar på ansökan även om kandidaten flyttas till Anställd —
+  // etiketten döljs bara där, och dyker upp igen om kandidaten flyttas tillbaka.
+  const isRejected = application.status !== 'hired'
+    && (!!application.rejected_at || application.status === 'rejected');
   const appliedTime = formatCompactTime(application.applied_at);
   const lastActiveTime = formatCompactTime(application.last_active_at);
   const criterionResults = application.criterionResults || [];
