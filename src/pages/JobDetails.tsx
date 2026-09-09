@@ -229,13 +229,11 @@ const JobDetails = () => {
     [activeStages]
   );
 
-  // Avslag och "Anställd" kan aldrig gälla samtidigt. Databasen rensar
-  // avslagsmarkeringen automatiskt vid anställning — här speglar vi det
-  // direkt lokalt så kortet aldrig visar "Avslagen" i Anställd-kolumnen.
+  // Avslagsmarkeringen följer ansökan och tas aldrig bort vid flytt. I
+  // Anställd döljs etiketten (och inga avslutsutskick går dit), men flyttas
+  // kandidaten tillbaka syns "Avslagen" igen — inget besked går förlorat.
   const stagePatch = useCallback((stage: string): Partial<JobApplication> => (
-    stage === 'hired'
-      ? { status: stage as JobApplication['status'], rejected_at: null }
-      : { status: stage as JobApplication['status'] }
+    { status: stage as JobApplication['status'] }
   ), []);
 
   const updateApplicationStatus = useCallback(async (applicationId: string, newStatus: string) => {
