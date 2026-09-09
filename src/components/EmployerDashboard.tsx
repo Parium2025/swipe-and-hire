@@ -491,6 +491,7 @@ const EmployerDashboard = memo(() => {
         .from('job_applications')
         .select('id', { count: 'exact', head: true })
         .eq('job_id', jobId)
+        .is('rejected_at', null)
         .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
       if (cancelled) return;
       setAutoNotifyCount(error ? null : (count ?? 0));
