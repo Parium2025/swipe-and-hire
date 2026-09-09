@@ -242,9 +242,10 @@ const JobbKommun = () => {
             <ul className="grid gap-3 md:grid-cols-3">
               {displayedJobs.map((job) => (
                 <li key={job.id}>
-                  <button
-                    type="button"
+                  <Link
+                    to={`/annons/${job.id}`}
                     onPointerDown={() => navigate(`/annons/${job.id}`)}
+                    onClick={(e) => e.preventDefault()}
                     className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
                   >
                     <div>
@@ -261,7 +262,7 @@ const JobbKommun = () => {
                       <p className="flex items-center gap-2"><Building2 className="h-4 w-4 text-white" aria-hidden="true" />{job.company}</p>
                       <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-white" aria-hidden="true" />{job.location} · {job.type}</p>
                     </div>
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
