@@ -364,6 +364,7 @@ const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
   interview_reminder: 'interview_scheduled',
   message: 'new_message',
   new_message: 'new_message',
+  message_reaction: 'new_message',
   job_expired: 'job_closed',
   job_closed: 'job_closed',
   saved_search_match: 'saved_search_match',
