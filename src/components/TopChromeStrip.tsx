@@ -74,11 +74,12 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
-  // Telefoner behåller den grå/blå toppytan som före senaste ändringen.
-  // Vanlig iPad-Safari undantas eftersom dess native browserrad redan ligger
-  // utanför viewporten; installerat app-läge behöver däremot safe-area-ytan.
-  const shouldShowStrip = isTouch && !(isTablet && !isStandalone);
-  const stripInset = isStandalone ? '8px' : '18px';
+  // I vanlig iOS Safari börjar viewporten nedanför den native statusraden.
+  // En fixed remsa här målar sig INNE i sidan och blir ett synligt mörkt band
+  // mot sidans glödgradient. Native chrome färgas i stället via theme-color.
+  // Endast installerat app-läge (standalone) behöver en egen safe-area-yta.
+  const shouldShowStrip = isTouch && isStandalone;
+  const stripInset = '8px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
