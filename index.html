@@ -54,7 +54,7 @@
           var isAuthRoute = path === '/auth';
           var chromeColor = isLandingVideoRoute
             ? '#2a2a2a'
-            : (isAudienceLandingRoute ? '#001F3D' : (isAuthRoute ? '#062B5E' : '#001935'));
+            : (isAudienceLandingRoute ? '#001F3D' : (isAuthRoute ? '#062B5E' : '#00193D'));
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
@@ -90,7 +90,7 @@
             }
           }, { once: true });
         } catch (e) {
-          document.write('<meta name="theme-color" content="#001935">');
+          document.write('<meta name="theme-color" content="#00193D">');
         }
       })();
     </script>
@@ -475,13 +475,13 @@
   <style>
     /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
        - På "/" → #2a2a2a (matchar landningssidans video + topp-URL-bar)
-       - Överallt annat → #001935 (matchar Parium-blå topp-URL-bar)
+       - Överallt annat → #00193D (matchar Parium-blå topp-URL-bar)
        iOS Safaris bottenverktygsfält samplar body's computed background-color,
        så inline-style på body ändrar bottenfältet automatiskt vid SPA-nav.
        Vi sätter en safe default här (blå) för first paint innan JS hinner köra,
        UTAN !important så syncBrowserChrome's inline-style vinner. */
     html, body {
-      background-color: #001935;
+      background-color: #00193D;
     }
 
     /* App content sits above any background layer */

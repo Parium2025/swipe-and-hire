@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 
 const LANDING_COLOR = '#2a2a2a';
-const PARIUM_COLOR = '#001935';
+const PARIUM_COLOR = '#00193D';
 const AUDIENCE_LANDING_COLOR = '#001F3D';
 const AUTH_COLOR = '#062B5E';
 
@@ -22,7 +22,6 @@ const TopChromeStrip = () => {
   const [isTouch, setIsTouch] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -37,15 +36,6 @@ const TopChromeStrip = () => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(display-mode: standalone)');
     const apply = () => setIsStandalone(mq.matches);
-    apply();
-    mq.addEventListener?.('change', apply);
-    return () => mq.removeEventListener?.('change', apply);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(pointer: coarse) and (min-width: 768px) and (max-width: 1366px)');
-    const apply = () => setIsTablet(mq.matches);
     apply();
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
@@ -74,11 +64,12 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
-  // Telefoner behåller den grå/blå toppytan som före senaste ändringen.
-  // Vanlig iPad-Safari undantas eftersom dess native browserrad redan ligger
-  // utanför viewporten; installerat app-läge behöver däremot safe-area-ytan.
-  const shouldShowStrip = isTouch && !(isTablet && !isStandalone);
-  const stripInset = isStandalone ? '8px' : '18px';
+  // I vanlig iOS Safari börjar viewporten nedanför den native statusraden.
+  // En fixed remsa här målar sig INNE i sidan och blir ett synligt mörkt band
+  // mot sidans glödgradient. Native chrome färgas i stället via theme-color.
+  // Endast installerat app-läge (standalone) behöver en egen safe-area-yta.
+  const shouldShowStrip = isTouch && isStandalone;
+  const stripInset = '8px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
@@ -96,9 +87,8 @@ const TopChromeStrip = () => {
 
   if (!shouldShowStrip) return null;
 
-  // Höjd på toppremsan:
-  // - Standalone PWA: tunn (8px), status-bar färgas av apple-mobile-web-app-status-bar-style.
-  // - Mobil i browser: 18px räcker — theme-color funkar pålitligt på iPhone Safari.
+  // Höjd på toppremsan: standalone PWA får en tunn 8px-remsa ovanför
+  // safe-area; i vanlig browser renderas ingen remsa alls (theme-color räcker).
   const stripHeight = chromeOffset;
 
   return (

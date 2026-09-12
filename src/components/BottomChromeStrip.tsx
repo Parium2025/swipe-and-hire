@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 
 const LANDING_COLOR = '#2a2a2a';
-const PARIUM_COLOR = '#001935';
+const PARIUM_COLOR = '#00193D';
 const AUDIENCE_LANDING_COLOR = '#001F3D';
 const AUTH_COLOR = '#062B5E';
 
