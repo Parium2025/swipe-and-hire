@@ -60,7 +60,12 @@ body {
   overscroll-behavior-y: none;
   position: fixed;
   width: 100%;
+  /* iOS Safari: en fixerad body med height:100% mäts mot den STORA viewporten
+     (verktygsfälten dolda). När fälten syns blir sidan högre än det synliga
+     området och Safari kan skjuta upp hela ytan — då försvinner toppraden
+     med menyknappen. 100dvh följer det som faktiskt syns. */
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
   /* Touch handling */
   touch-action: pan-y pinch-zoom;
