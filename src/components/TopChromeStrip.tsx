@@ -87,9 +87,8 @@ const TopChromeStrip = () => {
 
   if (!shouldShowStrip) return null;
 
-  // Höjd på toppremsan:
-  // - Standalone PWA: tunn (8px), status-bar färgas av apple-mobile-web-app-status-bar-style.
-  // - Mobil i browser: 18px räcker — theme-color funkar pålitligt på iPhone Safari.
+  // Höjd på toppremsan: standalone PWA får en tunn 8px-remsa ovanför
+  // safe-area; i vanlig browser renderas ingen remsa alls (theme-color räcker).
   const stripHeight = chromeOffset;
 
   return (
