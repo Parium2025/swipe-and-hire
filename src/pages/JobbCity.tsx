@@ -232,8 +232,6 @@ const JobbCity = () => {
                 <li key={job.id}>
                   <Link
                     to={`/annons/${job.id}`}
-                    onPointerDown={() => navigate(`/annons/${job.id}`)}
-                    onClick={(e) => e.preventDefault()}
                     className="group flex min-h-[150px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-white/[0.07] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.18)] transition-colors hover:bg-white/[0.10]"
                   >
                     <div>
