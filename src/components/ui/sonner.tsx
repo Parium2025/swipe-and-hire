@@ -16,6 +16,13 @@ const DURATIONS = { success: 4200, info: 4600, warning: 6000, error: 7000 } as c
 const DEDUPE_WINDOW = 6000;
 const recent = new Map<string, { id: string | number; count: number; at: number }>();
 
+// Transienta hämtningsfel ska bara visas som toast i stunden — de ska aldrig
+// arkiveras i kundens notislista, eftersom de oftast bara är tillfälligt
+// nätverkskrångel och skapar onödig oro.
+const TRANSIENT_FETCH_ERRORS = new Set<string>([
+  "Kunde inte hämta urvalskriterier",
+]);
+
 const textOf = (value: unknown): string => {
   if (value == null) return "";
   if (typeof value === "string" || typeof value === "number") return String(value);
@@ -40,8 +47,12 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
 
       // Logga i notisarkivet så att inget kan missas ens om toasten hinner försvinna.
       // `route` är en Parium-tilläggsprop: gör notisen klickbar i notiscentret.
+      // Transienta hämtningsfel läcker inte in i notiscentret.
       const route = typeof options?.route === "string" ? options.route : undefined;
-      toastArchive.add(kind as any, textOf(message), textOf(options?.description) || undefined, route);
+      const title = textOf(message);
+      if (!TRANSIENT_FETCH_ERRORS.has(title)) {
+        toastArchive.add(kind as any, title, textOf(options?.description) || undefined, route);
+      }
 
       const hit = key.length > 2 ? recent.get(key) : undefined;
       if (hit && now - hit.at < DEDUPE_WINDOW) {
