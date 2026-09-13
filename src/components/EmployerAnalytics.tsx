@@ -44,6 +44,23 @@ interface DailyView {
   count: number;
 }
 
+// Timmärke i svensk tid som matchar databasens bucket-format "YYYY-MM-DD HH24:00".
+const stockholmHourFormatter = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Europe/Stockholm',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  hourCycle: 'h23',
+});
+
+const stockholmHourKey = (d: Date): string => {
+  const parts = stockholmHourFormatter.formatToParts(d);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? '00';
+  return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:00`;
+};
+
 interface TrendData {
   current_views: number;
   prev_views: number;
