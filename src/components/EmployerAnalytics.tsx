@@ -1036,10 +1036,10 @@ const EmployerAnalytics = memo(() => {
         <Card className="bg-white/5 border-white/10 overflow-hidden">
           <CardContent className="p-5">
             <div className="flex items-center gap-1.5 mb-3">
-              <h3 className="text-sm font-medium text-white">Visningar per dag</h3>
+              <h3 className="text-sm font-medium text-white">{selectedDays === 1 ? 'Visningar per timme' : 'Visningar per dag'}</h3>
               <InlineInfoTooltip content="Unika besökare: samma person räknas bara en gång per annons, oavsett hur många gånger den öppnas. Visningar från dig och dina kollegor räknas aldrig med." />
             </div>
-            <DailySparkline data={dailyViews} />
+            <DailySparkline data={dailyViews} hourly={selectedDays === 1} />
           </CardContent>
         </Card>
       )}
