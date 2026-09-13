@@ -16,6 +16,13 @@ const DURATIONS = { success: 4200, info: 4600, warning: 6000, error: 7000 } as c
 const DEDUPE_WINDOW = 6000;
 const recent = new Map<string, { id: string | number; count: number; at: number }>();
 
+// Transienta hämtningsfel ska bara visas som toast i stunden — de ska aldrig
+// arkiveras i kundens notislista, eftersom de oftast bara är tillfälligt
+// nätverkskrångel och skapar onödig oro.
+const TRANSIENT_FETCH_ERRORS = new Set<string>([
+  "Kunde inte hämta urvalskriterier",
+]);
+
 const textOf = (value: unknown): string => {
   if (value == null) return "";
   if (typeof value === "string" || typeof value === "number") return String(value);
