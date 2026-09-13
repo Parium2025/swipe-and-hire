@@ -40,8 +40,12 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
 
       // Logga i notisarkivet så att inget kan missas ens om toasten hinner försvinna.
       // `route` är en Parium-tilläggsprop: gör notisen klickbar i notiscentret.
+      // `archive: false` låser transienta hämtningsfel från att läcka in i kundens notislista.
       const route = typeof options?.route === "string" ? options.route : undefined;
-      toastArchive.add(kind as any, textOf(message), textOf(options?.description) || undefined, route);
+      const shouldArchive = options?.archive !== false;
+      if (shouldArchive) {
+        toastArchive.add(kind as any, textOf(message), textOf(options?.description) || undefined, route);
+      }
 
       const hit = key.length > 2 ? recent.get(key) : undefined;
       if (hit && now - hit.at < DEDUPE_WINDOW) {
