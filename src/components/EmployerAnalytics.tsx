@@ -393,8 +393,8 @@ const DailySparkline = memo(({ data, hourly = false }: { data: DailyView[]; hour
         )}
       </div>
       <div className="flex justify-between mt-1">
-        <span className="text-[10px] text-white">{data[0]?.date?.slice(5)}</span>
-        <span className="text-[10px] text-white">{data[data.length - 1]?.date?.slice(5)}</span>
+        <span className="text-[10px] text-white">{hourly ? data[0]?.date?.slice(11) : data[0]?.date?.slice(5)}</span>
+        <span className="text-[10px] text-white">{hourly ? data[data.length - 1]?.date?.slice(11) : data[data.length - 1]?.date?.slice(5)}</span>
       </div>
     </div>
   );
