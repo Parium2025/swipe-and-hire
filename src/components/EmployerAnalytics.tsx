@@ -84,6 +84,7 @@ const TIME_FILTERS = [
   { label: '7d', days: 7 },
   { label: '14d', days: 14 },
   { label: '30d', days: 30 },
+  { label: 'Kvartal', days: 90 },
   { label: 'Allt', days: null },
 ] as const;
 
@@ -1001,21 +1002,7 @@ const EmployerAnalytics = memo(() => {
           <CardContent className="p-5">
             <div className="flex items-center gap-1.5 mb-3">
               <h3 className="text-sm font-medium text-white">Visningar per dag</h3>
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="shrink-0 text-white hover:text-white/80 transition-colors">
-                      <Info className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-[280px]">
-                    <p className="text-xs leading-relaxed">
-                      Unika besökare: samma person räknas bara en gång per annons, oavsett hur många gånger den öppnas.
-                      Visningar från dig och dina kollegor räknas aldrig med.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <InlineInfoTooltip content="Unika besökare: samma person räknas bara en gång per annons, oavsett hur många gånger den öppnas. Visningar från dig och dina kollegor räknas aldrig med." />
             </div>
             <DailySparkline data={dailyViews} />
           </CardContent>
