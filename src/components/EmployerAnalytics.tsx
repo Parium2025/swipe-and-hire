@@ -307,7 +307,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
 DeviceDonut.displayName = 'DeviceDonut';
 
 /* ─── Daily sparkline ─── */
-const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
+const DailySparkline = memo(({ data, hourly = false }: { data: DailyView[]; hourly?: boolean }) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
