@@ -705,6 +705,24 @@ const EmployerAnalytics = memo(() => {
   // felaktig — två punkter med en veckas mellanrum ritas som grannar.
   const dailyViews = useMemo(() => {
     const raw = rawData?.daily_views ?? [];
+
+    // 24h: databasen grupperar per timme ("YYYY-MM-DD HH24:00", svensk tid).
+    // Fyll alltid samtliga 24 timmar bakåt så kurvan får en korrekt tidsaxel.
+    if (selectedDays === 1) {
+      const counts = new Map(
+        raw
+          .filter((d) => typeof d?.date === 'string')
+          .map((d) => [d.date, Number(d.count) || 0]),
+      );
+      const now = Date.now();
+      const filled: DailyView[] = [];
+      for (let i = 23; i >= 0; i--) {
+        const key = stockholmHourKey(new Date(now - i * 3_600_000));
+        filled.push({ date: key, count: counts.get(key) ?? 0 });
+      }
+      return filled;
+    }
+
     if (raw.length < 2) return raw;
 
     const sorted = [...raw]
@@ -725,7 +743,7 @@ const EmployerAnalytics = memo(() => {
     }
 
     return filled;
-  }, [rawData]);
+  }, [rawData, selectedDays]);
   const trends = rawData?.trends ?? null;
   const bestDay = rawData?.best_day ?? null;
   const ttfa = useMemo(() => rawData?.time_to_first_application ?? [], [rawData]);
