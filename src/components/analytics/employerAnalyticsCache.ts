@@ -9,7 +9,7 @@ type PersistedAnalyticsCacheEntry<T> = {
 
 const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics:v2';
 const EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY = 'parium-employer-analytics:selected-filter';
-const VALID_FILTERS = new Set<number>([1, 7, 14, 30]);
+const VALID_FILTERS = new Set<number>([1, 7, 14, 30, 90]);
 
 const isPersistedEntry = <T,>(value: unknown): value is PersistedAnalyticsCacheEntry<T> => {
   return Boolean(
