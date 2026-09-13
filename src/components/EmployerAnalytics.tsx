@@ -44,6 +44,23 @@ interface DailyView {
   count: number;
 }
 
+// Timmärke i svensk tid som matchar databasens bucket-format "YYYY-MM-DD HH24:00".
+const stockholmHourFormatter = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Europe/Stockholm',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  hourCycle: 'h23',
+});
+
+const stockholmHourKey = (d: Date): string => {
+  const parts = stockholmHourFormatter.formatToParts(d);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? '00';
+  return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:00`;
+};
+
 interface TrendData {
   current_views: number;
   prev_views: number;
@@ -307,7 +324,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
 DeviceDonut.displayName = 'DeviceDonut';
 
 /* ─── Daily sparkline ─── */
-const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
+const DailySparkline = memo(({ data, hourly = false }: { data: DailyView[]; hourly?: boolean }) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -393,8 +410,8 @@ const DailySparkline = memo(({ data }: { data: DailyView[] }) => {
         )}
       </div>
       <div className="flex justify-between mt-1">
-        <span className="text-[10px] text-white">{data[0]?.date?.slice(5)}</span>
-        <span className="text-[10px] text-white">{data[data.length - 1]?.date?.slice(5)}</span>
+        <span className="text-[10px] text-white">{hourly ? data[0]?.date?.slice(11) : data[0]?.date?.slice(5)}</span>
+        <span className="text-[10px] text-white">{hourly ? data[data.length - 1]?.date?.slice(11) : data[data.length - 1]?.date?.slice(5)}</span>
       </div>
     </div>
   );
@@ -705,6 +722,24 @@ const EmployerAnalytics = memo(() => {
   // felaktig — två punkter med en veckas mellanrum ritas som grannar.
   const dailyViews = useMemo(() => {
     const raw = rawData?.daily_views ?? [];
+
+    // 24h: databasen grupperar per timme ("YYYY-MM-DD HH24:00", svensk tid).
+    // Fyll alltid samtliga 24 timmar bakåt så kurvan får en korrekt tidsaxel.
+    if (selectedDays === 1) {
+      const counts = new Map(
+        raw
+          .filter((d) => typeof d?.date === 'string')
+          .map((d) => [d.date, Number(d.count) || 0]),
+      );
+      const now = Date.now();
+      const filled: DailyView[] = [];
+      for (let i = 23; i >= 0; i--) {
+        const key = stockholmHourKey(new Date(now - i * 3_600_000));
+        filled.push({ date: key, count: counts.get(key) ?? 0 });
+      }
+      return filled;
+    }
+
     if (raw.length < 2) return raw;
 
     const sorted = [...raw]
@@ -725,7 +760,7 @@ const EmployerAnalytics = memo(() => {
     }
 
     return filled;
-  }, [rawData]);
+  }, [rawData, selectedDays]);
   const trends = rawData?.trends ?? null;
   const bestDay = rawData?.best_day ?? null;
   const ttfa = useMemo(() => rawData?.time_to_first_application ?? [], [rawData]);
@@ -1001,10 +1036,10 @@ const EmployerAnalytics = memo(() => {
         <Card className="bg-white/5 border-white/10 overflow-hidden">
           <CardContent className="p-5">
             <div className="flex items-center gap-1.5 mb-3">
-              <h3 className="text-sm font-medium text-white">Visningar per dag</h3>
+              <h3 className="text-sm font-medium text-white">{selectedDays === 1 ? 'Visningar per timme' : 'Visningar per dag'}</h3>
               <InlineInfoTooltip content="Unika besökare: samma person räknas bara en gång per annons, oavsett hur många gånger den öppnas. Visningar från dig och dina kollegor räknas aldrig med." />
             </div>
-            <DailySparkline data={dailyViews} />
+            <DailySparkline data={dailyViews} hourly={selectedDays === 1} />
           </CardContent>
         </Card>
       )}
