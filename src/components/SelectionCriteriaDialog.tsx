@@ -170,7 +170,7 @@ export function SelectionCriteriaDialog({
       });
     } catch (error) {
       console.error('Error fetching criteria:', error);
-      toast.error('Kunde inte hämta urvalskriterier', { archive: false });
+      toast.error('Kunde inte hämta urvalskriterier');
     } finally {
       setIsLoading(false);
     }
