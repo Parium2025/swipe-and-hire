@@ -50,10 +50,10 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
 
       // Logga i notisarkivet så att inget kan missas ens om toasten hinner försvinna.
       // `route` är en Parium-tilläggsprop: gör notisen klickbar i notiscentret.
-      // Transienta hämtningsfel läcker inte in i notiscentret.
+      // Bekräftelser på egna reglage och transienta fel läcker inte in i notiscentret.
       const route = typeof options?.route === "string" ? options.route : undefined;
       const title = textOf(message);
-      if (!TRANSIENT_FETCH_ERRORS.has(title)) {
+      if (!EXCLUDED_FROM_ARCHIVE.has(title)) {
         toastArchive.add(kind as any, title, textOf(options?.description) || undefined, route);
       }
 
