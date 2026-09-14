@@ -1106,7 +1106,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
 
   const handleSaveAndLeave = async () => {
     if (!user || !job) return;
-    
+    if (isSavingAndLeavingRef.current) return;
+    isSavingAndLeavingRef.current = true;
+
     setIsSavingAndLeaving(true);
     try {
       // Save as draft WITHOUT publishing — keep is_active as-is
