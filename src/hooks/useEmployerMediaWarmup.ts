@@ -8,6 +8,17 @@ import { imageCache } from '@/lib/imageCache';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
+ * Bildfälten i databasen innehåller redan fulla URL:er. Utan den här vakten
+ * byggdes ".../company-logos/https://..." → 400 och förvärmningen gav trasiga
+ * bilder i stället för snabba.
+ */
+const toPublicUrl = (bucket: 'job-images' | 'company-logos', raw: string): string | null => {
+  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw.split('?')[0];
+  const { data } = supabase.storage.from(bucket).getPublicUrl(raw);
+  return data?.publicUrl || null;
+};
+
+/**
  * 🖼️ EMPLOYER MEDIA WARMUP
  *
  * Förvärmer profilbilder för kandidater och my_candidates SÅ FORT
