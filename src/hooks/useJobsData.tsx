@@ -56,6 +56,13 @@ export interface JobPosting {
 }
 
 
+/** Intern typ — används bara av `recruiters`-listan längre ner i filen. */
+interface Recruiter {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
 interface UseJobsDataOptions {
   scope?: 'personal' | 'organization';
   enableRealtime?: boolean;
