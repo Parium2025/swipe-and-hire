@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.get_employer_jobs_page(uuid, uuid, text, text, integer, integer);
