@@ -13,6 +13,7 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
 const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
@@ -310,7 +311,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                         className="w-full h-full object-cover"
                         loading="eager"
                         decoding="sync"
-                        fetchPriority="high"
+                        {...fetchPriority('high')}
                         draggable={false}
                       />
                     </div>

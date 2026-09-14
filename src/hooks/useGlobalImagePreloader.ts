@@ -29,6 +29,9 @@ const IDLE_WARM_JOB_COUNT = 20; // upper bound — kept conservative for mobile 
 const IDLE_BATCH_SIZE = 4;
 
 function getPublicUrlSafe(bucket: 'job-images' | 'company-logos', path: string, transform: any): string | null {
+  // Bilderna lagras redan som fulla URL:er i databasen. Utan den här vakten
+  // byggdes ".../company-logos/https://..." → 400 och trasig förvärmning.
+  if (path.startsWith('http://') || path.startsWith('https://')) return path.split('?')[0];
   try {
     const { data } = supabase.storage.from(bucket).getPublicUrl(path, { transform });
     return data?.publicUrl || null;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Video as VideoIcon } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { fetchPriority } from '@/lib/fetchPriority';
 
 /** Rund miniatyr för en profil – bild, videoikon eller personikon. */
 export function ProfileAvatar({
@@ -29,7 +30,7 @@ export function ProfileAvatar({
           className="h-full w-full object-cover"
           loading={eager ? 'eager' : 'lazy'}
           decoding={eager ? 'sync' : 'async'}
-          fetchPriority={eager ? 'high' : 'auto'}
+          {...fetchPriority(eager ? 'high' : 'auto')}
         />
       ) : hasVideo ? (
         <VideoIcon className="h-5 w-5" />

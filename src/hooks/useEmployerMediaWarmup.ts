@@ -8,6 +8,17 @@ import { imageCache } from '@/lib/imageCache';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
+ * Bildfälten i databasen innehåller redan fulla URL:er. Utan den här vakten
+ * byggdes ".../company-logos/https://..." → 400 och förvärmningen gav trasiga
+ * bilder i stället för snabba.
+ */
+const toPublicUrl = (bucket: 'job-images' | 'company-logos', raw: string): string | null => {
+  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw.split('?')[0];
+  const { data } = supabase.storage.from(bucket).getPublicUrl(raw);
+  return data?.publicUrl || null;
+};
+
+/**
  * 🖼️ EMPLOYER MEDIA WARMUP
  *
  * Förvärmer profilbilder för kandidater och my_candidates SÅ FORT
@@ -149,16 +160,16 @@ export function useEmployerMediaWarmup() {
           const path = j.job_image_url.trim();
           if (path && !warmed.has(`job-img:${path}`)) {
             warmed.add(`job-img:${path}`);
-            const { data } = supabase.storage.from('job-images').getPublicUrl(path);
-            if (data?.publicUrl) urls.push(data.publicUrl);
+            const url = toPublicUrl('job-images', path);
+            if (url) urls.push(url);
           }
         }
         if (j.company_logo_url && typeof j.company_logo_url === 'string') {
           const path = j.company_logo_url.trim();
           if (path && !warmed.has(`co-logo:${path}`)) {
             warmed.add(`co-logo:${path}`);
-            const { data } = supabase.storage.from('company-logos').getPublicUrl(path);
-            if (data?.publicUrl) urls.push(data.publicUrl);
+            const url = toPublicUrl('company-logos', path);
+            if (url) urls.push(url);
           }
         }
         if (++scanned >= JOB_IMAGES_MAX) break;
