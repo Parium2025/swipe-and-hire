@@ -1839,6 +1839,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
 
   const handleSubmit = async () => {
     if (!user || !job || loading) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
     setLoading(true);
     try {
