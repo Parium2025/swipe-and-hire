@@ -2457,6 +2457,7 @@ const MobileJobWizard = ({
           variant: "destructive"
         });
         setIsSavingDraft(false);
+      isSavingDraftRef.current = false;
         return;
       }
 
@@ -2482,6 +2483,7 @@ const MobileJobWizard = ({
 
       // Reset and close
       setIsSavingDraft(false);
+      isSavingDraftRef.current = false;
       setShowUnsavedDialog(false);
       setPendingClose(false);
       setHasUnsavedChanges(false);
@@ -2504,6 +2506,7 @@ const MobileJobWizard = ({
         variant: "destructive"
       });
       setIsSavingDraft(false);
+      isSavingDraftRef.current = false;
     }
   };
 
