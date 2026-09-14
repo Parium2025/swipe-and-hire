@@ -1920,6 +1920,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         return;
       }
 
+      // Noll rader = inget sparades (t.ex. annonsen ägs inte längre av dig eller
+      // har tagits bort). Rapportera aldrig en sparning som inte skedde.
+      if (!savedRows || savedRows.length === 0) {
+        toast({
+          title: 'Kunde inte spara',
+          description: 'Annonsen kunde inte uppdateras. Ladda om sidan och försök igen.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+
       // Återpublicering: aktivera annonsen i 14 dagar via RPC (kringgår dubblettspärren,
       // behåller created_at, ansökningar och meddelanden).
       if (publishMode && !isDraft) {
