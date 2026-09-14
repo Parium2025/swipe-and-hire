@@ -16,11 +16,14 @@ const DURATIONS = { success: 4200, info: 4600, warning: 6000, error: 7000 } as c
 const DEDUPE_WINDOW = 6000;
 const recent = new Map<string, { id: string | number; count: number; at: number }>();
 
-// Transienta hämtningsfel ska bara visas som toast i stunden — de ska aldrig
-// arkiveras i kundens notislista, eftersom de oftast bara är tillfälligt
-// nätverkskrångel och skapar onödig oro.
-const TRANSIENT_FETCH_ERRORS = new Set<string>([
+// Vissa notiser är bara bekräftelser på användarens egen handling och ska bara
+// visas som toast i stunden — de ska aldrig arkiveras i notislistan, eftersom
+// de annars skapar brus (t.ex. tillfälliga nätverksfel eller reglage man själv
+// precis stängde av/på).
+const EXCLUDED_FROM_ARCHIVE = new Set<string>([
   "Kunde inte hämta urvalskriterier",
+  "Automatiskt utskick påslaget",
+  "Automatiskt utskick pausat",
 ]);
 
 const textOf = (value: unknown): string => {
@@ -47,10 +50,10 @@ if (typeof window !== "undefined" && !(sonnerToast as any)[patched]) {
 
       // Logga i notisarkivet så att inget kan missas ens om toasten hinner försvinna.
       // `route` är en Parium-tilläggsprop: gör notisen klickbar i notiscentret.
-      // Transienta hämtningsfel läcker inte in i notiscentret.
+      // Bekräftelser på egna reglage och transienta fel läcker inte in i notiscentret.
       const route = typeof options?.route === "string" ? options.route : undefined;
       const title = textOf(message);
-      if (!TRANSIENT_FETCH_ERRORS.has(title)) {
+      if (!EXCLUDED_FROM_ARCHIVE.has(title)) {
         toastArchive.add(kind as any, title, textOf(options?.description) || undefined, route);
       }
 
