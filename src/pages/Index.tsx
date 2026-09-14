@@ -102,6 +102,8 @@ const CandidatesContent = () => {
   // Swipe-läge på Alla kandidater — visar exakt de kandidater som sökningen
   // och frågefiltren gett, i samma ordning som listan.
   const [swipeOpen, setSwipeOpen] = useState(false);
+  const device = useDevice();
+  const isTouchDevice = useTouchCapable();
 
   // Debounce search: 300ms delay before hitting the database
   // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
@@ -519,7 +521,6 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const device = useDevice();
-  const isTouchDevice = useTouchCapable();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
