@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,7 +55,9 @@ export interface JobPosting {
   };
 }
 
-export interface Recruiter {
+
+/** Intern typ — används bara av `recruiters`-listan längre ner i filen. */
+interface Recruiter {
   id: string;
   first_name: string;
   last_name: string;
@@ -290,6 +292,64 @@ const isDeeper = (a: JobCursor | null, b: JobCursor | null): boolean => {
   if (a.created_at !== b.created_at) return a.created_at < b.created_at;
   return a.id < b.id;
 };
+
+/**
+ * ❄️ KALLSTARTSVÄRMNING — måste spegla queryFn:n nedan exakt.
+ *
+ * Tidigare hämtade route-prefetchen "de 200 senaste annonserna" utan
+ * statusuppdelning och skrev dem under samma query-nyckel med FÄRSK tidsstämpel.
+ * Följden: ett konto med fler än 200 annonser kunde visa fel innehåll i
+ * Utgångna/Utkast i upp till tio minuter (sidan ansåg datan färsk och
+ * validerade inte om), och bakgrundsströmningen av aktiva annonser startade
+ * aldrig. Nu hämtas första sidan per status, sidläget registreras, och datan
+ * skrivs med `updatedAt: 0` så att sidan alltid validerar om vid montering
+ * medan användaren ändå ser innehåll direkt.
+ */
+export async function prefetchEmployerJobsFirstPages(
+  queryClient: QueryClient,
+  params: { scope: 'personal' | 'organization'; orgId: string | null; userId: string },
+): Promise<void> {
+  const { scope, orgId, userId } = params;
+  const queryKey = ['jobs', scope, orgId, userId];
+  // 🔒 Skriv aldrig över en lista som sidan redan äger.
+  if (queryClient.getQueryData(queryKey)) return;
+
+  const streamKey = JSON.stringify(queryKey);
+
+  let employerIds: string[] = [userId];
+  if (scope === 'organization' && orgId) {
+    const { data: orgUsers, error: orgError } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('organization_id', orgId)
+      .eq('is_active', true);
+    if (orgError) throw orgError;
+    const ids = orgUsers?.map((u) => u.user_id) ?? [];
+    if (ids.length > 0) employerIds = ids;
+  }
+
+  const [active, expired, draft] = await Promise.all([
+    fetchJobsPage({ employerIds, status: 'active', cursor: null, size: FIRST_PAGE }),
+    fetchJobsPage({ employerIds, status: 'expired', cursor: null, size: FIRST_PAGE }),
+    fetchJobsPage({ employerIds, status: 'draft', cursor: null, size: FIRST_PAGE }),
+  ]);
+
+  ([
+    ['active', active],
+    ['expired', expired],
+    ['draft', draft],
+  ] as [JobStatusKey, JobPosting[]][]).forEach(([status, rows]) => {
+    archiveRegistry.set(archiveKey(streamKey, status), {
+      cursor: cursorOf(rows),
+      done: rows.length < FIRST_PAGE,
+      loading: false,
+    });
+  });
+  notifyArchive();
+
+  const merged = dropDeleted(sortJobsDesc([...active, ...expired, ...draft]));
+  queryClient.setQueryData(queryKey, merged, { updatedAt: 0 });
+}
 
 export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', enableRealtime: true }) => {
   const { user, profile } = useAuth();
