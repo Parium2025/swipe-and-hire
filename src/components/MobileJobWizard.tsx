@@ -2457,7 +2457,7 @@ const MobileJobWizard = ({
           variant: "destructive"
         });
         setIsSavingDraft(false);
-      isSavingDraftRef.current = false;
+        isSavingDraftRef.current = false;
         return;
       }
 
