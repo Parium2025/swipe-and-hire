@@ -204,6 +204,8 @@ const MobileJobWizard = ({
   const hasCompletedRestoreRef = useRef(false);
   // Synkron spärr mot dubbelpublicering (setLoading hinner inte uppdateras).
   const isPublishingRef = useRef(false);
+  // Synkron spärr mot dubbelsparade utkast (setIsSavingDraft hinner inte uppdateras).
+  const isSavingDraftRef = useRef(false);
   const editDraftKey = existingJob?.id ? getEditJobDraftKey(existingJob.id) : null;
   
   // Reset state when dialog ACTUALLY closes (not on initial mount)
@@ -2372,7 +2374,10 @@ const MobileJobWizard = ({
   
   const performSaveAsDraft = async () => {
     if (!user) return;
-    
+    // Två snabba klick hann tidigare starta två sparningar och skapa två utkast.
+    if (isSavingDraftRef.current) return;
+    isSavingDraftRef.current = true;
+
     setIsSavingDraft(true);
     
     try {
