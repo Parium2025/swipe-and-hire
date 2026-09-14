@@ -228,6 +228,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false);
+  // Synkrona spärrar: React-state hinner inte uppdateras mellan två snabba klick.
+  const isSubmittingRef = useRef(false);
+  const isSavingAndLeavingRef = useRef(false);
   
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
