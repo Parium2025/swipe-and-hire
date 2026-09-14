@@ -1991,6 +1991,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       console.error('Edit job error:', err);
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte uppdatera annonsen.', variant: 'destructive' });
     } finally {
+      isSubmittingRef.current = false;
       // Ensure loading is reset even if error occurs
       setTimeout(() => setLoading(false), 100);
     }
