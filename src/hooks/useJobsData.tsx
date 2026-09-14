@@ -55,11 +55,6 @@ export interface JobPosting {
   };
 }
 
-export interface Recruiter {
-  id: string;
-  first_name: string;
-  last_name: string;
-}
 
 interface UseJobsDataOptions {
   scope?: 'personal' | 'organization';

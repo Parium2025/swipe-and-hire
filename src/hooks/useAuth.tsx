@@ -2159,6 +2159,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase.rpc('count_distinct_candidates_scoped', { p_scope: 'organization' }),
       ]);
 
+      // ♻️ Dela svaret med React Query. Utan detta hämtade kallstartsvärmningen
+      // och dashboardens egna hookar exakt samma tre RPC:er en gång till direkt
+      // efter inloggning — tre onödiga anrop per session och användare.
+      const orgKey = (profile as { organization_id?: string | null } | null)?.organization_id || null;
+      if (personalCountsRes.data) {
+        queryClient.setQueryData(['employer-jobs-counts', 'personal', orgKey, user.id], personalCountsRes.data);
+      }
+      if (orgCountsRes.data) {
+        queryClient.setQueryData(['employer-jobs-counts', 'organization', orgKey, user.id], orgCountsRes.data);
+      }
+      if (orgStatsRes.data) {
+        queryClient.setQueryData(['employer-dashboard-stats', 'organization', orgKey, user.id], orgStatsRes.data);
+      }
+
       const personalCounts = (personalCountsRes.data ?? {}) as { total?: number };
       const orgCounts = (orgCountsRes.data ?? {}) as { active?: number; expired?: number };
       const orgStats = (orgStatsRes.data ?? {}) as { total_views?: number; total_applications?: number };
