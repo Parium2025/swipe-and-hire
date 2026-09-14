@@ -17,16 +17,13 @@ export function useIsPremium() {
     staleTime: 60_000,
     queryFn: async (): Promise<boolean> => {
       if (!userId) return false;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('is_premium, premium_until')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // ⚠️ is_premium/premium_until är INTE läsbara direkt från profiles —
+      // tabellen har kolumnnivå-grants och direktläsning gav 403 för alla
+      // användare (premium visades därför aldrig). has_premium() är
+      // security definer och kapslar samma regel.
+      const { data, error } = await supabase.rpc('has_premium', { p_user_id: userId });
       if (error) return false;
-      if (!data) return false;
-      if (data.is_premium === true) return true;
-      if (data.premium_until && new Date(data.premium_until as string) > new Date()) return true;
-      return false;
+      return data === true;
     },
   });
 

@@ -104,14 +104,10 @@ export function useSidebarRoutePrefetch() {
         queryClient.prefetchQuery({
           queryKey: ['is-premium', user.id],
           queryFn: async () => {
-            const { data, error } = await supabase
-              .from('profiles')
-              .select('is_premium, premium_until')
-              .eq('user_id', user.id)
-              .maybeSingle();
-            if (error || !data) return false;
-            if (data.is_premium === true) return true;
-            return !!data.premium_until && new Date(data.premium_until as string) > new Date();
+            // Samma källa som useIsPremium — direktläsning av profiles ger 403.
+            const { data, error } = await supabase.rpc('has_premium', { p_user_id: user.id });
+            if (error) return false;
+            return data === true;
           },
           staleTime: 60_000,
         }).catch(() => { prefetchedRef.current.delete(key); });
