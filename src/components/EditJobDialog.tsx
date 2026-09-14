@@ -1897,10 +1897,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         } : {})
       } as Record<string, any>;
 
-      const { error } = await supabase
+      const { data: savedRows, error } = await supabase
         .from('job_postings')
         .update(payload as never)
-        .eq('id', job.id);
+        .eq('id', job.id)
+        .select('id');
 
       if (error) {
         // Samma läsbara felmeddelanden som i skapa-flödet — annars fick
