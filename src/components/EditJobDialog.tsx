@@ -1198,6 +1198,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte spara utkastet.', variant: 'destructive' });
     } finally {
       setIsSavingAndLeaving(false);
+      isSavingAndLeavingRef.current = false;
     }
   };
 
