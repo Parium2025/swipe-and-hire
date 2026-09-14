@@ -58,6 +58,7 @@ import Messages from '@/pages/Messages';
 import RealtimeStatusPage from '@/components/RealtimeStatusPage';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { EmployerCandidatesSkeleton, EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
@@ -270,7 +271,7 @@ const CandidatesContent = () => {
                     <span>Välj kandidater</span>
                   )}
                 </button>
-                {safeApplications.length > 0 && (
+                {(isTouchDevice || device === 'mobile') && safeApplications.length > 0 && (
                   <button
                     onClick={() => setSwipeOpen(true)}
                     onMouseDown={(e) => e.preventDefault()}
@@ -518,6 +519,7 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const device = useDevice();
+  const isTouchDevice = useTouchCapable();
   const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
