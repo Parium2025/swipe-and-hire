@@ -943,23 +943,22 @@ export function CandidatesTable({
                     <TableCell>
                       {!isMembershipLoading && (
                         isAlreadyAdded ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                aria-label="Kandidaten finns i din lista – öppna listväljaren"
-                                className="h-8 w-8 p-0 text-green-400 hover:text-green-400 bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
-                                onPointerDown={(e) => e.preventDefault()}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedApplicationForTeam(application);
-                                  setTeamDialogOpen(true);
-                                }}
-                              >
-                                <UserCheck className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label="Kandidaten finns i din lista – öppna listväljaren"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-green-400/40 bg-transparent text-green-400 cursor-pointer [-webkit-tap-highlight-color:transparent]"
+                              onPointerDown={(e) => e.preventDefault()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedApplicationForTeam(application);
+                                setTeamDialogOpen(true);
+                              }}
+                            >
+                              <UserCheck className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
                             <TooltipContent side="top" className="max-w-xs">
                               <p className="text-xs">Finns i din lista. Klicka för att flytta eller lägga till hos kollega.</p>
                             </TooltipContent>

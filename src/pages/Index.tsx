@@ -58,6 +58,7 @@ import Messages from '@/pages/Messages';
 import RealtimeStatusPage from '@/components/RealtimeStatusPage';
 import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { EmployerCandidatesSkeleton, EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
@@ -101,6 +102,8 @@ const CandidatesContent = () => {
   // Swipe-läge på Alla kandidater — visar exakt de kandidater som sökningen
   // och frågefiltren gett, i samma ordning som listan.
   const [swipeOpen, setSwipeOpen] = useState(false);
+  const device = useDevice();
+  const isTouchDevice = useTouchCapable();
 
   // Debounce search: 300ms delay before hitting the database
   // Prevents spamming FTS queries on every keystroke (critical at 500k+ candidates)
@@ -270,7 +273,7 @@ const CandidatesContent = () => {
                     <span>Välj kandidater</span>
                   )}
                 </button>
-                {safeApplications.length > 0 && (
+                {(isTouchDevice || device === 'mobile') && safeApplications.length > 0 && (
                   <button
                     onClick={() => setSwipeOpen(true)}
                     onMouseDown={(e) => e.preventDefault()}
