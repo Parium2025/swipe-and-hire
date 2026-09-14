@@ -149,16 +149,16 @@ export function useEmployerMediaWarmup() {
           const path = j.job_image_url.trim();
           if (path && !warmed.has(`job-img:${path}`)) {
             warmed.add(`job-img:${path}`);
-            const { data } = supabase.storage.from('job-images').getPublicUrl(path);
-            if (data?.publicUrl) urls.push(data.publicUrl);
+            const url = toPublicUrl('job-images', path);
+            if (url) urls.push(url);
           }
         }
         if (j.company_logo_url && typeof j.company_logo_url === 'string') {
           const path = j.company_logo_url.trim();
           if (path && !warmed.has(`co-logo:${path}`)) {
             warmed.add(`co-logo:${path}`);
-            const { data } = supabase.storage.from('company-logos').getPublicUrl(path);
-            if (data?.publicUrl) urls.push(data.publicUrl);
+            const url = toPublicUrl('company-logos', path);
+            if (url) urls.push(url);
           }
         }
         if (++scanned >= JOB_IMAGES_MAX) break;
