@@ -228,6 +228,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
   const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   const [isSavingAndLeaving, setIsSavingAndLeaving] = useState(false);
+  // Synkrona spärrar: React-state hinner inte uppdateras mellan två snabba klick.
+  const isSubmittingRef = useRef(false);
+  const isSavingAndLeavingRef = useRef(false);
   
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
@@ -1103,7 +1106,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
 
   const handleSaveAndLeave = async () => {
     if (!user || !job) return;
-    
+    if (isSavingAndLeavingRef.current) return;
+    isSavingAndLeavingRef.current = true;
+
     setIsSavingAndLeaving(true);
     try {
       // Save as draft WITHOUT publishing — keep is_active as-is
@@ -1193,6 +1198,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte spara utkastet.', variant: 'destructive' });
     } finally {
       setIsSavingAndLeaving(false);
+      isSavingAndLeavingRef.current = false;
     }
   };
 
@@ -1833,6 +1839,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
 
   const handleSubmit = async () => {
     if (!user || !job || loading) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
     setLoading(true);
     try {
@@ -1894,10 +1902,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         } : {})
       } as Record<string, any>;
 
-      const { error } = await supabase
+      const { data: savedRows, error } = await supabase
         .from('job_postings')
         .update(payload as never)
-        .eq('id', job.id);
+        .eq('id', job.id)
+        .select('id');
 
       if (error) {
         // Samma läsbara felmeddelanden som i skapa-flödet — annars fick
@@ -1915,6 +1924,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         toast({ title, description, variant: 'destructive' });
         return;
       }
+
+      // Noll rader = inget sparades (t.ex. annonsen ägs inte längre av dig eller
+      // har tagits bort). Rapportera aldrig en sparning som inte skedde.
+      if (!savedRows || savedRows.length === 0) {
+        toast({
+          title: 'Kunde inte spara',
+          description: 'Annonsen kunde inte uppdateras. Ladda om sidan och försök igen.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
 
       // Återpublicering: aktivera annonsen i 14 dagar via RPC (kringgår dubblettspärren,
       // behåller created_at, ansökningar och meddelanden).
@@ -1970,6 +1991,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       console.error('Edit job error:', err);
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte uppdatera annonsen.', variant: 'destructive' });
     } finally {
+      isSubmittingRef.current = false;
       // Ensure loading is reset even if error occurs
       setTimeout(() => setLoading(false), 100);
     }
