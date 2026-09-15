@@ -81,7 +81,10 @@ export function useCompanyReviewsCache(companyId: string | null) {
         .from('company_reviews_public')
         .select('*')
         .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        // Tak: ett företag med tusentals recensioner får inte skicka hela
+        // listan till klienten. De 200 senaste räcker för vyn.
+        .limit(200);
 
       if (error) throw error;
 
@@ -176,7 +179,8 @@ export function useCompanyReviewsCache(companyId: string | null) {
           .from('company_reviews_public')
           .select('*')
           .eq('company_id', targetCompanyId)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(200);
 
         if (error) throw error;
 
@@ -254,7 +258,9 @@ export function useBatchPrefetchReviews() {
       .from('company_reviews_public')
       .select('*')
       .in('company_id', uncachedIds)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      // Förhämtning ska vara billig — aldrig en obegränsad payload.
+      .limit(600);
 
     if (!allReviews) return;
 
