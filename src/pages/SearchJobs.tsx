@@ -187,6 +187,7 @@ const SearchJobs = memo(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
   });
   const didMountPageRef = useRef(false);
+  const pageScrollAnimationRef = useRef<number | null>(null);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
@@ -777,10 +778,10 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Sidbyte ska mjukt föra användaren högst upp i jobbsöket utan att flytta
-  // dokumentets viewport. `scrollIntoView` får inte användas här: på iOS Safari
-  // kan den även dra app-toppen ovanför skärmen. Scrolla därför enbart den
-  // scroll-yta som layouten äger och håll den yttre viewporten låst på noll.
+  // Efter att en ny sida har renderats ska både den ägda scroll-ytan och den
+  // yttre viewporten vara exakt i toppen. Själva synliga animationen sker före
+  // sidbytet i handlePageChange, så att en kortare ny sida inte hinner klampa
+  // scrollpositionen och därmed kapa animationen.
   useLayoutEffect(() => {
     if (!didMountPageRef.current) {
       didMountPageRef.current = true;
@@ -794,18 +795,47 @@ const SearchJobs = memo(() => {
     writePositions(positions);
 
     const container = getManagedScrollContainer();
-    if (!container) return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    container.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: prefersReducedMotion ? 'auto' : 'smooth',
-    });
+    if (container) container.scrollTop = 0;
   }, [page]);
 
   const handlePageChange = useCallback((next: number) => {
-    setPage(next);
+    const container = getManagedScrollContainer();
+    if (!container) {
+      setPage(next);
+      return;
+    }
+
+    if (pageScrollAnimationRef.current !== null) {
+      cancelAnimationFrame(pageScrollAnimationRef.current);
+    }
+
+    const startTop = container.scrollTop;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || startTop <= 0) {
+      container.scrollTop = 0;
+      setPage(next);
+      return;
+    }
+
+    const startedAt = performance.now();
+    const durationMs = 650;
+    const animateToTop = (now: number) => {
+      const progress = Math.min((now - startedAt) / durationMs, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      container.scrollTop = Math.round(startTop * (1 - eased));
+      window.scrollTo(0, 0);
+
+      if (progress < 1) {
+        pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
+        return;
+      }
+
+      container.scrollTop = 0;
+      pageScrollAnimationRef.current = null;
+      setPage(next);
+    };
+
+    pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
