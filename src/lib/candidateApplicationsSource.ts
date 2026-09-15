@@ -209,6 +209,8 @@ async function loadJobScope(userId: string): Promise<JobScope> {
       .in('employer_id', employerIds)
       .order('id', { ascending: true })
       .range(from, to),
+    MAX_ROWS_JOB_SCOPE,
+    'organisationens annonser',
   );
 
   return {
@@ -266,6 +268,8 @@ export async function fetchApplicationsForApplicant(
         .in('job_id', jobIds)
         .order('id', { ascending: true })
         .range(from, to),
+      MAX_ROWS_PER_APPLICANT,
+      'ansökningar för en kandidat',
     );
     data.push(...rows);
   }
@@ -310,6 +314,8 @@ export async function fetchApplicationsForApplicants(
           .in('job_id', jobIds)
           .order('id', { ascending: true })
           .range(from, to),
+        MAX_ROWS_APPLICANT_BATCH,
+        'ansökningar för kandidatbatch',
       );
       rows.push(...page);
     }
