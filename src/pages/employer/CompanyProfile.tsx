@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { smartMatches } from '@/lib/seoSearch';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
 import { ChevronDown, Search, Check, Loader2, AlertCircle } from 'lucide-react';
