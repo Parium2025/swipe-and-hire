@@ -37,10 +37,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   const [content, setContent] = useState(() => {
     if (typeof window === 'undefined') return '';
+    // Läs aldrig en nyckel utan konto-id: inloggningen hinner inte alltid bli
+    // klar före första målningen, och då kunde ett annat konto på samma dator
+    // få se föregående användares anteckningar en kort stund.
     if (user?.id) {
       return localStorage.getItem(`${cachePrefix}_${user.id}`) || '';
     }
-    return localStorage.getItem(cachePrefix) || '';
+    return '';
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
