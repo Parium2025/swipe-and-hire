@@ -96,6 +96,17 @@ const clearAllAppCachesSync = () => {
     JOB_TEMPLATES_CACHE_KEY,
     'parium_candidate_counts_v1_',
     'candidate-profile-',
+    // 🔒 Kandidat-PII (namn, e-post, telefon, CV-länk) låg kvar i 24 h efter
+    // utloggning på delade datorer. Måste rensas som allt annat kontodata.
+    'parium_my_candidates_v2_',
+    'parium_colleague_candidates_v1_',
+    'parium_job_apps_v2_',
+    'parium_job_detail_v2_',
+    'parium_employer_jobs_v3_',
+    'parium_employer_counts_v1_',
+    'parium_employer_stats_v1_',
+    'parium_profile_lite_v1_',
+    'parium-employer-analytics:',
   ];
   
   const exactKeysToRemove = [
