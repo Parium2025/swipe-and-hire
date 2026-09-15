@@ -53,6 +53,15 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
 
         if (cancelled) return;
 
+        // ⚠️ Supabase returnerar fel i svaret utan att kasta. Utan denna koll
+        // såg en misslyckad frågehämtning ut som "Inga frågor att besvara"
+        // och kandidaten kunde skicka en ansökan utan sina svar.
+        if ((questionsRes as any).error || (jobRes as any).error) {
+          setQuestions([]);
+          setHasError(true);
+          return;
+        }
+
         // 📸 Om användaren redan har sökt — visa de frusna frågorna
         // från själva ansökan, inte de aktuella (som kan ha ändrats).
         const appRow = applicationRes.data as
