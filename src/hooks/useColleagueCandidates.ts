@@ -461,6 +461,13 @@ export function useColleagueCandidates(
         setCandidates(previousCandidates);
         throw new Error('Kandidaten kunde inte flyttas');
       }
+      if (colleagueId) {
+        writeColleagueCache(
+          colleagueId,
+          listId,
+          previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
+        );
+      }
     } catch (error: any) {
       toast.error(error.message || 'Kunde inte flytta kandidaten');
     }
@@ -485,6 +492,9 @@ const previousCandidates = [...candidates];
       if (!data || data.length === 0) {
         setCandidates(previousCandidates);
         throw new Error('Kandidaten kunde inte tas bort');
+      }
+      if (colleagueId) {
+        writeColleagueCache(colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
       }
       toast.success('Kandidat borttagen från kollegans lista');
     } catch (error: any) {
