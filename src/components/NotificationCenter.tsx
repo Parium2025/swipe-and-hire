@@ -381,6 +381,8 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     hasMore,
     isLoadingMore,
     loadMore,
+    hasError,
+    refetch,
   } = useNotifications();
   const { isEnabled } = useNotificationPreferences();
   const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
