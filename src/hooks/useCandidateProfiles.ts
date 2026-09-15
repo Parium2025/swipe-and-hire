@@ -2,6 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const candidateProfilesMemoryCache = new Map<string, CandidateProfile[]>();
+
+/** Rensas vid utloggning så att nästa konto i samma flik inte ser profilerna. */
+export const clearCandidateProfilesMemoryCache = () => {
+  candidateProfilesMemoryCache.clear();
+};
 const CANDIDATE_PROFILES_CACHE_PREFIX = 'parium_candidate_profiles';
 
 function isCandidateProfile(value: unknown): value is CandidateProfile {
