@@ -21,6 +21,8 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 interface PrivacyDataPanelProps {
   /** Arbetsgivare ser även länk till personuppgiftsbiträdesavtalet */
   showDpaLink?: boolean;
+  /** Styr texten så den speglar det som faktiskt sparas för rollen */
+  isEmployer?: boolean;
 }
 
 /**
