@@ -117,7 +117,7 @@ export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm 
           Avbryt
         </AlertDialogCancel>
         <AlertDialogAction
-          onClick={onConfirm}
+          onClick={handleConfirm}
           variant="destructiveSoft"
           className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
         >
@@ -127,4 +127,5 @@ export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm 
       </AlertDialogFooter>
     </AlertDialogContentNoFocus>
   </AlertDialog>
-);
+  );
+};
