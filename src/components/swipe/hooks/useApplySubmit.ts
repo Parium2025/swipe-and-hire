@@ -188,9 +188,14 @@ export function useApplySubmit({
         return;
       }
 
+      // Tekniska engelska databasfel visades rakt av för kandidaten.
+      const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      const swedish = /[åäöÅÄÖ]|^Den valda profilen|^Besvara alla/.test(msg) ? msg : '';
       toast({
         title: 'Kunde inte skicka ansökan',
-        description: err.message || 'Försök igen',
+        description: isOffline
+          ? 'Du verkar vara offline. Ansökan skickas när du är uppkopplad igen.'
+          : swedish || 'Något gick fel. Försök igen om en stund.',
         variant: 'destructive',
       });
 
