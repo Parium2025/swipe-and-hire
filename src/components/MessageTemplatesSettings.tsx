@@ -1013,49 +1013,27 @@ export function MessageTemplatesSettings() {
 
     const trigger = templateForm.trigger as AutoRuleTrigger;
     const baseName = templateForm.name.trim();
-    const buildPayload = (channel: AutomationChannel, name: string) => ({
-      owner_user_id: user.id,
-      organization_id: organizationId,
-      name,
-      channel,
-      trigger,
-      subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
-      body: templateForm.channelContent[channel].body.trim(),
-      is_active: true,
-      is_default: false,
+
+    // Skicka alla kanaler till backend i en enda atomisk transaktion.
+    // Tidigare sparades kanalerna en och en, vilket kunde lämna mallen delvis sparad.
+    const payload = selectedChannels.map((channel) => {
+      const name = selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName;
+      return {
+        channel,
+        name,
+        subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
+        body: templateForm.channelContent[channel].body.trim(),
+      };
     });
 
-    // En egen mall per händelse + kanal (max 4 händelser × 3 kanaler = 12).
-    // Finns redan en mall i sloten skrivs den över istället för att skapa en dubblett.
-    let failed = false;
+    const { error } = await supabase.rpc('upsert_outreach_templates_atomic', {
+      p_owner_user_id: user.id,
+      p_organization_id: organizationId,
+      p_trigger: trigger,
+      p_templates: payload,
+    });
 
-    for (const channel of selectedChannels) {
-      const name = selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName;
-      const payload = buildPayload(channel, name);
-
-      const slotOwner = templates.find(
-        (template) =>
-          !isStandardTemplate(template) &&
-          template.channel === channel &&
-          (template.trigger ?? null) === trigger,
-      );
-      const targetId =
-        slotOwner?.id ??
-        (templateForm.id && templates.some((t) => t.id === templateForm.id && t.channel === channel)
-          ? templateForm.id
-          : null);
-
-      const { error } = targetId
-        ? await supabase.from('outreach_templates').update(payload).eq('id', targetId)
-        : await supabase.from('outreach_templates').insert(payload);
-
-      if (error) {
-        failed = true;
-        break;
-      }
-    }
-
-    if (failed) {
+    if (error) {
       toast.error('Kunde inte spara mallen');
       setSavingTemplate(false);
       await fetchStudio({ silent: true });
@@ -1067,7 +1045,7 @@ export function MessageTemplatesSettings() {
     resetTemplateEditor();
 
     await fetchStudio({ silent: true });
-      notifyOutreachStudioUpdated(user.id);
+    notifyOutreachStudioUpdated(user.id);
     goToStudioTab('automations');
     toast.success('Mall sparad — steg 2: välj när den ska skickas');
 
@@ -1194,43 +1172,50 @@ export function MessageTemplatesSettings() {
 
     if (failedResult?.error) {
       toast.error('Kunde inte spara regeln');
-    } else {
-      // Endast en aktiv regeluppsättning per händelse: tidigare regler för samma händelse stängs av,
-      // så kanaler du inte kryssat i slutar skicka direkt.
-      let disabledConflicts = 0;
-      if (automationForm.is_enabled) {
-        const conflicting = automations.filter(
-          (automation) =>
-            automation.is_enabled &&
-            automation.trigger === automationForm.trigger &&
-            getAutomationGroupId(automation) !== groupId,
-        );
-
-
-        if (conflicting.length > 0) {
-          const { error: conflictError } = await supabase
-            .from('outreach_automations')
-            .update({ is_enabled: false })
-            .in('id', conflicting.map((automation) => automation.id));
-
-          if (!conflictError) disabledConflicts = conflicting.length;
-        }
-      }
-
-      const wasUpdate = !!automationForm.id;
-      toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
-      setAutomationFormTouched(false);
-      if (disabledConflicts > 0) {
-        toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
-      }
-
-      if (!wasUpdate) {
-        setAutomationForm(EMPTY_AUTOMATION_FORM);
-      }
       await fetchStudio({ silent: true });
-      notifyOutreachStudioUpdated(user.id);
+      setSavingAutomation(false);
+      return;
     }
 
+    // Endast en aktiv regeluppsättning per händelse: tidigare regler för samma händelse stängs av,
+    // så kanaler du inte kryssat i slutar skicka direkt.
+    let disabledConflicts = 0;
+    if (automationForm.is_enabled) {
+      const conflicting = automations.filter(
+        (automation) =>
+          automation.is_enabled &&
+          automation.trigger === automationForm.trigger &&
+          getAutomationGroupId(automation) !== groupId,
+      );
+
+      if (conflicting.length > 0) {
+        const { error: conflictError } = await supabase
+          .from('outreach_automations')
+          .update({ is_enabled: false })
+          .in('id', conflicting.map((automation) => automation.id));
+
+        if (conflictError) {
+          toast.error('Kunde inte stänga av tidigare regelkonflikter');
+          await fetchStudio({ silent: true });
+          setSavingAutomation(false);
+          return;
+        }
+        disabledConflicts = conflicting.length;
+      }
+    }
+
+    const wasUpdate = !!automationForm.id;
+    toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
+    setAutomationFormTouched(false);
+    if (disabledConflicts > 0) {
+      toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
+    }
+
+    if (!wasUpdate) {
+      setAutomationForm(EMPTY_AUTOMATION_FORM);
+    }
+    await fetchStudio({ silent: true });
+    notifyOutreachStudioUpdated(user.id);
 
     setSavingAutomation(false);
   };

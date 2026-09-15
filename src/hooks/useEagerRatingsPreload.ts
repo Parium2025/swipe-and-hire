@@ -107,6 +107,13 @@ const clearAllAppCachesSync = () => {
     'parium_employer_stats_v1_',
     'parium_profile_lite_v1_',
     'parium-employer-analytics:',
+    // Inställningar och notifikationer (pass 11)
+    'parium_notif_prefs_',
+    'parium_auto_rules_cache',
+    'parium-team-cache:',
+    'outreach-studio-cache:',
+    'outreach-templates-cache:',
+    'outreach-template-draft:',
   ];
   
   const exactKeysToRemove = [

@@ -114,7 +114,7 @@ export function ActiveSessionsSettings() {
       if (error) {
         toast({
           title: 'Kunde inte logga ut sessionen',
-          description: error.message,
+          description: 'Försök igen om en stund.',
           variant: 'destructive',
         });
         return;
@@ -129,6 +129,11 @@ export function ActiveSessionsSettings() {
       }
     } catch (err) {
       console.warn('Error kicking session:', err);
+      toast({
+        title: 'Kunde inte logga ut sessionen',
+        description: 'Försök igen om en stund.',
+        variant: 'destructive',
+      });
     } finally {
       setKickingId(null);
     }

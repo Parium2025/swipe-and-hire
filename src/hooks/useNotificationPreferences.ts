@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 export type NotificationType = 
   | 'new_application' 
@@ -117,38 +118,23 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
   const toggleMutation = useMutation({
     mutationFn: async ({ type, enabled, channel }: { type: NotificationType; enabled: boolean; channel: NotificationChannel }) => {
       if (!user?.id) throw new Error('Not authenticated');
-      
-      const updateField = FIELD_BY_CHANNEL[channel];
-      
-      
-      // First check if row exists
-      const { data: existing } = await supabase
-        .from('notification_preferences')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('notification_type', type)
-        .maybeSingle();
 
-      if (existing) {
-        const { error } = await supabase
-          .from('notification_preferences')
-          .update({ [updateField]: enabled, updated_at: new Date().toISOString() } as never)
-          .eq('user_id', user.id)
-          .eq('notification_type', type);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('notification_preferences')
-          .insert({
+      const updateField = FIELD_BY_CHANNEL[channel];
+
+      // Upsert på unik constraint (user_id, notification_type) gör ändringen
+      // atomär. Tidigare select → insert/update kunde ge race vid snabba toggles.
+      const { error } = await supabase
+        .from('notification_preferences')
+        .upsert(
+          {
             user_id: user.id,
             notification_type: type,
-            is_enabled: channel === 'push' ? enabled : true,
-            email_enabled: channel === 'email' ? enabled : true,
-            in_app_enabled: channel === 'in_app' ? enabled : true,
+            [updateField]: enabled,
             updated_at: new Date().toISOString(),
-          });
-        if (error) throw error;
-      }
+          } as never,
+          { onConflict: 'user_id,notification_type' }
+        );
+      if (error) throw error;
     },
     onMutate: async ({ type, enabled, channel }) => {
       await queryClient.cancelQueries({ queryKey: ['notification-preferences', user?.id] });
@@ -178,6 +164,11 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
       if (context?.previous) {
         queryClient.setQueryData(['notification-preferences', user?.id], context.previous);
       }
+      toast({
+        title: 'Kunde inte spara aviseringsinställningen',
+        description: 'Försök igen om en stund.',
+        variant: 'destructive',
+      });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-preferences', user?.id] });

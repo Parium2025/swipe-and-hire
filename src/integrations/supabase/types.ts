@@ -4988,6 +4988,18 @@ export type Database = {
       }
       try_uuid: { Args: { p_text: string }; Returns: string }
       unaccent: { Args: { "": string }; Returns: string }
+      upsert_outreach_templates_atomic: {
+        Args: {
+          p_organization_id: string
+          p_owner_user_id: string
+          p_templates: Json
+          p_trigger: string
+        }
+        Returns: {
+          channel: Database["public"]["Enums"]["outreach_channel"]
+          id: string
+        }[]
+      }
       validate_confirmation_token: {
         Args: { input_token: string }
         Returns: {

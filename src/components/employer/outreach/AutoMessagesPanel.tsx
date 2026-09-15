@@ -241,11 +241,16 @@ export function AutoMessagesPanel() {
     const key = `${event.trigger}-${channel}`;
     setBusyKey(key);
 
-    try {
-      const existing = getRow(event, channel);
+    const previousAutomations = automations;
+    const existing = getRow(event, channel);
 
+    // Optimistisk uppdatering; rullas tillbaka vid fel.
+    if (existing) {
+      setAutomations((prev) => prev.map((item) => item.id === existing.id ? { ...item, is_enabled: enabled } : item));
+    }
+
+    try {
       if (existing) {
-        setAutomations((prev) => prev.map((item) => item.id === existing.id ? { ...item, is_enabled: enabled } : item));
         const { error } = await supabase
           .from('outreach_automations')
           .update({ is_enabled: enabled })
@@ -280,6 +285,7 @@ export function AutoMessagesPanel() {
       notifyOutreachStudioUpdated(user.id);
       toast.success(enabled ? 'Automatiskt utskick påslaget' : 'Automatiskt utskick pausat');
     } catch {
+      setAutomations(previousAutomations);
       toast.error('Kunde inte spara ändringen');
     } finally {
       setBusyKey(null);
@@ -288,9 +294,9 @@ export function AutoMessagesPanel() {
 
   const handleDelayChange = async (event: AutoRuleEvent, value: number) => {
     const rows = rowsByTrigger.get(event.trigger) ?? [];
+    const previousValue = pendingDelays[event.trigger] ?? rows[0]?.delay_minutes ?? event.defaultDelay;
     setPendingDelays((prev) => ({ ...prev, [event.trigger]: value }));
     if (rows.length === 0) return;
-
 
     setBusyKey(`${event.trigger}-delay`);
     const { error } = await supabase
@@ -300,6 +306,7 @@ export function AutoMessagesPanel() {
     setBusyKey(null);
 
     if (error) {
+      setPendingDelays((prev) => ({ ...prev, [event.trigger]: previousValue }));
       toast.error('Kunde inte spara tidpunkten');
       return;
     }

@@ -18,6 +18,9 @@ const EmployerAccountEmailPanel = ({ email }: EmployerAccountEmailPanelProps) =>
             disabled
             className="bg-white/5 border-white/10 text-white h-11 !min-h-0 text-sm cursor-not-allowed"
           />
+          <p className="text-xs text-white">
+            E-postadressen kan inte ändras här. Kontakta support om du vill byta inloggningsmejl.
+          </p>
         </div>
       </div>
     </SettingsPanel>
