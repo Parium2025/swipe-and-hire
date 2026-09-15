@@ -179,7 +179,7 @@ export const useSavedJobs = () => {
 
   const { isOnline, showOfflineToast } = useOnline();
   const { enqueue } = useOfflineSavedJobsQueue(user?.id);
-  const { isPremium } = useIsPremium();
+  const { isPremium, premiumUnknown } = useIsPremium();
 
   const toggleSaveJob = useCallback(async (jobId: string) => {
     if (!user) {
@@ -190,7 +190,9 @@ export const useSavedJobs = () => {
     const isSaved = savedJobIds.has(jobId);
 
     // 🔒 Premium-gate: max 3 sparade jobb samtidigt på gratisplan.
-    if (!isSaved && !isPremium && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
+    // premiumUnknown = statusen kunde inte hämtas; då spärrar vi inte en
+    // betalande användare på grund av ett nätfel.
+    if (!isSaved && !isPremium && !premiumUnknown && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
       emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
       return;
     }
