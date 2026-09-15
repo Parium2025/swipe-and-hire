@@ -517,6 +517,7 @@ const EmployerDashboard = memo(() => {
     // spärren kunde två raderingar skickas och två toasts visas.
     if (!jobToDelete || deletingJobRef.current) return;
     deletingJobRef.current = true;
+    setDeletingJob(true);
 
     try {
       // Optimistic: remove from react-query cache immediately
@@ -566,6 +567,7 @@ const EmployerDashboard = memo(() => {
       });
     } finally {
       deletingJobRef.current = false;
+      setDeletingJob(false);
     }
   };
 
@@ -1046,11 +1048,12 @@ const EmployerDashboard = memo(() => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
+              disabled={deletingJob}
               variant="destructiveSoft"
               className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
+              {deletingJob ? 'Tar bort…' : 'Ta bort'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>
