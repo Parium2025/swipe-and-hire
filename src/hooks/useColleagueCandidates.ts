@@ -15,7 +15,24 @@ const PAGE_SIZE = 50;
  * Hook to fetch and manage a colleague's candidates.
  * Uses cursor-based pagination for scalability (handles 100k+ candidates).
  */
-export function useColleagueCandidates(colleagueId: string | null, listId: string | null = null) {
+type ColleagueRow = {
+  id: string;
+  recruiter_id: string;
+  applicant_id: string;
+  application_id: string;
+  job_id: string | null;
+  stage: string;
+  notes: string | null;
+  rating: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export function useColleagueCandidates(
+  colleagueId: string | null,
+  listId: string | null = null,
+  searchQuery: string = '',
+) {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +45,7 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
   // rader. Varje hämtning får nu ett löpnummer och bara den senaste får skriva.
   const requestSeqRef = useRef(0);
   const inFlightRef = useRef(false);
+  const trimmedSearch = searchQuery.trim();
 
   const fetchColleagueCandidates = useCallback(async (loadMore = false) => {
     if (!colleagueId || !user) {
@@ -48,29 +66,59 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
     }
 
     try {
-      // Build query with cursor-based pagination
-      let query = supabase
-        .from('my_candidates')
-        .select('*')
-        .eq('recruiter_id', colleagueId)
-        .order('updated_at', { ascending: false })
-        .order('id', { ascending: false })
-        .limit(PAGE_SIZE);
+      const cursor = loadMore ? cursorRef.current : null;
+      let myCandidates: ColleagueRow[];
 
-      // Varje lista har sina egna kandidater
-      if (listId) query = query.eq('list_id', listId);
+      if (trimmedSearch) {
+        // Samma serversökning som i din egen lista — kollegans lista söks alltså
+        // i hela databasen, inte bara bland de rader som råkar vara nedladdade.
+        const { data, error } = await (supabase.rpc as any)('search_my_candidates', {
+          p_recruiter_id: colleagueId,
+          p_search_query: trimmedSearch,
+          p_limit: PAGE_SIZE,
+          p_cursor_updated_at: cursor?.updated_at ?? null,
+          p_cursor_id: cursor?.id ?? null,
+          p_list_id: listId,
+          p_stage: null,
+        });
+        if (error) throw error;
+        myCandidates = ((data || []) as any[]).map((row) => ({
+          id: row.my_candidate_id,
+          recruiter_id: colleagueId,
+          applicant_id: row.applicant_id,
+          application_id: row.application_id,
+          job_id: row.job_id,
+          stage: row.stage,
+          notes: row.notes,
+          rating: row.rating,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+        }));
+      } else {
+        // Build query with cursor-based pagination
+        let query = supabase
+          .from('my_candidates')
+          .select('*')
+          .eq('recruiter_id', colleagueId)
+          .order('updated_at', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(PAGE_SIZE);
 
-      // Apply cursor for pagination
-      const cursor = cursorRef.current;
-      if (loadMore && cursor) {
-        query = query.or(
-          `updated_at.lt.${cursor.updated_at},and(updated_at.eq.${cursor.updated_at},id.lt.${cursor.id})`,
-        );
+        // Varje lista har sina egna kandidater
+        if (listId) query = query.eq('list_id', listId);
+
+        // Apply cursor for pagination
+        if (cursor) {
+          query = query.or(
+            `updated_at.lt.${cursor.updated_at},and(updated_at.eq.${cursor.updated_at},id.lt.${cursor.id})`,
+          );
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        myCandidates = (data || []) as unknown as ColleagueRow[];
       }
 
-      const { data: myCandidates, error: mcError } = await query;
-
-      if (mcError) throw mcError;
       // En nyare hämtning har startat under tiden → kasta det här svaret.
       if (seq !== requestSeqRef.current) return;
       if (!myCandidates || myCandidates.length === 0) {
