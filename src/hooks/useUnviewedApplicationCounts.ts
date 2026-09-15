@@ -81,6 +81,9 @@ export function useUnviewedApplicationCounts() {
       timer = setTimeout(() => {
         timer = null;
         queryClient.invalidateQueries({ queryKey: [UNVIEWED_APPLICATIONS_QUERY_KEY] });
+        // Samma händelse håller startsidans "Nya ansökningar" live utan att
+        // öppna en andra realtidskanal per inloggad arbetsgivare.
+        queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
       }, 1000);
     };
     const channel = createRealtimeChannel(`employer-unviewed-apps-${user.id}`)
