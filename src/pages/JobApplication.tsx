@@ -150,9 +150,9 @@ const JobApplication = () => {
 
   // Restore draft on mount
   useEffect(() => {
-    if (jobId && !draftRestored) {
+    if (jobId && user?.id && !draftRestored) {
       try {
-        const saved = localStorage.getItem(getDraftKey(jobId));
+        const saved = localStorage.getItem(getDraftKey(jobId, user.id));
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.formData) {
@@ -160,16 +160,19 @@ const JobApplication = () => {
             console.log('💾 Job application draft restored');
           }
         }
+        // Ett gammalt utkast utan konto-koppling kan tillhöra en annan person
+        // på samma dator — det återställs aldrig, bara städas bort.
+        localStorage.removeItem(`${JOB_APPLICATION_DRAFT_PREFIX}${jobId}`);
       } catch (e) {
         console.warn('Failed to restore job application draft');
       }
       setDraftRestored(true);
     }
-  }, [jobId, draftRestored]);
+  }, [jobId, user?.id, draftRestored]);
 
   // Auto-save draft to localStorage
   useEffect(() => {
-    if (!jobId || !draftRestored) return;
+    if (!jobId || !user?.id || !draftRestored) return;
     
     // Check if there's any content to save
     const hasContent = Object.entries(formData).some(([key, value]) => {
@@ -184,7 +187,7 @@ const JobApplication = () => {
     
     if (hasContent) {
       try {
-        localStorage.setItem(getDraftKey(jobId), JSON.stringify({
+        localStorage.setItem(getDraftKey(jobId, user.id), JSON.stringify({
           formData,
           savedAt: Date.now()
         }));
@@ -193,7 +196,7 @@ const JobApplication = () => {
         console.warn('Failed to save job application draft');
       }
     }
-  }, [formData, jobId, draftRestored]);
+  }, [formData, jobId, user?.id, draftRestored]);
 
   // Track unsaved changes for navigation guard
   useEffect(() => {
@@ -205,15 +208,15 @@ const JobApplication = () => {
   // Listen for unsaved-confirm event to clear draft when user chooses "Lämna utan att spara"
   useEffect(() => {
     const onUnsavedConfirm = () => {
-      if (jobId) {
-        clearJobApplicationDraft(jobId);
+      if (jobId && user?.id) {
+        clearJobApplicationDraft(jobId, user.id);
         console.log('🗑️ Job application draft cleared on discard');
       }
       setHasUnsavedChanges(false);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
-  }, [jobId, setHasUnsavedChanges]);
+  }, [jobId, user?.id, setHasUnsavedChanges]);
 
   // Store initial form data after restore to detect changes
   useEffect(() => {
