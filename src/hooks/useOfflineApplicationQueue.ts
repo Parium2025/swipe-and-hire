@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
@@ -92,6 +93,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
   const [queue, setQueue] = useState<QueuedApplication[]>([]);
   const [syncing, setSyncing] = useState(false);
   const syncInProgress = useRef(false);
+  const queryClient = useQueryClient();
 
   // Load queue on mount
   useEffect(() => {
@@ -196,8 +198,9 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
         synced++;
         syncedJobIds.push(app.jobId);
 
-        // Clear application draft
+        // Clear application draft (kontobunden nyckel + äldre format)
         try {
+          localStorage.removeItem(`parium_draft_job-application-${app.applicantId}-${app.jobId}`);
           localStorage.removeItem(`parium_draft_job-application-${app.jobId}`);
         } catch { /* ignore */ }
       } else if (result === 'permanent') {
@@ -233,6 +236,14 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
       // Clear caches so UI updates
       clearMyApplicationsLocalCache();
 
+      // Utan detta låg de gamla listorna kvar i minnet: ansökan syntes inte
+      // under Mina ansökningar och jobbet saknade "Sökt"-markering, vilket
+      // fick användaren att söka en gång till.
+      queryClient.invalidateQueries({ queryKey: ['my-applications', userId] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
+      queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', userId] });
+
       toast.success(
         synced === 1
           ? `Ansökan skickad! ✓`
@@ -245,7 +256,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
         }
       );
     }
-  }, [userId]);
+  }, [userId, queryClient]);
 
   // Auto-sync on connectivity restore
   useEffect(() => {
