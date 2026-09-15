@@ -172,7 +172,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
-          <header className="relative shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style' }}>
+          <header className="relative shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center">
               <LogoSidebarTrigger />
             </div>
