@@ -423,14 +423,17 @@ export function ChatView({
         }
         // Citerat värde: dubbelcitat inuti måste escapas för PostgREST.
         const pattern = `"%${escaped.replace(/"/g, '\\"')}%"`;
+        // Tak: en lång tråd med ett vanligt sökord kan annars ge tiotusentals
+        // rader och frysa vyn. Vi hämtar de 500 senaste träffarna och vänder
+        // dem till stigande ordning (äldst först) som resten av vyn förväntar.
         const { data, error } = await supabase
           .from('conversation_messages')
           .select('id')
           .eq('conversation_id', conversation.id)
           .eq('is_system_message', false)
           .or(`content.ilike.${pattern},attachment_name.ilike.${pattern}`)
-
-          .order('created_at', { ascending: true });
+          .order('created_at', { ascending: false })
+          .limit(500);
 
         if (cancelled) return;
 
@@ -442,7 +445,7 @@ export function ChatView({
           return;
         }
 
-        setDbSearchResultIds((data || []).map(m => m.id));
+        setDbSearchResultIds((data || []).map(m => m.id).reverse());
       } catch {
         if (cancelled) return;
         // Fallback to local search
