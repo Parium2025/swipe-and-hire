@@ -35,6 +35,8 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
     contactEmail,
     hasAlreadyApplied,
     loading,
+    hasError,
+    retry,
   } = useApplyData(jobId, open, user?.id);
 
   const {
