@@ -72,14 +72,17 @@ export function useAnimatedPageChange(
     const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
     const startedAt = performance.now();
     const swapThreshold = container.clientHeight * 1.25;
-    let frame = 0;
+    // Byt aldrig innehållet direkt efter klicket. Det var den enda praktiska
+    // asymmetrin: en tyngre framåtsida kunde blockera huvudtråden innan ögat
+    // hunnit se hissen starta, medan en redan renderad bakåtsida såg korrekt ut.
+    // Samma minsta synliga resväg gäller nu båda riktningarna.
+    const minimumTravelBeforeSwap = Math.min(container.clientHeight * 0.65, startTop * 0.25);
     let swapped = false;
     // Tiden som React-renderingen stjäl får inte räknas in i rörelsen, annars
     // hoppar hissen ifatt kurvan med ett synligt ryck efter sidbytet.
     let pausedMs = 0;
 
     const animate = (now: number) => {
-      frame += 1;
       const progress = Math.min((now - startedAt - pausedMs) / durationMs, 1);
       // Mjuk start och mjukt stopp – hisskänsla, ingen hetsig utskjutning.
       const eased = progress < 0.5
@@ -88,9 +91,10 @@ export function useAnimatedPageChange(
       const nextTop = startTop * (1 - eased);
       container.scrollTop = nextTop;
 
-      // Minst en målad rörelsebild före bytet. Därefter byts korten utanför
-      // synfältet, med exakt samma ordning oavsett riktning eller sidnummer.
-      if (!swapped && frame >= 2 && nextTop > swapThreshold) {
+      // Låt hissen synligt börja röra sig innan React byter korten. Detta är
+      // samma villkor för Nästa, Föregående och direktval av sidnummer.
+      const travelled = startTop - nextTop;
+      if (!swapped && travelled >= minimumTravelBeforeSwap && nextTop > swapThreshold) {
         swapped = true;
         const swapStartedAt = performance.now();
         flushSync(() => setPage(nextPage));
