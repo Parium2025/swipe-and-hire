@@ -501,7 +501,13 @@ const CompanyProfile = () => {
 
     try {
       setLoading(true);
-      await updateProfile(sanitizedFormData as any);
+      // Resultatet måste läsas — annars visas "Sparat" även när databasen
+      // nekade ändringen och texten bara ligger kvar i formuläret.
+      const { error: updateError } = await updateProfile(sanitizedFormData as any);
+      if (updateError) {
+        setSaveError('Kunde inte spara ändringen. Försök igen.');
+        return false;
+      }
 
       if (user) {
         // Rensa bild-cache för denna användares loggor (alla versioner)
@@ -526,13 +532,24 @@ const CompanyProfile = () => {
           }
         } catch {}
 
+        // Jobblistor visar företagsnamn och logga — bara de fälten kräver att
+        // annonscacherna hämtas om. Autosparet får inte tvinga fram en full
+        // omhämtning av alla annonser vid varje tangenttryck i ett textfält.
+        const brandingChanged =
+          originalValues?.company_name !== sanitizedFormData.company_name ||
+          originalValues?.company_logo_url !== sanitizedFormData.company_logo_url;
+
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['jobs'] }),
-          queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] }),
-          queryClient.invalidateQueries({ queryKey: ['saved-jobs'] }),
-          queryClient.invalidateQueries({ queryKey: ['skipped-jobs'] }),
-          queryClient.invalidateQueries({ queryKey: ['available-jobs'] }),
-          queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] }),
+          ...(brandingChanged
+            ? [
+                queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+                queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] }),
+                queryClient.invalidateQueries({ queryKey: ['saved-jobs'] }),
+                queryClient.invalidateQueries({ queryKey: ['skipped-jobs'] }),
+                queryClient.invalidateQueries({ queryKey: ['available-jobs'] }),
+                queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] }),
+              ]
+            : []),
           queryClient.invalidateQueries({ queryKey: ['profile'] }),
           queryClient.invalidateQueries({ queryKey: ['company-profile'] }),
         ]);
