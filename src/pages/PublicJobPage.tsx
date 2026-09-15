@@ -17,6 +17,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
  import { OCCUPATIONS } from '@/data/jobOccupations';
 import { TruncatedText } from '@/components/TruncatedText';
 import { parseSalary, formatSalary } from '@/lib/salaryRange';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
  
 
@@ -56,6 +57,24 @@ const slugify = (s: string) =>
   s.toLowerCase()
     .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Image paths can be stored either as full URLs or as bare storage paths —
+// resolve bare paths to public storage URLs (same behaviour as SearchJobs.tsx).
+const resolveStorageImageUrl = (
+  raw: string | null | undefined,
+  bucket: 'job-images' | 'company-logos',
+): string | null => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  try {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(trimmed);
+    return data?.publicUrl || null;
+  } catch {
+    return null;
+  }
+};
 
 const PublicJobPage = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -309,7 +328,9 @@ const PublicJobPage = () => {
     'Visstid': 'TEMPORARY', 'Sommarjobb': 'TEMPORARY', 'Konsult': 'CONTRACTOR',
     'Praktik': 'INTERN', 'Volontär': 'VOLUNTEER',
   };
-  const employmentTypeLD = employmentTypeMap[job.employment_type || ''] || 'OTHER';
+  const employmentLabel = getEmploymentTypeLabel(job.employment_type || undefined);
+  const employmentTypeLD = employmentTypeMap[job.employment_type || '']
+    || employmentTypeMap[employmentLabel] || 'OTHER';
 
   const validThrough = job.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
