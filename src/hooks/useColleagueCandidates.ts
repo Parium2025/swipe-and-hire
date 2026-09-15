@@ -7,9 +7,48 @@ import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
+
+// Samma lokala snabbcache som din egen lista har: första bilden ritas direkt ur
+// cachen och listan hämtas ändå om från databasen i bakgrunden. Nyckeln är egen
+// per kollega och lista, så ingens data kan blandas ihop med någon annans.
+const COLLEAGUE_CACHE_KEY = 'parium_colleague_candidates_v1_';
+const COLLEAGUE_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+interface CachedColleagueCandidates {
+  items: MyCandidateData[];
+  timestamp: number;
+}
+
+function colleagueCacheKey(colleagueId: string, listId: string | null): string {
+  return `${COLLEAGUE_CACHE_KEY}${colleagueId}${listId ? `_${listId}` : ''}`;
+}
+
+function readColleagueCache(colleagueId: string, listId: string | null): MyCandidateData[] | null {
+  const cached = safeReadJsonCache<CachedColleagueCandidates>(
+    colleagueCacheKey(colleagueId, listId),
+    (value): value is CachedColleagueCandidates => {
+      const cache = value as Partial<CachedColleagueCandidates>;
+      return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
+    },
+  );
+  if (!cached || Date.now() - cached.timestamp > COLLEAGUE_CACHE_MAX_AGE_MS) return null;
+  return cached.items;
+}
+
+function writeColleagueCache(colleagueId: string, listId: string | null, items: MyCandidateData[]): void {
+  try {
+    safeSetItem(
+      colleagueCacheKey(colleagueId, listId),
+      JSON.stringify({ items: items.slice(0, 100), timestamp: Date.now() }),
+    );
+  } catch {
+    // Storage full — cachen är bara en snabbstart, inte en datakälla.
+  }
+}
 
 /**
  * Hook to fetch and manage a colleague's candidates.
@@ -291,9 +330,15 @@ export function useColleagueCandidates(
       }, 0);
 
       if (loadMore) {
-        setCandidates(prev => [...prev, ...result]);
+        setCandidates(prev => {
+          const merged = [...prev, ...result];
+          if (!trimmedSearch) writeColleagueCache(colleagueId, listId, merged);
+          return merged;
+        });
       } else {
         setCandidates(result);
+        // Sökträffar är inte hela listan och får aldrig skriva över cachen.
+        if (!trimmedSearch) writeColleagueCache(colleagueId, listId, result);
       }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
@@ -310,14 +355,30 @@ export function useColleagueCandidates(
   }, [colleagueId, listId, user, trimmedSearch]);
 
   // Ny sökning → ladda om från början (samma beteende som din egen lista).
+  // Utan sökning ritas cachen först så att tavlan syns direkt, precis som i din
+  // egen vy — den färska datan ersätter den så fort svaret kommer.
   useEffect(() => {
     if (!colleagueId) return;
+    if (!trimmedSearch) {
+      const cached = readColleagueCache(colleagueId, listId);
+      if (cached && cached.length > 0) setCandidates(cached);
+    }
     void fetchColleagueCandidates(false);
   }, [colleagueId, listId, trimmedSearch, fetchColleagueCandidates]);
 
-  // 📡 REALTIME: Prenumerera på kollegans kandidatändringar
+  // 📡 REALTIME: kandidater, betyg och anteckningar — samma täckning som din
+  // egen vy, så en ändring som kollegan (eller någon annan i teamet) gör syns
+  // direkt i stället för vid nästa omladdning.
   useEffect(() => {
     if (!colleagueId || !user) return;
+
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleRefresh = () => {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        void fetchColleagueCandidates(false);
+      }, 250);
+    };
 
     const channel = createRealtimeChannel(`colleague-candidates-${colleagueId}`)
       .on(
@@ -328,14 +389,27 @@ export function useColleagueCandidates(
           table: 'my_candidates',
           filter: `recruiter_id=eq.${colleagueId}`,
         },
-        () => {
-          // Refresh hela listan vid ändringar
-          fetchColleagueCandidates(false);
-        }
+        scheduleRefresh,
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_ratings',
+          filter: `recruiter_id=eq.${colleagueId}`,
+        },
+        scheduleRefresh,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'candidate_notes' },
+        scheduleRefresh,
       )
       .subscribe();
 
     return () => {
+      if (refreshTimer) clearTimeout(refreshTimer);
       supabase.removeChannel(channel);
     };
   }, [colleagueId, user, fetchColleagueCandidates]);
@@ -387,6 +461,13 @@ export function useColleagueCandidates(
         setCandidates(previousCandidates);
         throw new Error('Kandidaten kunde inte flyttas');
       }
+      if (colleagueId) {
+        writeColleagueCache(
+          colleagueId,
+          listId,
+          previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
+        );
+      }
     } catch (error: any) {
       toast.error(error.message || 'Kunde inte flytta kandidaten');
     }
@@ -411,6 +492,9 @@ const previousCandidates = [...candidates];
       if (!data || data.length === 0) {
         setCandidates(previousCandidates);
         throw new Error('Kandidaten kunde inte tas bort');
+      }
+      if (colleagueId) {
+        writeColleagueCache(colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
       }
       toast.success('Kandidat borttagen från kollegans lista');
     } catch (error: any) {
