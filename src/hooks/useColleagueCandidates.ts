@@ -486,6 +486,7 @@ export function useColleagueCandidates(
       // sökträffarna, och de får inte ersätta hela listans sparade ögonblicksbild.
       if (colleagueId && !trimmedSearch) {
         writeColleagueCache(
+          user?.id,
           colleagueId,
           listId,
           previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
@@ -522,7 +523,7 @@ export function useColleagueCandidates(
         throw new Error('Kandidaten kunde inte tas bort');
       }
       if (colleagueId && !trimmedSearch) {
-        writeColleagueCache(colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
+        writeColleagueCache(user?.id, colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
       }
       if (!opts?.silent) toast.success('Kandidat borttagen från kollegans lista');
       return true;
