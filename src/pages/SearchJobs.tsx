@@ -806,45 +806,56 @@ const SearchJobs = memo(() => {
     }
 
     if (pageScrollAnimationRef.current !== null) {
-      cancelAnimationFrame(pageScrollAnimationRef.current);
+      return;
     }
 
     const startTop = container.scrollTop;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion || startTop <= 0) {
+    if (startTop <= 0) {
       container.scrollTop = 0;
       setPage(next);
       return;
     }
 
-    // Låt webbläsarens egen, kompositörsdrivna scrollmotor bära den gamla sidan
-    // uppåt. Direkta scrollTop-skrivningar i requestAnimationFrame kan räknas
-    // korrekt men ändå bara målas i sista läget av iOS momentum-scrollning — då
-    // ser användaren ett hopp. Sidan byts först när den synliga hissrörelsen är klar.
+    // iOS kan batcha både native smooth-scroll och scrollTop-skrivningar när
+    // huvudytan ligger i Safaris separata momentumlager. Koppla därför bort
+    // momentumlagret under just sidbytet och driv en enda deterministisk scroll.
+    // Den gamla sidan ligger kvar tills rörelsen är färdig; först därefter byts
+    // jobben. Toppraden ligger utanför containern och rörs aldrig.
+    const previousOverflowAnchor = container.style.overflowAnchor;
+    const previousScrollBehavior = container.style.scrollBehavior;
+    const previousMomentumScrolling = container.style.getPropertyValue('-webkit-overflow-scrolling');
+    container.style.overflowAnchor = 'none';
+    container.style.scrollBehavior = 'auto';
+    container.style.setProperty('-webkit-overflow-scrolling', 'auto');
+    void container.offsetHeight;
+
+    const durationMs = Math.min(1100, Math.max(750, startTop * 0.11));
     const startedAt = performance.now();
-    let previousTop = startTop;
-    let stableFrames = 0;
+    const animateToTop = (now: number) => {
+      const progress = Math.min((now - startedAt) / durationMs, 1);
+      const eased = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      container.scrollTop = startTop * (1 - eased);
 
-    container.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-
-    const waitForTop = (now: number) => {
-      const currentTop = container.scrollTop;
-      stableFrames = Math.abs(currentTop - previousTop) < 0.5 ? stableFrames + 1 : 0;
-      previousTop = currentTop;
-
-      const reachedTop = currentTop <= 1 && stableFrames >= 2;
-      const timedOut = now - startedAt >= 1400;
-      if (!reachedTop && !timedOut) {
-        pageScrollAnimationRef.current = requestAnimationFrame(waitForTop);
+      if (progress < 1) {
+        pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
         return;
       }
 
       container.scrollTop = 0;
+      container.style.overflowAnchor = previousOverflowAnchor;
+      container.style.scrollBehavior = previousScrollBehavior;
+      if (previousMomentumScrolling) {
+        container.style.setProperty('-webkit-overflow-scrolling', previousMomentumScrolling);
+      } else {
+        container.style.removeProperty('-webkit-overflow-scrolling');
+      }
       pageScrollAnimationRef.current = null;
       setPage(next);
     };
 
-    pageScrollAnimationRef.current = requestAnimationFrame(waitForTop);
+    pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
