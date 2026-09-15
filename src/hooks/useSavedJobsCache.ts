@@ -548,7 +548,7 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
       queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
       throw error;
     }
-  }, [user?.id, queryClient, savedJobIds, isPremium, removeSkippedJobLocally]);
+  }, [user?.id, queryClient, savedJobIds, isPremium, premiumUnknown, removeSkippedJobLocally]);
 
   /**
    * 🗑️ Massrensning — tar bort flera sparade jobb i en och samma runda.
