@@ -172,7 +172,27 @@ const MyCandidates = () => {
   } = useMyCandidatesData(debouncedSearchQuery, activeListId, activeStageOrder);
 
   // Sanna totalsiffror per kolumn (räknas i databasen, inte på nedladdade rader)
-  const stageCounts = useMyCandidateStageCounts(activeListId, !isViewingColleague);
+  // Kollegans vy ska ha exakt samma siffror och laddning som din egen lista —
+  // bara utan rätten att ändra kollegans inställningar.
+  const stageCounts = useMyCandidateStageCounts(
+    isViewingColleague ? viewingColleagueListId : activeListId,
+    true,
+    isViewingColleague ? viewingColleagueId : null,
+  );
+
+  // Kollegans lista paginerar över hela listan (inte per kolumn), så samma
+  // "ladda fler" används för alla kolumner.
+  const effectiveHasMoreInStage = useCallback(
+    (stage: string) => (isViewingColleague ? colleagueHasMore : hasMoreInStage(stage)),
+    [isViewingColleague, colleagueHasMore, hasMoreInStage],
+  );
+  const effectiveLoadMore = useCallback(
+    (stage: string) => {
+      if (isViewingColleague) loadMoreColleagueCandidates();
+      else loadMoreStage(stage);
+    },
+    [isViewingColleague, loadMoreColleagueCandidates, loadMoreStage],
+  );
 
   // updateCandidatesCache is now provided by useBulkCandidateOps hook
 
