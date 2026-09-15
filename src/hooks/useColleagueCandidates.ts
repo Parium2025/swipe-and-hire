@@ -23,13 +23,17 @@ interface CachedColleagueCandidates {
   timestamp: number;
 }
 
-function colleagueCacheKey(colleagueId: string, listId: string | null): string {
-  return `${COLLEAGUE_CACHE_KEY}${colleagueId}${listId ? `_${listId}` : ''}`;
+// Nyckeln är bunden till BÅDE den inloggade betraktaren och kollegan/listan.
+// Utan betraktar-id kunde nästa användare på samma dator se förra användarens
+// kandidatlista blinka fram innan behörighetskontrollen hunnit svara.
+function colleagueCacheKey(viewerId: string, colleagueId: string, listId: string | null): string {
+  return `${COLLEAGUE_CACHE_KEY}${viewerId}_${colleagueId}${listId ? `_${listId}` : ''}`;
 }
 
-function readColleagueCache(colleagueId: string, listId: string | null): MyCandidateData[] | null {
+function readColleagueCache(viewerId: string | undefined, colleagueId: string, listId: string | null): MyCandidateData[] | null {
+  if (!viewerId) return null;
   const cached = safeReadJsonCache<CachedColleagueCandidates>(
-    colleagueCacheKey(colleagueId, listId),
+    colleagueCacheKey(viewerId, colleagueId, listId),
     (value): value is CachedColleagueCandidates => {
       const cache = value as Partial<CachedColleagueCandidates>;
       return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
@@ -39,10 +43,11 @@ function readColleagueCache(colleagueId: string, listId: string | null): MyCandi
   return cached.items;
 }
 
-function writeColleagueCache(colleagueId: string, listId: string | null, items: MyCandidateData[]): void {
+function writeColleagueCache(viewerId: string | undefined, colleagueId: string, listId: string | null, items: MyCandidateData[]): void {
+  if (!viewerId) return;
   try {
     safeSetItem(
-      colleagueCacheKey(colleagueId, listId),
+      colleagueCacheKey(viewerId, colleagueId, listId),
       JSON.stringify({ items: items.slice(0, 100), timestamp: Date.now() }),
     );
   } catch {
