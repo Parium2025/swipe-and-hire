@@ -4260,6 +4260,14 @@ export type Database = {
           total_count: number
         }[]
       }
+      get_company_review_stats_batch: {
+        Args: { p_company_ids: string[] }
+        Returns: {
+          avg_rating: number
+          company_id: string
+          total_count: number
+        }[]
+      }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {

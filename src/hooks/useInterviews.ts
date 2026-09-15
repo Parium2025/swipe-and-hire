@@ -290,7 +290,7 @@ export const useCandidateInterviews = () => {
       return undefined;
   }, [user?.id]);
 
-  const { data: interviews = [], isLoading } = useQuery({
+  const { data: interviews = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['candidate-interviews', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -364,6 +364,9 @@ export const useCandidateInterviews = () => {
   return {
     interviews,
     isLoading,
+    // Ett hämtningsfel får inte se ut som "inga intervjuer".
+    isError: isError && interviews.length === 0,
+    refetch,
     respondToInterview,
   };
 };

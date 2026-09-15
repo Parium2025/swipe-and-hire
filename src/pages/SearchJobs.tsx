@@ -379,7 +379,7 @@ const SearchJobs = memo(() => {
   }, [timeFilter]);
 
   // Use the new optimized job search hook with full-text search
-  const { jobs: searchJobs, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
+  const { jobs: searchJobs, isLoading, error: searchError, refetch: refetchSearch, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
     searchQuery: debouncedSearch,
     city: selectedCity,
     employmentTypes: selectedEmploymentTypes,
@@ -999,6 +999,25 @@ const SearchJobs = memo(() => {
           // Vid filter/refetch används samma kortgeometri och aktuella antal som
           // den riktiga listan — inte ett separat generiskt femraders-skal.
           <JobCardGridSkeleton count={filteredAndSortedJobs.length} />
+        ) : searchError && filteredAndSortedJobs.length === 0 ? (
+          // Ett misslyckat anrop får ALDRIG visas som "inga jobb hittades" —
+          // då tror jobbsökaren att marknaden är tom.
+          <div className="text-center py-16 px-4">
+            <p className="text-white text-lg font-medium">Kunde inte hämta jobben</p>
+            <p className="text-white text-sm mt-2">
+              Kontrollera din uppkoppling och försök igen.
+            </p>
+            <button
+              onClick={() => { void refetchSearch(); }}
+              className="mt-4 inline-flex items-center justify-center rounded-full bg-white/10 border border-white/20 px-4 py-2 text-sm font-medium text-white active:scale-[0.97] touch-manipulation"
+            >
+              Försök igen
+            </button>
+          </div>
+        ) : filteredAndSortedJobs.length === 0 && (isFetchingNextPage || hasNextPage) ? (
+          // Lönefiltret körs på klienten mot serverns sidor. Innan nästa sida
+          // hämtats kan listan vara tom trots att fler träffar finns kvar.
+          <JobCardGridSkeleton count={6} />
         ) : filteredAndSortedJobs.length === 0 ? (
           <div className="text-center py-16 px-4">
             <p className="text-white text-lg font-medium">Inga jobb hittades</p>
