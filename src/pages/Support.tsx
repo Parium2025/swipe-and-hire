@@ -73,10 +73,22 @@ const Support = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Hämta befintliga ärenden
+  // Hämta befintliga ärenden — även vid kontobyte i samma flik
   useEffect(() => {
+    if (!user?.id) {
+      // Utloggad/kontobyte: visa aldrig föregående persons ärenden
+      setTickets([]);
+      setTicketsError(false);
+      setTicketsLoading(false);
+      return;
+    }
+    const cached = readCachedSupportTickets(user.id) as unknown as SupportTicket[] | null;
+    setTickets(cached ?? []);
+    setTicketsLoading(!cached);
+    setTicketsError(false);
     fetchTickets();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
 
   const fetchTickets = async () => {
@@ -88,13 +100,22 @@ const Support = () => {
 
       if (error) throw error;
       setTickets(data || []);
+      setTicketsError(false);
       writeCachedCount(SKELETON_COUNT_KEYS.supportTickets, (data || []).length);
       if (user?.id) writeCachedSupportTickets(user.id, (data || []) as never);
     } catch (error) {
       console.error('Error fetching tickets:', error);
+      // Ett hämtningsfel får aldrig se ut som "Inga supportärenden ännu"
+      setTicketsError(true);
     } finally {
       setTicketsLoading(false);
     }
+  };
+
+  const retryFetchTickets = () => {
+    setTicketsError(false);
+    setTicketsLoading(true);
+    fetchTickets();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
