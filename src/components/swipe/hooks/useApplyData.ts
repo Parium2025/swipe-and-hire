@@ -89,7 +89,11 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
           }
         }
       } catch (err) {
-        if (!cancelled) console.error('Error fetching apply data:', err);
+        if (!cancelled) {
+          console.error('Error fetching apply data:', err);
+          setQuestions([]);
+          setHasError(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -99,7 +103,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
     return () => {
       cancelled = true;
     };
-  }, [open, jobId, userId]);
+  }, [open, jobId, userId, reloadKey]);
 
   return {
     questions,
@@ -109,5 +113,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
     extraDetails,
     hasAlreadyApplied,
     loading,
+    hasError,
+    retry: () => setReloadKey((k) => k + 1),
   };
 }
