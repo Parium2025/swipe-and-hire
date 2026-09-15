@@ -44,7 +44,7 @@ const Billing = () => {
   // Riktiga köp från databasen. Betalningar är ännu inte aktiverade, så för de
   // allra flesta konton är listan tom — då visas ett korrekt tomt läge i stället
   // för påhittade kort och fakturor.
-  const { data: purchases = [], isLoading } = useQuery({
+  const { data: purchases = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['billing-purchases', user?.id],
     enabled: !!user?.id,
     staleTime: 60_000,
@@ -202,7 +202,7 @@ const Billing = () => {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <div className="text-right">
                           <p className="font-semibold text-white text-sm">
-                            {getTotalForMonth(monthData.payments)} kr
+                            {getTotalForMonth(monthData.payments).toLocaleString('sv-SE')} kr
                           </p>
                           <p className="text-sm text-white">Totalt</p>
                         </div>
@@ -235,7 +235,7 @@ const Billing = () => {
                               </div>
                               <div className="text-left sm:text-right">
                                 <p className="font-semibold text-white text-sm">
-                                  {payment.amount} {payment.currency}
+                                  {payment.amount.toLocaleString('sv-SE')} kr
                                 </p>
                                 {payment.invoice && (
                                   <p className="text-sm text-white">#{payment.invoice.slice(-8)}</p>
@@ -249,6 +249,20 @@ const Billing = () => {
                   )}
                 </div>
               ))}
+            </div>
+          ) : isError ? (
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4 text-center">
+              <CreditCard className="h-10 w-10 text-white mx-auto mb-4" />
+              <h3 className="font-medium text-white mb-2 text-sm">Kunde inte hämta betalningshistoriken</h3>
+              <p className="text-sm text-white mb-4">
+                Något gick fel när uppgifterna skulle hämtas
+              </p>
+              <button
+                onClick={() => refetch()}
+                className="min-h-[44px] rounded-full bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 transition"
+              >
+                Försök igen
+              </button>
             </div>
           ) : (
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4 text-center">

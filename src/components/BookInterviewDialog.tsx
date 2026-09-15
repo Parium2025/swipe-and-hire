@@ -591,7 +591,13 @@ export const BookInterviewDialog = ({
                   mode="single"
                   selected={date}
                   onSelect={setDate}
-                  disabled={(date) => date < startOfDay(new Date())}
+                  disabled={(day) => {
+                    // Inget bakåt i tiden, och som mest 12 månader fram –
+                    // ett feltryck ska inte kunna boka ett möte år 2031.
+                    const maxDate = new Date();
+                    maxDate.setMonth(maxDate.getMonth() + 12);
+                    return day < startOfDay(new Date()) || day > maxDate;
+                  }}
                   initialFocus
                   className="pointer-events-auto touch-manipulation"
                   classNames={{

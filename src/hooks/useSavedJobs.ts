@@ -179,7 +179,7 @@ export const useSavedJobs = () => {
 
   const { isOnline, showOfflineToast } = useOnline();
   const { enqueue } = useOfflineSavedJobsQueue(user?.id);
-  const { isPremium } = useIsPremium();
+  const { isPremium, premiumUnknown } = useIsPremium();
 
   const toggleSaveJob = useCallback(async (jobId: string) => {
     if (!user) {
@@ -190,7 +190,9 @@ export const useSavedJobs = () => {
     const isSaved = savedJobIds.has(jobId);
 
     // 🔒 Premium-gate: max 3 sparade jobb samtidigt på gratisplan.
-    if (!isSaved && !isPremium && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
+    // premiumUnknown = statusen kunde inte hämtas; då spärrar vi inte en
+    // betalande användare på grund av ett nätfel.
+    if (!isSaved && !isPremium && !premiumUnknown && savedJobIds.size >= SAVED_JOBS_FREE_LIMIT) {
       emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
       return;
     }
@@ -267,7 +269,7 @@ export const useSavedJobs = () => {
       console.error('Error toggling saved job:', err);
       toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
-  }, [user, savedJobIds, isOnline, enqueue, queryClient, isPremium]);
+  }, [user, savedJobIds, isOnline, enqueue, queryClient, isPremium, premiumUnknown]);
 
   // Explicit unsave - always deletes, no toggle logic
   const unsaveJob = useCallback(async (jobId: string) => {

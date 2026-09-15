@@ -54,8 +54,11 @@ export function useHasActivePlan() {
         _user_id: user.id,
       });
       if (error) {
+        // Tidigare returnerades null vid fel, vilket såg exakt likadant ut som
+        // "ingen plan" – en betalande kund kunde få uppmaningen att köpa plan
+        // vid ett tillfälligt nätfel. Nu blir det ett fel som kan göras om.
         console.warn('[useHasActivePlan] error:', error.message);
-        return null;
+        throw error;
       }
       const row = data?.[0];
       return row ? (row as unknown as ActivePlanDetails) : null;
@@ -71,6 +74,8 @@ export function useHasActivePlan() {
     expiresAt: query.data?.expires_at ?? null,
     isOwner: ownerBypass,
     loading: adminLoading || query.isLoading,
+    // Sant när planen inte kunde hämtas – då vet vi inte om kunden har plan.
+    planUnknown: query.isError,
     refetch: query.refetch,
   };
 }

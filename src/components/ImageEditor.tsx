@@ -90,6 +90,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         img.onerror = (error) => {
           console.error('Image failed to load from blob:', error);
           URL.revokeObjectURL(blobUrl);
+          // Utan besked står redigeraren bara tom (vanligt med HEIC-bilder
+          // i andra webbläsare än Safari).
+          toast.error('Kunde inte visa bilden', {
+            description: 'Formatet stöds inte här. Prova med en JPG- eller PNG-bild.',
+          });
         };
         
         img.src = blobUrl;
@@ -115,6 +120,12 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           setPosition({ x: 0, y: 0 });
           setImageLoaded(true);
           setHasUserMadeChanges(false); // Reset on new image load
+        };
+        img.onerror = () => {
+          console.error('Image failed to load directly');
+          toast.error('Kunde inte visa bilden', {
+            description: 'Formatet stöds inte här. Prova med en JPG- eller PNG-bild.',
+          });
         };
         img.src = imageSrc;
       }

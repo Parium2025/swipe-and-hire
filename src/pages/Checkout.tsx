@@ -122,6 +122,8 @@ export default function Checkout() {
             <span className="text-5xl font-black text-white">{plan.price.split('/')[0]}</span>
             <span className="text-sm font-medium text-white">/{plan.price.split('/')[1]}</span>
           </div>
+          {/* Priserna i appen anges exklusive moms – det ska framgå även här. */}
+          <p className="mt-1 text-xs text-white/70">Exkl. moms. 25 % moms tillkommer och specificeras på fakturan.</p>
           <p className="mt-3 text-sm leading-7 text-white">{plan.tagline}</p>
 
           <div className="mt-7 border-t border-white/10 pt-6">

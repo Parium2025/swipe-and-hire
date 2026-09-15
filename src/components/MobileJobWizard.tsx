@@ -959,7 +959,7 @@ const MobileJobWizard = ({
   };
 
   const { user } = useAuth();
-  const { hasPlan, loading: planLoading } = useHasActivePlan();
+  const { hasPlan, loading: planLoading, planUnknown } = useHasActivePlan();
   const { toast } = useToast();
 
   // Load user profile and question templates when opening
@@ -2512,6 +2512,17 @@ const MobileJobWizard = ({
 
   const handleSubmit = async () => {
     if (!user || !validateCurrentStep() || loading || planLoading) return;
+
+    // Kunde planen inte hämtas vet vi inte om kunden har en plan – då får
+    // ingen betalande kund skickas till plan-valet av misstag.
+    if (planUnknown) {
+      toast({
+        title: 'Kunde inte kontrollera din plan',
+        description: 'Ditt utkast är sparat. Försök publicera igen om en stund.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     // 🔒 Plan-gate: kräv aktiv plan för att publicera. Utkastet är redan sparat.
     if (!hasPlan) {

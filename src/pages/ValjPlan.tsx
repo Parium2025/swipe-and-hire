@@ -138,7 +138,7 @@ export default function ValjPlan() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, userRole } = useAuth();
-  const { plan: activePlan } = useHasActivePlan();
+  const { plan: activePlan, planUnknown } = useHasActivePlan();
   const isEmployer = userRole?.role === 'employer';
 
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
@@ -208,6 +208,13 @@ export default function ValjPlan() {
   const handleSelect = (plan: Plan) => {
     if (!user) {
       navigate(`/auth?redirect=${encodeURIComponent('/valj-plan')}`);
+      return;
+    }
+    // Vet vi inte om kunden redan har en plan får vi inte riskera ett dubbelköp.
+    if (planUnknown) {
+      toast.error('Kunde inte kontrollera din nuvarande plan', {
+        description: 'Försök igen om en stund.',
+      });
       return;
     }
     setSelectedPlan(plan);

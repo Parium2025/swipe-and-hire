@@ -47,7 +47,9 @@ export function useSecondaryPagesPrewarm() {
           queryFn: async () => {
             // Samma källa som useIsPremium — direktläsning av profiles ger 403.
             const { data, error } = await supabase.rpc('has_premium', { p_user_id: userId });
-            if (error) return false;
+            // Kasta i stället för att cacha "false" – annars skulle ett nätfel
+            // se ut som ett giltigt "ingen premium" för hela sidan.
+            if (error) throw error;
             return data === true;
           },
           staleTime: 60_000,
