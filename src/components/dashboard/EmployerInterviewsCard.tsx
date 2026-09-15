@@ -38,6 +38,8 @@ export const EmployerInterviewsCard = memo(() => {
   const { interviews, isLoading, error } = useInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
+  // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
+  const lastOpenRef = useRef(0);
 
   // Filtrera bort intervjuer som redan är avslutade – annars ligger de kvar
   // tills nästa refetch och visar "passerad".
