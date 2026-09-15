@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef, memo } from 'react';
-import { flushSync } from 'react-dom';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -53,7 +52,7 @@ import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPa
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
-import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
+import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
@@ -187,8 +186,6 @@ const SearchJobs = memo(() => {
   const [swipeModeActive, setSwipeModeActive] = useState(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
   });
-  const didMountPageRef = useRef(false);
-  const pageScrollAnimationRef = useRef<number | null>(null);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
@@ -779,125 +776,7 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Efter att en ny sida har renderats ska både den ägda scroll-ytan och den
-  // yttre viewporten vara exakt i toppen. Själva synliga animationen sker före
-  // sidbytet i handlePageChange, så att en kortare ny sida inte hinner klampa
-  // scrollpositionen och därmed kapa animationen.
-  useLayoutEffect(() => {
-    if (!didMountPageRef.current) {
-      didMountPageRef.current = true;
-      return;
-    }
-
-    // Under hissrörelsen byts jobben medan sidan fortfarande glider. Då får
-    // ingen nollställning ske — den skulle klippa animationen.
-    if (pageScrollAnimationRef.current !== null) return;
-
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-
-    const positions = readPositions();
-    positions[window.location.pathname] = { top: 0 };
-    writePositions(positions);
-
-    const container = getManagedScrollContainer();
-    if (container) container.scrollTop = 0;
-  }, [page]);
-
-
-  const handlePageChange = useCallback((next: number) => {
-    const container = getManagedScrollContainer();
-    if (!container) {
-      setPage(next);
-      return;
-    }
-
-    if (pageScrollAnimationRef.current !== null) {
-      return;
-    }
-
-    const startTop = container.scrollTop;
-    if (startTop <= 0) {
-      container.scrollTop = 0;
-      setPage(next);
-      return;
-    }
-
-    // iOS kan batcha både native smooth-scroll och scrollTop-skrivningar när
-    // huvudytan ligger i Safaris separata momentumlager. Koppla därför bort
-    // momentumlagret under just sidbytet och driv en enda deterministisk scroll.
-    // Den gamla sidan ligger kvar tills rörelsen är färdig; först därefter byts
-    // jobben. Toppraden ligger utanför containern och rörs aldrig.
-    const previousOverflowAnchor = container.style.overflowAnchor;
-    const previousScrollBehavior = container.style.scrollBehavior;
-    const previousMomentumScrolling = container.style.getPropertyValue('-webkit-overflow-scrolling');
-    container.style.overflowAnchor = 'none';
-    container.style.scrollBehavior = 'auto';
-    container.style.setProperty('-webkit-overflow-scrolling', 'auto');
-    void container.offsetHeight;
-
-    // Sista sidan är oftast kortare än en full sida. När jobben byts mitt i
-    // rörelsen krymper då innehållet och webbläsaren klampar scrollpositionen
-    // — det upplevs som att "Nästa" pausar, byter och sedan hoppar upp.
-    // Lås därför innehållshöjden med en tillfällig utfyllnad under hela
-    // rörelsen, så att Nästa glider exakt som Föregående.
-    const heightLock = document.createElement('div');
-    heightLock.setAttribute('aria-hidden', 'true');
-    heightLock.style.cssText = 'height:0;width:100%;pointer-events:none;';
-    container.appendChild(heightLock);
-    const lockedScrollHeight = container.scrollHeight;
-
-    const releaseHeightLock = () => {
-      heightLock.remove();
-    };
-
-    const durationMs = Math.min(1100, Math.max(750, startTop * 0.11));
-    const startedAt = performance.now();
-    // Byt jobben medan sidan fortfarande är utanför synfältet (mer än en
-    // skärmhöjd kvar till toppen). Då är nya kort och bilder redan på plats
-    // när hissen landar — inget byte syns vid toppen.
-    const swapAt = container.clientHeight * 1.25;
-    let swapped = false;
-    const animateToTop = (now: number) => {
-      const progress = Math.min((now - startedAt) / durationMs, 1);
-      const eased = progress < 0.5
-        ? 4 * progress * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const nextTop = startTop * (1 - eased);
-      container.scrollTop = nextTop;
-
-      if (!swapped && nextTop > swapAt) {
-        swapped = true;
-        flushSync(() => setPage(next));
-        // Renderingen av den nya sidan kan ändra höjden — fyll upp skillnaden
-        // så att positionen inte klampas, och håll kvar scrollpositionen.
-        const missing = lockedScrollHeight - container.scrollHeight;
-        heightLock.style.height = missing > 0 ? `${missing}px` : '0px';
-        container.scrollTop = nextTop;
-      }
-
-      if (progress < 1) {
-        pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
-        return;
-      }
-
-      container.scrollTop = 0;
-      releaseHeightLock();
-      container.style.overflowAnchor = previousOverflowAnchor;
-      container.style.scrollBehavior = previousScrollBehavior;
-      if (previousMomentumScrolling) {
-        container.style.setProperty('-webkit-overflow-scrolling', previousMomentumScrolling);
-      } else {
-        container.style.removeProperty('-webkit-overflow-scrolling');
-      }
-      pageScrollAnimationRef.current = null;
-      if (!swapped) setPage(next);
-      container.scrollTop = 0;
-    };
-
-
-    pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
-
-  }, []);
+  const handlePageChange = useAnimatedPageChange(page, setPage);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
   const handleSwipeNeedMore = useCallback(() => {

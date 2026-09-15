@@ -10,3 +10,5 @@
 - [ ] Oberoende djupgranska pass 1–5 igen: översikt, annonser, kandidater, kollegavy och statistik
 - [ ] Fixa varje ny bekräftad brist utan att ändra behörighetsmodellen eller gränssnittet
 - [ ] Verifiera pass 1–5 med typkontroll, tester och relevanta databas-/livekontroller
+- [x] Samla all sidnumrering i en gemensam, symmetrisk hissrörelse
+- [x] Verifiera Nästa, Föregående och sidnummer på jobbsökar- och arbetsgivarsidor

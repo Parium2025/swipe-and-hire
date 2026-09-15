@@ -46,6 +46,7 @@ import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { RepublishJobDialog } from '@/components/RepublishJobDialog';
+import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -234,7 +235,6 @@ const EmployerDashboard = memo(() => {
   const [page, setPage] = useState(1);
   const pageSize = 18;
   const listTopRef = useRef<HTMLDivElement>(null);
-  const didMountRef = useRef(false);
   const editLaunchTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -330,6 +330,7 @@ const EmployerDashboard = memo(() => {
     1,
     archiveHasMore ? Math.max(loadedPages, Math.ceil(activeTabTotalCount / pageSize)) : loadedPages,
   );
+  const handlePageChange = useAnimatedPageChange(page, setPage);
 
   // Klampa sidan när listan krymper (t.ex. massradering av hela sista sidan).
   // Utan detta stod man kvar på en sida som inte längre finns: tom lista och
@@ -384,24 +385,6 @@ const EmployerDashboard = memo(() => {
     expired: sliceToPage(tabBuckets.expired),
     draft: sliceToPage(tabBuckets.draft),
   }), [sliceToPage, tabBuckets]);
-
-  // Scroll to top when page changes (but not on initial mount)
-  useEffect(() => {
-    if (location.pathname !== '/my-jobs') return;
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      const scrollContainer = getManagedScrollContainer();
-      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      const positions = readPositions();
-      positions[window.location.pathname] = { top: 0 };
-      writePositions(positions);
-    }
-  }, [page]);
 
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
@@ -899,7 +882,7 @@ const EmployerDashboard = memo(() => {
               )}
 
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
         )}
       </div>
@@ -999,7 +982,7 @@ const EmployerDashboard = memo(() => {
               )}
 
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} compact />
           </>
         )}
       </div>

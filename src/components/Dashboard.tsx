@@ -22,8 +22,9 @@ import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
-import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow } from '@/lib/scrollRestoration';
+import { saveScrollNow } from '@/lib/scrollRestoration';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
+import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -182,7 +183,6 @@ const Dashboard = memo(() => {
   const [page, setPage] = useState(1);
   const pageSize = 18;
   const listTopRef = useRef<HTMLDivElement>(null);
-  const didMountRef = useRef(false);
 
   // Beräkna båda tabbars buckets EN gång från den filtrerade/sorterade listan.
   // Detta är samma mönster som EmployerDashboard använder.
@@ -214,6 +214,7 @@ const Dashboard = memo(() => {
       ? Math.max(loadedPages, Math.ceil((serverCounts?.expired ?? tabFilteredJobs.length) / pageSize))
       : loadedPages,
   );
+  const handlePageChange = useAnimatedPageChange(page, setPage);
 
   // Samma klamp som i Mina annonser: sidan får aldrig peka utanför listan.
   useEffect(() => {
@@ -261,24 +262,6 @@ const Dashboard = memo(() => {
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
-
-  // Scroll to top when page changes (but not on initial mount)
-  useEffect(() => {
-    if (location.pathname !== '/dashboard') return;
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (typeof window !== 'undefined') {
-      const scrollContainer = getManagedScrollContainer();
-      scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      const positions = readPositions();
-      positions[window.location.pathname] = { top: 0 };
-      writePositions(positions);
-    }
-  }, [page]);
 
   // Klick på ett statistikkort → byt flik och glid mjukt ner till listan
   const goToTab = useCallback((tab: JobStatusTab) => {
@@ -424,7 +407,7 @@ const Dashboard = memo(() => {
 
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
         )}
       </div>
@@ -482,7 +465,7 @@ const Dashboard = memo(() => {
 
               )}
             />
-            <DashboardPagination page={page} totalPages={totalPages} onPageChange={setPage} compact />
+            <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} compact />
           </>
         )}
       </div>
