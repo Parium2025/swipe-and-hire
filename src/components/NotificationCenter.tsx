@@ -381,6 +381,8 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     hasMore,
     isLoadingMore,
     loadMore,
+    hasError,
+    refetch,
   } = useNotifications();
   const { isEnabled } = useNotificationPreferences();
   const archived = useSyncExternalStore(toastArchive.subscribe, toastArchive.getSnapshot, toastArchive.getSnapshot);
@@ -569,7 +571,19 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
               if (el.scrollHeight - el.scrollTop - el.clientHeight < 240) void loadMore();
             }}
           >
-            {merged.length === 0 ? (
+            {merged.length === 0 && hasError ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12 text-white">
+                <AlertTriangle className="h-8 w-8 text-white" />
+                <p className="text-sm text-center px-4">Kunde inte hämta notifikationerna.</p>
+                <button
+                  type="button"
+                  onClick={() => { void refetch(); }}
+                  className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
+                >
+                  Försök igen
+                </button>
+              </div>
+            ) : merged.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-white">
                 <Bell className="h-8 w-8 mb-3 text-white" />
                 <p className="text-sm">Inga notifikationer</p>

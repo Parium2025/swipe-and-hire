@@ -60,12 +60,20 @@ export function useNotifications() {
 
   // Hydrate from cache on user change
   useEffect(() => {
-    if (user) {
-      const cached = getCached(user.id);
-      if (cached) {
-        setNotifications(cached);
-        setUnreadCount(cached.filter(n => !n.is_read).length);
-      }
+    if (!user) {
+      // Vid utloggning/kontobyte får föregående kontos notiser aldrig ligga kvar
+      // i klockan.
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
+    const cached = getCached(user.id);
+    if (cached) {
+      setNotifications(cached);
+      setUnreadCount(cached.filter(n => !n.is_read).length);
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
     }
   }, [user]);
 
@@ -77,6 +85,8 @@ export function useNotifications() {
   const loadingMoreRef = useRef(false);
   const notificationsRef = useRef<AppNotification[]>([]);
   const broadcastRef = useRef<RealtimeChannel | null>(null);
+  // Ett hämtningsfel får aldrig se ut som "Inga notifikationer".
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
@@ -125,8 +135,10 @@ export function useNotifications() {
       setUnreadCount(countRes.count ?? items.filter(n => !n.is_read).length);
       setHasMore(items.length === PAGE_SIZE);
       setCache(user.id, items);
+      setHasError(false);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
+      setHasError(true);
     }
   }, [user, loadMutedTypes]);
 
@@ -233,9 +245,14 @@ export function useNotifications() {
         (payload) => {
           const updatedNotif = payload.new as AppNotification;
           setNotifications(prev => {
+            const before = prev.find(n => n.id === updatedNotif.id);
             const updated = prev.map(n => (n.id === updatedNotif.id ? { ...n, ...updatedNotif } : n));
             setCache(user.id, updated);
-            setUnreadCount(updated.filter(n => !n.is_read).length);
+            // Justera räknaren med skillnaden i stället för att räkna om de
+            // laddade sidorna — annars tappas olästa notiser utanför sidan.
+            if (before && before.is_read !== updatedNotif.is_read) {
+              setUnreadCount(prev2 => Math.max(0, prev2 + (updatedNotif.is_read ? -1 : 1)));
+            }
             return updated;
           });
         }
@@ -252,10 +269,11 @@ export function useNotifications() {
           const removed = payload.old as Partial<AppNotification>;
           if (!removed?.id) return;
           setNotifications(prev => {
-            if (!prev.some(n => n.id === removed.id)) return prev;
+            const before = prev.find(n => n.id === removed.id);
+            if (!before) return prev;
             const updated = prev.filter(n => n.id !== removed.id);
             setCache(user.id, updated);
-            setUnreadCount(updated.filter(n => !n.is_read).length);
+            if (!before.is_read) setUnreadCount(prev2 => Math.max(0, prev2 - 1));
             return updated;
           });
         }
@@ -367,6 +385,7 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     clearAll,
+    hasError,
     refetch: fetchNotifications,
   };
 }
