@@ -187,6 +187,7 @@ const SearchJobs = memo(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
   });
   const didMountPageRef = useRef(false);
+  const pageScrollAnimationRef = useRef<number | null>(null);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
@@ -777,10 +778,10 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Sidbyte ska mjukt föra användaren högst upp i jobbsöket utan att flytta
-  // dokumentets viewport. `scrollIntoView` får inte användas här: på iOS Safari
-  // kan den även dra app-toppen ovanför skärmen. Scrolla därför enbart den
-  // scroll-yta som layouten äger och håll den yttre viewporten låst på noll.
+  // Sidbyte ska synligt glida högst upp i jobbsöket utan att flytta dokumentets
+  // viewport. `scrollIntoView` kan dra app-toppen ovanför skärmen på iOS, medan
+  // native `behavior: smooth` inte animerar pålitligt i en momentum-scrollande
+  // inre yta. En egen bildruteanimation ger samma beteende på iOS och Android.
   useLayoutEffect(() => {
     if (!didMountPageRef.current) {
       didMountPageRef.current = true;
@@ -797,11 +798,39 @@ const SearchJobs = memo(() => {
     if (!container) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    container.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: prefersReducedMotion ? 'auto' : 'smooth',
-    });
+    const startTop = container.scrollTop;
+    if (prefersReducedMotion || startTop <= 0) {
+      container.scrollTop = 0;
+      return;
+    }
+
+    if (pageScrollAnimationRef.current !== null) {
+      cancelAnimationFrame(pageScrollAnimationRef.current);
+    }
+
+    const startedAt = performance.now();
+    const durationMs = 650;
+    const animateToTop = (now: number) => {
+      const progress = Math.min((now - startedAt) / durationMs, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      container.scrollTop = Math.round(startTop * (1 - eased));
+      window.scrollTo(0, 0);
+
+      if (progress < 1) {
+        pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
+      } else {
+        container.scrollTop = 0;
+        pageScrollAnimationRef.current = null;
+      }
+    };
+
+    pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
+    return () => {
+      if (pageScrollAnimationRef.current !== null) {
+        cancelAnimationFrame(pageScrollAnimationRef.current);
+        pageScrollAnimationRef.current = null;
+      }
+    };
   }, [page]);
 
   const handlePageChange = useCallback((next: number) => {
