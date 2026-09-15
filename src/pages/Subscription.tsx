@@ -102,7 +102,7 @@ const Subscription = () => {
   // Kallstart utan hopp: planerna renderas först när premiumstatusen är känd,
   // så listan aldrig går från två kort till ett när svaret landar. Statusen
   // förvärms i bakgrunden, så i praktiken är den redan cachad vid montering.
-  const { isPremium, isLoading: premiumLoading } = useIsPremium();
+  const { isPremium, isLoading: premiumLoading, premiumUnknown } = useIsPremium();
   const currentPlan: 'basic' | 'premium' = isPremium ? 'premium' : 'basic';
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('premium');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -158,6 +158,14 @@ const Subscription = () => {
         </p>
 
       </div>
+
+      {/* Kunde statusen inte hämtas ska sidan säga det – annars ser en
+          betalande kund ut som gratisanvändare utan förklaring. */}
+      {premiumUnknown && (
+        <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white">
+          Kunde inte hämta din planstatus just nu. Uppgifterna nedan kan vara ofullständiga.
+        </div>
+      )}
 
       {/* Current Plan Status — kumulativ tidslinje */}
       <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur-xl p-5">
