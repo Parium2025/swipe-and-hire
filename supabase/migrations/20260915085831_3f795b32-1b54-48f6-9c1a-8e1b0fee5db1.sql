@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Organization members can update colleague interviews" ON public.interviews;

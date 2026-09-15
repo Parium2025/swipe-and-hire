@@ -143,7 +143,7 @@ export const BookInterviewDialog = ({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('interviews')
-        .select('id, scheduled_at, duration_minutes, location_type, location_details, subject, message')
+        .select('id, employer_id, scheduled_at, duration_minutes, location_type, location_details, subject, message')
         .eq('application_id', applicationId)
         .in('status', ['pending', 'confirmed'])
         .order('scheduled_at', { ascending: false })
@@ -158,6 +158,9 @@ export const BookInterviewDialog = ({
   });
 
   const isReschedule = !!existingInterview;
+  // Endast den rekryterare som bokade mötet får ändra eller boka om det.
+  // En kollega ser mötet men ska aldrig kunna röra någon annans kalender.
+  const lockedByColleague = !!existingInterview && existingInterview.employer_id !== user?.id;
 
   useEffect(() => {
     if (!open) {
@@ -273,6 +276,13 @@ export const BookInterviewDialog = ({
       toast.error('Välj ett datum för intervjun');
       return;
     }
+
+    if (lockedByColleague) {
+      toast.error('Mötet är bokat av en kollega', {
+        description: 'Bara den som bokade mötet kan boka om eller avboka det.',
+      });
+      return;
+    }
     
     if (locationType === 'video' && trimmedVideoLink && !videoLinkIsValid) {
       toast.error('Videolänken ser inte giltig ut', {
@@ -365,7 +375,12 @@ export const BookInterviewDialog = ({
 
       if (error) {
         if ((error as { code?: string }).code === '23505') {
-          throw new Error('En kollega har precis bokat ett möte med kandidaten. Ladda om sidan och boka om tiden i stället.');
+          throw new Error('En kollega har precis bokat ett möte med kandidaten. Bara den som bokade mötet kan ändra tiden.');
+        }
+        // Noll rader tillbaka = behörighetsreglerna nekade ändringen, dvs. mötet
+        // tillhör en kollega.
+        if ((error as { code?: string }).code === 'PGRST116' && isReschedule) {
+          throw new Error('Mötet är bokat av en kollega. Bara den som bokade det kan boka om eller avboka.');
         }
         throw error;
       }
@@ -550,9 +565,11 @@ export const BookInterviewDialog = ({
                   }}
                   className={`max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4 ${invitationSummaryTruncated ? 'cursor-pointer touch-manipulation' : 'pointer-events-none'}`}
                 >
-                  {isReschedule
-                    ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
-                    : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
+                  {lockedByColleague
+                    ? `Intervjun med ${candidateName} är bokad av en kollega. Bara den som bokade mötet kan ändra tiden eller avboka.`
+                    : isReschedule
+                      ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
+                      : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
                 </p>
               </PopoverTrigger>
               {invitationSummaryTruncated && (
@@ -831,9 +848,9 @@ export const BookInterviewDialog = ({
                 onClick={() => handleSubmit()} 
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isSubmitting || !date}
+                disabled={isSubmitting || !date || lockedByColleague}
                 className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && date ? 'border border-white/30' : ''
+                  !isSubmitting && date && !lockedByColleague ? 'border border-white/30' : ''
                 }`}
               >
                 {isSubmitting ? (
