@@ -50,6 +50,7 @@ import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
@@ -91,7 +92,9 @@ interface Job {
 
 // formatSalary is centralized in @/lib/jobViewHelpers — no local copy needed.
 
-const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
+const SEARCH_JOBS_PAGE_KEY = 'parium-search-page';
+/** Antal jobb per sida i den sidnumrerade listan. */
+const JOBS_PAGE_SIZE = 18;
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
 // Card thumbnail transform (smaller — used in list)
 // JobView hero transform — MUST stay byte-for-byte identical to JOB_VIEW_IMAGE_TRANSFORM
@@ -239,8 +242,8 @@ const SearchJobs = memo(() => {
       setFiltersExpanded(true);
     }
     
-    // Reset display count to show fresh results
-    setDisplayCount(20);
+    // Börja om på första sidan när ett nytt sök tillämpas
+    setPage(1);
     
     // Scroll to top of results
     listTopRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -330,22 +333,21 @@ const SearchJobs = memo(() => {
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
-  // Lazy loading state with infinite scroll
-  const [displayCount, setDisplayCount] = useState(() => {
+  // Sidnumrerad lista: 18 jobb per sida, sidan minns mellan besök i samma session.
+  const [page, setPage] = useState(() => {
     try {
-      const raw = sessionStorage.getItem(SEARCH_JOBS_DISPLAY_COUNT_KEY);
+      const raw = sessionStorage.getItem(SEARCH_JOBS_PAGE_KEY);
       const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
-      return Number.isFinite(parsed) && parsed >= 18 ? parsed : 18;
+      return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
     } catch {
-      return 18;
+      return 1;
     }
-  }); // Start with 18 jobs
-  const loadMoreSize = 18; // Load 18 more each time
+  });
+  const displayCount = page * JOBS_PAGE_SIZE;
+  
   const listTopRef = useRef<HTMLDivElement>(null);
-  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
-  const isLoadingMoreRef = useRef(false);
   const hasInitializedFiltersRef = useRef(false);
-  const [warmWindowEnd, setWarmWindowEnd] = useState(18);
+  const [warmWindowEnd, setWarmWindowEnd] = useState(JOBS_PAGE_SIZE);
 
   // Debounced search for better performance
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
@@ -624,12 +626,14 @@ const SearchJobs = memo(() => {
     }
   }, [filteredAndSortedJobs.length, isSearchResultsLoading]);
 
-  // Display jobs with lazy loading
+  // Sidnumrerad visning: exakt en sida i taget.
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / JOBS_PAGE_SIZE));
   const displayedJobs = useMemo(() => {
-    return filteredAndSortedJobs.slice(0, displayCount);
-  }, [filteredAndSortedJobs, displayCount]);
+    const start = (page - 1) * JOBS_PAGE_SIZE;
+    return filteredAndSortedJobs.slice(start, start + JOBS_PAGE_SIZE);
+  }, [filteredAndSortedJobs, page]);
 
-  const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
+  
 
   // Memoize swipe jobs – skipped OCH redan sökta jobb tas helt bort från stacken.
   // Sökta jobb finns kvar i den vanliga listan (med SÖKT-badge), men i swipe-mode
@@ -739,11 +743,11 @@ const SearchJobs = memo(() => {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(SEARCH_JOBS_DISPLAY_COUNT_KEY, String(displayCount));
+      sessionStorage.setItem(SEARCH_JOBS_PAGE_KEY, String(page));
     } catch {
       // ignore
     }
-  }, [displayCount]);
+  }, [page]);
 
   // Reset display count and default sort when filters change
   useEffect(() => {
@@ -752,58 +756,29 @@ const SearchJobs = memo(() => {
       return;
     }
 
-    setDisplayCount(20);
+    setPage(1);
     setSortBy('newest');
   }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, salaryRange, setSortBy]);
 
-  // Reset loading flag deterministically when displayCount actually changes
-  // (replaces the previous setTimeout-based unlock that could race on fast scroll).
+  // Hamnar användaren utanför sista sidan (t.ex. efter filtrering) — gå tillbaka.
   useEffect(() => {
-    isLoadingMoreRef.current = false;
-  }, [displayCount]);
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
-  // Infinite scroll with IntersectionObserver.
-  // 🔥 SCALE: När displayCount når slutet av redan-laddade jobb och DB:n har
-  // fler sidor (hasNextPage), trigga fetchNextPage(). Annars öka bara
-  // displayCount lokalt så att UI revealar nästa batch i den lista vi har.
+  // 🔥 SCALE: se till att nästa sida finns hämtad innan användaren klickar dit.
+  // Databasen levererar i block; så länge det finns fler block och vi närmar oss
+  // slutet av de redan hämtade jobben fyller vi på i bakgrunden.
   useEffect(() => {
-    const trigger = loadMoreTriggerRef.current;
-    if (!trigger) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (!entry.isIntersecting || isLoadingMoreRef.current) return;
-
-        if (hasMoreJobs) {
-          isLoadingMoreRef.current = true;
-          setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-        } else if (hasNextPage && !isFetchingNextPage) {
-          isLoadingMoreRef.current = true;
-          fetchNextPage().finally(() => {
-            setDisplayCount(prev => prev + loadMoreSize);
-          });
-        }
-      },
-      {
-        rootMargin: '400px',
-        threshold: 0.1,
-      }
-    );
-
-    observer.observe(trigger);
-    return () => observer.disconnect();
-  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMoreJobs) {
-      setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-    } else if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage().finally(() => {
-        setDisplayCount(prev => prev + loadMoreSize);
-      });
+    if (!hasNextPage || isFetchingNextPage) return;
+    if (filteredAndSortedJobs.length < (page + 1) * JOBS_PAGE_SIZE) {
+      fetchNextPage();
     }
-  }, [filteredAndSortedJobs.length, loadMoreSize, hasMoreJobs, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handlePageChange = useCallback((next: number) => {
+    setPage(next);
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
   const handleSwipeNeedMore = useCallback(() => {
@@ -1085,29 +1060,20 @@ const SearchJobs = memo(() => {
         )}
       </div>
 
-      {/* Infinite Scroll Trigger */}
-      <div ref={loadMoreTriggerRef} className="h-1" />
-      
-      {/* Loading indicator with progress */}
-      {(hasMoreJobs || hasNextPage || isFetchingNextPage) && (
-        <div className="flex justify-center py-4">
-          <div className="flex items-center gap-2 text-white/60 text-sm">
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-            <span>
-              {isFetchingNextPage ? 'Hämtar fler jobb...' : `Visar ${Math.min(displayCount, filteredAndSortedJobs.length)} av ${filteredAndSortedJobs.length}${hasNextPage ? '+' : ''} jobb`}
-            </span>
-          </div>
-        </div>
-      )}
-      
-      {/* Show message when all jobs are loaded */}
-      {!hasMoreJobs && !hasNextPage && !isFetchingNextPage && filteredAndSortedJobs.length > 0 && (
-        <div className="flex justify-center pt-2 pb-6">
-          <div className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 px-4 py-1.5">
-            <p className="text-white text-sm font-medium">
-              Alla {filteredAndSortedJobs.length} jobb visas
-            </p>
-          </div>
+      {/* Sidnumrering */}
+      {filteredAndSortedJobs.length > 0 && (
+        <div className="pt-2 pb-6">
+          <p className="text-center text-white text-sm font-medium">
+            Visar {Math.min((page - 1) * JOBS_PAGE_SIZE + 1, filteredAndSortedJobs.length)}–
+            {Math.min(page * JOBS_PAGE_SIZE, filteredAndSortedJobs.length)} av {filteredAndSortedJobs.length}
+            {hasNextPage ? '+' : ''} jobb
+          </p>
+          <DashboardPagination
+            page={Math.min(page, totalPages)}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            compact={isMobile}
+          />
         </div>
       )}
 

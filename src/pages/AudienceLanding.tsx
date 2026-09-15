@@ -2188,7 +2188,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               ) : (
                 <>
                   {/* 3 månadspaket för arbetsgivare */}
-                  <div className="relative mt-8 grid items-start gap-5 md:grid-cols-3">
+                  <div className="relative mt-8 grid items-stretch gap-5 md:grid-cols-3">
                     {employerPlans.map((plan, i) => {
                       const isActive = selectedPlan === plan.id;
                       return (
@@ -2206,7 +2206,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           data-allow-focus-shadow="true"
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedPlan(plan.id); } }}
                           style={isMobileFeatureMotion ? { ['--lf-x' as string]: i % 2 === 0 ? '-46px' : '46px', ['--lf-y' as string]: '0px', ['--lf-delay' as string]: `${120 + i * 120}ms`, willChange: 'opacity, transform' } : { willChange: 'opacity, transform' }}
-                          className={`landing-feature-card landing-feature-mobile-in relative isolate cursor-pointer overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 [@media_(hover:hover)]:backdrop-blur-xl ${
+                          className={`landing-feature-card landing-feature-mobile-in relative isolate flex h-full flex-col cursor-pointer overflow-hidden rounded-3xl border p-8 transition-all duration-300 hover:scale-[1.02] hover:border-secondary/40 [@media_(hover:hover)]:backdrop-blur-xl ${
                             isActive ? 'border-secondary bg-white/5' : 'border border-white/15 bg-white/5'
                           }`}
                         >
@@ -2218,7 +2218,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                           <motion.div
                             animate={{ y: isActive ? -12 : 0 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-                            className={isActive ? 'drop-shadow-[0_24px_40px_rgba(0,0,0,0.25)]' : ''}
+                            className={`flex h-full flex-col ${isActive ? 'drop-shadow-[0_24px_40px_rgba(0,0,0,0.25)]' : ''}`}
                           >
                             <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                             <p className="mt-2 text-4xl font-black text-white">
@@ -2232,6 +2232,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                               open={openEmployerPlans.includes(plan.id)}
                               onToggle={() => toggleAllPlans(setOpenEmployerPlans, employerPlans.map((p) => p.id))}
                             />
+                            {/* Fyller ut så att alla tre korten blir lika höga som det längsta */}
+                            <div className="flex-1" aria-hidden="true" />
                           </motion.div>
                         </motion.div>
                       );
