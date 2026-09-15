@@ -1013,49 +1013,27 @@ export function MessageTemplatesSettings() {
 
     const trigger = templateForm.trigger as AutoRuleTrigger;
     const baseName = templateForm.name.trim();
-    const buildPayload = (channel: AutomationChannel, name: string) => ({
-      owner_user_id: user.id,
-      organization_id: organizationId,
-      name,
-      channel,
-      trigger,
-      subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
-      body: templateForm.channelContent[channel].body.trim(),
-      is_active: true,
-      is_default: false,
+
+    // Skicka alla kanaler till backend i en enda atomisk transaktion.
+    // Tidigare sparades kanalerna en och en, vilket kunde lämna mallen delvis sparad.
+    const payload = selectedChannels.map((channel) => {
+      const name = selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName;
+      return {
+        channel,
+        name,
+        subject: channel === 'chat' ? null : templateForm.channelContent[channel].subject.trim() || null,
+        body: templateForm.channelContent[channel].body.trim(),
+      };
     });
 
-    // En egen mall per händelse + kanal (max 4 händelser × 3 kanaler = 12).
-    // Finns redan en mall i sloten skrivs den över istället för att skapa en dubblett.
-    let failed = false;
+    const { error } = await supabase.rpc('upsert_outreach_templates_atomic', {
+      p_owner_user_id: user.id,
+      p_organization_id: organizationId,
+      p_trigger: trigger,
+      p_templates: payload,
+    });
 
-    for (const channel of selectedChannels) {
-      const name = selectedChannels.length > 1 ? `${baseName} · ${getOutreachChannelLabel(channel)}` : baseName;
-      const payload = buildPayload(channel, name);
-
-      const slotOwner = templates.find(
-        (template) =>
-          !isStandardTemplate(template) &&
-          template.channel === channel &&
-          (template.trigger ?? null) === trigger,
-      );
-      const targetId =
-        slotOwner?.id ??
-        (templateForm.id && templates.some((t) => t.id === templateForm.id && t.channel === channel)
-          ? templateForm.id
-          : null);
-
-      const { error } = targetId
-        ? await supabase.from('outreach_templates').update(payload).eq('id', targetId)
-        : await supabase.from('outreach_templates').insert(payload);
-
-      if (error) {
-        failed = true;
-        break;
-      }
-    }
-
-    if (failed) {
+    if (error) {
       toast.error('Kunde inte spara mallen');
       setSavingTemplate(false);
       await fetchStudio({ silent: true });
@@ -1067,7 +1045,7 @@ export function MessageTemplatesSettings() {
     resetTemplateEditor();
 
     await fetchStudio({ silent: true });
-      notifyOutreachStudioUpdated(user.id);
+    notifyOutreachStudioUpdated(user.id);
     goToStudioTab('automations');
     toast.success('Mall sparad — steg 2: välj när den ska skickas');
 

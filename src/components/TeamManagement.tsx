@@ -86,6 +86,8 @@ const TeamManagement = () => {
   const [inviting, setInviting] = useState(false);
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
+  const [busyMemberId, setBusyMemberId] = useState<string | null>(null);
+  const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
   
 
   const fetchTeamMembers = useCallback(async (silent = false) => {
@@ -225,6 +227,7 @@ const TeamManagement = () => {
   };
 
   const handleRevokeInvitation = async (invitationId: string) => {
+    setBusyInvitationId(invitationId);
     try {
       const { error } = await supabase
         .from('organization_invitations')
@@ -242,6 +245,8 @@ const TeamManagement = () => {
         description: "Kunde inte återkalla inbjudan.",
         variant: "destructive"
       });
+    } finally {
+      setBusyInvitationId(null);
     }
   };
 
@@ -254,6 +259,10 @@ const TeamManagement = () => {
       });
       return;
     }
+
+    setBusyMemberId(memberId);
+    const previousMembers = teamMembers;
+    setTeamMembers((prev) => prev.filter((member) => member.user_id !== memberId));
 
     try {
       const { error } = await supabase
@@ -271,12 +280,15 @@ const TeamManagement = () => {
       
       void fetchTeamMembers(true);
     } catch (error) {
+      setTeamMembers(previousMembers);
       console.error('Error removing member:', error);
       toast({
         title: "Fel",
         description: "Kunde inte ta bort medlemmen.",
         variant: "destructive"
       });
+    } finally {
+      setBusyMemberId(null);
     }
   };
 
@@ -289,6 +301,12 @@ const TeamManagement = () => {
       });
       return;
     }
+
+    setBusyMemberId(memberId);
+    const previousMembers = teamMembers;
+    setTeamMembers((prev) =>
+      prev.map((member) => (member.user_id === memberId ? { ...member, role: newRole } : member))
+    );
 
     try {
       const { error } = await supabase
@@ -306,12 +324,15 @@ const TeamManagement = () => {
       
       void fetchTeamMembers(true);
     } catch (error) {
+      setTeamMembers(previousMembers);
       console.error('Error updating role:', error);
       toast({
         title: "Fel",
         description: "Kunde inte uppdatera rollen.",
         variant: "destructive"
       });
+    } finally {
+      setBusyMemberId(null);
     }
   };
 
@@ -402,9 +423,14 @@ const TeamManagement = () => {
                 size="icon"
                 aria-label="Återkalla inbjudan"
                 onClick={() => handleRevokeInvitation(invitation.id)}
-                className="h-8 w-8 shrink-0 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                disabled={busyInvitationId === invitation.id}
+                className="h-8 w-8 shrink-0 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white disabled:opacity-50"
               >
-                <Trash2 className="h-4 w-4" />
+                {busyInvitationId === invitation.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
               </Button>
             </div>
           ))}
@@ -456,11 +482,12 @@ const TeamManagement = () => {
                   </Badge>
                 ) : (
                   <>
-                    <Select 
-                      value={member.role} 
+                    <Select
+                      value={member.role}
                       onValueChange={(value) => handleRoleChange(member.user_id, value)}
+                      disabled={busyMemberId === member.user_id}
                     >
-                      <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white h-8 text-sm">
+                      <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white h-8 text-sm disabled:opacity-50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="glass-panel">
@@ -474,9 +501,14 @@ const TeamManagement = () => {
                       size="icon"
                       aria-label="Ta bort medlem"
                       onClick={() => handleRemoveMember(member.user_id)}
-                      className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                      disabled={busyMemberId === member.user_id}
+                      className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white disabled:opacity-50"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {busyMemberId === member.user_id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </>
                 )}

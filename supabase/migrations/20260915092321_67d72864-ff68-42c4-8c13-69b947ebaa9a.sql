@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.upsert_outreach_templates_atomic(uuid, uuid, text, jsonb) FROM anon;
