@@ -135,8 +135,10 @@ export function useNotifications() {
       setUnreadCount(countRes.count ?? items.filter(n => !n.is_read).length);
       setHasMore(items.length === PAGE_SIZE);
       setCache(user.id, items);
+      setHasError(false);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
+      setHasError(true);
     }
   }, [user, loadMutedTypes]);
 
