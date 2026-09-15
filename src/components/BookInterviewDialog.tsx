@@ -318,9 +318,10 @@ export const BookInterviewDialog = ({
       const { data: interviewRow, error } = isReschedule && existingInterview
         ? await supabase
             .from('interviews')
+            // Ingen employer_id-filtrering: en kollega i samma organisation ska
+            // kunna boka om ett redan bokat möte i stället för att skapa ett nytt.
             .update({ ...interviewFields, status: 'pending' })
             .eq('id', existingInterview.id)
-            .eq('employer_id', user.id)
             .select('id')
             .single()
         : await supabase.from('interviews').insert({
