@@ -527,7 +527,7 @@ const Auth = () => {
         // Andra fel - visa generiskt felmeddelande men stanna på formuläret
         toast({
           title: "Fel vid lösenordsuppdatering",
-          description: err?.message || 'Okänt fel. Försök igen.',
+          description: 'Lösenordet kunde inte uppdateras. Försök igen om en stund.',
           variant: "destructive"
         });
       }

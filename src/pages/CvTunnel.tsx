@@ -140,19 +140,15 @@ export default function CvTunnel() {
             <p className="text-sm">{error}</p>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={() => import('@/lib/appReloader').then(({ requestAppReload }) => requestAppReload('cv-retry'))}>Försök igen</Button>
-              {ref && (
+              {/^https?:\/\//i.test(ref) && (
                 <Button
                   variant="default"
-                  onClick={() => {
-                    // Sista utväg: försök öppna originalet direkt
-                    const isStoragePath = !/^https?:\/\//i.test(ref);
-                    if (isStoragePath) return; // inget att göra
-                    window.open(ref, '_blank');
-                  }}
+                  onClick={() => window.open(ref, '_blank')}
                 >
                   Öppna direkt
                 </Button>
               )}
+
             </div>
           </div>
         )}
