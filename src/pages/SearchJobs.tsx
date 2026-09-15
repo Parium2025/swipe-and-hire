@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef, memo } from 'react';
+import { flushSync } from 'react-dom';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -788,6 +789,10 @@ const SearchJobs = memo(() => {
       return;
     }
 
+    // Under hissrörelsen byts jobben medan sidan fortfarande glider. Då får
+    // ingen nollställning ske — den skulle klippa animationen.
+    if (pageScrollAnimationRef.current !== null) return;
+
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
     const positions = readPositions();
@@ -797,6 +802,7 @@ const SearchJobs = memo(() => {
     const container = getManagedScrollContainer();
     if (container) container.scrollTop = 0;
   }, [page]);
+
 
   const handlePageChange = useCallback((next: number) => {
     const container = getManagedScrollContainer();
@@ -831,12 +837,25 @@ const SearchJobs = memo(() => {
 
     const durationMs = Math.min(1100, Math.max(750, startTop * 0.11));
     const startedAt = performance.now();
+    // Byt jobben medan sidan fortfarande är utanför synfältet (mer än en
+    // skärmhöjd kvar till toppen). Då är nya kort och bilder redan på plats
+    // när hissen landar — inget byte syns vid toppen.
+    const swapAt = container.clientHeight * 1.25;
+    let swapped = false;
     const animateToTop = (now: number) => {
       const progress = Math.min((now - startedAt) / durationMs, 1);
       const eased = progress < 0.5
         ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      container.scrollTop = startTop * (1 - eased);
+      const nextTop = startTop * (1 - eased);
+      container.scrollTop = nextTop;
+
+      if (!swapped && nextTop > swapAt) {
+        swapped = true;
+        flushSync(() => setPage(next));
+        // Renderingen av den nya sidan kan justera höjden — håll positionen.
+        container.scrollTop = nextTop;
+      }
 
       if (progress < 1) {
         pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
@@ -852,8 +871,9 @@ const SearchJobs = memo(() => {
         container.style.removeProperty('-webkit-overflow-scrolling');
       }
       pageScrollAnimationRef.current = null;
-      setPage(next);
+      if (!swapped) setPage(next);
     };
+
 
     pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
   }, []);
