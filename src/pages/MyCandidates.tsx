@@ -99,15 +99,29 @@ const MyCandidates = () => {
 
   const isViewingColleague = !!viewingColleagueId;
   
+  // Search state with debounced version for FTS
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Debounce search query for FTS (300ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Colleague's candidates and stage settings
   const { 
     candidates: colleagueCandidates, 
     isLoading: loadingColleagueCandidates,
+    hasMore: colleagueHasMore,
+    loadMoreCandidates: loadMoreColleagueCandidates,
     fetchColleagueCandidates,
     moveCandidateInColleagueList,
     removeCandidateFromColleagueList,
     setCandidates: setColleagueCandidates,
-  } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId);
+  } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId, debouncedSearchQuery);
 
   const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
     // Rensa föregående kollegas rader i samma event innan den nya vyn målas.
