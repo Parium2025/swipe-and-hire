@@ -20,7 +20,14 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const cursorRef = useRef<string | null>(null);
+  // Markören har id som tiebreaker: en massflytt ger många rader exakt samma
+  // updated_at, och utan tiebreaker hoppades rader över mellan sidorna.
+  const cursorRef = useRef<{ updated_at: string; id: string } | null>(null);
+  // Realtime-uppdateringar och bakgrundsladdningen delade tidigare markör och
+  // lista utan ordningsvakt: kom svaren i fel ordning dubblerades eller tappades
+  // rader. Varje hämtning får nu ett löpnummer och bara den senaste får skriva.
+  const requestSeqRef = useRef(0);
+  const inFlightRef = useRef(false);
 
   const fetchColleagueCandidates = useCallback(async (loadMore = false) => {
     if (!colleagueId || !user) {
@@ -28,6 +35,12 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
       setHasMore(false);
       return;
     }
+
+    // En hämtning i taget. En ny full omladdning får däremot alltid gå före.
+    if (inFlightRef.current && loadMore) return;
+
+    const seq = ++requestSeqRef.current;
+    inFlightRef.current = true;
 
     if (!loadMore) {
       setIsLoading(true);
@@ -41,14 +54,18 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
         .select('*')
         .eq('recruiter_id', colleagueId)
         .order('updated_at', { ascending: false })
+        .order('id', { ascending: false })
         .limit(PAGE_SIZE);
 
       // Varje lista har sina egna kandidater
       if (listId) query = query.eq('list_id', listId);
 
       // Apply cursor for pagination
-      if (loadMore && cursorRef.current) {
-        query = query.lt('updated_at', cursorRef.current);
+      const cursor = cursorRef.current;
+      if (loadMore && cursor) {
+        query = query.or(
+          `updated_at.lt.${cursor.updated_at},and(updated_at.eq.${cursor.updated_at},id.lt.${cursor.id})`,
+        );
       }
 
       const { data: myCandidates, error: mcError } = await query;
