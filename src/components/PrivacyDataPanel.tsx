@@ -33,6 +33,20 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
 
+  /**
+   * Svenska felmeddelanden — tekniska engelska texter från nätverkslagret
+   * ("Failed to fetch", "Failed to send a request…") får aldrig visas.
+   */
+  const swedishError = (e: unknown, fallback: string) => {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return 'Du verkar vara offline. Kontrollera din uppkoppling och försök igen.';
+    }
+    const raw = (e as Error)?.message ?? '';
+    if (!raw || /[a-z]/.test(raw) === false) return fallback;
+    // Bara meddelanden vi själva skrivit på svenska släpps vidare.
+    return /[åäöÅÄÖ]|Kunde|Bekräftelse|Du måste/.test(raw) ? raw : fallback;
+  };
+
   const handleDeleteAccount = async () => {
     if (confirmText !== 'RADERA') return;
     setDeleting(true);
@@ -55,14 +69,22 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
       } catch {
         /* ignoreras */
       }
+      // 🔒 All lokal data (profil, ansökningar, notiser, kandidatcache) måste
+      // bort från enheten direkt — annars ligger PII kvar efter raderingen.
+      try {
+        clearAllAppCaches();
+      } catch {
+        /* ignoreras */
+      }
       window.location.href = '/';
 
     } catch (e) {
       toast({
         title: 'Kunde inte radera kontot',
-        description:
-          (e as Error).message ||
+        description: swedishError(
+          e,
           'Försök igen, eller kontakta support@parium.se så hjälper vi dig.',
+        ),
         variant: 'destructive',
       });
       setDeleting(false);
