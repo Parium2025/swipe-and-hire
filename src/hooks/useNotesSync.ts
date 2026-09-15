@@ -193,6 +193,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (!user?.id || !isFetched) return;
     if (!hasLocalEditsRef.current) return; // only save user-initiated changes
 
+    let cancelled = false;
+
     const timer = setTimeout(async () => {
       const latest = contentRef.current;
       if (latest === serverContentRef.current) return; // nothing changed vs server
@@ -201,7 +203,16 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         return;
       }
       setIsSaving(true);
-      const result = await saveToDb(latest);
+      // Vänta ut en pågående sparning i stället för att hoppa över. Slutade
+      // användaren skriva just då sparades den sista texten aldrig, trots att
+      // rutan visade "Sparat".
+      let result = await saveToDb(latest);
+      for (let attempt = 0; result === 'skipped' && attempt < 10 && !cancelled; attempt++) {
+        if (!getIsOnline()) break;
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        if (cancelled) break;
+        result = await saveToDb(contentRef.current);
+      }
       if (result === 'saved') {
         // Only clear edit flag if no NEW edits happened during save
         if (contentRef.current === latest) {
