@@ -862,6 +862,8 @@ export function useMyCandidatesData(
         }
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
       if (result.inserted > 0) {
         toast.success(`${result.inserted} kandidat${result.inserted !== 1 ? 'er' : ''} tillagd${result.inserted !== 1 ? 'a' : ''} i din lista`);
       } else if (result.alreadyExisted > 0) {
