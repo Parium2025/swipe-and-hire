@@ -210,6 +210,13 @@ export default function ValjPlan() {
       navigate(`/auth?redirect=${encodeURIComponent('/valj-plan')}`);
       return;
     }
+    // Vet vi inte om kunden redan har en plan får vi inte riskera ett dubbelköp.
+    if (planUnknown) {
+      toast.error('Kunde inte kontrollera din nuvarande plan', {
+        description: 'Försök igen om en stund.',
+      });
+      return;
+    }
     setSelectedPlan(plan);
     setDialogOpen(true);
   };
