@@ -147,6 +147,17 @@ const clearAllAppCachesSync = () => {
         localStorage.removeItem(key);
       }
     });
+
+    // Kandidatprofilerna (CV, video, bilder) cachas i sessionStorage och låg
+    // kvar för nästa konto i samma flik.
+    try {
+      const sessionPrefixes = [...prefixesToClear, 'parium_candidate_profiles'];
+      Object.keys(sessionStorage).forEach((key) => {
+        if (sessionPrefixes.some((prefix) => key.startsWith(prefix))) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch { /* privat läge */ }
     
     // Återställ global state
     lastPreloadTimestamp = 0;
