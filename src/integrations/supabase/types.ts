@@ -4098,7 +4098,7 @@ export type Database = {
         }[]
       }
       count_my_candidates_per_stage: {
-        Args: { p_list_id?: string }
+        Args: { p_list_id?: string; p_recruiter_id?: string }
         Returns: {
           candidate_count: number
           stage: string
