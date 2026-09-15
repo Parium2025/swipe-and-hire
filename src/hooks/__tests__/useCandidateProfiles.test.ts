@@ -31,16 +31,27 @@ function makeBuilder(op: 'select' | 'insert' | 'update' | 'delete', patch: Row =
       state.inserted.push(row);
       return Promise.resolve({ data: row, error: null });
     },
+    maybeSingle: () => {
+      const rows = record();
+      return Promise.resolve({ data: rows[0] ?? null, error: null });
+    },
     then: (resolve: (v: unknown) => unknown) => {
-      if (op === 'update') state.updates.push({ patch, filters });
-      if (op === 'delete') {
-        const idFilter = filters.find(([, col]) => col === 'id');
-        if (idFilter) state.deletedIds.push(String(idFilter[2]));
-      }
-      const data = op === 'select' ? state.rows : null;
+      const data = record();
       return Promise.resolve(resolve({ data, error: null }));
     },
   };
+
+  /** Registrerar skrivningen och returnerar raderna som databasen hade svarat. */
+  function record(): Row[] {
+    if (op === 'update') state.updates.push({ patch, filters });
+    if (op === 'delete') {
+      const idFilter = filters.find(([, col]) => col === 'id');
+      if (idFilter) state.deletedIds.push(String(idFilter[2]));
+    }
+    if (op === 'select') return state.rows;
+    const idFilter = filters.find(([, col]) => col === 'id');
+    return idFilter ? [{ id: idFilter[2] }] : [];
+  }
   return builder;
 }
 

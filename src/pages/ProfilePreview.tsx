@@ -69,7 +69,7 @@ const formatResidence = (location?: string | null, homeLocation?: string | null)
 };
 
 export default function ProfilePreview() {
-  const { profile, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
+  const { profile, user, loading: authLoading, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl } = useAuth();
   const [consentedData, setConsentedData] = useState<ProfileViewData | null>(null);
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,7 +97,12 @@ export default function ProfilePreview() {
 
   useEffect(() => {
     const loadPreviewData = async () => {
-      if (!user?.id || !profile) return;
+      // Saknas profilen när inloggningen är klar får sidan inte fastna i
+      // skelettläge — då visas tomt läge i stället för evig laddning.
+      if (!user?.id || !profile) {
+        if (!authLoading) setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -153,7 +158,7 @@ export default function ProfilePreview() {
     };
 
     loadPreviewData();
-  }, [user?.id, profile]);
+  }, [user?.id, profile, authLoading]);
 
   // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
   useEffect(() => {

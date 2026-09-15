@@ -1820,15 +1820,19 @@ const Profile = () => {
 
     try {
       // Update database to remove CV
-      const { error } = await supabase
+      // Radkontroll: utan .select() såg en blockerad borttagning ut att
+      // lyckas och CV:t kom tillbaka vid nästa laddning.
+      const { data: updated, error } = await supabase
         .from('profiles')
         .update({ 
           cv_url: null,
           profile_file_name: null 
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('user_id');
 
       if (error) throw error;
+      if (!updated || updated.length === 0) throw new Error('CV:t kunde inte tas bort.');
 
       // Update local state
       setCvUrl('');

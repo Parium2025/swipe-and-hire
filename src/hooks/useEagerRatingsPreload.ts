@@ -8,6 +8,7 @@ import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
 import { notesCache, questionsCache, summaryCache } from '@/components/candidateProfile/candidateProfileCache';
+import { clearCandidateProfilesMemoryCache } from '@/hooks/useCandidateProfiles';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -121,6 +122,8 @@ const clearAllAppCachesSync = () => {
     // får inte ligga kvar i klockan efter utloggning på delad enhet.
     'parium_notifications_cache',
     'parium_toast_archive_v1',
+    // Profilutkast (pass 16) — innehåller namn, telefon och bio.
+    'parium_draft_profile',
   ];
   
   const exactKeysToRemove = [
@@ -147,6 +150,17 @@ const clearAllAppCachesSync = () => {
         localStorage.removeItem(key);
       }
     });
+
+    // Kandidatprofilerna (CV, video, bilder) cachas i sessionStorage och låg
+    // kvar för nästa konto i samma flik.
+    try {
+      const sessionPrefixes = [...prefixesToClear, 'parium_candidate_profiles', 'parium_local_media_state'];
+      Object.keys(sessionStorage).forEach((key) => {
+        if (sessionPrefixes.some((prefix) => key.startsWith(prefix))) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch { /* privat läge */ }
     
     // Återställ global state
     lastPreloadTimestamp = 0;
@@ -155,6 +169,7 @@ const clearAllAppCachesSync = () => {
     summaryCache.clear();
     questionsCache.clear();
     notesCache.clear();
+    clearCandidateProfilesMemoryCache();
     
     console.log('✅ All app caches cleared');
   } catch (error) {

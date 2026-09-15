@@ -290,16 +290,19 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
 
   const makeDefault = async (id: string) => {
     if (id === effectiveDefaultId) return;
+    const previousDefaultId = effectiveDefaultId;
     // Direkt visuell respons: stjärnan poppar och kortet glider till mitten.
     setPendingDefaultId(id);
     selectChip(id);
     setStarBurstId(id);
     window.setTimeout(() => setStarBurstId((cur) => (cur === id ? null : cur)), 600);
 
-    if (id === 'base') {
-      await clearDefaultProfile();
-    } else {
-      await setDefaultProfile(id);
+    const res = id === 'base' ? await clearDefaultProfile() : await setDefaultProfile(id);
+    // Utan felkontroll stod stjärnan kvar på fel profil fast databasen
+    // aldrig ändrades — valet försvann först vid nästa besök.
+    if ('error' in res && res.error) {
+      setPendingDefaultId(previousDefaultId ?? null);
+      toast({ title: 'Kunde inte byta standardprofil', description: res.error, variant: 'destructive' });
     }
   };
 
