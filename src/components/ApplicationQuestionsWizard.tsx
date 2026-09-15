@@ -85,7 +85,7 @@ export function ApplicationQuestionsWizard({
     advanceTimers.current = [];
   }, []);
   const advanceAfterDelay = useCallback(() => {
-    const id = window.advanceAfterDelay();
+    const id = window.setTimeout(() => handleNext(), 250);
     advanceTimers.current.push(id);
   }, [handleNext]);
 
