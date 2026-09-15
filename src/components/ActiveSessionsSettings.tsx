@@ -57,6 +57,15 @@ export function ActiveSessionsSettings() {
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [kickingId, setKickingId] = useState<string | null>(null);
+  // Ett hämtningsfel fick tidigare listan att se tom ut ("Inga aktiva
+  // sessioner") — användaren kunde tro att ingen annan enhet var inloggad.
+  const [hasError, setHasError] = useState(false);
+
+  // Sessioner från föregående konto får aldrig ligga kvar vid kontobyte.
+  useEffect(() => {
+    setSessions([]);
+    setHasError(false);
+  }, [user?.id]);
 
   const fetchSessions = useCallback(async (silent = false) => {
     if (!user?.id) return;
@@ -65,6 +74,7 @@ export function ActiveSessionsSettings() {
       const { data, error } = await supabase.rpc('get_active_sessions');
       if (error) {
         console.warn('Failed to fetch sessions:', error.message);
+        setHasError(true);
         return;
       }
 
@@ -74,9 +84,11 @@ export function ActiveSessionsSettings() {
         is_current: s.session_token === currentToken,
       }));
 
+      setHasError(false);
       setSessions(enriched);
     } catch (err) {
       console.warn('Error fetching sessions:', err);
+      setHasError(true);
     } finally {
       if (!silent) setLoading(false);
     }
@@ -126,6 +138,13 @@ export function ActiveSessionsSettings() {
           description: 'Enheten har loggats ut.',
         });
         setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      } else {
+        // Sessionen fanns inte längre — tidigare hände ingenting alls på skärmen.
+        toast({
+          title: 'Sessionen är redan avslutad',
+          description: 'Enheten är inte längre inloggad.',
+        });
+        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
       }
     } catch (err) {
       console.warn('Error kicking session:', err);
@@ -173,6 +192,13 @@ export function ActiveSessionsSettings() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : hasError && sessions.length === 0 ? (
+          <div className="py-4 text-center space-y-3">
+            <p className="text-sm text-white">Kunde inte hämta dina aktiva sessioner.</p>
+            <PillButton onClick={() => fetchSessions()} className="h-8 px-4 text-xs">
+              Försök igen
+            </PillButton>
           </div>
         ) : sessions.length === 0 ? (
           <p className="text-sm text-white text-center py-4">Inga aktiva sessioner hittades</p>

@@ -461,6 +461,17 @@ export function useSessionManager(
     }
   }, [userId, onKicked, ensureFreshToken]);
 
+  // Vid nytt konto i samma flik (t.ex. inloggning direkt efter att man blivit
+  // utloggad från en annan enhet) låg kick-flaggan kvar och stängde av all
+  // vidare sessionsbevakning för den nya inloggningen. Nollställ per användare.
+  useEffect(() => {
+    alreadyKickedRef.current = false;
+    registeredRef.current = false;
+    sessionTokenRef.current = null;
+    consecutiveNetworkFailsRef.current = 0;
+    lastRegisteredAtRef.current = 0;
+  }, [userId]);
+
   // Set up session management
   useEffect(() => {
     if (!userId || isPreviewEnv) return;
