@@ -294,7 +294,7 @@ export function AutoMessagesPanel() {
 
   const handleDelayChange = async (event: AutoRuleEvent, value: number) => {
     const rows = rowsByTrigger.get(event.trigger) ?? [];
-    const previousValue = pendingDelays[event.trigger] ?? rows[0]?.delay_minutes ?? event.defaultDelayMinutes;
+    const previousValue = pendingDelays[event.trigger] ?? rows[0]?.delay_minutes ?? event.defaultDelay;
     setPendingDelays((prev) => ({ ...prev, [event.trigger]: value }));
     if (rows.length === 0) return;
 
