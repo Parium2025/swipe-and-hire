@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEmployerJobActive, getEmployerJobStatus } from '@/lib/jobStatus';
+import { UNVIEWED_APPLICATIONS_QUERY_KEY } from '@/hooks/useUnviewedApplicationCounts';
 
 export interface JobPosting {
   id: string;
