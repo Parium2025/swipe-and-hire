@@ -2188,7 +2188,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
               ) : (
                 <>
                   {/* 3 månadspaket för arbetsgivare */}
-                  <div className="relative mt-8 grid items-start gap-5 md:grid-cols-3">
+                  <div className="relative mt-8 grid items-stretch gap-5 md:grid-cols-3">
                     {employerPlans.map((plan, i) => {
                       const isActive = selectedPlan === plan.id;
                       return (
