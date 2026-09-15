@@ -130,6 +130,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
         setDetail(null);
         setQuestions([]);
         setMyAnswers(null);
+        setHasError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -138,7 +139,9 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
     return () => {
       cancelled = true;
     };
-  }, [open, jobId, userId]);
+  }, [open, jobId, userId, reloadKey]);
 
-  return { detail, questions, myAnswers, loading, viewRecordedRef };
+  const retry = () => setReloadKey((k) => k + 1);
+
+  return { detail, questions, myAnswers, loading, hasError, retry, viewRecordedRef };
 }
