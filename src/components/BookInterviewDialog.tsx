@@ -313,9 +313,19 @@ export const BookInterviewDialog = ({
         message: message || null,
       };
 
+      const insertInterview = () =>
+        supabase.from('interviews').insert({
+          job_id: jobId,
+          applicant_id: candidateId,
+          application_id: applicationId,
+          employer_id: user.id,
+          ...interviewFields,
+          status: 'pending',
+        }).select('id').single();
+
       // Ombokning uppdaterar samma möte – annars får kandidaten två
       // kalenderposter och två intervjuer i sina listor.
-      const { data: interviewRow, error } = isReschedule && existingInterview
+      let { data: interviewRow, error } = isReschedule && existingInterview
         ? await supabase
             .from('interviews')
             // Ingen employer_id-filtrering: en kollega i samma organisation ska
@@ -324,23 +334,42 @@ export const BookInterviewDialog = ({
             .eq('id', existingInterview.id)
             .select('id')
             .single()
-        : await supabase.from('interviews').insert({
-            job_id: jobId,
-            applicant_id: candidateId,
-            application_id: applicationId,
-            employer_id: user.id,
-            ...interviewFields,
-            status: 'pending',
-          }).select('id').single();
+        : await insertInterview();
+
+      // Databasen tillåter bara en aktiv intervju per ansökan. Ett möte som
+      // redan är över kan ligga kvar som pending/confirmed tills nattjobbet
+      // hinner stänga det – då ska en andra intervjuomgång ändå gå att boka.
+      if (error && (error as { code?: string }).code === '23505' && !isReschedule) {
+        const { data: blockers } = await supabase
+          .from('interviews')
+          .select('id, scheduled_at, duration_minutes')
+          .eq('application_id', applicationId)
+          .in('status', ['pending', 'confirmed']);
+
+        const stale = (blockers || []).filter(
+          (row) =>
+            new Date(row.scheduled_at).getTime() + (row.duration_minutes || 30) * 60_000 <= Date.now(),
+        );
+
+        if (stale.length > 0 && stale.length === (blockers || []).length) {
+          const { error: closeError } = await supabase
+            .from('interviews')
+            .update({ status: 'completed' })
+            .in('id', stale.map((row) => row.id))
+            .select('id');
+          if (!closeError) {
+            ({ data: interviewRow, error } = await insertInterview());
+          }
+        }
+      }
 
       if (error) {
-        // Databasen tillåter bara en aktiv intervju per ansökan. Slår det till
-        // har en kollega hunnit boka samma kandidat i samma stund.
         if ((error as { code?: string }).code === '23505') {
           throw new Error('En kollega har precis bokat ett möte med kandidaten. Ladda om sidan och boka om tiden i stället.');
         }
         throw error;
       }
+
 
       // Spara länken som standard om rekryteraren bad om det.
       if (locationType === 'video' && saveVideoLinkAsDefault && videoLinkIsValid && videoLinkDiffersFromDefault) {
