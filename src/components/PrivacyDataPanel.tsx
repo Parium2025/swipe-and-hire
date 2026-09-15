@@ -136,7 +136,7 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
     } catch (e) {
       toast({
         title: 'Kunde inte hämta dina uppgifter',
-        description: (e as Error).message || 'Försök igen om en stund.',
+        description: swedishError(e, 'Försök igen om en stund.'),
         variant: 'destructive',
       });
     } finally {
