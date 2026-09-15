@@ -75,6 +75,7 @@ const EmployerDashboard = memo(() => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const deletingJobRef = useRef(false);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
   // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
   // samma regel som databasens utskickstrigger använder.
@@ -508,8 +509,11 @@ const EmployerDashboard = memo(() => {
   };
 
   const confirmDeleteJob = async () => {
-    if (!jobToDelete) return;
-    
+    // Dubbelklickspärr: dialogen stängs först efter svaret, så utan den här
+    // spärren kunde två raderingar skickas och två toasts visas.
+    if (!jobToDelete || deletingJobRef.current) return;
+    deletingJobRef.current = true;
+
     try {
       // Optimistic: remove from react-query cache immediately
       queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
@@ -556,6 +560,8 @@ const EmployerDashboard = memo(() => {
         description: "Kunde inte ta bort annonsen.",
         variant: "destructive"
       });
+    } finally {
+      deletingJobRef.current = false;
     }
   };
 
