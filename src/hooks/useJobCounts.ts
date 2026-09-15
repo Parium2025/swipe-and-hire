@@ -42,6 +42,8 @@ export function useJobCounts() {
     queryKey: ['seo-job-counts'],
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+    // Behåll föregående siffror medan nya hämtas — inga blinkande nollor.
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       // Publik funktion — utloggade besökare saknar direktläsning på
       // job_postings och fick tidigare 0 jobb på alla SEO-sidor.
