@@ -257,12 +257,13 @@ export async function syncCandidateOperationQueue(userId?: string): Promise<{ sy
   try {
     let queue = getQueue();
     if (userId) queue = queue.filter((q) => q.recruiterId === userId);
-    if (queue.length === 0) return 0;
+    if (queue.length === 0) return { synced: 0, dropped: 0 };
 
     console.log(`[CandidateOpsQueue] Syncing ${queue.length} queued operations...`);
 
     const remaining: QueuedCandidateOperation[] = [];
     let synced = 0;
+    let dropped = 0;
 
     for (let i = 0; i < queue.length; i++) {
       const op = queue[i];
@@ -282,7 +283,10 @@ export async function syncCandidateOperationQueue(userId?: string): Promise<{ sy
         if (updated.attempts < MAX_ATTEMPTS) {
           remaining.push(updated);
         } else {
-          // Exhausted retries
+          // Exhausted retries — ändringen finns kvar i den optimistiska vyn men
+          // aldrig i databasen. Anroparen måste läsa om listan, annars visas ett
+          // steg/betyg som aldrig sparades tills sidan laddas om.
+          dropped++;
           const label = getOperationLabel(op);
           toast.error(`${label} kunde inte synkas`, {
             description: op.candidateName
