@@ -153,6 +153,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const isEmployerRole = (role?: string | null) => role === 'employer' || role === 'company_admin' || role === 'recruiter';
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || isEmployerRole(userRole?.role));
   const { getPrefetchedJob } = useJobPrefetchCache();
+  const queryClient = useQueryClient();
   // Profilval för ansökan — samma källa och regler som swipe-flödet.
   const {
     profiles: candidateProfiles,
