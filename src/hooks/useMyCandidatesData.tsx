@@ -941,6 +941,9 @@ export function useMyCandidatesData(
     },
     onSettled: () => {
       isDraggingRef.current = false;
+      // Kolumnrubrikernas riktiga antal kommer från databasen och hängde kvar
+      // med gammal siffra i upp till 30 sekunder efter en flytt.
+      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
     },
   });
 

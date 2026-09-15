@@ -338,13 +338,19 @@ export const useCandidateInterviews = () => {
     }) => {
       if (!getIsOnline()) throw new Error('Du är offline');
       
-      const { error } = await supabase
+      // .select() krävs: en intervju som arbetsgivaren redan avbokat ger noll
+      // rader utan fel, och kandidaten fick då en falsk bekräftelse.
+      const { data, error } = await supabase
         .from('interviews')
         .update({ status: accept ? 'confirmed' : 'declined' })
         .eq('id', interviewId)
-        .eq('applicant_id', user?.id);
+        .eq('applicant_id', user?.id)
+        .select('id');
 
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Intervjun kunde inte uppdateras – den kan ha ändrats av arbetsgivaren');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['candidate-interviews'] });
