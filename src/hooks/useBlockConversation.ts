@@ -54,7 +54,7 @@ export function useBlockConversation() {
       userIds: string[];
       reason?: string;
     }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error('Du är inte inloggad');
       const targets = Array.from(new Set(userIds.filter((id) => id && id !== user.id)));
       if (targets.length === 0) throw new Error('Ingen motpart att blockera');
 

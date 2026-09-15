@@ -4,7 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline } from '@/lib/connectivityManager';
-import { suppressAutoRead, type Conversation } from '@/hooks/useConversations';
+import { toast } from 'sonner';
+import { suppressAutoRead, clearAutoReadSuppression, type Conversation } from '@/hooks/useConversations';
 
 /**
  * Markera en konversation som oläst igen.
@@ -13,7 +14,7 @@ import { suppressAutoRead, type Conversation } from '@/hooks/useConversations';
  * via optimistisk cache-uppdatering.
  */
 export function useMarkConversationUnread() {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const queryClient = useQueryClient();
   const [isMarking, setIsMarking] = useState(false);
 
@@ -38,7 +39,7 @@ export function useMarkConversationUnread() {
           c.id === conversationId ? { ...c, unread_count: Math.max(1, c.unread_count || 0) } : c
         );
         const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-        writeUnreadBadgeCache(total);
+        writeUnreadBadgeCache(total, userRole?.role === 'employer' ? 'employer' : 'job_seeker');
         return next;
       });
 
@@ -47,18 +48,35 @@ export function useMarkConversationUnread() {
 
       setIsMarking(true);
       try {
-        await supabase
+        // Läs tillbaka raden: skrivs inget får badgen inte ligga kvar som
+        // oläst på skärmen medan servern säger något annat.
+        const { data, error } = await supabase
           .from('conversation_members')
           .update({ last_read_at: newLastRead, manually_unread: true } as never)
           .eq('conversation_id', conversationId)
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .select('conversation_id');
+
+        if (error || !data || data.length === 0) {
+          console.warn('markAsUnread failed:', error ?? 'ingen medlemsrad uppdaterades');
+          clearAutoReadSuppression(conversationId);
+          queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+          toast.error('Kunde inte markera som oläst', {
+            description: 'Försök igen om en stund.',
+          });
+        }
       } catch (err) {
         console.warn('markAsUnread failed:', err);
+        clearAutoReadSuppression(conversationId);
+        queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+        toast.error('Kunde inte markera som oläst', {
+          description: 'Försök igen om en stund.',
+        });
       } finally {
         setIsMarking(false);
       }
     },
-    [user, queryClient]
+    [user, userRole?.role, queryClient]
   );
 
   return { markAsUnread, isMarking };

@@ -48,6 +48,7 @@ export default function Messages() {
   const conversationsCtx = useConversationsContext();
   const conversations = conversationsCtx?.conversations ?? [];
   const isLoading = conversationsCtx?.isLoading ?? false;
+  const hasError = conversationsCtx?.isError ?? false;
   const hasMoreConversations = conversationsCtx?.hasMoreConversations ?? false;
   const loadingMoreConversations = conversationsCtx?.loadingMoreConversations ?? false;
   const loadMoreConversations = conversationsCtx?.loadMoreConversations ?? (async () => {});
@@ -368,9 +369,16 @@ export default function Messages() {
               <div className="h-full flex items-center justify-center">
                 <EmptyConversationList
                   hasSearch={!!searchQuery.trim()}
+                  hasError={hasError}
+                  onRetry={() => { void refetch(); }}
                   iconRef={leftEmptyIconRef}
                   contentRef={leftEmptyContentRef}
                 />
+                {/* Sökning ska nå hela historiken — fortsätt hämta fönster
+                    även när det aktuella fönstret inte gav träff. */}
+                {hasMoreConversations && !!searchQuery.trim() && (
+                  <div ref={loadMoreSentinelRef} className="absolute bottom-0 h-px w-full" aria-hidden="true" />
+                )}
               </div>
             ) : (
               <ScrollArea className="h-full w-full min-w-0 max-w-full overflow-x-hidden no-chrome-pad [&_[data-radix-scroll-area-viewport]]:overflow-x-hidden [&_[data-radix-scroll-area-viewport]>div]:!block [&_[data-radix-scroll-area-viewport]>div]:!w-full [&_[data-radix-scroll-area-viewport]>div]:!min-w-0 [&_[data-radix-scroll-area-viewport]>div]:!max-w-full">

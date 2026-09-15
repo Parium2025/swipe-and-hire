@@ -359,7 +359,9 @@ const ID_CHUNK = 100;
 
 export function useConversations() {
 
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  // Badge-cachen är rollspecifik: skriv aldrig över den andra rollens siffra.
+  const badgeRole = userRole?.role === 'employer' ? 'employer' as const : 'job_seeker' as const;
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxWaitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -800,7 +802,7 @@ export function useConversations() {
             });
             // Håll badge-cachen (topnav/sidebar) i synk direkt.
             const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-            writeUnreadBadgeCache(total);
+            writeUnreadBadgeCache(total, badgeRole);
             return next;
           });
         }
@@ -896,7 +898,7 @@ export function useConversations() {
       (c) => typeof c.unread_count === 'number'
     );
     if (!hasComputedUnread && conversationsQuery.data.length > 0) return;
-    writeUnreadBadgeCache(totalUnreadCount);
+    writeUnreadBadgeCache(totalUnreadCount, badgeRole);
   }, [totalUnreadCount, conversationsQuery.data, conversationsQuery.isFetching]);
 
   // Ladda nästa fönster (300 till). Anropas när listan scrollas mot slutet.
@@ -915,6 +917,8 @@ export function useConversations() {
   return {
     conversations: conversationsQuery.data || [],
     isLoading: conversationsQuery.isLoading,
+    // Ett misslyckat anrop får aldrig se ut som ett tomt konto.
+    isError: conversationsQuery.isError && (conversationsQuery.data?.length ?? 0) === 0,
     totalUnreadCount,
     refetch: conversationsQuery.refetch,
     hasMoreConversations,
@@ -937,7 +941,9 @@ export function useConversationMessages(
     [],
   );
 
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  // Badge-cachen är rollspecifik: skriv aldrig över den andra rollens siffra.
+  const badgeRole = userRole?.role === 'employer' ? 'employer' as const : 'job_seeker' as const;
   const queryClient = useQueryClient();
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -1238,7 +1244,7 @@ export function useConversationMessages(
         // Synka sessionStorage-cachen som AppSidebar/TopNav faller tillbaka på
         // vid nästa sidladdning, annars visas gammalt värde innan context hunnit hämta.
         const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-        writeUnreadBadgeCache(total);
+        writeUnreadBadgeCache(total, badgeRole);
         return next;
       }
     );
@@ -1515,31 +1521,28 @@ export function useCreateConversation() {
       // IMPORTANT: Must scope to conversations the current user is a member of,
       // otherwise two different employers messaging the same candidate would share a thread!
       if (!isGroup && memberIds.length === 1) {
-        // First get conversation IDs the current user belongs to
-        const { data: myMemberships } = await supabase
-          .from('conversation_members')
-          .select('conversation_id')
-          .eq('user_id', user.id);
-
-        const myConvIds = myMemberships?.map(m => m.conversation_id) || [];
-
-        if (myConvIds.length > 0 && !isInternal) {
-          const { data: existingByCandidate } = await supabase
+        // Skala: tidigare hämtades ALLA egna medlemskap (kan vara tiotusentals
+        // rader vid många chattar) innan sökningen. Nu filtreras det i samma
+        // indexerade fråga via inner join på medlemstabellen.
+        if (!isInternal) {
+          const { data: existingByCandidate, error: existingError } = await supabase
             .from('conversations')
-            .select('id, application_id')
+            .select('id, application_id, conversation_members!inner(user_id)')
             .eq('candidate_id', candidateId)
             .not('candidate_id', 'is', null)
             .eq('kind', 'job')
-            .in('id', myConvIds)
+            .eq('conversation_members.user_id', user.id)
             .order('updated_at', { ascending: false })
             .limit(1)
             .maybeSingle();
+
+          if (existingError) throw existingError;
 
           if (existingByCandidate) {
             conversationId = existingByCandidate.id;
             isExisting = true;
             previousApplicationId = existingByCandidate.application_id;
-            
+
             // Check if job context is changing
             if (applicationId && applicationId !== previousApplicationId) {
               needsJobContextSwitch = true;
@@ -1547,22 +1550,22 @@ export function useCreateConversation() {
           }
         }
 
-        // Intern 1-1: återanvänd befintlig kollegatråd i stället för att skapa dubbletter.
-        if (myConvIds.length > 0 && isInternal) {
-          const { data: internalCandidates } = await supabase
+        // Intern 1-1: återanvänd befintlig kollegatråd i stället för att skapa
+        // dubbletter. RLS visar bara trådar vi själva är med i, så det räcker
+        // att filtrera på motparten — ingen listning av alla egna trådar.
+        if (isInternal) {
+          const { data: internalMatches, error: internalError } = await supabase
             .from('conversations')
-            .select('id, conversation_members(user_id)')
+            .select('id, conversation_members!inner(user_id)')
             .eq('kind', 'internal')
             .eq('is_group', false)
-            .in('id', myConvIds)
-            .order('updated_at', { ascending: false });
+            .eq('conversation_members.user_id', memberIds[0])
+            .order('updated_at', { ascending: false })
+            .limit(1);
 
-          const match = (internalCandidates || []).find((c) => {
-            const ids = ((c as any).conversation_members || []).map((m: any) => m.user_id).sort();
-            const wanted = [user.id, memberIds[0]].sort();
-            return ids.length === 2 && ids[0] === wanted[0] && ids[1] === wanted[1];
-          });
+          if (internalError) throw internalError;
 
+          const match = (internalMatches || [])[0];
           if (match) {
             conversationId = match.id;
             isExisting = true;
@@ -1591,13 +1594,16 @@ export function useCreateConversation() {
         if (convError) throw convError;
         conversationId = conversation.id;
 
-        // Add creator as admin member (upsert to handle race conditions)
-        await supabase
+        // Add creator as admin member (upsert to handle race conditions).
+        // Felet måste läsas — annars skapas en tråd utan medlemmar som
+        // användaren aldrig ser, men som UI:t rapporterar som skapad.
+        const { error: selfMemberError } = await supabase
           .from('conversation_members')
           .upsert(
             { conversation_id: conversationId, user_id: user.id, is_admin: true },
             { onConflict: 'conversation_id,user_id' }
           );
+        if (selfMemberError) throw selfMemberError;
 
         // Add other members (ignore duplicates)
         for (const memberId of memberIds) {
@@ -1637,20 +1643,32 @@ export function useCreateConversation() {
 
         if (switchError) {
           console.error('Failed to switch job context:', switchError);
-          // Non-critical: conversation still works, just without the marker
+          // Tråden fungerar, men kopplingen till rätt ansökan uteblev —
+          // det får aldrig ske helt tyst.
+          toast.error('Chatten kopplades inte till den nya tjänsten', {
+            description: 'Meddelandena skickas, men jobbkontexten uppdaterades inte. Försök igen.',
+          });
         }
       }
 
       // Send initial message if provided
       if (initialMessage && conversationId) {
-        await supabase
+        // Läs tillbaka raden: en nekad skrivning får aldrig rapporteras som
+        // "Meddelande skickat".
+        const { data: insertedMessage, error: initialMessageError } = await supabase
           .from('conversation_messages')
           .insert({
             conversation_id: conversationId,
             sender_id: user.id,
             content: initialMessage,
-             sender_identity: 'person',
-          });
+            sender_identity: 'person',
+          })
+          .select('id');
+
+        if (initialMessageError) throw initialMessageError;
+        if (!insertedMessage || insertedMessage.length === 0) {
+          throw new Error('Meddelandet kunde inte skickas');
+        }
       }
 
       return { id: conversationId, isExisting, jobContextSwitched: needsJobContextSwitch };

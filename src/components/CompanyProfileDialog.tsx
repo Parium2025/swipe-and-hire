@@ -83,7 +83,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const { reviews: cachedReviews, avgRating, reviewCount, refetch: refetchReviews } = useCompanyReviewsCache(open && user ? companyId : null);
 
   // Use React Query for company profile with prefetched data
-  const { data: company, isLoading: loading } = useQuery<CompanyProfile | null>({
+  const { data: company, isLoading: loading, isError: companyError, refetch: refetchCompany } = useQuery<CompanyProfile | null>({
     queryKey: ['company-profile', companyId],
     queryFn: async () => {
       if (!companyId) return null;
@@ -133,10 +133,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
           table: 'profiles',
           filter: `user_id=eq.${companyId}`
         },
-        (payload) => {
-          console.log('Profile updated in dialog:', payload);
-          // Update the query cache directly with new data
-          queryClient.setQueryData(['company-profile', companyId], payload.new as CompanyProfile);
+        () => {
+          // Hämta om via RPC:t i stället för att skriva in den råa profilraden
+          // i cachen — bara de publika fälten får nå vyn.
+          queryClient.invalidateQueries({ queryKey: ['company-profile', companyId] });
         }
       )
       .subscribe();
@@ -273,10 +273,24 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         <DialogContentNoFocus className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
           <div className="flex flex-col items-center justify-center p-8 text-white">
             <Building2 className="h-16 w-16 mb-4 text-white" />
-            <p className="text-lg font-medium mb-2">Företagsinformation saknas</p>
-            <p className="text-sm text-white text-center">
-              Det finns ingen företagsprofil tillgänglig för detta konto.
+            {/* Ett hämtningsfel får aldrig se ut som ett företag utan profil. */}
+            <p className="text-lg font-medium mb-2">
+              {companyError ? 'Kunde inte hämta företagsprofilen' : 'Företagsinformation saknas'}
             </p>
+            <p className="text-sm text-white text-center">
+              {companyError
+                ? 'Något gick fel när informationen skulle hämtas.'
+                : 'Det finns ingen företagsprofil tillgänglig för detta konto.'}
+            </p>
+            {companyError && (
+              <button
+                type="button"
+                onClick={() => { void refetchCompany(); }}
+                className="mt-4 rounded-full bg-white/10 px-4 py-1.5 text-sm text-white transition-colors md:hover:bg-white/20"
+              >
+                Försök igen
+              </button>
+            )}
           </div>
         </DialogContentNoFocus>
       </Dialog>

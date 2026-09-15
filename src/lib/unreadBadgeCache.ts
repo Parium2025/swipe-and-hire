@@ -10,11 +10,23 @@ export const JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY = 'parium_job_seeker_unread_me
 
 const KEYS = [UNREAD_MESSAGES_CACHE_KEY, JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY] as const;
 
-/** Skriv totalen till båda nycklarna i både session- och localStorage. */
-export function writeUnreadBadgeCache(total: number): void {
+export type UnreadBadgeRole = 'employer' | 'job_seeker';
+
+/**
+ * Skriv totalen till rätt rolls nyckel. Utan roll skrivs båda — men då kan en
+ * arbetsgivarsiffra skriva över jobbsökarens badge (och tvärtom) på ett konto
+ * som växlar roll, så ange alltid roll när den är känd.
+ */
+export function writeUnreadBadgeCache(total: number, role?: UnreadBadgeRole): void {
   if (typeof window === 'undefined') return;
   const value = String(Math.max(0, Math.floor(Number(total) || 0)));
-  for (const key of KEYS) {
+  const keys =
+    role === 'employer'
+      ? [UNREAD_MESSAGES_CACHE_KEY]
+      : role === 'job_seeker'
+        ? [JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY]
+        : KEYS;
+  for (const key of keys) {
     try { sessionStorage.setItem(key, value); } catch { /* privat läge */ }
     try { localStorage.setItem(key, value); } catch { /* privat läge */ }
   }

@@ -14,6 +14,12 @@ interface QueuedMessage {
   id: string;
   sender_id: string;
   recipient_id: string; // candidate user_id
+  /**
+   * Känd konversation (chatten var öppen när meddelandet köades). Måste
+   * användas när den finns — annars skulle en kollegachatt (kind 'internal')
+   * felaktigt leta/skapa en kandidattråd och meddelandet hamna i fel chatt.
+   */
+  conversation_id?: string | null;
   content: string;
   job_id: string | null;
   application_id?: string | null;
@@ -84,6 +90,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
     content: string;
     job_id: string | null;
     application_id?: string | null;
+    conversation_id?: string | null;
   }) => {
     if (!userId) return null;
 
@@ -91,6 +98,7 @@ export function useOfflineMessageQueue(userId: string | undefined) {
       id: crypto.randomUUID(),
       sender_id: userId,
       recipient_id: message.recipient_id,
+      conversation_id: message.conversation_id || null,
       content: message.content,
       job_id: message.job_id,
       application_id: message.application_id || null,
@@ -110,27 +118,36 @@ export function useOfflineMessageQueue(userId: string | undefined) {
   /** Sync a single queued message using the conversation system. */
   const syncMessage = async (message: QueuedMessage): Promise<boolean> => {
     try {
-      // Find or create conversation with the recipient
-      let conversationId = await findExistingConversationId(
-        message.sender_id,
-        message.recipient_id
-      );
+      // Känd konversation (chatten var öppen) → skriv alltid dit. Utan detta
+      // skulle en kollegachatt leta/skapa en kandidattråd och meddelandet
+      // hamna i en helt ny, felaktig konversation.
+      let conversationId = message.conversation_id || null;
 
       if (!conversationId) {
-        conversationId = await createConversationForCandidate(
+        if (!message.recipient_id) throw new Error('Saknar mottagare för köat meddelande');
+
+        conversationId = await findExistingConversationId(
           message.sender_id,
-          message.recipient_id,
-          message.job_id,
-          message.application_id
+          message.recipient_id
+        );
+
+        if (!conversationId) {
+          conversationId = await createConversationForCandidate(
+            message.sender_id,
+            message.recipient_id,
+            message.job_id,
+            message.application_id
+          );
+        }
+
+        // Always ensure memberships exist (defensive — handles corrupted state)
+        await ensureConversationMemberships(
+          conversationId,
+          message.sender_id,
+          message.recipient_id
         );
       }
 
-      // Always ensure memberships exist (defensive — handles corrupted state)
-      await ensureConversationMemberships(
-        conversationId,
-        message.sender_id,
-        message.recipient_id
-      );
 
       // Nya köposter använder sitt UUID som meddelande-id. Tidsstämpelkontrollen
       // finns kvar endast för äldre köposter från före migreringen.

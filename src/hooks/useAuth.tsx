@@ -1633,19 +1633,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_name');
       const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_logo_url');
       
-      const { error } = await supabase
+      // Läs tillbaka raden: en nekad skrivning (RLS) ger inget fel men noll
+      // rader — då får ändringen aldrig rapporteras som sparad.
+      const { data: updatedRows, error } = await supabase
         .from('profiles')
         .update(cleanedUpdates)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('user_id');
 
       if (error) {
         console.error('Supabase profile update error:', error);
         toast({
-          title: "Fel vid uppdatering", 
-          description: error.message,
+          title: "Fel vid uppdatering",
+          description: "Ändringen kunde inte sparas. Försök igen.",
           variant: "destructive"
         });
         return { error };
+      }
+
+      if (!updatedRows || updatedRows.length === 0) {
+        const noRowError = new Error('Profilen kunde inte uppdateras');
+        console.error('Supabase profile update saved no rows');
+        toast({
+          title: "Ändringen sparades inte",
+          description: "Databasen nekade uppdateringen. Ladda om sidan och försök igen.",
+          variant: "destructive"
+        });
+        return { error: noRowError };
       }
 
       if (hasCompanyNameUpdate || hasCompanyLogoUpdate) {
@@ -2092,7 +2106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Tyst fel — behåller tidigare värde
         }
         setPreloadedJobSeekerUnreadMessages(jsUnread);
-        writeUnreadBadgeCache(jsUnread);
+        writeUnreadBadgeCache(jsUnread, 'job_seeker');
 
         // Hämta antal ansökningar för jobbsökare.
         // 🔗 Exakt samma filtrering som listan (dolda ansökningar räknas inte),
@@ -2231,7 +2245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setPreloadedUnreadMessages(unread);
-      writeUnreadBadgeCache(unread);
+      writeUnreadBadgeCache(unread, 'employer');
 
       // Hämta antal company reviews för denna employer
       const { count: reviewsCount } = await supabase

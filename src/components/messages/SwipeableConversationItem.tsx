@@ -65,7 +65,25 @@ export function SwipeableConversationItem({
   const [showConfirm, setShowConfirm] = useState(false);
   const [revealedSide, setRevealedSide] = useState<'delete' | 'unread' | null>(null);
 
-  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+  // Alla timers från animateBack samlas här så de kan rensas vid unmount —
+  // annars kan en rad som raderas mitt i animationen sätta state efter unmount.
+  const timersRef = useRef<number[]>([]);
+  const isMountedRef = useRef(true);
+  const scheduleTimer = useCallback((fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timersRef.current = timersRef.current.filter((t) => t !== id);
+      if (!isMountedRef.current) return;
+      fn();
+    }, ms);
+    timersRef.current.push(id);
+  }, []);
+
+  useEffect(() => () => {
+    isMountedRef.current = false;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    timersRef.current.forEach((id) => window.clearTimeout(id));
+    timersRef.current = [];
+  }, []);
 
   const paint = useCallback(() => {
     rafRef.current = null;
@@ -115,7 +133,7 @@ export function SwipeableConversationItem({
     if (content) {
       content.style.transition = `transform ${contentMs}ms ${easing}`;
       content.style.transform = 'translate3d(0,0,0)';
-      window.setTimeout(() => {
+      scheduleTimer(() => {
         if (gestureId !== gestureIdRef.current) return;
         if (contentRef.current) contentRef.current.style.transition = '';
       }, contentMs + 20);
@@ -126,14 +144,14 @@ export function SwipeableConversationItem({
       el.style.transition = `opacity ${fadeMs}ms ease-out, transform ${fadeMs}ms ${easing}`;
       el.style.opacity = '0';
       el.style.transform = 'scale(0.82)';
-      window.setTimeout(() => {
+      scheduleTimer(() => {
         if (gestureId !== gestureIdRef.current) return;
         if (el) el.style.transition = '';
       }, fadeMs + 20);
     });
     // Behåll pillret monterat tills det tonat klart.
     if (committed) {
-      window.setTimeout(() => {
+      scheduleTimer(() => {
         if (gestureId === gestureIdRef.current) setRevealedSide(null);
       }, 200);
     } else {
@@ -142,7 +160,7 @@ export function SwipeableConversationItem({
 
     pendingXRef.current = 0;
     currentXRef.current = 0;
-  }, []);
+  }, [scheduleTimer]);
 
 
 

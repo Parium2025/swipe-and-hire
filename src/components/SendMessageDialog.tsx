@@ -85,7 +85,15 @@ export function SendMessageDialog({
 
     const fetchTemplates = async () => {
       const { data, error } = await supabase.from('outreach_templates').select('*').eq('is_active', true).order('created_at', { ascending: false });
-      if (!error) {
+      if (error) {
+        // Ett misslyckat anrop får inte se ut som "inga mallar finns".
+        console.error('[SendMessageDialog] Kunde inte hämta mallar:', error);
+        if (!cached || cached.length === 0) {
+          toast.error('Kunde inte hämta dina mallar');
+        }
+        return;
+      }
+      {
         const filtered = (data ?? []).filter((template) => ['chat', 'email', 'push'].includes(template.channel)) as OutreachTemplate[];
         setTemplates(filtered);
         writeCachedOutreachTemplates(user.id, filtered);
