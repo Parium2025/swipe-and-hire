@@ -131,7 +131,7 @@ const MyApplications = () => {
   }, [showContent]);
   
   // Get candidate's interviews
-  const { interviews: allInterviews, isLoading: interviewsLoading } = useCandidateInterviews();
+  const { interviews: allInterviews, isLoading: interviewsLoading, isError: interviewsError, refetch: refetchInterviews } = useCandidateInterviews();
   const interviewNow = useMinuteTick();
   // Avslutade intervjuer ska aldrig ligga kvar i listan.
   const interviews = useMemo(
@@ -237,6 +237,20 @@ const MyApplications = () => {
   return (
      <div className="responsive-container-wide space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Interviews Section */}
+      {interviewsError && interviews.length === 0 && (
+        <section>
+          <div className="text-center py-4">
+            <p className="text-sm text-white mb-2">Kunde inte hämta intervjuerna.</p>
+            <button
+              type="button"
+              onClick={() => refetchInterviews()}
+              className="inline-flex items-center rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors md:hover:bg-white/15"
+            >
+              Försök igen
+            </button>
+          </div>
+        </section>
+      )}
       {interviews && interviews.length > 0 && (
         <section>
           <div className="flex items-center gap-3 mb-4">
