@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -52,6 +52,7 @@ import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPa
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { getManagedScrollContainer, readPositions, writePositions } from '@/lib/scrollRestoration';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
@@ -185,6 +186,7 @@ const SearchJobs = memo(() => {
   const [swipeModeActive, setSwipeModeActive] = useState(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
   });
+  const didMountPageRef = useRef(false);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
@@ -775,9 +777,28 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Sidbyte ska alltid börja högst upp i jobbsöket. `scrollIntoView` får inte
+  // användas här: på iOS Safari kan den även flytta dokumentets viewport trots
+  // att appen har en egen scroll-yta. Då hamnar den fasta app-toppen ovanför
+  // skärmen och nederkanten klipps. Återställ den ägda scroll-ytan efter att de
+  // nya korten har renderats och nollställ även webbläsarens yttre viewport.
+  useLayoutEffect(() => {
+    if (!didMountPageRef.current) {
+      didMountPageRef.current = true;
+      return;
+    }
+
+    const container = getManagedScrollContainer();
+    container?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+    const positions = readPositions();
+    positions[window.location.pathname] = { top: 0 };
+    writePositions(positions);
+  }, [page]);
+
   const handlePageChange = useCallback((next: number) => {
     setPage(next);
-    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
