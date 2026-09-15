@@ -22,6 +22,8 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
   const [extraDetails, setExtraDetails] = useState<ExtraJobDetails | null>(null);
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!open) return;
@@ -30,6 +32,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
     const fetchData = async () => {
       setLoading(true);
       setHasAlreadyApplied(false);
+      setHasError(false);
       try {
         const [questionsRes, jobRes, applicationRes] = await Promise.all([
           supabase.from('job_questions').select('*').eq('job_id', jobId).order('order_index'),
