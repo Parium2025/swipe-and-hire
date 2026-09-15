@@ -14,3 +14,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.parium.se/sitemap.xml
+Sitemap: https://jrjaegapuujushsiofoi.supabase.co/functions/v1/public-sitemap
