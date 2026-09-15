@@ -69,6 +69,15 @@ const CompanyProfile = () => {
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Samma smarta sökning som i jobbflödet: tål stavfel och ordföljd.
+  const matchedIndustries = useMemo(() => {
+    const term = searchTerm.trim();
+    if (term.length < 2) return SWEDISH_INDUSTRIES;
+    return SWEDISH_INDUSTRIES.filter((option) => smartMatches(term, [option]));
+  }, [searchTerm]);
+
+
   
   // Employee count dropdown state
   const [employeeCountOpen, setEmployeeCountOpen] = useState(false);
