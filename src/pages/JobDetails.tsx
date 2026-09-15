@@ -8,7 +8,7 @@ import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useTouchCapable, useSwipeCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
@@ -79,6 +79,8 @@ const JobDetails = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
+  // Svepläget får bara finnas på rena touch-enheter (ingen mus/pekplatta).
+  const canSwipe = useSwipeCapable();
   const device = useDevice();
   const useMobileView = isTouchDevice || device === 'mobile';
 

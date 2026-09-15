@@ -31,7 +31,7 @@ import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useIsMobile } from '@/hooks/use-mobile'; // kept for swipe mode layout
-import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useSwipeCapable } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
@@ -176,7 +176,8 @@ const SearchJobs = memo(() => {
   
   const { savedSearches, saveSearch, deleteSearch, hasActiveFilters, totalNewMatches, clearNewMatches } = useSavedSearches();
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
-  const isTouchCapable = useTouchCapable();
+  // Svepläget finns ENDAST på rena touch-enheter — aldrig när en mus/pekplatta finns.
+  const isTouchCapable = useSwipeCapable();
   const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
