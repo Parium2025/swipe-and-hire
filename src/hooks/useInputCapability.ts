@@ -110,3 +110,12 @@ export function useTouchCapable(): boolean {
   const input = useInputCapability();
   return input === 'touch' || input === 'hybrid';
 }
+
+/**
+ * Helper: swipe-läget får ENDAST finnas på rena touch-enheter.
+ * Så fort en mus/pekplatta finns (mouse eller hybrid, t.ex. touch-laptop)
+ * ska svepläget inte existera alls — varken knapp eller vy.
+ */
+export function useSwipeCapable(): boolean {
+  return useInputCapability() === 'touch';
+}
