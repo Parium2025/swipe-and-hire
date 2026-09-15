@@ -7,9 +7,48 @@ import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
+
+// Samma lokala snabbcache som din egen lista har: första bilden ritas direkt ur
+// cachen och listan hämtas ändå om från databasen i bakgrunden. Nyckeln är egen
+// per kollega och lista, så ingens data kan blandas ihop med någon annans.
+const COLLEAGUE_CACHE_KEY = 'parium_colleague_candidates_v1_';
+const COLLEAGUE_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+interface CachedColleagueCandidates {
+  items: MyCandidateData[];
+  timestamp: number;
+}
+
+function colleagueCacheKey(colleagueId: string, listId: string | null): string {
+  return `${COLLEAGUE_CACHE_KEY}${colleagueId}${listId ? `_${listId}` : ''}`;
+}
+
+function readColleagueCache(colleagueId: string, listId: string | null): MyCandidateData[] | null {
+  const cached = safeReadJsonCache<CachedColleagueCandidates>(
+    colleagueCacheKey(colleagueId, listId),
+    (value): value is CachedColleagueCandidates => {
+      const cache = value as Partial<CachedColleagueCandidates>;
+      return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
+    },
+  );
+  if (!cached || Date.now() - cached.timestamp > COLLEAGUE_CACHE_MAX_AGE_MS) return null;
+  return cached.items;
+}
+
+function writeColleagueCache(colleagueId: string, listId: string | null, items: MyCandidateData[]): void {
+  try {
+    safeSetItem(
+      colleagueCacheKey(colleagueId, listId),
+      JSON.stringify({ items: items.slice(0, 100), timestamp: Date.now() }),
+    );
+  } catch {
+    // Storage full — cachen är bara en snabbstart, inte en datakälla.
+  }
+}
 
 /**
  * Hook to fetch and manage a colleague's candidates.
