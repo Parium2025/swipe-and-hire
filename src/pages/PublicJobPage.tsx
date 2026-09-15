@@ -350,7 +350,7 @@ const PublicJobPage = () => {
     hiringOrganization: {
       '@type': 'Organization',
       name: company,
-      ...(job.company_logo_url ? { logo: job.company_logo_url } : {}),
+      ...(resolvedLogoUrl ? { logo: resolvedLogoUrl } : {}),
     },
     jobLocation: {
       '@type': 'Place',
@@ -404,7 +404,9 @@ const PublicJobPage = () => {
     ],
   };
 
-  const ogImage = job.job_image_url || job.company_logo_url;
+  const resolvedJobImageUrl = resolveStorageImageUrl(job.job_image_url, 'job-images');
+  const resolvedLogoUrl = resolveStorageImageUrl(job.company_logo_url, 'company-logos');
+  const ogImage = resolvedJobImageUrl || resolvedLogoUrl;
 
   const similarCities = CITIES.filter(c => c.slug !== slugify(city)).slice(0, 6);
 
