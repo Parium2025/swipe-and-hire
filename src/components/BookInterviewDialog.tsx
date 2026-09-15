@@ -565,9 +565,11 @@ export const BookInterviewDialog = ({
                   }}
                   className={`max-w-full text-white text-center text-sm leading-snug break-words [overflow-wrap:anywhere] line-clamp-4 ${invitationSummaryTruncated ? 'cursor-pointer touch-manipulation' : 'pointer-events-none'}`}
                 >
-                  {isReschedule
-                    ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
-                    : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
+                  {lockedByColleague
+                    ? `Intervjun med ${candidateName} är bokad av en kollega. Bara den som bokade mötet kan ändra tiden eller avboka.`
+                    : isReschedule
+                      ? `Ändra tid eller plats för intervjun med ${candidateName} – ${jobTitle}. Kandidaten får en ny kallelse och kalenderinbjudan.`
+                      : `Skicka en intervjukallelse till ${candidateName} för tjänsten ${jobTitle}`}
                 </p>
               </PopoverTrigger>
               {invitationSummaryTruncated && (
