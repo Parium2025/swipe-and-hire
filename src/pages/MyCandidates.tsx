@@ -160,7 +160,6 @@ const MyCandidates = () => {
     refetch: refetchCandidates,
     moveCandidate: hookMoveCandidate,
     removeCandidate: hookRemoveCandidate,
-    updateNotes: hookUpdateNotes,
     updateRating: hookUpdateRating,
     markAsViewed: hookMarkAsViewed,
     loadMoreStage,

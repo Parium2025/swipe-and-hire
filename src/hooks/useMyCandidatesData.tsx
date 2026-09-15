@@ -1017,69 +1017,6 @@ export function useMyCandidatesData(
     },
   });
 
-  // Update notes - also saves to persistent candidate_notes table (with retry queue fallback)
-  const updateNotes = useMutation({
-    mutationFn: async ({ id, notes, applicantId }: { id: string; notes: string; applicantId?: string }) => {
-      // Update my_candidates notes
-      const { data, error } = await supabase
-        .from('my_candidates')
-        .update({ notes })
-        .eq('id', id)
-        .select('applicant_id')
-        .single();
-
-      if (error) throw error;
-
-      // Also save to persistent candidate_notes table (upsert by employer_id + applicant_id)
-      const targetApplicantId = applicantId || data?.applicant_id;
-      if (targetApplicantId && user) {
-        const { data: existingNote } = await supabase
-          .from('candidate_notes')
-          .select('id')
-          .eq('employer_id', user.id)
-          .eq('applicant_id', targetApplicantId)
-          .is('job_id', null)
-          .maybeSingle();
-
-        if (existingNote) {
-          await supabase
-            .from('candidate_notes')
-            .update({ note: notes })
-            .eq('id', existingNote.id);
-        } else if (notes.trim()) {
-          await supabase
-            .from('candidate_notes')
-            .insert({
-              employer_id: user.id,
-              applicant_id: targetApplicantId,
-              note: notes,
-              job_id: null,
-            });
-        }
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
-    },
-    onError: (err, variables) => {
-      if (user) {
-        enqueueCandidateOperation({
-          type: 'notes_update',
-          candidateId: variables.id,
-          applicantId: variables.applicantId,
-          recruiterId: user.id,
-          payload: { notes: variables.notes },
-        });
-        // Silent — notes feel "saved" via optimistic update
-      } else {
-        toast.error('Kunde inte uppdatera anteckningar');
-      }
-    },
-  });
-
   // Update rating - also saves to persistent candidate_ratings table (with retry queue fallback)
   const updateRating = useMutation({
     mutationFn: async ({ id, rating, applicantId }: { id: string; rating: number; applicantId?: string }) => {
@@ -1300,7 +1237,6 @@ export function useMyCandidatesData(
     addCandidates,
     moveCandidate,
     removeCandidate,
-    updateNotes,
     updateRating,
     isInMyCandidates,
     isApplicantInMyCandidates,
