@@ -201,8 +201,9 @@ const Subscription = () => {
                     <p className="text-xs font-semibold text-white">Premium</p>
                   </div>
                   <p className="text-xs text-white/70 mt-0.5">
-                    Aktiv sedan {new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })} · Förnyas {nextBillingDate}
+                    Din plan är aktiv.
                   </p>
+
                 </div>
               )}
             </div>
@@ -315,7 +316,7 @@ const Subscription = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Avbryt Premium?</AlertDialogTitle>
             <AlertDialogDescription className="text-white/70">
-              Din Premium-prenumeration förblir aktiv fram till {nextBillingDate}. Därefter återgår ditt konto till Start-planen. Du kan när som helst återaktivera Premium.
+              Din Premium-prenumeration förblir aktiv perioden ut. Därefter återgår ditt konto till Start-planen. Du kan när som helst återaktivera Premium.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
