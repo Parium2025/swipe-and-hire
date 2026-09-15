@@ -269,10 +269,11 @@ export function useNotifications() {
           const removed = payload.old as Partial<AppNotification>;
           if (!removed?.id) return;
           setNotifications(prev => {
-            if (!prev.some(n => n.id === removed.id)) return prev;
+            const before = prev.find(n => n.id === removed.id);
+            if (!before) return prev;
             const updated = prev.filter(n => n.id !== removed.id);
             setCache(user.id, updated);
-            setUnreadCount(updated.filter(n => !n.is_read).length);
+            if (!before.is_read) setUnreadCount(prev2 => Math.max(0, prev2 - 1));
             return updated;
           });
         }
