@@ -69,16 +69,22 @@ export function useAnimatedPageChange(
     };
     restoreStylesRef.current = restore;
 
-    const durationMs = Math.min(1050, Math.max(700, startTop * 0.1));
+    const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
     const startedAt = performance.now();
     const swapThreshold = container.clientHeight * 1.25;
     let frame = 0;
     let swapped = false;
+    // Tiden som React-renderingen stjäl får inte räknas in i rörelsen, annars
+    // hoppar hissen ifatt kurvan med ett synligt ryck efter sidbytet.
+    let pausedMs = 0;
 
     const animate = (now: number) => {
       frame += 1;
-      const progress = Math.min((now - startedAt) / durationMs, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const progress = Math.min((now - startedAt - pausedMs) / durationMs, 1);
+      // Mjuk start och mjukt stopp – hisskänsla, ingen hetsig utskjutning.
+      const eased = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
       const nextTop = startTop * (1 - eased);
       container.scrollTop = nextTop;
 
@@ -86,7 +92,9 @@ export function useAnimatedPageChange(
       // synfältet, med exakt samma ordning oavsett riktning eller sidnummer.
       if (!swapped && frame >= 2 && nextTop > swapThreshold) {
         swapped = true;
+        const swapStartedAt = performance.now();
         flushSync(() => setPage(nextPage));
+        pausedMs += performance.now() - swapStartedAt;
         container.scrollTop = nextTop;
       }
 
