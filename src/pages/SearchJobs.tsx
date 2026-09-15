@@ -187,7 +187,8 @@ const SearchJobs = memo(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
   });
   const didMountPageRef = useRef(false);
-  const pageScrollAnimationRef = useRef<number | null>(null);
+  const pageContentRef = useRef<HTMLDivElement>(null);
+  const pageScrollAnimationRef = useRef<Animation | null>(null);
   const [jobToUnsave, setJobToUnsave] = useState<{ id: string; title: string } | null>(null);
   const [selectedCompanies, setSelectedCompaniesRaw] = useState<string[]>(() => {
     try { const raw = sessionStorage.getItem('parium-search-filters'); return raw ? (JSON.parse(raw).companies || []) : []; } catch { return []; }
@@ -800,51 +801,63 @@ const SearchJobs = memo(() => {
 
   const handlePageChange = useCallback((next: number) => {
     const container = getManagedScrollContainer();
-    if (!container) {
+    const pageContent = pageContentRef.current;
+    if (!container || !pageContent) {
       setPage(next);
       return;
     }
 
     if (pageScrollAnimationRef.current !== null) {
-      cancelAnimationFrame(pageScrollAnimationRef.current);
+      return;
     }
 
     const startTop = container.scrollTop;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion || startTop <= 0) {
+    if (startTop <= 0) {
       container.scrollTop = 0;
       setPage(next);
       return;
     }
 
-    // Låt webbläsarens egen, kompositörsdrivna scrollmotor bära den gamla sidan
-    // uppåt. Direkta scrollTop-skrivningar i requestAnimationFrame kan räknas
-    // korrekt men ändå bara målas i sista läget av iOS momentum-scrollning — då
-    // ser användaren ett hopp. Sidan byts först när den synliga hissrörelsen är klar.
-    const startedAt = performance.now();
-    let previousTop = startTop;
-    let stableFrames = 0;
+    // Flytta själva, fortfarande oförändrade sidan genom viewporten som en hiss.
+    // Vi använder medvetet inte Safaris native smooth-scroll eller scrollTop per
+    // bildruta: båda kan batchas till ett enda hopp i en momentum-scrollande yta.
+    // Toppraden ligger utanför pageContent och förblir därför helt stilla.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const durationMs = prefersReducedMotion
+      ? 320
+      : Math.min(1000, Math.max(700, startTop * 0.1));
+    const previousOverflowAnchor = container.style.overflowAnchor;
+    container.style.overflowAnchor = 'none';
 
-    container.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    const animation = pageContent.animate(
+      [
+        { transform: 'translate3d(0, 0, 0)' },
+        { transform: `translate3d(0, ${startTop}px, 0)` },
+      ],
+      {
+        duration: durationMs,
+        easing: 'cubic-bezier(0.45, 0, 0.2, 1)',
+        fill: 'forwards',
+      },
+    );
 
-    const waitForTop = (now: number) => {
-      const currentTop = container.scrollTop;
-      stableFrames = Math.abs(currentTop - previousTop) < 0.5 ? stableFrames + 1 : 0;
-      previousTop = currentTop;
-
-      const reachedTop = currentTop <= 1 && stableFrames >= 2;
-      const timedOut = now - startedAt >= 1400;
-      if (!reachedTop && !timedOut) {
-        pageScrollAnimationRef.current = requestAnimationFrame(waitForTop);
-        return;
-      }
-
+    const finishPageChange = () => {
+      if (pageScrollAnimationRef.current !== animation) return;
       container.scrollTop = 0;
+      container.style.overflowAnchor = previousOverflowAnchor;
+      animation.cancel();
       pageScrollAnimationRef.current = null;
       setPage(next);
     };
 
-    pageScrollAnimationRef.current = requestAnimationFrame(waitForTop);
+    animation.onfinish = finishPageChange;
+    animation.oncancel = () => {
+      if (pageScrollAnimationRef.current === animation) {
+        container.style.overflowAnchor = previousOverflowAnchor;
+        pageScrollAnimationRef.current = null;
+      }
+    };
+    pageScrollAnimationRef.current = animation;
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
@@ -902,7 +915,7 @@ const SearchJobs = memo(() => {
   }
 
    return (
-     <div className={cn("space-y-3 md:space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]")}>
+     <div ref={pageContentRef} className={cn("space-y-3 md:space-y-4 responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]")}>
       {/* Compact header: title centered + stats inline on mobile */}
       <div className="flex items-center justify-center mb-1 md:mb-4">
         <h1 className="text-lg md:text-2xl font-semibold text-white tracking-tight text-center">Sök Jobb</h1>
