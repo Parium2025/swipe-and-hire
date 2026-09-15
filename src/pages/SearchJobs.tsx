@@ -50,6 +50,7 @@ import { CompanySuggestionCard } from '@/components/search/CompanySuggestionCard
 import { SwipeModeToggle } from '@/components/search/SwipeModeToggle';
 import { JobListSkeleton, SwipeModeSkeleton } from '@/components/search/SearchPageSkeleton';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
