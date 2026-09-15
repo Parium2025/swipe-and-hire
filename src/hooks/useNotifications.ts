@@ -245,9 +245,14 @@ export function useNotifications() {
         (payload) => {
           const updatedNotif = payload.new as AppNotification;
           setNotifications(prev => {
+            const before = prev.find(n => n.id === updatedNotif.id);
             const updated = prev.map(n => (n.id === updatedNotif.id ? { ...n, ...updatedNotif } : n));
             setCache(user.id, updated);
-            setUnreadCount(updated.filter(n => !n.is_read).length);
+            // Justera räknaren med skillnaden i stället för att räkna om de
+            // laddade sidorna — annars tappas olästa notiser utanför sidan.
+            if (before && before.is_read !== updatedNotif.is_read) {
+              setUnreadCount(prev2 => Math.max(0, prev2 + (updatedNotif.is_read ? -1 : 1)));
+            }
             return updated;
           });
         }
