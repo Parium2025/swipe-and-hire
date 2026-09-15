@@ -144,9 +144,18 @@ export function useBulkCandidateOps({
       const ids = Array.from(selectedCandidateIds);
 
       if (isViewingColleague) {
-        for (const id of ids) await removeCandidateFromColleagueList(id);
+        let removed = 0;
+        for (const id of ids) {
+          if (await removeCandidateFromColleagueList(id, { silent: true }) !== false) removed++;
+        }
         exitSelectionMode();
-        toast.success(`${ids.length} kandidater borttagna`);
+        if (removed === 0) {
+          toast.error('Kunde inte ta bort kandidaterna');
+        } else if (removed < ids.length) {
+          toast.warning(`${removed} av ${ids.length} kandidater togs bort`);
+        } else {
+          toast.success(`${ids.length} kandidater borttagna`);
+        }
         return;
       }
 
