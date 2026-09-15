@@ -64,6 +64,10 @@ const PublicJobPage = () => {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Nätverks-/serverfel ska INTE visas som "annonsen är tillsatt" — det ger
+  // både fel besked till besökaren och noindex på en fullt aktiv annons.
+  const [fetchError, setFetchError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   // Vid utgången annons: titel + yrke från arkiverad rad (utan is_active-filter).
   const [expiredCtx, setExpiredCtx] = useState<{ title?: string; occupation?: string } | null>(null);
 
@@ -74,14 +78,32 @@ const PublicJobPage = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setNotFound(false);
+      setFetchError(false);
       // Utloggade besökare har ingen direktläsning på job_postings — annonsen
       // hämtas därför via en publik databasfunktion. Utan den blev varje delad
       // jobblänk "Tillsatt" för alla som inte var inloggade.
-      const { data, error } = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
+      let data: unknown = null;
+      let error: unknown = null;
+      // Två extra försök: ett tillfälligt nätverksfel ska inte ge besked om
+      // att annonsen är tillsatt.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
+        if (cancelled) return;
+        data = res.data;
+        error = res.error;
+        if (!error) break;
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      }
       if (cancelled) return;
+      if (error) {
+        setFetchError(true);
+        setLoading(false);
+        return;
+      }
       const payload = (data ?? {}) as { job?: Job; expired?: { title?: string; occupation?: string } };
-      if (error || !payload.job) {
-        if (!cancelled && payload.expired) {
+      if (!payload.job) {
+        if (payload.expired) {
           setExpiredCtx({ title: payload.expired.title || undefined, occupation: payload.expired.occupation || undefined });
         }
         setNotFound(true);
@@ -92,7 +114,7 @@ const PublicJobPage = () => {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [jobId]);
+  }, [jobId, reloadKey]);
 
   // Slussar till Ansök — om utloggad: parkera intent och gå via /auth.
   const goApply = (id: string) => {
@@ -111,6 +133,41 @@ const PublicJobPage = () => {
     return (
       <div className="seo-scroll-page bg-[hsl(215_100%_12%)] text-white flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin opacity-60" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+        <Helmet>
+          <title>Kunde inte hämta annonsen | Parium</title>
+          <meta name="robots" content="noindex,follow" />
+        </Helmet>
+        <LandingNav onLoginClick={() => navigate('/auth')} />
+        <div className="max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4 text-white">
+            Kunde inte hämta annonsen
+          </h1>
+          <p className="text-white text-base sm:text-lg mb-10 leading-relaxed">
+            Något gick fel när annonsen skulle hämtas. Kontrollera din uppkoppling och försök igen.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="bg-green-500 text-white md:hover:bg-green-600 rounded-full min-h-12 px-7 text-base font-medium"
+            >
+              Försök igen
+            </Button>
+            <Button
+              variant="outline"
+              asChild
+              className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7"
+            >
+              <Link to="/jobb">Se fler jobb</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -340,6 +397,10 @@ const PublicJobPage = () => {
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
         <meta property="og:type" content="article" />
+        <meta property="og:locale" content="sv_SE" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={job.title} />
+        <meta name="twitter:description" content={description} />
         {ogImage && <meta property="og:image" content={ogImage} />}
         <meta name="robots" content="index,follow,max-image-preview:large" />
         <script type="application/ld+json">{JSON.stringify(jobLD)}</script>

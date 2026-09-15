@@ -41,11 +41,20 @@ const JobbKommun = () => {
     let cancelled = false;
     (async () => {
       // Publik RPC — utloggade besökare får inte läsa job_postings direkt.
-      const { data } = await supabase.rpc('search_jobs', {
-        p_city: kommun.name,
-        p_limit: 6,
-      });
-      if (!cancelled) setJobs((data as PublicJobRow[]) || []);
+      // Tre försök: ett tillfälligt fel ska inte dölja kommunens annonser.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data, error } = await supabase.rpc('search_jobs', {
+          p_city: kommun.name,
+          p_limit: 6,
+        });
+        if (cancelled) return;
+        if (!error) {
+          setJobs((data as PublicJobRow[]) || []);
+          break;
+        }
+        if (attempt === 2) break;
+        await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      }
     })();
     return () => { cancelled = true; };
   }, [kommun]);
