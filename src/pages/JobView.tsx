@@ -669,6 +669,14 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         }).catch(err => console.warn('Background CV summary generation failed:', err));
       }
 
+      // Utan detta låg Mina ansökningar, "Sökt"-markeringen i söklistan och
+      // siffrorna på startsidan kvar på gammal data efter en skickad ansökan.
+      clearMyApplicationsLocalCache();
+      queryClient.invalidateQueries({ queryKey: ['my-applications', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', user?.id] });
+
       toast({
         title: 'Ansökan skickad!',
         description: 'Din ansökan har skickats till arbetsgivaren',
@@ -692,13 +700,22 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         setApplying(false);
         return;
       }
+      // Tekniska feltexter från databasen är engelska och obegripliga.
+      // Kandidaten ska alltid få en begriplig svensk förklaring.
+      const isOffline = !getIsOnline();
+      const description = isQuota
+        ? 'Du kan skicka 3 ansökningar per 7 dagar på gratisplanen. Uppgradera till Premium för obegränsat antal ansökningar.'
+        : isOffline
+          ? 'Du verkar vara offline. Försök igen när du har uppkoppling.'
+          : raw.includes('finns inte längre')
+            ? raw
+            : 'Kunde inte skicka ansökan. Försök igen.';
       toast({
         title: isQuota ? 'Ansökningsgränsen är nådd' : 'Ett fel uppstod',
-        description: isQuota
-          ? 'Du kan skicka 3 ansökningar per 7 dagar på gratisplanen. Uppgradera till Premium för obegränsat antal ansökningar.'
-          : (raw || 'Kunde inte skicka ansökan'),
+        description,
         variant: 'destructive',
       });
+
 
     } finally {
       setApplying(false);
