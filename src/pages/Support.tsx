@@ -351,6 +351,13 @@ const Support = () => {
                 </div>
               ))}
             </div>
+          ) : ticketsError && tickets.length === 0 ? (
+            <div className="text-center py-8 space-y-3">
+              <p className="text-sm text-white">Kunde inte hämta dina supportärenden.</p>
+              <Button variant="outline" size="sm" onClick={retryFetchTickets}>
+                Försök igen
+              </Button>
+            </div>
           ) : tickets.length === 0 ? (
             <div className="text-center text-white py-8 text-sm">
               Inga supportärenden ännu
