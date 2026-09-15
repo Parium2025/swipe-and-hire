@@ -306,14 +306,19 @@ const previousCandidates = [...candidates];
     setCandidates(prev => prev.filter(c => c.id !== candidateId));
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('my_candidates')
         .delete()
-        .eq('id', candidateId);
+        .eq('id', candidateId)
+        .select('id');
 
       if (error) {
         setCandidates(previousCandidates);
         throw error;
+      }
+      if (!data || data.length === 0) {
+        setCandidates(previousCandidates);
+        throw new Error('Kandidaten kunde inte tas bort');
       }
       toast.success('Kandidat borttagen från kollegans lista');
     } catch (error: any) {
