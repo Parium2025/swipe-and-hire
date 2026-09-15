@@ -38,6 +38,15 @@ const EmployerSettings = () => {
   // paint, så återkomsten alltid är ett rent, hopfällt läge utan animation.
   const [accordionKey, setAccordionKey] = useState(0);
   const wasAwayRef = useRef(false);
+  // Kommer man tillbaka från t.ex. integritetspolicyn ska den sektion man
+  // hade öppen fortfarande vara öppen — vi sparar valet per session.
+  const OPEN_SECTION_KEY = 'employer-settings-open-section';
+  useEffect(() => {
+    try {
+      if (openSection) sessionStorage.setItem(OPEN_SECTION_KEY, openSection);
+      else sessionStorage.removeItem(OPEN_SECTION_KEY);
+    } catch { /* privat läge m.m. — ignoreras */ }
+  }, [openSection]);
 
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
   // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
@@ -64,7 +73,16 @@ const EmployerSettings = () => {
 
     if (wasAwayRef.current) {
       wasAwayRef.current = false;
-      setOpenSection('');
+      // Återställ senast öppnade sektion. Nyckelbytet monterar om dragspelen
+      // med värdet direkt, så återkomsten sker utan "blixt"-animation.
+      let saved = '';
+      try {
+        saved = sessionStorage.getItem(OPEN_SECTION_KEY) ?? '';
+      } catch { /* ignoreras */ }
+      if (saved) {
+        setAccordionKey((key) => key + 1);
+        setOpenSection(saved);
+      }
     }
   }, [location.pathname, location.hash]);
 
@@ -182,7 +200,7 @@ const EmployerSettings = () => {
     {
       value: 'integritet',
       label: 'Dina uppgifter & integritet',
-      content: <PrivacyDataPanel showDpaLink />,
+      content: <PrivacyDataPanel showDpaLink isEmployer />,
     },
     {
       value: 'team',
