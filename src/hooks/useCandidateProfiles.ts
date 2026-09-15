@@ -126,14 +126,18 @@ export function useCandidateProfiles(userId?: string) {
   }, [load]);
 
   const clearDefaults = useCallback(async (exceptId?: string) => {
-    if (!userId) return;
+    if (!userId) return { error: 'Du är inte inloggad.' } as const;
     let query = supabase
       .from('candidate_profiles')
       .update({ is_default: false })
       .eq('user_id', userId)
       .eq('is_default', true);
     if (exceptId) query = query.neq('id', exceptId);
-    await query;
+    // Tidigare ignorerades felet helt — då kunde två profiler bli standard
+    // samtidigt utan att användaren fick veta något.
+    const { error } = await query;
+    if (error) return { error: 'Kunde inte uppdatera standardprofilen. Försök igen om en stund.' } as const;
+    return {} as const;
   }, [userId]);
 
   const createProfile = useCallback(async (input: CandidateProfileInput) => {
