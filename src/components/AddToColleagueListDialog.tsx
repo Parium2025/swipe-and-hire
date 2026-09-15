@@ -110,24 +110,30 @@ export function AddToColleagueListDialog({
             continue;
           }
           // Flytta befintliga kort till den valda listan (en kandidat = en lista)
-          const { error: moveError } = await supabase
+          const candidateIds = current.map((candidate) => candidate.id);
+          const { data: movedRows, error: moveError } = await supabase
             .from('my_candidates')
             .update({ list_id: listId, stage: defaultStage })
-            .in('id', current.map((c) => c.id));
+            .in('id', candidateIds)
+            .select('id');
           if (moveError) throw moveError;
+          if (!movedRows || movedRows.length !== candidateIds.length) {
+            throw new Error('Kandidaten kunde inte flyttas till listan');
+          }
           moved += 1;
           continue;
         }
 
-        const row = rows.find((r) => r.applicantId === applicantId)!;
-        const { error } = await supabase.from('my_candidates').insert({
+        const row = rows.find((candidate) => candidate.applicantId === applicantId);
+        if (!row) throw new Error('Kandidatens underlag saknas');
+        const { data: inserted, error } = await supabase.from('my_candidates').insert({
           recruiter_id: recruiterId,
           applicant_id: row.applicantId,
           application_id: row.applicationId,
           job_id: row.jobId || null,
           list_id: listId,
           stage: defaultStage,
-        });
+        }).select('id').maybeSingle();
 
         if (error) {
           if (error.code === '23505') {
@@ -136,11 +142,13 @@ export function AddToColleagueListDialog({
           }
           throw error;
         }
+        if (!inserted) throw new Error('Kandidaten kunde inte läggas till i listan');
         added += 1;
       }
 
       queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] });
 
       const target = isOwnList ? 'din lista' : 'kollegans lista';
 

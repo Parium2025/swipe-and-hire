@@ -4124,6 +4124,14 @@ export type Database = {
         Returns: string
       }
       cron_auth_header: { Args: never; Returns: Json }
+      delete_candidate_list_safely: {
+        Args: { p_list_id: string }
+        Returns: {
+          fallback_list_id: string
+          fallback_name: string
+          moved_count: number
+        }[]
+      }
       delete_note_activities_for_applicant: {
         Args: { p_applicant_id: string }
         Returns: undefined

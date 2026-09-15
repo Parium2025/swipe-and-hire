@@ -94,6 +94,7 @@ const clearAllAppCachesSync = () => {
     INTERVIEWS_CACHE_KEY,
     JOB_TEMPLATES_CACHE_KEY,
     'parium_candidate_counts_v1_',
+    'candidate-profile-',
   ];
   
   const exactKeysToRemove = [
@@ -123,6 +124,13 @@ const clearAllAppCachesSync = () => {
     
     // Återställ global state
     lastPreloadTimestamp = 0;
+    // Kandidatprofilens modulcacher lever annars kvar efter konto-byte trots
+    // att localStorage har rensats och kan visa föregående organisations data.
+    void import('@/components/candidateProfile/candidateProfileCache').then(({ summaryCache, questionsCache, notesCache }) => {
+      summaryCache.clear();
+      questionsCache.clear();
+      notesCache.clear();
+    });
     
     console.log('✅ All app caches cleared');
   } catch (error) {

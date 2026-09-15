@@ -202,16 +202,21 @@ export function SelectionCriteriaDialog({
   const autoSaveCriterion = useCallback(async (id: string, title: string, prompt: string) => {
     if (!title.trim() && !prompt.trim()) return; // Don't save completely empty
     try {
-      await supabase
+      const { data, error } = await supabase
         .from('job_criteria')
         .update({
           title: title.trim(),
           prompt: prompt.trim(),
           updated_at: new Date().toISOString(),
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select('id')
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error('Kriteriet kunde inte sparas');
     } catch (err) {
       console.error('Auto-save failed:', err);
+      toast.error('Kunde inte spara kriteriet');
     }
   }, []);
 
@@ -273,12 +278,15 @@ export function SelectionCriteriaDialog({
     const wasActive = criteria.find(c => c.id === id)?.is_active === true;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_criteria')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select('id')
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Kriteriet kunde inte tas bort');
 
       // An activated criterion disappeared → remaining candidates need new scores
       if (wasActive) needsReevalRef.current = true;
@@ -377,7 +385,7 @@ export function SelectionCriteriaDialog({
 
     try {
       // Batch update all valid criteria at once
-      await Promise.all(
+      const updateResults = await Promise.all(
         validCriteria.map(c =>
           supabase
             .from('job_criteria')
@@ -388,8 +396,12 @@ export function SelectionCriteriaDialog({
               updated_at: new Date().toISOString(),
             })
             .eq('id', c.id)
+            .select('id')
         )
       );
+      const failedUpdate = updateResults.find((result) => result.error || !result.data || result.data.length === 0);
+      if (failedUpdate?.error) throw failedUpdate.error;
+      if (failedUpdate) throw new Error('Alla kriterier kunde inte sparas');
 
       const emptyIds = criteria
         .filter(c => {
@@ -399,10 +411,15 @@ export function SelectionCriteriaDialog({
         .map(c => c.id);
 
       if (emptyIds.length > 0) {
-        await supabase
+        const { data: deletedRows, error: deleteError } = await supabase
           .from('job_criteria')
           .delete()
-          .in('id', emptyIds);
+          .in('id', emptyIds)
+          .select('id');
+        if (deleteError) throw deleteError;
+        if (!deletedRows || deletedRows.length !== emptyIds.length) {
+          throw new Error('Alla tomma kriterier kunde inte tas bort');
+        }
       }
 
       // Invalidate criteria cache so counter updates instantly

@@ -310,19 +310,22 @@ export function useStageSettings(listId: string | null = null) {
       const existingSetting = dbSettings?.find(s => s.stage_key === stageKey);
       
       if (existingSetting) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('user_stage_settings')
           .update({
             custom_label: label ?? existingSetting.custom_label,
             color: color ?? existingSetting.color,
             icon_name: iconName ?? existingSetting.icon_name,
           })
-          .eq('id', existingSetting.id);
+          .eq('id', existingSetting.id)
+          .select('id')
+          .maybeSingle();
         
         if (error) throw error;
+        if (!data) throw new Error('Steget kunde inte uppdateras');
       } else {
         const defaultConfig = DEFAULT_STAGES[stageKey];
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('user_stage_settings')
           .insert({
             user_id: user.id,
@@ -333,9 +336,12 @@ export function useStageSettings(listId: string | null = null) {
             icon_name: iconName || defaultConfig?.iconName || null,
             is_custom: false,
             order_index: defaultConfig?.orderIndex ?? 0,
-          });
+          })
+          .select('id')
+          .maybeSingle();
         
         if (error) throw error;
+        if (!data) throw new Error('Steget kunde inte sparas');
       }
     },
     onSuccess: () => {
@@ -364,7 +370,7 @@ export function useStageSettings(listId: string | null = null) {
         DEFAULT_STAGE_KEYS.length - 1
       );
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_stage_settings')
         .insert({
           user_id: user.id,
@@ -375,9 +381,12 @@ export function useStageSettings(listId: string | null = null) {
           icon_name: iconName,
           is_custom: true,
           order_index: maxOrderIndex + 1,
-        });
+        })
+        .select('id')
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('Steget kunde inte skapas');
       return stageKey;
     },
     onSuccess: () => {
@@ -393,12 +402,15 @@ export function useStageSettings(listId: string | null = null) {
       const setting = dbSettings?.find(s => s.stage_key === stageKey && s.is_custom);
       if (!setting) throw new Error('Cannot delete default stages');
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_stage_settings')
         .delete()
-        .eq('id', setting.id);
+        .eq('id', setting.id)
+        .select('id')
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('Steget kunde inte tas bort');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
@@ -419,15 +431,17 @@ export function useStageSettings(listId: string | null = null) {
         
         if (existingSetting) {
           // Delete the setting to mark it as removed
-          const { error } = await supabase
+          const { data: removed, error } = await supabase
             .from('user_stage_settings')
             .delete()
-            .eq('id', existingSetting.id);
+            .eq('id', existingSetting.id)
+            .select('id');
           if (error) throw error;
+          if (!removed || removed.length !== 1) throw new Error('Steget kunde inte tas bort');
         }
         
         // Insert a marker setting to indicate this default stage is deleted
-        const { error } = await supabase
+        const { data: marker, error } = await supabase
           .from('user_stage_settings')
           .insert({
             user_id: user.id,
@@ -438,20 +452,25 @@ export function useStageSettings(listId: string | null = null) {
             icon_name: null,
             is_custom: false,
             order_index: -1, // Special marker
-          });
+          })
+          .select('id')
+          .maybeSingle();
         
         if (error) throw error;
+        if (!marker) throw new Error('Steget kunde inte tas bort');
       } else {
         // For custom stages, just delete
         const setting = dbSettings?.find(s => s.stage_key === stageKey && s.is_custom);
         if (!setting) throw new Error('Stage not found');
 
-        const { error } = await supabase
+        const { data: removed, error } = await supabase
           .from('user_stage_settings')
           .delete()
-          .eq('id', setting.id);
+          .eq('id', setting.id)
+          .select('id');
         
         if (error) throw error;
+        if (!removed || removed.length !== 1) throw new Error('Steget kunde inte tas bort');
       }
     },
     onSuccess: () => {
@@ -473,8 +492,9 @@ export function useStageSettings(listId: string | null = null) {
         .eq('custom_label', '__DELETED__');
       if (listId) query = query.eq('list_id', listId);
 
-      const { error } = await query;
+      const { data: removed, error } = await query.select('id');
       if (error) throw error;
+      if (!removed || removed.length === 0) throw new Error('Steget kunde inte återställas');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
@@ -492,8 +512,9 @@ export function useStageSettings(listId: string | null = null) {
         .eq('stage_key', stageKey);
       if (listId) query = query.eq('list_id', listId);
 
-      const { error } = await query;
+      const { data: removed, error } = await query.select('id');
       if (error) throw error;
+      if (!removed || removed.length === 0) throw new Error('Steget kunde inte återställas');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
