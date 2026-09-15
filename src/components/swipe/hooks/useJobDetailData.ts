@@ -101,6 +101,15 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
       try {
         const [jobRes, questionsRes, answersRes] = await Promise.all(fetchPromises);
         if (cancelled) return;
+        // Supabase returnerar fel i svaret utan att kasta. Utan denna koll
+        // visades en helt tom detaljvy när hämtningen misslyckades.
+        if (jobRes.error || !jobRes.data) {
+          setDetail(null);
+          setQuestions([]);
+          setMyAnswers(null);
+          setHasError(true);
+          return;
+        }
         setDetail(jobRes.data ?? null);
         // 📸 Snapshot först: har användaren redan sökt använder vi de frusna
         // frågorna från ansökan så det som visas matchar det som besvarades.
