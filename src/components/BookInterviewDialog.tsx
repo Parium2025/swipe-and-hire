@@ -848,9 +848,9 @@ export const BookInterviewDialog = ({
                 onClick={() => handleSubmit()} 
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isSubmitting || !date}
+                disabled={isSubmitting || !date || lockedByColleague}
                 className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && date ? 'border border-white/30' : ''
+                  !isSubmitting && date && !lockedByColleague ? 'border border-white/30' : ''
                 }`}
               >
                 {isSubmitting ? (
