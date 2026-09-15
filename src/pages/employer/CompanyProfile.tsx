@@ -856,10 +856,7 @@ const CompanyProfile = () => {
                             </button>
                           ))}
                         
-                        {searchTerm.trim().length >= 2 &&
-                          !SWEDISH_INDUSTRIES.some(industryOption => 
-                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                          ) && (
+                        {searchTerm.trim().length >= 2 && matchedIndustries.length === 0 && (
                           <button
                             type="button"
                             onClick={() => {
