@@ -1551,25 +1551,21 @@ export function useCreateConversation() {
         }
 
         // Intern 1-1: återanvänd befintlig kollegatråd i stället för att skapa
-        // dubbletter. Utgå från motpartens trådar (alltid få) och kontrollera
-        // sedan att vi själva är med — i stället för att lista alla våra trådar.
+        // dubbletter. RLS visar bara trådar vi själva är med i, så det räcker
+        // att filtrera på motparten — ingen listning av alla egna trådar.
         if (isInternal) {
-          const { data: internalCandidates, error: internalError } = await supabase
+          const { data: internalMatches, error: internalError } = await supabase
             .from('conversations')
-            .select('id, conversation_members(user_id)')
+            .select('id, conversation_members!inner(user_id)')
             .eq('kind', 'internal')
             .eq('is_group', false)
+            .eq('conversation_members.user_id', memberIds[0])
             .order('updated_at', { ascending: false })
-            .limit(200);
+            .limit(1);
 
           if (internalError) throw internalError;
 
-          const match = (internalCandidates || []).find((c) => {
-            const ids = ((c as any).conversation_members || []).map((m: any) => m.user_id).sort();
-            const wanted = [user.id, memberIds[0]].sort();
-            return ids.length === 2 && ids[0] === wanted[0] && ids[1] === wanted[1];
-          });
-
+          const match = (internalMatches || [])[0];
           if (match) {
             conversationId = match.id;
             isExisting = true;
