@@ -85,7 +85,7 @@ export function ApplicationQuestionsWizard({
     advanceTimers.current = [];
   }, []);
   const advanceAfterDelay = useCallback(() => {
-    const id = window.setTimeout(() => handleNext(), 250);
+    const id = window.advanceAfterDelay();
     advanceTimers.current.push(id);
   }, [handleNext]);
 
@@ -129,7 +129,7 @@ export function ApplicationQuestionsWizard({
                 }
                 onAnswerChange(question.id, 'yes');
                 setNavigatedBack(false);
-                setTimeout(() => handleNext(), 250);
+                advanceAfterDelay();
               })()}
               disabled={isLocked}
               className={
@@ -151,7 +151,7 @@ export function ApplicationQuestionsWizard({
                 }
                 onAnswerChange(question.id, 'no');
                 setNavigatedBack(false);
-                setTimeout(() => handleNext(), 250);
+                advanceAfterDelay();
               })()}
               disabled={isLocked}
               className={
