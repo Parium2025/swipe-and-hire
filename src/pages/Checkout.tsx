@@ -35,11 +35,18 @@ export default function Checkout() {
 
   const plan = planId ? PLAN_DETAILS[planId] : null;
 
+  const checkoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth', { replace: true, state: { mode: 'register', plan: planId ?? 'premium' } });
     }
   }, [loading, user, navigate, planId]);
+
+  // Timern får aldrig leva vidare efter att sidan lämnats
+  useEffect(() => () => {
+    if (checkoutTimerRef.current) clearTimeout(checkoutTimerRef.current);
+  }, []);
 
   if (loading || !user) {
     return <div className="min-h-dvh bg-[hsl(215_100%_12%)]" />;
@@ -50,8 +57,10 @@ export default function Checkout() {
   }
 
   const handleCheckout = () => {
+    if (checkoutTimerRef.current) return; // dubbelklicksspärr
     setProcessing(true);
-    setTimeout(() => {
+    checkoutTimerRef.current = setTimeout(() => {
+      checkoutTimerRef.current = null;
       setProcessing(false);
       toast({
         title: 'Stripe kommer snart',
