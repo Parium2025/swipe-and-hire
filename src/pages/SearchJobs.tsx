@@ -332,22 +332,21 @@ const SearchJobs = memo(() => {
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
-  // Lazy loading state with infinite scroll
-  const [displayCount, setDisplayCount] = useState(() => {
+  // Sidnumrerad lista: 18 jobb per sida, sidan minns mellan besök i samma session.
+  const [page, setPage] = useState(() => {
     try {
-      const raw = sessionStorage.getItem(SEARCH_JOBS_DISPLAY_COUNT_KEY);
+      const raw = sessionStorage.getItem(SEARCH_JOBS_PAGE_KEY);
       const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
-      return Number.isFinite(parsed) && parsed >= 18 ? parsed : 18;
+      return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
     } catch {
-      return 18;
+      return 1;
     }
-  }); // Start with 18 jobs
-  const loadMoreSize = 18; // Load 18 more each time
+  });
+  const displayCount = page * JOBS_PAGE_SIZE;
+  const setDisplayCount = useCallback((_next: number) => setPage(1), []);
   const listTopRef = useRef<HTMLDivElement>(null);
-  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
-  const isLoadingMoreRef = useRef(false);
   const hasInitializedFiltersRef = useRef(false);
-  const [warmWindowEnd, setWarmWindowEnd] = useState(18);
+  const [warmWindowEnd, setWarmWindowEnd] = useState(JOBS_PAGE_SIZE);
 
   // Debounced search for better performance
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
