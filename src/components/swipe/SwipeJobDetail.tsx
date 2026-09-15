@@ -230,6 +230,18 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                     </div>
                   )}
                 </>
+              ) : hasError ? (
+                <div className="bg-white/10 rounded-lg p-4 text-center space-y-3">
+                  <p className="text-white text-[15px] sm:text-sm">
+                    Kunde inte hämta jobbet just nu.
+                  </p>
+                  <button
+                    onClick={retry}
+                    className="min-h-[44px] px-5 rounded-full bg-white/15 text-white text-[15px] sm:text-sm font-medium transition-all active:scale-[0.97]"
+                  >
+                    Försök igen
+                  </button>
+                </div>
               ) : null}
             </div>
 
@@ -237,10 +249,10 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
             <div className="shrink-0 px-5 pb-5 pt-3 border-t border-white/10" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1.25rem)' }}>
               <button
                 onClick={onApply}
-                disabled={hasApplied}
+                disabled={hasApplied || hasError}
                 className={`w-full h-14 rounded-full font-semibold text-base transition-all active:scale-[0.97] min-h-[44px] ${
-                  hasApplied
-                    ? 'bg-green-500 text-white cursor-not-allowed'
+                  hasApplied || hasError
+                    ? 'bg-green-500 text-white cursor-not-allowed opacity-70'
                     : 'bg-green-500 text-white shadow-lg shadow-green-500/30'
                 }`}
               >
