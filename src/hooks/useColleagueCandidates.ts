@@ -331,7 +331,11 @@ export function useColleagueCandidates(
 
       if (loadMore) {
         setCandidates(prev => {
-          const merged = [...prev, ...result];
+          // Dubblettskydd: en live-uppdatering kan ha hämtat om första sidan
+          // medan en scroll-hämtning var i luften — samma rad får aldrig ritas
+          // två gånger.
+          const seen = new Set(prev.map((c) => c.id));
+          const merged = [...prev, ...result.filter((c) => !seen.has(c.id))];
           if (!trimmedSearch) writeColleagueCache(colleagueId, listId, merged);
           return merged;
         });
@@ -461,7 +465,9 @@ export function useColleagueCandidates(
         setCandidates(previousCandidates);
         throw new Error('Kandidaten kunde inte flyttas');
       }
-      if (colleagueId) {
+      // Skriv aldrig cachen under aktiv sökning — listan i minnet är då bara
+      // sökträffarna, och de får inte ersätta hela listans sparade ögonblicksbild.
+      if (colleagueId && !trimmedSearch) {
         writeColleagueCache(
           colleagueId,
           listId,
@@ -493,7 +499,7 @@ const previousCandidates = [...candidates];
         setCandidates(previousCandidates);
         throw new Error('Kandidaten kunde inte tas bort');
       }
-      if (colleagueId) {
+      if (colleagueId && !trimmedSearch) {
         writeColleagueCache(colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
       }
       toast.success('Kandidat borttagen från kollegans lista');
