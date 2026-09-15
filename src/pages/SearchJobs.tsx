@@ -788,6 +788,10 @@ const SearchJobs = memo(() => {
       return;
     }
 
+    // Under hissrörelsen byts jobben medan sidan fortfarande glider. Då får
+    // ingen nollställning ske — den skulle klippa animationen.
+    if (pageScrollAnimationRef.current !== null) return;
+
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
     const positions = readPositions();
@@ -797,6 +801,7 @@ const SearchJobs = memo(() => {
     const container = getManagedScrollContainer();
     if (container) container.scrollTop = 0;
   }, [page]);
+
 
   const handlePageChange = useCallback((next: number) => {
     const container = getManagedScrollContainer();
