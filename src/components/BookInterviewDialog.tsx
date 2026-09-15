@@ -375,7 +375,12 @@ export const BookInterviewDialog = ({
 
       if (error) {
         if ((error as { code?: string }).code === '23505') {
-          throw new Error('En kollega har precis bokat ett möte med kandidaten. Ladda om sidan och boka om tiden i stället.');
+          throw new Error('En kollega har precis bokat ett möte med kandidaten. Bara den som bokade mötet kan ändra tiden.');
+        }
+        // Noll rader tillbaka = behörighetsreglerna nekade ändringen, dvs. mötet
+        // tillhör en kollega.
+        if ((error as { code?: string }).code === 'PGRST116' && isReschedule) {
+          throw new Error('Mötet är bokat av en kollega. Bara den som bokade det kan boka om eller avboka.');
         }
         throw error;
       }
