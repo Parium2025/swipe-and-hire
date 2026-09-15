@@ -184,10 +184,9 @@ Deno.serve(async (req) => {
     // ─────────────────────────────────────────────────────────
     // PART 1: 10-minute pre-interview reminders (existing)
     // ─────────────────────────────────────────────────────────
-    const nineMinutesFromNow = new Date(now.getTime() + 9 * 60 * 1000);
     const elevenMinutesFromNow = new Date(now.getTime() + 11 * 60 * 1000);
 
-    console.log(`Looking for confirmed interviews between ${nineMinutesFromNow.toISOString()} and ${elevenMinutesFromNow.toISOString()}`);
+    console.log(`Looking for confirmed interviews between ${now.toISOString()} and ${elevenMinutesFromNow.toISOString()}`);
 
     const { data: upcomingInterviews, error: interviewsError } = await supabase
       .from("interviews")
