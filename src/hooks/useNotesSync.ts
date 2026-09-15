@@ -229,7 +229,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setIsSaving(false);
     }, 1200);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [content, user?.id, isFetched, queryClient, queryKey, saveToDb]);
 
   // Retry queued save when coming back online
