@@ -2,7 +2,6 @@ import { memo, useMemo, useEffect } from 'react';
 import { Briefcase, Heart, UserPlus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEmployerJobsCounts } from '@/hooks/useEmployerScaleStats';
@@ -96,7 +95,6 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   useEffect(() => {
     if (!user?.id) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
-    // Koalescera händelser – annars triggar all aktivitet på plattformen en refetch-storm.
     const invalidateStats = () => {
       if (timer) return;
       timer = setTimeout(() => {
@@ -104,22 +102,12 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
         queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
       }, 1200);
     };
-    // Bara ansökningar på våra egna annonser är relevanta.
-    const onApplication = () => invalidateStats();
-    const msgChannel = createRealtimeChannel(`employer-conv-messages-${user.id}`)
-      // "Nya ansökningar" ska tickas upp live, inte först vid fliksbyte.
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' },
-        onApplication
-      )
-      .subscribe();
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') invalidateStats();
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    // Realtime + visibility-trigger ersätter polling – ingen 60s-interval behövs
     return () => {
       if (timer) clearTimeout(timer);
-      supabase.removeChannel(msgChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [user?.id, queryClient]);

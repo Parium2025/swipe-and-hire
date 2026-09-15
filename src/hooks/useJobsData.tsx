@@ -359,6 +359,27 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
   // Check for cached data BEFORE query runs
   const hasCachedData = user ? readJobsCache(user.id, scope || 'personal', profile?.organization_id || null) !== null : false;
 
+  const { data: realtimeEmployerIds = [] } = useQuery({
+    queryKey: ['jobs-realtime-employer-ids', profile?.organization_id, user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      if (scope !== 'organization' || !profile?.organization_id) return [user.id];
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true);
+      if (error) throw error;
+      return data?.map((row) => row.user_id) ?? [user.id];
+    },
+    enabled: !!user && enableRealtime,
+    staleTime: 5 * 60 * 1000,
+  });
+  const realtimeEmployerIdsKey = useMemo(
+    () => [...realtimeEmployerIds].sort().join(','),
+    [realtimeEmployerIds],
+  );
+
   // For organization scope, we need to fetch jobs from all users in the same organization
   const { data: jobs = [], isLoading: queryLoading, error, refetch } = useQuery({
     queryKey: ['jobs', scope, profile?.organization_id, user?.id],
@@ -664,8 +685,11 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     const effectInstanceId = crypto.randomUUID();
     const channelSuffix = `${user.id}-${scope}-${effectInstanceId}`;
 
-    // Only filter for personal scope — org scope needs all org members' jobs
-    const jobFilter = scope !== 'organization' ? `employer_id=eq.${user.id}` : undefined;
+    const employerIds = realtimeEmployerIdsKey ? realtimeEmployerIdsKey.split(',') : [];
+    if (employerIds.length === 0) return;
+    const jobFilter = employerIds.length === 1
+      ? `employer_id=eq.${employerIds[0]}`
+      : `employer_id=in.(${employerIds.join(',')})`;
 
     // 🔥 HÅL #4: Debounce counts/stats invalidations.
     // Vid burst (många jobb-uppdateringar samtidigt) skickar vi MAX 1 invalidate
@@ -684,9 +708,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     const channel = createRealtimeChannel(`job-postings-rt-${channelSuffix}`)
       .on(
         'postgres_changes',
-        jobFilter
-          ? { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const, filter: jobFilter }
-          : { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const },
+        { event: '*' as const, schema: 'public' as const, table: 'job_postings' as const, filter: jobFilter },
         (payload) => {
           const listKey = ['jobs', scope, profile?.organization_id, user?.id];
           const dropRow = (id?: string) => {
@@ -757,20 +779,20 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       ? `job_id=in.(${idsArr.join(',')})`
       : undefined;
 
-    const applicationsChannel = createRealtimeChannel(`job-apps-rt-${channelSuffix}`)
-      .on(
-        'postgres_changes',
-        appsFilter
-          ? { event: 'INSERT' as const, schema: 'public' as const, table: 'job_applications' as const, filter: appsFilter }
-          : { event: 'INSERT' as const, schema: 'public' as const, table: 'job_applications' as const },
-        (payload) => {
-          const jobId = (payload.new as { job_id?: string })?.job_id;
-          if (!jobId) return;
-          pendingDeltas.set(jobId, (pendingDeltas.get(jobId) || 0) + 1);
-          if (!flushTimer) flushTimer = setTimeout(flushDeltas, 1000);
-        }
-      )
-      .subscribe();
+    const applicationsChannel = appsFilter
+      ? createRealtimeChannel(`job-apps-rt-${channelSuffix}`)
+          .on(
+            'postgres_changes',
+            { event: 'INSERT' as const, schema: 'public' as const, table: 'job_applications' as const, filter: appsFilter },
+            (payload) => {
+              const jobId = (payload.new as { job_id?: string })?.job_id;
+              if (!jobId) return;
+              pendingDeltas.set(jobId, (pendingDeltas.get(jobId) || 0) + 1);
+              if (!flushTimer) flushTimer = setTimeout(flushDeltas, 1000);
+            }
+          )
+          .subscribe()
+      : null;
 
     return () => {
       if (flushTimer) {
@@ -781,9 +803,9 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
         clearTimeout(invalidateStatsTimer);
       }
       supabase.removeChannel(channel);
-      supabase.removeChannel(applicationsChannel);
+      if (applicationsChannel) supabase.removeChannel(applicationsChannel);
     };
-  }, [enableRealtime, user, queryClient, scope, profile?.organization_id, jobIdsKey]);
+  }, [enableRealtime, user, queryClient, scope, profile?.organization_id, jobIdsKey, realtimeEmployerIdsKey]);
 
   // Memoize stats to prevent unnecessary recalculations
   const activeJobsList = useMemo(() => 
