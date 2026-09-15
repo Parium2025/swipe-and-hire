@@ -52,6 +52,7 @@ const Support = () => {
   const [ticketsLoading, setTicketsLoading] = useState(
     () => !readCachedSupportTickets(user?.id),
   );
+  const [ticketsError, setTicketsError] = useState(false);
   // Skelettet renderar lika många rader som användaren faktiskt hade sist.
   const ticketSkeletonCount = readCachedCount(SKELETON_COUNT_KEYS.supportTickets, 2, 6);
 
