@@ -147,6 +147,25 @@ const CompanyProfile = () => {
     }
   }, [formData, hasUnsavedChanges]);
 
+  const draftAppliedRef = useRef(false);
+  const blobUrlsRef = useRef<string[]>([]);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      // Förhandsvisningar av loggan får inte ligga kvar i minnet.
+      blobUrlsRef.current.forEach((url) => { try { URL.revokeObjectURL(url); } catch {} });
+      blobUrlsRef.current = [];
+    };
+  }, []);
+
+  const trackBlobUrl = useCallback((url: string) => {
+    blobUrlsRef.current.push(url);
+    return url;
+  }, []);
+
   // Update form data when profile changes
   useEffect(() => {
     if (profile) {
@@ -168,13 +187,33 @@ const CompanyProfile = () => {
         interview_office_instructions: (profile as any)?.interview_office_instructions || '',
       };
       
-      const savedState = localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (!savedState) {
+      // Ett sparat utkast får bara gälla vid första inläsningen, och bara om
+      // det är färskt. Annars kan en gammal flik skriva tillbaka inaktuell
+      // text över en kollegas nyare sparning.
+      let draftIsFresh = false;
+      if (!draftAppliedRef.current) {
+        try {
+          const savedState = localStorage.getItem(DRAFT_STORAGE_KEY);
+          if (savedState) {
+            const parsed = JSON.parse(savedState);
+            const savedAt = typeof parsed?.savedAt === 'number' ? parsed.savedAt : 0;
+            draftIsFresh = Date.now() - savedAt < 24 * 60 * 60 * 1000;
+            if (!draftIsFresh) localStorage.removeItem(DRAFT_STORAGE_KEY);
+          }
+        } catch {
+          try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch {}
+        }
+        draftAppliedRef.current = true;
+      }
+
+      // Efter första inläsningen följer formuläret servern igen så länge
+      // användaren inte har egna osparade ändringar.
+      if (!draftIsFresh && !hasUnsavedChanges) {
         setFormData(values);
       }
       setOriginalValues(values);
     }
-  }, [profile]);
+  }, [profile, hasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.company_name) return false;
@@ -231,7 +270,7 @@ const CompanyProfile = () => {
 
     setOriginalLogoFile(file);
     
-    const imageUrl = URL.createObjectURL(file);
+    const imageUrl = trackBlobUrl(URL.createObjectURL(file));
     setOriginalLogoUrl(imageUrl);
     setOriginalLogoStoragePath('');
     setPendingImageSrc(imageUrl);
@@ -349,7 +388,7 @@ const CompanyProfile = () => {
       try {
         const response = await fetch(formData.company_logo_original_url);
         const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
+        const blobUrl = trackBlobUrl(URL.createObjectURL(blob));
         setOriginalLogoUrl(blobUrl);
         const match = formData.company_logo_original_url.match(/company-logos\/(.+?)(?:\?|$)/);
         if (match) {
@@ -368,7 +407,7 @@ const CompanyProfile = () => {
     try {
       const response = await fetch(formData.company_logo_url);
       const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      const blobUrl = trackBlobUrl(URL.createObjectURL(blob));
       setOriginalLogoUrl(blobUrl);
       const match = formData.company_logo_url.match(/company-logos\/(.+?)(?:\?|$)/);
       if (match) {
@@ -739,12 +778,20 @@ const CompanyProfile = () => {
                       value = value.slice(0, 6) + '-' + value.slice(6, 10);
                     }
                     setFormData({...formData, org_number: value});
+                    // Varna inte mitt i inmatningen — felet visas först när
+                    // fältet lämnas (onBlur nedan).
                     const digitsOnly = value.replace(/-/g, '');
-                    if (value && digitsOnly.length !== 10) {
-                      setOrgNumberError('Organisationsnummer måste vara exakt 10 siffror');
-                    } else {
+                    if (!value || digitsOnly.length === 10) {
                       setOrgNumberError('');
                     }
+                  }}
+                  onBlur={(e) => {
+                    const digitsOnly = e.target.value.replace(/-/g, '');
+                    setOrgNumberError(
+                      e.target.value && digitsOnly.length !== 10
+                        ? 'Organisationsnummer måste vara exakt 10 siffror'
+                        : ''
+                    );
                   }}
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
