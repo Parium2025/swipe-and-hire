@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+import { useSwipeCapable } from '@/hooks/useInputCapability';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
 import { useJobCriteria } from '@/hooks/useCriteriaResults';
 import { useCriteriaMatchFilter } from '@/hooks/useCriteriaMatchFilter';
@@ -1079,7 +1080,7 @@ const MyCandidates = () => {
       <CandidateSwipeViewer
         applications={swipeApplicationsData}
         initialIndex={swipeInitialIndex}
-        open={swipeViewerOpen}
+        open={canSwipe && swipeViewerOpen}
         behind={dialogOpen && returnToSwipe}
         onClose={() => { setSwipeViewerOpen(false); setSwipeFilteredApps(null); }}
         onOpenFullProfile={handleSwipeOpenFullProfile}
