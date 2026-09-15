@@ -205,9 +205,13 @@ Deno.serve(async (req) => {
       // En bokad intervju gäller tills den avbokas eller tackas nej till.
       // Kandidaten bekräftar sällan i appen – därför räknas även "pending".
       .in("status", ["pending", "confirmed"])
-      .gte("scheduled_at", nineMinutesFromNow.toISOString())
+      // Undre gränsen är "nu", inte "nu + 9 min": om fler än 200 möten ligger
+      // i samma fönster tas resten i nästa körning, och då har fönstret redan
+      // glidit förbi dem. Med "nu" som golv hinner överskottet alltid med –
+      // i värsta fall några minuter senare i stället för aldrig.
+      .gte("scheduled_at", now.toISOString())
       .lte("scheduled_at", elevenMinutesFromNow.toISOString())
-      // Fönstret är 2 minuter brett men cron kör varje minut – utan denna
+      // Fönstret är brett men cron kör varje minut – utan denna
       // markering skulle samma påminnelse skickas två gånger.
       .is("reminder_sent_at", null)
       // Taket skyddar mot timeout: cron kör varje minut, så resterande
