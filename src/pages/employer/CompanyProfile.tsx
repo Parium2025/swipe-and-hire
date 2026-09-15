@@ -837,10 +837,7 @@ const CompanyProfile = () => {
                       </div>
                       
                       <div className="overflow-y-auto max-h-60">
-                        {SWEDISH_INDUSTRIES
-                          .filter(industryOption => 
-                            searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
-                          )
+                        {matchedIndustries
                           .map((industryOption) => (
                             <button
                               key={industryOption}
