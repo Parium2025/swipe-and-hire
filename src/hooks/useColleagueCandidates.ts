@@ -442,8 +442,16 @@ export function useColleagueCandidates(
   }, [hasMore, isLoading, fetchColleagueCandidates]);
 
   // Move candidate to different stage (in colleague's list)
-  const moveCandidateInColleagueList = async (candidateId: string, newStage: CandidateStage) => {
-    const previousCandidates = [...candidates];
+  // Returnerar true bara när databasen bekräftat ändringen. Bulk-åtgärder
+  // måste kunna räkna misslyckanden i stället för att visa falsk framgång.
+  const moveCandidateInColleagueList = async (
+    candidateId: string,
+    newStage: CandidateStage,
+    opts?: { silent?: boolean },
+  ): Promise<boolean> => {
+    // Läs alltid ur den senaste listan (inte closure-värdet) — annars skrev en
+    // bulkflytt tillbaka en gammal ögonblicksbild där tidigare flyttar saknades.
+    const previousCandidates = [...candidatesRef.current];
     setCandidates(prev => prev.map(c => 
       c.id === candidateId ? { ...c, stage: newStage } : c
     ));
@@ -474,14 +482,19 @@ export function useColleagueCandidates(
           previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
         );
       }
+      return true;
     } catch (error: any) {
-      toast.error(error.message || 'Kunde inte flytta kandidaten');
+      if (!opts?.silent) toast.error(error.message || 'Kunde inte flytta kandidaten');
+      return false;
     }
   };
 
   // Remove candidate from colleague's list
-  const removeCandidateFromColleagueList = async (candidateId: string) => {
-const previousCandidates = [...candidates];
+  const removeCandidateFromColleagueList = async (
+    candidateId: string,
+    opts?: { silent?: boolean },
+  ): Promise<boolean> => {
+    const previousCandidates = [...candidatesRef.current];
     setCandidates(prev => prev.filter(c => c.id !== candidateId));
 
     try {
@@ -502,9 +515,11 @@ const previousCandidates = [...candidates];
       if (colleagueId && !trimmedSearch) {
         writeColleagueCache(colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
       }
-      toast.success('Kandidat borttagen från kollegans lista');
+      if (!opts?.silent) toast.success('Kandidat borttagen från kollegans lista');
+      return true;
     } catch (error: any) {
-      toast.error(error.message || 'Kunde inte ta bort kandidaten');
+      if (!opts?.silent) toast.error(error.message || 'Kunde inte ta bort kandidaten');
+      return false;
     }
   };
 
