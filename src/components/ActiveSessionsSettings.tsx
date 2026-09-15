@@ -193,6 +193,13 @@ export function ActiveSessionsSettings() {
               </div>
             ))}
           </div>
+        ) : hasError && sessions.length === 0 ? (
+          <div className="py-4 text-center space-y-3">
+            <p className="text-sm text-white">Kunde inte hämta dina aktiva sessioner.</p>
+            <PillButton onClick={() => fetchSessions()} className="h-8 px-4 text-xs">
+              Försök igen
+            </PillButton>
+          </div>
         ) : sessions.length === 0 ? (
           <p className="text-sm text-white text-center py-4">Inga aktiva sessioner hittades</p>
         ) : (
