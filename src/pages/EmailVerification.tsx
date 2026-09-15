@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle, Key, Mail, Smartphone, Copy } from 'lucide-react';
+import { CheckCircle, AlertCircle, Mail, Smartphone, Copy } from 'lucide-react';
+
 import { useToast } from '@/hooks/use-toast';
 import * as QRCodeStylingModule from 'qr-code-styling';
 // CJS/ESM interop: handle both default and namespace exports
