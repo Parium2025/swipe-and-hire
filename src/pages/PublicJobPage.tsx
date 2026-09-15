@@ -443,7 +443,7 @@ const PublicJobPage = () => {
           <TruncatedText text={job.title} className="text-white/80 truncate min-w-0 max-w-full sm:max-w-[60ch]" />
         </nav>
 
-        {job.job_image_url && (
+        {resolvedJobImageUrl && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -451,7 +451,7 @@ const PublicJobPage = () => {
             className="mb-8 overflow-hidden rounded-2xl border border-white/10 bg-white/5"
           >
             <img
-              src={job.job_image_url}
+              src={resolvedJobImageUrl}
               alt={`${job.title} hos ${company}`}
               className="w-full h-auto aspect-[16/9] object-cover"
               width={1200}
@@ -467,10 +467,10 @@ const PublicJobPage = () => {
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          {job.company_logo_url && (
+          {resolvedLogoUrl && (
             <div className="mb-5 w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-white/5">
               <img
-                src={job.company_logo_url}
+                src={resolvedLogoUrl}
                 alt={`${company} logotyp`}
                 className="w-full h-full object-contain"
                 width={128}
@@ -483,8 +483,8 @@ const PublicJobPage = () => {
           <div className="flex flex-wrap gap-3 text-white/70 text-sm">
             <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{company}</span>
             <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{city}</span>
-            {job.employment_type && (
-              <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{job.employment_type}</span>
+            {employmentLabel && (
+              <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{employmentLabel}</span>
             )}
             {job.work_schedule && (
               <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4" />{job.work_schedule}</span>
