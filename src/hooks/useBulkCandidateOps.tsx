@@ -12,8 +12,8 @@ interface UseBulkCandidateOpsParams {
   listId: string | null;
   stageConfig: Record<string, { label: string; color: string; iconName: string }>;
   isViewingColleague: boolean;
-  moveCandidateInColleagueList: (id: string, stage: string) => Promise<void>;
-  removeCandidateFromColleagueList: (id: string) => Promise<void>;
+  moveCandidateInColleagueList: (id: string, stage: string, opts?: { silent?: boolean }) => Promise<boolean | void>;
+  removeCandidateFromColleagueList: (id: string, opts?: { silent?: boolean }) => Promise<boolean | void>;
   exitSelectionMode: () => void;
   selectedCandidateIds: Set<string>;
   displayedCandidates: MyCandidateData[];
@@ -71,15 +71,26 @@ export function useBulkCandidateOps({
       const color = cfg?.color || '#22c55e';
 
       if (isViewingColleague) {
-        for (const id of ids) await moveCandidateInColleagueList(id, targetStage);
+        // Räkna verkliga träffar: tidigare visades "X kandidater flyttade"
+        // även när databasen nekade varenda rad.
+        let moved = 0;
+        for (const id of ids) {
+          if (await moveCandidateInColleagueList(id, targetStage, { silent: true }) !== false) moved++;
+        }
         exitSelectionMode();
         // Håll stegräknare och kollegors vy i synk – enskilda flyttar gör detta,
         // bulkflytten missade det tidigare.
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
-        toast.success(`${count} kandidater flyttade till "${label}"`, {
-          icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
-        });
+        if (moved === 0) {
+          toast.error('Kunde inte flytta kandidaterna');
+        } else if (moved < count) {
+          toast.warning(`${moved} av ${count} kandidater flyttades till "${label}"`);
+        } else {
+          toast.success(`${count} kandidater flyttade till "${label}"`, {
+            icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
+          });
+        }
         return;
       }
 
@@ -133,9 +144,18 @@ export function useBulkCandidateOps({
       const ids = Array.from(selectedCandidateIds);
 
       if (isViewingColleague) {
-        for (const id of ids) await removeCandidateFromColleagueList(id);
+        let removed = 0;
+        for (const id of ids) {
+          if (await removeCandidateFromColleagueList(id, { silent: true }) !== false) removed++;
+        }
         exitSelectionMode();
-        toast.success(`${ids.length} kandidater borttagna`);
+        if (removed === 0) {
+          toast.error('Kunde inte ta bort kandidaterna');
+        } else if (removed < ids.length) {
+          toast.warning(`${removed} av ${ids.length} kandidater togs bort`);
+        } else {
+          toast.success(`${ids.length} kandidater borttagna`);
+        }
         return;
       }
 

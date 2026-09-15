@@ -52,11 +52,16 @@ export const JobStatusBadge = memo(({ jobId, isActive, expiresAt, canToggle, onO
     const newActive = !isActive;
     onOptimisticUpdate({ is_active: newActive });
     try {
-      const { error } = await supabase
+      // .select() krävs: en ändring som behörighetsreglerna nekar ger noll
+      // rader utan fel, och märket visade då "Jobb aktiverat" i onödan.
+      const { data, error } = await supabase
         .from('job_postings')
         .update({ is_active: newActive })
-        .eq('id', jobId);
+        .eq('id', jobId)
+        .select('id')
+        .maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error('Statusen kunde inte ändras');
       toast.success(
         newActive ? 'Jobb aktiverat' : 'Jobb inaktiverat',
         { description: newActive ? 'Jobbet är nu aktivt.' : 'Jobbet är nu inaktivt.' }
