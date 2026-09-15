@@ -105,7 +105,15 @@ const ensureLiveChannel = (userId: string) => {
   liveChannelUserId = userId;
   liveChannel = supabase
     .channel(`employer-stats-live-${userId}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, notifyLiveListeners)
+    // Filtrera på ägaren där kolumnen finns. Utan filtret vaknade varje
+    // arbetsgivares översikt av varje annonsändring i hela systemet.
+    // job_applications/job_views saknar employer_id — där sköter behörigheterna
+    // gallringen, och debouncen nedan slår ihop skurar till en uppdatering.
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${userId}` },
+      notifyLiveListeners,
+    )
     .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, notifyLiveListeners)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_views' }, notifyLiveListeners)
     .subscribe();
