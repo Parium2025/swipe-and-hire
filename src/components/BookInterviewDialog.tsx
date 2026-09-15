@@ -158,6 +158,9 @@ export const BookInterviewDialog = ({
   });
 
   const isReschedule = !!existingInterview;
+  // Endast den rekryterare som bokade mötet får ändra eller boka om det.
+  // En kollega ser mötet men ska aldrig kunna röra någon annans kalender.
+  const lockedByColleague = !!existingInterview && existingInterview.employer_id !== user?.id;
 
   useEffect(() => {
     if (!open) {
