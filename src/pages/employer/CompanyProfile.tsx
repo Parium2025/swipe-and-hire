@@ -816,7 +816,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white truncate">
                       {formData.industry || 'Välj bransch'}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+                    <ChevronDown className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-200 ${industryMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                   </div>
                   
                   {industryMenuOpen && (
