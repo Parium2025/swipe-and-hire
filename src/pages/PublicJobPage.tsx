@@ -328,6 +328,8 @@ const PublicJobPage = () => {
     'Visstid': 'TEMPORARY', 'Sommarjobb': 'TEMPORARY', 'Konsult': 'CONTRACTOR',
     'Praktik': 'INTERN', 'Volontär': 'VOLUNTEER',
   };
+  const resolvedJobImageUrl = resolveStorageImageUrl(job.job_image_url, 'job-images');
+  const resolvedLogoUrl = resolveStorageImageUrl(job.company_logo_url, 'company-logos');
   const employmentLabel = getEmploymentTypeLabel(job.employment_type || undefined);
   const employmentTypeLD = employmentTypeMap[job.employment_type || '']
     || employmentTypeMap[employmentLabel] || 'OTHER';
@@ -404,8 +406,6 @@ const PublicJobPage = () => {
     ],
   };
 
-  const resolvedJobImageUrl = resolveStorageImageUrl(job.job_image_url, 'job-images');
-  const resolvedLogoUrl = resolveStorageImageUrl(job.company_logo_url, 'company-logos');
   const ogImage = resolvedJobImageUrl || resolvedLogoUrl;
 
   const similarCities = CITIES.filter(c => c.slug !== slugify(city)).slice(0, 6);
