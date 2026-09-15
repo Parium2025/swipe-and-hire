@@ -34,6 +34,7 @@ const Unsubscribe = () => {
       <Helmet>
         <title>Hantera dina mejl – Parium</title>
         <meta name="description" content="Styr vilka mejl och notiser du får från Parium i dina notisinställningar." />
+        <meta name="robots" content="noindex,follow" />
       </Helmet>
       <section className="w-full max-w-md rounded-lg border border-white/15 bg-white/[0.07] p-6 shadow-2xl backdrop-blur-md sm:p-8">
         <div className="mb-8 flex items-center justify-center gap-2">
