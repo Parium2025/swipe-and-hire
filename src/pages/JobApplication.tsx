@@ -243,9 +243,20 @@ const JobApplication = () => {
         .select('*')
         .eq('id', jobId)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (jobError) throw jobError;
+      // Annonsen kan ha stängts medan användaren var på väg hit. Det är inte
+      // ett tekniskt fel — säg som det är i stället för "Kunde inte hämta".
+      if (!jobData) {
+        toast({
+          title: 'Annonsen är inte längre tillgänglig',
+          description: 'Arbetsgivaren har stängt annonsen.',
+          variant: 'destructive',
+        });
+        navigate('/dashboard');
+        return;
+      }
       setJob(jobData);
 
       // Fetch custom questions
