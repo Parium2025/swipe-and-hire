@@ -71,6 +71,8 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
       const { data: myCandidates, error: mcError } = await query;
 
       if (mcError) throw mcError;
+      // En nyare hämtning har startat under tiden → kasta det här svaret.
+      if (seq !== requestSeqRef.current) return;
       if (!myCandidates || myCandidates.length === 0) {
         if (!loadMore) {
           setCandidates([]);
