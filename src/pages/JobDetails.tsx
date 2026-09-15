@@ -879,7 +879,7 @@ const JobDetails = () => {
         />
 
         {/* TikTok-style Swipe Viewer for touch devices */}
-        {isTouchDevice && (
+        {canSwipe && (
           <CandidateSwipeViewer
             applications={swipeApplicationsAsData}
             initialIndex={swipeInitialIndex}
