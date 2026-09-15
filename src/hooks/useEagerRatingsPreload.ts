@@ -7,6 +7,7 @@ import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
+import { notesCache, questionsCache, summaryCache } from '@/components/candidateProfile/candidateProfileCache';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -94,6 +95,7 @@ const clearAllAppCachesSync = () => {
     INTERVIEWS_CACHE_KEY,
     JOB_TEMPLATES_CACHE_KEY,
     'parium_candidate_counts_v1_',
+    'candidate-profile-',
   ];
   
   const exactKeysToRemove = [
@@ -123,6 +125,11 @@ const clearAllAppCachesSync = () => {
     
     // Återställ global state
     lastPreloadTimestamp = 0;
+    // Kandidatprofilens modulcacher lever annars kvar efter konto-byte trots
+    // att localStorage har rensats och kan visa föregående organisations data.
+    summaryCache.clear();
+    questionsCache.clear();
+    notesCache.clear();
     
     console.log('✅ All app caches cleared');
   } catch (error) {

@@ -650,45 +650,6 @@ const EmployerAnalytics = memo(() => {
   }, [selectedDays]);
 
   useEffect(() => {
-    if (!user?.id) return;
-
-    const warmAllQueries = () => {
-      TIME_FILTERS.forEach(({ days }) => {
-        const overviewKey = getEmployerAnalyticsCacheKey('overview', user.id, days);
-        const advancedKey = getEmployerAnalyticsCacheKey('advanced', user.id, days);
-
-        if (!readEmployerAnalyticsCache<AnalyticsData>(overviewKey)) {
-          void queryClient.fetchQuery({
-            queryKey: ['employer-analytics-v2', user.id, days],
-            queryFn: () => fetchEmployerAnalyticsOverview(user.id, days),
-            staleTime: 2 * 60 * 1000,
-          }).then((data) => {
-            if (data) writeEmployerAnalyticsCache(overviewKey, data);
-          });
-        }
-
-        if (!readEmployerAnalyticsCache<AdvancedAnalyticsData>(advancedKey)) {
-          void queryClient.fetchQuery({
-            queryKey: ['employer-advanced-analytics', user.id, days],
-            queryFn: () => fetchEmployerAnalyticsAdvanced(user.id, days),
-            staleTime: 2 * 60 * 1000,
-          }).then((data) => {
-            if (data) writeEmployerAnalyticsCache(advancedKey, data);
-          });
-        }
-      });
-    };
-
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const handle = window.requestIdleCallback(warmAllQueries, { timeout: 1200 });
-      return () => window.cancelIdleCallback(handle);
-    }
-
-    const timeout = globalThis.setTimeout(warmAllQueries, 250);
-    return () => globalThis.clearTimeout(timeout);
-  }, [queryClient, user?.id]);
-
-  useEffect(() => {
     if (rawData && user?.id) {
       writeEmployerAnalyticsCache(overviewCacheKey, rawData);
     }

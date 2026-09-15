@@ -278,22 +278,28 @@ const JobDetails = () => {
     try {
       // Betyget är per kandidat och lever i candidate_ratings — samma källa som
       // Mina kandidater. Kandidaten behöver alltså inte ligga i en lista först.
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('candidate_ratings')
         .upsert(
           { recruiter_id: user.id, applicant_id: applicantId, rating: newRating },
           { onConflict: 'recruiter_id,applicant_id' }
-        );
+        )
+        .select('applicant_id')
+        .maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error('Betyget kunde inte sparas');
 
       // Håll ev. listrader i synk så att kortet visar samma sak överallt.
       const myCandidateId = myCandidatesMap.get(applicantId);
       if (myCandidateId) {
-        await supabase
+        const { data: updatedRows, error: spreadError } = await supabase
           .from('my_candidates')
           .update({ rating: newRating })
           .eq('recruiter_id', user.id)
-          .eq('applicant_id', applicantId);
+          .eq('applicant_id', applicantId)
+          .select('id');
+        if (spreadError) throw spreadError;
+        if (!updatedRows || updatedRows.length === 0) throw new Error('Betyget kunde inte synkroniseras');
       }
     } catch {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
@@ -379,12 +385,14 @@ const JobDetails = () => {
     exitSelectionMode();
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_applications')
         .update({ status: targetStage })
-        .in('id', idsToMove);
+        .in('id', idsToMove)
+        .select('id');
         
       if (error) throw error;
+      if (!data || data.length !== idsToMove.length) throw new Error('Alla kandidater kunde inte flyttas');
       toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
         icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
       });
@@ -554,11 +562,13 @@ const JobDetails = () => {
     if (isSelectionMode) exitSelectionMode();
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_applications')
         .update({ rejected_at: rejectedAt })
-        .in('id', ids);
+        .in('id', ids)
+        .select('id');
       if (error) throw error;
+      if (!data || data.length !== ids.length) throw new Error('Alla avslag kunde inte registreras');
       toast.success(ids.length === 1 ? 'Avslag registrerat' : `${ids.length} kandidater fick avslag`);
     } catch {
       refetch();
@@ -575,14 +585,19 @@ const JobDetails = () => {
     // … men flytta ALLA i steget på servern. Vid stora annonser är bara en
     // del av ansökningarna inlästa; utan detta blev resten kvar med en status
     // vars kolumn strax raderas och de försvann tyst ur vyn.
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('job_applications')
       .update({ status: targetKey })
       .eq('job_id', jobId)
-      .eq('status', stageKey);
+      .eq('status', stageKey)
+      .select('id');
     if (error) {
       refetch();
       throw error;
+    }
+    if (apps.length > 0 && (!data || data.length === 0)) {
+      refetch();
+      throw new Error('Kandidaterna kunde inte flyttas');
     }
   }, [applicationsByStatus, updateApplicationLocally, refetch, jobId]);
 

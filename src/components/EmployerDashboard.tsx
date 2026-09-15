@@ -446,11 +446,13 @@ const EmployerDashboard = memo(() => {
       const CHUNK = 200;
       for (let i = 0; i < ids.length; i += CHUNK) {
         const chunk = ids.slice(i, i + CHUNK);
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('job_postings')
           .update({ deleted_at: now, is_active: false })
-          .in('id', chunk);
+          .in('id', chunk)
+          .select('id');
         if (error) throw error;
+        if (!data || data.length !== chunk.length) throw new Error('Alla annonser kunde inte tas bort');
       }
 
       toast({
@@ -520,17 +522,19 @@ const EmployerDashboard = memo(() => {
 
       // Soft delete in DB — is_active måste nollas också, annars ligger raden
       // kvar som "aktiv" i alla vyer/räknare som bara tittar på is_active.
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_postings')
         .update({ deleted_at: new Date().toISOString(), is_active: false })
-        .eq('id', jobToDelete.id);
+        .eq('id', jobToDelete.id)
+        .select('id')
+        .maybeSingle();
 
-      if (error) {
+      if (error || !data) {
         // Rollback on error
         invalidateJobs();
         toast({
           title: "Fel vid borttagning",
-          description: error.message,
+          description: error?.message || 'Annonsen kunde inte tas bort.',
           variant: "destructive"
         });
         return;

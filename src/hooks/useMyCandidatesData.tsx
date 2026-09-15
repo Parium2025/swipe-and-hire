@@ -1041,12 +1041,14 @@ export function useMyCandidatesData(
       // betyget inte "försvinner" när man öppnar kortet från en annan lista.
       const spreadApplicantId = applicantId || data?.applicant_id;
       if (spreadApplicantId && user) {
-        const { error: spreadError } = await supabase
+        const { data: spreadRows, error: spreadError } = await supabase
           .from('my_candidates')
           .update({ rating })
           .eq('recruiter_id', user.id)
-          .eq('applicant_id', spreadApplicantId);
+          .eq('applicant_id', spreadApplicantId)
+          .select('id');
         if (spreadError) throw spreadError;
+        if (!spreadRows || spreadRows.length === 0) throw new Error('Betyget kunde inte sparas');
       }
 
       // Also save to persistent candidate_ratings table (upsert)

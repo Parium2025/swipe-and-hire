@@ -156,35 +156,15 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       if (!list) throw new Error('Listan hittades inte');
       if (list.is_default) throw new Error('Standardlistan går inte att ta bort');
 
-      // Kandidaterna får inte försvinna med listan (raden kaskaderar i databasen).
-      // Flytta dem till standardlistans första steg innan vi raderar.
-      const fallback = lists.find((l) => l.is_default && l.id !== id);
-      if (fallback) {
-        const { data: targetStages } = await supabase
-          .from('user_stage_settings')
-          .select('stage_key')
-          .eq('user_id', ownerId!)
-          .eq('list_id', fallback.id)
-          .gt('order_index', -1)
-          .order('order_index', { ascending: true })
-          .limit(1);
-        const targetStage = targetStages?.[0]?.stage_key || 'to_contact';
-
-        const { error: moveError } = await supabase
-          .from('my_candidates')
-          .update({ list_id: fallback.id, stage: targetStage, updated_at: new Date().toISOString() })
-          .eq('list_id', id);
-        if (moveError) throw moveError;
-      }
-
-      const { data: deleted, error } = await supabase
-        .from('candidate_lists')
-        .delete()
-        .eq('id', id)
-        .select('id');
+      // Flytt + borttagning sker i samma databastransaktion. Det förhindrar att
+      // listans cascade tar kandidater om en flytt nekas eller två flikar krockar.
+      const { data, error } = await supabase.rpc('delete_candidate_list_safely', {
+        p_list_id: id,
+      });
       if (error) throw error;
-      if (!deleted || deleted.length === 0) throw new Error('Listan kunde inte tas bort');
-      return { movedTo: fallback?.name ?? null };
+      const result = data?.[0];
+      if (!result?.fallback_list_id) throw new Error('Listan kunde inte tas bort');
+      return { movedTo: result.fallback_name ?? null };
     },
 
     onSuccess: (result) => {
@@ -214,11 +194,14 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
     mutationFn: async (orderedIds: string[]) => {
       if (!ownerId) throw new Error('Not authenticated');
       const updates = orderedIds.map((id, index) =>
-        supabase.from('candidate_lists').update({ order_index: index }).eq('id', id),
+        supabase.from('candidate_lists').update({ order_index: index }).eq('id', id).select('id'),
       );
       const results = await Promise.all(updates);
       const failed = results.find((r) => r.error);
       if (failed?.error) throw failed.error;
+      if (results.some((result) => !result.data || result.data.length !== 1)) {
+        throw new Error('Listordningen kunde inte sparas');
+      }
       return orderedIds;
     },
     onMutate: async (orderedIds: string[]) => {

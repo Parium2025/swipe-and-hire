@@ -77,9 +77,9 @@ function writeCache<T>(prefix: string, userId: string, scope: string, orgId: str
 /**
  * 🔴 Live-synk för arbetsgivarsiffrorna.
  * En delad kanal (per användare) som lyssnar på annonser, visningar och
- * ansökningar. RLS filtrerar payloads per prenumerant, så vi ser bara
- * händelser vi har rätt till. Invalidering är debouncad så en burst av
- * events bara ger en refetch.
+ * annonsändringar. Ansökningar och visningar saknar arbetsgivar-id och kan
+ * därför inte filtreras säkert i Realtime; de fångas av 60-sekunderssynken
+ * och omedelbart av de job-id-filtrerade kanalerna där jobblistan är laddad.
  *
  * Utgångna annonser byter status via tid, inte via ett DB-event — därför
  * kompletterar vi med en tyst refetch var 60:e sekund och vid fönsterfokus.
@@ -107,15 +107,11 @@ const ensureLiveChannel = (userId: string) => {
     .channel(`employer-stats-live-${userId}`)
     // Filtrera på ägaren där kolumnen finns. Utan filtret vaknade varje
     // arbetsgivares översikt av varje annonsändring i hela systemet.
-    // job_applications/job_views saknar employer_id — där sköter behörigheterna
-    // gallringen, och debouncen nedan slår ihop skurar till en uppdatering.
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'job_postings', filter: `employer_id=eq.${userId}` },
       notifyLiveListeners,
     )
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, notifyLiveListeners)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_views' }, notifyLiveListeners)
     .subscribe();
 };
 

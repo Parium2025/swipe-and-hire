@@ -166,16 +166,19 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
     setSavingNote(true);
 
     try {
-      const { error } = await supabase
+      const { data: savedNote, error } = await supabase
         .from('candidate_notes')
         .insert({
           employer_id: user.id,
           applicant_id: applicantId,
           job_id: jobId,
           note: noteText.trim(),
-        });
+        })
+        .select('id')
+        .maybeSingle();
 
       if (error) throw error;
+      if (!savedNote) throw new Error('Anteckningen kunde inte sparas');
 
       logActivity.mutate({
         applicantId,
