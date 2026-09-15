@@ -926,7 +926,12 @@ const EmployerDashboard = memo(() => {
             <span>Hämtar sida {page}…</span>
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          searchTerm.trim() ? (
+          showJobsError ? (
+            <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex flex-col items-center justify-center gap-3">
+              <span>Kunde inte hämta dina annonser.</span>
+              <Button variant="secondary" onClick={() => invalidateJobs()}>Försök igen</Button>
+            </div>
+          ) : searchTerm.trim() ? (
             <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
               <span>Inga annonser stämde med din sökning.</span>
             </div>
