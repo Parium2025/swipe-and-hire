@@ -134,8 +134,14 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
       if (lists.some((l) => l.id !== id && l.name.toLowerCase() === trimmed.toLowerCase())) {
         throw new Error('Du har redan en lista med det namnet');
       }
-      const { error } = await supabase.from('candidate_lists').update({ name: trimmed }).eq('id', id);
+      // .select() så vi aldrig visar "Listan bytte namn" när noll rader ändrades.
+      const { data, error } = await supabase
+        .from('candidate_lists')
+        .update({ name: trimmed })
+        .eq('id', id)
+        .select('id');
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Listan kunde inte byta namn');
     },
     onSuccess: () => {
       invalidate();
@@ -171,8 +177,13 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
         if (moveError) throw moveError;
       }
 
-      const { error } = await supabase.from('candidate_lists').delete().eq('id', id);
+      const { data: deleted, error } = await supabase
+        .from('candidate_lists')
+        .delete()
+        .eq('id', id)
+        .select('id');
       if (error) throw error;
+      if (!deleted || deleted.length === 0) throw new Error('Listan kunde inte tas bort');
       return { movedTo: fallback?.name ?? null };
     },
 

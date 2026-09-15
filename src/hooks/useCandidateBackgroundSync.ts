@@ -27,6 +27,9 @@ const REALTIME_DEBOUNCE_MS = 800;
  * 8 queries × 10s × N användare = ohållbart vid skala.
  * Realtime + filter räcker; tab-focus-recovery hanteras av RealtimeKeepAlive.
  */
+/** Senast synkade tidsstämplar per användare – styr när kanban-vyn hämtar om sig. */
+const lastMyCandidatesSignature = new Map<string, string>();
+
 export const useCandidateBackgroundSync = (enabled = true) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -439,6 +442,30 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
       pageParams: existingPageParams.length > 1
         ? [null, ...existingPageParams.slice(1)]
         : [null],
+    });
+  }
+
+  // Desktop-kanban läser en annan nyckel (samma lista, men med stegen i
+  // nyckeln). Den träffades aldrig av skrivningen ovan, så bakgrundssynken var
+  // i praktiken verkningslös där. Vi låter de vyerna hämta om sig i stället —
+  // men bara när datan faktiskt ändrats, och aldrig vid första synken efter
+  // inloggning (då har vyerna precis hämtat själva).
+  const signature = `${listId}:${newTimestamps}`;
+  const previousSignature = lastMyCandidatesSignature.get(userId);
+  lastMyCandidatesSignature.set(userId, signature);
+  if (previousSignature !== undefined && previousSignature !== signature) {
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) &&
+          key[0] === 'my-candidates' &&
+          key[1] === userId &&
+          key[2] === '' &&
+          key[3] === listId &&
+          key[4] !== ''
+        );
+      },
     });
   }
 
