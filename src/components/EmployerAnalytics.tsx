@@ -1062,8 +1062,25 @@ const EmployerAnalytics = memo(() => {
       {/* ─── Kollegial statistik (endast för organisationer med flera rekryterare) ─── */}
       <TeamInsightsSection data={teamData ?? null} />
 
+      {/* Fel vid hämtning får aldrig se ut som "inga data" – då tror
+          arbetsgivaren att statistiken är tom trots att annonser finns. */}
+      {overviewError && !rawData && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <BarChart3 className="h-12 w-12 text-white/20 mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">Kunde inte hämta statistiken</h3>
+            <p className="text-sm text-white text-center max-w-sm mb-4">
+              Kontrollera din uppkoppling och försök igen.
+            </p>
+            <Button variant="outline" onClick={() => refetchOverview()}>
+              Försök igen
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Empty state */}
-      {analytics.length === 0 && !isLoading && (
+      {!overviewError && analytics.length === 0 && !isLoading && (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <BarChart3 className="h-12 w-12 text-white/20 mb-4" />
@@ -1074,6 +1091,7 @@ const EmployerAnalytics = memo(() => {
           </CardContent>
         </Card>
       )}
+
     </div>
   );
 });
