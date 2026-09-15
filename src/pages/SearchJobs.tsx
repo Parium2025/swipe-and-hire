@@ -1059,29 +1059,20 @@ const SearchJobs = memo(() => {
         )}
       </div>
 
-      {/* Infinite Scroll Trigger */}
-      <div ref={loadMoreTriggerRef} className="h-1" />
-      
-      {/* Loading indicator with progress */}
-      {(hasMoreJobs || hasNextPage || isFetchingNextPage) && (
-        <div className="flex justify-center py-4">
-          <div className="flex items-center gap-2 text-white/60 text-sm">
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-            <span>
-              {isFetchingNextPage ? 'Hämtar fler jobb...' : `Visar ${Math.min(displayCount, filteredAndSortedJobs.length)} av ${filteredAndSortedJobs.length}${hasNextPage ? '+' : ''} jobb`}
-            </span>
-          </div>
-        </div>
-      )}
-      
-      {/* Show message when all jobs are loaded */}
-      {!hasMoreJobs && !hasNextPage && !isFetchingNextPage && filteredAndSortedJobs.length > 0 && (
-        <div className="flex justify-center pt-2 pb-6">
-          <div className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-[2px] border border-white/25 px-4 py-1.5">
-            <p className="text-white text-sm font-medium">
-              Alla {filteredAndSortedJobs.length} jobb visas
-            </p>
-          </div>
+      {/* Sidnumrering */}
+      {filteredAndSortedJobs.length > 0 && (
+        <div className="pt-2 pb-6">
+          <p className="text-center text-white text-sm font-medium">
+            Visar {Math.min((page - 1) * JOBS_PAGE_SIZE + 1, filteredAndSortedJobs.length)}–
+            {Math.min(page * JOBS_PAGE_SIZE, filteredAndSortedJobs.length)} av {filteredAndSortedJobs.length}
+            {hasNextPage ? '+' : ''} jobb
+          </p>
+          <DashboardPagination
+            page={Math.min(page, totalPages)}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            compact={isMobile}
+          />
         </div>
       )}
 
