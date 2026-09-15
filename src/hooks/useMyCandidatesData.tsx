@@ -278,7 +278,11 @@ export function useMyCandidatesData(
 
   // 🔥 Auto-sync queued candidate operations when connectivity returns
   useCandidateOperationQueue(user?.id);
-  const [isDragging, setIsDragging] = useState(false);
+  // Ref, inte state: realtime-kanalen nedan läser värdet. Som state hamnade
+  // det i effektens dependencies, vilket gjorde att kanalen kopplades ner och
+  // upp igen vid varje drag — under omkopplingen tappades kollegornas
+  // uppdateringar helt.
+  const isDraggingRef = useRef(false);
   const [loadingStage, setLoadingStage] = useState<string | null>(null);
 
   // Check for cached data BEFORE query runs (only for non-search queries)
