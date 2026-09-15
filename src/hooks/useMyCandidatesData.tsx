@@ -1034,17 +1034,20 @@ export function useMyCandidatesData(
       // betyget inte "försvinner" när man öppnar kortet från en annan lista.
       const spreadApplicantId = applicantId || data?.applicant_id;
       if (spreadApplicantId && user) {
-        await supabase
+        const { error: spreadError } = await supabase
           .from('my_candidates')
           .update({ rating })
           .eq('recruiter_id', user.id)
           .eq('applicant_id', spreadApplicantId);
+        if (spreadError) throw spreadError;
       }
 
       // Also save to persistent candidate_ratings table (upsert)
       const targetApplicantId = applicantId || data?.applicant_id;
       if (targetApplicantId && user) {
-        await supabase
+        // candidate_ratings är den kanoniska källan som listan läser tillbaka.
+        // Utan kontroll här visades ett betyg som aldrig sparades.
+        const { data: savedRating, error: ratingError } = await supabase
           .from('candidate_ratings')
           .upsert({
             recruiter_id: user.id,
@@ -1052,7 +1055,12 @@ export function useMyCandidatesData(
             rating,
           }, {
             onConflict: 'recruiter_id,applicant_id',
-          });
+          })
+          .select('applicant_id');
+        if (ratingError) throw ratingError;
+        if (!savedRating || savedRating.length === 0) {
+          throw new Error('Betyget kunde inte sparas');
+        }
         
         // Update localStorage ratings cache for instant sync with /candidates
         try {
