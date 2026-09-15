@@ -177,8 +177,13 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
         if (moveError) throw moveError;
       }
 
-      const { error } = await supabase.from('candidate_lists').delete().eq('id', id);
+      const { data: deleted, error } = await supabase
+        .from('candidate_lists')
+        .delete()
+        .eq('id', id)
+        .select('id');
       if (error) throw error;
+      if (!deleted || deleted.length === 0) throw new Error('Listan kunde inte tas bort');
       return { movedTo: fallback?.name ?? null };
     },
 
