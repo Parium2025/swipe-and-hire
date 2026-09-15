@@ -28,15 +28,21 @@ import type { Database, Json } from '@/integrations/supabase/types';
 type JobApplicationInsert = Database['public']['Tables']['job_applications']['Insert'];
 
 
-// Draft key for localStorage
+// Draft key for localStorage.
+// Nyckeln är kontobunden: utkastet innehåller namn, e-post, telefon och
+// personligt brev och fick aldrig kunna återställas av nästa person som
+// loggar in på samma dator.
 const JOB_APPLICATION_DRAFT_PREFIX = 'parium_draft_job-application-';
 
-const getDraftKey = (jobId: string) => `${JOB_APPLICATION_DRAFT_PREFIX}${jobId}`;
+const getDraftKey = (jobId: string, userId: string) =>
+  `${JOB_APPLICATION_DRAFT_PREFIX}${userId}-${jobId}`;
 
 // Clear draft for a specific job
-export const clearJobApplicationDraft = (jobId: string) => {
+export const clearJobApplicationDraft = (jobId: string, userId: string) => {
   try {
-    localStorage.removeItem(getDraftKey(jobId));
+    localStorage.removeItem(getDraftKey(jobId, userId));
+    // Städa även äldre, icke kontobundna utkast.
+    localStorage.removeItem(`${JOB_APPLICATION_DRAFT_PREFIX}${jobId}`);
   } catch (e) {
     console.warn('Failed to clear job application draft');
   }
