@@ -117,6 +117,10 @@ const clearAllAppCachesSync = () => {
     // Jobbsökarsidan (pass 12) — siffror och intervjuer på startsidan
     'parium-jobseeker-stats',
     'job_seeker_interviews_',
+    // Notiser (pass 15) — notistexter kan innehålla namn och jobbtitlar och
+    // får inte ligga kvar i klockan efter utloggning på delad enhet.
+    'parium_notifications_cache',
+    'parium_toast_archive_v1',
   ];
   
   const exactKeysToRemove = [
