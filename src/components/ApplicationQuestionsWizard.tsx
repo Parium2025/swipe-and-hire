@@ -77,6 +77,18 @@ export function ApplicationQuestionsWizard({
     }
   }, [currentStep, totalSteps]);
 
+  // Ja/Nej-knapparna byter steg efter 250 ms. Stängs vyn inom den tiden ska
+  // hoppet inte ske — annars tickar ett steg in i en stängd ansökningsvy.
+  const advanceTimers = useRef<number[]>([]);
+  useEffect(() => () => {
+    advanceTimers.current.forEach(id => window.clearTimeout(id));
+    advanceTimers.current = [];
+  }, []);
+  const advanceAfterDelay = useCallback(() => {
+    const id = window.setTimeout(() => handleNext(), 250);
+    advanceTimers.current.push(id);
+  }, [handleNext]);
+
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
       // Blur any focused element before step change to prevent focus-ring flash
