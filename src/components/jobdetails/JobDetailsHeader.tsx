@@ -131,9 +131,11 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
         </div>
         {job.expires_at && (
           <span className="text-white text-xs">
-            {new Date(job.expires_at) < new Date() 
-              ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
-              : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE')}`
+            {/* Datumet visas alltid i svensk tid, annars kunde en arbetsgivare
+                utomlands se fel utgångsdag nära midnatt. */}
+            {new Date(job.expires_at) < new Date()
+              ? `Gick ut ${new Date(job.expires_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Stockholm' })}`
+              : `Går ut ${new Date(job.expires_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Stockholm' })}`
             }
           </span>
         )}
