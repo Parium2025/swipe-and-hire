@@ -47,7 +47,12 @@ export function useJobCounts() {
       // job_postings och fick tidigare 0 jobb på alla SEO-sidor.
       const { data, error } = await supabase.rpc('get_public_job_facets' as any);
 
-      if (error || !data) return EMPTY;
+      // ⚠️ Tidigare returnerades EMPTY vid fel. Det cachades som ett lyckat
+      // svar i 5 minuter → alla interna SEO-länkar visade "0 jobb" och blev
+      // icke-länkar. Kasta i stället så React Query gör om försöket och
+      // behåller senast kända siffror.
+      if (error) throw error;
+      if (!data) return EMPTY;
 
       const rows = data as Array<{ city: string | null; occupation: string | null; job_count: number }>;
 
