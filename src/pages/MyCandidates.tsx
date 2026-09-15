@@ -258,12 +258,8 @@ const MyCandidates = () => {
   // Bulk action confirmation dialogs
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   
-  // Fetch colleague's candidates when switching
-  useEffect(() => {
-    if (viewingColleagueId) {
-      fetchColleagueCandidates();
-    }
-  }, [viewingColleagueId, fetchColleagueCandidates]);
+  // Kollegans kandidater hämtas av hooken själv (även vid byte av lista/sökning).
+
 
   const fetchCandidates = refetchCandidates;
 
@@ -931,8 +927,8 @@ const MyCandidates = () => {
           onPrefetch={handlePrefetchCandidate}
           onMarkAsViewed={markApplicationAsViewed}
           stageCounts={debouncedSearchQuery ? undefined : stageCounts}
-          hasMoreInStage={hasMoreInStage}
-          onLoadMore={loadMoreStage}
+          hasMoreInStage={effectiveHasMoreInStage}
+          onLoadMore={effectiveLoadMore}
           loadingStage={loadingStage}
           renderActionBar={isSelectionMode ? (
             <MyCandidatesMobileActionBar
@@ -1000,8 +996,8 @@ const MyCandidates = () => {
                   onToggleSelect={toggleCandidateSelection}
                   // Vid sökning gäller inte serverns totalsiffra — då räknar vi träffarna.
                   totalCount={debouncedSearchQuery ? undefined : stageCounts?.[stage]}
-                  hasMore={hasMoreInStage(stage)}
-                  onLoadMore={loadMoreStage}
+                  hasMore={effectiveHasMoreInStage(stage)}
+                  onLoadMore={effectiveLoadMore}
                    isLoadingMore={loadingStage === stage || loadingStage === '__all__'}
                 />
               );
@@ -1061,7 +1057,7 @@ const MyCandidates = () => {
         savedApplicantIds={swipeSavedApplicantIds}
         onLoadMore={() => {
           const stage = swipeStageCandidates[swipeInitialIndex]?.stage;
-          if (stage) loadMoreStage(stage);
+          if (stage) effectiveLoadMore(stage);
         }}
         hasMore={Boolean(swipeStageCandidates[swipeInitialIndex]?.stage && hasMoreInStage(swipeStageCandidates[swipeInitialIndex].stage))}
         onRemoveCandidate={(app) => {
