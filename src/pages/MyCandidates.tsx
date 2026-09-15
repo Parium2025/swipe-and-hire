@@ -443,6 +443,21 @@ const MyCandidates = () => {
       query = activeListId ? query.eq('list_id', activeListId) : query.is('list_id', null);
       const { error } = await query;
       if (error) throw error;
+
+      // Kontrollera att kolumnen verkligen är tom innan steget tas bort. En
+      // nekad flytt ger noll rader utan fel, och kandidaterna hade då följt
+      // med i steget som raderades.
+      let check = supabase
+        .from('my_candidates')
+        .select('id', { count: 'exact', head: true })
+        .eq('recruiter_id', user.id)
+        .eq('stage', fromStage);
+      check = activeListId ? check.eq('list_id', activeListId) : check.is('list_id', null);
+      const { count: leftBehind, error: checkError } = await check;
+      if (checkError) throw checkError;
+      if ((leftBehind ?? 0) > 0) {
+        throw new Error('Alla kandidater kunde inte flyttas – steget togs inte bort');
+      }
     } catch (error: any) {
       // Ogiltigförklara i stället för att skriva tillbaka en gissad ögonblicksbild.
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
