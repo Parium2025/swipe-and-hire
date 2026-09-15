@@ -209,21 +209,29 @@ export function useBulkCandidateOps({
       updateCandidatesCache(items => items.filter(c => !selectedCandidateIds.has(c.id)));
       exitSelectionMode();
 
-      const { data, error } = await supabase
-        .from('my_candidates')
-        .update({ list_id: targetListId, stage: targetStage, updated_at: new Date().toISOString() })
-        .in('id', ids)
-        .select('id');
+      try {
+        const { data, error } = await supabase
+          .from('my_candidates')
+          .update({ list_id: targetListId, stage: targetStage, updated_at: new Date().toISOString() })
+          .in('id', ids)
+          .select('id');
 
-      if (error || (data?.length ?? 0) < ids.length) {
+        if (error || (data?.length ?? 0) < ids.length) {
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          toast.error('Kunde inte flytta alla kandidater');
+          return;
+        }
+
         queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
-        toast.error('Kunde inte flytta alla kandidater');
-        return;
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
+        toast.success(`${ids.length} kandidat${ids.length !== 1 ? 'er' : ''} flyttade till "${targetListName}"`);
+      } catch {
+        // Utan detta lämnade ett nätverksfel kandidaterna dolda i vyn, utan
+        // felmeddelande — trots att de fortfarande låg kvar i listan.
+        queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
+        toast.error('Kunde inte flytta kandidaterna');
       }
-
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
-      toast.success(`${ids.length} kandidat${ids.length !== 1 ? 'er' : ''} flyttade till "${targetListName}"`);
     },
     [user, isViewingColleague, selectedCandidateIds, updateCandidatesCache, exitSelectionMode, queryClient],
   );
