@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,6 +12,23 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 
+/**
+ * Dubbeltryck på "Ta bort" (vanligt på touch) skickade tidigare två
+ * borttagningar: två nätverksanrop, två toaster och i värsta fall två poster i
+ * återförsökskön. Bekräftelsen får därför bara gå igenom en gång per öppning.
+ */
+function useSingleConfirm(open: boolean, onConfirm: () => void) {
+  const firedRef = useRef(false);
+  useEffect(() => {
+    if (open) firedRef.current = false;
+  }, [open]);
+  return useCallback(() => {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    onConfirm();
+  }, [onConfirm]);
+}
+
 interface RemoveCandidateDialogProps {
   candidate: MyCandidateData | null;
   onOpenChange: (open: boolean) => void;
@@ -18,7 +36,9 @@ interface RemoveCandidateDialogProps {
   onCancel: () => void;
 }
 
-export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCancel }: RemoveCandidateDialogProps) => (
+export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCancel }: RemoveCandidateDialogProps) => {
+  const handleConfirm = useSingleConfirm(!!candidate, onConfirm);
+  return (
   <AlertDialog open={!!candidate} onOpenChange={(open) => !open && onOpenChange(false)}>
     <AlertDialogContentNoFocus 
       elevated
