@@ -345,13 +345,13 @@ export function useColleagueCandidates(
           // två gånger.
           const seen = new Set(prev.map((c) => c.id));
           const merged = [...prev, ...result.filter((c) => !seen.has(c.id))];
-          if (!trimmedSearch) writeColleagueCache(colleagueId, listId, merged);
+          if (!trimmedSearch) writeColleagueCache(user?.id, colleagueId, listId, merged);
           return merged;
         });
       } else {
         setCandidates(result);
         // Sökträffar är inte hela listan och får aldrig skriva över cachen.
-        if (!trimmedSearch) writeColleagueCache(colleagueId, listId, result);
+        if (!trimmedSearch) writeColleagueCache(user?.id, colleagueId, listId, result);
       }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
@@ -373,7 +373,7 @@ export function useColleagueCandidates(
   useEffect(() => {
     if (!colleagueId) return;
     if (!trimmedSearch) {
-      const cached = readColleagueCache(colleagueId, listId);
+      const cached = readColleagueCache(user?.id, colleagueId, listId);
       if (cached && cached.length > 0) setCandidates(cached);
     }
     void fetchColleagueCandidates(false);
