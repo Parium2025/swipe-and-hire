@@ -23,13 +23,17 @@ interface CachedColleagueCandidates {
   timestamp: number;
 }
 
-function colleagueCacheKey(colleagueId: string, listId: string | null): string {
-  return `${COLLEAGUE_CACHE_KEY}${colleagueId}${listId ? `_${listId}` : ''}`;
+// Nyckeln är bunden till BÅDE den inloggade betraktaren och kollegan/listan.
+// Utan betraktar-id kunde nästa användare på samma dator se förra användarens
+// kandidatlista blinka fram innan behörighetskontrollen hunnit svara.
+function colleagueCacheKey(viewerId: string, colleagueId: string, listId: string | null): string {
+  return `${COLLEAGUE_CACHE_KEY}${viewerId}_${colleagueId}${listId ? `_${listId}` : ''}`;
 }
 
-function readColleagueCache(colleagueId: string, listId: string | null): MyCandidateData[] | null {
+function readColleagueCache(viewerId: string | undefined, colleagueId: string, listId: string | null): MyCandidateData[] | null {
+  if (!viewerId) return null;
   const cached = safeReadJsonCache<CachedColleagueCandidates>(
-    colleagueCacheKey(colleagueId, listId),
+    colleagueCacheKey(viewerId, colleagueId, listId),
     (value): value is CachedColleagueCandidates => {
       const cache = value as Partial<CachedColleagueCandidates>;
       return Array.isArray(cache.items) && typeof cache.timestamp === 'number';
@@ -39,10 +43,11 @@ function readColleagueCache(colleagueId: string, listId: string | null): MyCandi
   return cached.items;
 }
 
-function writeColleagueCache(colleagueId: string, listId: string | null, items: MyCandidateData[]): void {
+function writeColleagueCache(viewerId: string | undefined, colleagueId: string, listId: string | null, items: MyCandidateData[]): void {
+  if (!viewerId) return;
   try {
     safeSetItem(
-      colleagueCacheKey(colleagueId, listId),
+      colleagueCacheKey(viewerId, colleagueId, listId),
       JSON.stringify({ items: items.slice(0, 100), timestamp: Date.now() }),
     );
   } catch {
@@ -340,13 +345,13 @@ export function useColleagueCandidates(
           // två gånger.
           const seen = new Set(prev.map((c) => c.id));
           const merged = [...prev, ...result.filter((c) => !seen.has(c.id))];
-          if (!trimmedSearch) writeColleagueCache(colleagueId, listId, merged);
+          if (!trimmedSearch) writeColleagueCache(user?.id, colleagueId, listId, merged);
           return merged;
         });
       } else {
         setCandidates(result);
         // Sökträffar är inte hela listan och får aldrig skriva över cachen.
-        if (!trimmedSearch) writeColleagueCache(colleagueId, listId, result);
+        if (!trimmedSearch) writeColleagueCache(user?.id, colleagueId, listId, result);
       }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
@@ -368,11 +373,11 @@ export function useColleagueCandidates(
   useEffect(() => {
     if (!colleagueId) return;
     if (!trimmedSearch) {
-      const cached = readColleagueCache(colleagueId, listId);
+      const cached = readColleagueCache(user?.id, colleagueId, listId);
       if (cached && cached.length > 0) setCandidates(cached);
     }
     void fetchColleagueCandidates(false);
-  }, [colleagueId, listId, trimmedSearch, fetchColleagueCandidates]);
+  }, [colleagueId, listId, trimmedSearch, user?.id, fetchColleagueCandidates]);
 
   // 📡 REALTIME: kandidater, betyg och anteckningar — samma täckning som din
   // egen vy, så en ändring som kollegan (eller någon annan i teamet) gör syns
@@ -481,6 +486,7 @@ export function useColleagueCandidates(
       // sökträffarna, och de får inte ersätta hela listans sparade ögonblicksbild.
       if (colleagueId && !trimmedSearch) {
         writeColleagueCache(
+          user?.id,
           colleagueId,
           listId,
           previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
@@ -517,7 +523,7 @@ export function useColleagueCandidates(
         throw new Error('Kandidaten kunde inte tas bort');
       }
       if (colleagueId && !trimmedSearch) {
-        writeColleagueCache(colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
+        writeColleagueCache(user?.id, colleagueId, listId, previousCandidates.filter((c) => c.id !== candidateId));
       }
       if (!opts?.silent) toast.success('Kandidat borttagen från kollegans lista');
       return true;

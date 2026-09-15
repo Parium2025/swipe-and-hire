@@ -250,19 +250,20 @@ async function executeOperationInner(op: QueuedCandidateOperation): Promise<bool
 
 let syncLock = false;
 
-export async function syncCandidateOperationQueue(userId?: string): Promise<number> {
-  if (syncLock) return 0;
+export async function syncCandidateOperationQueue(userId?: string): Promise<{ synced: number; dropped: number }> {
+  if (syncLock) return { synced: 0, dropped: 0 };
   syncLock = true;
 
   try {
     let queue = getQueue();
     if (userId) queue = queue.filter((q) => q.recruiterId === userId);
-    if (queue.length === 0) return 0;
+    if (queue.length === 0) return { synced: 0, dropped: 0 };
 
     console.log(`[CandidateOpsQueue] Syncing ${queue.length} queued operations...`);
 
     const remaining: QueuedCandidateOperation[] = [];
     let synced = 0;
+    let dropped = 0;
 
     for (let i = 0; i < queue.length; i++) {
       const op = queue[i];
@@ -282,7 +283,10 @@ export async function syncCandidateOperationQueue(userId?: string): Promise<numb
         if (updated.attempts < MAX_ATTEMPTS) {
           remaining.push(updated);
         } else {
-          // Exhausted retries
+          // Exhausted retries — ändringen finns kvar i den optimistiska vyn men
+          // aldrig i databasen. Anroparen måste läsa om listan, annars visas ett
+          // steg/betyg som aldrig sparades tills sidan laddas om.
+          dropped++;
           const label = getOperationLabel(op);
           toast.error(`${label} kunde inte synkas`, {
             description: op.candidateName
@@ -311,7 +315,7 @@ export async function syncCandidateOperationQueue(userId?: string): Promise<numb
       );
     }
 
-    return synced;
+    return { synced, dropped };
   } finally {
     syncLock = false;
   }
@@ -351,11 +355,12 @@ export function useCandidateOperationQueue(userId: string | undefined) {
     if (!userId || syncInProgress.current) return;
     syncInProgress.current = true;
     try {
-      const synced = await syncCandidateOperationQueue(userId);
+      const { synced, dropped } = await syncCandidateOperationQueue(userId);
       // Köade flyttar/borttagningar ändrar kolumn- och listräknarna på servern.
       // Utan den här invalideringen visade menyn gamla siffror tills man
-      // laddade om sidan manuellt.
-      if (synced > 0) {
+      // laddade om sidan manuellt. Uppgivna ändringar (dropped) måste också
+      // läsas om, annars står en osparad flytt/betyg kvar i vyn.
+      if (synced > 0 || dropped > 0) {
         queryClient.invalidateQueries({ queryKey: ['my-candidates', userId] });
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', userId] });
         queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', userId] });
