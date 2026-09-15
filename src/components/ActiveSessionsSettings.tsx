@@ -138,6 +138,13 @@ export function ActiveSessionsSettings() {
           description: 'Enheten har loggats ut.',
         });
         setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      } else {
+        // Sessionen fanns inte längre — tidigare hände ingenting alls på skärmen.
+        toast({
+          title: 'Sessionen är redan avslutad',
+          description: 'Enheten är inte längre inloggad.',
+        });
+        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
       }
     } catch (err) {
       console.warn('Error kicking session:', err);
