@@ -806,7 +806,7 @@ const SearchJobs = memo(() => {
     }
 
     if (pageScrollAnimationRef.current !== null) {
-      cancelAnimationFrame(pageScrollAnimationRef.current);
+      return;
     }
 
     const startTop = container.scrollTop;
