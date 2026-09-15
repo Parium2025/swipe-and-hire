@@ -96,19 +96,23 @@ const EmailVerification = () => {
     }
   };
 
-  const renderQRCode = () => {
-    useEffect(() => {
-      if (qrCode && verificationMethod === 'qr') {
-        const qrContainer = document.getElementById('qr-code-container');
-        if (qrContainer) {
-          qrContainer.innerHTML = '';
-          qrCode.append(qrContainer);
-        }
+  // Effekten låg tidigare inne i renderfunktionen och kördes bara när
+  // QR-fliken var vald — antalet hooks ändrades då vid flikbyte och React
+  // kraschade. Nu ligger den på toppnivå och körs alltid.
+  useEffect(() => {
+    if (qrCode && verificationMethod === 'qr') {
+      const qrContainer = document.getElementById('qr-code-container');
+      if (qrContainer) {
+        qrContainer.innerHTML = '';
+        qrCode.append(qrContainer);
       }
-    }, [qrCode, verificationMethod]);
+    }
+  }, [qrCode, verificationMethod]);
 
-    return <div id="qr-code-container" className="flex justify-center mb-4"></div>;
-  };
+  const renderQRCode = () => (
+    <div id="qr-code-container" className="flex justify-center mb-4"></div>
+  );
+
 
   if (status === 'success') {
     return (
