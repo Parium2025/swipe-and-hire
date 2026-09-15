@@ -94,7 +94,14 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
     setUploading(false);
     if (uploadAbortRef.current === controller) uploadAbortRef.current = null;
     if (error || !storagePath) {
-      toast({ title: 'Uppladdningen misslyckades', description: error?.message ?? 'Försök igen.', variant: 'destructive' });
+      // Avbruten uppladdning (användaren valde en ny fil) är inget fel att
+      // larma om, och tekniska engelska feltexter visas aldrig för användaren.
+      if (controller.signal.aborted) return null;
+      toast({
+        title: 'Uppladdningen misslyckades',
+        description: 'Kontrollera din uppkoppling och försök igen.',
+        variant: 'destructive',
+      });
       return null;
     }
     uploadedPathsRef.current.set(storagePath, type);
