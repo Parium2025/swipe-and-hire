@@ -60,12 +60,20 @@ export function useNotifications() {
 
   // Hydrate from cache on user change
   useEffect(() => {
-    if (user) {
-      const cached = getCached(user.id);
-      if (cached) {
-        setNotifications(cached);
-        setUnreadCount(cached.filter(n => !n.is_read).length);
-      }
+    if (!user) {
+      // Vid utloggning/kontobyte får föregående kontos notiser aldrig ligga kvar
+      // i klockan.
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
+    const cached = getCached(user.id);
+    if (cached) {
+      setNotifications(cached);
+      setUnreadCount(cached.filter(n => !n.is_read).length);
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
     }
   }, [user]);
 
