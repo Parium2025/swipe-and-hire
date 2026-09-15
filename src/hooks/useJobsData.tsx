@@ -760,6 +760,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       if (pendingDeltas.size === 0) return;
       const deltas = new Map(pendingDeltas);
       pendingDeltas.clear();
+      queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
+      queryClient.invalidateQueries({ queryKey: [UNVIEWED_APPLICATIONS_QUERY_KEY] });
       queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
         if (!oldData) return oldData;
         let mutated = false;

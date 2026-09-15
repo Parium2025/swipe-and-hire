@@ -7,6 +7,7 @@ import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
+import { notesCache, questionsCache, summaryCache } from '@/components/candidateProfile/candidateProfileCache';
 
 const RATINGS_CACHE_PREFIX = 'ratings_cache_';
 const STAGE_SETTINGS_CACHE_KEY = 'stage_settings_cache_';
@@ -126,11 +127,9 @@ const clearAllAppCachesSync = () => {
     lastPreloadTimestamp = 0;
     // Kandidatprofilens modulcacher lever annars kvar efter konto-byte trots
     // att localStorage har rensats och kan visa föregående organisations data.
-    void import('@/components/candidateProfile/candidateProfileCache').then(({ summaryCache, questionsCache, notesCache }) => {
-      summaryCache.clear();
-      questionsCache.clear();
-      notesCache.clear();
-    });
+    summaryCache.clear();
+    questionsCache.clear();
+    notesCache.clear();
     
     console.log('✅ All app caches cleared');
   } catch (error) {
