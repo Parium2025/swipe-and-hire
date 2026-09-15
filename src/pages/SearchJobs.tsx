@@ -817,16 +817,25 @@ const SearchJobs = memo(() => {
       return;
     }
 
+    // Låt webbläsarens egen, kompositörsdrivna scrollmotor bära den gamla sidan
+    // uppåt. Direkta scrollTop-skrivningar i requestAnimationFrame kan räknas
+    // korrekt men ändå bara målas i sista läget av iOS momentum-scrollning — då
+    // ser användaren ett hopp. Sidan byts först när den synliga hissrörelsen är klar.
     const startedAt = performance.now();
-    const durationMs = 650;
-    const animateToTop = (now: number) => {
-      const progress = Math.min((now - startedAt) / durationMs, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      container.scrollTop = Math.round(startTop * (1 - eased));
-      window.scrollTo(0, 0);
+    let previousTop = startTop;
+    let stableFrames = 0;
 
-      if (progress < 1) {
-        pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
+    container.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+
+    const waitForTop = (now: number) => {
+      const currentTop = container.scrollTop;
+      stableFrames = Math.abs(currentTop - previousTop) < 0.5 ? stableFrames + 1 : 0;
+      previousTop = currentTop;
+
+      const reachedTop = currentTop <= 1 && stableFrames >= 2;
+      const timedOut = now - startedAt >= 1400;
+      if (!reachedTop && !timedOut) {
+        pageScrollAnimationRef.current = requestAnimationFrame(waitForTop);
         return;
       }
 
@@ -835,7 +844,7 @@ const SearchJobs = memo(() => {
       setPage(next);
     };
 
-    pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
+    pageScrollAnimationRef.current = requestAnimationFrame(waitForTop);
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
