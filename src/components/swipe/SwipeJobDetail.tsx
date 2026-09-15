@@ -61,7 +61,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
     handleHandleTouchStart,
   } = useSheetDragDismiss(open, onClose);
 
-  const { detail, questions, myAnswers, loading, viewRecordedRef } =
+  const { detail, questions, myAnswers, loading, hasError, retry, viewRecordedRef } =
     useJobDetailData(job.id, open, user?.id);
 
   // Track view när swipe detail öppnas (en gång per jobb-öppning)
