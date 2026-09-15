@@ -45,6 +45,8 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [myAnswers, setMyAnswers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const viewRecordedRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
       setDetail(null);
       setQuestions([]);
       setMyAnswers(null);
+      setHasError(false);
       setLoading(false);
       return;
     }
@@ -60,6 +63,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
     setDetail(null);
     setQuestions([]);
     setMyAnswers(null);
+    setHasError(false);
     setLoading(true);
 
     void (async () => {
