@@ -278,7 +278,11 @@ export function useMyCandidatesData(
 
   // 🔥 Auto-sync queued candidate operations when connectivity returns
   useCandidateOperationQueue(user?.id);
-  const [isDragging, setIsDragging] = useState(false);
+  // Ref, inte state: realtime-kanalen nedan läser värdet. Som state hamnade
+  // det i effektens dependencies, vilket gjorde att kanalen kopplades ner och
+  // upp igen vid varje drag — under omkopplingen tappades kollegornas
+  // uppdateringar helt.
+  const isDraggingRef = useRef(false);
   const [loadingStage, setLoadingStage] = useState<string | null>(null);
 
   // Check for cached data BEFORE query runs (only for non-search queries)
@@ -492,7 +496,7 @@ export function useMyCandidatesData(
         },
         (payload: any) => {
           // Don't apply realtime changes during drag/drop optimistic updates
-          if (isDragging) return;
+          if (isDraggingRef.current) return;
 
           // For the common case (stage change), update cache in-place to avoid
           // refetch jitter that makes drag/drop feel "laggy".
@@ -534,7 +538,7 @@ export function useMyCandidatesData(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient, isDragging]);
+  }, [user, queryClient]);
 
   // 🔥 Stable ref for applicant IDs — prevents realtime channels from
   // re-subscribing every time the candidate list changes.
@@ -884,7 +888,7 @@ export function useMyCandidatesData(
     },
     onMutate: ({ id, stage }) => {
       // Mark as dragging to prevent realtime from overwriting
-      setIsDragging(true);
+      isDraggingRef.current = true;
 
       // Optimistic update - MUST be synchronous to feel instant (paginated structure)
       void queryClient.cancelQueries({ queryKey });
@@ -936,7 +940,7 @@ export function useMyCandidatesData(
       }
     },
     onSettled: () => {
-      setIsDragging(false);
+      isDraggingRef.current = false;
     },
   });
 
