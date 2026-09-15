@@ -742,11 +742,11 @@ const SearchJobs = memo(() => {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(SEARCH_JOBS_DISPLAY_COUNT_KEY, String(displayCount));
+      sessionStorage.setItem(SEARCH_JOBS_PAGE_KEY, String(page));
     } catch {
       // ignore
     }
-  }, [displayCount]);
+  }, [page]);
 
   // Reset display count and default sort when filters change
   useEffect(() => {
@@ -755,58 +755,29 @@ const SearchJobs = memo(() => {
       return;
     }
 
-    setDisplayCount(20);
+    setPage(1);
     setSortBy('newest');
   }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, salaryRange, setSortBy]);
 
-  // Reset loading flag deterministically when displayCount actually changes
-  // (replaces the previous setTimeout-based unlock that could race on fast scroll).
+  // Hamnar användaren utanför sista sidan (t.ex. efter filtrering) — gå tillbaka.
   useEffect(() => {
-    isLoadingMoreRef.current = false;
-  }, [displayCount]);
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
-  // Infinite scroll with IntersectionObserver.
-  // 🔥 SCALE: När displayCount når slutet av redan-laddade jobb och DB:n har
-  // fler sidor (hasNextPage), trigga fetchNextPage(). Annars öka bara
-  // displayCount lokalt så att UI revealar nästa batch i den lista vi har.
+  // 🔥 SCALE: se till att nästa sida finns hämtad innan användaren klickar dit.
+  // Databasen levererar i block; så länge det finns fler block och vi närmar oss
+  // slutet av de redan hämtade jobben fyller vi på i bakgrunden.
   useEffect(() => {
-    const trigger = loadMoreTriggerRef.current;
-    if (!trigger) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (!entry.isIntersecting || isLoadingMoreRef.current) return;
-
-        if (hasMoreJobs) {
-          isLoadingMoreRef.current = true;
-          setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-        } else if (hasNextPage && !isFetchingNextPage) {
-          isLoadingMoreRef.current = true;
-          fetchNextPage().finally(() => {
-            setDisplayCount(prev => prev + loadMoreSize);
-          });
-        }
-      },
-      {
-        rootMargin: '400px',
-        threshold: 0.1,
-      }
-    );
-
-    observer.observe(trigger);
-    return () => observer.disconnect();
-  }, [hasMoreJobs, filteredAndSortedJobs.length, loadMoreSize, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMoreJobs) {
-      setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
-    } else if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage().finally(() => {
-        setDisplayCount(prev => prev + loadMoreSize);
-      });
+    if (!hasNextPage || isFetchingNextPage) return;
+    if (filteredAndSortedJobs.length < (page + 1) * JOBS_PAGE_SIZE) {
+      fetchNextPage();
     }
-  }, [filteredAndSortedJobs.length, loadMoreSize, hasMoreJobs, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handlePageChange = useCallback((next: number) => {
+    setPage(next);
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
   const handleSwipeNeedMore = useCallback(() => {
