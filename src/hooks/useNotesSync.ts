@@ -138,14 +138,21 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
     isSavingRef.current = true;
     try {
-      const { error } = await (supabase
+      // .select() krävs: en skrivning som nekas av behörighetsreglerna ger
+      // 0 rader utan fel — utan läs-tillbaka skulle vi visa "Sparat" i onödan.
+      const { data, error } = await (supabase
         .from(table) as any)
         .upsert(
           { [ownerColumn]: user.id, content: contentToSave },
           { onConflict: ownerColumn }
-        );
+        )
+        .select(ownerColumn);
       if (error) {
         console.error(`❌ ${table} save failed:`, error.message);
+        return 'failed';
+      }
+      if (!data || (data as unknown[]).length === 0) {
+        console.error(`❌ ${table} save affected 0 rows`);
         return 'failed';
       }
       console.log(`✅ ${table} saved to database`);
