@@ -108,11 +108,10 @@ const Subscription = () => {
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const nextBillingDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString('sv-SE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  // Betalningar är inte aktiverade ännu — vi hittar aldrig på datum för
+  // "aktiv sedan" eller "förnyas". Riktiga datum visas först när betalningar
+  // är inkopplade och kommer från databasen.
+
 
 
   const plans = [
