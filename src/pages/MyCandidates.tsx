@@ -155,17 +155,7 @@ const MyCandidates = () => {
     setStageCount(activeStageOrder.length);
   }, [activeStageOrder.length, setStageCount]);
   
-  // Search state with debounced version for FTS
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   
-  // Debounce search query for FTS (300ms delay)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
   
   // Use the hook with debounced search for FTS
   const {
