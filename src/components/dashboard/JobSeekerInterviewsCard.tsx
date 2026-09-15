@@ -37,7 +37,7 @@ const getLocationLabel = (type: LocationType) => {
 };
 
 export const JobSeekerInterviewsCard = memo(() => {
-  const { interviews, isLoading } = useCandidateInterviews();
+  const { interviews, isLoading, isError, refetch } = useCandidateInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
 
