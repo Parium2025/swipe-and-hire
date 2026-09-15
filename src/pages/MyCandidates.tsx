@@ -450,6 +450,10 @@ const MyCandidates = () => {
       return;
     }
 
+    // Hela kolumnen har bytt steg — siffrorna i rubrikerna kommer från
+    // databasen och hade annars stått kvar med gamla värden.
+    queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user.id] });
+
     await deleteStage.mutateAsync(fromStage);
   }, [user, activeListId, deleteStage, queryClient, updateCandidatesCache]);
 
