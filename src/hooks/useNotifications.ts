@@ -385,6 +385,7 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     clearAll,
+    hasError,
     refetch: fetchNotifications,
   };
 }
