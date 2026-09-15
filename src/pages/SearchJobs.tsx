@@ -344,7 +344,7 @@ const SearchJobs = memo(() => {
     }
   });
   const displayCount = page * JOBS_PAGE_SIZE;
-  const setDisplayCount = useCallback((_next: number) => setPage(1), []);
+  
   const listTopRef = useRef<HTMLDivElement>(null);
   const hasInitializedFiltersRef = useRef(false);
   const [warmWindowEnd, setWarmWindowEnd] = useState(JOBS_PAGE_SIZE);
