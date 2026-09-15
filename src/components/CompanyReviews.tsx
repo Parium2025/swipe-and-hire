@@ -89,15 +89,21 @@ const CompanyReviews = () => {
   });
 
   // Delad cache + realtime-synk (localStorage-instant load, bakgrundssynk)
-  const { reviews: cachedReviews, avgRating, isLoading: reviewsLoading } =
-    useCompanyReviewsCache(user?.id ?? null);
+  const {
+    reviews: cachedReviews,
+    avgRating,
+    reviewCount,
+    isLoading: reviewsLoading,
+    hasMore,
+    loadMore,
+    isLoadingMore,
+  } = useCompanyReviewsCache(user?.id ?? null);
   const reviews = (cachedReviews ?? []) as unknown as CompanyReview[];
 
   const loading = companyLoading || reviewsLoading;
 
-  const averageRating = reviews.length > 0
-    ? (avgRating ?? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
-    : "0";
+  // Snitt + antal är serverräknade över ALLA recensioner, inte bara hämtade sidor.
+  const averageRating = reviewCount > 0 ? (avgRating ?? 0).toFixed(1) : "0";
 
   const renderStars = (rating: number) => {
     return (
