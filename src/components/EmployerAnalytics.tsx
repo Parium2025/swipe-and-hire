@@ -2,6 +2,7 @@ import { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
@@ -590,7 +591,7 @@ const EmployerAnalytics = memo(() => {
     [advancedCacheKey],
   );
 
-  const { data: rawData, isLoading, isFetching, dataUpdatedAt } = useQuery({
+  const { data: rawData, isLoading, isFetching, dataUpdatedAt, error: overviewError, refetch: refetchOverview } = useQuery({
     queryKey: ['employer-analytics-v2', user?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
@@ -1062,8 +1063,25 @@ const EmployerAnalytics = memo(() => {
       {/* ─── Kollegial statistik (endast för organisationer med flera rekryterare) ─── */}
       <TeamInsightsSection data={teamData ?? null} />
 
+      {/* Fel vid hämtning får aldrig se ut som "inga data" – då tror
+          arbetsgivaren att statistiken är tom trots att annonser finns. */}
+      {overviewError && !rawData && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <BarChart3 className="h-12 w-12 text-white/20 mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2">Kunde inte hämta statistiken</h3>
+            <p className="text-sm text-white text-center max-w-sm mb-4">
+              Kontrollera din uppkoppling och försök igen.
+            </p>
+            <Button variant="outline" onClick={() => refetchOverview()}>
+              Försök igen
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Empty state */}
-      {analytics.length === 0 && !isLoading && (
+      {!overviewError && analytics.length === 0 && !isLoading && (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <BarChart3 className="h-12 w-12 text-white/20 mb-4" />
@@ -1074,6 +1092,7 @@ const EmployerAnalytics = memo(() => {
           </CardContent>
         </Card>
       )}
+
     </div>
   );
 });
