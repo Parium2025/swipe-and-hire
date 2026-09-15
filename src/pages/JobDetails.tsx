@@ -8,7 +8,7 @@ import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
 import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTouchCapable } from '@/hooks/useInputCapability';
+import { useTouchCapable, useSwipeCapable } from '@/hooks/useInputCapability';
 import { useDevice } from '@/hooks/use-device';
 import { MobileCandidateView } from '@/components/MobileCandidateView';
 import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
@@ -79,6 +79,8 @@ const JobDetails = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTouchDevice = useTouchCapable();
+  // Svepläget får bara finnas på rena touch-enheter (ingen mus/pekplatta).
+  const canSwipe = useSwipeCapable();
   const device = useDevice();
   const useMobileView = isTouchDevice || device === 'mobile';
 
@@ -710,14 +712,16 @@ const JobDetails = () => {
         {/* Swipe-läge — mobil/touch */}
         {useMobileView && applications.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2 pb-3">
-            <button
-              type="button"
-              onClick={() => { setSwipeFilteredApps(null); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
-              className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
-            >
-              <Layers className="h-4 w-4" />
-              <span>Swipe-läge</span>
-            </button>
+            {canSwipe && (
+              <button
+                type="button"
+                onClick={() => { setSwipeFilteredApps(null); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
+                className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
+              >
+                <Layers className="h-4 w-4" />
+                <span>Swipe-läge</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setCriteriaDialogOpen(true)}
@@ -875,7 +879,7 @@ const JobDetails = () => {
         />
 
         {/* TikTok-style Swipe Viewer for touch devices */}
-        {isTouchDevice && (
+        {canSwipe && (
           <CandidateSwipeViewer
             applications={swipeApplicationsAsData}
             initialIndex={swipeInitialIndex}
