@@ -943,12 +943,17 @@ export function useMyCandidatesData(
   // Remove candidate from my list (with retry queue fallback)
   const removeCandidate = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      // .select() krävs: utan den returnerar databasen "inget fel" även när noll
+      // rader togs bort (t.ex. raden ägs inte längre av dig) — och den
+      // optimistiska borttagningen hade då aldrig rullats tillbaka.
+      const { data, error } = await supabase
         .from('my_candidates')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select('id');
 
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Kandidaten kunde inte tas bort');
     },
     onMutate: async (id: string) => {
       // Optimistic removal
