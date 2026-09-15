@@ -778,10 +778,10 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Sidbyte ska synligt glida högst upp i jobbsöket utan att flytta dokumentets
-  // viewport. `scrollIntoView` kan dra app-toppen ovanför skärmen på iOS, medan
-  // native `behavior: smooth` inte animerar pålitligt i en momentum-scrollande
-  // inre yta. En egen bildruteanimation ger samma beteende på iOS och Android.
+  // Efter att en ny sida har renderats ska både den ägda scroll-ytan och den
+  // yttre viewporten vara exakt i toppen. Själva synliga animationen sker före
+  // sidbytet i handlePageChange, så att en kortare ny sida inte hinner klampa
+  // scrollpositionen och därmed kapa animationen.
   useLayoutEffect(() => {
     if (!didMountPageRef.current) {
       didMountPageRef.current = true;
@@ -795,17 +795,26 @@ const SearchJobs = memo(() => {
     writePositions(positions);
 
     const container = getManagedScrollContainer();
-    if (!container) return;
+    if (container) container.scrollTop = 0;
+  }, [page]);
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const startTop = container.scrollTop;
-    if (prefersReducedMotion || startTop <= 0) {
-      container.scrollTop = 0;
+  const handlePageChange = useCallback((next: number) => {
+    const container = getManagedScrollContainer();
+    if (!container) {
+      setPage(next);
       return;
     }
 
     if (pageScrollAnimationRef.current !== null) {
       cancelAnimationFrame(pageScrollAnimationRef.current);
+    }
+
+    const startTop = container.scrollTop;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || startTop <= 0) {
+      container.scrollTop = 0;
+      setPage(next);
+      return;
     }
 
     const startedAt = performance.now();
@@ -818,23 +827,15 @@ const SearchJobs = memo(() => {
 
       if (progress < 1) {
         pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
-      } else {
-        container.scrollTop = 0;
-        pageScrollAnimationRef.current = null;
+        return;
       }
+
+      container.scrollTop = 0;
+      pageScrollAnimationRef.current = null;
+      setPage(next);
     };
 
     pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
-    return () => {
-      if (pageScrollAnimationRef.current !== null) {
-        cancelAnimationFrame(pageScrollAnimationRef.current);
-        pageScrollAnimationRef.current = null;
-      }
-    };
-  }, [page]);
-
-  const handlePageChange = useCallback((next: number) => {
-    setPage(next);
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
