@@ -420,12 +420,42 @@ const PublicJobPage = () => {
           <TruncatedText text={job.title} className="text-white/80 truncate min-w-0 max-w-full sm:max-w-[60ch]" />
         </nav>
 
+        {job.job_image_url && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-8 overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+          >
+            <img
+              src={job.job_image_url}
+              alt={`${job.title} hos ${company}`}
+              className="w-full h-auto aspect-[16/9] object-cover"
+              width={1200}
+              height={675}
+              decoding="async"
+            />
+          </motion.div>
+        )}
+
         <motion.header
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
+          {job.company_logo_url && (
+            <div className="mb-5 w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+              <img
+                src={job.company_logo_url}
+                alt={`${company} logotyp`}
+                className="w-full h-full object-contain"
+                width={128}
+                height={128}
+                decoding="async"
+              />
+            </div>
+          )}
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4 break-words [overflow-wrap:anywhere]">{job.title}</h1>
           <div className="flex flex-wrap gap-3 text-white/70 text-sm">
             <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{company}</span>
