@@ -777,24 +777,31 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Sidbyte ska alltid börja högst upp i jobbsöket. `scrollIntoView` får inte
-  // användas här: på iOS Safari kan den även flytta dokumentets viewport trots
-  // att appen har en egen scroll-yta. Då hamnar den fasta app-toppen ovanför
-  // skärmen och nederkanten klipps. Återställ den ägda scroll-ytan efter att de
-  // nya korten har renderats och nollställ även webbläsarens yttre viewport.
+  // Sidbyte ska mjukt föra användaren högst upp i jobbsöket utan att flytta
+  // dokumentets viewport. `scrollIntoView` får inte användas här: på iOS Safari
+  // kan den även dra app-toppen ovanför skärmen. Scrolla därför enbart den
+  // scroll-yta som layouten äger och håll den yttre viewporten låst på noll.
   useLayoutEffect(() => {
     if (!didMountPageRef.current) {
       didMountPageRef.current = true;
       return;
     }
 
-    const container = getManagedScrollContainer();
-    container?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
     const positions = readPositions();
     positions[window.location.pathname] = { top: 0 };
     writePositions(positions);
+
+    const container = getManagedScrollContainer();
+    if (!container) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    container.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
   }, [page]);
 
   const handlePageChange = useCallback((next: number) => {
