@@ -19,6 +19,19 @@ import EmployerLocationPanel from '@/components/employer/settings/EmployerLocati
 import { prewarmEmployerSettings } from '@/lib/settingsPrewarm';
 import { EmployerSettingsSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
+// Kommer man tillbaka från t.ex. integritetspolicyn ska den sektion man
+// hade öppen fortfarande vara öppen — vi sparar valet per session.
+// Sparas bara vid användarens eget klick, inte vid kod-styrd nollställning.
+const OPEN_SECTION_KEY = 'employer-settings-open-section';
+
+const readSavedSection = (): string => {
+  try {
+    return sessionStorage.getItem(OPEN_SECTION_KEY) ?? '';
+  } catch {
+    return '';
+  }
+};
+
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword, loading: authLoading } = useAuth();
   const location = useLocation();
