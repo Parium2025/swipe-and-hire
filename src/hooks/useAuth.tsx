@@ -2092,7 +2092,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Tyst fel — behåller tidigare värde
         }
         setPreloadedJobSeekerUnreadMessages(jsUnread);
-        writeUnreadBadgeCache(jsUnread);
+        writeUnreadBadgeCache(jsUnread, 'job_seeker');
 
         // Hämta antal ansökningar för jobbsökare.
         // 🔗 Exakt samma filtrering som listan (dolda ansökningar räknas inte),
@@ -2231,7 +2231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setPreloadedUnreadMessages(unread);
-      writeUnreadBadgeCache(unread);
+      writeUnreadBadgeCache(unread, 'employer');
 
       // Hämta antal company reviews för denna employer
       const { count: reviewsCount } = await supabase

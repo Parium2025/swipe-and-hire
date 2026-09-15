@@ -359,7 +359,9 @@ const ID_CHUNK = 100;
 
 export function useConversations() {
 
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  // Badge-cachen är rollspecifik: skriv aldrig över den andra rollens siffra.
+  const badgeRole = userRole?.role === 'employer' ? 'employer' as const : 'job_seeker' as const;
   const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxWaitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -800,7 +802,7 @@ export function useConversations() {
             });
             // Håll badge-cachen (topnav/sidebar) i synk direkt.
             const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-            writeUnreadBadgeCache(total);
+            writeUnreadBadgeCache(total, badgeRole);
             return next;
           });
         }
@@ -896,7 +898,7 @@ export function useConversations() {
       (c) => typeof c.unread_count === 'number'
     );
     if (!hasComputedUnread && conversationsQuery.data.length > 0) return;
-    writeUnreadBadgeCache(totalUnreadCount);
+    writeUnreadBadgeCache(totalUnreadCount, badgeRole);
   }, [totalUnreadCount, conversationsQuery.data, conversationsQuery.isFetching]);
 
   // Ladda nästa fönster (300 till). Anropas när listan scrollas mot slutet.
@@ -915,6 +917,8 @@ export function useConversations() {
   return {
     conversations: conversationsQuery.data || [],
     isLoading: conversationsQuery.isLoading,
+    // Ett misslyckat anrop får aldrig se ut som ett tomt konto.
+    isError: conversationsQuery.isError && (conversationsQuery.data?.length ?? 0) === 0,
     totalUnreadCount,
     refetch: conversationsQuery.refetch,
     hasMoreConversations,
@@ -937,7 +941,9 @@ export function useConversationMessages(
     [],
   );
 
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  // Badge-cachen är rollspecifik: skriv aldrig över den andra rollens siffra.
+  const badgeRole = userRole?.role === 'employer' ? 'employer' as const : 'job_seeker' as const;
   const queryClient = useQueryClient();
   const [hasMore, setHasMore] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -1238,7 +1244,7 @@ export function useConversationMessages(
         // Synka sessionStorage-cachen som AppSidebar/TopNav faller tillbaka på
         // vid nästa sidladdning, annars visas gammalt värde innan context hunnit hämta.
         const total = next.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-        writeUnreadBadgeCache(total);
+        writeUnreadBadgeCache(total, badgeRole);
         return next;
       }
     );
@@ -1591,13 +1597,16 @@ export function useCreateConversation() {
         if (convError) throw convError;
         conversationId = conversation.id;
 
-        // Add creator as admin member (upsert to handle race conditions)
-        await supabase
+        // Add creator as admin member (upsert to handle race conditions).
+        // Felet måste läsas — annars skapas en tråd utan medlemmar som
+        // användaren aldrig ser, men som UI:t rapporterar som skapad.
+        const { error: selfMemberError } = await supabase
           .from('conversation_members')
           .upsert(
             { conversation_id: conversationId, user_id: user.id, is_admin: true },
             { onConflict: 'conversation_id,user_id' }
           );
+        if (selfMemberError) throw selfMemberError;
 
         // Add other members (ignore duplicates)
         for (const memberId of memberIds) {
@@ -1637,20 +1646,32 @@ export function useCreateConversation() {
 
         if (switchError) {
           console.error('Failed to switch job context:', switchError);
-          // Non-critical: conversation still works, just without the marker
+          // Tråden fungerar, men kopplingen till rätt ansökan uteblev —
+          // det får aldrig ske helt tyst.
+          toast.error('Chatten kopplades inte till den nya tjänsten', {
+            description: 'Meddelandena skickas, men jobbkontexten uppdaterades inte. Försök igen.',
+          });
         }
       }
 
       // Send initial message if provided
       if (initialMessage && conversationId) {
-        await supabase
+        // Läs tillbaka raden: en nekad skrivning får aldrig rapporteras som
+        // "Meddelande skickat".
+        const { data: insertedMessage, error: initialMessageError } = await supabase
           .from('conversation_messages')
           .insert({
             conversation_id: conversationId,
             sender_id: user.id,
             content: initialMessage,
-             sender_identity: 'person',
-          });
+            sender_identity: 'person',
+          })
+          .select('id');
+
+        if (initialMessageError) throw initialMessageError;
+        if (!insertedMessage || insertedMessage.length === 0) {
+          throw new Error('Meddelandet kunde inte skickas');
+        }
       }
 
       return { id: conversationId, isExisting, jobContextSwitched: needsJobContextSwitch };

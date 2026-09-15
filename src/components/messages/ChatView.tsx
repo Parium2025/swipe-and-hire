@@ -701,6 +701,7 @@ export function ChatView({
       if (!getIsOnline() && !outgoingFile) {
         queueMessage({
           recipient_id: candidateUserId || otherMembers[0]?.user_id || '',
+          conversation_id: conversation.id,
           content: outgoingText,
           job_id: conversation.job_id,
           application_id: conversation.application_id,
