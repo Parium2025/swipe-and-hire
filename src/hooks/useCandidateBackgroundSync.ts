@@ -27,6 +27,9 @@ const REALTIME_DEBOUNCE_MS = 800;
  * 8 queries × 10s × N användare = ohållbart vid skala.
  * Realtime + filter räcker; tab-focus-recovery hanteras av RealtimeKeepAlive.
  */
+/** Senast synkade tidsstämplar per användare – styr när kanban-vyn hämtar om sig. */
+const lastMyCandidatesSignature = new Map<string, string>();
+
 export const useCandidateBackgroundSync = (enabled = true) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
