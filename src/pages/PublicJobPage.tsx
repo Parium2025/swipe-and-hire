@@ -78,14 +78,32 @@ const PublicJobPage = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setNotFound(false);
+      setFetchError(false);
       // Utloggade besökare har ingen direktläsning på job_postings — annonsen
       // hämtas därför via en publik databasfunktion. Utan den blev varje delad
       // jobblänk "Tillsatt" för alla som inte var inloggade.
-      const { data, error } = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
+      let data: unknown = null;
+      let error: unknown = null;
+      // Två extra försök: ett tillfälligt nätverksfel ska inte ge besked om
+      // att annonsen är tillsatt.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
+        if (cancelled) return;
+        data = res.data;
+        error = res.error;
+        if (!error) break;
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      }
       if (cancelled) return;
+      if (error) {
+        setFetchError(true);
+        setLoading(false);
+        return;
+      }
       const payload = (data ?? {}) as { job?: Job; expired?: { title?: string; occupation?: string } };
-      if (error || !payload.job) {
-        if (!cancelled && payload.expired) {
+      if (!payload.job) {
+        if (payload.expired) {
           setExpiredCtx({ title: payload.expired.title || undefined, occupation: payload.expired.occupation || undefined });
         }
         setNotFound(true);
@@ -96,7 +114,7 @@ const PublicJobPage = () => {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [jobId]);
+  }, [jobId, reloadKey]);
 
   // Slussar till Ansök — om utloggad: parkera intent och gå via /auth.
   const goApply = (id: string) => {
