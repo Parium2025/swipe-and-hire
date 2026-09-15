@@ -93,6 +93,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
   const [queue, setQueue] = useState<QueuedApplication[]>([]);
   const [syncing, setSyncing] = useState(false);
   const syncInProgress = useRef(false);
+  const queryClient = useQueryClient();
 
   // Load queue on mount
   useEffect(() => {
