@@ -242,8 +242,8 @@ const SearchJobs = memo(() => {
       setFiltersExpanded(true);
     }
     
-    // Reset display count to show fresh results
-    setDisplayCount(20);
+    // Börja om på första sidan när ett nytt sök tillämpas
+    setPage(1);
     
     // Scroll to top of results
     listTopRef.current?.scrollIntoView({ behavior: 'smooth' });
