@@ -35,6 +35,8 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
     contactEmail,
     hasAlreadyApplied,
     loading,
+    hasError,
+    retry,
   } = useApplyData(jobId, open, user?.id);
 
   const {
@@ -196,6 +198,18 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                     Din profil och svar har skickats till {companyName}. Lycka till!
                   </p>
                 </motion.div>
+              ) : hasError ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+                  <p className="text-white text-[15px] sm:text-sm max-w-xs">
+                    Kunde inte hämta ansökningsfrågorna. Skicka inte ansökan förrän frågorna visas.
+                  </p>
+                  <button
+                    onClick={retry}
+                    className="min-h-[44px] px-6 rounded-full bg-white/15 text-white text-[15px] sm:text-sm font-medium transition-all active:scale-[0.97]"
+                  >
+                    Försök igen
+                  </button>
+                </div>
               ) : (
                 <>
                   {questions.length === 0 ? (

@@ -43,26 +43,35 @@ export function useSwipeActions() {
     setIsLoading(true);
 
     const fetchActions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('swipe_actions')
-          .select('job_id, action')
-          .eq('user_id', user.id)
-          .order('updated_at', { ascending: false })
-          .limit(MAX_HYDRATED_ACTIONS);
+      // Misslyckad hämtning gav en tom historik, vilket la tillbaka redan
+      // bortsvepta jobb i kön. Försök igen innan vi ger upp.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const { data, error } = await supabase
+            .from('swipe_actions')
+            .select('job_id, action')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false })
+            .limit(MAX_HYDRATED_ACTIONS);
 
-        if (error) throw error;
-        if (cancelled) return;
+          if (error) throw error;
+          if (cancelled) return;
 
-        const map = new Map<string, SwipeActionType>();
-        data?.forEach((row: any) => map.set(row.job_id, row.action as SwipeActionType));
-        actionsRef.current = map;
-        setActions(map);
-      } catch (err) {
-        console.error('Error fetching swipe actions:', err);
-      } finally {
-        if (!cancelled) setIsLoading(false);
+          const map = new Map<string, SwipeActionType>();
+          data?.forEach((row: any) => map.set(row.job_id, row.action as SwipeActionType));
+          actionsRef.current = map;
+          setActions(map);
+          break;
+        } catch (err) {
+          if (cancelled) return;
+          if (attempt === 2) {
+            console.error('Error fetching swipe actions:', err);
+            break;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+        }
       }
+      if (!cancelled) setIsLoading(false);
     };
 
     fetchActions();

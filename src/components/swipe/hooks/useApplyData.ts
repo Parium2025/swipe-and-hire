@@ -22,6 +22,8 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
   const [extraDetails, setExtraDetails] = useState<ExtraJobDetails | null>(null);
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!open) return;
@@ -30,6 +32,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
     const fetchData = async () => {
       setLoading(true);
       setHasAlreadyApplied(false);
+      setHasError(false);
       try {
         const [questionsRes, jobRes, applicationRes] = await Promise.all([
           supabase.from('job_questions').select('*').eq('job_id', jobId).order('order_index'),
@@ -49,6 +52,15 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
         ]);
 
         if (cancelled) return;
+
+        // ⚠️ Supabase returnerar fel i svaret utan att kasta. Utan denna koll
+        // såg en misslyckad frågehämtning ut som "Inga frågor att besvara"
+        // och kandidaten kunde skicka en ansökan utan sina svar.
+        if ((questionsRes as any).error || (jobRes as any).error) {
+          setQuestions([]);
+          setHasError(true);
+          return;
+        }
 
         // 📸 Om användaren redan har sökt — visa de frusna frågorna
         // från själva ansökan, inte de aktuella (som kan ha ändrats).
@@ -77,7 +89,11 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
           }
         }
       } catch (err) {
-        if (!cancelled) console.error('Error fetching apply data:', err);
+        if (!cancelled) {
+          console.error('Error fetching apply data:', err);
+          setQuestions([]);
+          setHasError(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -87,7 +103,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
     return () => {
       cancelled = true;
     };
-  }, [open, jobId, userId]);
+  }, [open, jobId, userId, reloadKey]);
 
   return {
     questions,
@@ -97,5 +113,7 @@ export function useApplyData(jobId: string, open: boolean, userId?: string) {
     extraDetails,
     hasAlreadyApplied,
     loading,
+    hasError,
+    retry: () => setReloadKey((k) => k + 1),
   };
 }

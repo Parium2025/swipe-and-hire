@@ -45,6 +45,8 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
   const [questions, setQuestions] = useState<(JobQuestion & { id: string })[]>([]);
   const [myAnswers, setMyAnswers] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const viewRecordedRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
       setDetail(null);
       setQuestions([]);
       setMyAnswers(null);
+      setHasError(false);
       setLoading(false);
       return;
     }
@@ -60,6 +63,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
     setDetail(null);
     setQuestions([]);
     setMyAnswers(null);
+    setHasError(false);
     setLoading(true);
 
     void (async () => {
@@ -97,6 +101,15 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
       try {
         const [jobRes, questionsRes, answersRes] = await Promise.all(fetchPromises);
         if (cancelled) return;
+        // Supabase returnerar fel i svaret utan att kasta. Utan denna koll
+        // visades en helt tom detaljvy när hämtningen misslyckades.
+        if (jobRes.error || !jobRes.data) {
+          setDetail(null);
+          setQuestions([]);
+          setMyAnswers(null);
+          setHasError(true);
+          return;
+        }
         setDetail(jobRes.data ?? null);
         // 📸 Snapshot först: har användaren redan sökt använder vi de frusna
         // frågorna från ansökan så det som visas matchar det som besvarades.
@@ -117,6 +130,7 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
         setDetail(null);
         setQuestions([]);
         setMyAnswers(null);
+        setHasError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -125,7 +139,9 @@ export function useJobDetailData(jobId: string, open: boolean, userId?: string) 
     return () => {
       cancelled = true;
     };
-  }, [open, jobId, userId]);
+  }, [open, jobId, userId, reloadKey]);
 
-  return { detail, questions, myAnswers, loading, viewRecordedRef };
+  const retry = () => setReloadKey((k) => k + 1);
+
+  return { detail, questions, myAnswers, loading, hasError, retry, viewRecordedRef };
 }

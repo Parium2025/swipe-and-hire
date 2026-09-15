@@ -154,7 +154,9 @@ const clearAllAppCachesSync = () => {
     // Kandidatprofilerna (CV, video, bilder) cachas i sessionStorage och låg
     // kvar för nästa konto i samma flik.
     try {
-      const sessionPrefixes = [...prefixesToClear, 'parium_candidate_profiles', 'parium_local_media_state'];
+      // Svepläget (pass 18) — ångra-stacken är knuten till kontots swipe-historik
+      // och fick aldrig följa med till nästa konto i samma flik.
+      const sessionPrefixes = [...prefixesToClear, 'parium_candidate_profiles', 'parium_local_media_state', 'parium-swipe-undo-stack'];
       Object.keys(sessionStorage).forEach((key) => {
         if (sessionPrefixes.some((prefix) => key.startsWith(prefix))) {
           sessionStorage.removeItem(key);
