@@ -71,15 +71,26 @@ export function useBulkCandidateOps({
       const color = cfg?.color || '#22c55e';
 
       if (isViewingColleague) {
-        for (const id of ids) await moveCandidateInColleagueList(id, targetStage);
+        // Räkna verkliga träffar: tidigare visades "X kandidater flyttade"
+        // även när databasen nekade varenda rad.
+        let moved = 0;
+        for (const id of ids) {
+          if (await moveCandidateInColleagueList(id, targetStage, { silent: true }) !== false) moved++;
+        }
         exitSelectionMode();
         // Håll stegräknare och kollegors vy i synk – enskilda flyttar gör detta,
         // bulkflytten missade det tidigare.
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
-        toast.success(`${count} kandidater flyttade till "${label}"`, {
-          icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
-        });
+        if (moved === 0) {
+          toast.error('Kunde inte flytta kandidaterna');
+        } else if (moved < count) {
+          toast.warning(`${moved} av ${count} kandidater flyttades till "${label}"`);
+        } else {
+          toast.success(`${count} kandidater flyttade till "${label}"`, {
+            icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
+          });
+        }
         return;
       }
 
