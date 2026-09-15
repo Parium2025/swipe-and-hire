@@ -281,6 +281,8 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   const {
     data: savedJobs = [],
     isLoading: queryLoadingSaved,
+    isError: savedError,
+    refetch: refetchSaved,
   } = useQuery({
     queryKey: ['saved-jobs', user?.id],
     queryFn: async (): Promise<SavedJob[]> => {
@@ -307,6 +309,8 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
   const {
     data: skippedJobs = [],
     isLoading: queryLoadingSkipped,
+    isError: skippedError,
+    refetch: refetchSkipped,
   } = useQuery({
     queryKey: ['skipped-jobs', user?.id],
     queryFn: async (): Promise<SkippedJob[]> => {
