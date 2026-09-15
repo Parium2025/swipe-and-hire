@@ -169,13 +169,16 @@ export function useCandidateProfiles(userId?: string) {
       .select('*')
       .single();
 
-    if (error) return { error: error.message } as const;
+    if (error) return { error: 'Kunde inte skapa profilen. Försök igen om en stund.' } as const;
     await load();
     return { data: data as CandidateProfile } as const;
   }, [userId, profiles.length, clearDefaults, load]);
 
   const updateProfile = useCallback(async (id: string, patch: Partial<CandidateProfileInput>) => {
-    if (patch.is_default) await clearDefaults(id);
+    if (patch.is_default) {
+      const cleared = await clearDefaults(id);
+      if (cleared.error) return { error: cleared.error } as const;
+    }
     const { data, error } = await supabase
       .from('candidate_profiles')
       .update({
@@ -186,44 +189,70 @@ export function useCandidateProfiles(userId?: string) {
       .eq('user_id', userId ?? '')
       .select('id')
       .maybeSingle();
-    if (error) return { error: error.message } as const;
-    if (!data) return { error: 'Profilen finns inte längre' } as const;
+    if (error) return { error: 'Kunde inte spara profilen. Försök igen om en stund.' } as const;
+    if (!data) return { error: 'Profilen finns inte längre.' } as const;
     await load();
     return {} as const;
   }, [clearDefaults, load, userId]);
 
   const deleteProfile = useCallback(async (id: string) => {
+    if (!userId) return { error: 'Du är inte inloggad.' } as const;
     const removed = profiles.find(p => p.id === id);
-    const { error } = await supabase.from('candidate_profiles').delete().eq('id', id);
-    if (error) return { error: error.message } as const;
+    // Raderingen måste bekräftas radvis: utan kontroll såg en blockerad
+    // radering ut att lyckas och profilen kom tillbaka vid nästa besök.
+    const { data: deleted, error } = await supabase
+      .from('candidate_profiles')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('id');
+    if (error) return { error: 'Kunde inte ta bort profilen. Försök igen om en stund.' } as const;
+    if (!deleted || deleted.length === 0) {
+      await load();
+      return { error: 'Profilen kunde inte tas bort.' } as const;
+    }
 
     // Se till att det alltid finns en standardprofil kvar.
     if (removed?.is_default) {
       const next = profiles.find(p => p.id !== id);
       if (next) {
-        await supabase.from('candidate_profiles').update({ is_default: true }).eq('id', next.id);
+        await supabase
+          .from('candidate_profiles')
+          .update({ is_default: true })
+          .eq('id', next.id)
+          .eq('user_id', userId);
       }
     }
 
     await load();
     return {} as const;
-  }, [profiles, load]);
+  }, [profiles, load, userId]);
 
   const setDefaultProfile = useCallback(async (id: string) => {
-    await clearDefaults(id);
-    const { error } = await supabase
+    if (!userId) return { error: 'Du är inte inloggad.' } as const;
+    const cleared = await clearDefaults(id);
+    if (cleared.error) return { error: cleared.error } as const;
+    const { data, error } = await supabase
       .from('candidate_profiles')
       .update({ is_default: true })
-      .eq('id', id);
-    if (error) return { error: error.message } as const;
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('id')
+      .maybeSingle();
+    if (error) return { error: 'Kunde inte spara standardprofilen. Försök igen om en stund.' } as const;
+    if (!data) {
+      await load();
+      return { error: 'Profilen finns inte längre.' } as const;
+    }
     await load();
     return {} as const;
-  }, [clearDefaults, load]);
+  }, [clearDefaults, load, userId]);
 
   /** Nollställer standard – används när grundprofilen ska vara standard igen. */
   const clearDefaultProfile = useCallback(async () => {
-    await clearDefaults();
+    const cleared = await clearDefaults();
     await load();
+    if (cleared.error) return { error: cleared.error } as const;
     return {} as const;
   }, [clearDefaults, load]);
 
