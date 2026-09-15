@@ -250,8 +250,8 @@ async function executeOperationInner(op: QueuedCandidateOperation): Promise<bool
 
 let syncLock = false;
 
-export async function syncCandidateOperationQueue(userId?: string): Promise<number> {
-  if (syncLock) return 0;
+export async function syncCandidateOperationQueue(userId?: string): Promise<{ synced: number; dropped: number }> {
+  if (syncLock) return { synced: 0, dropped: 0 };
   syncLock = true;
 
   try {

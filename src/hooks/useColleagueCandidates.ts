@@ -377,7 +377,7 @@ export function useColleagueCandidates(
       if (cached && cached.length > 0) setCandidates(cached);
     }
     void fetchColleagueCandidates(false);
-  }, [colleagueId, listId, trimmedSearch, fetchColleagueCandidates]);
+  }, [colleagueId, listId, trimmedSearch, user?.id, fetchColleagueCandidates]);
 
   // 📡 REALTIME: kandidater, betyg och anteckningar — samma täckning som din
   // egen vy, så en ändring som kollegan (eller någon annan i teamet) gör syns
