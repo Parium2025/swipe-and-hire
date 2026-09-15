@@ -155,6 +155,10 @@ export function useApplySubmit({
       queryClient.invalidateQueries({ queryKey: ['my-applications', userId] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
+      // Startsidans siffror (antal ansökningar) uppdaterades inte när ansökan
+      // skickades från svepläget — bara från jobbvyn.
+      queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', userId] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-jobs', userId] });
 
       toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats`, route: '/my-applications' });
       refreshQuota();
