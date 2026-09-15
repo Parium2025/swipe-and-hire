@@ -279,14 +279,21 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
     ));
 
     try {
-      const { error } = await supabase
+      // .select() krävs: databasen svarar "inget fel" även när noll rader
+      // ändrades (t.ex. om behörigheten till kollegans lista saknas).
+      const { data, error } = await supabase
         .from('my_candidates')
         .update({ stage: newStage })
-        .eq('id', candidateId);
+        .eq('id', candidateId)
+        .select('id');
 
       if (error) {
         setCandidates(previousCandidates);
         throw error;
+      }
+      if (!data || data.length === 0) {
+        setCandidates(previousCandidates);
+        throw new Error('Kandidaten kunde inte flyttas');
       }
     } catch (error: any) {
       toast.error(error.message || 'Kunde inte flytta kandidaten');
