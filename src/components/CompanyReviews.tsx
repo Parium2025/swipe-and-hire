@@ -89,15 +89,21 @@ const CompanyReviews = () => {
   });
 
   // Delad cache + realtime-synk (localStorage-instant load, bakgrundssynk)
-  const { reviews: cachedReviews, avgRating, isLoading: reviewsLoading } =
-    useCompanyReviewsCache(user?.id ?? null);
+  const {
+    reviews: cachedReviews,
+    avgRating,
+    reviewCount,
+    isLoading: reviewsLoading,
+    hasMore,
+    loadMore,
+    isLoadingMore,
+  } = useCompanyReviewsCache(user?.id ?? null);
   const reviews = (cachedReviews ?? []) as unknown as CompanyReview[];
 
   const loading = companyLoading || reviewsLoading;
 
-  const averageRating = reviews.length > 0
-    ? (avgRating ?? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
-    : "0";
+  // Snitt + antal är serverräknade över ALLA recensioner, inte bara hämtade sidor.
+  const averageRating = reviewCount > 0 ? (avgRating ?? 0).toFixed(1) : "0";
 
   const renderStars = (rating: number) => {
     return (
@@ -232,7 +238,7 @@ const CompanyReviews = () => {
               <div className="flex items-center gap-2 mt-0.5">
                 <Star className="h-3.5 w-3.5 fill-[#FFC44D] text-[#FFC44D] shrink-0" />
                 <span className="text-sm text-white">
-                  {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
+                  {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                 </span>
               </div>
             </div>
@@ -419,6 +425,21 @@ const CompanyReviews = () => {
               ))
             )}
           </div>
+
+          {/* Visa fler — hämtar nästa sida (50 åt gången) vid behov */}
+          {hasMore && (
+            <div className="flex justify-center mt-4">
+              <button
+                type="button"
+                onClick={() => loadMore()}
+                disabled={isLoadingMore}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-sm text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoadingMore ? 'Hämtar fler…' : `Visa fler recensioner (${reviews.length} av ${reviewCount})`}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

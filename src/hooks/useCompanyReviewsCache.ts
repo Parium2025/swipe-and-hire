@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
 export interface CachedReview {
@@ -21,10 +21,14 @@ export interface CachedReview {
 interface CompanyReviewsData {
   reviews: CachedReview[];
   avgRating: number | undefined;
+  /** Totalt antal recensioner i databasen (inte bara de hämtade). */
   reviewCount: number;
 }
 
 const CACHE_KEY = 'parium_company_reviews_cache';
+// Sidstorlek: första sidan laddas direkt, "Visa fler" hämtar nästa sida.
+// Håller vyn snabb även för företag med tusentals recensioner.
+const PAGE_SIZE = 50;
 
 // LocalStorage cache helpers - NO EXPIRY, always syncs in background
 const getLocalCache = (companyId: string): { data: CompanyReviewsData; timestamp: number } | null => {
@@ -63,67 +67,77 @@ const setLocalCache = (companyId: string, data: CompanyReviewsData) => {
   }
 };
 
+/** Hämta en sida recensioner + berika med profilnamn för icke-anonyma. */
+async function fetchReviewsPage(companyId: string, from: number, to: number): Promise<CachedReview[]> {
+  const { data: reviews, error } = await supabase
+    .from('company_reviews_public')
+    .select('*')
+    .eq('company_id', companyId)
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (error) throw error;
+  if (!reviews || reviews.length === 0) return [];
+
+  const userIds = reviews.filter(r => !r.is_anonymous).map(r => r.user_id);
+  if (userIds.length === 0) return reviews as CachedReview[];
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, first_name, last_name')
+    .in('user_id', userIds);
+
+  if (!profiles) return reviews as CachedReview[];
+
+  const profileMap = new Map(profiles.map(p => [p.user_id, p]));
+  return reviews.map(r => ({
+    ...r,
+    profiles: profileMap.get(r.user_id) || undefined,
+  })) as CachedReview[];
+}
+
+/** Hämta totala antalet + snittbetyg över ALLA recensioner (serverräknat). */
+async function fetchReviewStats(companyId: string): Promise<{ total: number; avg: number | undefined }> {
+  const { data, error } = await supabase.rpc('get_company_review_stats', {
+    p_company_id: companyId,
+  });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  const total = Number(row?.total_count ?? 0);
+  const avg = row?.avg_rating != null ? Number(row.avg_rating) : undefined;
+  return { total, avg };
+}
+
 /**
  * Hook to get cached company reviews with instant load from localStorage
  * and background sync with the database.
+ *
+ * Första sidan (50 senaste) hämtas direkt. hasMore/loadMore hämtar nästa
+ * sida vid behov — snittbetyg och totalräkning kommer alltid från servern
+ * och gäller samtliga recensioner, inte bara de hämtade.
  */
 export function useCompanyReviewsCache(companyId: string | null) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<CompanyReviewsData>({
     queryKey: ['company-reviews-cached', companyId],
     queryFn: async () => {
       if (!companyId) return { reviews: [], avgRating: undefined, reviewCount: 0 };
 
-      // Fetch reviews from database
-      const { data: reviews, error } = await supabase
-        .from('company_reviews_public')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false })
-        // Tak: ett företag med tusentals recensioner får inte skicka hela
-        // listan till klienten. De 200 senaste räcker för vyn.
-        .limit(200);
-
-      if (error) throw error;
-
-      // Fetch user profiles for non-anonymous reviews
-      let enrichedReviews: CachedReview[] = reviews || [];
-      
-      if (reviews && reviews.length > 0) {
-        const userIds = reviews
-          .filter(r => !r.is_anonymous)
-          .map(r => r.user_id);
-        
-        if (userIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('user_id, first_name, last_name')
-            .in('user_id', userIds);
-          
-          if (profiles) {
-            const profileMap = new Map(profiles.map(p => [p.user_id, p]));
-            enrichedReviews = reviews.map(r => ({
-              ...r,
-              profiles: profileMap.get(r.user_id) || undefined,
-            }));
-          }
-        }
-      }
-
-      // Calculate average rating
-      const avgRating = enrichedReviews.length > 0
-        ? enrichedReviews.reduce((sum, r) => sum + r.rating, 0) / enrichedReviews.length
-        : undefined;
+      const [reviews, stats] = await Promise.all([
+        fetchReviewsPage(companyId, 0, PAGE_SIZE - 1),
+        fetchReviewStats(companyId),
+      ]);
 
       const result: CompanyReviewsData = {
-        reviews: enrichedReviews,
-        avgRating,
-        reviewCount: enrichedReviews.length,
+        reviews,
+        avgRating: stats.avg,
+        reviewCount: stats.total,
       };
 
-      // Update localStorage cache
+      // Cacha bara första sidan + statistik — aldrig en obegränsad lista.
       setLocalCache(companyId, result);
 
       return result;
@@ -169,52 +183,51 @@ export function useCompanyReviewsCache(companyId: string | null) {
     };
   }, [companyId, queryClient]);
 
+  // Hämta nästa sida och lägg till i cachen (visas direkt, skrivs inte till localStorage)
+  const loadMore = useCallback(async () => {
+    if (!companyId) return;
+    const current = queryClient.getQueryData<CompanyReviewsData>(['company-reviews-cached', companyId]);
+    if (!current) return;
+    if (current.reviews.length >= current.reviewCount) return;
+
+    setIsLoadingMore(true);
+    try {
+      const from = current.reviews.length;
+      const nextPage = await fetchReviewsPage(companyId, from, from + PAGE_SIZE - 1);
+      if (nextPage.length > 0) {
+        queryClient.setQueryData<CompanyReviewsData>(
+          ['company-reviews-cached', companyId],
+          { ...current, reviews: [...current.reviews, ...nextPage] }
+        );
+      } else {
+        // Servern säger att det finns fler men sidan kom tillbaka tom —
+        // räkna om totalen så knappen inte loopar.
+        const stats = await fetchReviewStats(companyId);
+        queryClient.setQueryData<CompanyReviewsData>(
+          ['company-reviews-cached', companyId],
+          { ...current, reviewCount: Math.min(current.reviews.length, stats.total), avgRating: stats.avg }
+        );
+      }
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [companyId, queryClient]);
+
   // Prefetch reviews for a company (call when hovering over company card)
   const prefetchReviews = useCallback((targetCompanyId: string) => {
     if (!user?.id) return Promise.resolve();
     queryClient.prefetchQuery({
       queryKey: ['company-reviews-cached', targetCompanyId],
       queryFn: async () => {
-        const { data: reviews, error } = await supabase
-          .from('company_reviews_public')
-          .select('*')
-          .eq('company_id', targetCompanyId)
-          .order('created_at', { ascending: false })
-          .limit(200);
-
-        if (error) throw error;
-
-        let enrichedReviews: CachedReview[] = reviews || [];
-        
-        if (reviews && reviews.length > 0) {
-          const userIds = reviews
-            .filter(r => !r.is_anonymous)
-            .map(r => r.user_id);
-          
-          if (userIds.length > 0) {
-            const { data: profiles } = await supabase
-              .from('profiles')
-              .select('user_id, first_name, last_name')
-              .in('user_id', userIds);
-            
-            if (profiles) {
-              const profileMap = new Map(profiles.map(p => [p.user_id, p]));
-              enrichedReviews = reviews.map(r => ({
-                ...r,
-                profiles: profileMap.get(r.user_id) || undefined,
-              }));
-            }
-          }
-        }
-
-        const avgRating = enrichedReviews.length > 0
-          ? enrichedReviews.reduce((sum, r) => sum + r.rating, 0) / enrichedReviews.length
-          : undefined;
+        const [reviews, stats] = await Promise.all([
+          fetchReviewsPage(targetCompanyId, 0, PAGE_SIZE - 1),
+          fetchReviewStats(targetCompanyId),
+        ]);
 
         const result: CompanyReviewsData = {
-          reviews: enrichedReviews,
-          avgRating,
-          reviewCount: enrichedReviews.length,
+          reviews,
+          avgRating: stats.avg,
+          reviewCount: stats.total,
         };
 
         setLocalCache(targetCompanyId, result);
@@ -231,6 +244,9 @@ export function useCompanyReviewsCache(companyId: string | null) {
     isLoading: isLoading && !data,
     refetch,
     prefetchReviews,
+    hasMore: (data?.reviews.length ?? 0) < (data?.reviewCount ?? 0),
+    loadMore,
+    isLoadingMore,
   };
 }
 
@@ -277,11 +293,21 @@ export function useBatchPrefetchReviews() {
         .from('profiles')
         .select('user_id, first_name, last_name')
         .in('user_id', userIds);
-      
+
       if (profiles) {
         profileMap = new Map(profiles.map(p => [p.user_id, p]));
       }
     }
+
+    // Hämta korrekt totalräkning + snitt för varje företag parallellt
+    const statsByCompany = new Map<string, { total: number; avg: number | undefined }>();
+    await Promise.all(uncachedIds.map(async (companyId) => {
+      try {
+        statsByCompany.set(companyId, await fetchReviewStats(companyId));
+      } catch {
+        // Statistikfältet fylls i av första riktiga hämtningen — ej kritiskt här.
+      }
+    }));
 
     // Group reviews by company and update cache
     const reviewsByCompany = new Map<string, CachedReview[]>();
@@ -298,14 +324,14 @@ export function useBatchPrefetchReviews() {
     // Update query cache for each company
     uncachedIds.forEach(companyId => {
       const reviews = reviewsByCompany.get(companyId) || [];
-      const avgRating = reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : undefined;
-      
+      const stats = statsByCompany.get(companyId);
+
       const result: CompanyReviewsData = {
         reviews,
-        avgRating,
-        reviewCount: reviews.length,
+        avgRating: stats?.avg ?? (reviews.length > 0
+          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          : undefined),
+        reviewCount: stats?.total ?? reviews.length,
       };
 
       queryClient.setQueryData(['company-reviews-cached', companyId], result);

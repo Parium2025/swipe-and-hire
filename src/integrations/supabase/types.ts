@@ -4253,6 +4253,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_company_review_stats: {
+        Args: { p_company_id: string }
+        Returns: {
+          avg_rating: number
+          total_count: number
+        }[]
+      }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {
