@@ -904,7 +904,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white">
                       {formData.employee_count || 'Välj antal'}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white" />
+                    <ChevronDown className={`h-4 w-4 text-white transition-transform duration-200 ${employeeCountOpen ? 'rotate-180' : 'rotate-0'}`} />
                   </div>
                   
                   {employeeCountOpen && (

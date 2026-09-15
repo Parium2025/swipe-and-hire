@@ -3,6 +3,7 @@ import { Check, ChevronDown, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
+import { smartMatches } from '@/lib/seoSearch';
 
 interface AuthSelectFieldProps {
   id: string;
@@ -48,9 +49,10 @@ const AuthSelectField = ({
     return () => document.removeEventListener('pointerdown', handlePointerDown);
   }, [open]);
 
+  // Samma smarta sökning som i jobbflödet: tål stavfel och ordföljd.
   const filtered =
     searchable && search.trim().length >= 2
-      ? options.filter((o) => o.toLowerCase().includes(search.toLowerCase()))
+      ? options.filter((o) => smartMatches(search.trim(), [o]))
       : options;
 
   const select = (next: string) => {
