@@ -436,7 +436,7 @@ const JobApplication = () => {
 
       // Clear draft — data is safe in the queue
       if (jobId) {
-        clearJobApplicationDraft(jobId);
+        clearJobApplicationDraft(jobId, user.id);
       }
       setHasUnsavedChanges(false);
 
@@ -470,7 +470,7 @@ const JobApplication = () => {
 
       // Clear draft on successful submission
       if (jobId) {
-        clearJobApplicationDraft(jobId);
+        clearJobApplicationDraft(jobId, user.id);
         console.log('💾 Job application draft cleared after submission');
       }
 
@@ -509,7 +509,7 @@ const JobApplication = () => {
         queryClient.invalidateQueries({ queryKey: ['my-applications', user.id] });
         queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user.id] });
         toast({ title: 'Du har redan sökt det här jobbet' });
-        if (jobId) clearJobApplicationDraft(jobId);
+        if (jobId) clearJobApplicationDraft(jobId, user.id);
         setHasUnsavedChanges(false);
         navigate('/dashboard');
         return;
@@ -541,7 +541,7 @@ const JobApplication = () => {
       });
 
       if (jobId) {
-        clearJobApplicationDraft(jobId);
+        clearJobApplicationDraft(jobId, user.id);
       }
       setHasUnsavedChanges(false);
       navigate('/dashboard');
