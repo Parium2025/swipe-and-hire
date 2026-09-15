@@ -496,7 +496,7 @@ export function useMyCandidatesData(
         },
         (payload: any) => {
           // Don't apply realtime changes during drag/drop optimistic updates
-          if (isDragging) return;
+          if (isDraggingRef.current) return;
 
           // For the common case (stage change), update cache in-place to avoid
           // refetch jitter that makes drag/drop feel "laggy".
@@ -538,7 +538,7 @@ export function useMyCandidatesData(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient, isDragging]);
+  }, [user, queryClient]);
 
   // 🔥 Stable ref for applicant IDs — prevents realtime channels from
   // re-subscribing every time the candidate list changes.
@@ -888,7 +888,7 @@ export function useMyCandidatesData(
     },
     onMutate: ({ id, stage }) => {
       // Mark as dragging to prevent realtime from overwriting
-      setIsDragging(true);
+      isDraggingRef.current = true;
 
       // Optimistic update - MUST be synchronous to feel instant (paginated structure)
       void queryClient.cancelQueries({ queryKey });
@@ -940,7 +940,7 @@ export function useMyCandidatesData(
       }
     },
     onSettled: () => {
-      setIsDragging(false);
+      isDraggingRef.current = false;
     },
   });
 
