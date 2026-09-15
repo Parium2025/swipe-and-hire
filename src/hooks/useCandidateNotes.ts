@@ -261,12 +261,19 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
     setSavingNote(true);
 
     try {
-      const { error } = await supabase
+      // .select() krävs: utan den rapporteras en nekad redigering (t.ex. en
+      // kollegas anteckning) som lyckad, och texten hoppade tillbaka vid nästa
+      // hämtning utan att användaren fick veta varför.
+      const { data: updated, error } = await supabase
         .from('candidate_notes')
         .update({ note: trimmed })
-        .eq('id', noteId);
+        .eq('id', noteId)
+        .select('id');
 
       if (error) throw error;
+      if (!updated || updated.length === 0) {
+        throw new Error('Anteckningen kunde inte uppdateras');
+      }
 
       logActivity.mutate({
         applicantId,

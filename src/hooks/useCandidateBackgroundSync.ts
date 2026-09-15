@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
+import { hydrateMyCandidateRows } from '@/lib/myCandidatesHydration';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 
@@ -322,100 +323,14 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
 
   if (mcError || !myCandidates || myCandidates.length === 0) return;
 
-  // Hämta job_applications data
-  const applicationIds = myCandidates.map((mc) => mc.application_id);
-  const applicantIds = [...new Set(myCandidates.map((mc) => mc.applicant_id))];
-
-  const { data: applications } = await supabase
-    .from('job_applications')
-    .select(`
-      id, applicant_id, first_name, last_name, email, phone, location, bio,
-      cv_url, age, employment_status, work_schedule, availability, custom_answers,
-      candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
-      status, applied_at, viewed_at, job_postings!inner(title)
-    `)
-    .in('id', applicationIds);
-
-  const appMap = new Map(applications?.map((app) => [app.id, app]) || []);
-
-  // Hämta media batch
-  const profileMediaMap: Record<string, any> = {};
-  const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
-    p_applicant_ids: applicantIds,
-    p_employer_id: userId,
-  });
-
-  if (batchMediaData) {
-    batchMediaData.forEach((row: any) => {
-      profileMediaMap[row.applicant_id] = {
-        profile_image_url: row.profile_image_url,
-        video_url: row.video_url,
-        is_profile_video: row.is_profile_video,
-        last_active_at: row.last_active_at,
-      };
-    });
-  }
-
-  // Hämta aktivitetsdata batch
-  const activityMap: Record<string, any> = {};
-  const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
-    p_applicant_ids: applicantIds,
-    p_employer_id: userId,
-  });
-
-  if (activityData) {
-    activityData.forEach((item: any) => {
-      activityMap[item.applicant_id] = {
-        latest_application_at: item.latest_application_at,
-        last_active_at: item.last_active_at,
-      };
-    });
-  }
-
-  // Bygg items
-  const rawItems = myCandidates.map((mc) => {
-    const app = appMap.get(mc.application_id);
-    const liveMedia = profileMediaMap[mc.applicant_id] || {};
-    const media = resolveCandidateMedia(app as any, liveMedia);
-    const activity = activityMap[mc.applicant_id] || {};
-
-    return {
-      id: mc.id,
-      recruiter_id: mc.recruiter_id,
-      applicant_id: mc.applicant_id,
-      application_id: mc.application_id,
-      job_id: mc.job_id,
-      stage: mc.stage,
-      notes: mc.notes,
-      rating: mc.rating,
-      created_at: mc.created_at,
-      updated_at: mc.updated_at,
-      first_name: app?.first_name || null,
-      last_name: app?.last_name || null,
-      email: app?.email || null,
-      phone: app?.phone || null,
-      location: app?.location || null,
-      bio: app?.bio || null,
-      cv_url: app?.cv_url || null,
-      age: app?.age || null,
-      employment_status: app?.employment_status || null,
-      work_schedule: app?.work_schedule || null,
-      availability: app?.availability || null,
-      custom_answers: app?.custom_answers || null,
-      status: app?.status || null,
-      applied_at: app?.applied_at || null,
-      viewed_at: app?.viewed_at || null,
-      job_title: (app as any)?.job_postings?.title || 'Okänt jobb',
-      profile_image_url: media.profile_image_url,
-      video_url: media.video_url,
-      is_profile_video: media.is_profile_video || false,
-      last_active_at: activity.last_active_at || liveMedia.last_active_at || null,
-      latest_application_at: activity.latest_application_at || app?.applied_at,
-    };
-  });
+  // Exakt samma hydrering som vyn själv använder. Tidigare byggdes raderna här
+  // med egen logik: betyget togs ur den gamla kolumnen i stället för
+  // candidate_ratings, och jobbtiteln fick en annan reservtext. Det skrevs rakt
+  // in i samma cache som vyn läser, så bakgrundssynken kunde visa fel betyg.
+  const rawItems = await hydrateMyCandidateRows(userId, myCandidates as any);
 
   // Deduplicera per applicant_id (behåll senast uppdaterad)
-  const deduped = new Map<string, typeof rawItems[0]>();
+  const deduped = new Map<string, (typeof rawItems)[number]>();
   for (const item of rawItems) {
     const existing = deduped.get(item.applicant_id);
     if (!existing || item.updated_at > existing.updated_at) {
@@ -429,19 +344,16 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
   const newTimestamps = items.map((i) => i.updated_at).join(',');
   const existingTimestamps = existingData?.pages?.[0]?.items?.map((i: any) => i.updated_at)?.join(',');
 
-  if (newTimestamps !== existingTimestamps) {
-    // Bevara extra sidor från useProgressivePagination — byt bara ut sida 1
-    const existingPages = existingData?.pages ?? [];
-    const existingPageParams = existingData?.pageParams ?? [null];
-    const newFirstPage = { items, nextCursor: items.length === PAGE_SIZE ? items[items.length - 1].updated_at : null };
+  if (newTimestamps !== existingTimestamps && existingData?.pages?.length) {
+    // Sidan MÅSTE behålla sitt `cursors`-fält. Den gamla koden skrev
+    // { items, nextCursor } — en form vyn inte känner igen — vilket fick
+    // "ladda fler" att tro att listan var slut efter första sidan.
+    const existingPages = existingData.pages as any[];
+    const newFirstPage = { ...existingPages[0], items };
 
     queryClient.setQueryData(queryKey, {
-      pages: existingPages.length > 1
-        ? [newFirstPage, ...existingPages.slice(1)]
-        : [newFirstPage],
-      pageParams: existingPageParams.length > 1
-        ? [null, ...existingPageParams.slice(1)]
-        : [null],
+      ...existingData,
+      pages: [newFirstPage, ...existingPages.slice(1)],
     });
   }
 
