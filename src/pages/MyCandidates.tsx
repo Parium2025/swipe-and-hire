@@ -1059,7 +1059,7 @@ const MyCandidates = () => {
           const stage = swipeStageCandidates[swipeInitialIndex]?.stage;
           if (stage) effectiveLoadMore(stage);
         }}
-        hasMore={Boolean(swipeStageCandidates[swipeInitialIndex]?.stage && hasMoreInStage(swipeStageCandidates[swipeInitialIndex].stage))}
+        hasMore={Boolean(swipeStageCandidates[swipeInitialIndex]?.stage && effectiveHasMoreInStage(swipeStageCandidates[swipeInitialIndex].stage))}
         onRemoveCandidate={(app) => {
           const original = displayedCandidates.find(c => c.application_id === app.id);
           if (original) {
