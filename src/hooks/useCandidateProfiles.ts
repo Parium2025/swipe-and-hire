@@ -146,7 +146,11 @@ export function useCandidateProfiles(userId?: string) {
       return { error: `Du kan ha max ${MAX_CANDIDATE_PROFILES} profiler` } as const;
     }
     const makeDefault = input.is_default || profiles.length === 0;
-    if (makeDefault) await clearDefaults();
+    if (makeDefault) {
+      const cleared = await clearDefaults();
+      if (cleared.error) return { error: cleared.error } as const;
+    }
+
 
     const { data, error } = await supabase
       .from('candidate_profiles')
