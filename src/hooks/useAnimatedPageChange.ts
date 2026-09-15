@@ -71,15 +71,17 @@ export function useAnimatedPageChange(
 
     const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
     const startedAt = performance.now();
-    const swapThreshold = container.clientHeight * 1.25;
-    let frame = 0;
+    // Byt först när hissen nått den gemensamma, stabila zonen nära toppen.
+    // Tidigare byttes en kortare nästa sida för tidigt; dess mindre innehåll
+    // lämnade då höjdlåsets tomma yta synlig och såg ut som paus + nytt hopp.
+    // Nästa och Föregående följer nu bokstavligen samma bana och bytespunkt.
+    const swapThreshold = container.clientHeight * 0.65;
     let swapped = false;
     // Tiden som React-renderingen stjäl får inte räknas in i rörelsen, annars
     // hoppar hissen ifatt kurvan med ett synligt ryck efter sidbytet.
     let pausedMs = 0;
 
     const animate = (now: number) => {
-      frame += 1;
       const progress = Math.min((now - startedAt - pausedMs) / durationMs, 1);
       // Mjuk start och mjukt stopp – hisskänsla, ingen hetsig utskjutning.
       const eased = progress < 0.5
@@ -88,9 +90,9 @@ export function useAnimatedPageChange(
       const nextTop = startTop * (1 - eased);
       container.scrollTop = nextTop;
 
-      // Minst en målad rörelsebild före bytet. Därefter byts korten utanför
-      // synfältet, med exakt samma ordning oavsett riktning eller sidnummer.
-      if (!swapped && frame >= 2 && nextTop > swapThreshold) {
+      // I den här zonen syns sidans gemensamma topp, inte de kort vars längd
+      // skiljer sig mellan sidorna. Därför blir bytet osynligt i båda riktningar.
+      if (!swapped && nextTop <= swapThreshold) {
         swapped = true;
         const swapStartedAt = performance.now();
         flushSync(() => setPage(nextPage));
