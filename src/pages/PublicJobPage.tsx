@@ -397,6 +397,10 @@ const PublicJobPage = () => {
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
         <meta property="og:type" content="article" />
+        <meta property="og:locale" content="sv_SE" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={job.title} />
+        <meta name="twitter:description" content={description} />
         {ogImage && <meta property="og:image" content={ogImage} />}
         <meta name="robots" content="index,follow,max-image-preview:large" />
         <script type="application/ld+json">{JSON.stringify(jobLD)}</script>
