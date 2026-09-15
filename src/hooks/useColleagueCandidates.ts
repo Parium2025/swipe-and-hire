@@ -295,7 +295,13 @@ export function useColleagueCandidates(
       inFlightRef.current = false;
       if (seq === requestSeqRef.current) setIsLoading(false);
     }
-  }, [colleagueId, listId, user]);
+  }, [colleagueId, listId, user, trimmedSearch]);
+
+  // Ny sökning → ladda om från början (samma beteende som din egen lista).
+  useEffect(() => {
+    if (!colleagueId) return;
+    void fetchColleagueCandidates(false);
+  }, [colleagueId, listId, trimmedSearch, fetchColleagueCandidates]);
 
   // 📡 REALTIME: Prenumerera på kollegans kandidatändringar
   useEffect(() => {
