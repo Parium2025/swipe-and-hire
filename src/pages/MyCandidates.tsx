@@ -99,15 +99,29 @@ const MyCandidates = () => {
 
   const isViewingColleague = !!viewingColleagueId;
   
+  // Search state with debounced version for FTS
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Debounce search query for FTS (300ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Colleague's candidates and stage settings
   const { 
     candidates: colleagueCandidates, 
     isLoading: loadingColleagueCandidates,
+    hasMore: colleagueHasMore,
+    loadMoreCandidates: loadMoreColleagueCandidates,
     fetchColleagueCandidates,
     moveCandidateInColleagueList,
     removeCandidateFromColleagueList,
     setCandidates: setColleagueCandidates,
-  } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId);
+  } = useColleagueCandidates(viewingColleagueId, viewingColleagueListId, debouncedSearchQuery);
 
   const handleViewColleague = useCallback((colleagueId: string | null, listId: string | null = null) => {
     // Rensa föregående kollegas rader i samma event innan den nya vyn målas.
@@ -141,17 +155,7 @@ const MyCandidates = () => {
     setStageCount(activeStageOrder.length);
   }, [activeStageOrder.length, setStageCount]);
   
-  // Search state with debounced version for FTS
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   
-  // Debounce search query for FTS (300ms delay)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
   
   // Use the hook with debounced search for FTS
   const {
@@ -168,7 +172,27 @@ const MyCandidates = () => {
   } = useMyCandidatesData(debouncedSearchQuery, activeListId, activeStageOrder);
 
   // Sanna totalsiffror per kolumn (räknas i databasen, inte på nedladdade rader)
-  const stageCounts = useMyCandidateStageCounts(activeListId, !isViewingColleague);
+  // Kollegans vy ska ha exakt samma siffror och laddning som din egen lista —
+  // bara utan rätten att ändra kollegans inställningar.
+  const stageCounts = useMyCandidateStageCounts(
+    isViewingColleague ? viewingColleagueListId : activeListId,
+    true,
+    isViewingColleague ? viewingColleagueId : null,
+  );
+
+  // Kollegans lista paginerar över hela listan (inte per kolumn), så samma
+  // "ladda fler" används för alla kolumner.
+  const effectiveHasMoreInStage = useCallback(
+    (stage: string) => (isViewingColleague ? colleagueHasMore : hasMoreInStage(stage)),
+    [isViewingColleague, colleagueHasMore, hasMoreInStage],
+  );
+  const effectiveLoadMore = useCallback(
+    (stage: string) => {
+      if (isViewingColleague) loadMoreColleagueCandidates();
+      else loadMoreStage(stage);
+    },
+    [isViewingColleague, loadMoreColleagueCandidates, loadMoreStage],
+  );
 
   // updateCandidatesCache is now provided by useBulkCandidateOps hook
 
@@ -234,12 +258,8 @@ const MyCandidates = () => {
   // Bulk action confirmation dialogs
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   
-  // Fetch colleague's candidates when switching
-  useEffect(() => {
-    if (viewingColleagueId) {
-      fetchColleagueCandidates();
-    }
-  }, [viewingColleagueId, fetchColleagueCandidates]);
+  // Kollegans kandidater hämtas av hooken själv (även vid byte av lista/sökning).
+
 
   const fetchCandidates = refetchCandidates;
 
@@ -907,8 +927,8 @@ const MyCandidates = () => {
           onPrefetch={handlePrefetchCandidate}
           onMarkAsViewed={markApplicationAsViewed}
           stageCounts={debouncedSearchQuery ? undefined : stageCounts}
-          hasMoreInStage={hasMoreInStage}
-          onLoadMore={loadMoreStage}
+          hasMoreInStage={effectiveHasMoreInStage}
+          onLoadMore={effectiveLoadMore}
           loadingStage={loadingStage}
           renderActionBar={isSelectionMode ? (
             <MyCandidatesMobileActionBar
@@ -976,8 +996,8 @@ const MyCandidates = () => {
                   onToggleSelect={toggleCandidateSelection}
                   // Vid sökning gäller inte serverns totalsiffra — då räknar vi träffarna.
                   totalCount={debouncedSearchQuery ? undefined : stageCounts?.[stage]}
-                  hasMore={hasMoreInStage(stage)}
-                  onLoadMore={loadMoreStage}
+                  hasMore={effectiveHasMoreInStage(stage)}
+                  onLoadMore={effectiveLoadMore}
                    isLoadingMore={loadingStage === stage || loadingStage === '__all__'}
                 />
               );
@@ -1037,9 +1057,9 @@ const MyCandidates = () => {
         savedApplicantIds={swipeSavedApplicantIds}
         onLoadMore={() => {
           const stage = swipeStageCandidates[swipeInitialIndex]?.stage;
-          if (stage) loadMoreStage(stage);
+          if (stage) effectiveLoadMore(stage);
         }}
-        hasMore={Boolean(swipeStageCandidates[swipeInitialIndex]?.stage && hasMoreInStage(swipeStageCandidates[swipeInitialIndex].stage))}
+        hasMore={Boolean(swipeStageCandidates[swipeInitialIndex]?.stage && effectiveHasMoreInStage(swipeStageCandidates[swipeInitialIndex].stage))}
         onRemoveCandidate={(app) => {
           const original = displayedCandidates.find(c => c.application_id === app.id);
           if (original) {

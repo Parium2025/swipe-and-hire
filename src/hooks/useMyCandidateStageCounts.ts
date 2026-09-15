@@ -13,19 +13,25 @@ import { readCandidateCounts, writeCandidateCounts } from '@/lib/candidateCounts
  *
  * Senast kända siffror sparas lokalt så de syns direkt vid kallstart.
  */
-export function useMyCandidateStageCounts(listId: string | null, enabled = true) {
+export function useMyCandidateStageCounts(
+  listId: string | null,
+  enabled = true,
+  recruiterId: string | null = null,
+) {
   const { user } = useAuth();
-  const scope = `stages_${listId ?? 'all'}`;
+  // Kollegans siffror cachas separat så de aldrig blandas ihop med dina egna.
+  const scope = `stages_${recruiterId ? `${recruiterId}_` : ''}${listId ?? 'all'}`;
 
   const { data } = useQuery({
-    queryKey: ['my-candidates-stage-counts', user?.id, listId],
+    queryKey: ['my-candidates-stage-counts', user?.id, listId, recruiterId],
     enabled: !!user && enabled,
     staleTime: 30_000,
     gcTime: 10 * 60_000,
     placeholderData: () => readCandidateCounts(scope, user?.id) ?? undefined,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('count_my_candidates_per_stage', {
+      const { data, error } = await (supabase.rpc as any)('count_my_candidates_per_stage', {
         p_list_id: listId,
+        p_recruiter_id: recruiterId,
       });
       if (error) throw error;
       const counts: Record<string, number> = {};
