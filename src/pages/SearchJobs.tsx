@@ -835,6 +835,21 @@ const SearchJobs = memo(() => {
     container.style.setProperty('-webkit-overflow-scrolling', 'auto');
     void container.offsetHeight;
 
+    // Sista sidan är oftast kortare än en full sida. När jobben byts mitt i
+    // rörelsen krymper då innehållet och webbläsaren klampar scrollpositionen
+    // — det upplevs som att "Nästa" pausar, byter och sedan hoppar upp.
+    // Lås därför innehållshöjden med en tillfällig utfyllnad under hela
+    // rörelsen, så att Nästa glider exakt som Föregående.
+    const heightLock = document.createElement('div');
+    heightLock.setAttribute('aria-hidden', 'true');
+    heightLock.style.cssText = 'height:0;width:100%;pointer-events:none;';
+    container.appendChild(heightLock);
+    const lockedScrollHeight = container.scrollHeight;
+
+    const releaseHeightLock = () => {
+      heightLock.remove();
+    };
+
     const durationMs = Math.min(1100, Math.max(750, startTop * 0.11));
     const startedAt = performance.now();
     // Byt jobben medan sidan fortfarande är utanför synfältet (mer än en
@@ -853,7 +868,10 @@ const SearchJobs = memo(() => {
       if (!swapped && nextTop > swapAt) {
         swapped = true;
         flushSync(() => setPage(next));
-        // Renderingen av den nya sidan kan justera höjden — håll positionen.
+        // Renderingen av den nya sidan kan ändra höjden — fyll upp skillnaden
+        // så att positionen inte klampas, och håll kvar scrollpositionen.
+        const missing = lockedScrollHeight - container.scrollHeight;
+        heightLock.style.height = missing > 0 ? `${missing}px` : '0px';
         container.scrollTop = nextTop;
       }
 
@@ -863,6 +881,7 @@ const SearchJobs = memo(() => {
       }
 
       container.scrollTop = 0;
+      releaseHeightLock();
       container.style.overflowAnchor = previousOverflowAnchor;
       container.style.scrollBehavior = previousScrollBehavior;
       if (previousMomentumScrolling) {
@@ -872,10 +891,12 @@ const SearchJobs = memo(() => {
       }
       pageScrollAnimationRef.current = null;
       if (!swapped) setPage(next);
+      container.scrollTop = 0;
     };
 
 
     pageScrollAnimationRef.current = requestAnimationFrame(animateToTop);
+
   }, []);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
