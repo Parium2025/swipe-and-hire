@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { smartMatches } from '@/lib/seoSearch';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
 import { ChevronDown, Search, Check, Loader2, AlertCircle } from 'lucide-react';
@@ -68,6 +69,15 @@ const CompanyProfile = () => {
   // Industry dropdown states
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Samma smarta sökning som i jobbflödet: tål stavfel och ordföljd.
+  const matchedIndustries = useMemo(() => {
+    const term = searchTerm.trim();
+    if (term.length < 2) return SWEDISH_INDUSTRIES;
+    return SWEDISH_INDUSTRIES.filter((option) => smartMatches(term, [option]));
+  }, [searchTerm]);
+
+
   
   // Employee count dropdown state
   const [employeeCountOpen, setEmployeeCountOpen] = useState(false);
@@ -816,7 +826,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white truncate">
                       {formData.industry || 'Välj bransch'}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
+                    <ChevronDown className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-200 ${industryMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                   </div>
                   
                   {industryMenuOpen && (
@@ -837,10 +847,7 @@ const CompanyProfile = () => {
                       </div>
                       
                       <div className="overflow-y-auto max-h-60">
-                        {SWEDISH_INDUSTRIES
-                          .filter(industryOption => 
-                            searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
-                          )
+                        {matchedIndustries
                           .map((industryOption) => (
                             <button
                               key={industryOption}
@@ -859,10 +866,7 @@ const CompanyProfile = () => {
                             </button>
                           ))}
                         
-                        {searchTerm.trim().length >= 2 &&
-                          !SWEDISH_INDUSTRIES.some(industryOption => 
-                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                          ) && (
+                        {searchTerm.trim().length >= 2 && matchedIndustries.length === 0 && (
                           <button
                             type="button"
                             onClick={() => {
@@ -876,10 +880,7 @@ const CompanyProfile = () => {
                           </button>
                         )}
                         
-                        {searchTerm.trim().length >= 3 && 
-                          SWEDISH_INDUSTRIES.filter(industryOption => 
-                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                          ).length === 0 && (
+                        {searchTerm.trim().length >= 3 && matchedIndustries.length === 0 && (
                           <div className="py-3 px-3 text-center text-white text-sm">
                             Inga resultat hittades för "{searchTerm}"
                           </div>
@@ -903,7 +904,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white">
                       {formData.employee_count || 'Välj antal'}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white" />
+                    <ChevronDown className={`h-4 w-4 text-white transition-transform duration-200 ${employeeCountOpen ? 'rotate-180' : 'rotate-0'}`} />
                   </div>
                   
                   {employeeCountOpen && (
