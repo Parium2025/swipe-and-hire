@@ -17,6 +17,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
  import { OCCUPATIONS } from '@/data/jobOccupations';
 import { TruncatedText } from '@/components/TruncatedText';
 import { parseSalary, formatSalary } from '@/lib/salaryRange';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
  
 
@@ -56,6 +57,24 @@ const slugify = (s: string) =>
   s.toLowerCase()
     .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Image paths can be stored either as full URLs or as bare storage paths —
+// resolve bare paths to public storage URLs (same behaviour as SearchJobs.tsx).
+const resolveStorageImageUrl = (
+  raw: string | null | undefined,
+  bucket: 'job-images' | 'company-logos',
+): string | null => {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  try {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(trimmed);
+    return data?.publicUrl || null;
+  } catch {
+    return null;
+  }
+};
 
 const PublicJobPage = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -309,7 +328,11 @@ const PublicJobPage = () => {
     'Visstid': 'TEMPORARY', 'Sommarjobb': 'TEMPORARY', 'Konsult': 'CONTRACTOR',
     'Praktik': 'INTERN', 'Volontär': 'VOLUNTEER',
   };
-  const employmentTypeLD = employmentTypeMap[job.employment_type || ''] || 'OTHER';
+  const resolvedJobImageUrl = resolveStorageImageUrl(job.job_image_url, 'job-images');
+  const resolvedLogoUrl = resolveStorageImageUrl(job.company_logo_url, 'company-logos');
+  const employmentLabel = getEmploymentTypeLabel(job.employment_type || undefined);
+  const employmentTypeLD = employmentTypeMap[job.employment_type || '']
+    || employmentTypeMap[employmentLabel] || 'OTHER';
 
   const validThrough = job.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -329,7 +352,7 @@ const PublicJobPage = () => {
     hiringOrganization: {
       '@type': 'Organization',
       name: company,
-      ...(job.company_logo_url ? { logo: job.company_logo_url } : {}),
+      ...(resolvedLogoUrl ? { logo: resolvedLogoUrl } : {}),
     },
     jobLocation: {
       '@type': 'Place',
@@ -383,7 +406,7 @@ const PublicJobPage = () => {
     ],
   };
 
-  const ogImage = job.job_image_url || job.company_logo_url;
+  const ogImage = resolvedJobImageUrl || resolvedLogoUrl;
 
   const similarCities = CITIES.filter(c => c.slug !== slugify(city)).slice(0, 6);
 
@@ -420,7 +443,7 @@ const PublicJobPage = () => {
           <TruncatedText text={job.title} className="text-white/80 truncate min-w-0 max-w-full sm:max-w-[60ch]" />
         </nav>
 
-        {job.job_image_url && (
+        {resolvedJobImageUrl && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -428,7 +451,7 @@ const PublicJobPage = () => {
             className="mb-8 overflow-hidden rounded-2xl border border-white/10 bg-white/5"
           >
             <img
-              src={job.job_image_url}
+              src={resolvedJobImageUrl}
               alt={`${job.title} hos ${company}`}
               className="w-full h-auto aspect-[16/9] object-cover"
               width={1200}
@@ -444,10 +467,10 @@ const PublicJobPage = () => {
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          {job.company_logo_url && (
+          {resolvedLogoUrl && (
             <div className="mb-5 w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-white/5">
               <img
-                src={job.company_logo_url}
+                src={resolvedLogoUrl}
                 alt={`${company} logotyp`}
                 className="w-full h-full object-contain"
                 width={128}
@@ -460,8 +483,8 @@ const PublicJobPage = () => {
           <div className="flex flex-wrap gap-3 text-white/70 text-sm">
             <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{company}</span>
             <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{city}</span>
-            {job.employment_type && (
-              <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{job.employment_type}</span>
+            {employmentLabel && (
+              <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{employmentLabel}</span>
             )}
             {job.work_schedule && (
               <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4" />{job.work_schedule}</span>
