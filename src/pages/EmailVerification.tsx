@@ -67,27 +67,18 @@ const EmailVerification = () => {
       localStorage.removeItem('pending-verification-email');
       setTimeout(() => navigate('/auth'), 3000);
     } catch (error: any) {
+      const raw = String(error?.message ?? '').toLowerCase();
       setStatus('error');
-      setMessage(error.message || 'Bekräftelsen misslyckades');
+      if (raw.includes('redan') || raw.includes('already')) {
+        setMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
+      } else if (raw.includes('utgången') || raw.includes('expired')) {
+        setMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
+      } else {
+        setMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
+      }
     }
   };
 
-  const handlePinSubmit = async () => {
-    if (pinCode.length !== 6) {
-      toast({
-        title: "Fel PIN-kod",
-        description: "PIN-koden ska vara 6 siffror.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Här skulle vi verifiera PIN-koden mot databasen
-    // För nu, simulerar vi framgång
-    setStatus('success');
-    setMessage('Konto bekräftat med PIN-kod!');
-    setTimeout(() => navigate('/auth'), 3000);
-  };
 
   const copyUrlToClipboard = async () => {
     try {
@@ -177,7 +168,7 @@ const EmailVerification = () => {
           </div>
 
           {/* Metod-väljare */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
+          <div className="grid grid-cols-2 gap-2 mb-6">
             <Button
               variant={verificationMethod === 'email' ? 'default' : 'outline'}
               size="sm"
@@ -196,16 +187,8 @@ const EmailVerification = () => {
               <Smartphone className="h-3 w-3 mr-1" />
               QR-kod
             </Button>
-            <Button
-              variant={verificationMethod === 'pin' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setVerificationMethod('pin')}
-              className="text-sm"
-            >
-              <Key className="h-3 w-3 mr-1" />
-              PIN-kod
-            </Button>
           </div>
+
 
           {/* Email-metod */}
           {verificationMethod === 'email' && (
@@ -244,32 +227,8 @@ const EmailVerification = () => {
             </div>
           )}
 
-          {/* PIN-kod metod */}
-          {verificationMethod === 'pin' && (
-            <div className="space-y-4">
-              <div className="bg-primary-foreground/10 rounded-lg p-4">
-                <p className="text-sm text-primary-foreground/90 mb-3 text-center">
-                  Ange den 6-siffriga PIN-koden<br />
-                  som skickades till din email:
-                </p>
-                <Input
-                  type="text"
-                  placeholder="123456"
-                  value={pinCode}
-                  onChange={(e) => setPinCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="text-center text-lg tracking-widest"
-                  maxLength={6}
-                />
-              </div>
-              <Button 
-                onClick={handlePinSubmit}
-                className="w-full"
-                disabled={pinCode.length !== 6}
-              >
-                Bekräfta med PIN
-              </Button>
-            </div>
-          )}
+
+
 
           <div className="mt-6 text-center">
             <Button 
