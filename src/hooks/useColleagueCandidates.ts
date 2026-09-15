@@ -274,17 +274,21 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
     };
   }, [colleagueId, user, fetchColleagueCandidates]);
 
-  // PRE-FETCHING: Automatically load next batch in background after each page loads
-  // This makes scrolling feel instant - data is ready before user reaches bottom
+  // PRE-FETCHING: en sida i förväg så att scrollen känns instant.
+  // Taket är nödvändigt: varje laddad sida triggar den här effekten igen, så
+  // utan gräns hade hela kollegans lista (kan vara hundratusentals rader)
+  // laddats ner i bakgrunden direkt vid öppning. Resten hämtas när användaren
+  // faktiskt scrollar (loadMoreCandidates).
+  const PREFETCH_LIMIT = PAGE_SIZE * 2;
   useEffect(() => {
-    if (hasMore && !isLoading && candidates.length > 0) {
+    if (hasMore && !isLoading && candidates.length > 0 && candidates.length < PREFETCH_LIMIT) {
       // Small delay to avoid blocking the main thread
       const timer = setTimeout(() => {
         fetchColleagueCandidates(true);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [candidates.length, hasMore, isLoading, fetchColleagueCandidates]);
+  }, [candidates.length, hasMore, isLoading, fetchColleagueCandidates, PREFETCH_LIMIT]);
 
   // Load more candidates (for pagination)
   const loadMoreCandidates = useCallback(() => {
