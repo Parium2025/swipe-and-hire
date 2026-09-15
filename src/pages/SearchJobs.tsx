@@ -633,7 +633,7 @@ const SearchJobs = memo(() => {
     return filteredAndSortedJobs.slice(start, start + JOBS_PAGE_SIZE);
   }, [filteredAndSortedJobs, page]);
 
-  const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
+  
 
   // Memoize swipe jobs – skipped OCH redan sökta jobb tas helt bort från stacken.
   // Sökta jobb finns kvar i den vanliga listan (med SÖKT-badge), men i swipe-mode
