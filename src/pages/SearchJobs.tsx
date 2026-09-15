@@ -91,7 +91,9 @@ interface Job {
 
 // formatSalary is centralized in @/lib/jobViewHelpers — no local copy needed.
 
-const SEARCH_JOBS_DISPLAY_COUNT_KEY = 'parium-search-display-count';
+const SEARCH_JOBS_PAGE_KEY = 'parium-search-page';
+/** Antal jobb per sida i den sidnumrerade listan. */
+const JOBS_PAGE_SIZE = 18;
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
 // Card thumbnail transform (smaller — used in list)
 // JobView hero transform — MUST stay byte-for-byte identical to JOB_VIEW_IMAGE_TRANSFORM
