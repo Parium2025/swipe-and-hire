@@ -209,7 +209,11 @@ Deno.serve(async (req) => {
       .lte("scheduled_at", elevenMinutesFromNow.toISOString())
       // Fönstret är 2 minuter brett men cron kör varje minut – utan denna
       // markering skulle samma påminnelse skickas två gånger.
-      .is("reminder_sent_at", null);
+      .is("reminder_sent_at", null)
+      // Taket skyddar mot timeout: cron kör varje minut, så resterande
+      // påminnelser tas i nästa körning i stället för att hela körningen dör.
+      .order("scheduled_at", { ascending: true })
+      .limit(200);
 
     if (interviewsError) {
       console.error("Error fetching interviews:", interviewsError);
@@ -372,7 +376,10 @@ Deno.serve(async (req) => {
       .in("status", ["pending", "confirmed", "completed"])
       .gte("scheduled_at", fourDaysAgo.toISOString())
       .lte("scheduled_at", threeDaysAgo.toISOString())
-      .is("followup_reminder_sent_at", null);
+      .is("followup_reminder_sent_at", null)
+      // Samma skäl som ovan – resten tas i nästa körning.
+      .order("scheduled_at", { ascending: true })
+      .limit(200);
 
     if (pastError) {
       console.error("Error fetching past interviews for follow-up:", pastError);

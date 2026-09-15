@@ -22,7 +22,9 @@ export function useIsPremium() {
       // användare (premium visades därför aldrig). has_premium() är
       // security definer och kapslar samma regel.
       const { data, error } = await supabase.rpc('has_premium', { p_user_id: userId });
-      if (error) return false;
+      // Ett nätfel får inte tyst se ut som "ingen premium" – kasta så att
+      // frågan görs om (retry) i stället för att nedgradera en betalande kund.
+      if (error) throw error;
       return data === true;
     },
   });
@@ -30,5 +32,7 @@ export function useIsPremium() {
   return {
     isPremium: query.data ?? false,
     isLoading: query.isLoading,
+    // Sant när statusen inte kunde hämtas – då vet vi inte säkert.
+    premiumUnknown: query.isError,
   };
 }

@@ -615,6 +615,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUserRole(null);
             setOrganization(null);
             profileLoadedRef.current = false;
+            // Föregående kontos profilbild/omslag/video får inte ligga kvar
+            // och visas för det nya kontot på samma dator.
+            setMediaPreloadComplete(false);
+            setPreloadedAvatarUrl(null);
+            setPreloadedCoverUrl(null);
+            setPreloadedVideoUrl(null);
+            try {
+              sessionStorage.removeItem(AVATAR_CACHE_KEY);
+              sessionStorage.removeItem(COVER_CACHE_KEY);
+              sessionStorage.removeItem(VIDEO_CACHE_KEY);
+            } catch { /* ignorera */ }
           }
         }
 
@@ -1608,6 +1619,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Ensure interests is always an array when updating
       const cleanedUpdates: any = { ...updates };
+
+      // 🛡️ Behörighetsfält får aldrig skrivas härifrån — de styrs av
+      // serversidan. Utan den här spärren räcker ett anrop från klienten
+      // för att byta roll eller organisation.
+      const PROTECTED_COLUMNS = [
+        'id', 'user_id', 'role', 'organization_id', 'created_at',
+        'email_confirmed', 'is_verified',
+      ];
+      for (const column of PROTECTED_COLUMNS) {
+        if (Object.prototype.hasOwnProperty.call(cleanedUpdates, column)) {
+          delete cleanedUpdates[column];
+        }
+      }
+
       if (cleanedUpdates.interests) {
         cleanedUpdates.interests = Array.isArray(cleanedUpdates.interests)
           ? cleanedUpdates.interests

@@ -16,7 +16,12 @@ import ImageEditor from '@/components/ImageEditor';
 import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
 
 // localStorage key för draft
-const DRAFT_KEY = 'parium_draft_employer-profile';
+// Utkastet måste vara låst till kontot, annars kan nästa inloggade
+// användare på samma dator få upp någon annans osparade uppgifter.
+const DRAFT_KEY_PREFIX = 'parium_draft_employer-profile';
+const LEGACY_DRAFT_KEY = 'parium_draft_employer-profile';
+const draftKeyFor = (userId?: string | null) =>
+  userId ? `${DRAFT_KEY_PREFIX}_${userId}` : null;
 
 const EmployerProfile = () => {
   const { profile, updateProfile, user, userRole, loading: authLoading } = useAuth();
@@ -57,6 +62,17 @@ const EmployerProfile = () => {
   // Konvertera storage path till signerad URL för visning
   const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
 
+  const draftKey = draftKeyFor(user?.id);
+
+  // När den cachade signerade originallänken slutar gälla
+  const signedOriginalExpiresAtRef = useRef(0);
+
+  // Städa bort det gamla kontolösa utkastet en gång, så att det inte kan
+  // dyka upp hos nästa användare på samma dator.
+  useEffect(() => {
+    try { localStorage.removeItem(LEGACY_DRAFT_KEY); } catch { /* ignorera */ }
+  }, []);
+
 
   // Update form data when profile changes OR restore from localStorage draft
   useEffect(() => {
@@ -67,13 +83,20 @@ const EmployerProfile = () => {
     if (didInitRef.current && hasUnsavedChanges) return;
 
     // Check for saved draft in localStorage
+    const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
     let savedDraft = null;
     try {
-      const stored = localStorage.getItem(DRAFT_KEY);
+      const stored = draftKey ? localStorage.getItem(draftKey) : null;
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Handle both old format (direct formData) and new format (with savedAt)
-        savedDraft = parsed.formData || parsed;
+        // Ett gammalt utkast får aldrig skriva över nyare uppgifter från servern
+        const savedAt = typeof parsed?.savedAt === 'number' ? parsed.savedAt : 0;
+        if (savedAt && Date.now() - savedAt > DRAFT_MAX_AGE_MS) {
+          if (draftKey) localStorage.removeItem(draftKey);
+        } else {
+          // Handle both old format (direct formData) and new format (with savedAt)
+          savedDraft = parsed.formData || parsed;
+        }
       }
     } catch (e) {
       console.warn('Failed to load draft:', e);
@@ -107,11 +130,14 @@ const EmployerProfile = () => {
     setOriginalValues(values);
     setHasUnsavedChanges(false);
     didInitRef.current = true;
-  }, [profile, hasUnsavedChanges, setHasUnsavedChanges]);
+  }, [profile, hasUnsavedChanges, setHasUnsavedChanges, draftKey]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name) return false;
-    
+    // Vänta tills profilen är inläst. Tidigare krävdes ett namn i profilen,
+    // vilket gjorde att en profil utan namn aldrig kunde spara ens en ny
+    // profilbild — Spara-knappen förblev låst.
+    if (!didInitRef.current) return false;
+
     const hasChanges = Object.keys(formData).some(key => {
       return formData[key] !== originalValues[key];
     });
@@ -125,9 +151,9 @@ const EmployerProfile = () => {
     const hasChanges = checkForChanges();
     
     // Auto-save draft to localStorage when there are changes
-    if (hasChanges) {
+    if (hasChanges && draftKey) {
       try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        localStorage.setItem(draftKey, JSON.stringify({
           formData,
           savedAt: Date.now()
         }));
@@ -135,7 +161,7 @@ const EmployerProfile = () => {
         console.warn('Failed to save draft:', e);
       }
     }
-  }, [checkForChanges, formData]);
+  }, [checkForChanges, formData, draftKey]);
 
   // Prevent leaving page with unsaved changes (browser/tab close)
   useEffect(() => {
@@ -157,6 +183,19 @@ const EmployerProfile = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Stoppa för stora filer innan de laddas in i redigeraren — annars
+    // laddas hela bilden i minnet och uppladdningen nekas först efteråt.
+    const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast({
+        title: "Bilden är för stor",
+        description: "Välj en bild som är mindre än 50 MB.",
+        variant: "destructive"
+      });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     if (file.type.startsWith('image/')) {
       // Store original file for future edits (Job Wizard pattern)
@@ -188,8 +227,13 @@ const EmployerProfile = () => {
     // Job Wizard pattern: ALWAYS prioritize originalProfileImageUrl for editing from the original source
     // This prevents quality loss from double-cropping
     
-    // Priority 1: Use stored original URL from current session
-    if (originalProfileImageUrl) {
+    // Priority 1: Use stored original URL from current session.
+    // Signerade länkar gäller i en timme — en gammal länk ger en tom
+    // redigerare, så den hämtas om i stället.
+    const cachedIsUsable =
+      originalProfileImageUrl.startsWith('blob:') ||
+      (!!originalProfileImageUrl && Date.now() < signedOriginalExpiresAtRef.current);
+    if (cachedIsUsable) {
       setPendingImageSrc(originalProfileImageUrl);
       setIsEditingExistingProfileImage(true);
       setImageEditorOpen(true);
@@ -202,6 +246,7 @@ const EmployerProfile = () => {
         const signedUrl = await getMediaUrl(originalProfileImageStoragePath, 'profile-image', 3600);
         if (signedUrl) {
           // Cache for future edits in the same session (Job Wizard pattern)
+          signedOriginalExpiresAtRef.current = Date.now() + 55 * 60 * 1000;
           setOriginalProfileImageUrl(signedUrl);
           setPendingImageSrc(signedUrl);
           setIsEditingExistingProfileImage(true);
@@ -219,21 +264,25 @@ const EmployerProfile = () => {
         const signedUrl = await getMediaUrl(formData.profile_image_url, 'profile-image', 3600);
         if (signedUrl) {
           // This becomes our "original" if we don't have a better one (Job Wizard pattern)
+          signedOriginalExpiresAtRef.current = Date.now() + 55 * 60 * 1000;
           setOriginalProfileImageUrl(signedUrl);
           setOriginalProfileImageStoragePath(formData.profile_image_url);
           setPendingImageSrc(signedUrl);
           setIsEditingExistingProfileImage(true);
           setImageEditorOpen(true);
+          return;
         }
       } catch (error) {
         console.error('Error loading image for editing:', error);
-        toast({
-          title: "Kunde inte ladda bilden",
-          description: "Försök ladda upp en ny bild istället.",
-          variant: "destructive"
-        });
       }
     }
+
+    // Inget kunde hämtas — säg det i stället för att inget händer
+    toast({
+      title: "Kunde inte ladda bilden",
+      description: "Försök ladda upp en ny bild istället.",
+      variant: "destructive"
+    });
   };
 
   // Spara redigerad bild
@@ -274,6 +323,10 @@ const EmployerProfile = () => {
           // Keep originalProfileImageUrl (blob) for session-based edits
         } catch (origErr) {
           console.error('Failed to save original image:', origErr);
+          toast({
+            title: "Bilden sparades",
+            description: "Originalbilden kunde inte sparas, så du kan inte beskära om den senare.",
+          });
         }
       }
 
@@ -284,8 +337,11 @@ const EmployerProfile = () => {
       setProfileImageIsEdited(true); // Mark as edited/cropped
       
       setImageEditorOpen(false);
-      if (pendingImageSrc) {
+      // Frigör bara om länken inte fortfarande används som original för
+      // "Anpassa din bild" — annars blir originalet en död länk.
+      if (pendingImageSrc.startsWith('blob:') && pendingImageSrc !== originalProfileImageUrl) {
         URL.revokeObjectURL(pendingImageSrc);
+        blobUrlsRef.current.delete(pendingImageSrc);
       }
       setPendingImageSrc('');
 
@@ -361,7 +417,7 @@ const EmployerProfile = () => {
       setFormData({ ...originalValues });
       // IMPORTANT: user chose to discard changes -> clear local draft as well
       try {
-        localStorage.removeItem(DRAFT_KEY);
+        draftKey && localStorage.removeItem(draftKey);
       } catch {}
       setHasUnsavedChanges(false);
     };
@@ -369,12 +425,47 @@ const EmployerProfile = () => {
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
   }, [originalValues, setHasUnsavedChanges]);
 
+  // Släpp blob-URL:er när sidan lämnas så att minnet inte växer
+  const blobUrlsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (pendingImageSrc.startsWith('blob:')) blobUrlsRef.current.add(pendingImageSrc);
+  }, [pendingImageSrc]);
+  useEffect(() => {
+    if (originalProfileImageUrl.startsWith('blob:')) blobUrlsRef.current.add(originalProfileImageUrl);
+  }, [originalProfileImageUrl]);
+  useEffect(() => {
+    const urls = blobUrlsRef.current;
+    return () => {
+      urls.forEach((url) => {
+        try { URL.revokeObjectURL(url); } catch { /* ignorera */ }
+      });
+      urls.clear();
+    };
+  }, []);
+
   const { isOnline, showOfflineToast } = useOnline();
 
+  const savingRef = useRef(false);
+
   const handleSave = async () => {
+    // Dubbelklickspärr: två parallella sparningar får inte skickas
+    if (savingRef.current) return;
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
+    savingRef.current = true;
     try {
       setLoading(true);
-      await updateProfile(formData as any);
+      // updateProfile kastar inte vid DB-fel — den returnerar { error }.
+      // Utan den här kontrollen visades "Profil uppdaterad" och utkastet
+      // rensades även när databasen nekade skrivningen.
+      const result = await updateProfile(formData as any);
+      if (result?.error) {
+        // updateProfile visar redan en svensk feltoast. Behåll utkastet
+        // och osparat-läget så att ändringen inte går förlorad.
+        return;
+      }
 
       const updatedValues = { ...formData };
 
@@ -385,8 +476,7 @@ const EmployerProfile = () => {
       
       // Clear localStorage draft after successful save
       try {
-        localStorage.removeItem(DRAFT_KEY);
-        console.log('🗑️ Draft cleared for employer-profile');
+        draftKey && localStorage.removeItem(draftKey);
       } catch (e) {
         console.warn('Failed to clear draft:', e);
       }
@@ -403,6 +493,7 @@ const EmployerProfile = () => {
         variant: "destructive"
       });
     } finally {
+      savingRef.current = false;
       setLoading(false);
     }
   };
@@ -496,7 +587,7 @@ const EmployerProfile = () => {
                   className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  Klicka för att ladda upp • Max 5MB
+                  Klicka för att ladda upp • Max 50 MB
                 </label>
                 
                 {/* Anpassa din bild-knapp om bild finns */}
@@ -584,8 +675,9 @@ const EmployerProfile = () => {
         onClose={() => {
           setImageEditorOpen(false);
           setIsEditingExistingProfileImage(false);
-          if (pendingImageSrc) {
+          if (pendingImageSrc.startsWith('blob:') && pendingImageSrc !== originalProfileImageUrl) {
             URL.revokeObjectURL(pendingImageSrc);
+            blobUrlsRef.current.delete(pendingImageSrc);
           }
           setPendingImageSrc('');
         }}

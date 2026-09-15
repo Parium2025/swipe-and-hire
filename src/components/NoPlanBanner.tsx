@@ -9,9 +9,11 @@ import { useAuth } from '@/hooks/useAuth';
  */
 export function NoPlanBanner() {
   const { user } = useAuth();
-  const { hasPlan, loading } = useHasActivePlan();
+  const { hasPlan, loading, planUnknown } = useHasActivePlan();
 
-  if (!user || loading || hasPlan) return null;
+  // planUnknown: hämtningen misslyckades. Då vet vi inte om kunden har plan –
+  // bättre att inte visa något än att påstå "ingen aktiv plan" för en betalande kund.
+  if (!user || loading || hasPlan || planUnknown) return null;
 
   return (
     <div className="w-full">

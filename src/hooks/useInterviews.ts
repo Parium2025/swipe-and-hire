@@ -93,7 +93,10 @@ export const useInterviews = () => {
         // försvinna från kortet mitt under intervjun. isInterviewOver städar bort.
         .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
         .in('status', ['pending', 'confirmed'])
-        .order('scheduled_at', { ascending: true });
+        .order('scheduled_at', { ascending: true })
+        // Tak: ett stort företag kan ha tusentals bokade möten framåt.
+        // Kortet visar bara de närmaste – hämta aldrig hela historiken.
+        .limit(200);
 
       if (error) throw error;
 
@@ -229,7 +232,8 @@ export async function fetchCandidateInterviewsForUser(userId: string) {
     .eq('applicant_id', userId)
     .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
     .in('status', ['pending', 'confirmed'])
-    .order('scheduled_at', { ascending: true });
+    .order('scheduled_at', { ascending: true })
+    .limit(200);
 
   if (error) throw error;
 
