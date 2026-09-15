@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ShieldCheck, Download, Loader2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { buildDataExportPdf } from '@/lib/dataExportPdf';
+import { clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import {
   AlertDialog,
   AlertDialogAction,
