@@ -870,10 +870,7 @@ const CompanyProfile = () => {
                           </button>
                         )}
                         
-                        {searchTerm.trim().length >= 3 && 
-                          SWEDISH_INDUSTRIES.filter(industryOption => 
-                            industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                          ).length === 0 && (
+                        {searchTerm.trim().length >= 3 && matchedIndustries.length === 0 && (
                           <div className="py-3 px-3 text-center text-white text-sm">
                             Inga resultat hittades för "{searchTerm}"
                           </div>
