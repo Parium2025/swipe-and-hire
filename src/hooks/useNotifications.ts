@@ -85,6 +85,8 @@ export function useNotifications() {
   const loadingMoreRef = useRef(false);
   const notificationsRef = useRef<AppNotification[]>([]);
   const broadcastRef = useRef<RealtimeChannel | null>(null);
+  // Ett hämtningsfel får aldrig se ut som "Inga notifikationer".
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
