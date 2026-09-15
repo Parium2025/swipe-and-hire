@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
@@ -65,6 +66,7 @@ function saveQueue(queue: QueuedAction[]): boolean {
 export function useOfflineSavedJobsQueue(userId: string | undefined) {
   const [queue, setQueue] = useState<QueuedAction[]>([]);
   const syncInProgress = useRef(false);
+  const queryClient = useQueryClient();
 
   // Load queue on mount
   useEffect(() => {
@@ -142,9 +144,13 @@ export function useOfflineSavedJobsQueue(userId: string | undefined) {
     syncInProgress.current = false;
 
     if (synced > 0) {
+      // Spegla synken i alla öppna vyer (Sparade jobb, swipe-läget, sidomenyn)
+      // — annars kan listorna visa ett läge som inte längre stämmer med servern.
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs', userId] });
+      queryClient.invalidateQueries({ queryKey: ['skipped-jobs', userId] });
       toast.success(`${synced} sparade jobb synkroniserade`);
     }
-  }, [userId]);
+  }, [userId, queryClient]);
 
   // Auto-sync using ConnectivityManager (ping-based, not navigator.onLine)
   useEffect(() => {
