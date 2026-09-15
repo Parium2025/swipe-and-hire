@@ -57,7 +57,9 @@ const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { jobs, stats, isLoading: loading, invalidateJobs, loadMore, hasMore, isLoadingMore } = useJobsData();
+  const { jobs, stats, isLoading: loading, invalidateJobs, loadMore, hasMore, isLoadingMore, error: jobsError } = useJobsData();
+  // Ett misslyckat anrop får aldrig se ut som ett tomt konto.
+  const showJobsError = !!jobsError && jobs.length === 0 && !loading;
   // Server-side truth — exakta totaler även vid 10k+ jobb
   const { data: serverCounts } = useEmployerJobsCounts('personal');
   const { data: serverStats } = useEmployerDashboardStats('personal');
@@ -824,7 +826,12 @@ const EmployerDashboard = memo(() => {
             Hämtar sida {page}…
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          searchTerm.trim() ? (
+          showJobsError ? (
+            <div className="text-center text-white py-12 font-medium text-sm space-y-3">
+              <p>Kunde inte hämta dina annonser.</p>
+              <Button variant="secondary" onClick={() => invalidateJobs()}>Försök igen</Button>
+            </div>
+          ) : searchTerm.trim() ? (
             <div className="text-center text-white py-12 font-medium text-sm">
               Inga annonser stämde med din sökning.
             </div>
