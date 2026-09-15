@@ -12,18 +12,20 @@ const QRCodeStyling = (QRCodeStylingModule as any).default || QRCodeStylingModul
 const PUBLIC_APP_URL = 'https://www.parium.se';
 
 const EmailVerification = () => {
-  const [verificationMethod, setVerificationMethod] = useState<'email' | 'pin' | 'qr'>('email');
-  const [pinCode, setPinCode] = useState('');
+  // PIN-metoden är borttagen: ingen PIN-kod skickas någonsin ut och knappen
+  // visade "Konto aktiverat!" utan att något verifierades.
+  const [verificationMethod, setVerificationMethod] = useState<'email' | 'qr'>('email');
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const [message, setMessage] = useState('');
   const [qrCode, setQrCode] = useState<any>(null);
   const [userEmail, setUserEmail] = useState('');
   const [confirmationUrl, setConfirmationUrl] = useState('');
-  
+
   const { confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+
 
   useEffect(() => {
     const token = searchParams.get('confirm');
