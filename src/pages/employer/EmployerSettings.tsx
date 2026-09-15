@@ -19,6 +19,19 @@ import EmployerLocationPanel from '@/components/employer/settings/EmployerLocati
 import { prewarmEmployerSettings } from '@/lib/settingsPrewarm';
 import { EmployerSettingsSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
+// Kommer man tillbaka från t.ex. integritetspolicyn ska den sektion man
+// hade öppen fortfarande vara öppen — vi sparar valet per session.
+// Sparas bara vid användarens eget klick, inte vid kod-styrd nollställning.
+const OPEN_SECTION_KEY = 'employer-settings-open-section';
+
+const readSavedSection = (): string => {
+  try {
+    return sessionStorage.getItem(OPEN_SECTION_KEY) ?? '';
+  } catch {
+    return '';
+  }
+};
+
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword, loading: authLoading } = useAuth();
   const location = useLocation();
@@ -31,17 +44,15 @@ const EmployerSettings = () => {
   const [backgroundLocationEnabled, setBackgroundLocationEnabled] = useState(false);
   const [savingBackgroundLocation, setSavingBackgroundLocation] = useState(false);
   const isNativeApp = Capacitor.isNativePlatform();
-  const [openSection, setOpenSection] = useState<string>('');
+  // Startvärdet läses direkt från sessionen: monteras sidan om helt (t.ex.
+  // efter ett besök på integritetspolicyn) ska sektionen fortfarande vara öppen.
+  const [openSection, setOpenSection] = useState<string>(readSavedSection);
   // Dragspelet monteras om när sidan lämnas. Sidan ligger kvar i minnet
   // (KeepAlive), så utan detta ligger en öppen sektion kvar och "blixtrar"
   // fram när man kommer tillbaka. Nyckelbytet sker medan vyn är dold, före
   // paint, så återkomsten alltid är ett rent, hopfällt läge utan animation.
   const [accordionKey, setAccordionKey] = useState(0);
   const wasAwayRef = useRef(false);
-  // Kommer man tillbaka från t.ex. integritetspolicyn ska den sektion man
-  // hade öppen fortfarande vara öppen — vi sparar valet per session.
-  // Sparas bara vid användarens eget klick, inte vid kod-styrd nollställning.
-  const OPEN_SECTION_KEY = 'employer-settings-open-section';
   const handleSectionChange = (value: string) => {
     setOpenSection(value);
     try {
