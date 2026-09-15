@@ -276,6 +276,13 @@ export const BookInterviewDialog = ({
       toast.error('Välj ett datum för intervjun');
       return;
     }
+
+    if (lockedByColleague) {
+      toast.error('Mötet är bokat av en kollega', {
+        description: 'Bara den som bokade mötet kan boka om eller avboka det.',
+      });
+      return;
+    }
     
     if (locationType === 'video' && trimmedVideoLink && !videoLinkIsValid) {
       toast.error('Videolänken ser inte giltig ut', {
