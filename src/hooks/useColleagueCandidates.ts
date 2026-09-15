@@ -213,6 +213,18 @@ export function useColleagueCandidates(
         });
       }
 
+      // Kollegans betyg ligger kanoniskt i candidate_ratings (en rad per rekryterare),
+      // samma källa som din egen vy använder — den gamla kolumnen kan vara inaktuell.
+      const ratingMap: Record<string, number> = {};
+      const { data: ratingRows } = await supabase
+        .from('candidate_ratings')
+        .select('applicant_id, rating')
+        .eq('recruiter_id', colleagueId)
+        .in('applicant_id', applicantIds);
+      (ratingRows || []).forEach((row: any) => {
+        ratingMap[row.applicant_id] = Number(row.rating) || 0;
+      });
+
       // Combine the data
       const result: MyCandidateData[] = myCandidates.map(mc => {
         const app = appMap.get(mc.application_id);
@@ -227,7 +239,7 @@ export function useColleagueCandidates(
           job_id: mc.job_id,
           stage: mc.stage as CandidateStage,
           notes: mc.notes,
-          rating: mc.rating || 0,
+          rating: ratingMap[mc.applicant_id] ?? (mc.rating || 0),
           created_at: mc.created_at,
           updated_at: mc.updated_at,
           first_name: app?.first_name || null,

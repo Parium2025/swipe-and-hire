@@ -161,14 +161,13 @@ export const useInterviews = () => {
     }) => {
       if (!getIsOnline()) throw new Error('Du är offline');
       
-      // Filtrera även på ägaren och läs tillbaka raden: annars kan en ändring
+      // Läs tillbaka raden: annars kan en ändring
       // som blockeras av behörighetsreglerna se ut att lyckas (0 rader, inget
       // fel) och gränssnittet visa fel status.
       const { data, error } = await supabase
         .from('interviews')
         .update({ status })
         .eq('id', interviewId)
-        .eq('employer_id', user?.id ?? '')
         .select('id')
         .maybeSingle();
 
@@ -190,7 +189,6 @@ export const useInterviews = () => {
         .from('interviews')
         .update({ status: 'cancelled' })
         .eq('id', interviewId)
-        .eq('employer_id', user?.id ?? '')
         .select('id')
         .maybeSingle();
 

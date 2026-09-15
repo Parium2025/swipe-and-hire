@@ -512,6 +512,13 @@ const MyCandidates = () => {
 
   // Update rating - delegates to hook mutation (includes retry queue + optimistic update)
   const updateCandidateRating = async (candidateId: string, newRating: number) => {
+    // Betyg är personliga i databasen (en rad per rekryterare). I kollegans vy
+    // visas kollegans egen bedömning — den får inte skrivas över av en betraktare,
+    // och den gamla koden skrev dessutom betyget på betraktarens egna rader.
+    if (isViewingColleague) {
+      toast.info('Betyget är kollegans egen bedömning och kan inte ändras här.');
+      return;
+    }
     const candidate = displayedCandidates.find(c => c.id === candidateId);
     if (selectedCandidate?.id === candidateId) {
       setSelectedCandidate(prev => prev ? { ...prev, rating: newRating } : null);

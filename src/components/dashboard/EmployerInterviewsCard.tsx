@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,9 +35,11 @@ const getLocationLabel = (type: Interview['location_type']) => {
 };
 
 export const EmployerInterviewsCard = memo(() => {
-  const { interviews, isLoading } = useInterviews();
+  const { interviews, isLoading, error } = useInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
+  // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
+  const lastOpenRef = useRef(0);
 
   // Filtrera bort intervjuer som redan är avslutade – annars ligger de kvar
   // tills nästa refetch och visar "passerad".
@@ -80,7 +82,13 @@ export const EmployerInterviewsCard = memo(() => {
           {upcomingInterviews.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Calendar className="h-8 w-8 text-white mb-2" />
-              <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
+              {/* Ett hämtningsfel får aldrig se ut som "inga intervjuer". */}
+              <p className="text-sm font-medium text-white">
+                {error ? 'Kunde inte hämta intervjuer' : 'Inga bokade intervjuer'}
+              </p>
+              {error && (
+                <p className="text-xs text-white mt-1">Försök igen om en stund.</p>
+              )}
             </div>
           ) : (
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
@@ -97,6 +105,9 @@ export const EmployerInterviewsCard = memo(() => {
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
                     onClick={() => {
+                      const nowMs = Date.now();
+                      if (nowMs - lastOpenRef.current < 800) return;
+                      lastOpenRef.current = nowMs;
                       if (interview.location_type === 'video' && meetingUrl) {
                         window.open(meetingUrl, '_blank', 'noopener,noreferrer');
                       } else {

@@ -61,9 +61,10 @@ export const StageColumn = ({
   const [canScrollUp, setCanScrollUp] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // isReadOnly gäller stegens inställningar (kollegans pipeline) — inte att flytta
+  // kandidater, vilket är tillåtet inom organisationen och redan möjligt via dialogen.
   const { setNodeRef, isOver } = useDroppable({
     id: stage,
-    disabled: isReadOnly,
   });
 
   const displayColor = liveColor ?? stageSettings.color;

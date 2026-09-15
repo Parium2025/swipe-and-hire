@@ -204,12 +204,18 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
     setDeletingNoteId(null);
 
     try {
-      const { error } = await supabase
+      // .select() krävs: utan den rapporteras en nekad borttagning som lyckad.
+      const { data: deleted, error } = await supabase
         .from('candidate_notes')
         .delete()
-        .eq('id', noteId);
+        .eq('id', noteId)
+        .select('id');
 
       if (error) throw error;
+      if (!deleted || deleted.length === 0) {
+        throw new Error('Anteckningen kunde inte tas bort');
+      }
+
 
       await deleteNoteActivities.mutateAsync({ applicantId });
       toast.success('Anteckning borttagen');
