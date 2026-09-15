@@ -64,6 +64,10 @@ const PublicJobPage = () => {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Nätverks-/serverfel ska INTE visas som "annonsen är tillsatt" — det ger
+  // både fel besked till besökaren och noindex på en fullt aktiv annons.
+  const [fetchError, setFetchError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   // Vid utgången annons: titel + yrke från arkiverad rad (utan is_active-filter).
   const [expiredCtx, setExpiredCtx] = useState<{ title?: string; occupation?: string } | null>(null);
 
