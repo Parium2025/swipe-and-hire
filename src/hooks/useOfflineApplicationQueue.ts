@@ -236,6 +236,14 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
       // Clear caches so UI updates
       clearMyApplicationsLocalCache();
 
+      // Utan detta låg de gamla listorna kvar i minnet: ansökan syntes inte
+      // under Mina ansökningar och jobbet saknade "Sökt"-markering, vilket
+      // fick användaren att söka en gång till.
+      queryClient.invalidateQueries({ queryKey: ['my-applications', userId] });
+      queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
+      queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId] });
+      queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', userId] });
+
       toast.success(
         synced === 1
           ? `Ansökan skickad! ✓`
@@ -248,7 +256,7 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
         }
       );
     }
-  }, [userId]);
+  }, [userId, queryClient]);
 
   // Auto-sync on connectivity restore
   useEffect(() => {
