@@ -50,6 +50,9 @@ export default function CvTunnel() {
 
   useEffect(() => {
     let revoked: string | null = null;
+    // Byter man CV innan det förra hämtats klart får det gamla svaret inte
+    // skriva över vyn.
+    let cancelled = false;
     async function run() {
       setLoading(true);
       setError(null);
@@ -65,6 +68,7 @@ export default function CvTunnel() {
         setSignedDownloadUrl(finalUrl);
 
         const res = await fetch(finalUrl);
+        if (cancelled) return;
         if (!res.ok) {
           if (res.status >= 400 && res.status < 500) {
             throw new Error(`Filen kunde inte hittas eller är inte tillgänglig (${res.status}). Den kan ha flyttats eller tagits bort.`);
@@ -83,13 +87,15 @@ export default function CvTunnel() {
         revoked = url;
         setBlobUrl(url);
       } catch (e: any) {
+        if (cancelled) return;
         setError(e?.message || 'Kunde inte visa CV.');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     run();
     return () => {
+      cancelled = true;
       if (revoked) URL.revokeObjectURL(revoked);
     };
   }, [ref, fileName]);

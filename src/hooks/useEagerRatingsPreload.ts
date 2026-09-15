@@ -122,6 +122,8 @@ const clearAllAppCachesSync = () => {
     // får inte ligga kvar i klockan efter utloggning på delad enhet.
     'parium_notifications_cache',
     'parium_toast_archive_v1',
+    // Profilutkast (pass 16) — innehåller namn, telefon och bio.
+    'parium_draft_profile',
   ];
   
   const exactKeysToRemove = [
