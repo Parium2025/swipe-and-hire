@@ -599,6 +599,16 @@ const SavedJobs = () => {
         <>
           {isLoadingSkipped ? (
             <JobCardGridSkeleton count={skippedSkeletonCount} />
+          ) : skippedError && skippedJobs.length === 0 ? (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-lg font-medium text-white mb-2">Kunde inte hämta skippade jobb</h3>
+                <p className="text-white mb-4">Kontrollera din uppkoppling och försök igen.</p>
+                <Button onClick={() => refetchSkipped()} variant="glass">
+                  Försök igen
+                </Button>
+              </CardContent>
+            </Card>
           ) : filteredSkippedJobs.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
