@@ -105,6 +105,9 @@ export const EmployerInterviewsCard = memo(() => {
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
                     onClick={() => {
+                      const nowMs = Date.now();
+                      if (nowMs - lastOpenRef.current < 800) return;
+                      lastOpenRef.current = nowMs;
                       if (interview.location_type === 'video' && meetingUrl) {
                         window.open(meetingUrl, '_blank', 'noopener,noreferrer');
                       } else {
