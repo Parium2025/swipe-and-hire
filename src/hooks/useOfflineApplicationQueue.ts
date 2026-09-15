@@ -196,8 +196,9 @@ export function useOfflineApplicationQueue(userId: string | undefined) {
         synced++;
         syncedJobIds.push(app.jobId);
 
-        // Clear application draft
+        // Clear application draft (kontobunden nyckel + äldre format)
         try {
+          localStorage.removeItem(`parium_draft_job-application-${app.applicantId}-${app.jobId}`);
           localStorage.removeItem(`parium_draft_job-application-${app.jobId}`);
         } catch { /* ignore */ }
       } else if (result === 'permanent') {
