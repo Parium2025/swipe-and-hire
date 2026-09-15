@@ -31,10 +31,16 @@ export function useSwipeActions() {
   // Fetch existing swipe actions
   useEffect(() => {
     if (!user?.id) {
+      actionsRef.current = new Map();
       setActions(new Map());
       setIsLoading(false);
       return;
     }
+
+    // Vid kontobyte får ett sent svar för föregående konto aldrig skriva över
+    // den nya användarens swipe-historik.
+    let cancelled = false;
+    setIsLoading(true);
 
     const fetchActions = async () => {
       try {
@@ -46,6 +52,7 @@ export function useSwipeActions() {
           .limit(MAX_HYDRATED_ACTIONS);
 
         if (error) throw error;
+        if (cancelled) return;
 
         const map = new Map<string, SwipeActionType>();
         data?.forEach((row: any) => map.set(row.job_id, row.action as SwipeActionType));
@@ -54,11 +61,12 @@ export function useSwipeActions() {
       } catch (err) {
         console.error('Error fetching swipe actions:', err);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchActions();
+    return () => { cancelled = true; };
   }, [user?.id]);
 
   // 🔔 Lyssna på broadcast från restoreSkippedJob (Skippade jobb-sidan) så

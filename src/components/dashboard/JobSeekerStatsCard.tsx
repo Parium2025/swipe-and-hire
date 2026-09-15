@@ -10,20 +10,28 @@ import { StatsCarousel } from './StatsCarousel';
 import { useProfileViewStats } from '@/hooks/useProfileViewStats';
 import type { StatData } from './StatsCarousel';
 
-const STATS_CACHE_KEY = 'parium-jobseeker-stats';
+// Nyckeln är kontobunden. Utan användar-id kunde nästa person som loggade in
+// på samma dator se föregående användares siffror innan servern svarat.
+const statsCacheKey = (userId?: string | null) =>
+  userId ? `parium-jobseeker-stats:${userId}` : null;
 
-const readCachedStats = (): Record<string, number> => {
+const readCachedStats = (userId?: string | null): Record<string, number> => {
+  const key = statsCacheKey(userId);
+  if (!key) return {};
   try {
-    const raw = localStorage.getItem(STATS_CACHE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
   } catch { return {}; }
 };
 
-const writeCachedStats = (key: string, value: number) => {
+const writeCachedStats = (userId: string | null | undefined, key: string, value: number) => {
+  const cacheKey = statsCacheKey(userId);
+  if (!cacheKey) return;
   try {
-    const current = readCachedStats();
+    const current = readCachedStats(userId);
     current[key] = value;
-    safeSetItem(STATS_CACHE_KEY, JSON.stringify(current));
+    safeSetItem(cacheKey, JSON.stringify(current));
   } catch {}
 };
 
@@ -35,10 +43,11 @@ interface JobSeekerStatsCardProps {
 export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const cachedStats = useMemo(() => readCachedStats(), []);
+  const userId = user?.id;
+  const cachedStats = useMemo(() => readCachedStats(userId), [userId]);
   const { stats: viewStats } = useProfileViewStats();
   const profileViewsCount = viewStats.unique_viewers_30d;
-  useEffect(() => { writeCachedStats('profile_views', profileViewsCount); }, [profileViewsCount]);
+  useEffect(() => { writeCachedStats(userId, 'profile_views', profileViewsCount); }, [userId, profileViewsCount]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],
@@ -47,12 +56,15 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       const { data, error } = await supabase.rpc('get_jobseeker_dashboard_stats', {
         p_user_id: user.id,
       });
-      if (error) return { applications: 0, interviews: 0, saved_jobs: 0, unread_messages: 0 };
+      // Ett fel får inte visas som nollor — då tror användaren att alla
+      // ansökningar försvunnit. Vi kastar vidare så senast kända siffror
+      // (cachen) ligger kvar och React Query kan försöka igen.
+      if (error) throw error;
       const stats = data as { applications: number; interviews: number; saved_jobs: number; unread_messages: number };
-      writeCachedStats('applications', stats.applications);
-      writeCachedStats('interviews', stats.interviews);
-      writeCachedStats('saved', stats.saved_jobs);
-      writeCachedStats('messages', stats.unread_messages);
+      writeCachedStats(user.id, 'applications', stats.applications);
+      writeCachedStats(user.id, 'interviews', stats.interviews);
+      writeCachedStats(user.id, 'saved', stats.saved_jobs);
+      writeCachedStats(user.id, 'messages', stats.unread_messages);
       return stats;
     },
     enabled: !!user?.id,
@@ -71,7 +83,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
     conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
-  useEffect(() => { writeCachedStats('messages', unreadMessagesCount); }, [unreadMessagesCount]);
+  useEffect(() => { writeCachedStats(userId, 'messages', unreadMessagesCount); }, [userId, unreadMessagesCount]);
 
   // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
   // på servern, och händelser koalesceras så en burst ger EN omhämtning.

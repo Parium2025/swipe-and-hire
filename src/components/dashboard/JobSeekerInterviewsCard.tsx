@@ -37,7 +37,7 @@ const getLocationLabel = (type: LocationType) => {
 };
 
 export const JobSeekerInterviewsCard = memo(() => {
-  const { interviews, isLoading } = useCandidateInterviews();
+  const { interviews, isLoading, isError, refetch } = useCandidateInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
 
@@ -85,7 +85,21 @@ export const JobSeekerInterviewsCard = memo(() => {
         
         {/* Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {upcomingInterviews.length === 0 ? (
+          {isError ? (
+            <div
+              className="flex-1 flex flex-col items-center justify-center text-center transform-gpu"
+              style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased' }}
+            >
+              <Calendar className="h-8 w-8 text-white mb-2" />
+              <p className="text-sm font-medium text-white">Kunde inte hämta intervjuerna</p>
+              <button
+                onClick={() => { void refetch(); }}
+                className="text-xs text-white underline underline-offset-2 mt-1"
+              >
+                Försök igen
+              </button>
+            </div>
+          ) : upcomingInterviews.length === 0 ? (
             <div
               className="flex-1 flex flex-col items-center justify-center text-center transform-gpu"
               style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased' }}

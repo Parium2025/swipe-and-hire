@@ -114,6 +114,9 @@ const clearAllAppCachesSync = () => {
     'outreach-studio-cache:',
     'outreach-templates-cache:',
     'outreach-template-draft:',
+    // Jobbsökarsidan (pass 12) — siffror och intervjuer på startsidan
+    'parium-jobseeker-stats',
+    'job_seeker_interviews_',
   ];
   
   const exactKeysToRemove = [

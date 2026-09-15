@@ -49,6 +49,16 @@ const setCachedSearches = (userId: string, searches: SavedSearch[]) => {
   }
 };
 
+/**
+ * Söktext kan innehålla komma, punkt och parenteser — tecken som PostgREST
+ * använder som syntax i or()-filter. Utan citering blev filtret ogiltigt och
+ * räkningen misslyckades tyst, så antalet nya träffar kunde bli fel.
+ */
+const escapeOrPattern = (value: string): string => {
+  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"%${escaped}%"`;
+};
+
 export interface SavedSearch {
   id: string;
   user_id: string;
@@ -146,10 +156,12 @@ export const useSavedSearches = () => {
             .gt('created_at', sinceDate);
 
           if (search.search_query) {
-            query = query.or(`title.ilike.%${search.search_query}%,workplace_city.ilike.%${search.search_query}%`);
+            const q = escapeOrPattern(search.search_query);
+            query = query.or(`title.ilike.${q},workplace_city.ilike.${q}`);
           }
           if (search.city) {
-            query = query.or(`workplace_city.ilike.%${search.city}%,workplace_municipality.ilike.%${search.city}%`);
+            const c = escapeOrPattern(search.city);
+            query = query.or(`workplace_city.ilike.${c},workplace_municipality.ilike.${c}`);
           }
           if (search.county) {
             query = query.eq('workplace_county', search.county);
@@ -200,9 +212,37 @@ export const useSavedSearches = () => {
     fetchSavedSearches();
   }, [fetchSavedSearches]);
 
+  // Antal sparade sökningar behövs i realtidslyssnaren utan att den startas om.
+  const savedSearchCountRef = useRef(savedSearches.length);
+  useEffect(() => {
+    savedSearchCountRef.current = savedSearches.length;
+  }, [savedSearches.length]);
+
   // Realtime subscription for updates
   useEffect(() => {
     if (!user) return;
+
+    // Varje publicerad annons i hela landet träffar ALLA inloggade jobbsökare.
+    // Utan broms skulle varje sådan händelse starta en ny omräkning per sparad
+    // sökning — vid hög publiceringstakt blir det en storm av databasfrågor.
+    // Vi samlar därför ihop händelserna och räknar om som mest en gång/minut.
+    let newJobTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastNewJobRefetch = 0;
+    const NEW_JOB_DEBOUNCE_MS = 8000;
+    const NEW_JOB_MIN_INTERVAL_MS = 60000;
+
+    const scheduleNewJobRefetch = () => {
+      // Ingen sparad sökning = inget att räkna om.
+      if (savedSearchCountRef.current === 0) return;
+      if (newJobTimer) return;
+      const sinceLast = Date.now() - lastNewJobRefetch;
+      const wait = Math.max(NEW_JOB_DEBOUNCE_MS, NEW_JOB_MIN_INTERVAL_MS - sinceLast);
+      newJobTimer = setTimeout(() => {
+        newJobTimer = null;
+        lastNewJobRefetch = Date.now();
+        fetchSavedSearches();
+      }, wait);
+    };
 
     const channel = createRealtimeChannel(`saved-searches-${user.id}`)
       .on(
@@ -227,12 +267,13 @@ export const useSavedSearches = () => {
           table: 'job_postings',
         },
         () => {
-          fetchSavedSearches();
+          scheduleNewJobRefetch();
         }
       )
       .subscribe();
 
     return () => {
+      if (newJobTimer) clearTimeout(newJobTimer);
       supabase.removeChannel(channel);
     };
   }, [user, fetchSavedSearches]);

@@ -1070,39 +1070,42 @@ const isRealtimeJobVisible = (job?: RealtimeJobPosting | null) => {
 };
 
 
+/**
+ * Snittbetyg och antal recensioner räknas i DATABASEN, inte i klienten.
+ * Tidigare hämtades varje enskild recensionsrad för alla arbetsgivare i
+ * sökresultatet — ett företag med 10 000 recensioner drog då 10 000 rader
+ * bara för att visa en stjärna på ett jobbkort. Nu returnerar servern en
+ * rad per företag.
+ */
 function useCompanyReviews(employerIds: string[], isEnabled: boolean) {
-  return useQuery({
-    queryKey: ['company-reviews-batch', employerIds],
-    queryFn: async (): Promise<JobReviewMap> => {
-      if (employerIds.length === 0) return {};
+  const sortedIds = useMemo(() => [...employerIds].sort(), [employerIds]);
+  const idsKey = sortedIds.join(',');
 
-      const { data } = await supabase
-        .from('company_reviews_public')
-        .select('company_id, rating')
-        .in('company_id', employerIds);
+  return useQuery({
+    queryKey: ['company-reviews-batch', idsKey],
+    queryFn: async (): Promise<JobReviewMap> => {
+      if (sortedIds.length === 0) return {};
+
+      const { data, error } = await supabase.rpc('get_company_review_stats_batch', {
+        p_company_ids: sortedIds,
+      });
+      if (error) throw error;
 
       const ratingsMap: JobReviewMap = {};
-      if (data) {
-        const acc: Record<string, { total: number; count: number }> = {};
-        data.forEach((row) => {
-          if (!acc[row.company_id]) acc[row.company_id] = { total: 0, count: 0 };
-          acc[row.company_id].total += row.rating;
-          acc[row.company_id].count++;
-        });
-
-        Object.keys(acc).forEach((id) => {
-          ratingsMap[id] = {
-            avgRating: acc[id].total / acc[id].count,
-            reviewCount: acc[id].count,
-          };
-        });
-      }
+      (data || []).forEach((row: { company_id: string; total_count: number | string; avg_rating: number | string | null }) => {
+        const count = Number(row.total_count ?? 0);
+        if (!row.company_id || count === 0) return;
+        ratingsMap[row.company_id] = {
+          avgRating: row.avg_rating != null ? Number(row.avg_rating) : undefined,
+          reviewCount: count,
+        };
+      });
 
       return ratingsMap;
     },
-    enabled: employerIds.length > 0,
+    enabled: isEnabled && sortedIds.length > 0,
     staleTime: 5 * 60 * 1000,
-    gcTime: Infinity,
+    gcTime: 30 * 60 * 1000,
   });
 }
 
