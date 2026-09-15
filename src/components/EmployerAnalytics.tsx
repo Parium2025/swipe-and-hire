@@ -590,7 +590,7 @@ const EmployerAnalytics = memo(() => {
     [advancedCacheKey],
   );
 
-  const { data: rawData, isLoading, isFetching, dataUpdatedAt } = useQuery({
+  const { data: rawData, isLoading, isFetching, dataUpdatedAt, error: overviewError, refetch: refetchOverview } = useQuery({
     queryKey: ['employer-analytics-v2', user?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
