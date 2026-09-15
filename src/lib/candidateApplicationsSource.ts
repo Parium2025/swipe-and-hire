@@ -129,19 +129,36 @@ const JOB_SCOPE_TTL_MS = 60 * 1000;
 const PAGE_ROWS = 1000;
 /** Max antal job_id per `in()`-filter så URL:en inte spränger längdgränsen. */
 const JOB_ID_CHUNK = 250;
-/** Hård säkerhetsspärr så en trasig query aldrig kan loopa i evighet. */
-const MAX_ROWS = 50000;
+/**
+ * Hårda säkerhetsspärrar så en trasig query aldrig kan loopa i evighet.
+ * Spärren gäller ALLTID en avgränsad delfråga — aldrig "alla kandidater hos
+ * arbetsgivaren". Kandidatlistan i sig är keyset-paginerad och obegränsad.
+ *  - EN kandidats ansökningar: en människa söker aldrig 20 000 jobb.
+ *  - Organisationens annonser: taket följer samma nivå som annonslistan.
+ *  - Batchen: 200 kandidater × annonschunk, satt högt så trunkering i praktiken
+ *    inte kan inträffa.
+ */
+const MAX_ROWS_PER_APPLICANT = 20_000;
+const MAX_ROWS_JOB_SCOPE = 50_000;
+const MAX_ROWS_APPLICANT_BATCH = 500_000;
 
 async function fetchAllPages<T>(
   build: (from: number, to: number) => PromiseLike<{ data: any; error: any }>,
+  maxRows: number,
+  label: string,
 ): Promise<T[]> {
   const out: T[] = [];
-  for (let from = 0; from < MAX_ROWS; from += PAGE_ROWS) {
+  for (let from = 0; from < maxRows; from += PAGE_ROWS) {
     const { data, error } = await build(from, from + PAGE_ROWS - 1);
     if (error) throw error;
     const rows = (data || []) as T[];
     out.push(...rows);
     if (rows.length < PAGE_ROWS) break;
+    // Nådde taket med en full sida kvar → resultatet är trunkerat. Tyst
+    // trunkering är det farliga; logga så det går att upptäcka.
+    if (from + PAGE_ROWS >= maxRows) {
+      console.warn(`[candidateApplicationsSource] ${label}: nådde taket ${maxRows} rader — resultatet kan vara trunkerat.`);
+    }
   }
   return out;
 }
