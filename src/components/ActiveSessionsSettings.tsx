@@ -57,6 +57,15 @@ export function ActiveSessionsSettings() {
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [kickingId, setKickingId] = useState<string | null>(null);
+  // Ett hämtningsfel fick tidigare listan att se tom ut ("Inga aktiva
+  // sessioner") — användaren kunde tro att ingen annan enhet var inloggad.
+  const [hasError, setHasError] = useState(false);
+
+  // Sessioner från föregående konto får aldrig ligga kvar vid kontobyte.
+  useEffect(() => {
+    setSessions([]);
+    setHasError(false);
+  }, [user?.id]);
 
   const fetchSessions = useCallback(async (silent = false) => {
     if (!user?.id) return;
@@ -65,6 +74,7 @@ export function ActiveSessionsSettings() {
       const { data, error } = await supabase.rpc('get_active_sessions');
       if (error) {
         console.warn('Failed to fetch sessions:', error.message);
+        setHasError(true);
         return;
       }
 
@@ -74,9 +84,11 @@ export function ActiveSessionsSettings() {
         is_current: s.session_token === currentToken,
       }));
 
+      setHasError(false);
       setSessions(enriched);
     } catch (err) {
       console.warn('Error fetching sessions:', err);
+      setHasError(true);
     } finally {
       if (!silent) setLoading(false);
     }
