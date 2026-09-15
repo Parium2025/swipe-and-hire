@@ -330,9 +330,15 @@ export function useColleagueCandidates(
       }, 0);
 
       if (loadMore) {
-        setCandidates(prev => [...prev, ...result]);
+        setCandidates(prev => {
+          const merged = [...prev, ...result];
+          if (!trimmedSearch) writeColleagueCache(colleagueId, listId, merged);
+          return merged;
+        });
       } else {
         setCandidates(result);
+        // Sökträffar är inte hela listan och får aldrig skriva över cachen.
+        if (!trimmedSearch) writeColleagueCache(colleagueId, listId, result);
       }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
@@ -349,14 +355,30 @@ export function useColleagueCandidates(
   }, [colleagueId, listId, user, trimmedSearch]);
 
   // Ny sökning → ladda om från början (samma beteende som din egen lista).
+  // Utan sökning ritas cachen först så att tavlan syns direkt, precis som i din
+  // egen vy — den färska datan ersätter den så fort svaret kommer.
   useEffect(() => {
     if (!colleagueId) return;
+    if (!trimmedSearch) {
+      const cached = readColleagueCache(colleagueId, listId);
+      if (cached && cached.length > 0) setCandidates(cached);
+    }
     void fetchColleagueCandidates(false);
   }, [colleagueId, listId, trimmedSearch, fetchColleagueCandidates]);
 
-  // 📡 REALTIME: Prenumerera på kollegans kandidatändringar
+  // 📡 REALTIME: kandidater, betyg och anteckningar — samma täckning som din
+  // egen vy, så en ändring som kollegan (eller någon annan i teamet) gör syns
+  // direkt i stället för vid nästa omladdning.
   useEffect(() => {
     if (!colleagueId || !user) return;
+
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleRefresh = () => {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        void fetchColleagueCandidates(false);
+      }, 250);
+    };
 
     const channel = createRealtimeChannel(`colleague-candidates-${colleagueId}`)
       .on(
@@ -367,14 +389,27 @@ export function useColleagueCandidates(
           table: 'my_candidates',
           filter: `recruiter_id=eq.${colleagueId}`,
         },
-        () => {
-          // Refresh hela listan vid ändringar
-          fetchColleagueCandidates(false);
-        }
+        scheduleRefresh,
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'candidate_ratings',
+          filter: `recruiter_id=eq.${colleagueId}`,
+        },
+        scheduleRefresh,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'candidate_notes' },
+        scheduleRefresh,
       )
       .subscribe();
 
     return () => {
+      if (refreshTimer) clearTimeout(refreshTimer);
       supabase.removeChannel(channel);
     };
   }, [colleagueId, user, fetchColleagueCandidates]);
