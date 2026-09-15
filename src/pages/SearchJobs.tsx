@@ -625,10 +625,12 @@ const SearchJobs = memo(() => {
     }
   }, [filteredAndSortedJobs.length, isSearchResultsLoading]);
 
-  // Display jobs with lazy loading
+  // Sidnumrerad visning: exakt en sida i taget.
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / JOBS_PAGE_SIZE));
   const displayedJobs = useMemo(() => {
-    return filteredAndSortedJobs.slice(0, displayCount);
-  }, [filteredAndSortedJobs, displayCount]);
+    const start = (page - 1) * JOBS_PAGE_SIZE;
+    return filteredAndSortedJobs.slice(start, start + JOBS_PAGE_SIZE);
+  }, [filteredAndSortedJobs, page]);
 
   const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
 
