@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,6 +12,23 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 
+/**
+ * Dubbeltryck på "Ta bort" (vanligt på touch) skickade tidigare två
+ * borttagningar: två nätverksanrop, två toaster och i värsta fall två poster i
+ * återförsökskön. Bekräftelsen får därför bara gå igenom en gång per öppning.
+ */
+function useSingleConfirm(open: boolean, onConfirm: () => void) {
+  const firedRef = useRef(false);
+  useEffect(() => {
+    if (open) firedRef.current = false;
+  }, [open]);
+  return useCallback(() => {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    onConfirm();
+  }, [onConfirm]);
+}
+
 interface RemoveCandidateDialogProps {
   candidate: MyCandidateData | null;
   onOpenChange: (open: boolean) => void;
@@ -18,7 +36,9 @@ interface RemoveCandidateDialogProps {
   onCancel: () => void;
 }
 
-export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCancel }: RemoveCandidateDialogProps) => (
+export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCancel }: RemoveCandidateDialogProps) => {
+  const handleConfirm = useSingleConfirm(!!candidate, onConfirm);
+  return (
   <AlertDialog open={!!candidate} onOpenChange={(open) => !open && onOpenChange(false)}>
     <AlertDialogContentNoFocus 
       elevated
@@ -49,7 +69,7 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
           Avbryt
         </AlertDialogCancel>
         <AlertDialogAction
-          onClick={onConfirm}
+          onClick={handleConfirm}
           variant="destructiveSoft"
           className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
         >
@@ -59,7 +79,8 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
       </AlertDialogFooter>
     </AlertDialogContentNoFocus>
   </AlertDialog>
-);
+  );
+};
 
 interface BulkDeleteDialogProps {
   open: boolean;
@@ -68,7 +89,9 @@ interface BulkDeleteDialogProps {
   onConfirm: () => void;
 }
 
-export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm }: BulkDeleteDialogProps) => (
+export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm }: BulkDeleteDialogProps) => {
+  const handleConfirm = useSingleConfirm(open, onConfirm);
+  return (
   <AlertDialog open={open} onOpenChange={(o) => !o && onOpenChange(false)}>
     <AlertDialogContentNoFocus 
       className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
@@ -94,7 +117,7 @@ export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm 
           Avbryt
         </AlertDialogCancel>
         <AlertDialogAction
-          onClick={onConfirm}
+          onClick={handleConfirm}
           variant="destructiveSoft"
           className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
         >
@@ -104,4 +127,5 @@ export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm 
       </AlertDialogFooter>
     </AlertDialogContentNoFocus>
   </AlertDialog>
-);
+  );
+};

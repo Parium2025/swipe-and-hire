@@ -20,7 +20,14 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const cursorRef = useRef<string | null>(null);
+  // Markören har id som tiebreaker: en massflytt ger många rader exakt samma
+  // updated_at, och utan tiebreaker hoppades rader över mellan sidorna.
+  const cursorRef = useRef<{ updated_at: string; id: string } | null>(null);
+  // Realtime-uppdateringar och bakgrundsladdningen delade tidigare markör och
+  // lista utan ordningsvakt: kom svaren i fel ordning dubblerades eller tappades
+  // rader. Varje hämtning får nu ett löpnummer och bara den senaste får skriva.
+  const requestSeqRef = useRef(0);
+  const inFlightRef = useRef(false);
 
   const fetchColleagueCandidates = useCallback(async (loadMore = false) => {
     if (!colleagueId || !user) {
@@ -28,6 +35,12 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
       setHasMore(false);
       return;
     }
+
+    // En hämtning i taget. En ny full omladdning får däremot alltid gå före.
+    if (inFlightRef.current && loadMore) return;
+
+    const seq = ++requestSeqRef.current;
+    inFlightRef.current = true;
 
     if (!loadMore) {
       setIsLoading(true);
@@ -41,19 +54,25 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
         .select('*')
         .eq('recruiter_id', colleagueId)
         .order('updated_at', { ascending: false })
+        .order('id', { ascending: false })
         .limit(PAGE_SIZE);
 
       // Varje lista har sina egna kandidater
       if (listId) query = query.eq('list_id', listId);
 
       // Apply cursor for pagination
-      if (loadMore && cursorRef.current) {
-        query = query.lt('updated_at', cursorRef.current);
+      const cursor = cursorRef.current;
+      if (loadMore && cursor) {
+        query = query.or(
+          `updated_at.lt.${cursor.updated_at},and(updated_at.eq.${cursor.updated_at},id.lt.${cursor.id})`,
+        );
       }
 
       const { data: myCandidates, error: mcError } = await query;
 
       if (mcError) throw mcError;
+      // En nyare hämtning har startat under tiden → kasta det här svaret.
+      if (seq !== requestSeqRef.current) return;
       if (!myCandidates || myCandidates.length === 0) {
         if (!loadMore) {
           setCandidates([]);
@@ -190,7 +209,7 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
 
       // Update cursor for next page
       const lastItem = myCandidates[myCandidates.length - 1];
-      cursorRef.current = lastItem.updated_at;
+      cursorRef.current = { updated_at: lastItem.updated_at, id: lastItem.id };
       setHasMore(myCandidates.length === PAGE_SIZE);
 
       const imagePaths = result
@@ -218,12 +237,15 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
       }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
-      toast.error('Kunde inte ladda kollegans kandidater');
-      if (!loadMore) {
-        setCandidates([]);
+      if (seq === requestSeqRef.current) {
+        toast.error('Kunde inte ladda kollegans kandidater');
+        if (!loadMore) {
+          setCandidates([]);
+        }
       }
     } finally {
-      setIsLoading(false);
+      inFlightRef.current = false;
+      if (seq === requestSeqRef.current) setIsLoading(false);
     }
   }, [colleagueId, listId, user]);
 
@@ -252,17 +274,21 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
     };
   }, [colleagueId, user, fetchColleagueCandidates]);
 
-  // PRE-FETCHING: Automatically load next batch in background after each page loads
-  // This makes scrolling feel instant - data is ready before user reaches bottom
+  // PRE-FETCHING: en sida i förväg så att scrollen känns instant.
+  // Taket är nödvändigt: varje laddad sida triggar den här effekten igen, så
+  // utan gräns hade hela kollegans lista (kan vara hundratusentals rader)
+  // laddats ner i bakgrunden direkt vid öppning. Resten hämtas när användaren
+  // faktiskt scrollar (loadMoreCandidates).
+  const PREFETCH_LIMIT = PAGE_SIZE * 2;
   useEffect(() => {
-    if (hasMore && !isLoading && candidates.length > 0) {
+    if (hasMore && !isLoading && candidates.length > 0 && candidates.length < PREFETCH_LIMIT) {
       // Small delay to avoid blocking the main thread
       const timer = setTimeout(() => {
         fetchColleagueCandidates(true);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [candidates.length, hasMore, isLoading, fetchColleagueCandidates]);
+  }, [candidates.length, hasMore, isLoading, fetchColleagueCandidates, PREFETCH_LIMIT]);
 
   // Load more candidates (for pagination)
   const loadMoreCandidates = useCallback(() => {
