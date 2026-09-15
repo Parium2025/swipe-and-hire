@@ -173,7 +173,9 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       hasLocalEditsRef.current = true;
       setSaveFailed(false);
       setContent(next);
-      if (typeof window !== 'undefined') {
+      // Skriv bara till en kontobunden nyckel — annars kan texten läcka mellan
+      // konton på samma dator.
+      if (typeof window !== 'undefined' && user?.id) {
         safeSetItem(cacheKey, next);
       }
     },
