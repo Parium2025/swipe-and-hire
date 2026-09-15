@@ -359,7 +359,9 @@ export function CandidatesTable({
     if (!navigator.onLine) {
       const BULK_QUEUE_KEY = 'parium_bulk_message_queue';
       try {
-        const existing = JSON.parse(localStorage.getItem(BULK_QUEUE_KEY) || '[]');
+        const rawQueue = JSON.parse(localStorage.getItem(BULK_QUEUE_KEY) || '[]');
+        // Skadad cache får aldrig blockera att nya meddelanden köas
+        const existing = Array.isArray(rawQueue) ? rawQueue : [];
         const newItems = selectedRecipientApplications.map(app => ({
           id: `bulk-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           sender_id: user.id,
