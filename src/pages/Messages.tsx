@@ -152,9 +152,20 @@ export default function Messages() {
         setShowMobileChat(true);
         handledDeepLinkRef.current = conversationParam;
         setSearchParams({}, { replace: true });
+        return;
+      }
+      // Chatten kan ligga utanför det laddade fönstret — hämta fler innan vi
+      // ger upp, annars händer ingenting när man klickar på en notis.
+      if (hasMoreConversations) {
+        void loadMoreConversations();
+        return;
+      }
+      if (!isLoading) {
+        handledDeepLinkRef.current = conversationParam;
+        setSearchParams({}, { replace: true });
       }
     }
-  }, [searchParams, conversations, setSearchParams]);
+  }, [searchParams, conversations, setSearchParams, hasMoreConversations, loadMoreConversations, isLoading]);
 
   // Empty-state alignment refs (desktop split view)
   const leftEmptyIconRef = useRef<HTMLDivElement | null>(null);
