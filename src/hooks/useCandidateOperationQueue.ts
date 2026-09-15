@@ -126,27 +126,45 @@ async function executeOperation(op: QueuedCandidateOperation): Promise<boolean> 
   return executeOperationInner(op);
 }
 
+/**
+ * En nekad skrivning ger noll rader utan fel. Utan den här kontrollen togs
+ * den köade ändringen bort som "synkad" och försvann tyst.
+ * Om raden inte längre finns finns inget att göra — då räknas det som klart.
+ */
+async function rowStillExists(candidateId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('my_candidates')
+    .select('id')
+    .eq('id', candidateId)
+    .maybeSingle();
+  return !!data;
+}
+
 async function executeOperationInner(op: QueuedCandidateOperation): Promise<boolean> {
   try {
     switch (op.type) {
       case 'stage_move': {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('my_candidates')
           .update({ stage: op.payload.stage })
-          .eq('id', op.candidateId);
+          .eq('id', op.candidateId)
+          .select('id');
         if (error) throw error;
+        if (!data || data.length === 0) return !(await rowStillExists(op.candidateId));
         return true;
       }
 
       case 'rating_update': {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('my_candidates')
           .update({ rating: op.payload.rating })
-          .eq('id', op.candidateId);
+          .eq('id', op.candidateId)
+          .select('id');
         if (error) throw error;
+        if (!data || data.length === 0) return !(await rowStillExists(op.candidateId));
 
         if (op.applicantId && op.recruiterId) {
-          await supabase
+          const { data: saved, error: ratingError } = await supabase
             .from('candidate_ratings')
             .upsert(
               {
@@ -155,17 +173,22 @@ async function executeOperationInner(op: QueuedCandidateOperation): Promise<bool
                 rating: op.payload.rating,
               },
               { onConflict: 'recruiter_id,applicant_id' }
-            );
+            )
+            .select('applicant_id');
+          if (ratingError) throw ratingError;
+          if (!saved || saved.length === 0) return false;
         }
         return true;
       }
 
       case 'notes_update': {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('my_candidates')
           .update({ notes: op.payload.notes })
-          .eq('id', op.candidateId);
+          .eq('id', op.candidateId)
+          .select('id');
         if (error) throw error;
+        if (!data || data.length === 0) return !(await rowStillExists(op.candidateId));
 
         if (op.applicantId && op.recruiterId) {
           const { data: existing } = await supabase
@@ -177,30 +200,39 @@ async function executeOperationInner(op: QueuedCandidateOperation): Promise<bool
             .maybeSingle();
 
           if (existing) {
-            await supabase
+            const { data: updated, error: noteError } = await supabase
               .from('candidate_notes')
               .update({ note: op.payload.notes })
-              .eq('id', existing.id);
+              .eq('id', existing.id)
+              .select('id');
+            if (noteError) throw noteError;
+            if (!updated || updated.length === 0) return false;
           } else if (op.payload.notes?.trim()) {
-            await supabase
+            const { data: inserted, error: noteError } = await supabase
               .from('candidate_notes')
               .insert({
                 employer_id: op.recruiterId,
                 applicant_id: op.applicantId,
                 note: op.payload.notes,
                 job_id: null,
-              });
+              })
+              .select('id');
+            if (noteError) throw noteError;
+            if (!inserted || inserted.length === 0) return false;
           }
         }
         return true;
       }
 
       case 'remove': {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('my_candidates')
           .delete()
-          .eq('id', op.candidateId);
+          .eq('id', op.candidateId)
+          .select('id');
         if (error) throw error;
+        // Noll rader: antingen redan borta (klart) eller nekad (måste göras om).
+        if (!data || data.length === 0) return !(await rowStillExists(op.candidateId));
         return true;
       }
 
