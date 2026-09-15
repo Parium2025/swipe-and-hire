@@ -1521,31 +1521,28 @@ export function useCreateConversation() {
       // IMPORTANT: Must scope to conversations the current user is a member of,
       // otherwise two different employers messaging the same candidate would share a thread!
       if (!isGroup && memberIds.length === 1) {
-        // First get conversation IDs the current user belongs to
-        const { data: myMemberships } = await supabase
-          .from('conversation_members')
-          .select('conversation_id')
-          .eq('user_id', user.id);
-
-        const myConvIds = myMemberships?.map(m => m.conversation_id) || [];
-
-        if (myConvIds.length > 0 && !isInternal) {
-          const { data: existingByCandidate } = await supabase
+        // Skala: tidigare hämtades ALLA egna medlemskap (kan vara tiotusentals
+        // rader vid många chattar) innan sökningen. Nu filtreras det i samma
+        // indexerade fråga via inner join på medlemstabellen.
+        if (!isInternal) {
+          const { data: existingByCandidate, error: existingError } = await supabase
             .from('conversations')
-            .select('id, application_id')
+            .select('id, application_id, conversation_members!inner(user_id)')
             .eq('candidate_id', candidateId)
             .not('candidate_id', 'is', null)
             .eq('kind', 'job')
-            .in('id', myConvIds)
+            .eq('conversation_members.user_id', user.id)
             .order('updated_at', { ascending: false })
             .limit(1)
             .maybeSingle();
+
+          if (existingError) throw existingError;
 
           if (existingByCandidate) {
             conversationId = existingByCandidate.id;
             isExisting = true;
             previousApplicationId = existingByCandidate.application_id;
-            
+
             // Check if job context is changing
             if (applicationId && applicationId !== previousApplicationId) {
               needsJobContextSwitch = true;
@@ -1553,15 +1550,19 @@ export function useCreateConversation() {
           }
         }
 
-        // Intern 1-1: återanvänd befintlig kollegatråd i stället för att skapa dubbletter.
-        if (myConvIds.length > 0 && isInternal) {
-          const { data: internalCandidates } = await supabase
+        // Intern 1-1: återanvänd befintlig kollegatråd i stället för att skapa
+        // dubbletter. Utgå från motpartens trådar (alltid få) och kontrollera
+        // sedan att vi själva är med — i stället för att lista alla våra trådar.
+        if (isInternal) {
+          const { data: internalCandidates, error: internalError } = await supabase
             .from('conversations')
             .select('id, conversation_members(user_id)')
             .eq('kind', 'internal')
             .eq('is_group', false)
-            .in('id', myConvIds)
-            .order('updated_at', { ascending: false });
+            .order('updated_at', { ascending: false })
+            .limit(200);
+
+          if (internalError) throw internalError;
 
           const match = (internalCandidates || []).find((c) => {
             const ids = ((c as any).conversation_members || []).map((m: any) => m.user_id).sort();
