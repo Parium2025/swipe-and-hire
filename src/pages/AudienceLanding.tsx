@@ -2232,6 +2232,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
                               open={openEmployerPlans.includes(plan.id)}
                               onToggle={() => toggleAllPlans(setOpenEmployerPlans, employerPlans.map((p) => p.id))}
                             />
+                            {/* Fyller ut så att alla tre korten blir lika höga som det längsta */}
+                            <div className="flex-1" aria-hidden="true" />
                           </motion.div>
                         </motion.div>
                       );
