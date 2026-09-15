@@ -137,6 +137,41 @@ const PublicJobPage = () => {
     );
   }
 
+  if (fetchError) {
+    return (
+      <div className="seo-scroll-page bg-[hsl(215_100%_12%)] bg-parium-gradient text-white">
+        <Helmet>
+          <title>Kunde inte hämta annonsen | Parium</title>
+          <meta name="robots" content="noindex,follow" />
+        </Helmet>
+        <LandingNav onLoginClick={() => navigate('/auth')} />
+        <div className="max-w-2xl mx-auto px-6 pt-32 pb-24 text-center">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4 text-white">
+            Kunde inte hämta annonsen
+          </h1>
+          <p className="text-white text-base sm:text-lg mb-10 leading-relaxed">
+            Något gick fel när annonsen skulle hämtas. Kontrollera din uppkoppling och försök igen.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="bg-green-500 text-white md:hover:bg-green-600 rounded-full min-h-12 px-7 text-base font-medium"
+            >
+              Försök igen
+            </Button>
+            <Button
+              variant="outline"
+              asChild
+              className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full min-h-12 px-7"
+            >
+              <Link to="/jobb">Se fler jobb</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (notFound || !job) {
     const fallbackCities = CITIES.slice(0, 8);
     // Försök matcha utgånget jobb till ett yrke i vår taxonomi.
