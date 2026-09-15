@@ -289,7 +289,13 @@ const CompanyProfile = () => {
           newOriginalStoragePath = originalFileName;
           setOriginalLogoStoragePath(originalFileName);
         } catch (origErr) {
+          // Originalbilden behövs för att kunna beskära om loggan senare —
+          // misslyckandet får inte se ut som att allt sparades.
           console.warn('Original logo upload failed (cropped saved):', origErr);
+          toast({
+            title: "Loggan sparades",
+            description: "Originalbilden kunde inte sparas, så du kan inte beskära om den senare. Ladda upp loggan igen om du vill kunna justera beskärningen.",
+          });
         }
       }
 
