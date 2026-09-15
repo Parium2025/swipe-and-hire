@@ -37,10 +37,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
 
   const [content, setContent] = useState(() => {
     if (typeof window === 'undefined') return '';
+    // Läs aldrig en nyckel utan konto-id: inloggningen hinner inte alltid bli
+    // klar före första målningen, och då kunde ett annat konto på samma dator
+    // få se föregående användares anteckningar en kort stund.
     if (user?.id) {
       return localStorage.getItem(`${cachePrefix}_${user.id}`) || '';
     }
-    return localStorage.getItem(cachePrefix) || '';
+    return '';
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -170,11 +173,13 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       hasLocalEditsRef.current = true;
       setSaveFailed(false);
       setContent(next);
-      if (typeof window !== 'undefined') {
+      // Skriv bara till en kontobunden nyckel — annars kan texten läcka mellan
+      // konton på samma dator.
+      if (typeof window !== 'undefined' && user?.id) {
         safeSetItem(cacheKey, next);
       }
     },
-    [cacheKey]
+    [cacheKey, user?.id]
   );
 
   // Auto-save with debounce — uses contentRef to avoid stale closures
@@ -188,6 +193,8 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
     if (!user?.id || !isFetched) return;
     if (!hasLocalEditsRef.current) return; // only save user-initiated changes
 
+    let cancelled = false;
+
     const timer = setTimeout(async () => {
       const latest = contentRef.current;
       if (latest === serverContentRef.current) return; // nothing changed vs server
@@ -196,7 +203,16 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         return;
       }
       setIsSaving(true);
-      const result = await saveToDb(latest);
+      // Vänta ut en pågående sparning i stället för att hoppa över. Slutade
+      // användaren skriva just då sparades den sista texten aldrig, trots att
+      // rutan visade "Sparat".
+      let result = await saveToDb(latest);
+      for (let attempt = 0; result === 'skipped' && attempt < 10 && !cancelled; attempt++) {
+        if (!getIsOnline()) break;
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        if (cancelled) break;
+        result = await saveToDb(contentRef.current);
+      }
       if (result === 'saved') {
         // Only clear edit flag if no NEW edits happened during save
         if (contentRef.current === latest) {
@@ -213,7 +229,10 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
       setIsSaving(false);
     }, 1200);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [content, user?.id, isFetched, queryClient, queryKey, saveToDb]);
 
   // Retry queued save when coming back online
