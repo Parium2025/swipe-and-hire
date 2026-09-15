@@ -55,6 +55,10 @@ const SavedJobs = () => {
     skippedJobs,
     isLoadingSaved: isLoading,
     isLoadingSkipped,
+    savedError,
+    skippedError,
+    refetchSaved,
+    refetchSkipped,
     savedJobIds,
     removeSavedJobLocally,
     toggleSavedJob,
@@ -440,6 +444,16 @@ const SavedJobs = () => {
         <>
           {(isLoading && savedJobs.length === 0) ? (
             <JobCardGridSkeleton count={savedSkeletonCount} />
+          ) : savedError && savedJobs.length === 0 ? (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-lg font-medium text-white mb-2">Kunde inte hämta sparade jobb</h3>
+                <p className="text-white mb-4">Kontrollera din uppkoppling och försök igen.</p>
+                <Button onClick={() => refetchSaved()} variant="glass">
+                  Försök igen
+                </Button>
+              </CardContent>
+            </Card>
           ) : savedJobs.filter(hasRenderableJobPosting).length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center">
