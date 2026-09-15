@@ -143,7 +143,7 @@ export const BookInterviewDialog = ({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('interviews')
-        .select('id, scheduled_at, duration_minutes, location_type, location_details, subject, message')
+        .select('id, employer_id, scheduled_at, duration_minutes, location_type, location_details, subject, message')
         .eq('application_id', applicationId)
         .in('status', ['pending', 'confirmed'])
         .order('scheduled_at', { ascending: false })
