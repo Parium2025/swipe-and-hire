@@ -21,13 +21,15 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 interface PrivacyDataPanelProps {
   /** Arbetsgivare ser även länk till personuppgiftsbiträdesavtalet */
   showDpaLink?: boolean;
+  /** Styr texten så den speglar det som faktiskt sparas för rollen */
+  isEmployer?: boolean;
 }
 
 /**
  * GDPR-panel: dataportabilitet (art. 20) + genvägar till policydokument.
  * Används både i jobbsökarens profil och arbetsgivarens inställningar.
  */
-export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps) {
+export function PrivacyDataPanel({ showDpaLink = false, isEmployer = false }: PrivacyDataPanelProps) {
   const [downloading, setDownloading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
@@ -153,9 +155,9 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
         </div>
 
         <p className="text-xs text-white">
-          Du kan när som helst ladda ner en kopia av allt vi sparar om dig — profil, ansökningar,
-          meddelanden du skrivit, sparade jobb och inställningar. Du får två filer: en läsbar
-          PDF och en JSON-fil som kan tas med till en annan tjänst.
+          {isEmployer
+            ? 'Du kan när som helst ladda ner en kopia av allt vi sparar om dig — profil, företagsinformation, annonser, meddelanden du skrivit och inställningar. Du får två filer: en läsbar PDF och en JSON-fil som kan tas med till en annan tjänst.'
+            : 'Du kan när som helst ladda ner en kopia av allt vi sparar om dig — profil, ansökningar, meddelanden du skrivit, sparade jobb och inställningar. Du får två filer: en läsbar PDF och en JSON-fil som kan tas med till en annan tjänst.'}
         </p>
 
         <div className="flex justify-center">
@@ -175,8 +177,9 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
         </div>
         <div className="pt-1 border-t border-white/10 space-y-3">
           <p className="text-xs text-white text-center">
-            Vill du radera ditt konto raderas allt permanent — profil, ansökningar, CV,
-            bilder och meddelanden. Det går inte att ångra.
+            {isEmployer
+              ? 'Vill du radera ditt konto raderas allt permanent — profil, företagsprofil, annonser, bilder och meddelanden. Det går inte att ångra.'
+              : 'Vill du radera ditt konto raderas allt permanent — profil, ansökningar, CV, bilder och meddelanden. Det går inte att ångra.'}
           </p>
           <div className="flex justify-center">
             <Button
@@ -216,8 +219,9 @@ export function PrivacyDataPanel({ showDpaLink = false }: PrivacyDataPanelProps)
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Radera ditt konto permanent?</AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-white">
-              All din data raderas direkt och går inte att återskapa: profil, CV, bilder,
-              video, ansökningar, meddelanden och sparade jobb. Skriv{' '}
+              {isEmployer
+                ? 'All din data raderas direkt och går inte att återskapa: profil, företagsprofil, annonser, bilder, video och meddelanden. Skriv '
+                : 'All din data raderas direkt och går inte att återskapa: profil, CV, bilder, video, ansökningar, meddelanden och sparade jobb. Skriv '}
               <span className="font-semibold text-white">RADERA</span> för att bekräfta.
             </AlertDialogDescription>
           </AlertDialogHeader>
