@@ -40,13 +40,15 @@ const EmployerSettings = () => {
   const wasAwayRef = useRef(false);
   // Kommer man tillbaka från t.ex. integritetspolicyn ska den sektion man
   // hade öppen fortfarande vara öppen — vi sparar valet per session.
+  // Sparas bara vid användarens eget klick, inte vid kod-styrd nollställning.
   const OPEN_SECTION_KEY = 'employer-settings-open-section';
-  useEffect(() => {
+  const handleSectionChange = (value: string) => {
+    setOpenSection(value);
     try {
-      if (openSection) sessionStorage.setItem(OPEN_SECTION_KEY, openSection);
+      if (value) sessionStorage.setItem(OPEN_SECTION_KEY, value);
       else sessionStorage.removeItem(OPEN_SECTION_KEY);
     } catch { /* privat läge m.m. — ignoreras */ }
-  }, [openSection]);
+  };
 
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
   // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
@@ -224,7 +226,7 @@ const EmployerSettings = () => {
         type="single"
         collapsible
         value={openSection}
-        onValueChange={setOpenSection}
+        onValueChange={handleSectionChange}
         className="space-y-4"
       >
         {sections.map((section) => (
