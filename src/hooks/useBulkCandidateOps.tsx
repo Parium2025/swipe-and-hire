@@ -12,8 +12,8 @@ interface UseBulkCandidateOpsParams {
   listId: string | null;
   stageConfig: Record<string, { label: string; color: string; iconName: string }>;
   isViewingColleague: boolean;
-  moveCandidateInColleagueList: (id: string, stage: string) => Promise<void>;
-  removeCandidateFromColleagueList: (id: string) => Promise<void>;
+  moveCandidateInColleagueList: (id: string, stage: string, opts?: { silent?: boolean }) => Promise<boolean | void>;
+  removeCandidateFromColleagueList: (id: string, opts?: { silent?: boolean }) => Promise<boolean | void>;
   exitSelectionMode: () => void;
   selectedCandidateIds: Set<string>;
   displayedCandidates: MyCandidateData[];

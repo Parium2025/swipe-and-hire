@@ -74,6 +74,10 @@ export function useColleagueCandidates(
 ) {
   const { user } = useAuth();
   const [candidates, setCandidates] = useState<MyCandidateData[]>([]);
+  // Spegel av listan: bulk-åtgärder kör flera await i rad och closure-värdet
+  // hinner aldrig uppdateras mellan varven.
+  const candidatesRef = useRef<MyCandidateData[]>([]);
+  candidatesRef.current = candidates;
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   // Markören har id som tiebreaker: en massflytt ger många rader exakt samma
