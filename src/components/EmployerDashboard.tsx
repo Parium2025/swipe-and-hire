@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, ChevronsDownUp, ChevronsUpDown, Check, X } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
@@ -57,7 +58,9 @@ const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { jobs, stats, isLoading: loading, invalidateJobs, loadMore, hasMore, isLoadingMore } = useJobsData();
+  const { jobs, stats, isLoading: loading, invalidateJobs, loadMore, hasMore, isLoadingMore, error: jobsError } = useJobsData();
+  // Ett misslyckat anrop får aldrig se ut som ett tomt konto.
+  const showJobsError = !!jobsError && jobs.length === 0 && !loading;
   // Server-side truth — exakta totaler även vid 10k+ jobb
   const { data: serverCounts } = useEmployerJobsCounts('personal');
   const { data: serverStats } = useEmployerDashboardStats('personal');
@@ -76,6 +79,7 @@ const EmployerDashboard = memo(() => {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const deletingJobRef = useRef(false);
+  const [deletingJob, setDeletingJob] = useState(false);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
   // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
   // samma regel som databasens utskickstrigger använder.
@@ -513,6 +517,7 @@ const EmployerDashboard = memo(() => {
     // spärren kunde två raderingar skickas och två toasts visas.
     if (!jobToDelete || deletingJobRef.current) return;
     deletingJobRef.current = true;
+    setDeletingJob(true);
 
     try {
       // Optimistic: remove from react-query cache immediately
@@ -562,6 +567,7 @@ const EmployerDashboard = memo(() => {
       });
     } finally {
       deletingJobRef.current = false;
+      setDeletingJob(false);
     }
   };
 
@@ -824,7 +830,12 @@ const EmployerDashboard = memo(() => {
             Hämtar sida {page}…
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          searchTerm.trim() ? (
+          showJobsError ? (
+            <div className="text-center text-white py-12 font-medium text-sm space-y-3">
+              <p>Kunde inte hämta dina annonser.</p>
+              <Button variant="secondary" onClick={() => invalidateJobs()}>Försök igen</Button>
+            </div>
+          ) : searchTerm.trim() ? (
             <div className="text-center text-white py-12 font-medium text-sm">
               Inga annonser stämde med din sökning.
             </div>
@@ -918,7 +929,12 @@ const EmployerDashboard = memo(() => {
             <span>Hämtar sida {page}…</span>
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          searchTerm.trim() ? (
+          showJobsError ? (
+            <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex flex-col items-center justify-center gap-3">
+              <span>Kunde inte hämta dina annonser.</span>
+              <Button variant="secondary" onClick={() => invalidateJobs()}>Försök igen</Button>
+            </div>
+          ) : searchTerm.trim() ? (
             <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
               <span>Inga annonser stämde med din sökning.</span>
             </div>
@@ -1032,11 +1048,12 @@ const EmployerDashboard = memo(() => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
+              disabled={deletingJob}
               variant="destructiveSoft"
               className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
-              Ta bort
+              {deletingJob ? 'Tar bort…' : 'Ta bort'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContentNoFocus>

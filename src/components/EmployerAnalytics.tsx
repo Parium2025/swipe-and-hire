@@ -293,7 +293,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
           const y2 = cy + radius * Math.sin(toRad(seg.startAngle + seg.angle - 0.5));
           return (
             <path
-              key={i}
+              key={seg.device}
               d={`M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`}
               fill="none"
               stroke={seg.config.color}
@@ -310,7 +310,7 @@ const DeviceDonut = memo(({ data }: { data: DeviceBreakdown[] }) => {
         {segments.map((seg, i) => {
           const Icon = seg.config.icon;
           return (
-            <div key={i} className="flex items-center gap-2.5">
+            <div key={seg.device} className="flex items-center gap-2.5">
               <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.config.color }} />
               <Icon className="h-3.5 w-3.5 text-white" />
               <span className="text-[12px] text-white font-medium">{Math.round(seg.pct * 100)}% {seg.config.label}</span>
