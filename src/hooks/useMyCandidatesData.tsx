@@ -771,6 +771,8 @@ export function useMyCandidatesData(
         addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
       toast.success('Kandidat tillagd i din lista', { route: '/my-candidates' } as Parameters<typeof toast.success>[1]);
     },
     onError: (error: Error) => {
