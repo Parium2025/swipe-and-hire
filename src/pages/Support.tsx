@@ -52,6 +52,7 @@ const Support = () => {
   const [ticketsLoading, setTicketsLoading] = useState(
     () => !readCachedSupportTickets(user?.id),
   );
+  const [ticketsError, setTicketsError] = useState(false);
   // Skelettet renderar lika många rader som användaren faktiskt hade sist.
   const ticketSkeletonCount = readCachedCount(SKELETON_COUNT_KEYS.supportTickets, 2, 6);
 
@@ -73,10 +74,22 @@ const Support = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Hämta befintliga ärenden
+  // Hämta befintliga ärenden — även vid kontobyte i samma flik
   useEffect(() => {
+    if (!user?.id) {
+      // Utloggad/kontobyte: visa aldrig föregående persons ärenden
+      setTickets([]);
+      setTicketsError(false);
+      setTicketsLoading(false);
+      return;
+    }
+    const cached = readCachedSupportTickets(user.id) as unknown as SupportTicket[] | null;
+    setTickets(cached ?? []);
+    setTicketsLoading(!cached);
+    setTicketsError(false);
     fetchTickets();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
 
   const fetchTickets = async () => {
@@ -88,13 +101,22 @@ const Support = () => {
 
       if (error) throw error;
       setTickets(data || []);
+      setTicketsError(false);
       writeCachedCount(SKELETON_COUNT_KEYS.supportTickets, (data || []).length);
       if (user?.id) writeCachedSupportTickets(user.id, (data || []) as never);
     } catch (error) {
       console.error('Error fetching tickets:', error);
+      // Ett hämtningsfel får aldrig se ut som "Inga supportärenden ännu"
+      setTicketsError(true);
     } finally {
       setTicketsLoading(false);
     }
+  };
+
+  const retryFetchTickets = () => {
+    setTicketsError(false);
+    setTicketsLoading(true);
+    fetchTickets();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -328,6 +350,13 @@ const Support = () => {
                   <div className="h-5 w-20 rounded-full bg-white/10 flex-shrink-0" />
                 </div>
               ))}
+            </div>
+          ) : ticketsError && tickets.length === 0 ? (
+            <div className="text-center py-8 space-y-3">
+              <p className="text-sm text-white">Kunde inte hämta dina supportärenden.</p>
+              <Button variant="outline" size="sm" onClick={retryFetchTickets}>
+                Försök igen
+              </Button>
             </div>
           ) : tickets.length === 0 ? (
             <div className="text-center text-white py-8 text-sm">

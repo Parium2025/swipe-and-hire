@@ -256,7 +256,10 @@ const JobDetails = () => {
         throw new Error('Ingen rad uppdaterades');
       }
     } catch (error: any) {
-      toast.error('Fel', { description: error.message });
+      // Tekniska engelska databasfel ska aldrig visas för rekryteraren
+      toast.error('Kunde inte uppdatera kandidatens status', {
+        description: 'Ändringen sparades inte. Försök igen.',
+      });
     }
   }, [updateApplicationLocally, refetch]);
 
