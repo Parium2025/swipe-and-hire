@@ -333,7 +333,14 @@ export const BookInterviewDialog = ({
             status: 'pending',
           }).select('id').single();
 
-      if (error) throw error;
+      if (error) {
+        // Databasen tillåter bara en aktiv intervju per ansökan. Slår det till
+        // har en kollega hunnit boka samma kandidat i samma stund.
+        if ((error as { code?: string }).code === '23505') {
+          throw new Error('En kollega har precis bokat ett möte med kandidaten. Ladda om sidan och boka om tiden i stället.');
+        }
+        throw error;
+      }
 
       // Spara länken som standard om rekryteraren bad om det.
       if (locationType === 'video' && saveVideoLinkAsDefault && videoLinkIsValid && videoLinkDiffersFromDefault) {
