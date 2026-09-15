@@ -209,7 +209,7 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
 
       // Update cursor for next page
       const lastItem = myCandidates[myCandidates.length - 1];
-      cursorRef.current = lastItem.updated_at;
+      cursorRef.current = { updated_at: lastItem.updated_at, id: lastItem.id };
       setHasMore(myCandidates.length === PAGE_SIZE);
 
       const imagePaths = result
@@ -237,12 +237,15 @@ export function useColleagueCandidates(colleagueId: string | null, listId: strin
       }
     } catch (error) {
       console.error('Error fetching colleague candidates:', error);
-      toast.error('Kunde inte ladda kollegans kandidater');
-      if (!loadMore) {
-        setCandidates([]);
+      if (seq === requestSeqRef.current) {
+        toast.error('Kunde inte ladda kollegans kandidater');
+        if (!loadMore) {
+          setCandidates([]);
+        }
       }
     } finally {
-      setIsLoading(false);
+      inFlightRef.current = false;
+      if (seq === requestSeqRef.current) setIsLoading(false);
     }
   }, [colleagueId, listId, user]);
 
