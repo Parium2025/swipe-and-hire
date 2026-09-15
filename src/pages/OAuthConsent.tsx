@@ -35,9 +35,10 @@ export default function OAuthConsent() {
       const { data, error: detailsError } = await oauthApi().getAuthorizationDetails(authorizationId);
       if (!active) return;
       if (detailsError) {
-        setError(detailsError.message);
+        setError('Förfrågan kunde inte läsas. Länken kan ha gått ut — försök ansluta appen på nytt.');
         return;
       }
+
       const immediate = data?.redirect_url ?? data?.redirect_to;
       if (immediate && !data?.client) {
         window.location.href = immediate;
@@ -52,23 +53,30 @@ export default function OAuthConsent() {
 
   async function decide(approve: boolean) {
     setBusy(true);
-    const api = oauthApi();
-    const { data, error: decisionError } = approve
-      ? await api.approveAuthorization(authorizationId)
-      : await api.denyAuthorization(authorizationId);
-    if (decisionError) {
+    try {
+      const api = oauthApi();
+      const { data, error: decisionError } = approve
+        ? await api.approveAuthorization(authorizationId)
+        : await api.denyAuthorization(authorizationId);
+      if (decisionError) {
+        setBusy(false);
+        setError('Ditt svar kunde inte skickas. Försök igen om en stund.');
+        return;
+      }
+      const target = data?.redirect_url ?? data?.redirect_to;
+      if (!target) {
+        setBusy(false);
+        setError('Auktoriseringsservern skickade ingen vidarelänk.');
+        return;
+      }
+      window.location.href = target;
+    } catch {
+      // Nätfel lämnade tidigare knapparna låsta utan förklaring.
       setBusy(false);
-      setError(decisionError.message);
-      return;
+      setError('Ditt svar kunde inte skickas. Kontrollera din uppkoppling och försök igen.');
     }
-    const target = data?.redirect_url ?? data?.redirect_to;
-    if (!target) {
-      setBusy(false);
-      setError("Auktoriseringsservern skickade ingen vidarelänk.");
-      return;
-    }
-    window.location.href = target;
   }
+
 
   const clientName = details?.client?.name ?? "Appen";
 
