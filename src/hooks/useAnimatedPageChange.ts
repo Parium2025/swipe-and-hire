@@ -71,12 +71,11 @@ export function useAnimatedPageChange(
 
     const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
     const startedAt = performance.now();
-    const swapThreshold = container.clientHeight * 1.25;
-    // Byt aldrig innehållet direkt efter klicket. Det var den enda praktiska
-    // asymmetrin: en tyngre framåtsida kunde blockera huvudtråden innan ögat
-    // hunnit se hissen starta, medan en redan renderad bakåtsida såg korrekt ut.
-    // Samma minsta synliga resväg gäller nu båda riktningarna.
-    const minimumTravelBeforeSwap = Math.min(container.clientHeight * 0.65, startTop * 0.25);
+    // Byt först när hissen nått den gemensamma, stabila zonen nära toppen.
+    // Tidigare byttes en kortare nästa sida för tidigt; dess mindre innehåll
+    // lämnade då höjdlåsets tomma yta synlig och såg ut som paus + nytt hopp.
+    // Nästa och Föregående följer nu bokstavligen samma bana och bytespunkt.
+    const swapThreshold = container.clientHeight * 0.65;
     let swapped = false;
     // Tiden som React-renderingen stjäl får inte räknas in i rörelsen, annars
     // hoppar hissen ifatt kurvan med ett synligt ryck efter sidbytet.
@@ -91,10 +90,9 @@ export function useAnimatedPageChange(
       const nextTop = startTop * (1 - eased);
       container.scrollTop = nextTop;
 
-      // Låt hissen synligt börja röra sig innan React byter korten. Detta är
-      // samma villkor för Nästa, Föregående och direktval av sidnummer.
-      const travelled = startTop - nextTop;
-      if (!swapped && travelled >= minimumTravelBeforeSwap && nextTop > swapThreshold) {
+      // I den här zonen syns sidans gemensamma topp, inte de kort vars längd
+      // skiljer sig mellan sidorna. Därför blir bytet osynligt i båda riktningar.
+      if (!swapped && nextTop <= swapThreshold) {
         swapped = true;
         const swapStartedAt = performance.now();
         flushSync(() => setPage(nextPage));
