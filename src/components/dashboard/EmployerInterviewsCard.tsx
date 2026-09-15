@@ -35,7 +35,7 @@ const getLocationLabel = (type: Interview['location_type']) => {
 };
 
 export const EmployerInterviewsCard = memo(() => {
-  const { interviews, isLoading } = useInterviews();
+  const { interviews, isLoading, error } = useInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
 
@@ -80,7 +80,13 @@ export const EmployerInterviewsCard = memo(() => {
           {upcomingInterviews.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Calendar className="h-8 w-8 text-white mb-2" />
-              <p className="text-sm font-medium text-white">Inga bokade intervjuer</p>
+              {/* Ett hämtningsfel får aldrig se ut som "inga intervjuer". */}
+              <p className="text-sm font-medium text-white">
+                {error ? 'Kunde inte hämta intervjuer' : 'Inga bokade intervjuer'}
+              </p>
+              {error && (
+                <p className="text-xs text-white mt-1">Försök igen om en stund.</p>
+              )}
             </div>
           ) : (
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
