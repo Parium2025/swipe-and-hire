@@ -179,7 +179,7 @@ export function useNotesSync({ table, ownerColumn, cachePrefix, queryKey }: UseN
         safeSetItem(cacheKey, next);
       }
     },
-    [cacheKey]
+    [cacheKey, user?.id]
   );
 
   // Auto-save with debounce — uses contentRef to avoid stale closures
