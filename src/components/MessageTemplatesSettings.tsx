@@ -1172,43 +1172,50 @@ export function MessageTemplatesSettings() {
 
     if (failedResult?.error) {
       toast.error('Kunde inte spara regeln');
-    } else {
-      // Endast en aktiv regeluppsättning per händelse: tidigare regler för samma händelse stängs av,
-      // så kanaler du inte kryssat i slutar skicka direkt.
-      let disabledConflicts = 0;
-      if (automationForm.is_enabled) {
-        const conflicting = automations.filter(
-          (automation) =>
-            automation.is_enabled &&
-            automation.trigger === automationForm.trigger &&
-            getAutomationGroupId(automation) !== groupId,
-        );
-
-
-        if (conflicting.length > 0) {
-          const { error: conflictError } = await supabase
-            .from('outreach_automations')
-            .update({ is_enabled: false })
-            .in('id', conflicting.map((automation) => automation.id));
-
-          if (!conflictError) disabledConflicts = conflicting.length;
-        }
-      }
-
-      const wasUpdate = !!automationForm.id;
-      toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
-      setAutomationFormTouched(false);
-      if (disabledConflicts > 0) {
-        toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
-      }
-
-      if (!wasUpdate) {
-        setAutomationForm(EMPTY_AUTOMATION_FORM);
-      }
       await fetchStudio({ silent: true });
-      notifyOutreachStudioUpdated(user.id);
+      setSavingAutomation(false);
+      return;
     }
 
+    // Endast en aktiv regeluppsättning per händelse: tidigare regler för samma händelse stängs av,
+    // så kanaler du inte kryssat i slutar skicka direkt.
+    let disabledConflicts = 0;
+    if (automationForm.is_enabled) {
+      const conflicting = automations.filter(
+        (automation) =>
+          automation.is_enabled &&
+          automation.trigger === automationForm.trigger &&
+          getAutomationGroupId(automation) !== groupId,
+      );
+
+      if (conflicting.length > 0) {
+        const { error: conflictError } = await supabase
+          .from('outreach_automations')
+          .update({ is_enabled: false })
+          .in('id', conflicting.map((automation) => automation.id));
+
+        if (conflictError) {
+          toast.error('Kunde inte stänga av tidigare regelkonflikter');
+          await fetchStudio({ silent: true });
+          setSavingAutomation(false);
+          return;
+        }
+        disabledConflicts = conflicting.length;
+      }
+    }
+
+    const wasUpdate = !!automationForm.id;
+    toast.success(wasUpdate ? 'Regel uppdaterad' : 'Regel klar — steg 3: följ utskicken under Logg');
+    setAutomationFormTouched(false);
+    if (disabledConflicts > 0) {
+      toast.info(`${disabledConflicts} tidigare regel${disabledConflicts > 1 ? 'er' : ''} för samma händelse stängdes av`);
+    }
+
+    if (!wasUpdate) {
+      setAutomationForm(EMPTY_AUTOMATION_FORM);
+    }
+    await fetchStudio({ silent: true });
+    notifyOutreachStudioUpdated(user.id);
 
     setSavingAutomation(false);
   };
