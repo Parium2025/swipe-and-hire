@@ -52,19 +52,19 @@ export const template = {
   subject: (data: Props) => data.subject || `Meddelande från ${data.company_name || 'företaget'}`,
   displayName: 'Mejl från arbetsgivare (arbetsgivarens egen text)',
   previewData: {
-    body: 'Hej Anna,\n\nTack för din ansökan till Butikssäljare hos Parium AB. Vi har tagit emot din ansökan och återkommer så snart vi kan.\n\nVänliga hälsningar,\nParium AB',
-    company_name: 'Parium AB',
-    subject: 'Vi har tagit emot din ansökan till Butikssäljare',
+    body: 'Hej Fredrik,\n\nTack för din ansökan till tjänsten som Fordonsmekaniker hos oss på Hoffstens Motor.\n\nVi har gått igenom din ansökan tillsammans med övriga sökande, och vi vill gärna träffa dig för en intervju. Vi återkommer inom kort med förslag på tider.\n\nHör gärna av dig om du har frågor under tiden.\n\nVänliga hälsningar,\nAnna Lindqvist\nHoffstens Motor',
+    company_name: 'Hoffstens Motor',
+    subject: 'Uppdatering om din ansökan – Fordonsmekaniker',
   },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
 const container = { padding: '32px 28px', maxWidth: '600px' }
-const brandSection = { margin: '0 0 24px' }
+const brandSection = { margin: '8px 0 24px' }
 const companyName = { fontSize: '22px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
 const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', borderRadius: '2px', margin: '10px 0 0' }
 const subjectLine = { fontSize: '15px', fontWeight: 600 as const, color: '#1E4B8A', margin: '14px 0 0' }
-const card = { backgroundColor: '#ffffff', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0' }
+const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0' }
 const messageText = { margin: 0, fontSize: '15px', lineHeight: '1.7', color: '#334155', whiteSpace: 'pre-line' as const }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '20px 0 0', textAlign: 'center' as const }
 const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
