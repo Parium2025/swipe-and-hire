@@ -71,6 +71,7 @@ export function ResilientImage({
           attempt: 0,
           sourceIndex: current.sourceSignature === sourceSignature ? current.sourceIndex + 1 : 1,
           failed: false,
+          broken: true,
         }));
         return;
       }
