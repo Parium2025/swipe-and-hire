@@ -2207,7 +2207,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
     if (!user) return;
-    
+    // 🔒 Utan giltig session nekas alla anrop nedan av databasen. Hoppa hellre
+    // över hämtningen än att skriva nollor över senast kända siffror.
+    if (!(await hasUsableSession())) return;
+
     try {
       // 🔒 SKALA + SANNING: tidigare laddades hela organisationens annonslista ner
       // (kapades vid 1 000 rader av PostgREST) och status räknades om lokalt med en
