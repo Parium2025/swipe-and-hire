@@ -390,7 +390,7 @@ const MyApplications = () => {
 
               return (
                 <ReadOnlyMobileJobCard
-                  key={application.id}
+                  key={`application-page-slot-${index}`}
                   job={{
                     id: job.id,
                     title: job.title,
