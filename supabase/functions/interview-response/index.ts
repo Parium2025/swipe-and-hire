@@ -45,20 +45,48 @@ ${body}
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 }
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+}
+
+// Svarssidan ligger på parium.se; den anropar den här funktionen med JSON.
+function json(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+  })
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+
   const url = new URL(req.url)
   let token = url.searchParams.get('token') ?? ''
   let answer = url.searchParams.get('answer') ?? ''
+  let wantsJson = false
 
   if (req.method === 'POST') {
-    const form = await req.formData().catch(() => null)
-    if (form) {
-      token = String(form.get('token') ?? token)
-      answer = String(form.get('answer') ?? answer)
+    const contentType = req.headers.get('content-type') ?? ''
+    if (contentType.includes('application/json')) {
+      wantsJson = true
+      const body = await req.json().catch(() => null) as Record<string, unknown> | null
+      if (body) {
+        token = String(body.token ?? token)
+        answer = String(body.answer ?? answer)
+      }
+    } else {
+      const form = await req.formData().catch(() => null)
+      if (form) {
+        token = String(form.get('token') ?? token)
+        answer = String(form.get('answer') ?? answer)
+      }
     }
   }
 
   if (!UUID_RE.test(token) || (answer !== 'yes' && answer !== 'no')) {
+    if (wantsJson) return json({ ok: false, reason: 'invalid' }, 400)
     return page('Länken fungerar inte', '<p>Länken är ofullständig eller felaktig. Logga in i Parium för att svara på intervjun.</p>')
   }
 
@@ -85,10 +113,21 @@ Deno.serve(async (req) => {
 
   if (error) {
     console.error('interview-response failed:', error.message)
+    if (wantsJson) return json({ ok: false, reason: 'error' }, 500)
     return page('Något gick fel', '<p>Svaret kunde inte registreras just nu. Försök igen om en stund eller svara inne i Parium.</p>')
   }
 
   const result = (data ?? {}) as Record<string, unknown>
+
+  if (wantsJson) {
+    return json({
+      ok: result.ok === true,
+      reason: result.reason ?? null,
+      already: result.already === true,
+      jobTitle: typeof result.job_title === 'string' ? result.job_title : null,
+      accept,
+    })
+  }
 
   if (!result.ok) {
     const reason = String(result.reason ?? '')
