@@ -26,6 +26,12 @@ export interface SendTemplateEmailOptions {
   replyTo?: string
 }
 
+function assertValidEmailEncoding(value: string, field: string): void {
+  if (value.includes('\uFFFD')) {
+    throw new Error(`Email ${field} contains invalid UTF-8 replacement characters`)
+  }
+}
+
 /**
  * Renders a registered template and sends it through Lovable's managed email
  * API. Suppression, retries, and rate limits are enforced by Lovable
@@ -65,6 +71,12 @@ export async function sendTemplateEmail(
     typeof template.subject === 'function'
       ? template.subject(templateData)
       : template.subject
+
+  // A replacement character means content was already damaged before rendering.
+  // Refuse the send rather than delivering visibly broken Swedish text.
+  assertValidEmailEncoding(subject, 'subject')
+  assertValidEmailEncoding(html, 'HTML')
+  assertValidEmailEncoding(text, 'plain text')
 
   try {
     await sendLovableEmail(
