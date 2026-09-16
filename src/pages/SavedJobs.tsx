@@ -660,11 +660,8 @@ const SavedJobs = () => {
             {selectionToolbar}
 
 
-            {totalPages > 1 && (
-              <p className="mb-3 text-center text-xs text-white/80">
-                Visar {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredSkippedJobs.length)} av {filteredSkippedJobs.length} jobb
-              </p>
-            )}
+
+
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedSkippedJobs.length === 1 ? ' job-card-grid-single' : pagedSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {pagedSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
