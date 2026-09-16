@@ -79,12 +79,15 @@ export function ResilientImage({
       // 5 attempts total, gentle backoff. Keeps CDN cache benefits since
       // we only cache-bust after attempt 3 (transient blip vs. stuck cache).
       if (attempt < 4) {
+        setImageState((current) => current.sourceSignature === sourceSignature
+          ? { ...current, broken: true }
+          : current);
         const delays = [500, 1200, 2500, 4500];
         setTimeout(() => setImageState((current) => current.sourceSignature === sourceSignature
           ? { ...current, attempt: current.attempt + 1 }
           : current), delays[attempt]);
       } else {
-        setImageState({ sourceSignature, attempt, sourceIndex, failed: true });
+        setImageState({ sourceSignature, attempt, sourceIndex, failed: true, broken: true });
         onError?.(e);
       }
     },
@@ -92,8 +95,18 @@ export function ResilientImage({
   );
 
   const handleManualRetry = useCallback(() => {
-    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   }, [sourceSignature]);
+
+  const handleLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setImageState((current) => (current.sourceSignature === sourceSignature && current.broken)
+        ? { ...current, broken: false }
+        : current);
+      onLoad?.(e);
+    },
+    [onLoad, sourceSignature]
+  );
 
   if (!activeSrc) {
     return null;
