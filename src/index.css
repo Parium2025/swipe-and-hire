@@ -1153,6 +1153,14 @@ All colors MUST be HSL.
     animation: none !important;
     opacity: 1 !important;
   }
+
+  /* Vid sidnumrering är den gamla gridens entré redan färdig. Den nya sidan
+     får därför inte spela samma fade-in igen mitt under hissrörelsen — i
+     WebKit blir opacity 0 → 1 en synlig blixt precis före toppen. */
+  [data-main-scroll-container="true"][data-suppress-grid-entry-animation="true"] .job-card-grid {
+    animation: none !important;
+    opacity: 1 !important;
+  }
   .job-card-grid .job-card-mobile-shell {
     /* Per-card animation removed — container handles the fade */
     animation: none !important;

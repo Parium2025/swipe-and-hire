@@ -22,6 +22,8 @@ export function useAnimatedPageChange(
       cancelAnimationFrame(animationFrameRef.current);
     }
     restoreStylesRef.current?.();
+    const container = getManagedScrollContainer();
+    if (container) delete container.dataset.suppressGridEntryAnimation;
   }, []);
 
   return useCallback((nextPage: number) => {
@@ -42,6 +44,12 @@ export function useAnimatedPageChange(
     container.style.overflowAnchor = 'none';
     container.style.scrollBehavior = 'auto';
     container.style.setProperty('-webkit-overflow-scrolling', 'auto');
+    // Sidans vanliga grid-animation är avsedd för första besöket. Om den körs
+    // när React byter sida tonas hela den nya kortgruppen från opacity 0 precis
+    // före landningen, vilket syns som en blixt i Safari. Markera endast det
+    // pågående sidbytet så CSS kan stänga av entréanimationen utan att röra
+    // hissens timing, easing eller bytespunkt.
+    container.dataset.suppressGridEntryAnimation = 'true';
 
     // Lägg låset före sidbytet. Att räkna ut och lägga till höjd efter render
     // är för sent i Safari: scrollTop har då redan klampats av en kortare sida.
