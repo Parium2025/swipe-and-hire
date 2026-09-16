@@ -7,6 +7,9 @@
 - [x] Granska databasregler, funktioner, index och dataintegritet
 - [x] Granska närliggande kritiska flöden utanför chatten
 - [x] Fixa och verifiera alla bekräftade fel
+- [ ] Stripe/betalning: aktivera betalningar, koppla checkout och webhooks (kräver Pro + juridik-granskning)
+- [ ] Stripe: "Avbryt prenumeration" avbryter direkt (cancel_at_period_end), perioden ut utan förlängning — ersätt supportärende-flödet
+- [ ] Stripe: no-refund-regel i villkoren vid betalning; undantag endast via support; uppdatera policy, DPA, FAQ och registerförteckning
 - [ ] Oberoende djupgranska pass 1–5 igen: översikt, annonser, kandidater, kollegavy och statistik
 - [ ] Fixa varje ny bekräftad brist utan att ändra behörighetsmodellen eller gränssnittet
 - [ ] Verifiera pass 1–5 med typkontroll, tester och relevanta databas-/livekontroller
