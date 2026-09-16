@@ -71,6 +71,10 @@ export function useAnimatedPageChange(
 
     const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
     const startedAt = performance.now();
+    // Byt först när hissen nått den gemensamma, stabila zonen nära toppen.
+    // Där syns inte korten som skiljer sig i längd mellan sidorna, så samma
+    // bytespunkt fungerar utan blinkning i båda riktningarna.
+    const swapThreshold = container.clientHeight * 0.65;
     let swapped = false;
     // Tiden som React-renderingen stjäl får inte räknas in i rörelsen, annars
     // hoppar hissen ifatt kurvan med ett synligt ryck efter sidbytet.
@@ -85,10 +89,8 @@ export function useAnimatedPageChange(
       const nextTop = startTop * (1 - eased);
       container.scrollTop = nextTop;
 
-      // Byt på hissens första målade bildruta, aldrig nära landningen. Då har
-      // nästa sida hela rörelsen på sig att rendera och avkoda sina redan
-      // förladdade bilder. Samma enda kodväg används i båda riktningarna.
-      if (!swapped) {
+      // Nästa, Föregående och sidnummer använder bokstavligen samma villkor.
+      if (!swapped && nextTop <= swapThreshold) {
         swapped = true;
         const swapStartedAt = performance.now();
         flushSync(() => setPage(nextPage));
