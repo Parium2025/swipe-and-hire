@@ -42,6 +42,12 @@ export function useAnimatedPageChange(
     container.style.overflowAnchor = 'none';
     container.style.scrollBehavior = 'auto';
     container.style.setProperty('-webkit-overflow-scrolling', 'auto');
+    // Sidans vanliga grid-animation är avsedd för första besöket. Om den körs
+    // när React byter sida tonas hela den nya kortgruppen från opacity 0 precis
+    // före landningen, vilket syns som en blixt i Safari. Markera endast det
+    // pågående sidbytet så CSS kan stänga av entréanimationen utan att röra
+    // hissens timing, easing eller bytespunkt.
+    container.dataset.pageChangeActive = 'true';
 
     // Lägg låset före sidbytet. Att räkna ut och lägga till höjd efter render
     // är för sent i Safari: scrollTop har då redan klampats av en kortare sida.
@@ -60,6 +66,7 @@ export function useAnimatedPageChange(
       heightLock.remove();
       container.style.overflowAnchor = previousOverflowAnchor;
       container.style.scrollBehavior = previousScrollBehavior;
+      delete container.dataset.pageChangeActive;
       if (previousMomentumScrolling) {
         container.style.setProperty('-webkit-overflow-scrolling', previousMomentumScrolling);
       } else {
