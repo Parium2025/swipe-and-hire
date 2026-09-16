@@ -2076,6 +2076,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
 
+  // 🔒 Siffrorna får bara hämtas med en giltig inloggning. Med utgången token
+  // körs anropen som anon och nekas av databasen ("permission denied") — då
+  // skrevs nollor in i cachen och användaren såg 0 sparade jobb/ansökningar.
+  // Här förnyas sessionen först; går det inte hoppar vi över hämtningen helt.
+  const hasUsableSession = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (!session) return false;
+      const expiresAt = session.expires_at ?? 0;
+      if (expiresAt - Math.floor(Date.now() / 1000) > 60) return true;
+      const { data: refreshed, error } = await supabase.auth.refreshSession();
+      return !error && !!refreshed.session;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
     try {
