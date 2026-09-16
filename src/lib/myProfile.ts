@@ -19,8 +19,8 @@ const MICRO_CACHE_MS = 3000;
 let inFlight: Promise<ProfileRpcResult> | null = null;
 let cached: { at: number; result: ProfileRpcResult } | null = null;
 
-function rawFetch() {
-  return supabase.rpc('get_my_profile');
+async function rawFetch() {
+  return await supabase.rpc('get_my_profile');
 }
 
 export function invalidateMyProfileCache() {
