@@ -175,8 +175,11 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
         onClick={handleMediaClick}
       >
 
-        {displayUrl ? (
-          <>
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+        </div>
+        <div className="absolute inset-0 transform-gpu overflow-hidden">
+          {displayUrl && (
             <img
               src={displayUrl}
               alt={job.title}
@@ -193,13 +196,9 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
               {...fetchPriority(cardIndex < 3 ? 'high' : 'auto')}
               onError={handleImageError}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </>
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-            <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
-          </div>
-        )}
+          )}
+        </div>
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${displayUrl ? 'opacity-100' : 'opacity-0'}`} />
 
         <div className="absolute top-2.5 left-2.5">
           {isExpired ? (
