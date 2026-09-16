@@ -39,6 +39,31 @@ const initialsOf = (name: string) =>
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || '?';
 
+/**
+ * Teamets profilbilder lagras som filsökväg i databasen, inte som färdig adress.
+ * Samma resolver som resten av appen används här, med permanenta lager
+ * (initialer under, bild över) så inget hoppar när bilden är klar.
+ */
+const TeamMemberAvatar = memo(({ path, name }: { path: string | null; name: string }) => {
+  const resolvedUrl = useMediaUrl(path || undefined, 'profile-image');
+  return (
+    <div className="relative h-8 w-8 rounded-full bg-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+      <span className="text-[11px] font-semibold text-white">{initialsOf(name)}</span>
+      {resolvedUrl && (
+        <img
+          src={resolvedUrl}
+          alt=""
+          aria-hidden="true"
+          decoding="sync"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+    </div>
+  );
+});
+TeamMemberAvatar.displayName = 'TeamMemberAvatar';
+
+
 const InfoTip = memo(({ content }: { content: string }) => (
   <Popover modal>
     <PopoverTrigger asChild>
