@@ -19,7 +19,10 @@ const OutreachMessageEmail = ({
   tracking_url,
 }: Props) => (
   <Html lang="sv" dir="ltr">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+    </Head>
     <Preview>{subject || `Meddelande från ${company_name}`}</Preview>
     <Body style={main}>
       <Container style={container}>
