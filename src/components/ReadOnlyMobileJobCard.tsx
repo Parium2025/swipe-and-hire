@@ -220,6 +220,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             <ResilientImage
               src={displayUrl}
               alt={`${job.title} hos ${companyName}`}
+              decoding="sync"
               className="w-full h-full object-cover"
               style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
               loading={cardIndex < 6 ? 'eager' : 'lazy'}

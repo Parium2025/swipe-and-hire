@@ -260,13 +260,18 @@ class ImageCache {
       // Dekoda blobben innan loadImage löser ut, så bakgrundsvärmningen även
       // förbereder själva bitmapen och inte lämnar avkodningen till sidbytet.
       if (typeof Image !== 'undefined') {
-        try {
-          const image = new Image();
-          image.src = objectUrl;
-          await image.decode?.();
-        } catch {
-          // WebKit kan sakna/avbryta decode trots att bilden är giltig. Cacha
-          // den ändå; <img> har fortfarande sin vanliga felhantering.
+        const image = new Image();
+        image.src = objectUrl;
+        if (!image.complete || image.naturalWidth === 0) {
+          await new Promise<void>((resolve, reject) => {
+            image.onload = () => resolve();
+            image.onerror = () => reject(new Error('Image could not be decoded'));
+          });
+        }
+        await image.decode?.();
+        if (image.naturalWidth === 0) {
+          URL.revokeObjectURL(objectUrl);
+          throw new Error('Image decoded without pixels');
         }
       }
 
