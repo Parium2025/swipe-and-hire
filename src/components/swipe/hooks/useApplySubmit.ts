@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useCallback, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -68,7 +69,7 @@ export function useApplySubmit({
       // 📸 Snapshot: frys frågorna som visas för kandidaten precis nu.
       // Arbetsgivaren kommer alltid se exakt dessa frågor + svar, även om
       // frågorna senare ändras. Nya sökande får de nya frågorna.
-      const profileRes = await supabase.rpc('get_my_profile');
+      const profileRes = await fetchMyProfile();
       const profileRows = profileRes.data;
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
       // Använd exakt frågeversionen som kandidaten har sett och besvarat.

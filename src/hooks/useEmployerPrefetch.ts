@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,7 +46,7 @@ export function useEmployerPrefetch() {
       queryClient.prefetchQuery({
         queryKey: ['company-profile', userId],
         queryFn: async () => {
-          const { data: rows, error } = await supabase.rpc('get_my_profile');
+          const { data: rows, error } = await fetchMyProfile();
           if (error) throw error;
           return Array.isArray(rows) ? rows[0] ?? null : null;
         },

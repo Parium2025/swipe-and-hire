@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -64,7 +65,7 @@ const CompanyReviews = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
-      const { data: rows, error } = await supabase.rpc('get_my_profile');
+      const { data: rows, error } = await fetchMyProfile();
       const data = Array.isArray(rows) ? rows[0] ?? null : null;
 
 

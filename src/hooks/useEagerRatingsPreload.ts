@@ -1,3 +1,4 @@
+import { invalidateMyProfileCache } from '@/lib/myProfile';
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -190,6 +191,9 @@ const clearAllAppCachesSync = () => {
  */
 export const clearAllAppCaches = () => {
   console.log('🗑️ Clearing all app caches on logout...');
+
+  // Kontobyte/utloggning: den delade profilhämtningen får aldrig återanvändas.
+  try { invalidateMyProfileCache(); } catch { /* ignore */ }
 
   // Weather cache is cleared SYNCHRONOUSLY on every call — it's a single
   // localStorage removal with zero perf impact, and it guarantees no stale

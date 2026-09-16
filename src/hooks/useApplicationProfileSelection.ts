@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCandidateProfiles, type CandidateProfile } from '@/hooks/useCandidateProfiles';
@@ -47,7 +48,7 @@ export function useApplicationProfileSelection(userId?: string) {
     if (!userId) return;
     let active = true;
     setBaseLoading(true);
-    supabase.rpc('get_my_profile').then(({ data }) => {
+    fetchMyProfile().then(({ data }) => {
       if (!active) return;
       const rows = data as Array<Record<string, unknown>> | null;
       const row = Array.isArray(rows) ? rows[0] : null;

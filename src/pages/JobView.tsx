@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -583,7 +584,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         }
       }
       
-      const { data: profileRows } = await supabase.rpc('get_my_profile');
+      const { data: profileRows } = await fetchMyProfile();
       const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
 
       // 📸 Ögonblicksbild av vald kandidatprofil — exakt samma regler som swipe-flödet.
