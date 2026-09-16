@@ -9,7 +9,8 @@ import type { JobPosting } from '@/hooks/useJobsData';
  *
  *  - Alla tabbars kort renderas EN gång och hålls i DOM:en
  *  - Tab-byte = ren CSS-toggle (display:none) → 0ms React-jobb
- *  - Stabila keys per job.id → React.memo träffar alltid
+ *  - Stabila keys per kortplats → sidbyte uppdaterar befintliga lager i stället
+ *    för att riva och återskapa hela kortet
  *
  * Detta är den faktiska "Spotify-modellen" och löser hack-känslan utan
  * att bryta layouten.
@@ -91,7 +92,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             }}
           >
             {tab.jobs.map((job, idx) => (
-              <div className="job-card-grid-item w-full" key={job.id} style={{ contain: 'layout style paint' }}>
+              <div className="job-card-grid-item w-full" key={`page-slot-${idx}`} style={{ contain: 'layout style paint' }}>
                 {renderCard(job, idx)}
               </div>
             ))}

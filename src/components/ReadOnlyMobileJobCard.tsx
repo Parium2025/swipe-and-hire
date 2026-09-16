@@ -304,10 +304,10 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
 
       {/* Content */}
        <div className="job-card-mobile-body space-y-2.5">
-        {/* Logo circle — always shown, matches employer card */}
+        {/* Logo circle — both layers stay mounted so logo ↔ initials never changes structure */}
         <div className="flex justify-center pt-1">
           <div
-            className="w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg shrink-0 touch-manipulation select-none"
+            className="relative w-14 h-14 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-lg shrink-0 touch-manipulation select-none"
             role={canOpenCompanyProfile ? 'button' : undefined}
             aria-label={canOpenCompanyProfile ? `Visa företagsprofil för ${companyName}` : undefined}
             tabIndex={canOpenCompanyProfile ? 0 : undefined}
@@ -316,11 +316,17 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             onKeyDown={canOpenCompanyProfile ? handleCompanyKeyDown : undefined}
             style={canOpenCompanyProfile ? { cursor: 'pointer' } : undefined}
           >
-            {logoUrl ? (
-              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover rounded-full" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
-            ) : (
-              <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
-            )}
+            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/80 tracking-wide">{initials}</span>
+            <ResilientImage
+              src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
+              alt={logoUrl ? companyName : ''}
+              aria-hidden={logoUrl ? undefined : true}
+              className="absolute inset-0 w-full h-full object-cover rounded-full"
+              draggable={false}
+              decoding="sync"
+              onError={handleLogoError}
+              fallbackClassName="absolute inset-0 w-full h-full"
+            />
           </div>
         </div>
 

@@ -543,7 +543,7 @@ const SavedJobs = () => {
                   const companyName = job.workplace_name?.trim() || 'Företag';
 
                   return (
-                    <CardErrorBoundary key={job.id}>
+                    <CardErrorBoundary key={`saved-page-slot-${index}`}>
                      <div className="relative">
                       <ReadOnlyMobileJobCard
                         job={{
@@ -667,7 +667,7 @@ const SavedJobs = () => {
                 const companyName = job.workplace_name?.trim() || 'Företag';
 
                 return (
-                  <CardErrorBoundary key={job.id}>
+                  <CardErrorBoundary key={`skipped-page-slot-${index}`}>
                     <div className="relative group">
                       <ReadOnlyMobileJobCard
                         job={{
