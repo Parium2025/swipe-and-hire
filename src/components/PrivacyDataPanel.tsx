@@ -116,6 +116,9 @@ export function PrivacyDataPanel({ showDpaLink = false, isEmployer = false }: Pr
         body: {},
       });
       if (error) throw error;
+      if ((data as { error?: string })?.error) {
+        throw new Error((data as { error: string }).error);
+      }
 
       const stamp = new Date().toISOString().slice(0, 10);
       const payload = data as Record<string, unknown>;
