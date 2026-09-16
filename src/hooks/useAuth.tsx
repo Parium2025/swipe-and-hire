@@ -2076,6 +2076,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
 
+  // 🔒 Siffrorna får bara hämtas med en giltig inloggning. Med utgången token
+  // körs anropen som anon och nekas av databasen ("permission denied") — då
+  // skrevs nollor in i cachen och användaren såg 0 sparade jobb/ansökningar.
+  // Här förnyas sessionen först; går det inte hoppar vi över hämtningen helt.
+  const hasUsableSession = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (!session) return false;
+      const expiresAt = session.expires_at ?? 0;
+      if (expiresAt - Math.floor(Date.now() / 1000) > 60) return true;
+      const { data: refreshed, error } = await supabase.auth.refreshSession();
+      return !error && !!refreshed.session;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
     try {
@@ -2104,52 +2122,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
       // Hämta antal sparade jobb för användaren (alla, inklusive utgångna)
-      if (user) {
-        const { count: savedJobsCount } = await supabase
+      // 🔒 Utan en giltig session körs anropen som anon och nekas av databasen.
+      // Då får vi INTE skriva nollor över senast kända siffror.
+      if (user && (await hasUsableSession())) {
+        const { count: savedJobsCount, error: savedJobsError } = await supabase
           .from('saved_jobs')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id);
-        
-        const newSavedJobs = savedJobsCount || 0;
-        setPreloadedSavedJobs(newSavedJobs);
-        try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+
+        if (!savedJobsError) {
+          const newSavedJobs = savedJobsCount || 0;
+          setPreloadedSavedJobs(newSavedJobs);
+          try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+        }
 
         // Hämta antal olästa meddelanden för jobbsökare via aggregerad RPC.
         // 🔥 SCALED: Ett enda anrop istället för N+1 (en count-query per konversation).
         // Vid 50+ chattar går detta från 50+ round-trips till 1.
-        let jsUnread = 0;
         try {
-          const { data: jsSummaries } = await supabase
+          const { data: jsSummaries, error: jsSummariesError } = await supabase
             .rpc('get_conversation_summaries', { p_user_id: user.id });
-          if (Array.isArray(jsSummaries)) {
-            jsUnread = jsSummaries.reduce(
+          if (!jsSummariesError && Array.isArray(jsSummaries)) {
+            const jsUnread = jsSummaries.reduce(
               (sum: number, s: { unread_count?: number }) => sum + (Number(s?.unread_count) || 0),
               0
             );
+            setPreloadedJobSeekerUnreadMessages(jsUnread);
+            writeUnreadBadgeCache(jsUnread, 'job_seeker');
           }
         } catch {
           // Tyst fel — behåller tidigare värde
         }
-        setPreloadedJobSeekerUnreadMessages(jsUnread);
-        writeUnreadBadgeCache(jsUnread, 'job_seeker');
 
         // Hämta antal ansökningar för jobbsökare.
         // 🔗 Exakt samma filtrering som listan (dolda ansökningar räknas inte),
         // annars visade sidomenyn ett högre tal än sidan själv.
-        const { count: myApplications } = await supabase
+        const { count: myApplications, error: myApplicationsError } = await supabase
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
           .eq('applicant_id', user.id)
           .is('hidden_by_applicant_at', null);
 
-        const appCount = myApplications || 0;
-        setPreloadedMyApplications(appCount);
-        writeMyApplicationsCache(appCount);
+        if (!myApplicationsError) {
+          const appCount = myApplications || 0;
+          setPreloadedMyApplications(appCount);
+          writeMyApplicationsCache(appCount);
+        }
       }
     } catch (err) {
       // Silent error handling
     }
-  }, [user]);
+  }, [user, hasUsableSession]);
 
   // 🔗 Exakt spegling av sparade jobb-listan → sidomenyns siffra.
   // Listan (useSavedJobsCache) är sanningen i klienten; när den ändras optimistiskt
@@ -2184,7 +2207,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // OBS: För Dashboard-konsistens hämtar vi organisations-jobb om användaren tillhör en org
   const refreshEmployerStats = useCallback(async () => {
     if (!user) return;
-    
+    // 🔒 Utan giltig session nekas alla anrop nedan av databasen. Hoppa hellre
+    // över hämtningen än att skriva nollor över senast kända siffror.
+    if (!(await hasUsableSession())) return;
+
     try {
       // 🔒 SKALA + SANNING: tidigare laddades hela organisationens annonslista ner
       // (kapades vid 1 000 rader av PostgREST) och status räknades om lokalt med en
@@ -2216,84 +2242,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const orgCounts = (orgCountsRes.data ?? {}) as { active?: number; expired?: number };
       const orgStats = (orgStatsRes.data ?? {}) as { total_views?: number; total_applications?: number };
 
+      // ⛔️ Varje svar skrivs bara om det faktiskt lyckades. Ett nekat anrop
+      // (utgången inloggning) får aldrig ersätta en riktig siffra med 0.
       // Mina annonser = användarens EGNA annonser (samma scope som sidan)
-      const myJobsCount = Number(personalCounts.total) || 0;
-      setPreloadedEmployerMyJobs(myJobsCount);
-      try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, EMPLOYER_MY_JOBS_CACHE_KEY, myJobsCount);
+      if (!personalCountsRes.error) {
+        const myJobsCount = Number(personalCounts.total) || 0;
+        setPreloadedEmployerMyJobs(myJobsCount);
+        try { sessionStorage.setItem(EMPLOYER_MY_JOBS_CACHE_KEY, String(myJobsCount)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, EMPLOYER_MY_JOBS_CACHE_KEY, myJobsCount);
+      }
 
-      const activeCount = Number(orgCounts.active) || 0;
-      setPreloadedEmployerActiveJobs(activeCount);
-      try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, EMPLOYER_ACTIVE_JOBS_CACHE_KEY, activeCount);
+      if (!orgCountsRes.error) {
+        const activeCount = Number(orgCounts.active) || 0;
+        setPreloadedEmployerActiveJobs(activeCount);
+        try { sessionStorage.setItem(EMPLOYER_ACTIVE_JOBS_CACHE_KEY, String(activeCount)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, EMPLOYER_ACTIVE_JOBS_CACHE_KEY, activeCount);
 
-      // Dashboard = aktiva + utgångna (utkast exkluderas)
-      const expiredCount = Number(orgCounts.expired) || 0;
-      const dashboardCount = activeCount + expiredCount;
-      setPreloadedEmployerDashboardJobs(dashboardCount);
-      try { sessionStorage.setItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, String(dashboardCount)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, dashboardCount);
+        // Dashboard = aktiva + utgångna (utkast exkluderas)
+        const expiredCount = Number(orgCounts.expired) || 0;
+        const dashboardCount = activeCount + expiredCount;
+        setPreloadedEmployerDashboardJobs(dashboardCount);
+        try { sessionStorage.setItem(EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, String(dashboardCount)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, EMPLOYER_DASHBOARD_JOBS_CACHE_KEY, dashboardCount);
+      }
 
-      // Samma definition som Dashboard-korten → inget hopp när serversvaret landar
-      const totalViews = Number(orgStats.total_views) || 0;
-      setPreloadedEmployerTotalViews(totalViews);
-      try { sessionStorage.setItem(EMPLOYER_TOTAL_VIEWS_CACHE_KEY, String(totalViews)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, EMPLOYER_TOTAL_VIEWS_CACHE_KEY, totalViews);
+      if (!orgStatsRes.error) {
+        // Samma definition som Dashboard-korten → inget hopp när serversvaret landar
+        const totalViews = Number(orgStats.total_views) || 0;
+        setPreloadedEmployerTotalViews(totalViews);
+        try { sessionStorage.setItem(EMPLOYER_TOTAL_VIEWS_CACHE_KEY, String(totalViews)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, EMPLOYER_TOTAL_VIEWS_CACHE_KEY, totalViews);
 
-      const totalApplications = Number(orgStats.total_applications) || 0;
-      setPreloadedEmployerTotalApplications(totalApplications);
-      try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, totalApplications);
+        const totalApplications = Number(orgStats.total_applications) || 0;
+        setPreloadedEmployerTotalApplications(totalApplications);
+        try { sessionStorage.setItem(EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, String(totalApplications)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, EMPLOYER_TOTAL_APPLICATIONS_CACHE_KEY, totalApplications);
+      }
 
       // Unika kandidater — räknas serverside, inga annons-id:n skickas upp
-      const candidatesCount = typeof candidatesRes.data === 'number' ? candidatesRes.data : 0;
-      setPreloadedEmployerCandidates(candidatesCount);
-      try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, String(candidatesCount)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, EMPLOYER_CANDIDATES_CACHE_KEY, candidatesCount);
+      if (!candidatesRes.error) {
+        const candidatesCount = typeof candidatesRes.data === 'number' ? candidatesRes.data : 0;
+        setPreloadedEmployerCandidates(candidatesCount);
+        try { sessionStorage.setItem(EMPLOYER_CANDIDATES_CACHE_KEY, String(candidatesCount)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, EMPLOYER_CANDIDATES_CACHE_KEY, candidatesCount);
+      }
 
       
       // Hämta antal olästa meddelanden via aggregerad RPC.
       // 🔥 SCALED: Ett enda anrop istället för N+1 (en count-query per konversation).
       // Vid 50+ chattar går detta från 50+ round-trips till 1.
-      let unread = 0;
       try {
-        const { data: unreadSummaries } = await supabase
+        const { data: unreadSummaries, error: unreadError } = await supabase
           .rpc('get_conversation_summaries', { p_user_id: user.id });
-        if (Array.isArray(unreadSummaries)) {
-          unread = unreadSummaries.reduce(
+        if (!unreadError && Array.isArray(unreadSummaries)) {
+          const unread = unreadSummaries.reduce(
             (sum: number, s: { unread_count?: number }) => sum + (Number(s?.unread_count) || 0),
             0
           );
+          setPreloadedUnreadMessages(unread);
+          writeUnreadBadgeCache(unread, 'employer');
         }
       } catch {
         // Tyst fel — behåller tidigare värde i state
       }
 
-      setPreloadedUnreadMessages(unread);
-      writeUnreadBadgeCache(unread, 'employer');
-
       // Hämta antal company reviews för denna employer
-      const { count: reviewsCount } = await supabase
+      const { count: reviewsCount, error: reviewsError } = await supabase
         .from('company_reviews_public')
         .select('id', { count: 'exact', head: true })
         .eq('company_id', user.id);
-      
-      const reviews = reviewsCount || 0;
-      setPreloadedCompanyReviewsCount(reviews);
-      try { sessionStorage.setItem(COMPANY_REVIEWS_COUNT_CACHE_KEY, String(reviews)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, COMPANY_REVIEWS_COUNT_CACHE_KEY, reviews);
+
+      if (!reviewsError) {
+        const reviews = reviewsCount || 0;
+        setPreloadedCompanyReviewsCount(reviews);
+        try { sessionStorage.setItem(COMPANY_REVIEWS_COUNT_CACHE_KEY, String(reviews)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, COMPANY_REVIEWS_COUNT_CACHE_KEY, reviews);
+      }
 
       // Hämta antal UNIKA kandidater i "Mina kandidater" (distinct applicant_id)
-      const { data: myCandidatesDistinct } = await supabase.rpc('count_distinct_my_candidates', { p_recruiter_id: user.id });
-      
-      const myCandidates = (typeof myCandidatesDistinct === 'number' ? myCandidatesDistinct : 0);
-      setPreloadedMyCandidates(myCandidates);
-      try { sessionStorage.setItem(MY_CANDIDATES_CACHE_KEY, String(myCandidates)); } catch {}
-      writeEmployerCountsMirrorEntry(user.id, MY_CANDIDATES_CACHE_KEY, myCandidates);
+      const { data: myCandidatesDistinct, error: myCandidatesError } = await supabase.rpc('count_distinct_my_candidates', { p_recruiter_id: user.id });
+
+      if (!myCandidatesError) {
+        const myCandidates = (typeof myCandidatesDistinct === 'number' ? myCandidatesDistinct : 0);
+        setPreloadedMyCandidates(myCandidates);
+        try { sessionStorage.setItem(MY_CANDIDATES_CACHE_KEY, String(myCandidates)); } catch {}
+        writeEmployerCountsMirrorEntry(user.id, MY_CANDIDATES_CACHE_KEY, myCandidates);
+      }
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
-  }, [user]);
+  }, [user, hasUsableSession]);
 
   // Återfyll siffrorna direkt från den kontoskopade spegeln (localStorage) innan
   // servern hunnit svara — annars renderas menyn utan siffror vid kallstart/ny flik.
