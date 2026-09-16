@@ -129,17 +129,18 @@ const resolveStorageImageUrl = (
 const warmImageCacheBatch = (urls: string[], batchSize = 4) => {
   const unique = [...new Set(urls.filter(Boolean))];
   if (unique.length === 0) return;
-  const container = document.querySelector('[data-main-scroll-container="true"]');
-  if (container?.hasAttribute('data-page-change-active')) {
-    window.addEventListener(
-      'parium:page-change-complete',
-      () => warmImageCacheBatch(unique, batchSize),
-      { once: true },
-    );
-    return;
-  }
   let i = 0;
   const next = () => {
+    const container = document.querySelector('[data-main-scroll-container="true"]');
+    if (container?.hasAttribute('data-page-change-active')) {
+      const remaining = unique.slice(i);
+      window.addEventListener(
+        'parium:page-change-complete',
+        () => warmImageCacheBatch(remaining, batchSize),
+        { once: true },
+      );
+      return;
+    }
     const batch = unique.slice(i, i + batchSize);
     i += batchSize;
     if (batch.length === 0) return;
