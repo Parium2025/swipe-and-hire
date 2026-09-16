@@ -1,3 +1,4 @@
+import { invalidateMyProfileCache } from '@/lib/myProfile';
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
