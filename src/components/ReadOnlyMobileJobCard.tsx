@@ -92,6 +92,8 @@ const GRADIENTS = [
   'from-cyan-900/40 via-blue-900/30 to-slate-900/50',
 ];
 
+const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
 function getGradientForId(id: string) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
@@ -213,28 +215,25 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           : navigate(`/job-view/${job.id}`, { state: { background: location, ...imageState } });
       }}
     >
-      {/* Visual header — image or gradient placeholder */}
+      {/* Visual header — both layers stay mounted so image ↔ initials never changes layout/compositing structure */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
-        {displayUrl ? (
-          <>
-            <ResilientImage
-              src={displayUrl}
-              alt={`${job.title} hos ${companyName}`}
-              decoding="sync"
-              className="w-full h-full object-cover"
-              style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
-              loading={cardIndex < 6 ? 'eager' : 'lazy'}
-              onError={handleImageError}
-              fallbackClassName="w-full h-full"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </>
-        ) : (
-          /* Gradient placeholder with large company initials — matches employer card */
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-            <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
-          </div>
-        )}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+        </div>
+        <div className="absolute inset-0 transform-gpu overflow-hidden">
+          <ResilientImage
+            src={displayUrl ?? TRANSPARENT_IMAGE_SRC}
+            alt={displayUrl ? `${job.title} hos ${companyName}` : ''}
+            aria-hidden={displayUrl ? undefined : true}
+            decoding="sync"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
+            loading={cardIndex < 6 ? 'eager' : 'lazy'}
+            onError={handleImageError}
+            fallbackClassName="w-full h-full"
+          />
+        </div>
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${displayUrl ? 'opacity-100' : 'opacity-0'}`} />
         
         {/* Action button — delete (trash) or save (heart) */}
         {showDeleteButton && (
