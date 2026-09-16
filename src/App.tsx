@@ -42,13 +42,16 @@ import OAuthConsent from "./pages/OAuthConsent";
 // imported module" errors from freezing the app on a dark Suspense fallback.
 function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
   return lazy(() => {
+    const recoveryKey = 'parium-module-recovery-pending';
     let timeout: ReturnType<typeof setTimeout> | undefined;
     const importWithTransientRetry = async () => {
       let lastError: unknown;
 
       for (let attempt = 0; attempt < 3; attempt += 1) {
         try {
-          return await factory();
+          const loadedModule = await factory();
+          sessionStorage.removeItem(recoveryKey);
+          return loadedModule;
         } catch (error) {
           lastError = error;
           if (attempt < 2) {
@@ -63,19 +66,13 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
     const importPromise = importWithTransientRetry();
 
     const recoverFromFailedImport = (err: unknown) => {
-      const key = 'parium-chunk-reload-at';
-      // I dev/preview byts modulerna ut ofta – då ska sidan få hämta om sig
-      // igen efter några sekunder i stället för att visa en felruta.
-      const cooldownMs = import.meta.env.DEV ? 4000 : 60000;
-      const lastAt = Number(sessionStorage.getItem(key) || 0);
-      const canReload = !Number.isFinite(lastAt) || Date.now() - lastAt > cooldownMs;
-
-      if (canReload && typeof window !== 'undefined') {
-        sessionStorage.setItem(key, Date.now().toString());
+      // En enda omladdning får försöka hämta en ny modulversion. Markören
+      // tas bort först när en modul faktiskt har laddats, så ett bestående
+      // nätverksfel kan aldrig skapa en blinkande omladdningsloop.
+      if (typeof window !== 'undefined' && !sessionStorage.getItem(recoveryKey)) {
+        sessionStorage.setItem(recoveryKey, '1');
         try {
-          const url = new URL(window.location.href);
-          url.searchParams.set('_v', Date.now().toString());
-          window.location.replace(url.toString());
+          window.location.reload();
           return new Promise<never>(() => {});
         } catch {
           // fall through to surfaced error state

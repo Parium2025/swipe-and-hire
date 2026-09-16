@@ -19,4 +19,4 @@
 - [x] Verifiera bild ↔ initialer i båda riktningarna utan att ändra hissrörelsen
 - [x] Färdigställ målsidans kort och medielager före hissens första bildruta
 
-- [ ] Stoppa förhandsvisningens omladdningsloop vid saknad dynamisk modul; visa stabil återhämtning utan blinkande.
+- [x] Stoppa förhandsvisningens omladdningsloop vid saknad dynamisk modul; visa stabil återhämtning utan blinkande.
