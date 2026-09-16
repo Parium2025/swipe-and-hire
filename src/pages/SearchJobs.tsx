@@ -665,6 +665,20 @@ const SearchJobs = memo(() => {
         version,
         { width: 64, height: 64, quality: 80, resize: 'contain' },
       ),
+      // Jobbdetaljens större variant får inte börja värmas mitt under hissen.
+      // Ta med den i samma förberedelse så huvudtråden är helt fri vid bytet.
+      buildCardImageUrl(
+        job.job_image_url,
+        'job-images',
+        version,
+        JOB_VIEW_HERO_TRANSFORM,
+      ),
+      buildCardImageUrl(
+        job.job_image_desktop_url || job.job_image_url,
+        'job-images',
+        version,
+        JOB_VIEW_HERO_TRANSFORM,
+      ),
     ];
   }, []);
   const preparePageImages = usePageImagePreparation(
