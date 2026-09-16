@@ -193,19 +193,6 @@ const Subscription = () => {
                 </p>
 
               </div>
-
-              {isPremium && (
-                <div className="pt-2 border-t border-white/10">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-3.5 w-3.5 text-secondary shrink-0" />
-                    <p className="text-xs font-semibold text-white">Premium</p>
-                  </div>
-                  <p className="text-xs text-white/70 mt-0.5">
-                    Din plan är aktiv.
-                  </p>
-
-                </div>
-              )}
             </div>
           </div>
           <span className="inline-flex shrink-0 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
