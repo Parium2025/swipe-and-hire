@@ -25,6 +25,8 @@ const OutreachMessageEmail = ({
       <Container style={container}>
         <Section style={brandSection}>
           <Text style={companyName}>{company_name}</Text>
+          <Section style={accentBar} />
+          {subject ? <Text style={subjectLine}>{subject}</Text> : null}
         </Section>
         <Section style={card}>
           {/* Bibehåller radbrytningar från arbetsgivarens meddelande */}
