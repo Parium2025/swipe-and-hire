@@ -420,6 +420,15 @@ const MyApplications = () => {
               );
             })}
           </div>
+          <div className="pt-2 pb-6">
+            <p className="text-center text-white text-sm font-medium">
+              Visar {Math.min((page - 1) * PAGE_SIZE + 1, visibleApplications.length)}–
+              {Math.min(page * PAGE_SIZE, visibleApplications.length)} av {visibleApplications.length} ansökningar
+            </p>
+            <DashboardPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={handlePageChange} compact={isMobile} />
+          </div>
+          </>
+
         )}
       </section>
 
