@@ -29,13 +29,13 @@ export function ResilientImage({
 }: ResilientImageProps) {
   const fallbackSrcSignature = fallbackSrcs.filter(Boolean).join("|");
   const sourceSignature = `${src ?? ''}|${fallbackSrcSignature}`;
-  const [imageState, setImageState] = useState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+  const [imageState, setImageState] = useState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   // When a persistent card slot receives a different job, stale retry/failure
   // state must never leak into the first frame of the new image.
   const state = imageState.sourceSignature === sourceSignature
     ? imageState
-    : { sourceSignature, attempt: 0, sourceIndex: 0, failed: false };
-  const { attempt, sourceIndex, failed } = state;
+    : { sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false };
+  const { attempt, sourceIndex, failed, broken } = state;
   const sources = [src, ...fallbackSrcs].filter((value, index, array): value is string => {
     return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
   });
@@ -43,14 +43,14 @@ export function ResilientImage({
 
   // Reset when src changes
   useEffect(() => {
-    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   }, [sourceSignature]);
 
   // Auto-recover when tab regains focus or network comes back online
   useEffect(() => {
     if (!failed) return;
     const retry = () => {
-      setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+      setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
     };
     const onVis = () => {
       if (document.visibilityState === "visible") retry();
@@ -71,6 +71,7 @@ export function ResilientImage({
           attempt: 0,
           sourceIndex: current.sourceSignature === sourceSignature ? current.sourceIndex + 1 : 1,
           failed: false,
+          broken: true,
         }));
         return;
       }
@@ -78,12 +79,15 @@ export function ResilientImage({
       // 5 attempts total, gentle backoff. Keeps CDN cache benefits since
       // we only cache-bust after attempt 3 (transient blip vs. stuck cache).
       if (attempt < 4) {
+        setImageState((current) => current.sourceSignature === sourceSignature
+          ? { ...current, broken: true }
+          : current);
         const delays = [500, 1200, 2500, 4500];
         setTimeout(() => setImageState((current) => current.sourceSignature === sourceSignature
           ? { ...current, attempt: current.attempt + 1 }
           : current), delays[attempt]);
       } else {
-        setImageState({ sourceSignature, attempt, sourceIndex, failed: true });
+        setImageState({ sourceSignature, attempt, sourceIndex, failed: true, broken: true });
         onError?.(e);
       }
     },
@@ -91,8 +95,18 @@ export function ResilientImage({
   );
 
   const handleManualRetry = useCallback(() => {
-    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   }, [sourceSignature]);
+
+  const handleLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setImageState((current) => (current.sourceSignature === sourceSignature && current.broken)
+        ? { ...current, broken: false }
+        : current);
+      onLoad?.(e);
+    },
+    [onLoad, sourceSignature]
+  );
 
   if (!activeSrc) {
     return null;
@@ -134,7 +148,11 @@ export function ResilientImage({
       src={finalSrc}
       alt={alt}
       className={className}
-      onLoad={onLoad}
+      // A src that fails to load makes WebKit paint its own broken-image glyph
+      // on top of the card. Keep the element mounted (no layout change) but
+      // invisible while it is broken, so only the initials layer shows.
+      style={broken ? { ...(rest.style ?? {}), visibility: 'hidden' } : rest.style}
+      onLoad={handleLoad}
       onError={handleError}
     />
   );
