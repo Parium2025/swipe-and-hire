@@ -124,6 +124,7 @@ export function ResilientImage({
 
   return (
     <img
+      decoding="async"
       {...rest}
       src={finalSrc}
       alt={alt}
