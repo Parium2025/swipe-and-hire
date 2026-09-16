@@ -94,8 +94,11 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
     if (this.isStaleBundleError(error) && typeof window !== 'undefined') {
       try {
         const key = 'parium_stale_bundle_recovered_at';
+        // I dev/preview byts modulerna ut varje gång koden ändras – då ska
+        // sidan hämta om sig igen i stället för att visa felrutan.
+        const cooldownMs = import.meta.env.DEV ? 4_000 : 60_000;
         const last = Number(window.sessionStorage.getItem(key) || '0');
-        if (!last || Date.now() - last > 60_000) {
+        if (!last || Date.now() - last > cooldownMs) {
           window.sessionStorage.setItem(key, String(Date.now()));
           this.handleReload();
         }
