@@ -73,6 +73,21 @@ export function useAnimatedPageChange(
     // ändras därefter inget innehåll alls.
     flushSync(() => setPage(nextPage));
     container.scrollTop = startTop;
+
+    // Har målsidan färre kort är den kortare än den man står på. Då flyttas
+    // låset upp ovanför listan i stället: kortet man ser blir målsidans sista
+    // kort — aldrig en tom yta — och hissen åker bara den sträcka som
+    // målsidans innehåll faktiskt har.
+    const naturalHeight = container.scrollHeight - heightLock.offsetHeight;
+    const maxNaturalTop = Math.max(0, naturalHeight - container.clientHeight);
+    const topGap = Math.max(0, startTop - maxNaturalTop);
+    if (topGap > 0) {
+      heightLock.style.height = `${topGap}px`;
+      container.insertBefore(heightLock, container.firstChild);
+    }
+    const endTop = topGap;
+    container.scrollTop = startTop;
+
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
         container.scrollTop = startTop;
