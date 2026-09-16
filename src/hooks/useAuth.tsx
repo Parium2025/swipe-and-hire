@@ -2104,47 +2104,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
       // Hämta antal sparade jobb för användaren (alla, inklusive utgångna)
-      if (user) {
-        const { count: savedJobsCount } = await supabase
+      // 🔒 Utan en giltig session körs anropen som anon och nekas av databasen.
+      // Då får vi INTE skriva nollor över senast kända siffror.
+      if (user && (await hasUsableSession())) {
+        const { count: savedJobsCount, error: savedJobsError } = await supabase
           .from('saved_jobs')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id);
-        
-        const newSavedJobs = savedJobsCount || 0;
-        setPreloadedSavedJobs(newSavedJobs);
-        try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+
+        if (!savedJobsError) {
+          const newSavedJobs = savedJobsCount || 0;
+          setPreloadedSavedJobs(newSavedJobs);
+          try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
+        }
 
         // Hämta antal olästa meddelanden för jobbsökare via aggregerad RPC.
         // 🔥 SCALED: Ett enda anrop istället för N+1 (en count-query per konversation).
         // Vid 50+ chattar går detta från 50+ round-trips till 1.
-        let jsUnread = 0;
         try {
-          const { data: jsSummaries } = await supabase
+          const { data: jsSummaries, error: jsSummariesError } = await supabase
             .rpc('get_conversation_summaries', { p_user_id: user.id });
-          if (Array.isArray(jsSummaries)) {
-            jsUnread = jsSummaries.reduce(
+          if (!jsSummariesError && Array.isArray(jsSummaries)) {
+            const jsUnread = jsSummaries.reduce(
               (sum: number, s: { unread_count?: number }) => sum + (Number(s?.unread_count) || 0),
               0
             );
+            setPreloadedJobSeekerUnreadMessages(jsUnread);
+            writeUnreadBadgeCache(jsUnread, 'job_seeker');
           }
         } catch {
           // Tyst fel — behåller tidigare värde
         }
-        setPreloadedJobSeekerUnreadMessages(jsUnread);
-        writeUnreadBadgeCache(jsUnread, 'job_seeker');
 
         // Hämta antal ansökningar för jobbsökare.
         // 🔗 Exakt samma filtrering som listan (dolda ansökningar räknas inte),
         // annars visade sidomenyn ett högre tal än sidan själv.
-        const { count: myApplications } = await supabase
+        const { count: myApplications, error: myApplicationsError } = await supabase
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
           .eq('applicant_id', user.id)
           .is('hidden_by_applicant_at', null);
 
-        const appCount = myApplications || 0;
-        setPreloadedMyApplications(appCount);
-        writeMyApplicationsCache(appCount);
+        if (!myApplicationsError) {
+          const appCount = myApplications || 0;
+          setPreloadedMyApplications(appCount);
+          writeMyApplicationsCache(appCount);
+        }
       }
     } catch (err) {
       // Silent error handling
