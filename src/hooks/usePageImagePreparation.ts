@@ -74,7 +74,7 @@ export function usePageImagePreparation<T>(
   return useCallback(async (targetPage: number) => {
     const urls = urlsByPage(targetPage);
     if (urls.length === 0) return;
-    await imageCache.preloadImages(urls);
+    await imageCache.preloadImages(urls, true);
     await primeRenderedPixels(urls);
   }, [urlsByPage]);
 }
