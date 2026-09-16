@@ -113,10 +113,21 @@ Deno.serve(async (req) => {
 
   if (error) {
     console.error('interview-response failed:', error.message)
+    if (wantsJson) return json({ ok: false, reason: 'error' }, 500)
     return page('Något gick fel', '<p>Svaret kunde inte registreras just nu. Försök igen om en stund eller svara inne i Parium.</p>')
   }
 
   const result = (data ?? {}) as Record<string, unknown>
+
+  if (wantsJson) {
+    return json({
+      ok: result.ok === true,
+      reason: result.reason ?? null,
+      already: result.already === true,
+      jobTitle: typeof result.job_title === 'string' ? result.job_title : null,
+      accept,
+    })
+  }
 
   if (!result.ok) {
     const reason = String(result.reason ?? '')
