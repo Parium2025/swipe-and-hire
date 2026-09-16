@@ -217,7 +217,7 @@ const SavedJobs = () => {
   const getPageImageUrls = useCallback((entry: SavedJob) => {
     const posting = entry.job_postings;
     if (!posting) return [];
-    const version = getImageVersion(posting);
+    const version = getImageVersion(posting as { image_updated_at?: string | null; updated_at?: string | null });
     return [
       buildCardImageUrl(
         posting.job_image_url ?? posting.job_image_desktop_url,

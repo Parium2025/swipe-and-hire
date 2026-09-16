@@ -233,10 +233,17 @@ const Dashboard = memo(() => {
   }), [sliceToPage, tabBuckets]);
 
   const getPageImageUrls = useCallback((job: (typeof tabFilteredJobs)[number]) => {
-    const version = getImageVersion(job);
+    const mediaJob = job as (typeof job) & {
+      job_image_url?: string | null;
+      job_image_desktop_url?: string | null;
+      company_logo_url?: string | null;
+      image_updated_at?: string | null;
+      updated_at?: string | null;
+    };
+    const version = getImageVersion(mediaJob);
     return [
-      buildCardImageUrl(job.job_image_url ?? job.job_image_desktop_url, 'job-images', version, { width: 600, height: 400, quality: 75, resize: 'cover' }),
-      buildCardImageUrl(job.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
+      buildCardImageUrl(mediaJob.job_image_url ?? mediaJob.job_image_desktop_url, 'job-images', version, { width: 600, height: 400, quality: 75, resize: 'cover' }),
+      buildCardImageUrl(mediaJob.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
     ];
   }, []);
   const preparePageImages = usePageImagePreparation(tabFilteredJobs, page, pageSize, getPageImageUrls);
