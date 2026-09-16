@@ -358,6 +358,36 @@ async function dispatchLog(log: OutreachLog) {
       const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
       const emailSubject = subject || `Meddelande från ${context.companyName}`;
 
+      // Intervjuinbjudan får ja/nej-knappar. Svaret uppdaterar intervjun och
+      // arbetsgivaren får notis direkt — samma väg som svar inne i appen.
+      let acceptUrl: string | undefined;
+      let declineUrl: string | undefined;
+      if (log.trigger === 'interview_scheduled' && log.interview_id && log.recipient_user_id) {
+        const { data: existing } = await admin
+          .from('interview_email_tokens')
+          .select('token')
+          .eq('interview_id', log.interview_id)
+          .is('used_at', null)
+          .gt('expires_at', new Date().toISOString())
+          .limit(1)
+          .maybeSingle();
+        let token = existing?.token as string | undefined;
+        if (!token) {
+          const { data: created, error: tokenError } = await admin
+            .from('interview_email_tokens')
+            .insert({ interview_id: log.interview_id, applicant_id: log.recipient_user_id })
+            .select('token')
+            .single();
+          if (tokenError) console.error('Kunde inte skapa svarslänk:', tokenError.message);
+          token = created?.token as string | undefined;
+        }
+        if (token) {
+          const base = `${supabaseUrl}/functions/v1/interview-response?token=${encodeURIComponent(token)}`;
+          acceptUrl = `${base}&answer=yes`;
+          declineUrl = `${base}&answer=no`;
+        }
+      }
+
       // Skickar via Lovable Emails — samma domän (notify.parium.se) som övriga
       // mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
       await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
@@ -373,6 +403,8 @@ async function dispatchLog(log: OutreachLog) {
           company_name: context.companyName,
           subject: emailSubject,
           tracking_url: trackingUrl,
+          accept_url: acceptUrl,
+          decline_url: declineUrl,
         },
       });
 

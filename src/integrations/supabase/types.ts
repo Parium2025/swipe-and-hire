@@ -1592,6 +1592,44 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_email_tokens: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          expires_at: string
+          interview_id: string
+          token: string
+          used_answer: string | null
+          used_at: string | null
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          expires_at?: string
+          interview_id: string
+          token?: string
+          used_answer?: string | null
+          used_at?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          expires_at?: string
+          interview_id?: string
+          token?: string
+          used_answer?: string | null
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_email_tokens_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interviews: {
         Row: {
           applicant_id: string
@@ -4726,6 +4764,10 @@ export type Database = {
         Returns: Json
       }
       reserve_rate_limits: { Args: { _rules: Json }; Returns: Json }
+      respond_to_interview_by_token: {
+        Args: { p_accept: boolean; p_token: string }
+        Returns: Json
+      }
       resume_paused_criteria_eval_runs: {
         Args: { p_min_age_minutes?: number }
         Returns: number
