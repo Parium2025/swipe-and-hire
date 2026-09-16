@@ -239,15 +239,19 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
         onClick={handleBodyClick}
       >
         <div className="flex justify-center mt-1 mb-1">
-          {logoUrl ? (
-            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
-              <img src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} decoding="async" loading="eager" onError={handleLogoError} />
-            </div>
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center shadow-lg">
-              <span className="text-base font-bold text-white/80 tracking-wide">{initials}</span>
-            </div>
-          )}
+          <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
+            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/80 tracking-wide">{initials}</span>
+            <img
+              src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
+              alt={logoUrl ? companyName : ''}
+              aria-hidden={logoUrl ? undefined : true}
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+              decoding="sync"
+              loading="eager"
+              onError={handleLogoError}
+            />
+          </div>
         </div>
         <div className="flex min-h-[clamp(4.25rem,3.8rem+1.6vw,5.25rem)] items-start justify-center px-2">
           <TruncatedText

@@ -12,3 +12,5 @@
 - [ ] Verifiera pass 1–5 med typkontroll, tester och relevanta databas-/livekontroller
 - [x] Samla all sidnumrering i en gemensam, symmetrisk hissrörelse
 - [x] Verifiera Nästa, Föregående och sidnummer på jobbsökar- och arbetsgivarsidor
+- [x] Behåll samma kortplatser och medielager vid sidbyte mellan bild och initialer
+- [x] Verifiera bild ↔ initialer i båda riktningarna utan att ändra hissrörelsen
