@@ -121,7 +121,7 @@ async function ensureConversation(ownerUserId: string, recipientUserId: string, 
 
 async function buildContext(log: OutreachLog) {
   const [{ data: ownerProfile }, { data: recipientProfile }, { data: job }, { data: interview }, { data: application }] = await Promise.all([
-    admin.from('profiles').select('company_name').eq('user_id', log.owner_user_id).maybeSingle(),
+    admin.from('profiles').select('company_name, organization_id').eq('user_id', log.owner_user_id).maybeSingle(),
     log.recipient_user_id ? admin.from('profiles').select('first_name, last_name, email').eq('user_id', log.recipient_user_id).maybeSingle() : Promise.resolve({ data: null }),
     log.job_id ? admin.from('job_postings').select('title').eq('id', log.job_id).maybeSingle() : Promise.resolve({ data: null }),
     log.interview_id ? admin.from('interviews').select('scheduled_at, duration_minutes, location_details, message').eq('id', log.interview_id).maybeSingle() : Promise.resolve({ data: null }),
@@ -138,8 +138,24 @@ async function buildContext(log: OutreachLog) {
     authEmail = authUser?.user?.email ?? null;
   }
 
+  // Saknar profilen ett bolagsnamn används organisationens namn — annars
+  // skulle mejlet felaktigt stå "från Parium".
+  let companyName = ownerProfile?.company_name?.trim() || '';
+  if (!companyName) {
+    let orgId = ownerProfile?.organization_id as string | null | undefined;
+    if (!orgId) {
+      const { data: membership } = await admin.from('user_roles').select('organization_id').eq('user_id', log.owner_user_id).eq('is_active', true).not('organization_id', 'is', null).limit(1).maybeSingle();
+      orgId = membership?.organization_id ?? null;
+    }
+    if (orgId) {
+      const { data: org } = await admin.from('organizations').select('name').eq('id', orgId).maybeSingle();
+      companyName = org?.name?.trim() || '';
+    }
+  }
+  if (!companyName) companyName = 'Parium';
+
   return {
-    companyName: ownerProfile?.company_name || 'Parium',
+    companyName,
     candidateName,
     firstName: application?.first_name || recipientProfile?.first_name || 'där',
     recipientEmail: application?.email || recipientProfile?.email || authEmail || null,
@@ -350,6 +366,8 @@ async function dispatchLog(log: OutreachLog) {
         // key" på varje omförsök, vilket gör att ett tillfälligt fel blir
         // permanent och meddelandet aldrig når kandidaten.
         idempotencyKey: `outreach-${log.id}-a${(log.attempt_count ?? 0) + 1}`,
+        // Mottagaren ska direkt se att mejlet kommer från arbetsgivaren.
+        fromName: `${context.companyName} via Parium`,
         templateData: {
           body,
           company_name: context.companyName,
