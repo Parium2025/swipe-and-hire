@@ -20,6 +20,8 @@ import { getCompanyInitials } from '@/lib/companyInitials';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchPriority } from '@/lib/fetchPriority';
 
+const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
 
 interface MobileJobCardProps {
   job: JobPosting;
@@ -179,24 +181,23 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
           <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
-          {displayUrl && (
-            <img
-              src={displayUrl}
-              alt={job.title}
-              decoding="sync"
-              className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
-                if (!v || v === 'center') return '50%';
-                if (v === 'top') return '20%';
-                if (v === 'bottom') return '80%';
-                return `${v}%`;
-              })()}` }}
-              loading={cardIndex < 6 ? 'eager' : 'lazy'}
-              {...fetchPriority(cardIndex < 3 ? 'high' : 'auto')}
-              onError={handleImageError}
-            />
-          )}
+          <img
+            src={displayUrl ?? TRANSPARENT_IMAGE_SRC}
+            alt={displayUrl ? job.title : ''}
+            aria-hidden={displayUrl ? undefined : true}
+            decoding="sync"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: `center ${(() => {
+              const v = job.image_focus_position;
+              if (!v || v === 'center') return '50%';
+              if (v === 'top') return '20%';
+              if (v === 'bottom') return '80%';
+              return `${v}%`;
+            })()}` }}
+            loading={cardIndex < 6 ? 'eager' : 'lazy'}
+            {...fetchPriority(cardIndex < 3 ? 'high' : 'auto')}
+            onError={handleImageError}
+          />
         </div>
         <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${displayUrl ? 'opacity-100' : 'opacity-0'}`} />
 
