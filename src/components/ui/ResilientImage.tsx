@@ -29,13 +29,13 @@ export function ResilientImage({
 }: ResilientImageProps) {
   const fallbackSrcSignature = fallbackSrcs.filter(Boolean).join("|");
   const sourceSignature = `${src ?? ''}|${fallbackSrcSignature}`;
-  const [imageState, setImageState] = useState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+  const [imageState, setImageState] = useState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   // When a persistent card slot receives a different job, stale retry/failure
   // state must never leak into the first frame of the new image.
   const state = imageState.sourceSignature === sourceSignature
     ? imageState
-    : { sourceSignature, attempt: 0, sourceIndex: 0, failed: false };
-  const { attempt, sourceIndex, failed } = state;
+    : { sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false };
+  const { attempt, sourceIndex, failed, broken } = state;
   const sources = [src, ...fallbackSrcs].filter((value, index, array): value is string => {
     return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
   });
