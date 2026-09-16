@@ -256,6 +256,20 @@ class ImageCache {
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
 
+      // En hämtad fil är inte nödvändigtvis en färdigrenderad bild i WebKit.
+      // Dekoda blobben innan loadImage löser ut, så bakgrundsvärmningen även
+      // förbereder själva bitmapen och inte lämnar avkodningen till sidbytet.
+      if (typeof Image !== 'undefined') {
+        try {
+          const image = new Image();
+          image.src = objectUrl;
+          await image.decode?.();
+        } catch {
+          // WebKit kan sakna/avbryta decode trots att bilden är giltig. Cacha
+          // den ändå; <img> har fortfarande sin vanliga felhantering.
+        }
+      }
+
       const cached: CachedImage = {
         url,
         blob,
