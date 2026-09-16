@@ -15,7 +15,10 @@ const AccountConfirmationEmail = ({
   confirmation_url = 'https://parium.se',
 }: Props) => (
   <Html lang="sv" dir="ltr">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+    </Head>
     <Preview>Bekräfta ditt Parium-konto för att komma igång</Preview>
     <Body style={main}>
       <Container style={container}>

@@ -21,7 +21,10 @@ const TeamInvitationEmail = ({
   expires_at = '',
 }: Props) => (
   <Html lang="sv" dir="ltr">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+    </Head>
     <Preview>{`${inviter_name} har bjudit in dig till ${company_name} på Parium`}</Preview>
     <Body style={main}>
       <Container style={container}>

@@ -38,7 +38,10 @@ const AdminAlertEmail = ({
   const accent = severityAccent(severity)
   return (
     <Html lang="sv" dir="ltr">
-      <Head />
+      <Head>
+      <meta charSet="utf-8" />
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+    </Head>
       <Preview>{`${alert_emoji} ${alert_title}`}</Preview>
       <Body style={main}>
         <Container style={container}>
