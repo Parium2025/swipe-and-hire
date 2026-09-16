@@ -73,11 +73,24 @@ export function useAnimatedPageChange(
     // ändras därefter inget innehåll alls.
     flushSync(() => setPage(nextPage));
     container.scrollTop = startTop;
+
+    // Är målsidan kortare (t.ex. sista sidan) skulle låset bara vara tom yta
+    // i vyn — hissen skulle starta från ett tomt fält. Börja i stället från
+    // den lägsta position där målsidans innehåll fyller skärmen.
+    const lockHeight = heightLock.offsetHeight;
+    const naturalHeight = container.scrollHeight - lockHeight;
+    const maxNaturalTop = Math.max(0, naturalHeight - container.clientHeight);
+    const animationStartTop = Math.min(startTop, maxNaturalTop);
+    if (animationStartTop < startTop) {
+      heightLock.style.height = '0px';
+    }
+    container.scrollTop = animationStartTop;
+
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
-        container.scrollTop = startTop;
+        container.scrollTop = animationStartTop;
         requestAnimationFrame(() => {
-          container.scrollTop = startTop;
+          container.scrollTop = animationStartTop;
           resolve();
         });
       });
@@ -101,7 +114,7 @@ export function useAnimatedPageChange(
     };
     restoreStylesRef.current = restore;
 
-    const durationMs = Math.min(820, Math.max(550, startTop * 0.08));
+    const durationMs = Math.min(820, Math.max(550, animationStartTop * 0.08));
     const startedAt = performance.now();
 
     const animate = (now: number) => {
@@ -110,7 +123,7 @@ export function useAnimatedPageChange(
       const eased = progress < 0.5
         ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const nextTop = startTop * (1 - eased);
+      const nextTop = animationStartTop * (1 - eased);
       container.scrollTop = nextTop;
 
       if (progress < 1) {
