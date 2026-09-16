@@ -182,7 +182,7 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
     templates: {
       email: {
         name: 'Jobb avslutat · professionellt mejl',
-        subject: 'Uppdatering kring {job_title}',
+        subject: 'Uppdatering om din ansökan – {job_title}',
         body: 'Hej {candidate_name},\n\nTjänsten {job_title} hos {company_name} är nu avslutad. Tack för ditt intresse och för att du sökte till oss. Vi har valt att gå vidare med andra kandidater i den här processen.\n\nVi hoppas att du söker igen så snart nya tjänster dyker upp hos oss.\n\nVänliga hälsningar,\n{company_name}',
       },
       push: {
