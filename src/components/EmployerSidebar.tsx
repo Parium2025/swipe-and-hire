@@ -424,7 +424,7 @@ export function EmployerSidebar() {
                             <span className="text-white font-normal ml-1">({preloadedMyCandidates})</span>
                           )}
                           {item.url === '/messages' && preloadedUnreadMessages > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center align-middle bg-destructive text-destructive-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                            <span className="ml-1.5 inline-flex items-center justify-center align-middle h-5 min-w-[20px] px-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-semibold leading-none">
                               {preloadedUnreadMessages}
                             </span>
                           )}
