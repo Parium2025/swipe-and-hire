@@ -148,7 +148,11 @@ export function ResilientImage({
       src={finalSrc}
       alt={alt}
       className={className}
-      onLoad={onLoad}
+      // A src that fails to load makes WebKit paint its own broken-image glyph
+      // on top of the card. Keep the element mounted (no layout change) but
+      // invisible while it is broken, so only the initials layer shows.
+      style={broken ? { ...(rest.style ?? {}), visibility: 'hidden' } : rest.style}
+      onLoad={handleLoad}
       onError={handleError}
     />
   );
