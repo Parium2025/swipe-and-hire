@@ -2156,7 +2156,7 @@ const Profile = () => {
           </p>
         )}
         <div
-          className="mt-1 h-4 text-xs text-white/70"
+          className="mt-1 h-4 text-xs text-white"
           aria-live="polite"
           role="status"
         >

@@ -292,9 +292,7 @@ const Subscription = () => {
         <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full">
-                <Crown className="h-4 w-4 text-white" />
-              </div>
+              <Crown className="h-5 w-5 text-white" />
               <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
                 Avbryt Premium?
               </AlertDialogTitle>
@@ -305,13 +303,13 @@ const Subscription = () => {
             Din Premium-prenumeration förblir aktiv perioden ut. Därefter återgår ditt konto till Start-planen. Du kan när som helst återaktivera Premium.
           </AlertDialogDescription>
 
-          <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-center">
-            <AlertDialogCancel className="w-full sm:w-auto h-10 px-5 rounded-full text-sm !bg-white/5 !text-white !border-white/10 backdrop-blur-sm !transition-none hover:!bg-white/10 hover:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0">
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center">
+            <AlertDialogCancel className="btn-dialog-action mt-0 flex-1 rounded-full border-white/20 !bg-white/10 !text-white backdrop-blur-sm md:hover:!bg-white/20 md:hover:!text-white">
               Behåll Premium
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructiveSoft"
-              className="btn-dialog-action w-full sm:w-auto text-sm flex items-center justify-center rounded-full"
+              className="btn-dialog-action flex-1 rounded-full text-sm"
               onClick={() =>
                 navigate(
                   `/support?category=billing&message=${encodeURIComponent('Jag vill avsluta min Premium-prenumeration.')}`,
