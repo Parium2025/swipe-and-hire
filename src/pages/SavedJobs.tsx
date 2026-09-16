@@ -722,7 +722,14 @@ const SavedJobs = () => {
                  );
                })}
              </div>
-             <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+             <div className="pt-2 pb-6">
+               <p className="text-center text-white text-sm font-medium">
+                 Visar {Math.min((page - 1) * PAGE_SIZE + 1, filteredSkippedJobs.length)}–
+                 {Math.min(page * PAGE_SIZE, filteredSkippedJobs.length)} av {filteredSkippedJobs.length} skippade jobb
+               </p>
+               <DashboardPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={handlePageChange} compact={isMobile} />
+             </div>
+
             </>
            )}
          </>
