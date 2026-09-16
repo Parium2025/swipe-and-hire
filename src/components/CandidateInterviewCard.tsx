@@ -274,6 +274,25 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
             </Button>
           )}
         </div>
+
+        {/* Kalenderfilen fungerar i Google, Outlook, Apple och övriga kalendrar.
+            Avbokade möten ska aldrig kunna läggas in. */}
+        {(isPending || isConfirmed) && (
+          <Button
+            onClick={() => {
+              window.open(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-interview-ics?id=${interview.id}`,
+                '_blank',
+                'noopener,noreferrer',
+              );
+            }}
+            variant="ghost"
+            className="w-full text-white hover:bg-white/10 border border-white/10"
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Lägg till i kalender
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
