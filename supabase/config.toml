@@ -81,6 +81,8 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.outreach-open-track]
     verify_jwt = false
+  [functions.interview-response]
+    verify_jwt = false
   [functions.criteria-eval-worker]
     verify_jwt = false
   [functions.purge-deleted-jobs]

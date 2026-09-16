@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.respond_to_interview_by_token(uuid, boolean) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.respond_to_interview_by_token(uuid, boolean) TO service_role;

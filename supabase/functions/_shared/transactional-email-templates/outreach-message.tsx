@@ -1,7 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Html, Img, Preview, Section, Text,
+  Body, Button, Container, Head, Html, Img, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -10,6 +10,8 @@ interface Props {
   company_name?: string
   subject?: string
   tracking_url?: string
+  accept_url?: string
+  decline_url?: string
 }
 
 const OutreachMessageEmail = ({
@@ -17,6 +19,8 @@ const OutreachMessageEmail = ({
   company_name = 'företaget',
   subject,
   tracking_url,
+  accept_url,
+  decline_url,
 }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head>
@@ -35,6 +39,16 @@ const OutreachMessageEmail = ({
           {/* Bibehåller radbrytningar från arbetsgivarens meddelande */}
           <Text style={messageText}>{body}</Text>
         </Section>
+        {accept_url && decline_url ? (
+          <Section style={answerSection}>
+            <Text style={answerLabel}>Kan du komma?</Text>
+            <Button href={accept_url} style={acceptButton}>Ja, jag kommer</Button>
+            <Button href={decline_url} style={declineButton}>Nej, jag kan inte</Button>
+            <Text style={answerHint}>
+              Ditt svar skickas direkt till {company_name}. Du kan också svara inne i Parium.
+            </Text>
+          </Section>
+        ) : null}
         <Text style={footer}>Skickat av {company_name} via Parium</Text>
         <Text style={noReply}>
           Svara inte på detta mejl. Det är skickat från en automatisk utgående adress.
@@ -46,6 +60,7 @@ const OutreachMessageEmail = ({
     </Body>
   </Html>
 )
+
 
 export const template = {
   component: OutreachMessageEmail,
@@ -66,6 +81,11 @@ const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', bo
 const subjectLine = { fontSize: '15px', fontWeight: 600 as const, color: '#1E4B8A', margin: '14px 0 0' }
 const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0' }
 const messageText = { margin: 0, fontSize: '15px', lineHeight: '1.7', color: '#334155', whiteSpace: 'pre-line' as const }
+const answerSection = { margin: '24px 0 0', textAlign: 'center' as const }
+const answerLabel = { fontSize: '14px', fontWeight: 600 as const, color: '#001F3D', margin: '0 0 14px' }
+const acceptButton = { backgroundColor: '#1E4B8A', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
+const declineButton = { backgroundColor: '#ffffff', color: '#1E4B8A', fontSize: '15px', fontWeight: 600 as const, padding: '11px 23px', borderRadius: '999px', border: '1px solid #cbd5e1', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
+const answerHint = { fontSize: '12px', color: '#94a3b8', margin: '6px 0 0' }
 const footer = { fontSize: '12px', color: '#94a3b8', margin: '20px 0 0', textAlign: 'center' as const }
 const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
 const pixel = { display: 'block', width: '1px', height: '1px', opacity: 0, border: 0, overflow: 'hidden' as const }
