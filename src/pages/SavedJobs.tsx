@@ -39,6 +39,8 @@ type TabValue = 'saved' | 'skipped';
 
 const SavedJobs = () => {
   const { refreshSidebarCounts } = useAuth();
+  const isMobile = useIsMobile();
+
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
