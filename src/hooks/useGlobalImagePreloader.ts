@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
@@ -89,7 +90,7 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
 
         // Media-kolumnerna är inte läsbara direkt i `profiles` — använd den
         // säkra RPC:n som returnerar hela den egna profilen.
-        const { data: myProfileRows } = await supabase.rpc('get_my_profile');
+        const { data: myProfileRows } = await fetchMyProfile();
         const currentProfile = (Array.isArray(myProfileRows) ? myProfileRows[0] : null) as
           | { profile_image_url?: string | null; cover_image_url?: string | null; video_url?: string | null }
           | null;

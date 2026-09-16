@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { recordJobView } from '@/lib/recordJobView';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -382,7 +383,7 @@ const JobApplication = () => {
 
     if (!selectedProfile && getIsOnline()) {
       try {
-        const { data: myProfileRows } = await supabase.rpc('get_my_profile');
+        const { data: myProfileRows } = await fetchMyProfile();
         const currentProfile = (Array.isArray(myProfileRows) ? myProfileRows[0] : null) as
           | { profile_image_url?: string | null; video_url?: string | null; cover_image_url?: string | null }
           | null;

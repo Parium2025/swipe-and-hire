@@ -1,3 +1,4 @@
+import { fetchMyProfile, invalidateMyProfileCache } from '@/lib/myProfile';
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { readUnreadBadgeCache, writeUnreadBadgeCache, UNREAD_MESSAGES_CACHE_KEY, JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
@@ -791,8 +792,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
       // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
       // the `authenticated` role to prevent cross-row leakage.
-      const { data: profileRows, error: profileError } = await supabase
-        .rpc('get_my_profile');
+      const { data: profileRows, error: profileError } = await fetchMyProfile({ force: true });
       if (isStale()) return;
       const profileData = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
 

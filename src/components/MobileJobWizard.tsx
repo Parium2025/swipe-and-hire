@@ -1,3 +1,4 @@
+import { fetchMyProfile } from '@/lib/myProfile';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { isValidClockTime } from '@/lib/clockTime';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
@@ -1262,7 +1263,7 @@ const MobileJobWizard = ({
   const fetchProfile = async () => {
     if (!user) return;
     
-    const { data: profileRows } = await supabase.rpc('get_my_profile');
+    const { data: profileRows } = await fetchMyProfile();
     const data = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
 
     
