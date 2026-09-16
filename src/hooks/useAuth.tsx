@@ -2172,7 +2172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       // Silent error handling
     }
-  }, [user]);
+  }, [user, hasUsableSession]);
 
   // 🔗 Exakt spegling av sparade jobb-listan → sidomenyns siffra.
   // Listan (useSavedJobsCache) är sanningen i klienten; när den ändras optimistiskt
