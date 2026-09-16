@@ -123,7 +123,7 @@ export function useAnimatedPageChange(
       const eased = progress < 0.5
         ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const nextTop = startTop * (1 - eased);
+      const nextTop = animationStartTop * (1 - eased);
       container.scrollTop = nextTop;
 
       if (progress < 1) {
