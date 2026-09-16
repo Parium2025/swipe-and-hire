@@ -63,11 +63,15 @@ function lazyWithRetry(factory: () => Promise<{ default: React.ComponentType<any
     const importPromise = importWithTransientRetry();
 
     const recoverFromFailedImport = (err: unknown) => {
-      const key = 'parium-chunk-reload-once';
-      const alreadyRetried = sessionStorage.getItem(key);
+      const key = 'parium-chunk-reload-at';
+      // I dev/preview byts modulerna ut ofta – då ska sidan få hämta om sig
+      // igen efter några sekunder i stället för att visa en felruta.
+      const cooldownMs = import.meta.env.DEV ? 4000 : 60000;
+      const lastAt = Number(sessionStorage.getItem(key) || 0);
+      const canReload = !Number.isFinite(lastAt) || Date.now() - lastAt > cooldownMs;
 
-      if (!alreadyRetried && typeof window !== 'undefined') {
-        sessionStorage.setItem(key, '1');
+      if (canReload && typeof window !== 'undefined') {
+        sessionStorage.setItem(key, Date.now().toString());
         try {
           const url = new URL(window.location.href);
           url.searchParams.set('_v', Date.now().toString());
