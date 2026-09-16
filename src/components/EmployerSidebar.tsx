@@ -423,11 +423,11 @@ export function EmployerSidebar() {
                           {item.url === '/my-candidates' && preloadedMyCandidates > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedMyCandidates})</span>
                           )}
-                        </span>
-                      )}
-                      {item.url === '/messages' && preloadedUnreadMessages > 0 && !collapsed && (
-                        <span className="bg-destructive text-destructive-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                          {preloadedUnreadMessages}
+                          {item.url === '/messages' && preloadedUnreadMessages > 0 && (
+                            <span className="ml-2 inline-flex items-center justify-center align-middle bg-destructive text-destructive-foreground text-xs font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                              {preloadedUnreadMessages}
+                            </span>
+                          )}
                         </span>
                       )}
                     </button>
