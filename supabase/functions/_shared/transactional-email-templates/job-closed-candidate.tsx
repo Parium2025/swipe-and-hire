@@ -17,7 +17,10 @@ const JobClosedCandidateEmail = ({
   company_name = 'Arbetsgivaren',
 }: Props) => (
   <Html lang="sv" dir="ltr">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+    </Head>
     <Preview>{`Annonsen "${job_title}" har utgått`}</Preview>
     <Body style={main}>
       <Container style={container}>
