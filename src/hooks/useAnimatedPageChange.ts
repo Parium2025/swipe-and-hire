@@ -47,7 +47,7 @@ export function useAnimatedPageChange(
     // före landningen, vilket syns som en blixt i Safari. Markera endast det
     // pågående sidbytet så CSS kan stänga av entréanimationen utan att röra
     // hissens timing, easing eller bytespunkt.
-    container.dataset.pageChangeActive = 'true';
+    container.dataset.suppressGridEntryAnimation = 'true';
 
     // Lägg låset före sidbytet. Att räkna ut och lägga till höjd efter render
     // är för sent i Safari: scrollTop har då redan klampats av en kortare sida.
@@ -66,7 +66,6 @@ export function useAnimatedPageChange(
       heightLock.remove();
       container.style.overflowAnchor = previousOverflowAnchor;
       container.style.scrollBehavior = previousScrollBehavior;
-      delete container.dataset.pageChangeActive;
       if (previousMomentumScrolling) {
         container.style.setProperty('-webkit-overflow-scrolling', previousMomentumScrolling);
       } else {
