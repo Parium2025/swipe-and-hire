@@ -2331,7 +2331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
     }
-  }, [user]);
+  }, [user, hasUsableSession]);
 
   // Återfyll siffrorna direkt från den kontoskopade spegeln (localStorage) innan
   // servern hunnit svara — annars renderas menyn utan siffror vid kallstart/ny flik.
