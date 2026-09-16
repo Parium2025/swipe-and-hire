@@ -190,7 +190,11 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
     <Card 
       data-scroll-anchor-id={job.id}
       className="job-card-mobile-shell group bg-white/5 border-white/20 overflow-hidden cursor-pointer transition-[background-color,border-color] duration-150"
-      style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 420px' } as React.CSSProperties}
+      // Sidnumrerade gridar styr content-visibility i index.css. Ett inline
+      // `auto` vann tidigare över gridens `visible` och fick WebKit att väcka
+      // flera nya kort samtidigt precis före toppen — den synliga blixten.
+      // Utanför grid gäller fortfarande grundklassens content-visibility:auto.
+      style={{ contain: 'layout style paint' } as React.CSSProperties}
       onPointerDown={() => {
         warmJobViewImage();
         // Snapshota exakt scroll-position synkront innan navigation,
