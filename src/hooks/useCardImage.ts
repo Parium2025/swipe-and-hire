@@ -126,11 +126,10 @@ export function useCardImage(
 
   // Bild-CDN:en kan neka transformering (t.ex. mycket stora original) → fall
   // tillbaka på originalbilden så att kortet aldrig blir tomt.
-  const [transformFailed, setTransformFailed] = useState(false);
-
-  useEffect(() => {
-    setTransformFailed(false);
-  }, [normalizedRawPath]);
+  const [failedSource, setFailedSource] = useState<string | null>(null);
+  // Kortplatserna återanvänds mellan sidor. Knyt därför feltillståndet till
+  // exakt bildkälla så en gammal transformmiss aldrig syns i nästa korts frame.
+  const transformFailed = failedSource === normalizedRawPath;
 
   const originalUrl = useMemo(() => {
     if (!normalizedRawPath || normalizedRawPath.startsWith('http')) return null;
@@ -149,7 +148,7 @@ export function useCardImage(
       .loadImage(resolvedUrl)
       .catch(() => {
         // Transformeringen nekades → visa originalbilden istället.
-        if (!cancelled && originalUrl && resolvedUrl !== originalUrl) setTransformFailed(true);
+        if (!cancelled && originalUrl && resolvedUrl !== originalUrl) setFailedSource(normalizedRawPath);
       });
     return () => {
       cancelled = true;
@@ -185,10 +184,10 @@ export function useCardImage(
       }
       // Transformerad URL kunde inte renderas → visa originalbilden istället
       if (originalUrl && e.currentTarget.src !== originalUrl) {
-        setTransformFailed(true);
+        setFailedSource(normalizedRawPath);
       }
     },
-    [resolvedUrl, originalUrl]
+    [normalizedRawPath, resolvedUrl, originalUrl]
   );
 
   return { displayUrl, handleError };
