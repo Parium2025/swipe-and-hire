@@ -4,6 +4,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Users, Info, Lightbulb, CalendarCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
+
 
 export interface TeamMemberStats {
   user_id: string;
