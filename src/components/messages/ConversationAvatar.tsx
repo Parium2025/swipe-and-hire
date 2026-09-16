@@ -1,10 +1,18 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useEffect, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
 import { Users } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
+
+// Transparent 1x1 reserv så bildytan alltid finns kvar — ingen strukturbyte
+// när ett konto saknar bild eller när bilden dyker upp senare.
+const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+// Adresser som redan laddats i den här sessionen ritas direkt vid remount.
+const loadedAvatarUrls = new Set<string>();
+
 
 interface ConversationAvatarProps {
   profile: ProfileData | null | undefined;
@@ -67,18 +75,50 @@ export function ConversationAvatar({
     );
   }
 
-  // Only delay fallback if there's an actual image URL to wait for
+  // Permanenta lager: initialer och bildyta ligger alltid kvar. Radix
+  // AvatarImage monterade om bilden vid varje besök och visade initialer
+  // först — det upplevdes som att loggan "laddades om" varje gång.
   const hasImageUrl = !!resolvedUrl;
+  const isReady = hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:'));
+  const [loaded, setLoaded] = useState(isReady);
+
+  useEffect(() => {
+    setLoaded(hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:')));
+  }, [resolvedUrl, hasImageUrl]);
 
   return (
-    <Avatar className={cn(sizeClasses[size], 'border border-white/10', className)}>
-      <AvatarImage src={resolvedUrl || ''} />
-      <AvatarFallback 
-        className={cn("bg-white/10 text-pure-white", fallbackClassName)} 
-        delayMs={hasImageUrl ? 150 : 0}
+    <div
+      className={cn(
+        sizeClasses[size],
+        'relative shrink-0 overflow-hidden rounded-full border border-white/10 bg-white/10 flex items-center justify-center',
+        className,
+      )}
+    >
+      <span
+        className={cn(
+          'text-pure-white font-medium',
+          size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-base',
+          fallbackClassName,
+        )}
       >
         {getInitials()}
-      </AvatarFallback>
-    </Avatar>
+      </span>
+      <img
+        src={resolvedUrl || TRANSPARENT_PIXEL}
+        alt=""
+        aria-hidden="true"
+        decoding="sync"
+        className={cn(
+          'absolute inset-0 h-full w-full object-cover',
+          loaded && hasImageUrl ? 'opacity-100' : 'opacity-0',
+        )}
+        onLoad={() => {
+          if (resolvedUrl) loadedAvatarUrls.add(resolvedUrl);
+          setLoaded(true);
+        }}
+        onError={() => setLoaded(false)}
+      />
+    </div>
   );
 }
+

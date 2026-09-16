@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,6 +41,8 @@ type TabValue = 'saved' | 'skipped';
 
 const SavedJobs = () => {
   const { refreshSidebarCounts } = useAuth();
+  const isMobile = useIsMobile();
+
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -531,11 +535,9 @@ const SavedJobs = () => {
               ) : (
 
               <>
-              {totalPages > 1 && (
-                <p className="mb-3 text-center text-xs text-white/80">
-                  Visar {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sortedJobs.length)} av {sortedJobs.length} jobb
-                </p>
-              )}
+
+
+
               <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedSavedJobs.length === 1 ? ' job-card-grid-single' : pagedSavedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
                 {pagedSavedJobs.map((savedJob, index) => {
                   const job = savedJob.job_postings!;
@@ -585,7 +587,14 @@ const SavedJobs = () => {
                   );
                 })}
               </div>
-              <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+              <div className="pt-2 pb-6">
+                <p className="text-center text-white text-sm font-medium">
+                  Visar {Math.min((page - 1) * PAGE_SIZE + 1, sortedJobs.length)}–
+                  {Math.min(page * PAGE_SIZE, sortedJobs.length)} av {sortedJobs.length} sparade jobb
+                </p>
+                <DashboardPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={handlePageChange} compact={isMobile} />
+              </div>
+
               </>
               )}
             </>
@@ -655,11 +664,8 @@ const SavedJobs = () => {
             {selectionToolbar}
 
 
-            {totalPages > 1 && (
-              <p className="mb-3 text-center text-xs text-white/80">
-                Visar {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredSkippedJobs.length)} av {filteredSkippedJobs.length} jobb
-              </p>
-            )}
+
+
             <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedSkippedJobs.length === 1 ? ' job-card-grid-single' : pagedSkippedJobs.length === 2 ? ' job-card-grid-double' : ''}`}>
               {pagedSkippedJobs.map((skippedJob, index) => {
                 const job = skippedJob.job_postings!;
@@ -720,7 +726,14 @@ const SavedJobs = () => {
                  );
                })}
              </div>
-             <DashboardPagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+             <div className="pt-2 pb-6">
+               <p className="text-center text-white text-sm font-medium">
+                 Visar {Math.min((page - 1) * PAGE_SIZE + 1, filteredSkippedJobs.length)}–
+                 {Math.min(page * PAGE_SIZE, filteredSkippedJobs.length)} av {filteredSkippedJobs.length} skippade jobb
+               </p>
+               <DashboardPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={handlePageChange} compact={isMobile} />
+             </div>
+
             </>
            )}
          </>

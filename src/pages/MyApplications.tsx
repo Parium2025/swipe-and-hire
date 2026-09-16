@@ -38,7 +38,17 @@ import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { isInterviewOver } from '@/lib/interviewTime';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
+import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion, JOB_CARD_TRANSFORM } from '@/lib/imageTransforms';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
+
+/** Samma sidstorlek som Sparade jobb / Mina annonser — 18 kort per sida. */
+const PAGE_SIZE = 18;
+
 
 // Application shape lives in src/hooks/myApplicationsShared.ts —
 // single source of truth for the initial query, background sync and realtime.
@@ -187,6 +197,34 @@ const MyApplications = () => {
 
   const visibleApplications = activeTab === 'active' ? activeApplications : expiredApplications;
 
+  // 📄 Sidnavigering — exakt samma modell som Sparade jobb / Mina annonser:
+  // 18 kort per sida, målsidans bilder färdigställs före hissrörelsen.
+  const isMobile = useIsMobile();
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(visibleApplications.length / PAGE_SIZE));
+  const getPageImageUrls = useCallback((entry: (typeof visibleApplications)[number]) => {
+    const job = entry?.job_postings as any;
+    if (!job) return [];
+    const version = getImageVersion(job as { image_updated_at?: string | null; updated_at?: string | null });
+    return [
+      buildCardImageUrl(job.job_image_url ?? job.job_image_desktop_url, 'job-images', version, JOB_CARD_TRANSFORM),
+      buildCardImageUrl(job.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
+    ];
+  }, []);
+  const preparePageImages = usePageImagePreparation(visibleApplications, page, PAGE_SIZE, getPageImageUrls);
+  const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
+
+  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const pagedApplications = useMemo(
+    () => visibleApplications.slice((page - 1) * PAGE_SIZE, (page - 1) * PAGE_SIZE + PAGE_SIZE),
+    [visibleApplications, page],
+  );
+
+
 
   const handleDeleteClick = (jobId: string, jobTitle: string) => {
     // Find the application by job_id
@@ -331,8 +369,10 @@ const MyApplications = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${visibleApplications.length === 1 ? ' job-card-grid-single' : visibleApplications.length === 2 ? ' job-card-grid-double' : ''}`}>
-            {visibleApplications.map((application) => {
+          <>
+          <div className={`job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4${pagedApplications.length === 1 ? ' job-card-grid-single' : pagedApplications.length === 2 ? ' job-card-grid-double' : ''}`}>
+            {pagedApplications.map((application, index) => {
+
               const job = application.job_postings;
               if (!job) return null;
 
@@ -350,7 +390,7 @@ const MyApplications = () => {
 
               return (
                 <ReadOnlyMobileJobCard
-                  key={application.id}
+                  key={`application-page-slot-${index}`}
                   job={{
                     id: job.id,
                     title: job.title,
@@ -380,6 +420,15 @@ const MyApplications = () => {
               );
             })}
           </div>
+          <div className="pt-2 pb-6">
+            <p className="text-center text-white text-sm font-medium">
+              Visar {Math.min((page - 1) * PAGE_SIZE + 1, visibleApplications.length)}–
+              {Math.min(page * PAGE_SIZE, visibleApplications.length)} av {visibleApplications.length} ansökningar
+            </p>
+            <DashboardPagination page={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={handlePageChange} compact={isMobile} />
+          </div>
+          </>
+
         )}
       </section>
 
