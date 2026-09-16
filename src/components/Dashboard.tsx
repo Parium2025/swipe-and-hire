@@ -17,7 +17,6 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { EmployerJobCard } from '@/components/dashboard/EmployerJobCard';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
-import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 import { useEmployerJobsCounts, useEmployerDashboardStats } from '@/hooks/useEmployerScaleStats';
@@ -25,6 +24,7 @@ import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
+import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -214,8 +214,6 @@ const Dashboard = memo(() => {
       ? Math.max(loadedPages, Math.ceil((serverCounts?.expired ?? tabFilteredJobs.length) / pageSize))
       : loadedPages,
   );
-  const handlePageChange = useAnimatedPageChange(page, setPage);
-
   // Samma klamp som i Mina annonser: sidan får aldrig peka utanför listan.
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
@@ -234,30 +232,22 @@ const Dashboard = memo(() => {
     expired: sliceToPage(tabBuckets.expired),
   }), [sliceToPage, tabBuckets]);
 
-  // 🔥 HÅL #2: Pre-warma BARA aktuell + nästa sida (~40 bilder), inte alla
-  // tusentals. Tidigare prewarm av 5k bilder mättade nätverket och evictade
-  // sin egen cache i imageCache.ts. Nu: smart, bounded, alltid relevant.
-  // 🔑 URL:erna måste byggas EXAKT som korten renderar dem (600x400 q75 cover
-  // för bilden, 64x64 q80 contain för logon, plus `?v=`-versionen). Tidigare
-  // förvärmdes originalbilden — varje kort blev då en cache-MISS och laddade
-  // ner flera MB i onödan ovanpå den transformerade bilden.
-  const prewarmEntries = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize * 2; // current + next page
-    const currentBucket = activeTab === 'expired' ? tabBuckets.expired : tabBuckets.active;
-    const window = currentBucket.slice(start, end);
-    const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
-    for (const job of window) {
-      const j = job as any;
-      const v = getImageVersion(j);
-      const cardUrl = buildCardImageUrl(j.job_image_url ?? j.job_image_desktop_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
-      if (cardUrl) entries.push({ path: cardUrl });
-      const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
-      if (logoUrl) entries.push({ path: logoUrl });
-    }
-    return entries;
-  }, [tabBuckets, activeTab, page, pageSize]);
-  useImagePrewarm(prewarmEntries);
+  const getPageImageUrls = useCallback((job: (typeof tabFilteredJobs)[number]) => {
+    const mediaJob = job as (typeof job) & {
+      job_image_url?: string | null;
+      job_image_desktop_url?: string | null;
+      company_logo_url?: string | null;
+      image_updated_at?: string | null;
+      updated_at?: string | null;
+    };
+    const version = getImageVersion(mediaJob);
+    return [
+      buildCardImageUrl(mediaJob.job_image_url ?? mediaJob.job_image_desktop_url, 'job-images', version, { width: 600, height: 400, quality: 75, resize: 'cover' }),
+      buildCardImageUrl(mediaJob.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
+    ];
+  }, []);
+  const preparePageImages = usePageImagePreparation(tabFilteredJobs, page, pageSize, getPageImageUrls);
+  const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
 
   // Reset page when tab or filters change
   useEffect(() => { setPage(1); }, [activeTab]);

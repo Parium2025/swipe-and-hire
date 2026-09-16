@@ -36,7 +36,6 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { EmptyJobsCta } from '@/components/dashboard/EmptyJobsCta';
-import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 
@@ -47,6 +46,7 @@ import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSke
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { RepublishJobDialog } from '@/components/RepublishJobDialog';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
+import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -330,8 +330,6 @@ const EmployerDashboard = memo(() => {
     1,
     archiveHasMore ? Math.max(loadedPages, Math.ceil(activeTabTotalCount / pageSize)) : loadedPages,
   );
-  const handlePageChange = useAnimatedPageChange(page, setPage);
-
   // Klampa sidan när listan krymper (t.ex. massradering av hela sista sidan).
   // Utan detta stod man kvar på en sida som inte längre finns: tom lista och
   // "Visar 37–36 av 36".
@@ -341,32 +339,15 @@ const EmployerDashboard = memo(() => {
 
 
 
-  // 🔥 Pre-warma BARA aktuell tab × current+next page (~40 bilder).
-  // Tidigare prewarm av tusentals bilder mättade nätet och evictade cachen.
-  // 🔑 URL:erna byggs med EXAKT samma källa, transform och version som
-  // `MobileJobCard` renderar (job_image_url @ 600x400 q75 cover / logo 64x64
-  // q80 contain). Minsta avvikelse → cache-MISS vid render, dubbel bandbredd.
-  const prewarmEntries = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize * 2;
-    const currentBucket = activeTab === 'expired'
-      ? tabBuckets.expired
-      : activeTab === 'draft'
-        ? tabBuckets.draft
-        : tabBuckets.active;
-    const window = currentBucket.slice(start, end);
-    const entries: Array<{ path?: string | null; bucket?: 'job-images' | 'company-logos' }> = [];
-    for (const j of window) {
-      const v = getImageVersion(j as any);
-      const cardUrl = buildCardImageUrl(j.job_image_url ?? (j as any).job_image_desktop_url ?? null, 'job-images', v, { width: 600, height: 400, quality: 75, resize: 'cover' });
-
-      if (cardUrl) entries.push({ path: cardUrl });
-      const logoUrl = buildCardImageUrl(j.company_logo_url ?? null, 'company-logos', v, { width: 64, height: 64, quality: 80, resize: 'contain' });
-      if (logoUrl) entries.push({ path: logoUrl });
-    }
-    return entries;
-  }, [tabBuckets, activeTab, page, pageSize]);
-  useImagePrewarm(prewarmEntries);
+  const getPageImageUrls = useCallback((job: JobPosting) => {
+    const version = getImageVersion(job);
+    return [
+      buildCardImageUrl(job.job_image_url ?? job.job_image_desktop_url, 'job-images', version, { width: 600, height: 400, quality: 75, resize: 'cover' }),
+      buildCardImageUrl(job.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
+    ];
+  }, []);
+  const preparePageImages = usePageImagePreparation(tabFilteredJobs, page, pageSize, getPageImageUrls);
+  const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
 
 
   // Sida-slice för respektive tab så pagineringen funkar oberoende.

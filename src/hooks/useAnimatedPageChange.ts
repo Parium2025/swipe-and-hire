@@ -13,9 +13,11 @@ type RestoreStyles = () => void;
 export function useAnimatedPageChange(
   page: number,
   setPage: Dispatch<SetStateAction<number>>,
+  preparePage?: (page: number) => Promise<void>,
 ) {
   const animationFrameRef = useRef<number | null>(null);
   const restoreStylesRef = useRef<RestoreStyles | null>(null);
+  const preparingRef = useRef(false);
 
   useEffect(() => () => {
     if (animationFrameRef.current !== null) {
@@ -24,13 +26,24 @@ export function useAnimatedPageChange(
     restoreStylesRef.current?.();
   }, []);
 
-  return useCallback((nextPage: number) => {
-    if (nextPage === page || animationFrameRef.current !== null) return;
+  return useCallback(async (nextPage: number) => {
+    if (nextPage === page || animationFrameRef.current !== null || preparingRef.current) return;
 
     const container = getManagedScrollContainer();
+    preparingRef.current = true;
+    container?.setAttribute('data-page-change-active', 'true');
+    try {
+      await preparePage?.(nextPage);
+    } catch {
+      // Bildkomponenternas vanliga fallback hanterar en enskild misslyckad bild.
+    } finally {
+      preparingRef.current = false;
+    }
+
     if (!container || container.scrollTop <= 1) {
       setPage(nextPage);
       if (container) container.scrollTop = 0;
+      container?.removeAttribute('data-page-change-active');
       return;
     }
 
@@ -66,6 +79,8 @@ export function useAnimatedPageChange(
         container.style.removeProperty('-webkit-overflow-scrolling');
       }
       restoreStylesRef.current = null;
+      container.removeAttribute('data-page-change-active');
+      window.dispatchEvent(new Event('parium:page-change-complete'));
     };
     restoreStylesRef.current = restore;
 
@@ -115,5 +130,5 @@ export function useAnimatedPageChange(
     };
 
     animationFrameRef.current = requestAnimationFrame(animate);
-  }, [page, setPage]);
+  }, [page, preparePage, setPage]);
 }

@@ -55,13 +55,23 @@ export function useImagePrewarm(entries: PrewarmEntry[], options: PrewarmOptions
     const urls = resolveUrls(entries);
     if (urls.length === 0) return;
 
+    let cancelled = false;
     const run = () => {
+      if (cancelled) return;
+      const container = document.querySelector('[data-main-scroll-container="true"]');
+      if (container?.hasAttribute('data-page-change-active')) return;
       imageCache.preloadImages(urls).catch(() => {});
     };
 
+    const runAfterPageChange = () => run();
+    window.addEventListener('parium:page-change-complete', runAfterPageChange);
+
     if (immediate) {
       run();
-      return;
+      return () => {
+        cancelled = true;
+        window.removeEventListener('parium:page-change-complete', runAfterPageChange);
+      };
     }
 
     type IdleWindow = Window & {
@@ -72,9 +82,17 @@ export function useImagePrewarm(entries: PrewarmEntry[], options: PrewarmOptions
 
     if (typeof w.requestIdleCallback === 'function') {
       const id = w.requestIdleCallback(run, { timeout: 1500 });
-      return () => w.cancelIdleCallback?.(id);
+      return () => {
+        cancelled = true;
+        w.cancelIdleCallback?.(id);
+        window.removeEventListener('parium:page-change-complete', runAfterPageChange);
+      };
     }
     const id = window.setTimeout(run, 200);
-    return () => window.clearTimeout(id);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+      window.removeEventListener('parium:page-change-complete', runAfterPageChange);
+    };
   }, [entries, immediate]);
 }

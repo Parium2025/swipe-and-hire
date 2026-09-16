@@ -180,6 +180,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
             <img
               src={displayUrl}
               alt={job.title}
+              decoding="sync"
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${(() => {
                 const v = job.image_focus_position;
@@ -189,7 +190,6 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                 return `${v}%`;
               })()}` }}
               loading={cardIndex < 6 ? 'eager' : 'lazy'}
-              decoding="async"
               {...fetchPriority(cardIndex < 3 ? 'high' : 'auto')}
               onError={handleImageError}
             />

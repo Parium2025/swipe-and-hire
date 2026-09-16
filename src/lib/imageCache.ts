@@ -178,9 +178,19 @@ class ImageCache {
    * Ladda och cacha media permanent (bilder + videor)
    * Hoppar över filer som inte ska cachas
    */
-  async loadImage(url: string): Promise<string> {
+  async loadImage(url: string, allowDuringPageChange = false): Promise<string> {
     if (this.shouldSkip(url)) {
       return url;
+    }
+
+    if (!allowDuringPageChange && typeof document !== 'undefined') {
+      const container = document.querySelector('[data-main-scroll-container="true"]');
+      if (container?.hasAttribute('data-page-change-active')) {
+        await new Promise<void>((resolve) => {
+          window.addEventListener('parium:page-change-complete', () => resolve(), { once: true });
+        });
+        return this.loadImage(url);
+      }
     }
 
     const cacheKey = this.getCacheKey(url);
@@ -260,13 +270,18 @@ class ImageCache {
       // Dekoda blobben innan loadImage löser ut, så bakgrundsvärmningen även
       // förbereder själva bitmapen och inte lämnar avkodningen till sidbytet.
       if (typeof Image !== 'undefined') {
-        try {
-          const image = new Image();
-          image.src = objectUrl;
-          await image.decode?.();
-        } catch {
-          // WebKit kan sakna/avbryta decode trots att bilden är giltig. Cacha
-          // den ändå; <img> har fortfarande sin vanliga felhantering.
+        const image = new Image();
+        image.src = objectUrl;
+        if (!image.complete || image.naturalWidth === 0) {
+          await new Promise<void>((resolve, reject) => {
+            image.onload = () => resolve();
+            image.onerror = () => reject(new Error('Image could not be decoded'));
+          });
+        }
+        await image.decode?.();
+        if (image.naturalWidth === 0) {
+          URL.revokeObjectURL(objectUrl);
+          throw new Error('Image decoded without pixels');
         }
       }
 
@@ -296,14 +311,14 @@ class ImageCache {
   /**
    * Förladdda flera media samtidigt
    */
-  async preloadImages(urls: string[]): Promise<void> {
+  async preloadImages(urls: string[], allowDuringPageChange = false): Promise<void> {
     const uniqueUrls = [...new Set(urls.filter(url => 
       url && url.trim() !== '' && !this.shouldSkip(url)
     ))];
     
     // Ladda alla bilder parallellt
     await Promise.allSettled(
-      uniqueUrls.map(url => this.loadImage(url))
+      uniqueUrls.map(url => this.loadImage(url, allowDuringPageChange))
     );
   }
 
