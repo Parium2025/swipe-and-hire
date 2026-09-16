@@ -2101,24 +2101,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
       // vid 1 000 så fort marknaden växte — och payloaden blev onödigt tung.
       // Nu räknar databasen: en enda liten JSON tillbaka.
-      const { data: marketCounts } = await supabase.rpc('get_job_market_counts');
-      const market = (marketCounts ?? {}) as {
-        total_jobs?: number;
-        unique_companies?: number;
-        new_this_week?: number;
-      };
+      const { data: marketCounts, error: marketError } = await supabase.rpc('get_job_market_counts');
 
-      const newTotalJobs = Number(market.total_jobs) || 0;
-      setPreloadedTotalJobs(newTotalJobs);
-      try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
+      // 🔒 Offline eller trasigt svar får ALDRIG skriva nollor över senast kända
+      // siffror — annars nollställs "Sök Jobb" i sidomenyn vid nätbortfall och
+      // 0:an fastnar i cache:n tills nästa lyckade hämtning.
+      if (!marketError && marketCounts) {
+        const market = marketCounts as {
+          total_jobs?: number;
+          unique_companies?: number;
+          new_this_week?: number;
+        };
 
-      const newUniqueCompanies = Number(market.unique_companies) || 0;
-      setPreloadedUniqueCompanies(newUniqueCompanies);
-      try { sessionStorage.setItem(UNIQUE_COMPANIES_CACHE_KEY, String(newUniqueCompanies)); } catch {}
+        const newTotalJobs = Number(market.total_jobs) || 0;
+        setPreloadedTotalJobs(newTotalJobs);
+        try { sessionStorage.setItem(TOTAL_JOBS_CACHE_KEY, String(newTotalJobs)); } catch {}
 
-      const newThisWeek = Number(market.new_this_week) || 0;
-      setPreloadedNewThisWeek(newThisWeek);
-      try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
+        const newUniqueCompanies = Number(market.unique_companies) || 0;
+        setPreloadedUniqueCompanies(newUniqueCompanies);
+        try { sessionStorage.setItem(UNIQUE_COMPANIES_CACHE_KEY, String(newUniqueCompanies)); } catch {}
+
+        const newThisWeek = Number(market.new_this_week) || 0;
+        setPreloadedNewThisWeek(newThisWeek);
+        try { sessionStorage.setItem(NEW_THIS_WEEK_CACHE_KEY, String(newThisWeek)); } catch {}
+      }
 
 
       // Hämta antal sparade jobb för användaren (alla, inklusive utgångna)
