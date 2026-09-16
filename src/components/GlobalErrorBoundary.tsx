@@ -73,10 +73,36 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
     return { hasError: true, error, isStuck: false };
   }
 
+  private isStaleBundleError(error?: Error) {
+    const text = `${error?.name ?? ''}: ${error?.message ?? ''}`.toLowerCase();
+    return (
+      text.includes('importing a module script failed') ||
+      text.includes('failed to fetch dynamically imported module') ||
+      text.includes('error loading dynamically imported module') ||
+      text.includes("unexpected token '<'") ||
+      text.includes('module script failed')
+    );
+  }
+
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     // Log details for debugging
     console.error('[GlobalErrorBoundary] Caught error:', error);
     console.error('[GlobalErrorBoundary] Info:', info);
+
+    // A new version was deployed while this tab held the old app shell:
+    // the old chunk URLs no longer exist. Recover automatically, once.
+    if (this.isStaleBundleError(error) && typeof window !== 'undefined') {
+      try {
+        const key = 'parium_stale_bundle_recovered_at';
+        const last = Number(window.sessionStorage.getItem(key) || '0');
+        if (!last || Date.now() - last > 60_000) {
+          window.sessionStorage.setItem(key, String(Date.now()));
+          this.handleReload();
+        }
+      } catch {
+        // ignore
+      }
+    }
   }
 
   handleReload = () => {
