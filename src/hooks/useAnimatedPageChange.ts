@@ -73,24 +73,11 @@ export function useAnimatedPageChange(
     // ändras därefter inget innehåll alls.
     flushSync(() => setPage(nextPage));
     container.scrollTop = startTop;
-
-    // Är målsidan kortare (t.ex. sista sidan) skulle låset bara vara tom yta
-    // i vyn — hissen skulle starta från ett tomt fält. Börja i stället från
-    // den lägsta position där målsidans innehåll fyller skärmen.
-    const lockHeight = heightLock.offsetHeight;
-    const naturalHeight = container.scrollHeight - lockHeight;
-    const maxNaturalTop = Math.max(0, naturalHeight - container.clientHeight);
-    const animationStartTop = Math.min(startTop, maxNaturalTop);
-    if (animationStartTop < startTop) {
-      heightLock.style.height = '0px';
-    }
-    container.scrollTop = animationStartTop;
-
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
-        container.scrollTop = animationStartTop;
+        container.scrollTop = startTop;
         requestAnimationFrame(() => {
-          container.scrollTop = animationStartTop;
+          container.scrollTop = startTop;
           resolve();
         });
       });
