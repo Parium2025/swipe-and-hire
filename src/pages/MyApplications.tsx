@@ -197,6 +197,34 @@ const MyApplications = () => {
 
   const visibleApplications = activeTab === 'active' ? activeApplications : expiredApplications;
 
+  // 📄 Sidnavigering — exakt samma modell som Sparade jobb / Mina annonser:
+  // 18 kort per sida, målsidans bilder färdigställs före hissrörelsen.
+  const isMobile = useIsMobile();
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(visibleApplications.length / PAGE_SIZE));
+  const getPageImageUrls = useCallback((entry: (typeof visibleApplications)[number]) => {
+    const job = entry?.job_postings as any;
+    if (!job) return [];
+    const version = getImageVersion(job as { image_updated_at?: string | null; updated_at?: string | null });
+    return [
+      buildCardImageUrl(job.job_image_url ?? job.job_image_desktop_url, 'job-images', version, JOB_CARD_TRANSFORM),
+      buildCardImageUrl(job.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
+    ];
+  }, []);
+  const preparePageImages = usePageImagePreparation(visibleApplications, page, PAGE_SIZE, getPageImageUrls);
+  const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
+
+  useEffect(() => { setPage(1); }, [activeTab]);
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const pagedApplications = useMemo(
+    () => visibleApplications.slice((page - 1) * PAGE_SIZE, (page - 1) * PAGE_SIZE + PAGE_SIZE),
+    [visibleApplications, page],
+  );
+
+
 
   const handleDeleteClick = (jobId: string, jobTitle: string) => {
     // Find the application by job_id
