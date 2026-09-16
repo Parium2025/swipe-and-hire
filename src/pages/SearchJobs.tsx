@@ -662,11 +662,13 @@ const SearchJobs = memo(() => {
           JOB_CARD_IMAGE_TRANSFORM,
         );
         if (card) urls.push(card);
+        // Kortets logo renderas som 64×64 (retina-dubblas till 128) — samma
+        // värden MÅSTE användas här, annars warmar vi en annan variant.
         const logo = buildCardImageUrl(
           (job as any).company_logo_url,
           'company-logos',
           version,
-          COMPANY_LOGO_TRANSFORM,
+          { width: 64, height: 64, quality: 80, resize: 'contain' },
         );
         if (logo) urls.push(logo);
       }
