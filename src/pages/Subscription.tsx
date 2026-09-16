@@ -193,19 +193,6 @@ const Subscription = () => {
                 </p>
 
               </div>
-
-              {isPremium && (
-                <div className="pt-2 border-t border-white/10">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-3.5 w-3.5 text-secondary shrink-0" />
-                    <p className="text-xs font-semibold text-white">Premium</p>
-                  </div>
-                  <p className="text-xs text-white/70 mt-0.5">
-                    Din plan är aktiv.
-                  </p>
-
-                </div>
-              )}
             </div>
           </div>
           <span className="inline-flex shrink-0 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
@@ -296,35 +283,35 @@ const Subscription = () => {
                   : 'Kom igång gratis'}
               </button>
 
-              {plan.id === 'premium' && isCurrent && (
-                <button
-                  type="button"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); navigate('/billing'); }}
-                  className="mt-4 w-full text-center text-xs font-medium text-white/60 underline-offset-4 hover:text-white hover:underline transition-colors"
-                >
-                  Hantera betalmetod
-                </button>
-              )}
             </div>
           );
         })}
       </div>
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContentNoFocus className="bg-primary border-white/15 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Avbryt Premium?</AlertDialogTitle>
-            <AlertDialogDescription className="text-white/70">
-              Din Premium-prenumeration förblir aktiv perioden ut. Därefter återgår ditt konto till Start-planen. Du kan när som helst återaktivera Premium.
-            </AlertDialogDescription>
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <Crown className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Avbryt Premium?
+              </AlertDialogTitle>
+            </div>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/15 hover:text-white">
+
+          <AlertDialogDescription className="text-white text-sm leading-relaxed text-center my-4">
+            Din Premium-prenumeration förblir aktiv perioden ut. Därefter återgår ditt konto till Start-planen. Du kan när som helst återaktivera Premium.
+          </AlertDialogDescription>
+
+          <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+            <AlertDialogCancel className="w-full sm:w-auto h-10 px-5 rounded-full text-sm !bg-white/5 !text-white !border-white/10 backdrop-blur-sm !transition-none hover:!bg-white/10 hover:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0">
               Behåll Premium
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500/80 text-white hover:bg-red-500/80 hover:text-white border-0"
+              variant="destructiveSoft"
+              className="btn-dialog-action w-full sm:w-auto text-sm flex items-center justify-center rounded-full"
               onClick={() =>
                 navigate(
                   `/support?category=billing&message=${encodeURIComponent('Jag vill avsluta min Premium-prenumeration.')}`,
