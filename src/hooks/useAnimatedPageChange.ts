@@ -78,11 +78,12 @@ export function useAnimatedPageChange(
     // låset upp ovanför listan i stället: kortet man ser blir målsidans sista
     // kort — aldrig en tom yta — och hissen åker bara den sträcka som
     // målsidans innehåll faktiskt har.
-    const naturalHeight = container.scrollHeight - heightLock.offsetHeight;
+    heightLock.style.height = '0px';
+    const naturalHeight = container.scrollHeight;
     const maxNaturalTop = Math.max(0, naturalHeight - container.clientHeight);
     const topGap = Math.max(0, startTop - maxNaturalTop);
+    heightLock.style.height = `${topGap}px`;
     if (topGap > 0) {
-      heightLock.style.height = `${topGap}px`;
       container.insertBefore(heightLock, container.firstChild);
     }
     const endTop = topGap;
