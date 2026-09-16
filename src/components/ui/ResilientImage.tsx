@@ -43,14 +43,14 @@ export function ResilientImage({
 
   // Reset when src changes
   useEffect(() => {
-    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   }, [sourceSignature]);
 
   // Auto-recover when tab regains focus or network comes back online
   useEffect(() => {
     if (!failed) return;
     const retry = () => {
-      setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+      setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
     };
     const onVis = () => {
       if (document.visibilityState === "visible") retry();
