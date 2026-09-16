@@ -54,6 +54,7 @@ import { DashboardPagination } from '@/components/dashboard/DashboardPagination'
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
@@ -126,6 +127,15 @@ const resolveStorageImageUrl = (
 const warmImageCacheBatch = (urls: string[], batchSize = 4) => {
   const unique = [...new Set(urls.filter(Boolean))];
   if (unique.length === 0) return;
+  const container = document.querySelector('[data-main-scroll-container="true"]');
+  if (container?.hasAttribute('data-page-change-active')) {
+    window.addEventListener(
+      'parium:page-change-complete',
+      () => warmImageCacheBatch(unique, batchSize),
+      { once: true },
+    );
+    return;
+  }
   let i = 0;
   const next = () => {
     const batch = unique.slice(i, i + batchSize);
@@ -637,47 +647,29 @@ const SearchJobs = memo(() => {
     return filteredAndSortedJobs.slice(start, start + JOBS_PAGE_SIZE);
   }, [filteredAndSortedJobs, page]);
 
-  // 🔑 BLIXT-FIX: warma EXAKT de kortbilder som grann-sidorna kommer att rendera,
-  // i samma ordning som listan faktiskt visar dem (filteredAndSortedJobs — inte
-  // rå `jobs`). Den generella fönstervärmningen ovan utgår från DB-ordningen och
-  // missar därför bilder så snart användaren sorterar eller filtrerar, vilket gav
-  // en synlig bildväxling precis när hissen landade. Här laddas + dekodas nästa
-  // (och föregående) sidas bilder direkt, utan idle-fördröjning.
-  useEffect(() => {
-    if (filteredAndSortedJobs.length === 0) return;
-    if (isSlowOrMeteredConnection()) return;
-
-    const neighbourPages = [page + 1, page - 1].filter(
-      (p) => p >= 1 && p <= Math.ceil(filteredAndSortedJobs.length / JOBS_PAGE_SIZE),
-    );
-    const urls: string[] = [];
-    for (const p of neighbourPages) {
-      const start = (p - 1) * JOBS_PAGE_SIZE;
-      for (const job of filteredAndSortedJobs.slice(start, start + JOBS_PAGE_SIZE)) {
-        const version = getImageVersion(job);
-        const card = buildCardImageUrl(
-          job.job_image_url || job.job_image_desktop_url,
-          'job-images',
-          version,
-          JOB_CARD_IMAGE_TRANSFORM,
-        );
-        if (card) urls.push(card);
-        // Kortets logo renderas som 64×64 (retina-dubblas till 128) — samma
-        // värden MÅSTE användas här, annars warmar vi en annan variant.
-        const logo = buildCardImageUrl(
-          (job as any).company_logo_url,
-          'company-logos',
-          version,
-          { width: 64, height: 64, quality: 80, resize: 'contain' },
-        );
-        if (logo) urls.push(logo);
-      }
-    }
-
-    const pending = urls.filter((url) => !imageCache.getCachedUrl(url));
-    if (pending.length === 0) return;
-    warmImageCacheBatch(pending, 4);
-  }, [filteredAndSortedJobs, page]);
+  const getPageImageUrls = useCallback((job: Job) => {
+    const version = getImageVersion(job);
+    return [
+      buildCardImageUrl(
+        job.job_image_url || job.job_image_desktop_url,
+        'job-images',
+        version,
+        JOB_CARD_IMAGE_TRANSFORM,
+      ),
+      buildCardImageUrl(
+        job.company_logo_url,
+        'company-logos',
+        version,
+        { width: 64, height: 64, quality: 80, resize: 'contain' },
+      ),
+    ];
+  }, []);
+  const preparePageImages = usePageImagePreparation(
+    filteredAndSortedJobs,
+    page,
+    JOBS_PAGE_SIZE,
+    getPageImageUrls,
+  );
 
 
 
@@ -823,7 +815,7 @@ const SearchJobs = memo(() => {
     }
   }, [page, filteredAndSortedJobs.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const handlePageChange = useAnimatedPageChange(page, setPage);
+  const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
 
   // Swipe-läget behöver egen påfyllning: där finns ingen scroll-trigger i listan.
   const handleSwipeNeedMore = useCallback(() => {

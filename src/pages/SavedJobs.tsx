@@ -19,13 +19,15 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { useSavedJobsCache, type SavedJob } from '@/hooks/useSavedJobsCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
-import { useImagePrewarm } from '@/hooks/useImagePrewarm';
 import { TruncatedText } from '@/components/TruncatedText';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
+import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion, JOB_CARD_TRANSFORM } from '@/lib/imageTransforms';
 
 /** Samma sidstorlek som Mina annonser / Dashboard — 18 kort per sida (6 rader × 3 kolumner). */
 const PAGE_SIZE = 18;
@@ -212,7 +214,32 @@ const SavedJobs = () => {
   // och klampas alltid inom listans längd.
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(activeJobsForMedia.length / PAGE_SIZE));
-  const handlePageChange = useAnimatedPageChange(page, setPage);
+  const getPageImageUrls = useCallback((entry: SavedJob) => {
+    const posting = entry.job_postings;
+    if (!posting) return [];
+    const version = getImageVersion(posting);
+    return [
+      buildCardImageUrl(
+        posting.job_image_url ?? posting.job_image_desktop_url,
+        'job-images',
+        version,
+        JOB_CARD_TRANSFORM,
+      ),
+      buildCardImageUrl(
+        posting.company_logo_url,
+        'company-logos',
+        version,
+        { width: 64, height: 64, quality: 80, resize: 'contain' },
+      ),
+    ];
+  }, []);
+  const preparePageImages = usePageImagePreparation(
+    activeJobsForMedia,
+    page,
+    PAGE_SIZE,
+    getPageImageUrls,
+  );
+  const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
 
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [sortBy, statusFilter, skippedSort]);
@@ -326,23 +353,6 @@ const SavedJobs = () => {
       </button>
     );
   };
-
-  // Förvärm bilder för aktuell sida + nästa sida, så "Nästa" känns instant
-  // utan att vi någonsin drar ner tusentals bilder i onödan.
-  const prewarmEntries = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return activeJobsForMedia.slice(start, start + PAGE_SIZE * 2).flatMap((entry) => {
-      const posting = entry.job_postings;
-      if (!posting) return [];
-
-      return [
-        { path: posting.job_image_url, bucket: 'job-images' as const },
-        { path: posting.company_logo_url, bucket: 'company-logos' as const },
-      ].filter((item) => Boolean(item.path));
-    });
-  }, [activeJobsForMedia, page]);
-
-  useImagePrewarm(prewarmEntries);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
