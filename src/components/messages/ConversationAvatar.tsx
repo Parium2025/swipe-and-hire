@@ -1,10 +1,18 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useEffect, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
 import { Users } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
+
+// Transparent 1x1 reserv så bildytan alltid finns kvar — ingen strukturbyte
+// när ett konto saknar bild eller när bilden dyker upp senare.
+const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+// Adresser som redan laddats i den här sessionen ritas direkt vid remount.
+const loadedAvatarUrls = new Set<string>();
+
 
 interface ConversationAvatarProps {
   profile: ProfileData | null | undefined;
