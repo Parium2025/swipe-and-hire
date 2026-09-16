@@ -16,6 +16,8 @@ import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { getCompanyInitials } from '@/lib/companyInitials';
 
+const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
 
 interface EmployerJobCardProps {
   job: {
@@ -132,31 +134,29 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       {/* Image header */}
       <div className="job-card-mobile-media relative w-full overflow-hidden cursor-pointer" onClick={handleMediaClick}>
 
-        {displayUrl ? (
-          <>
-            <ResilientImage
-              src={displayUrl}
-              alt={job.title}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${(() => {
-                const v = job.image_focus_position;
-                if (!v || v === 'center') return '50%';
-                if (v === 'top') return '20%';
-                if (v === 'bottom') return '80%';
-                return `${v}%`;
-              })()}` }}
-              loading="lazy"
-              decoding="async"
-              onError={handleImageError}
-              fallbackClassName="w-full h-full"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </>
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-            <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
-          </div>
-        )}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+        </div>
+        <div className="absolute inset-0 transform-gpu overflow-hidden">
+          <ResilientImage
+            src={displayUrl ?? TRANSPARENT_IMAGE_SRC}
+            alt={displayUrl ? job.title : ''}
+            aria-hidden={displayUrl ? undefined : true}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: `center ${(() => {
+              const v = job.image_focus_position;
+              if (!v || v === 'center') return '50%';
+              if (v === 'top') return '20%';
+              if (v === 'bottom') return '80%';
+              return `${v}%`;
+            })()}` }}
+            loading="lazy"
+            decoding="sync"
+            onError={handleImageError}
+            fallbackClassName="w-full h-full"
+          />
+        </div>
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${displayUrl ? 'opacity-100' : 'opacity-0'}`} />
 
         {/* Status badge — top-left */}
         <div className="absolute top-2.5 left-2.5">
@@ -197,15 +197,19 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5 cursor-pointer" onClick={handleBodyClick}>
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
-          {logoUrl ? (
-            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
-              <ResilientImage src={logoUrl} alt={companyName} className="w-full h-full object-cover" draggable={false} onError={handleLogoError} fallbackClassName="w-full h-full" />
-            </div>
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center flex-shrink-0 shadow-lg">
-              <span className="text-base font-bold text-white/70 tracking-wide">{initials}</span>
-            </div>
-          )}
+          <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/70 tracking-wide">{initials}</span>
+            <ResilientImage
+              src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
+              alt={logoUrl ? companyName : ''}
+              aria-hidden={logoUrl ? undefined : true}
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+              decoding="sync"
+              onError={handleLogoError}
+              fallbackClassName="absolute inset-0 w-full h-full"
+            />
+          </div>
           <TruncatedText
             text={job.title}
             className="w-full text-center text-[clamp(1.02rem,0.98rem+0.18vw,1.12rem)] font-bold leading-[1.32] line-clamp-2 min-h-[calc(2*1.32*clamp(1.02rem,0.98rem+0.18vw,1.12rem))]"

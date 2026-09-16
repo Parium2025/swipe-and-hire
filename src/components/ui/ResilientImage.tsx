@@ -27,10 +27,15 @@ export function ResilientImage({
   onError,
   ...rest
 }: ResilientImageProps) {
-  const [attempt, setAttempt] = useState(0);
-  const [sourceIndex, setSourceIndex] = useState(0);
-  const [failed, setFailed] = useState(false);
   const fallbackSrcSignature = fallbackSrcs.filter(Boolean).join("|");
+  const sourceSignature = `${src ?? ''}|${fallbackSrcSignature}`;
+  const [imageState, setImageState] = useState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+  // When a persistent card slot receives a different job, stale retry/failure
+  // state must never leak into the first frame of the new image.
+  const state = imageState.sourceSignature === sourceSignature
+    ? imageState
+    : { sourceSignature, attempt: 0, sourceIndex: 0, failed: false };
+  const { attempt, sourceIndex, failed } = state;
   const sources = [src, ...fallbackSrcs].filter((value, index, array): value is string => {
     return typeof value === "string" && value.trim().length > 0 && array.indexOf(value) === index;
   });
@@ -38,18 +43,14 @@ export function ResilientImage({
 
   // Reset when src changes
   useEffect(() => {
-    setAttempt(0);
-    setSourceIndex(0);
-    setFailed(false);
-  }, [src, fallbackSrcSignature]);
+    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+  }, [sourceSignature]);
 
   // Auto-recover when tab regains focus or network comes back online
   useEffect(() => {
     if (!failed) return;
     const retry = () => {
-      setAttempt(0);
-      setSourceIndex(0);
-      setFailed(false);
+      setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
     };
     const onVis = () => {
       if (document.visibilityState === "visible") retry();
@@ -60,13 +61,17 @@ export function ResilientImage({
       window.removeEventListener("online", retry);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [failed]);
+  }, [failed, sourceSignature]);
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       if (sourceIndex < sources.length - 1) {
-        setAttempt(0);
-        setSourceIndex((index) => index + 1);
+        setImageState((current) => ({
+          sourceSignature,
+          attempt: 0,
+          sourceIndex: current.sourceSignature === sourceSignature ? current.sourceIndex + 1 : 1,
+          failed: false,
+        }));
         return;
       }
 
@@ -74,20 +79,20 @@ export function ResilientImage({
       // we only cache-bust after attempt 3 (transient blip vs. stuck cache).
       if (attempt < 4) {
         const delays = [500, 1200, 2500, 4500];
-        setTimeout(() => setAttempt((a) => a + 1), delays[attempt]);
+        setTimeout(() => setImageState((current) => current.sourceSignature === sourceSignature
+          ? { ...current, attempt: current.attempt + 1 }
+          : current), delays[attempt]);
       } else {
-        setFailed(true);
+        setImageState({ sourceSignature, attempt, sourceIndex, failed: true });
         onError?.(e);
       }
     },
-    [attempt, onError, sourceIndex, sources.length]
+    [attempt, onError, sourceIndex, sourceSignature, sources.length]
   );
 
   const handleManualRetry = useCallback(() => {
-    setAttempt(0);
-    setSourceIndex(0);
-    setFailed(false);
-  }, []);
+    setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false });
+  }, [sourceSignature]);
 
   if (!activeSrc) {
     return null;
