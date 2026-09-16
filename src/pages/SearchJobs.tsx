@@ -53,6 +53,7 @@ import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
 
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
@@ -498,10 +499,12 @@ const SearchJobs = memo(() => {
   const jobImageUrls = useMemo(() => {
     return jobs
       .slice(0, warmWindowSize)
-      .map(job => {
-        const url = resolveStorageImageUrl(job.job_image_url || job.job_image_desktop_url, 'job-images', JOB_CARD_IMAGE_TRANSFORM);
-        return appendVersionToUrl(url, getImageVersion(job));
-      })
+      .map(job => buildCardImageUrl(
+        job.job_image_url || job.job_image_desktop_url,
+        'job-images',
+        getImageVersion(job),
+        JOB_CARD_IMAGE_TRANSFORM,
+      ))
       .filter(Boolean) as string[];
   }, [jobs, warmWindowSize]);
 
