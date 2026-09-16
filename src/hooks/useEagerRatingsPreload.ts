@@ -191,6 +191,9 @@ const clearAllAppCachesSync = () => {
 export const clearAllAppCaches = () => {
   console.log('🗑️ Clearing all app caches on logout...');
 
+  // Kontobyte/utloggning: den delade profilhämtningen får aldrig återanvändas.
+  try { invalidateMyProfileCache(); } catch { /* ignore */ }
+
   // Weather cache is cleared SYNCHRONOUSLY on every call — it's a single
   // localStorage removal with zero perf impact, and it guarantees no stale
   // weather effects flash on the next login before the deferred clear runs.
