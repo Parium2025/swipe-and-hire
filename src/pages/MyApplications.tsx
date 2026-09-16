@@ -38,7 +38,17 @@ import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { isInterviewOver } from '@/lib/interviewTime';
 import CandidateInterviewCard from '@/components/CandidateInterviewCard';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
+import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
+import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion, JOB_CARD_TRANSFORM } from '@/lib/imageTransforms';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
+
+/** Samma sidstorlek som Sparade jobb / Mina annonser — 18 kort per sida. */
+const PAGE_SIZE = 18;
+
 
 // Application shape lives in src/hooks/myApplicationsShared.ts —
 // single source of truth for the initial query, background sync and realtime.
