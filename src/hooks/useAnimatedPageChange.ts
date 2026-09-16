@@ -101,7 +101,7 @@ export function useAnimatedPageChange(
     };
     restoreStylesRef.current = restore;
 
-    const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
+    const durationMs = Math.min(820, Math.max(550, startTop * 0.08));
     const startedAt = performance.now();
 
     const animate = (now: number) => {
