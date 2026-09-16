@@ -24,6 +24,14 @@ export interface SendTemplateEmailOptions {
   /** Dedupes retries of the same logical send; defaults to a random UUID (no dedupe). */
   idempotencyKey?: string
   replyTo?: string
+  /** Optional visible From-name (e.g. "Hoffstens Motor via Parium"); defaults to SITE_NAME. */
+  fromName?: string
+}
+
+function sanitizeFromName(name: string): string {
+  // Header-safe: strip CR/LF and double quotes, cap length, fall back to site name.
+  const cleaned = name.replace(/[\r\n"]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80)
+  return cleaned || SITE_NAME
 }
 
 function assertValidEmailEncoding(value: string, field: string): void {
@@ -82,7 +90,7 @@ export async function sendTemplateEmail(
     await sendLovableEmail(
       {
         to: recipient,
-        from: `${SITE_NAME} <no-reply@${FROM_DOMAIN}>`,
+        from: `"${sanitizeFromName(options.fromName ?? SITE_NAME)}" <no-reply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
         subject,
         html,
