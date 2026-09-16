@@ -116,7 +116,8 @@ export function useAnimatedPageChange(
     };
     restoreStylesRef.current = restore;
 
-    const durationMs = Math.min(820, Math.max(550, animationStartTop * 0.08));
+    const travel = startTop - endTop;
+    const durationMs = Math.min(820, Math.max(550, travel * 0.08));
     const startedAt = performance.now();
 
     const animate = (now: number) => {
@@ -125,7 +126,7 @@ export function useAnimatedPageChange(
       const eased = progress < 0.5
         ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const nextTop = animationStartTop * (1 - eased);
+      const nextTop = endTop + travel * (1 - eased);
       container.scrollTop = nextTop;
 
       if (progress < 1) {
