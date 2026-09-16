@@ -124,13 +124,8 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                 className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-white/10 overflow-hidden shrink-0 flex items-center justify-center">
-                    {m.profile_image_url ? (
-                      <img src={m.profile_image_url} alt="" className="h-full w-full object-cover" loading="eager" />
-                    ) : (
-                      <span className="text-[11px] font-semibold text-white">{initialsOf(m.name)}</span>
-                    )}
-                  </div>
+                  <TeamMemberAvatar path={m.profile_image_url} name={m.name} />
+
                   <div className="min-w-0 flex-1">
                     <TruncatedText text={m.name} className="text-[13px] font-medium text-white" />
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-white">
