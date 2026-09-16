@@ -7,8 +7,9 @@ type RestoreStyles = () => void;
 /**
  * En enda sidbytesmotor för alla sidnumrerade listor.
  *
- * Rörelsen startar innan innehållet byts. En tillfällig höjdlåsning läggs dit
- * före React-renderingen, så en kortare nästa sida inte kan klampa scrollTop.
+ * Målsidan förbereds och färdigmålas innan rörelsen startar. En tillfällig
+ * höjdlåsning läggs dit före React-renderingen, så en kortare nästa sida inte
+ * kan klampa scrollTop.
  */
 export function useAnimatedPageChange(
   page: number,
@@ -66,6 +67,22 @@ export function useAnimatedPageChange(
     heightLock.style.pointerEvents = 'none';
     container.appendChild(heightLock);
 
+    // Aktivera den redan bildförberedda målsidan före hissens första frame.
+    // Två rAF ger React-layouten och Safari-kompositorn varsin hel bildruta att
+    // färdigställa kort, bilder, logotyper och initialer. Under själva hissen
+    // ändras därefter inget innehåll alls.
+    flushSync(() => setPage(nextPage));
+    container.scrollTop = startTop;
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        container.scrollTop = startTop;
+        requestAnimationFrame(() => {
+          container.scrollTop = startTop;
+          resolve();
+        });
+      });
+    });
+
     let restored = false;
     const restore = () => {
       if (restored) return;
@@ -86,17 +103,9 @@ export function useAnimatedPageChange(
 
     const durationMs = Math.min(1150, Math.max(780, startTop * 0.11));
     const startedAt = performance.now();
-    // Byt först när hissen nått den gemensamma, stabila zonen nära toppen.
-    // Där syns inte korten som skiljer sig i längd mellan sidorna, så samma
-    // bytespunkt fungerar utan blinkning i båda riktningarna.
-    const swapThreshold = container.clientHeight * 0.65;
-    let swapped = false;
-    // Tiden som React-renderingen stjäl får inte räknas in i rörelsen, annars
-    // hoppar hissen ifatt kurvan med ett synligt ryck efter sidbytet.
-    let pausedMs = 0;
 
     const animate = (now: number) => {
-      const progress = Math.min((now - startedAt - pausedMs) / durationMs, 1);
+      const progress = Math.min((now - startedAt) / durationMs, 1);
       // Mjuk start och mjukt stopp – hisskänsla, ingen hetsig utskjutning.
       const eased = progress < 0.5
         ? 4 * progress * progress * progress
@@ -104,21 +113,11 @@ export function useAnimatedPageChange(
       const nextTop = startTop * (1 - eased);
       container.scrollTop = nextTop;
 
-      // Nästa, Föregående och sidnummer använder bokstavligen samma villkor.
-      if (!swapped && nextTop <= swapThreshold) {
-        swapped = true;
-        const swapStartedAt = performance.now();
-        flushSync(() => setPage(nextPage));
-        pausedMs += performance.now() - swapStartedAt;
-        container.scrollTop = nextTop;
-      }
-
       if (progress < 1) {
         animationFrameRef.current = requestAnimationFrame(animate);
         return;
       }
 
-      if (!swapped) flushSync(() => setPage(nextPage));
       container.scrollTop = 0;
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       restore();

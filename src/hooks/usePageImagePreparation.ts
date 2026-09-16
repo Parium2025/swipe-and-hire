@@ -7,29 +7,43 @@ const waitForPaint = () => new Promise<void>((resolve) => {
   requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
 });
 
+async function decodeAtRenderedSize(src: string, width: number, height: number) {
+  const image = document.createElement('img');
+  image.decoding = 'sync';
+  image.width = width;
+  image.height = height;
+  image.style.cssText = `display:block;width:${width}px;height:${height}px;object-fit:cover;`;
+  image.src = src;
+
+  await new Promise<void>((resolve) => {
+    image.onload = () => resolve();
+    image.onerror = () => resolve();
+    if (image.complete) resolve();
+  });
+  if (image.naturalWidth > 0 && typeof image.decode === 'function') {
+    await image.decode().catch(() => undefined);
+  }
+  return image;
+}
+
 async function primeRenderedPixels(urls: string[]) {
-  const cachedUrls = urls
-    .map((url) => imageCache.getCachedUrl(url))
-    .filter((url): url is string => Boolean(url));
+  const cachedUrls = urls.flatMap((url) => {
+    const cached = imageCache.getCachedUrl(url);
+    return cached ? [{ source: url, cached }] : [];
+  });
   if (cachedUrls.length === 0) return;
 
   const rack = document.createElement('div');
   rack.setAttribute('aria-hidden', 'true');
-  rack.style.cssText = 'position:fixed;left:-10000px;top:0;width:1px;height:1px;overflow:hidden;pointer-events:none;';
+  rack.style.cssText = 'position:fixed;left:-10000px;top:0;width:600px;overflow:hidden;pointer-events:none;visibility:hidden;';
   document.body.appendChild(rack);
 
   try {
-    await Promise.all(cachedUrls.map((src) => new Promise<void>((resolve) => {
-      const image = document.createElement('img');
-      image.decoding = 'sync';
-      image.width = 1;
-      image.height = 1;
-      image.onload = () => resolve();
-      image.onerror = () => resolve();
-      image.src = src;
-      rack.appendChild(image);
-      if (image.complete && image.naturalWidth > 0) resolve();
-    })));
+    const images = await Promise.all(cachedUrls.map(({ source, cached }) => {
+      const isLogo = source.includes('/company-logos/');
+      return decodeAtRenderedSize(cached, isLogo ? 64 : 600, isLogo ? 64 : 300);
+    }));
+    images.forEach((image) => rack.appendChild(image));
     await waitForPaint();
   } finally {
     rack.remove();

@@ -14,3 +14,4 @@
 - [x] Verifiera Nästa, Föregående och sidnummer på jobbsökar- och arbetsgivarsidor
 - [x] Behåll samma kortplatser och medielager vid sidbyte mellan bild och initialer
 - [x] Verifiera bild ↔ initialer i båda riktningarna utan att ändra hissrörelsen
+- [x] Färdigställ målsidans kort och medielager före hissens första bildruta
