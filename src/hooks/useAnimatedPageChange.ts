@@ -74,23 +74,26 @@ export function useAnimatedPageChange(
     flushSync(() => setPage(nextPage));
     container.scrollTop = startTop;
 
-    // Är målsidan kortare (t.ex. sista sidan) skulle låset bara vara tom yta
-    // i vyn — hissen skulle starta från ett tomt fält. Börja i stället från
-    // den lägsta position där målsidans innehåll fyller skärmen.
-    const lockHeight = heightLock.offsetHeight;
-    const naturalHeight = container.scrollHeight - lockHeight;
+    // Har målsidan färre kort är den kortare än den man står på. Då flyttas
+    // låset upp ovanför listan i stället: kortet man ser blir målsidans sista
+    // kort — aldrig en tom yta — och hissen åker bara den sträcka som
+    // målsidans innehåll faktiskt har.
+    heightLock.style.height = '0px';
+    const naturalHeight = container.scrollHeight;
     const maxNaturalTop = Math.max(0, naturalHeight - container.clientHeight);
-    const animationStartTop = Math.min(startTop, maxNaturalTop);
-    if (animationStartTop < startTop) {
-      heightLock.style.height = '0px';
+    const topGap = Math.max(0, startTop - maxNaturalTop);
+    heightLock.style.height = `${topGap}px`;
+    if (topGap > 0) {
+      container.insertBefore(heightLock, container.firstChild);
     }
-    container.scrollTop = animationStartTop;
+    const endTop = topGap;
+    container.scrollTop = startTop;
 
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
-        container.scrollTop = animationStartTop;
+        container.scrollTop = startTop;
         requestAnimationFrame(() => {
-          container.scrollTop = animationStartTop;
+          container.scrollTop = startTop;
           resolve();
         });
       });
@@ -114,7 +117,8 @@ export function useAnimatedPageChange(
     };
     restoreStylesRef.current = restore;
 
-    const durationMs = Math.min(820, Math.max(550, animationStartTop * 0.08));
+    const travel = startTop - endTop;
+    const durationMs = Math.min(820, Math.max(550, travel * 0.08));
     const startedAt = performance.now();
 
     const animate = (now: number) => {
@@ -123,7 +127,7 @@ export function useAnimatedPageChange(
       const eased = progress < 0.5
         ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const nextTop = animationStartTop * (1 - eased);
+      const nextTop = endTop + travel * (1 - eased);
       container.scrollTop = nextTop;
 
       if (progress < 1) {
