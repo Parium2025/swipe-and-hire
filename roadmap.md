@@ -11,4 +11,4 @@
 - [ ] Fixa varje ny bekräftad brist utan att ändra behörighetsmodellen eller gränssnittet
 - [ ] Verifiera pass 1–5 med typkontroll, tester och relevanta databas-/livekontroller
 - [x] Samla all sidnumrering i en gemensam, symmetrisk hissrörelse
-- [ ] Verifiera Nästa, Föregående och sidnummer på jobbsökar- och arbetsgivarsidor
+- [x] Verifiera Nästa, Föregående och sidnummer på jobbsökar- och arbetsgivarsidor
