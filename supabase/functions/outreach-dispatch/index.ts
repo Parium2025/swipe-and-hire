@@ -138,8 +138,24 @@ async function buildContext(log: OutreachLog) {
     authEmail = authUser?.user?.email ?? null;
   }
 
+  // Saknar profilen ett bolagsnamn används organisationens namn — annars
+  // skulle mejlet felaktigt stå "från Parium".
+  let companyName = ownerProfile?.company_name?.trim() || '';
+  if (!companyName) {
+    let orgId = ownerProfile?.organization_id as string | null | undefined;
+    if (!orgId) {
+      const { data: membership } = await admin.from('user_roles').select('organization_id').eq('user_id', log.owner_user_id).eq('is_active', true).not('organization_id', 'is', null).limit(1).maybeSingle();
+      orgId = membership?.organization_id ?? null;
+    }
+    if (orgId) {
+      const { data: org } = await admin.from('organizations').select('name').eq('id', orgId).maybeSingle();
+      companyName = org?.name?.trim() || '';
+    }
+  }
+  if (!companyName) companyName = 'Parium';
+
   return {
-    companyName: ownerProfile?.company_name || 'Parium',
+    companyName,
     candidateName,
     firstName: application?.first_name || recipientProfile?.first_name || 'där',
     recipientEmail: application?.email || recipientProfile?.email || authEmail || null,
