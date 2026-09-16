@@ -22,6 +22,8 @@ export function useAnimatedPageChange(
       cancelAnimationFrame(animationFrameRef.current);
     }
     restoreStylesRef.current?.();
+    const container = getManagedScrollContainer();
+    if (container) delete container.dataset.suppressGridEntryAnimation;
   }, []);
 
   return useCallback((nextPage: number) => {
