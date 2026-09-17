@@ -1,0 +1,1 @@
+revoke all on function public.sync_organization_name_from_profile() from public, anon, authenticated;

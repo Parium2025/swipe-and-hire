@@ -1,0 +1,1 @@
+update public.profiles set company_name='Hoffstens Motor' where id='bfc5976f-9b46-4b2b-a6d6-ceaa222ba613';
