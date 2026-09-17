@@ -154,6 +154,9 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
+    if (triggerLeaveBlocker()) {
+      return false;
+    }
     if (autosaveFlushRef.current) {
       autosaveFlushRef.current();
       return true;
@@ -206,6 +209,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       setHasUnsavedChanges,
       checkBeforeNavigation,
       registerAutosaveFlush,
+      registerLeaveBlocker,
     }}>
       {children}
       <UnsavedChangesDialog
