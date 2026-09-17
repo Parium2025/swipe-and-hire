@@ -19,7 +19,10 @@ Deno.serve(async (req) => {
     { global: { headers: { Authorization: req.headers.get('Authorization')! } } },
   );
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return new Response('Sign in required', { status: 401, headers: corsHeaders });
+  if (!user) {
+    console.error('OAuth-klar: ingen inloggad användare i förfrågan');
+    return new Response('Sign in required', { status: 401, headers: corsHeaders });
+  }
 
   let body: { code?: unknown };
   try {
