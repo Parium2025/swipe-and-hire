@@ -668,8 +668,9 @@ const CompanyProfile = () => {
         const ok = await saveRef.current({ silent: true });
         if (ok) {
           setFailedSignature(null);
+          // "Sparat" ligger kvar tills användaren lämnar sektionen — ingen
+          // automatisk dold, så bekräftelsen syns även när man står långt ner.
           setSaveStatus('saved');
-          savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
         } else {
           setFailedSignature(signature);
           setSaveStatus('error');
@@ -744,7 +745,7 @@ const CompanyProfile = () => {
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
           <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater.</p>
-          <div className="mt-1 min-h-4 text-xs text-white/70" aria-live="polite" role="status">
+          <div className="mt-1 min-h-4 text-xs text-white" aria-live="polite" role="status">
             {saveStatus === 'error' ? (
               <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
                 <AlertCircle className="h-3 w-3" aria-hidden="true" />
