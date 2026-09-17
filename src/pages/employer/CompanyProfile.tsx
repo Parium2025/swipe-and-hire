@@ -30,6 +30,21 @@ import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
 
 import { EmployerCompanyProfileSkeleton } from '@/components/employer/EmployerPageSkeleton';
 
+// Obligatoriska fält i företagsinformationen. Stjärnan vid etiketten är röd
+// tills fältet är ifyllt och vit när det är det. Orgnummer och webbsida är
+// medvetet frivilliga och saknar stjärna.
+const REQUIRED_FIELDS: { key: keyof CompanyFormData; label: string }[] = [
+  { key: 'company_name', label: 'Företagsnamn' },
+  { key: 'industry', label: 'Bransch' },
+  { key: 'employee_count', label: 'Antal anställda' },
+  { key: 'address', label: 'Huvudkontor' },
+  { key: 'company_description', label: 'Företagsbeskrivning' },
+];
+
+const RequiredStar = ({ filled }: { filled: boolean }) => (
+  <span aria-hidden="true" className={filled ? 'text-white' : 'text-red-400'}> *</span>
+);
+
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
