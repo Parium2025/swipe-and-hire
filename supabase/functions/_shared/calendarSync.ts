@@ -1,7 +1,7 @@
 // Server-only. Lägger in och tar bort intervjuevents i den kopplade
 // användarens egen kalender (Google Calendar eller Outlook) via kopplings-
-// gatewayen. Anropas från outreach-dispatch — fel här får aldrig stoppa
-// ett utskick, därför returneras alltid status i stället för att kasta.
+// gatewayen. Anropas från den direkta intervjufunktionen och som reserv från
+// outreach-dispatch. Fel returneras som status i stället för att kasta.
 
 import { appUserReconnectRequired, callAsAppUser } from './appUserConnector.ts';
 import { getConnectionForUser } from './appUserConnections.ts';
