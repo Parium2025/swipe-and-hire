@@ -186,12 +186,24 @@ class ImageCache {
     if (!allowDuringPageChange && typeof document !== 'undefined') {
       const container = document.querySelector('[data-main-scroll-container="true"]');
       if (container?.hasAttribute('data-page-change-active')) {
+        // Vänta på sidbytet — men aldrig i evighet. Utan tak kan en enda
+        // missad signal frysa all bildladdning resten av besöket.
         await new Promise<void>((resolve) => {
-          window.addEventListener('parium:page-change-complete', () => resolve(), { once: true });
+          let done = false;
+          const finish = () => {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            window.removeEventListener('parium:page-change-complete', finish);
+            resolve();
+          };
+          const timer = setTimeout(finish, 3000);
+          window.addEventListener('parium:page-change-complete', finish);
         });
-        return this.loadImage(url);
+        return this.loadImage(url, true);
       }
     }
+
 
     const cacheKey = this.getCacheKey(url);
     

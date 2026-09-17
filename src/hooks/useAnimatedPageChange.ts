@@ -25,6 +25,13 @@ export function useAnimatedPageChange(
       cancelAnimationFrame(animationFrameRef.current);
     }
     restoreStylesRef.current?.();
+    // Avmontering mitt i förberedelsen får aldrig lämna spärren kvar på den
+    // beständiga scrollytan — då fryser all bildladdning i appen.
+    const container = getManagedScrollContainer();
+    if (container?.hasAttribute('data-page-change-active')) {
+      container.removeAttribute('data-page-change-active');
+      window.dispatchEvent(new Event('parium:page-change-complete'));
+    }
   }, []);
 
   return useCallback(async (nextPage: number) => {
@@ -45,8 +52,10 @@ export function useAnimatedPageChange(
       setPage(nextPage);
       if (container) container.scrollTop = 0;
       container?.removeAttribute('data-page-change-active');
+      window.dispatchEvent(new Event('parium:page-change-complete'));
       return;
     }
+
 
     const startTop = container.scrollTop;
     const previousOverflowAnchor = container.style.overflowAnchor;
