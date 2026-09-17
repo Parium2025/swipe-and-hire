@@ -48,7 +48,7 @@ const RequiredStar = ({ filled }: { filled: boolean }) => (
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
