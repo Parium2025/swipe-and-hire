@@ -48,7 +48,7 @@ const RequiredStar = ({ filled }: { filled: boolean }) => (
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -723,6 +723,22 @@ const CompanyProfile = () => {
     setFailedSignature(null);
     setSaveStatus('idle');
   }, []);
+
+  // Hårt stopp: sidan får inte lämnas medan ett obligatoriskt fält (röd
+  // stjärna) är tomt. Gäller både menyval i appen och webbläsarens
+  // bakåt-/framåtknappar.
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+  useEffect(() => {
+    return registerLeaveBlocker(() => {
+      const missing = REQUIRED_FIELDS
+        .filter(({ key }) => !String(formDataRef.current[key] ?? '').trim())
+        .map(({ label }) => label);
+      return missing.length > 0
+        ? `Fyll i alla obligatoriska fält innan du lämnar sidan: ${missing.join(', ')}.`
+        : null;
+    });
+  }, [registerLeaveBlocker]);
 
 
 
