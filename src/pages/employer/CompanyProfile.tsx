@@ -152,23 +152,10 @@ const CompanyProfile = () => {
     }
   }, [employeeCountOpen, industryMenuOpen]);
 
-  // Save unsaved state to localStorage when formData changes
-  useEffect(() => {
-    if (hasUnsavedChanges) {
-      try {
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({
-          formData,
-          savedAt: Date.now()
-        }));
-        console.log('💾 Company profile draft saved');
-      } catch (e) {
-        console.warn('Failed to save company profile state to localStorage');
-      }
-    }
-  }, [formData, hasUnsavedChanges]);
-
-  const draftAppliedRef = useRef(false);
+  // Inget utkast sparas lokalt längre — autosparet skriver direkt till
+  // databasen, så ett gammalt utkast kan aldrig återuppstå.
   const blobUrlsRef = useRef<string[]>([]);
+
   const isMountedRef = useRef(true);
 
   useEffect(() => {
