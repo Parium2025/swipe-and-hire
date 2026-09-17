@@ -162,20 +162,32 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
         <div className="mt-auto flex items-center justify-between gap-2 shrink-0 h-6">
           <div className="flex-1 min-w-0">
             {currentNews?.source_url && (
-              <a
-                href={currentNews.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                onTouchEnd={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap touch-manipulation"
-                aria-label="Läs artikeln"
-              >
-                <span className="text-xs shrink-0">Läs mer</span>
-                <span className="min-w-0 text-[10px] text-white truncate">· {currentNews.source}</span>
-                <ExternalLink className="h-3 w-3 shrink-0" />
-              </a>
-
+              <div className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap">
+                <a
+                  href={currentNews.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                  className="text-xs shrink-0 touch-manipulation"
+                  aria-label="Läs artikeln"
+                >
+                  Läs mer
+                </a>
+                <TruncatedText text={`· ${currentNews.source}`} className="min-w-0 flex-1 truncate text-[10px] text-white" />
+                <a
+                  href={currentNews.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                  className="shrink-0 touch-manipulation"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             )}
           </div>
           <div className="shrink-0">
