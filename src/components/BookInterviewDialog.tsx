@@ -426,6 +426,9 @@ export const BookInterviewDialog = ({
               employerEmail: user?.email || undefined,
               employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
               interviewId: interviewRow.id,
+              // En ombokning uppdaterar kalendern och appnotisen, men skickar
+              // inte en ny kopia av kallelsemejlet.
+              sendEmail: !isReschedule,
             },
           });
         }
@@ -446,12 +449,14 @@ export const BookInterviewDialog = ({
         });
         if (dispatchError) throw dispatchError;
         const processedCount = Number((dispatchData as { processedCount?: number } | null)?.processedCount ?? 0);
-        description = processedCount > 0
-          ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
-          : 'Intervjukallelse med kalenderinbjudan skickad!';
+        description = isReschedule
+          ? 'Kalenderbokningen är uppdaterad.'
+          : processedCount > 0
+            ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
+            : 'Intervjukallelse med kalenderinbjudan skickad!';
       } catch (dispatchErr) {
         console.error('Error invoking outreach-dispatch:', dispatchErr);
-        description = 'Intervjukallelse med kalenderinbjudan skickad!';
+        description = isReschedule ? 'Kalenderbokningen är uppdaterad.' : 'Intervjukallelse med kalenderinbjudan skickad!';
       }
 
       toast.success(

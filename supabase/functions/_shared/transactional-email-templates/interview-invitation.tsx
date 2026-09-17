@@ -19,6 +19,8 @@ interface Props {
   ics_url?: string
   maps_url?: string
   is_employer?: boolean
+  accept_url?: string
+  decline_url?: string
 }
 
 const InterviewInvitationEmail = ({
@@ -35,6 +37,8 @@ const InterviewInvitationEmail = ({
   ics_url = '',
   maps_url = '',
   is_employer = false,
+  accept_url,
+  decline_url,
 }: Props) => {
   const locationLabel = location_type === 'video' ? 'Videointervju' : 'På plats'
   const isVideoLink = location_type === 'video' && location_details.startsWith('http')
@@ -55,9 +59,10 @@ const InterviewInvitationEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={brandSection}>
-            <Text style={brand}>Parium</Text>
+            <Text style={brand}>{company_name}</Text>
+            <Section style={accentBar} />
           </Section>
-          <Heading style={h1}>Intervjukallelse 📅</Heading>
+          <Heading style={h1}>Intervjukallelse</Heading>
           <Text style={text}>{greeting}</Text>
 
           <Section style={card}>
@@ -82,6 +87,15 @@ const InterviewInvitationEmail = ({
             </>
           ) : null}
 
+          {!is_employer && accept_url && decline_url ? (
+            <Section style={answerSection}>
+              <Text style={answerLabel}>Kan du komma?</Text>
+              <Button href={accept_url} style={acceptButton}>Ja, jag kommer</Button>
+              <Button href={decline_url} style={declineButton}>Nej, jag kan inte</Button>
+              <Text style={answerHint}>Ditt svar skickas direkt till {company_name}. Du kan också svara inne i Parium.</Text>
+            </Section>
+          ) : null}
+
           {isVideoLink ? (
             <Section style={{ textAlign: 'center' as const, margin: '28px 0 20px' }}>
               <Button style={button} href={location_details}>Anslut till videomötet</Button>
@@ -99,7 +113,7 @@ const InterviewInvitationEmail = ({
           </Section>
 
           <Hr style={hr} />
-          <Text style={footer}>Parium · Sveriges nya jobbplattform</Text>
+          <Text style={footer}>Skickat av {company_name} via Parium</Text>
           <Text style={noReply}>
             Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
           </Text>
@@ -135,7 +149,8 @@ export const template = {
 const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
 const container = { padding: '32px 28px', maxWidth: '560px' }
 const brandSection = { margin: '0 0 24px' }
-const brand = { fontSize: '20px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
+const brand = { fontSize: '22px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
+const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', borderRadius: '2px', margin: '10px 0 0' }
 const h1 = { fontSize: '24px', fontWeight: 700 as const, color: '#001F3D', margin: '0 0 20px', letterSpacing: '-0.3px' }
 const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0 0 12px' }
 const smallLabel = { fontSize: '13px', color: '#6B7280', fontWeight: 600 as const, margin: '16px 0 4px' }
@@ -143,6 +158,11 @@ const card = { backgroundColor: '#F0F9FF', borderLeft: '4px solid #001F3D', padd
 const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const link = { color: '#001F3D', textDecoration: 'underline', wordBreak: 'break-all' as const }
 const calendarLink = { color: '#6B7280', textDecoration: 'underline', fontSize: '13px' }
+const answerSection = { margin: '24px 0 0', textAlign: 'center' as const }
+const answerLabel = { fontSize: '14px', fontWeight: 600 as const, color: '#001F3D', margin: '0 0 14px' }
+const acceptButton = { backgroundColor: '#1E4B8A', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
+const declineButton = { backgroundColor: '#ffffff', color: '#1E4B8A', fontSize: '15px', fontWeight: 600 as const, padding: '11px 23px', borderRadius: '999px', border: '1px solid #cbd5e1', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
+const answerHint = { fontSize: '12px', color: '#94a3b8', margin: '6px 0 0' }
 const hr = { borderColor: '#e2e8f0', margin: '24px 0 8px' }
 const button = {
   backgroundColor: '#001F3D',

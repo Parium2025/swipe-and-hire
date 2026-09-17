@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
+import { addInterviewToCalendar } from '../_shared/calendarSync.ts'
+import { SUPPORTED_CONNECTORS } from '../_shared/appUserScopes.ts'
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -26,6 +28,7 @@ const RequestSchema = z.object({
   employerEmail: z.string().email().max(320).optional(),
   employerName: z.string().max(200).optional(),
   interviewId: z.string().uuid(),
+  sendEmail: z.boolean().optional().default(true),
 });
 
 // ── Helpers ───────────────────────────────────────────────
@@ -135,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
     const {
       candidateEmail, candidateName, companyName, jobTitle,
       scheduledAt, durationMinutes, locationType, locationDetails, message,
-      employerEmail, employerName, interviewId,
+      employerEmail, employerName, interviewId, sendEmail,
     } = parsed.data;
 
     // Ombokning måste kunna skicka en ny kallelse – nyckeln versioneras.
@@ -143,10 +146,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     // === AUTHORIZATION: caller MUST own the interview (or its job/org) ===
     // interviewId is required — no anonymous "send email to anyone" path.
+    let applicantId = '';
+    let interviewEmployerId = '';
     {
       const { data: interview } = await supabaseAdmin
         .from('interviews')
-        .select('employer_id, job_id, revision')
+        .select('applicant_id, employer_id, job_id, revision')
         .eq('id', interviewId)
         .maybeSingle();
       if (!interview) {
@@ -156,6 +161,8 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
       interviewRevision = (interview as { revision?: number }).revision ?? 0;
+      applicantId = interview.applicant_id;
+      interviewEmployerId = interview.employer_id;
       let allowed = interview.employer_id === callerId;
       if (!allowed && interview.job_id) {
         const { data: job } = await supabaseAdmin
@@ -219,6 +226,46 @@ const handler = async (req: Request): Promise<Response> => {
 
     const idBase = `${interviewId || `${candidateEmail}-${scheduledAt}`}-r${interviewRevision}`;
 
+    let acceptUrl: string | undefined;
+    let declineUrl: string | undefined;
+    const { data: existingToken } = await supabaseAdmin
+      .from('interview_email_tokens')
+      .select('token')
+      .eq('interview_id', interviewId)
+      .is('used_at', null)
+      .gt('expires_at', new Date().toISOString())
+      .limit(1)
+      .maybeSingle();
+    let responseToken = existingToken?.token as string | undefined;
+    if (!responseToken) {
+      const { data: createdToken } = await supabaseAdmin
+        .from('interview_email_tokens')
+        .insert({ interview_id: interviewId, applicant_id: applicantId })
+        .select('token')
+        .single();
+      responseToken = createdToken?.token as string | undefined;
+    }
+    if (responseToken) {
+      const responseBase = `https://parium.se/intervjusvar?token=${encodeURIComponent(responseToken)}`;
+      acceptUrl = `${responseBase}&answer=yes`;
+      declineUrl = `${responseBase}&answer=no`;
+    }
+
+    const calendarInput = {
+      interviewId,
+      jobTitle,
+      companyName,
+      candidateName,
+      scheduledAt,
+      durationMinutes,
+      locationDetails: normalizedLocationDetails || null,
+      message: message || null,
+    };
+    for (const connector of SUPPORTED_CONNECTORS) {
+      await addInterviewToCalendar(applicantId, connector, calendarInput, 'job_seeker');
+      await addInterviewToCalendar(interviewEmployerId, connector, calendarInput, 'employer');
+    }
+
     // Candidate email — respect notification preference
     let candidateResult: any = { skipped: false };
     let candidateAllowed = true;
@@ -232,11 +279,11 @@ const handler = async (req: Request): Promise<Response> => {
       console.warn('Preference check failed, defaulting to send:', prefErr);
     }
 
-    if (candidateAllowed) {
+    if (sendEmail && candidateAllowed) {
       candidateResult = await enqueueInvitation(
         candidateEmail,
         false,
-        { ...baseData, recipient_name: candidateName },
+        { ...baseData, recipient_name: candidateName, accept_url: acceptUrl, decline_url: declineUrl },
         `interview-candidate-${idBase}`,
       );
     } else {
@@ -245,7 +292,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Employer confirmation (if different address)
     let employerResult: any = null;
-    if (employerEmail && employerEmail.toLowerCase() !== candidateEmail.toLowerCase()) {
+    if (sendEmail && employerEmail && employerEmail.toLowerCase() !== candidateEmail.toLowerCase()) {
       try {
         employerResult = await enqueueInvitation(
           employerEmail,
