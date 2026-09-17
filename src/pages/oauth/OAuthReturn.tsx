@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { isCalendarConnector } from '@/lib/calendarConnection';
 
 /**
  * Återvägssida för kalenderkopplingen. Leverantören skickar hit en engångs-
- * kod i popup-fönstret; koden byts mot en kopplingsnyckel i en serverfunktion
- * och sparas krypterat. Aldrig en nyckel i webbläsaren — bara en signal till
- * fönstret som öppnade popupen.
+ * kod i popup-fönstret. Koden skickas vidare till fönstret som öppnade popupen
+ * — där finns den inloggade sessionen — och växlas mot kopplingsnyckeln i en
+ * serverfunktion. Aldrig en nyckel i webbläsaren.
  */
 export default function OAuthReturn() {
   const { connector } = useParams<{ connector: string }>();
@@ -20,21 +19,16 @@ export default function OAuthReturn() {
     }
     const connectorId = connector;
 
-    const notifyOpenerAndClose = (
-      type: 'appUserConnectorOAuthComplete' | 'appUserConnectorOAuthFailed',
-      reason?: string,
-    ) => {
-      window.opener?.postMessage(
-        { type, connectorId, ...(reason ? { reason } : {}) },
-        window.location.origin,
-      );
-      window.close();
+    const post = (payload: Record<string, unknown>) => {
+      window.opener?.postMessage({ connectorId, ...payload }, window.location.origin);
     };
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') !== 'true') {
-      setMessage(params.get('error') ?? 'Kopplingen kunde inte slutföras.');
-      notifyOpenerAndClose('appUserConnectorOAuthFailed', params.get('error') ?? undefined);
+      const reason = params.get('error') ?? 'Kopplingen kunde inte slutföras.';
+      setMessage(reason);
+      post({ type: 'appUserConnectorOAuthFailed', reason });
+      window.close();
       return;
     }
 
@@ -43,24 +37,12 @@ export default function OAuthReturn() {
       const reason =
         'Kopplingen kan inte användas ännu: en administratör måste aktivera offline-åtkomst för kopplingsklienten.';
       setMessage(reason);
-      window.opener?.postMessage(
-        { type: 'appUserConnectorOAuthFailed', connectorId, reason },
-        window.location.origin,
-      );
+      post({ type: 'appUserConnectorOAuthFailed', reason });
       return;
     }
 
-    void supabase.functions
-      .invoke('app-user-oauth-complete', { body: { code } })
-      .then(({ error }) => {
-        if (error) throw error;
-        notifyOpenerAndClose('appUserConnectorOAuthComplete');
-      })
-      .catch(() => {
-        const reason = 'Kunde inte slutföra kopplingen. Försök igen.';
-        setMessage(reason);
-        notifyOpenerAndClose('appUserConnectorOAuthFailed', reason);
-      });
+    post({ type: 'appUserConnectorOAuthCode', code });
+    window.close();
   }, [connector]);
 
   return (

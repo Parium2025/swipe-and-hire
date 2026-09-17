@@ -35,6 +35,7 @@ export async function fetchCalendarStatus(): Promise<CalendarStatusMap> {
 function waitForOAuthCompletion(popup: Window, connectorId: CalendarConnector) {
   return new Promise<void>((resolve, reject) => {
     let poll: number | undefined;
+    let exchanging = false;
     const cleanup = () => {
       window.removeEventListener('message', onMessage);
       if (poll !== undefined) window.clearInterval(poll);
@@ -43,10 +44,27 @@ function waitForOAuthCompletion(popup: Window, connectorId: CalendarConnector) {
       const type = event.data?.type;
       if (
         event.origin !== window.location.origin ||
-        event.source !== popup ||
         event.data?.connectorId !== connectorId ||
-        (type !== 'appUserConnectorOAuthComplete' && type !== 'appUserConnectorOAuthFailed')
+        (type !== 'appUserConnectorOAuthComplete' &&
+          type !== 'appUserConnectorOAuthCode' &&
+          type !== 'appUserConnectorOAuthFailed')
       ) return;
+      if (type === 'appUserConnectorOAuthCode') {
+        // Koden växlas här, i fönstret som har den inloggade sessionen.
+        cleanup();
+        exchanging = true;
+        void supabase.functions
+          .invoke('app-user-oauth-complete', { body: { code: event.data.code } })
+          .then(async ({ error }) => {
+            if (error) {
+              const details = FunctionsHttpErrorLike(error) ? await readErrorDetails(error) : '';
+              throw new Error(details || 'Kunde inte slutföra kopplingen. Försök igen.');
+            }
+            resolve();
+          })
+          .catch((err) => reject(err instanceof Error ? err : new Error('Kunde inte slutföra kopplingen.')));
+        return;
+      }
       cleanup();
       if (type === 'appUserConnectorOAuthComplete') {
         resolve();
@@ -57,7 +75,7 @@ function waitForOAuthCompletion(popup: Window, connectorId: CalendarConnector) {
     };
     window.addEventListener('message', onMessage);
     poll = window.setInterval(() => {
-      if (!popup.closed) return;
+      if (!popup.closed || exchanging) return;
       cleanup();
       reject(new Error('Fönstret stängdes innan kopplingen var klar.'));
     }, 500);
