@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
+import { toast } from '@/hooks/use-toast';
 
 interface UnsavedChangesContextType {
   hasUnsavedChanges: boolean;
@@ -12,6 +13,14 @@ interface UnsavedChangesContextType {
    * Returnerar en avregistrerare.
    */
   registerAutosaveFlush: (flush: () => void) => () => void;
+  /**
+   * Sidor med obligatoriska fält kan registrera en spärr som helt stoppar
+   * sidbytet tills fälten är ifyllda. Returnerar spärren ett meddelande
+   * visas det som en varning och användaren stannar kvar på sidan.
+   * Returnerar den null gäller det vanliga flödet. Returnerar en
+   * avregistrerare.
+   */
+  registerLeaveBlocker: (blocker: () => string | null) => () => void;
 }
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefined>(undefined);
