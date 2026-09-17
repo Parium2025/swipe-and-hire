@@ -196,6 +196,7 @@ export function AutoMessagesPanel() {
 
   const ensureTemplateId = async (event: AutoRuleEvent, channel: AutoRuleChannel): Promise<string | null> => {
     const config = event.templates[channel];
+    if (!config) return null;
     const existing = templates.find((template) => template.name === config.name && template.channel === channel);
     if (existing) return existing.id;
 
@@ -338,9 +339,11 @@ export function AutoMessagesPanel() {
           <div className="space-y-3">
             {AUTO_RULE_EVENTS.map((event) => {
               const delay = getDelay(event);
-              
-              const previewEntries: PreviewEntry[] = AUTO_RULE_CHANNELS.map(({ value, label }) => {
-                const config = event.templates[value];
+              // Visa bara kanaler som händelsen faktiskt stödjer.
+              const eventChannels = AUTO_RULE_CHANNELS.filter(({ value }) => Boolean(event.templates[value]));
+
+              const previewEntries: PreviewEntry[] = eventChannels.map(({ value, label }) => {
+                const config = event.templates[value]!;
                 const saved = templates.find((template) => template.name === config.name && template.channel === value);
                 return {
                   channel: value,
@@ -351,7 +354,7 @@ export function AutoMessagesPanel() {
                 };
               });
 
-              const allChannelsOn = AUTO_RULE_CHANNELS.every(({ value }) => Boolean(getRow(event, value)?.is_enabled));
+              const allChannelsOn = eventChannels.length > 0 && eventChannels.every(({ value }) => Boolean(getRow(event, value)?.is_enabled));
 
               return (
 
@@ -366,7 +369,7 @@ export function AutoMessagesPanel() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4">
-                      {AUTO_RULE_CHANNELS.map(({ value, label }) => {
+                      {eventChannels.map(({ value, label }) => {
                         const Icon = CHANNEL_ICON[value];
                         const row = getRow(event, value);
                         const key = `${event.trigger}-${value}`;
