@@ -28,7 +28,7 @@
 - [ ] Kalender: lägg till testkonton i Google OAuth-appens målgrupp och verifiera ett fullständigt Google-samtycke
 
 - [x] Stoppa förhandsvisningens omladdningsloop vid saknad dynamisk modul; visa stabil återhämtning utan blinkande.
-- [ ] Kalender: stoppa anrop till ej konfigurerad Outlook-klient utan 500/felruta
-- [ ] Kalender: ta bort hover-effekt från samtliga kopplingsknappar
+- [x] Kalender: stoppa anrop till ej konfigurerad Outlook-klient utan 500/felruta
+- [x] Kalender: ta bort hover-effekt från samtliga kopplingsknappar
 - [ ] Kalender: verifiera Google-kopplingens återkomstsida utan 404
 
