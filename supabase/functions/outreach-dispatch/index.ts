@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
+import { SUPPORTED_CONNECTORS } from '../_shared/appUserScopes.ts';
+import { addInterviewToCalendar, removeInterviewFromCalendar } from '../_shared/calendarSync.ts';
 // (service-role check now uses literal key match — no JWT payload trust)
 // Ersätter tidigare Resend-import: outreach-mejl går nu via Lovable Emails (hanterad e-postleverans).
 
@@ -250,6 +252,55 @@ async function markSent(logId: string, patch: Record<string, unknown>) {
 }
 
 
+/**
+ * Lägger in (eller tar bort) intervjun i den kopplade användarens egen
+ * kalender — både kandidatens och arbetsgivarens. Körs efter ett lyckat
+ * utskick och får aldrig stoppa utskicket: alla fel loggas bara.
+ */
+async function maybeSyncInterviewCalendar(log: OutreachLog, context: Awaited<ReturnType<typeof buildContext>>) {
+  if (!log.interview_id) return;
+  const isSchedule = log.trigger === 'interview_scheduled';
+  const isCancel = log.trigger === 'interview_cancelled';
+  if (!isSchedule && !isCancel) return;
+
+  try {
+    const { data: interview } = await admin
+      .from('interviews')
+      .select('scheduled_at, duration_minutes, location_details, message, status')
+      .eq('id', log.interview_id)
+      .maybeSingle();
+
+    if (isCancel || !interview || interview.status === 'cancelled' || interview.status === 'declined') {
+      for (const connector of SUPPORTED_CONNECTORS) {
+        if (log.recipient_user_id) await removeInterviewFromCalendar(log.recipient_user_id, connector, log.interview_id, 'job_seeker');
+        await removeInterviewFromCalendar(log.owner_user_id, connector, log.interview_id, 'employer');
+      }
+      return;
+    }
+    if (!interview.scheduled_at) return;
+
+    const input = {
+      interviewId: log.interview_id,
+      jobTitle: context.jobTitle,
+      companyName: context.companyName,
+      candidateName: context.candidateName,
+      scheduledAt: interview.scheduled_at as string,
+      durationMinutes: (interview.duration_minutes as number | null) ?? null,
+      locationDetails: (interview.location_details as string | null) ?? null,
+      message: (interview.message as string | null) ?? null,
+    };
+    for (const connector of SUPPORTED_CONNECTORS) {
+      if (log.recipient_user_id) await addInterviewToCalendar(log.recipient_user_id, connector, input, 'job_seeker');
+      await addInterviewToCalendar(log.owner_user_id, connector, input, 'employer');
+    }
+  } catch (error) {
+    console.error('Kalendersynk misslyckades (påverkar inte utskicket):', error);
+  }
+}
+
+
+
+
 async function dispatchLog(log: OutreachLog) {
 
   // Arbetsgivarens val väger alltid tyngst: har regeln stängts av (eller tagits
@@ -341,6 +392,7 @@ async function dispatchLog(log: OutreachLog) {
       // levererat, så vi bokför det som skickat i stället för att skicka igen.
       if (error && error.code !== '23505') throw error;
       await markSent(log.id, { status: 'sent', sent_at: new Date().toISOString(), conversation_id: conversationId, error_message: null });
+      await maybeSyncInterviewCalendar(log, context);
       return { conversationId };
 
     }
@@ -424,6 +476,7 @@ async function dispatchLog(log: OutreachLog) {
         },
         error_message: null,
       });
+      await maybeSyncInterviewCalendar(log, context);
       return {};
     }
 
@@ -456,6 +509,7 @@ async function dispatchLog(log: OutreachLog) {
 
       if (!response.ok) throw new Error(await response.text());
       await markSent(log.id, { status: 'sent', sent_at: new Date().toISOString(), error_message: null });
+      await maybeSyncInterviewCalendar(log, context);
       return {};
     }
   } catch (error) {
