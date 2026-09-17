@@ -848,7 +848,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="industry" className="text-white">Bransch</Label>
+                <Label htmlFor="industry" className="text-white">Bransch<RequiredStar filled={!!formData.industry.trim()} /></Label>
                 <div className="relative" ref={industryRef}>
                   <div
                     onClick={() => {
@@ -926,7 +926,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="employee_count" className="text-white">Antal anställda</Label>
+                <Label htmlFor="employee_count" className="text-white">Antal anställda<RequiredStar filled={!!formData.employee_count.trim()} /></Label>
                 <div className="relative" ref={employeeCountRef}>
                   <div
                     onClick={() => {
@@ -965,7 +965,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="address" className="text-white">Huvudkontor</Label>
+                <Label htmlFor="address" className="text-white">Huvudkontor<RequiredStar filled={!!formData.address.trim()} /></Label>
                 <Input
                   id="address"
                   maxLength={TEXT_LIMITS.address}
@@ -990,7 +990,7 @@ const CompanyProfile = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="company_description" className="text-white">Företagsbeskrivning</Label>
+              <Label htmlFor="company_description" className="text-white">Företagsbeskrivning<RequiredStar filled={!!formData.company_description.trim()} /></Label>
               <Textarea
                 id="company_description"
                 maxLength={TEXT_LIMITS.companyDescription}
