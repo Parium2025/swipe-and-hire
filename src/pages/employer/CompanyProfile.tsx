@@ -724,6 +724,22 @@ const CompanyProfile = () => {
     setSaveStatus('idle');
   }, []);
 
+  // Hårt stopp: sidan får inte lämnas medan ett obligatoriskt fält (röd
+  // stjärna) är tomt. Gäller både menyval i appen och webbläsarens
+  // bakåt-/framåtknappar.
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+  useEffect(() => {
+    return registerLeaveBlocker(() => {
+      const missing = REQUIRED_FIELDS
+        .filter(({ key }) => !String(formDataRef.current[key] ?? '').trim())
+        .map(({ label }) => label);
+      return missing.length > 0
+        ? `Fyll i alla obligatoriska fält innan du lämnar sidan: ${missing.join(', ')}.`
+        : null;
+    });
+  }, [registerLeaveBlocker]);
+
 
 
   // Visa loggan via exakt samma transformerade URL som sidebar/header redan
