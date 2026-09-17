@@ -6,6 +6,7 @@ export interface CalendarConnectionStatus {
   connected: boolean;
   email: string | null;
   reconnectRequired?: boolean;
+  available?: boolean;
 }
 
 export type CalendarStatusMap = Record<CalendarConnector, CalendarConnectionStatus>;
@@ -26,8 +27,8 @@ export async function fetchCalendarStatus(): Promise<CalendarStatusMap> {
   }
   const connections = (data?.connections ?? {}) as Record<string, CalendarConnectionStatus>;
   return {
-    google_calendar: connections.google_calendar ?? { connected: false, email: null },
-    microsoft_outlook: connections.microsoft_outlook ?? { connected: false, email: null },
+    google_calendar: connections.google_calendar ?? { connected: false, email: null, available: false },
+    microsoft_outlook: connections.microsoft_outlook ?? { connected: false, email: null, available: false },
   };
 }
 

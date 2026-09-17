@@ -53,7 +53,11 @@ function redirectAuthTokensIfNeeded() {
   // Sidor med EGNA ?token=-parametrar (avprenumerationslänkar i mejl) får
   // aldrig kapas hit — annars blir det en extra full sidladdning till /auth
   // med blank skärm och splash-blink direkt från inkorgen.
-  if (pathname === '/unsubscribe' || pathname === '/unsubscribe/') return false;
+  if (
+    pathname === '/unsubscribe' ||
+    pathname === '/unsubscribe/' ||
+    /^\/oauth\/(google_calendar|microsoft_outlook)\/return\/?$/.test(pathname)
+  ) return false;
 
   const search = new URLSearchParams(location.search);
   const hashStr = location.hash.startsWith('#') ? location.hash.slice(1) : '';

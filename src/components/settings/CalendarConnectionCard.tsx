@@ -24,8 +24,8 @@ const CalendarConnectionCard = () => {
       setStatus(await fetchCalendarStatus());
     } catch (error) {
       setStatus({
-        google_calendar: { connected: false, email: null },
-        microsoft_outlook: { connected: false, email: null },
+        google_calendar: { connected: false, email: null, available: false },
+        microsoft_outlook: { connected: false, email: null, available: false },
       });
       toast({
         title: 'Kunde inte hämta kopplingsstatus',
@@ -89,6 +89,7 @@ const CalendarConnectionCard = () => {
         {CALENDAR_CONNECTORS.map((connector) => {
           const connection = status?.[connector.id];
           const connecting = busy === connector.id;
+          const unavailable = status !== null && connection?.available === false;
           return (
             <div
               key={connector.id}
@@ -103,6 +104,8 @@ const CalendarConnectionCard = () => {
                       ? `Kopplad${connection.email ? ` som ${connection.email}` : ''}`
                       : connection?.reconnectRequired
                         ? 'Kopplingen behöver förnyas.'
+                        : unavailable
+                          ? 'Inte tillgänglig ännu.'
                         : 'Inte kopplad.'}
                 </p>
               </div>
@@ -111,19 +114,19 @@ const CalendarConnectionCard = () => {
                   <>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="outlineNeutral"
                       disabled={connecting}
                       onClick={() => void handleConnect(connector.id)}
-                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white"
                     >
                       {connecting ? 'Kopplar …' : 'Byt konto'}
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="outlineNeutral"
                       disabled={connecting}
                       onClick={() => void handleDisconnect(connector.id)}
-                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white"
                     >
                       {connecting ? 'Kopplar från …' : 'Koppla från'}
                     </Button>
@@ -131,12 +134,18 @@ const CalendarConnectionCard = () => {
                 ) : (
                   <Button
                     size="sm"
-                    variant="outline"
-                    disabled={connecting || !status}
+                    variant="outlineNeutral"
+                    disabled={connecting || !status || unavailable}
                     onClick={() => void handleConnect(connector.id)}
-                    className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                    className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white"
                   >
-                    {connecting ? 'Kopplar …' : connection?.reconnectRequired ? 'Förnya koppling' : 'Koppla'}
+                    {connecting
+                      ? 'Kopplar …'
+                      : unavailable
+                        ? 'Ej tillgänglig'
+                        : connection?.reconnectRequired
+                          ? 'Förnya koppling'
+                          : 'Koppla'}
                   </Button>
                 )}
               </div>
