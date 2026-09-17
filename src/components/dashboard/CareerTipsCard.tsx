@@ -152,7 +152,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 aria-label="Läs artikeln"
               >
                 <span className="text-xs shrink-0">Läs mer</span>
-                <TruncatedText text={`· ${currentTip.source}`} className="min-w-0 flex-1 text-[10px] text-white" />
+                <TruncatedText text={`· ${currentTip.source}`} className="min-w-0 flex-1 truncate text-[10px] text-white" />
                 <ExternalLink className="h-3 w-3 shrink-0" />
               </a>
             ) : currentTip ? (
