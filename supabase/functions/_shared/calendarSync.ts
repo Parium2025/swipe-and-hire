@@ -125,11 +125,13 @@ async function upsertGoogleEvent(connectionAPIKey: string, input: InterviewEvent
 async function deleteGoogleEvents(connectionAPIKey: string, interviewId: string, role: CalendarRole) {
   const eventIds = await findGoogleEventIds(connectionAPIKey, interviewId, role);
   for (const eventId of eventIds) {
-    await googleRequest(connectionAPIKey, `/calendar/v3/calendars/primary/events/${encodeURIComponent(eventId)}`, {
+    const res = await googleRequest(connectionAPIKey, `/calendar/v3/calendars/primary/events/${encodeURIComponent(eventId)}`, {
       method: 'DELETE',
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    if (!res.ok && res.status !== 404) return res;
   }
+  return null;
 }
 
 async function outlookRequest(
@@ -183,15 +185,17 @@ async function deleteOutlookEvents(connectionAPIKey: string, interviewId: string
     method: 'GET',
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!res.ok) return;
+  if (!res.ok) return res;
   const data = await res.json().catch(() => null) as { value?: Array<{ id?: string }> } | null;
   for (const item of data?.value ?? []) {
     if (!item.id) continue;
-    await outlookRequest(connectionAPIKey, `/v1.0/me/events/${encodeURIComponent(item.id)}`, {
+    const deleteRes = await outlookRequest(connectionAPIKey, `/v1.0/me/events/${encodeURIComponent(item.id)}`, {
       method: 'DELETE',
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    if (!deleteRes.ok && deleteRes.status !== 404) return deleteRes;
   }
+  return null;
 }
 
 export async function addInterviewToCalendar(
@@ -250,10 +254,15 @@ export async function removeInterviewFromCalendar(
   if (!connection) return { status: 'not_connected' };
 
   try {
-    if (connectorId === 'google_calendar') {
-      await deleteGoogleEvents(connection.connectionAPIKey, interviewId, role);
-    } else {
-      await deleteOutlookEvents(connection.connectionAPIKey, interviewId, role);
+    const failedResponse = connectorId === 'google_calendar'
+      ? await deleteGoogleEvents(connection.connectionAPIKey, interviewId, role)
+      : await deleteOutlookEvents(connection.connectionAPIKey, interviewId, role);
+    if (failedResponse && await appUserReconnectRequired(failedResponse)) {
+      return { status: 'not_connected', reconnectRequired: true };
+    }
+    if (failedResponse) {
+      console.error(`Kalender: borttagning misslyckades [${failedResponse.status}]: ${(await failedResponse.text()).slice(0, 300)}`);
+      return { status: 'skipped' };
     }
     return { status: 'connected' };
   } catch (error) {
