@@ -142,12 +142,21 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
         <div className="mt-auto flex items-center justify-between gap-2 shrink-0 h-6">
           <div className="flex-1 min-w-0">
             {currentTip?.source_url ? (
-              <div className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap">
+              <a
+                href={currentTip.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                className="flex items-center gap-1.5 text-white min-w-0 overflow-hidden whitespace-nowrap touch-manipulation"
+                aria-label="Läs artikeln"
+              >
                 <span className="text-xs shrink-0">Läs mer</span>
                 <TruncatedText text={`· ${currentTip.source}`} className="min-w-0 flex-1 text-[10px] text-white" />
                 <ExternalLink className="h-3 w-3 shrink-0" />
-              </div>
+              </a>
             ) : currentTip ? (
+
               <div
                 className="flex items-center gap-1 text-white/90 min-w-0 overflow-hidden whitespace-nowrap"
                 title="Denna text är genererad av vår AI-karriärcoach när inga aktuella RSS-artiklar finns tillgängliga."
