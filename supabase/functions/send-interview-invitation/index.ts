@@ -141,7 +141,8 @@ const handler = async (req: Request): Promise<Response> => {
       employerEmail, employerName, interviewId, sendEmail,
     } = parsed.data;
 
-    // Ombokning måste kunna skicka en ny kallelse – nyckeln versioneras.
+    // Revisionen håller bokningens identitet stabil och används om en ny
+    // strukturerad kallelse uttryckligen behöver skickas för en senare version.
     let interviewRevision = 0;
 
     // === AUTHORIZATION: caller MUST own the interview (or its job/org) ===
