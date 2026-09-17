@@ -114,7 +114,7 @@ const CalendarConnectionCard = () => {
                       variant="outline"
                       disabled={connecting}
                       onClick={() => void handleConnect(connector.id)}
-                      className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
                     >
                       {connecting ? 'Kopplar …' : 'Byt konto'}
                     </Button>
@@ -123,7 +123,7 @@ const CalendarConnectionCard = () => {
                       variant="outline"
                       disabled={connecting}
                       onClick={() => void handleDisconnect(connector.id)}
-                      className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
                     >
                       {connecting ? 'Kopplar från …' : 'Koppla från'}
                     </Button>
@@ -134,7 +134,7 @@ const CalendarConnectionCard = () => {
                     variant="outline"
                     disabled={connecting || !status}
                     onClick={() => void handleConnect(connector.id)}
-                    className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                    className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
                   >
                     {connecting ? 'Kopplar …' : connection?.reconnectRequired ? 'Förnya koppling' : 'Koppla'}
                   </Button>
