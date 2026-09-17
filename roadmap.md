@@ -19,10 +19,11 @@
 - [x] Verifiera bild ↔ initialer i båda riktningarna utan att ändra hissrörelsen
 - [x] Färdigställ målsidans kort och medielager före hissens första bildruta
 
-- [ ] Kalenderintegration: koppla Google Calendar (klart: OAuth-klient länkad), därefter Outlook — samma flöde
-- [ ] Kalender: lagringstjänst, OAuth-start/-klar-funktioner och återvägsida
-- [ ] Kalender: automatisk inläggning av intervjuer för kopplade arbetsgivare och jobbsökare vid utskick; borttag vid avbokning
-- [ ] Kalender: kopplingskort i arbetsgivarens inställningar och jobbsökarens profil
-- [ ] Kalender: typkontroll, tester och funktionsdeploy
+- [x] Kalenderintegration: koppla Google Calendar (OAuth-klient länkad), därefter Outlook — samma flöde
+- [x] Kalender: lagringstjänst, OAuth-start/-klar-funktioner och återvägsida
+- [x] Kalender: automatisk inläggning av intervjuer för kopplade arbetsgivare och jobbsökare vid utskick; borttag vid avbokning
+- [x] Kalender: kopplingskort i arbetsgivarens inställningar och jobbsökarens profil
+- [x] Kalender: typkontroll, tester och funktionsdeploy
+- [ ] Kalender: användaren slutför Google-samtycke och bekräftar att kopplad status + automatisk inläggning fungerar på riktigt
 
 - [x] Stoppa förhandsvisningens omladdningsloop vid saknad dynamisk modul; visa stabil återhämtning utan blinkande.
