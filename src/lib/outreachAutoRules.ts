@@ -17,7 +17,10 @@ export type AutoRuleEvent = {
   delayLabel: string;
   delayOptions: { value: number; label: string }[];
   defaultDelay: number;
-  templates: Record<AutoRuleChannel, { name: string; subject: string | null; body: string }>;
+  // En kanal kan utelämnas helt – då visas ingen reglage för den och inget
+  // skickas i kanalen. "Intervjun bokas" saknar t.ex. mejl eftersom den
+  // strukturerade kallelsen (med ja/nej-knappar) alltid skickas vid bokning.
+  templates: Partial<Record<AutoRuleChannel, { name: string; subject: string | null; body: string }>>;
 };
 
 export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
@@ -62,11 +65,9 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
       { value: 60, label: 'Efter 1 timme' },
     ],
     templates: {
-      email: {
-        name: 'Intervju bokad · professionellt mejl',
-        subject: 'Din intervju för {job_title} är bokad',
-        body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} är nu bokad.\nDatum: {scheduled_date}\nTid: {scheduled_time}\nTyp: {location_type}\nPlats/länk: {location_details}\n\n{message}\n\nVänliga hälsningar,\n{company_name}',
-      },
+      // Mejl utelämnas avsiktligt: kandidaten får alltid den strukturerade
+      // intervjukallelsen (send-interview-invitation) vid bokning, och ett
+      // extra automatiskt bekräftelsemejl skulle bli en dubblett.
       push: {
         name: 'Intervju bokad · push',
         subject: 'Intervju bokad',
