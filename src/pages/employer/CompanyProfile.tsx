@@ -193,32 +193,14 @@ const CompanyProfile = () => {
         interview_office_address: (profile as any)?.interview_office_address || '',
         interview_office_instructions: (profile as any)?.interview_office_instructions || '',
       };
-      
-      // Ett sparat utkast får bara gälla vid första inläsningen, och bara om
-      // det är färskt. Annars kan en gammal flik skriva tillbaka inaktuell
-      // text över en kollegas nyare sparning.
-      let draftIsFresh = false;
-      if (!draftAppliedRef.current) {
-        try {
-          const savedState = localStorage.getItem(DRAFT_STORAGE_KEY);
-          if (savedState) {
-            const parsed = JSON.parse(savedState);
-            const savedAt = typeof parsed?.savedAt === 'number' ? parsed.savedAt : 0;
-            draftIsFresh = Date.now() - savedAt < 24 * 60 * 60 * 1000;
-            if (!draftIsFresh) localStorage.removeItem(DRAFT_STORAGE_KEY);
-          }
-        } catch {
-          try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch {}
-        }
-        draftAppliedRef.current = true;
-      }
 
-      // Efter första inläsningen följer formuläret servern igen så länge
-      // användaren inte har egna osparade ändringar.
-      if (!draftIsFresh && !hasUnsavedChanges) {
+      // Formuläret följer alltid servern så länge användaren inte har egna
+      // osparade ändringar.
+      if (!hasUnsavedChanges) {
         setFormData(values);
       }
       setOriginalValues(values);
+
     }
   }, [profile, hasUnsavedChanges]);
 
