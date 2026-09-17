@@ -12,13 +12,16 @@ const OWN_TOKEN_ROUTES = new Set([
   '/unsubscribe/',
 ]);
 
+const isOwnCallbackRoute = (pathname: string) =>
+  OWN_TOKEN_ROUTES.has(pathname) || /^\/oauth\/(google_calendar|microsoft_outlook)\/return\/?$/.test(pathname);
+
 const AuthTokenBridge = () => {
   const location = useLocation();
 
   useEffect(() => {
     // Avoid loops if we are already on /auth
     if (location.pathname === '/auth') return;
-    if (OWN_TOKEN_ROUTES.has(location.pathname)) return;
+    if (isOwnCallbackRoute(location.pathname)) return;
 
     const searchParams = new URLSearchParams(window.location.search);
     const hashStr = window.location.hash.startsWith('#')

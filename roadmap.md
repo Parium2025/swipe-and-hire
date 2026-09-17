@@ -30,5 +30,5 @@
 - [x] Stoppa förhandsvisningens omladdningsloop vid saknad dynamisk modul; visa stabil återhämtning utan blinkande.
 - [x] Kalender: stoppa anrop till ej konfigurerad Outlook-klient utan 500/felruta
 - [x] Kalender: ta bort hover-effekt från samtliga kopplingsknappar
-- [ ] Kalender: verifiera Google-kopplingens återkomstsida utan 404
+- [x] Kalender: verifiera Google-kopplingens återkomstsida utan 404
 
