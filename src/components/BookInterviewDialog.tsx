@@ -400,6 +400,7 @@ export const BookInterviewDialog = ({
       }
 
       let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
+      let invitationSucceeded = false;
 
       // 1. Send the interview invitation email with .ics calendar attachment
       try {
@@ -412,7 +413,7 @@ export const BookInterviewDialog = ({
 
         const candidateEmail = appData?.email;
         if (candidateEmail && interviewRow?.id) {
-          await supabase.functions.invoke('send-interview-invitation', {
+          const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
             body: {
               candidateEmail,
               candidateName,
@@ -426,13 +427,20 @@ export const BookInterviewDialog = ({
               employerEmail: user?.email || undefined,
               employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
               interviewId: interviewRow.id,
+              // En ombokning uppdaterar kalendern och appnotisen, men skickar
+              // inte en ny kopia av kallelsemejlet.
+              sendEmail: !isReschedule,
             },
           });
+          if (invitationError) throw invitationError;
+          invitationSucceeded = true;
         }
 
       } catch (emailErr) {
         console.error('Error sending interview email:', emailErr);
-        // Non-blocking — interview is already created
+        if (isReschedule) {
+          description = 'Intervjun är ombokad, men kalendern kunde inte uppdateras.';
+        }
       }
 
       // 2. Trigger outreach automations (chat, push, etc.)
@@ -446,12 +454,16 @@ export const BookInterviewDialog = ({
         });
         if (dispatchError) throw dispatchError;
         const processedCount = Number((dispatchData as { processedCount?: number } | null)?.processedCount ?? 0);
-        description = processedCount > 0
-          ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
-          : 'Intervjukallelse med kalenderinbjudan skickad!';
+        description = isReschedule
+          ? invitationSucceeded
+            ? 'Kalenderbokningen är uppdaterad.'
+            : description
+          : processedCount > 0
+            ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
+            : 'Intervjukallelse med kalenderinbjudan skickad!';
       } catch (dispatchErr) {
         console.error('Error invoking outreach-dispatch:', dispatchErr);
-        description = 'Intervjukallelse med kalenderinbjudan skickad!';
+        if (!isReschedule) description = 'Intervjukallelse med kalenderinbjudan skickad!';
       }
 
       toast.success(

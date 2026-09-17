@@ -1,7 +1,7 @@
 // Server-only. Lägger in och tar bort intervjuevents i den kopplade
 // användarens egen kalender (Google Calendar eller Outlook) via kopplings-
-// gatewayen. Anropas från outreach-dispatch — fel här får aldrig stoppa
-// ett utskick, därför returneras alltid status i stället för att kasta.
+// gatewayen. Anropas från den direkta intervjufunktionen och som reserv från
+// outreach-dispatch. Fel returneras som status i stället för att kasta.
 
 import { appUserReconnectRequired, callAsAppUser } from './appUserConnector.ts';
 import { getConnectionForUser } from './appUserConnections.ts';
@@ -72,24 +72,23 @@ async function googleRequest(
   });
 }
 
-async function googleEventExists(connectionAPIKey: string, interviewId: string, role: CalendarRole): Promise<boolean> {
+async function findGoogleEventIds(connectionAPIKey: string, interviewId: string, role: CalendarRole): Promise<string[]> {
   const query = new URLSearchParams({
-    privateExtendedProperty: `parium_interview_id:${interviewId}`,
-    privateExtendedProperty: `parium_role:${role}`,
-    maxResults: '1',
+    iCalUID: icalUid(interviewId, role),
+    maxResults: '10',
     showDeleted: 'false',
   });
   const res = await googleRequest(connectionAPIKey, `/calendar/v3/calendars/primary/events?${query}`, {
     method: 'GET',
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!res.ok) return false;
-  const data = await res.json().catch(() => null) as { items?: unknown[] } | null;
-  return (data?.items?.length ?? 0) > 0;
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => null) as { items?: Array<{ id?: string }> } | null;
+  return (data?.items ?? []).flatMap((item) => item.id ? [item.id] : []);
 }
 
-async function insertGoogleEvent(connectionAPIKey: string, input: InterviewEventInput, role: CalendarRole) {
-  const body = {
+function googleEventBody(input: InterviewEventInput, role: CalendarRole) {
+  return {
     summary: eventSummary(input, role),
     description: eventDescription(input),
     location: input.locationDetails ?? undefined,
@@ -104,8 +103,19 @@ async function insertGoogleEvent(connectionAPIKey: string, input: InterviewEvent
       },
     },
   };
-  return googleRequest(connectionAPIKey, '/calendar/v3/calendars/primary/events', {
-    method: 'POST',
+}
+
+async function upsertGoogleEvent(connectionAPIKey: string, input: InterviewEventInput, role: CalendarRole) {
+  const existingIds = await findGoogleEventIds(connectionAPIKey, input.interviewId, role);
+  const existingId = existingIds[0];
+  const path = existingId
+    ? `/calendar/v3/calendars/primary/events/${encodeURIComponent(existingId)}`
+    : '/calendar/v3/calendars/primary/events';
+  const body = {
+    ...googleEventBody(input, role),
+  };
+  return googleRequest(connectionAPIKey, path, {
+    method: existingId ? 'PATCH' : 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -113,25 +123,15 @@ async function insertGoogleEvent(connectionAPIKey: string, input: InterviewEvent
 }
 
 async function deleteGoogleEvents(connectionAPIKey: string, interviewId: string, role: CalendarRole) {
-  const query = new URLSearchParams({
-    privateExtendedProperty: `parium_interview_id:${interviewId}`,
-    privateExtendedProperty: `parium_role:${role}`,
-    maxResults: '10',
-    showDeleted: 'false',
-  });
-  const res = await googleRequest(connectionAPIKey, `/calendar/v3/calendars/primary/events?${query}`, {
-    method: 'GET',
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
-  if (!res.ok) return;
-  const data = await res.json().catch(() => null) as { items?: Array<{ id?: string }> } | null;
-  for (const item of data?.items ?? []) {
-    if (!item.id) continue;
-    await googleRequest(connectionAPIKey, `/calendar/v3/calendars/primary/events/${encodeURIComponent(item.id)}`, {
+  const eventIds = await findGoogleEventIds(connectionAPIKey, interviewId, role);
+  for (const eventId of eventIds) {
+    const res = await googleRequest(connectionAPIKey, `/calendar/v3/calendars/primary/events/${encodeURIComponent(eventId)}`, {
       method: 'DELETE',
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    if (!res.ok && res.status !== 404) return res;
   }
+  return null;
 }
 
 async function outlookRequest(
@@ -185,15 +185,17 @@ async function deleteOutlookEvents(connectionAPIKey: string, interviewId: string
     method: 'GET',
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!res.ok) return;
+  if (!res.ok) return res;
   const data = await res.json().catch(() => null) as { value?: Array<{ id?: string }> } | null;
   for (const item of data?.value ?? []) {
     if (!item.id) continue;
-    await outlookRequest(connectionAPIKey, `/v1.0/me/events/${encodeURIComponent(item.id)}`, {
+    const deleteRes = await outlookRequest(connectionAPIKey, `/v1.0/me/events/${encodeURIComponent(item.id)}`, {
       method: 'DELETE',
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    if (!deleteRes.ok && deleteRes.status !== 404) return deleteRes;
   }
+  return null;
 }
 
 export async function addInterviewToCalendar(
@@ -212,14 +214,15 @@ export async function addInterviewToCalendar(
   if (!connection) return { status: 'not_connected' };
 
   try {
-    const exists = connectorId === 'google_calendar'
-      ? await googleEventExists(connection.connectionAPIKey, input.interviewId, role)
-      : await outlookEventExists(connection.connectionAPIKey, input.interviewId, role);
-    if (exists) return { status: 'connected' };
-
     const res = connectorId === 'google_calendar'
-      ? await insertGoogleEvent(connection.connectionAPIKey, input, role)
-      : await insertOutlookEvent(connection.connectionAPIKey, input, role);
+      ? await upsertGoogleEvent(connection.connectionAPIKey, input, role)
+      : await (async () => {
+          const exists = await outlookEventExists(connection.connectionAPIKey, input.interviewId, role);
+          if (exists) {
+            await deleteOutlookEvents(connection.connectionAPIKey, input.interviewId, role);
+          }
+          return insertOutlookEvent(connection.connectionAPIKey, input, role);
+        })();
 
     if (await appUserReconnectRequired(res)) {
       return { status: 'not_connected', reconnectRequired: true };
@@ -251,10 +254,15 @@ export async function removeInterviewFromCalendar(
   if (!connection) return { status: 'not_connected' };
 
   try {
-    if (connectorId === 'google_calendar') {
-      await deleteGoogleEvents(connection.connectionAPIKey, interviewId, role);
-    } else {
-      await deleteOutlookEvents(connection.connectionAPIKey, interviewId, role);
+    const failedResponse = connectorId === 'google_calendar'
+      ? await deleteGoogleEvents(connection.connectionAPIKey, interviewId, role)
+      : await deleteOutlookEvents(connection.connectionAPIKey, interviewId, role);
+    if (failedResponse && await appUserReconnectRequired(failedResponse)) {
+      return { status: 'not_connected', reconnectRequired: true };
+    }
+    if (failedResponse) {
+      console.error(`Kalender: borttagning misslyckades [${failedResponse.status}]: ${(await failedResponse.text()).slice(0, 300)}`);
+      return { status: 'skipped' };
     }
     return { status: 'connected' };
   } catch (error) {
