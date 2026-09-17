@@ -46,6 +46,7 @@ import { useCachedImage } from '@/hooks/useCachedImage';
 import { JobSeekerNotificationSettings } from '@/components/JobSeekerNotificationSettings';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+import CalendarConnectionCard from '@/components/settings/CalendarConnectionCard';
 import ProfileSwitcherRail, { type ProfileSwitcherRailHandle } from '@/components/candidateProfiles/ProfileSwitcherRail';
 import type { CandidateProfile } from '@/hooks/useCandidateProfiles';
 
@@ -2879,6 +2880,11 @@ const Profile = () => {
       {/* Active Sessions */}
       <div className="mt-8">
         <ActiveSessionsSettings />
+      </div>
+
+      {/* Kalenderkoppling (Google/Outlook) — intervjuer läggs in automatiskt */}
+      <div className="mt-8">
+        <CalendarConnectionCard />
       </div>
 
       {/* GDPR: dataportabilitet */}

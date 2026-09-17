@@ -9,6 +9,7 @@ import { AutoMessagesPanel } from '@/components/employer/outreach/AutoMessagesPa
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
+import CalendarConnectionCard from '@/components/settings/CalendarConnectionCard';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 
@@ -209,6 +210,11 @@ const EmployerSettings = () => {
           <MessageTemplatesSettings />
         </div>
       ),
+    },
+    {
+      value: 'kalender',
+      label: 'Kalender',
+      content: <CalendarConnectionCard />,
     },
     {
       value: 'integritet',

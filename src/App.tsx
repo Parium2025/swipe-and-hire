@@ -36,6 +36,7 @@ import NotFound from "./pages/NotFound";
 import ValjPlan from "./pages/ValjPlan";
 import Unsubscribe from "./pages/Unsubscribe";
 import InterviewResponse from "./pages/InterviewResponse";
+import OAuthReturn from "./pages/oauth/OAuthReturn";
 import TeamInvite from "./pages/TeamInvite";
 import OAuthConsent from "./pages/OAuthConsent";
 
@@ -272,6 +273,7 @@ const AnimatedRoutes = () => {
           <Route path="/cv-tunnel" element={<CvTunnel />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/intervjusvar" element={<InterviewResponse />} />
+          <Route path="/oauth/:connector/return" element={<OAuthReturn />} />
           <Route path="/team-invite" element={<TeamInvite />} />
           
           
