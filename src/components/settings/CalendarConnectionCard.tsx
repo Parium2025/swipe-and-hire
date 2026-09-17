@@ -117,7 +117,7 @@ const CalendarConnectionCard = () => {
                       variant="outlineNeutral"
                       disabled={connecting}
                       onClick={() => void handleConnect(connector.id)}
-                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white"
+                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white !transition-none hover:!bg-transparent hover:!text-white md:hover:!bg-transparent md:hover:!text-white active:!scale-100 active:!bg-transparent active:!text-white"
                     >
                       {connecting ? 'Kopplar …' : 'Byt konto'}
                     </Button>
@@ -126,7 +126,7 @@ const CalendarConnectionCard = () => {
                       variant="outlineNeutral"
                       disabled={connecting}
                       onClick={() => void handleDisconnect(connector.id)}
-                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white"
+                      className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white !transition-none hover:!bg-transparent hover:!text-white md:hover:!bg-transparent md:hover:!text-white active:!scale-100 active:!bg-transparent active:!text-white"
                     >
                       {connecting ? 'Kopplar från …' : 'Koppla från'}
                     </Button>
@@ -137,7 +137,7 @@ const CalendarConnectionCard = () => {
                     variant="outlineNeutral"
                     disabled={connecting || !status || unavailable}
                     onClick={() => void handleConnect(connector.id)}
-                    className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white"
+                    className="min-w-[104px] justify-center rounded-full border-white/20 bg-transparent text-white !transition-none hover:!bg-transparent hover:!text-white md:hover:!bg-transparent md:hover:!text-white active:!scale-100 active:!bg-transparent active:!text-white"
                   >
                     {connecting
                       ? 'Kopplar …'

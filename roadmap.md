@@ -25,7 +25,7 @@
 - [x] Kalender: kopplingskort i arbetsgivarens inställningar och jobbsökarens profil
 - [x] Kalender: typkontroll, tester och funktionsdeploy
 - [ ] Kalender: användaren slutför Google-samtycke och bekräftar att kopplad status + automatisk inläggning fungerar på riktigt
-- [ ] Kalender: lägg till testkonton i Google OAuth-appens målgrupp och verifiera ett fullständigt Google-samtycke
+- [ ] Kalender: testkonto är tillagt; slutför Googles varnings- och samtyckessteg med **Fortsätt** och verifiera kopplad status
 
 - [x] Stoppa förhandsvisningens omladdningsloop vid saknad dynamisk modul; visa stabil återhämtning utan blinkande.
 - [x] Kalender: stoppa anrop till ej konfigurerad Outlook-klient utan 500/felruta
