@@ -303,6 +303,17 @@ async function maybeSyncInterviewCalendar(log: OutreachLog, context: Awaited<Ret
 
 async function dispatchLog(log: OutreachLog) {
 
+  // Intervjubokningar har en enda särskild kallelse med datum, plats,
+  // kalendervägar och svarsknappar. En äldre eller manuellt skapad automation
+  // får aldrig skicka ett andra, generiskt mejl för samma bokning.
+  if (log.trigger === 'interview_scheduled' && log.channel === 'email') {
+    await admin.from('outreach_dispatch_logs').update({
+      status: 'skipped',
+      error_message: 'Ersatt av den strukturerade intervjukallelsen',
+    }).eq('id', log.id);
+    return { skipped: true };
+  }
+
   // Arbetsgivarens val väger alltid tyngst: har regeln stängts av (eller tagits
   // bort) efter att raden köades ska inget skickas — inte ens en fördröjd rad.
   if (log.automation_id) {
