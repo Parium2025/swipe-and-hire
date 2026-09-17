@@ -517,6 +517,25 @@ const CompanyProfile = () => {
       interview_video_link: normalizeMeetingLink(formData.interview_video_link || ''),
     };
 
+    // Obligatoriska fält får aldrig sparas tomma — annars kan profilen stå
+    // halvtom inför kandidater. Sparningen blockeras tills allt är ifyllt,
+    // och kvarvarande osparade ändringar stoppar användaren vid sidbyte.
+    const missingRequired = REQUIRED_FIELDS
+      .filter(({ key }) => !String(sanitizedFormData[key] ?? '').trim())
+      .map(({ label }) => label);
+    if (missingRequired.length > 0) {
+      const msg = `Fyll i alla obligatoriska fält: ${missingRequired.join(', ')}.`;
+      if (!silent) {
+        toast({
+          title: "Obligatoriska fält saknas",
+          description: msg,
+          variant: "destructive"
+        });
+      }
+      setSaveError(msg);
+      return false;
+    }
+
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
       if (!silent) {
         toast({
@@ -783,7 +802,7 @@ const CompanyProfile = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
+                <Label htmlFor="company_name" className="text-white">Företagsnamn<RequiredStar filled={!!formData.company_name.trim()} /></Label>
                 <Input
                   id="company_name"
                   value={formData.company_name}
