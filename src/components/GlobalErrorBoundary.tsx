@@ -56,7 +56,8 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
       
       const ownsTokenParameter =
         window.location.pathname === '/unsubscribe' ||
-        window.location.pathname === '/unsubscribe/';
+        window.location.pathname === '/unsubscribe/' ||
+        /^\/oauth\/(google_calendar|microsoft_outlook)\/return\/?$/.test(window.location.pathname);
 
       if (hasAuthTokens && window.location.pathname !== '/auth' && !ownsTokenParameter) {
         console.warn('[GlobalErrorBoundary] Detected potential stuck state');
