@@ -39,6 +39,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const currentPathRef = useRef(`${location.pathname}${location.search}`);
   const autosaveFlushRef = useRef<(() => void) | null>(null);
+  const leaveBlockerRef = useRef<(() => string | null) | null>(null);
 
   const registerAutosaveFlush = useCallback((flush: () => void) => {
     autosaveFlushRef.current = flush;
@@ -46,6 +47,22 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       if (autosaveFlushRef.current === flush) autosaveFlushRef.current = null;
     };
   }, []);
+
+  const registerLeaveBlocker = useCallback((blocker: () => string | null) => {
+    leaveBlockerRef.current = blocker;
+    return () => {
+      if (leaveBlockerRef.current === blocker) leaveBlockerRef.current = null;
+    };
+  }, []);
+
+  // Hårt stopp: sidan får inte lämnas alls (t.ex. tomma obligatoriska fält).
+  // Returnerar true om spärren slog till och användaren ska stanna kvar.
+  const triggerLeaveBlocker = (): boolean => {
+    const message = leaveBlockerRef.current?.();
+    if (!message) return false;
+    toast({ title: "Du kan inte lämna sidan än", description: message, variant: "destructive" });
+    return true;
+  };
 
   const setHasUnsavedChanges = (value: boolean) => {
     if (value && suppressDirtyAfterConfirmRef.current) {
@@ -82,16 +99,24 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Autosparande sida: skriv ned ändringen och låt navigeringen ske.
-      if (autosaveFlushRef.current) {
-        autosaveFlushRef.current();
-        return;
-      }
-
       const originPath = currentPathRef.current;
       const targetPath = `${window.location.pathname}${window.location.search}`;
 
       if (targetPath === originPath) {
+        return;
+      }
+
+      // Sida med hårt stopp (t.ex. tomma obligatoriska fält): hoppa tillbaka
+      // till redigeringssidan direkt, ingen dialog visas.
+      if (triggerLeaveBlocker()) {
+        skipNextPopRef.current = true;
+        window.history.pushState(null, '', originPath);
+        return;
+      }
+
+      // Autosparande sida: skriv ned ändringen och låt navigeringen ske.
+      if (autosaveFlushRef.current) {
+        autosaveFlushRef.current();
         return;
       }
 
