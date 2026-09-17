@@ -392,7 +392,7 @@ export function AutoMessagesPanel() {
                   </div>
 
                   {(() => {
-                    const activeHints = CHANNEL_HINTS.filter(({ value }) => Boolean(getRow(event, value)?.is_enabled));
+                    const activeHints = CHANNEL_HINTS.filter(({ value }) => Boolean(event.templates[value]) && Boolean(getRow(event, value)?.is_enabled));
                     if (activeHints.length === 0) return null;
                     return (
                       <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-2.5">
@@ -403,9 +403,9 @@ export function AutoMessagesPanel() {
                               <span className="font-medium">{label}:</span> {hint}
                             </p>
                           ))}
-                          {allChannelsOn && (
+                          {allChannelsOn && eventChannels.length > 2 && (
                             <p className="min-w-0 break-words text-xs text-white">
-                              Kandidaten nås på tre ställen samtidigt. Vill du hålla nere bruset räcker oftast mejl + push (standard).
+                              Kandidaten nås på {eventChannels.length} ställen samtidigt. Vill du hålla nere bruset räcker oftast mejl + push (standard).
                             </p>
                           )}
                         </div>
