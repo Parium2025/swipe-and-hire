@@ -896,11 +896,12 @@ All colors MUST be HSL.
   .auth-dark select:-webkit-autofill {
     -webkit-text-fill-color: hsl(210 40% 98%) !important;
     caret-color: hsl(210 40% 98%) !important;
-    -webkit-box-shadow: 0 0 0px 1000px rgb(49 82 113) inset !important;
-    box-shadow: 0 0 0px 1000px rgb(49 82 113) inset !important;
-    border-color: hsla(0 0% 100% / 0.2) !important;
-    border-width: 1px !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
   }
+
 }
 
 @layer utilities {
