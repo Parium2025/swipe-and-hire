@@ -1,7 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Button, Container, Head, Heading, Html, Link, Preview, Section, Text, Hr,
+  Body, Button, Container, Head, Html, Link, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -62,10 +62,9 @@ const InterviewInvitationEmail = ({
             <Text style={brand}>{company_name}</Text>
             <Section style={accentBar} />
           </Section>
-          <Heading style={h1}>Intervjukallelse</Heading>
-          <Text style={text}>{greeting}</Text>
-
+          <Text style={subjectLine}>Intervjukallelse · {job_title}</Text>
           <Section style={card}>
+            <Text style={text}>{greeting}</Text>
             <Text style={row}><strong>Datum:</strong> {date_str}</Text>
             <Text style={row}><strong>Tid:</strong> {time_str} · {duration_minutes} min</Text>
             <Text style={row}>
@@ -78,14 +77,13 @@ const InterviewInvitationEmail = ({
                 location_details || 'Information meddelas'
               )}
             </Text>
-          </Section>
-
-          {message ? (
-            <>
+            {message ? (
+              <Section style={messageSection}>
               <Text style={smallLabel}>{messageLabel}</Text>
               <Text style={{ ...text, whiteSpace: 'pre-line' as const }}>{message}</Text>
-            </>
-          ) : null}
+              </Section>
+            ) : null}
+          </Section>
 
           {!is_employer && accept_url && decline_url ? (
             <Section style={answerSection}>
@@ -112,7 +110,6 @@ const InterviewInvitationEmail = ({
             <Link href={google_calendar_url} style={calendarLink}>Eller lägg till i Google Kalender</Link>
           </Section>
 
-          <Hr style={hr} />
           <Text style={footer}>Skickat av {company_name} via Parium</Text>
           <Text style={noReply}>
             Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
@@ -151,10 +148,11 @@ const container = { padding: '32px 28px', maxWidth: '560px' }
 const brandSection = { margin: '0 0 24px' }
 const brand = { fontSize: '22px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
 const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', borderRadius: '2px', margin: '10px 0 0' }
-const h1 = { fontSize: '24px', fontWeight: 700 as const, color: '#001F3D', margin: '0 0 20px', letterSpacing: '-0.3px' }
+const subjectLine = { fontSize: '15px', fontWeight: 600 as const, color: '#1E4B8A', margin: '14px 0 20px' }
 const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0 0 12px' }
-const smallLabel = { fontSize: '13px', color: '#6B7280', fontWeight: 600 as const, margin: '16px 0 4px' }
-const card = { backgroundColor: '#F0F9FF', borderLeft: '4px solid #001F3D', padding: '16px 20px', borderRadius: '0 8px 8px 0', margin: '20px 0' }
+const smallLabel = { fontSize: '13px', color: '#6B7280', fontWeight: 600 as const, margin: '0 0 8px' }
+const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0' }
+const messageSection = { borderTop: '1px solid #e2e8f0', margin: '20px 0 0', padding: '20px 0 0' }
 const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const link = { color: '#001F3D', textDecoration: 'underline', wordBreak: 'break-all' as const }
 const calendarLink = { color: '#6B7280', textDecoration: 'underline', fontSize: '13px' }
@@ -163,7 +161,6 @@ const answerLabel = { fontSize: '14px', fontWeight: 600 as const, color: '#001F3
 const acceptButton = { backgroundColor: '#1E4B8A', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
 const declineButton = { backgroundColor: '#ffffff', color: '#1E4B8A', fontSize: '15px', fontWeight: 600 as const, padding: '11px 23px', borderRadius: '999px', border: '1px solid #cbd5e1', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
 const answerHint = { fontSize: '12px', color: '#94a3b8', margin: '6px 0 0' }
-const hr = { borderColor: '#e2e8f0', margin: '24px 0 8px' }
 const button = {
   backgroundColor: '#001F3D',
   color: '#ffffff',
