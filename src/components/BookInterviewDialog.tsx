@@ -400,6 +400,7 @@ export const BookInterviewDialog = ({
       }
 
       let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
+      let invitationSucceeded = false;
 
       // 1. Send the interview invitation email with .ics calendar attachment
       try {
@@ -432,6 +433,7 @@ export const BookInterviewDialog = ({
             },
           });
           if (invitationError) throw invitationError;
+          invitationSucceeded = true;
         }
 
       } catch (emailErr) {
@@ -453,7 +455,9 @@ export const BookInterviewDialog = ({
         if (dispatchError) throw dispatchError;
         const processedCount = Number((dispatchData as { processedCount?: number } | null)?.processedCount ?? 0);
         description = isReschedule
-          ? 'Kalenderbokningen är uppdaterad.'
+          ? invitationSucceeded
+            ? 'Kalenderbokningen är uppdaterad.'
+            : description
           : processedCount > 0
             ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
             : 'Intervjukallelse med kalenderinbjudan skickad!';
