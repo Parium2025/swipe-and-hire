@@ -172,7 +172,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 aria-label="Läs artikeln"
               >
                 <span className="text-xs shrink-0">Läs mer</span>
-                <span className="text-[10px] text-white truncate">· {currentNews.source}</span>
+                <span className="min-w-0 text-[10px] text-white truncate">· {currentNews.source}</span>
                 <ExternalLink className="h-3 w-3 shrink-0" />
               </a>
 
