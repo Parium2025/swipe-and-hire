@@ -8,6 +8,13 @@
       "when": 1789671976059,
       "tag": "0000_create_app_user_connections",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789679919649,
+      "tag": "0001_disable_interview_scheduled_email_automation",
+      "breakpoints": true
     }
   ]
 }
