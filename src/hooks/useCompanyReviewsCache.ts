@@ -79,7 +79,7 @@ async function fetchReviewsPage(companyId: string, from: number, to: number): Pr
   if (error) throw error;
   if (!reviews || reviews.length === 0) return [];
 
-  const userIds = reviews.filter(r => !r.is_anonymous).map(r => r.user_id);
+  const userIds = reviews.filter(r => !r.is_anonymous).map(r => r.user_id).filter((id): id is string => !!id);
   if (userIds.length === 0) return reviews as CachedReview[];
 
   const { data: profiles } = await supabase
@@ -92,7 +92,7 @@ async function fetchReviewsPage(companyId: string, from: number, to: number): Pr
   const profileMap = new Map(profiles.map(p => [p.user_id, p]));
   return reviews.map(r => ({
     ...r,
-    profiles: profileMap.get(r.user_id) || undefined,
+    profiles: profileMap.get(r.user_id as string) || undefined,
   })) as CachedReview[];
 }
 
@@ -287,7 +287,7 @@ export function useBatchPrefetchReviews() {
         .map(r => r.user_id)
     )];
 
-    let profileMap = new Map<string, { first_name?: string; last_name?: string }>();
+    let profileMap = new Map<string, { first_name?: string | null; last_name?: string | null }>();
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
         .from('profiles')
@@ -317,7 +317,7 @@ export function useBatchPrefetchReviews() {
       }
       reviewsByCompany.get(r.company_id)!.push({
         ...r,
-        profiles: profileMap.get(r.user_id) || undefined,
+        profiles: profileMap.get(r.user_id as string) || undefined,
       });
     });
 
