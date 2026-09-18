@@ -163,7 +163,7 @@ export const ProfileInfoSections = ({
                     className="border-t border-white/10 pt-2 first:border-t-0 first:pt-0"
                   >
                     <p className="text-sm text-white break-words">
-                      {jobQuestions[questionId]?.text || 'Frågan finns inte längre i den här annonsen'}
+                      {jobQuestions[questionId]?.text || 'Frågan har tagits bort från annonsen – kandidatens sparade svar visas nedan'}
                     </p>
                     <p className="text-sm text-white break-words">
                       Svar: {String(answer) || <span className="opacity-50 italic">Inget svar</span>}

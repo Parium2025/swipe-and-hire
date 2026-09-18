@@ -242,12 +242,6 @@ const CandidatesContent = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="dashboard-control-compact pl-11 pr-11 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal transition-colors"
               />
-              {showSearchBusy && (
-                <span
-                  aria-hidden="true"
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
-                />
-              )}
             </div>
 
             <div className="space-y-2">
@@ -277,9 +271,10 @@ const CandidatesContent = () => {
                 </button>
                 {canSwipe && safeApplications.length > 0 && (
                   <button
+                    disabled={isBusy}
                     onClick={() => setSwipeOpen(true)}
                     onMouseDown={(e) => e.preventDefault()}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none bg-secondary border-secondary/40 text-white shadow-lg shadow-secondary/30 hover:bg-secondary/90"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none bg-secondary border-secondary/40 text-white shadow-lg shadow-secondary/30 hover:bg-secondary/90 disabled:opacity-60 disabled:pointer-events-none"
                   >
                     <Layers className="h-4 w-4" />
                     <span>Swipe-läge</span>
@@ -297,6 +292,14 @@ const CandidatesContent = () => {
                   />
                 </div>
               )}
+              <div className="flex h-5 items-center justify-center" aria-live="polite">
+                {showSearchBusy && (
+                  <div className="flex items-center gap-2 text-xs text-white">
+                    <span aria-hidden="true" className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span>Uppdaterar kandidater…</span>
+                  </div>
+                )}
+              </div>
             </div>
 
           </div>
@@ -365,7 +368,7 @@ const CandidatesContent = () => {
             )}
           </div>
         ) : (
-          <div className={`transition-opacity duration-200 ${showSearchBusy ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+          <div>
             <CandidatesTable 
               applications={filteredApplications} 
               onUpdate={refetch}
@@ -381,6 +384,7 @@ const CandidatesContent = () => {
               onServerSortChange={setSortBy}
               swipeOpen={swipeOpen}
               onSwipeOpenChange={setSwipeOpen}
+              activeQuestionFilters={questionFilters}
             />
           </div>
 

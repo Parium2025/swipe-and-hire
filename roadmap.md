@@ -42,3 +42,6 @@
 - [x] Förtydliga historisk frågetext och ta bort dubbelt avstånd i återpubliceringsdialogen
 - [x] Ta bort mobilens globala bottenreserv från återpubliceringsdialogen så knappglipan försvinner helt
 - [x] Lås arbetsgivarens mobilskal till viewporten så toppmenyn aldrig kan scrollas bort vid statusbyte
+- [x] Stabil frågefiltrering utan felplacerad laddare eller fyrkantiga avatarartefakter
+- [x] Visa aktiva frågefilter genom hela Swipe-läget och blockera öppning innan resultatet är färdigt
+- [x] Förtydliga att borttagen annonsfråga behåller kandidatens historiska svar

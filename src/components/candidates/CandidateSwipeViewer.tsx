@@ -6,6 +6,12 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
+import { TruncatedText } from '@/components/ui/truncated-text';
+
+export interface CandidateSwipeFilter {
+  question: string;
+  answers: string[];
+}
 
 
 interface CandidateSwipeViewerProps {
@@ -25,6 +31,8 @@ interface CandidateSwipeViewerProps {
   onSaveCandidate?: (application: ApplicationData) => void;
   /** Kvar monterad bakom kandidatprofilen — inget blixtrar fram och positionen bevaras. */
   behind?: boolean;
+  /** Frågefilter som skapade urvalet. Visas stabilt över varje kort. */
+  activeQuestionFilters?: CandidateSwipeFilter[];
 }
 
 /* ── Main Viewer ────────────────────────────────── */
@@ -42,6 +50,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   savedApplicantIds,
   onSaveCandidate,
   behind = false,
+  activeQuestionFilters = [],
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -199,6 +208,28 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             </div>
           </button>
         </div>
+
+        {activeQuestionFilters.length > 0 && (
+          <div className="pointer-events-none absolute left-4 right-16 top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20">
+            <div className="flex min-w-0 items-center gap-2 overflow-hidden rounded-lg border border-white/20 bg-card-parium/90 px-3 py-2 shadow-lg backdrop-blur-md">
+              <span className="shrink-0 text-[11px] font-semibold uppercase text-white">Filter</span>
+              <div className="flex min-w-0 flex-1 gap-1.5 overflow-hidden">
+                {activeQuestionFilters.map((filter) => {
+                  const answer = filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ');
+                  const label = `${filter.question}: ${answer}`;
+                  return (
+                    <span
+                      key={`${filter.question}:${answer}`}
+                      className="pointer-events-auto inline-flex min-w-0 max-w-full shrink rounded-full border border-white/20 bg-white/10 px-2 py-1 text-[11px] text-white"
+                    >
+                      <TruncatedText text={label} className="min-w-0 truncate" />
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Compact position indicator — never creates thousands of DOM nodes. */}
         <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">

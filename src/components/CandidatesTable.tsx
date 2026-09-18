@@ -30,7 +30,7 @@ import { useDevice } from '@/hooks/use-device';
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
 import { InfiniteScrollSentinel } from '@/components/candidates/InfiniteScrollSentinel';
-import { CandidateSwipeViewer } from '@/components/candidates/CandidateSwipeViewer';
+import { CandidateSwipeViewer, type CandidateSwipeFilter } from '@/components/candidates/CandidateSwipeViewer';
 
 
 import { useBulkMessageSync } from '@/hooks/useBulkMessageSync';
@@ -67,6 +67,7 @@ interface CandidatesTableProps {
   /** Swipe-läge styrs av sidan ovanför (knappen bredvid filtren) */
   swipeOpen?: boolean;
   onSwipeOpenChange?: (open: boolean) => void;
+  activeQuestionFilters?: CandidateSwipeFilter[];
 
 }
 
@@ -93,6 +94,7 @@ export function CandidatesTable({
   onServerSortChange,
   swipeOpen = false,
   onSwipeOpenChange,
+  activeQuestionFilters = [],
 
 
 }: CandidatesTableProps) {
@@ -1055,6 +1057,7 @@ export function CandidatesTable({
         onLoadMore={onLoadMore}
         hasMore={hasMore && !hasReachedLimit}
         isLoadingMore={isLoadingMore}
+        activeQuestionFilters={activeQuestionFilters}
       />
 
       <CandidateProfileDialog
