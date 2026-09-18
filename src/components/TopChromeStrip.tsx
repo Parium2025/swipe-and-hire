@@ -81,10 +81,11 @@ const TopChromeStrip = () => {
   // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
   // exakt över statusradens safe-area som sidorna redan paddingar för.
   const shouldShowStrip = isTouch;
-  // Samma 14 px överlapp som BottomChromeStrip. Safe-area kan rapporteras
-  // som 0 i vanlig iPhone-Safari; överlappet ser då till att remsan ändå
-  // målar ända in bakom den övre webbläsarkanten i stället för att bli 0 px.
-  const stripInset = isStandalone ? '22px' : '14px';
+  // Toppen behöver ett något djupare överlapp än botten. iOS Safari kan annars
+  // klippa precis i mötet mellan statusytan och sidans första bildruta, vilket
+  // får samma yta att upplevas som två separata ränder. De extra 8 px ligger
+  // ovanpå sidinnehållet och flyttar därför varken navigation eller video.
+  const stripInset = isStandalone ? '30px' : '22px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
