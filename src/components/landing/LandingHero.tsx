@@ -131,7 +131,7 @@ const AudienceCard = ({
         style={{ x: innerX, y: innerY }}
       >
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/[0.10] text-secondary transition-shadow duration-500 ease-out [@media(hover:hover)]:group-hover:shadow-[0_0_30px_hsl(var(--secondary)/0.28)] group-focus-visible:shadow-[0_0_30px_hsl(var(--secondary)/0.28)]">
-          <Icon className="h-[18px] w-[18px]" />
+          <Icon className="h-[18px] w-[18px] text-white" />
         </span>
         <span className="flex-1 flex flex-col items-center gap-0.5 leading-none text-center">
           <span className="whitespace-nowrap text-base font-black leading-none text-white sm:text-lg">
