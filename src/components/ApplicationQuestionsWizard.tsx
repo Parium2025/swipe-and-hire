@@ -98,7 +98,7 @@ export function ApplicationQuestionsWizard({
     }
   }, [currentStep]);
 
-  const renderQuestionInput = (question: JobQuestion) => {
+  const renderQuestionInput = (question: ResolvedJobQuestion) => {
     const answer = answers[question.id];
     const isLocked = hasAlreadyApplied || previewMode;
 
