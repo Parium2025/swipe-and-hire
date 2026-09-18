@@ -6,10 +6,6 @@ import { Users } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
 
-// Transparent 1x1 reserv så bildytan alltid finns kvar — ingen strukturbyte
-// när ett konto saknar bild eller när bilden dyker upp senare.
-const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-
 // Adresser som redan laddats i den här sessionen ritas direkt vid remount.
 const loadedAvatarUrls = new Set<string>();
 
@@ -86,28 +82,30 @@ export function ConversationAvatar({
     >
       <span
         className={cn(
-          'text-pure-white font-medium',
+          'absolute inset-0 flex items-center justify-center rounded-full bg-transparent text-pure-white font-medium',
           size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-base',
           fallbackClassName,
         )}
       >
         {fallbackInitials}
       </span>
-      <img
-        src={resolvedUrl || TRANSPARENT_PIXEL}
-        alt=""
-        aria-hidden="true"
-        decoding="sync"
-        className={cn(
-          'absolute inset-0 h-full w-full object-cover',
-          loaded && hasImageUrl ? 'opacity-100' : 'opacity-0',
-        )}
-        onLoad={() => {
-          if (resolvedUrl) loadedAvatarUrls.add(resolvedUrl);
-          setLoaded(true);
-        }}
-        onError={() => setLoaded(false)}
-      />
+      {hasImageUrl && (
+        <img
+          src={resolvedUrl}
+          alt=""
+          aria-hidden="true"
+          decoding="sync"
+          className={cn(
+            'absolute inset-0 h-full w-full object-cover',
+            loaded ? 'opacity-100' : 'opacity-0',
+          )}
+          onLoad={() => {
+            loadedAvatarUrls.add(resolvedUrl);
+            setLoaded(true);
+          }}
+          onError={() => setLoaded(false)}
+        />
+      )}
     </div>
   );
 }

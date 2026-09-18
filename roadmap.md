@@ -33,7 +33,7 @@
 - [x] Kalender: verifiera Google-kopplingens återkomstsida utan 404
 - [x] Behåll initialer som bildersättning och dölj trasiga bildikoner
 - [x] Lås datorförhandsvisningens övre och nedre rullgräns till hela skärmlägen utan tom bakgrund
-- [x] Ta bort den rektangulära bakgrunden bakom initialer i chattlistans profilringar
+- [x] Ta bort den rektangulära bakgrunden bakom initialer i chattlistans profilringar, inklusive det tomma bildlagret
 - [x] Anpassa Swipe Mode-förhandsvisningen på små skärmar så knappar, publiceringstid och telefonkanter aldrig överlappar
 - [ ] Granska kvarvarande abrupta vybyten för jobbsökare och arbetsgivare och verifiera ändringarna
 
