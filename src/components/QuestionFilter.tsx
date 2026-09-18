@@ -274,13 +274,12 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
         onChange(value.filter(v => v.question !== questionText));
         return;
       }
+    } else if (options.length <= 2) {
+      // Ja/Nej-frågor byter direkt — ett tryck räcker, aldrig via "Alla".
+      newAnswers = [answer];
     } else {
-      // Add this answer
+      // Add this answer — valet stannar exakt där användaren satte det.
       newAnswers = [...currentAnswers, answer];
-      // If all options are selected, switch to "Alla"
-      if (newAnswers.length === options.length) {
-        newAnswers = [];
-      }
     }
     
     const existingIndex = value.findIndex(v => v.question === questionText);
