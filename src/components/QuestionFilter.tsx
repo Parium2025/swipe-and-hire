@@ -518,11 +518,10 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             )}
           </div>
 
-          {/* Total question count */}
-          {questions && questions.length > 0 && (
+          {/* Total question count (only filterable questions are listed) */}
+          {filterableQuestions.length > 0 && (
             <div className="question-filter-footer px-2.5 py-1.5 border-t border-white/10 text-xs text-white text-center">
-              {`Visar ${filterableQuestions.length} av ${questions.length} frågor`}
-              {unfilteredCount > 0 && ` · ${unfilteredCount} fritextfrågor går inte att filtrera`}
+              {`Totalt ${filterableQuestions.length} ${filterableQuestions.length === 1 ? 'fråga' : 'frågor'}`}
             </div>
           )}
 
