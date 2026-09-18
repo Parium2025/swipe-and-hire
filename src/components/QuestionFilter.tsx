@@ -367,7 +367,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="flex-none px-2.5 py-1.5 border-b border-white/10">
+          <div className="question-filter-header px-2.5 py-1.5 border-b border-white/10">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
               <input
@@ -380,7 +380,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-1 overflow-hidden">
+          <div className="question-filter-list relative min-h-0 flex-1">
             <div 
               ref={scrollContainerRef}
               onScroll={updateScrollIndicator}
@@ -485,13 +485,13 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
 
           {/* Total question count */}
           {questions && questions.length > 0 && (
-            <div className="flex-none px-2.5 py-1.5 border-t border-white/10 text-xs text-white text-center">
+            <div className="question-filter-footer px-2.5 py-1.5 border-t border-white/10 text-xs text-white text-center">
               Totalt {questions.length} {questions.length === 1 ? 'fråga' : 'frågor'}
             </div>
           )}
 
           {hasFilters && (
-            <div className="flex-none p-2 border-t border-white/10">
+            <div className="question-filter-footer p-2 border-t border-white/10">
               <Button
                 variant="ghost"
                 size="sm"

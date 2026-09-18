@@ -1082,6 +1082,15 @@ All colors MUST be HSL.
       min-height: 0;
     }
 
+    .question-filter-header,
+    .question-filter-footer {
+      flex: none;
+    }
+
+    .question-filter-list {
+      overflow: hidden;
+    }
+
     .question-filter-scroll {
       touch-action: pan-y;
       scroll-padding-block: 0.5rem;
