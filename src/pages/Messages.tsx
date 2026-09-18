@@ -339,6 +339,7 @@ export default function Messages() {
         {/* Mobil: lista och chatt ligger sida vid sida i ett spår som glider.
             Desktop: oförändrad delad vy. */}
         <div
+          data-messages-track
           className={cn(
             "flex h-full min-h-0 md:gap-4",
             isMobile && "w-full transform-gpu transition-transform ease-[cubic-bezier(0.32,0.72,0,1)]"
