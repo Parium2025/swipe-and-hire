@@ -49,8 +49,8 @@ describe('TopChromeStrip', () => {
     const { container } = renderStrip();
     const strip = container.firstChild as HTMLElement;
     expect(strip).not.toBeNull();
-    // jsdom tappar calc(env(...))-höjden — asserta position och färg i stället.
-    expect(strip.style.top).toBe('0px');
+    // Reservmålningen ligger ovanför layouten så den inte skapar en andra rad.
+    expect(strip.style.top).toBe('-14px');
     expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
