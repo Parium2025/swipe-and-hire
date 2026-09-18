@@ -929,7 +929,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               (async () => {
                 try {
                   // Använd retry-funktionen för stabilare hämtning
-                  const videoUrl = await fetchWithRetry(processedProfile.video_url, 'profile-video', 3000, 2);
+                  const videoUrl = await fetchWithRetry(processedProfile.video_url!, 'profile-video', 3000, 2);
                   if (videoUrl) {
                     // Spara till state OCH sessionStorage
                     setPreloadedVideoUrl(videoUrl);
@@ -1047,7 +1047,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: roleData?.id ?? `profile-role-${userId}`,
           user_id: userId,
           role: profileRole,
-          organization_id: membershipOrgId,
+          organization_id: membershipOrgId ?? undefined,
           is_active: roleData?.is_active ?? true,
         });
 
@@ -1085,8 +1085,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setOrganization(orgData);
         }
       } else if (orgResult.data) {
-        if (orgResult.error) {
-          console.error('Error fetching organization:', orgResult.error);
+        const orgErr = (orgResult as { error?: unknown }).error;
+        if (orgErr) {
+          console.error('Error fetching organization:', orgErr);
         } else {
           setOrganization(orgResult.data);
         }
