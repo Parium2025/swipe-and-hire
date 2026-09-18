@@ -17,18 +17,7 @@ const removeLegacySentinels = () => {
   });
 };
 
-const nudgeColor = (color: string) => {
-  // Minimal färgskillnad (osynlig för ögat) som tvingar Safari att se
-  // theme-color som "ändrad" och därmed re-sampla URL-/verktygsbaren.
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return color;
-  const b = parseInt(hex.slice(4, 6), 16);
-  const nb = (b === 255 ? b - 1 : b + 1).toString(16).padStart(2, '0');
-  return `#${hex.slice(0, 4)}${nb}`;
-};
-
 const THEME_META_ID = 'parium-theme-color';
-let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
   // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
@@ -53,23 +42,7 @@ const writeThemeColor = (color: string) => {
 };
 
 const setThemeColor = (color: string) => {
-  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
-    cancelAnimationFrame(pendingThemeFrame);
-    pendingThemeFrame = null;
-  }
-
-  // Skriv först en nästan identisk färg, sedan målfärgen på nästa frame.
-  // iOS Safari ignorerar annars ibland en uppdatering vid back-navigation
-  // eftersom värdet uppfattas som oförändrat sedan förra samplingen.
-  writeThemeColor(nudgeColor(color));
-  if (typeof requestAnimationFrame === 'function') {
-    pendingThemeFrame = requestAnimationFrame(() => {
-      pendingThemeFrame = null;
-      writeThemeColor(color);
-    });
-  } else {
-    writeThemeColor(color);
-  }
+  writeThemeColor(color);
 };
 
 

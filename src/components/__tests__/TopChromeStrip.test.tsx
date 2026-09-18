@@ -4,9 +4,8 @@ import { MemoryRouter } from '@/lib/router-compat';
 import TopChromeStrip from '../TopChromeStrip';
 
 /**
- * Regressionsskydd: i vanlig mobil-Safari börjar viewporten UNDER statusraden.
- * En fixed toppremsa där målas inne i sidan och blir ett svart band mot
- * gradienten. Remsan får därför bara finnas i installerat app-läge.
+ * Regressionsskydd: toppremsan speglar bottenremsan på alla touch-enheter så
+ * iOS safe-area aldrig faller tillbaka till svart under kallstart eller SPA-nav.
  */
 const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   vi.stubGlobal(
@@ -44,13 +43,13 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar ingen remsa i vanlig mobilwebbläsare', async () => {
+  it('renderar remsa och offset i vanlig mobilwebbläsare', async () => {
     mockMatchMedia(false, true);
     const { container } = await renderStrip();
-    expect(container.firstChild).toBeNull();
+    expect(container.firstChild).not.toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
-    ).toBe('');
+    ).toContain('safe-area-inset-top');
   });
 
   it('renderar ingen remsa på desktop', async () => {

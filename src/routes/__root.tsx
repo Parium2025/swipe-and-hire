@@ -518,7 +518,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "Parium" },
       { httpEquiv: "Content-Language", content: "sv-SE" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "google-site-verification", content: "sT_ifEq3gWpYLlAA7K8O_I4xOyHau2g-FUa6j5C5y_E" },
       { name: "google-site-verification", content: "BmLp4Z31QrCWzPg_3lxUkSRFOCryhQCg2mqfCcRqvoE" },
       { property: "og:type", content: "website" },
