@@ -605,7 +605,7 @@ const InlineHeroPhone = ({
 
   
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let frame = 0;
     const measureTop = () => {
       const el = wrapperRef.current;
