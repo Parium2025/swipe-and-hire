@@ -104,7 +104,6 @@ export function ConversationItem({
                 ? "border-emerald-500/50"
                 : "border-blue-500/50"
           )}
-          fallbackClassName="bg-white/10"
         />
         {conversation.unread_count > 0 && (
           <span
