@@ -187,6 +187,10 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
     const boot = async () => {
       try {
+        // import.meta.env.SSR håller Spline-runtimen utanför SSR-bundlen:
+        // den kör `new Function` redan vid modul-evaluering, vilket är
+        // förbjudet på edge/SSR och gav 500 på /jobbsokare & /arbetsgivare.
+        if (import.meta.env.SSR) return;
         const { Application } = await import('@splinetool/runtime');
         if (cancelled) return;
 
