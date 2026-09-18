@@ -2,6 +2,7 @@
 import * as React from 'npm:react@18.3.1'
 import { template as applicationConfirmation } from './application-confirmation.tsx'
 import { template as interviewInvitation } from './interview-invitation.tsx'
+import { template as interviewRescheduled } from './interview-rescheduled.tsx'
 import { template as jobExpiration } from './job-expiration.tsx'
 import { template as jobClosedCandidate } from './job-closed-candidate.tsx'
 import { template as supportTicketAlert } from './support-ticket-alert.tsx'
@@ -24,6 +25,7 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-confirmation': applicationConfirmation,
   'interview-invitation': interviewInvitation,
+  'interview-rescheduled': interviewRescheduled,
   'job-expiration': jobExpiration,
   'job-closed-candidate': jobClosedCandidate,
   'support-ticket-alert': supportTicketAlert,
