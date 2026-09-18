@@ -49,10 +49,8 @@ describe('TopChromeStrip', () => {
     const { container } = renderStrip();
     const strip = container.firstChild as HTMLElement;
     expect(strip).not.toBeNull();
-    // Ingen minsta reservhöjd i browser-läge: den skapade en separat linje
-    // ovanpå videon. Safari samplar i stället Landing-ytans egen bakgrund.
+    // jsdom tappar calc(env(...))-höjden — asserta position och färg i stället.
     expect(strip.style.top).toBe('0px');
-
     expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')

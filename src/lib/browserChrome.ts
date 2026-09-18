@@ -154,14 +154,6 @@ let resyncScheduled = false;
 export const mountChromePopstateGuard = () => {
   if (pageshowMounted || typeof window === 'undefined') return;
   pageshowMounted = true;
-  const resyncImmediately = () => {
-    // Vid webbläsarens tillbaka/framåt är location redan uppdaterad när
-    // popstate körs. Skriv den nya färgen i samma event-loop-varv, före nästa
-    // paint. En rAF här gav iOS Safari exakt en bildruta med föregående
-    // statusradsfärg medan den nya sidan redan syntes.
-    resyncScheduled = false;
-    syncBrowserChrome(window.location.pathname);
-  };
   const resync = () => {
     if (resyncScheduled) return;
     resyncScheduled = true;
@@ -172,9 +164,9 @@ export const mountChromePopstateGuard = () => {
   };
   // Endast bfcache-restore — första laddningen hanteras redan av App.tsx.
   window.addEventListener('pageshow', (e) => {
-    if (e.persisted) resyncImmediately();
+    if (e.persisted) resync();
   });
-  window.addEventListener('popstate', resyncImmediately);
+  window.addEventListener('popstate', resync);
   // Tillbaka från en extern sida/app-växling: Safari kan ha kvar den gamla
   // sampladefärgen. Re-synka så snart sidan blir synlig igen.
   document.addEventListener('visibilitychange', () => {

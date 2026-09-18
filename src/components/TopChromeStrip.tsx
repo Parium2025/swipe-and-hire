@@ -81,15 +81,11 @@ const TopChromeStrip = () => {
   // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
   // exakt över statusradens safe-area som sidorna redan paddingar för.
   const shouldShowStrip = isTouch;
-  // I vanlig Safari färgas systemytan från sidans fasta toppyta. Remsan ska
-  // därför bara täcka en verklig safe-area; en minsta höjd här blir annars en
-  // separat synlig linje ovanpå startsidans video. Landing-ytan har själv den
-  // färg Safari ska sampla (se Landing.tsx).
-  const chromeOffset = isStandalone
-    ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
-    : 'env(safe-area-inset-top, 0px)';
-  const chromeTop = '0px';
-
+  // Samma 14 px överlapp som BottomChromeStrip. Safe-area kan rapporteras
+  // som 0 i vanlig iPhone-Safari; överlappet ser då till att remsan ändå
+  // målar ända in bakom den övre webbläsarkanten i stället för att bli 0 px.
+  const stripInset = isStandalone ? '22px' : '14px';
+  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -113,7 +109,7 @@ const TopChromeStrip = () => {
         position: 'fixed',
         left: 0,
         right: 0,
-        top: chromeTop,
+        top: 0,
         height: chromeOffset,
         backgroundColor: displayColor,
         zIndex: 2147483647,

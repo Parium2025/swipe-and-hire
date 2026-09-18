@@ -102,7 +102,7 @@ const Landing = () => {
 
     <div
       ref={scrollContainerRef}
-      className="fixed inset-0 z-0 overflow-hidden bg-[var(--active-browser-chrome-color)] text-foreground"
+      className="fixed inset-0 z-0 overflow-hidden text-foreground"
       style={{ touchAction: 'none', overscrollBehavior: 'none' }}
     >
       <div className="relative z-10 min-h-full">
