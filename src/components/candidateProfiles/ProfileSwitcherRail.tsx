@@ -61,14 +61,16 @@ function ProfileAvatar({
 }: { imagePath?: string | null; imageMediaType?: 'profile-image' | 'cover-image'; signedImageUrl?: string | null; hasVideo?: boolean; size?: number }) {
   const resolved = useMediaUrl(imagePath || undefined, imageMediaType);
   const src = signedImageUrl ?? resolved;
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const showImage = Boolean(src && failedSrc !== src);
 
   return (
     <span
       className="flex items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10"
       style={{ height: size, width: size }}
     >
-      {src ? (
-        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+      {showImage && src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" onError={() => setFailedSrc(src)} />
       ) : hasVideo ? (
         <VideoIcon className="h-5 w-5 text-white" />
       ) : (

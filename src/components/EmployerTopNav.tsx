@@ -7,6 +7,7 @@ import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
 import { useQueryClient } from '@tanstack/react-query';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
@@ -335,16 +336,12 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                     isDropdownActive(businessItems) ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
                   }`} 
                 />
-                {preloadedCompanyLogoUrl ? (
-                  <img 
-                    src={preloadedCompanyLogoUrl} 
-                    alt="Företagslogo" 
-                    className="h-6 w-6 rounded-full object-cover relative z-10"
+                {profile?.company_name ? (
+                  <CompanyAvatar
+                    companyLogoUrl={preloadedCompanyLogoUrl}
+                    companyName={profile.company_name}
+                    initials={getCompanyInitials(profile.company_name)}
                   />
-                ) : profile?.company_name ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-semibold text-white relative z-10">
-                    {getCompanyInitials(profile.company_name)}
-                  </div>
                 ) : profile ? (
                   <Building className="h-4 w-4 relative z-10" />
                 ) : (
@@ -380,16 +377,11 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
               <button
                 className="flex items-center gap-1.5 px-3 h-10 rounded-lg transition-colors hover:bg-white/10"
               >
-                {resolvedProfileImageUrl ? (
-                  <img 
-                    src={resolvedProfileImageUrl} 
-                    alt={getUserDisplayName()} 
-                    className="h-6 w-6 rounded-full object-cover"
-                  />
-                ) : profile ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-semibold text-white">
-                    {getUserInitials()}
-                  </div>
+                {profile ? (
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={resolvedProfileImageUrl || ''} alt={getUserDisplayName()} />
+                    <AvatarFallback className="bg-white/20 text-white" delayMs={150}>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
                 ) : (
                   <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse" />
                 )}
@@ -400,16 +392,11 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
               {/* Profilhuvud med namn */}
               <div className="px-2.5 py-2 border-b border-white/10 mb-1">
                 <div className="flex items-center gap-2.5">
-                  {resolvedProfileImageUrl ? (
-                    <img 
-                      src={resolvedProfileImageUrl} 
-                      alt={getUserDisplayName()} 
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : profile ? (
-                    <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold text-white">
-                      {getUserInitials()}
-                    </div>
+                  {profile ? (
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={resolvedProfileImageUrl || ''} alt={getUserDisplayName()} />
+                      <AvatarFallback className="bg-white/20 text-white" delayMs={150}>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
                   ) : (
                     <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
                   )}

@@ -25,6 +25,7 @@ import {
   normalizeJobOverlayTextColor,
 } from '@/lib/jobOverlayText';
 import { formatDateShortSv } from '@/lib/date';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 
 
 
@@ -61,16 +62,6 @@ export interface WizardPreviewData {
   viewsCount?: number;
   isExpired?: boolean;
   isActive?: boolean;
-}
-
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) {
-    const w = words[0];
-    return (w[0] + (w[w.length - 1] || '')).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
 function getObjectPosition(v?: string): string {
@@ -148,11 +139,12 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
           <div className="flex justify-center mb-1">
             {companyLogoUrl ? (
               <div className="w-7 h-7 rounded-full bg-[hsl(215,85%,15%)] border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
-                <img
+                <ResilientImage
                   src={companyLogoUrl}
                   alt=""
                   className="w-full h-full object-cover"
                   draggable={false}
+                  fallbackClassName="absolute inset-0 h-full w-full"
                 />
               </div>
             ) : (
@@ -403,7 +395,7 @@ export const WizardListPreview = memo(function WizardListPreview({
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70 flex flex-col items-center justify-center gap-2 px-3 py-4">
             {companyLogoUrl ? (
               <div className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+                <ResilientImage src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} fallbackClassName="absolute inset-0 h-full w-full" />
               </div>
             ) : (
               <div className="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">

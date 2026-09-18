@@ -16,7 +16,6 @@ import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
-import { getCompanyInitials } from '@/lib/companyInitials';
 import { hapticLight } from '@/lib/haptics';
 
 
@@ -119,7 +118,6 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
-  const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const getCachedJobViewHeroUrl = useCallback(() => {
     const raw = job.job_image_url || (job as any).job_image_desktop_url;

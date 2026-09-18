@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Eye, Users, UserPlus, Edit, Trash2, RotateCcw } from 'lucide-react';
+import { Building2, ChevronDown, Eye, Users, UserPlus, Edit, Trash2, RotateCcw } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -16,7 +16,6 @@ import { useCompactWidth } from '@/hooks/useCompactWidth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
-import { getCompanyInitials } from '@/lib/companyInitials';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { ResilientImage } from '@/components/ui/ResilientImage';
@@ -117,7 +116,6 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
-  const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
 
   const openJob = useCallback(() => {
