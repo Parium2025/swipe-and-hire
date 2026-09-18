@@ -81,12 +81,14 @@ const TopChromeStrip = () => {
   // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
   // exakt över statusradens safe-area som sidorna redan paddingar för.
   const shouldShowStrip = isTouch;
-  // Måla endast den verkliga safe-area-ytan. En minsta CSS-höjd här skapar en
-  // andra remsa ovanpå sidans redan full-bleed bakgrund när Safari rapporterar
-  // safe-area som 0. Den native ytan färgas i stället av theme-color + body.
+  // I vanlig Safari läggs reservmålningen OVANFÖR layoutens nollpunkt. Då kan
+  // kompositorn använda färgen bakom browser-chrome utan att 14 px spiller ned
+  // över sidan och bildar en andra synlig remsa. En riktig safe-area täcks ändå
+  // exakt till sin nederkant: top -14 + height (safe-area + 14) = safe-area.
   const chromeOffset = isStandalone
     ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
-    : 'env(safe-area-inset-top, 0px)';
+    : 'calc(env(safe-area-inset-top, 0px) + 14px)';
+  const chromeTop = isStandalone ? '0px' : '-14px';
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -110,7 +112,7 @@ const TopChromeStrip = () => {
         position: 'fixed',
         left: 0,
         right: 0,
-        top: 0,
+        top: chromeTop,
         height: chromeOffset,
         backgroundColor: displayColor,
         zIndex: 2147483647,
