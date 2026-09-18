@@ -40,3 +40,5 @@
 - [x] Filtrera kandidater via fråge-ID och exakta svar; Alla kräver ett sparat svar
 - [x] Låt kandidatlista, räknare, pagination och Swipe Mode dela samma korrigerade resultat
 - [x] Förtydliga historisk frågetext och ta bort dubbelt avstånd i återpubliceringsdialogen
+- [x] Ta bort mobilens globala bottenreserv från återpubliceringsdialogen så knappglipan försvinner helt
+- [x] Lås arbetsgivarens mobilskal till viewporten så toppmenyn aldrig kan scrollas bort vid statusbyte

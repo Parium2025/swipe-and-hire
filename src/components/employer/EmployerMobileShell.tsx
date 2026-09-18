@@ -36,11 +36,11 @@ const EmployerMobileShell = ({
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
 
-      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch' } as CSSProperties}>
+      <div className="fixed inset-0 h-[100dvh] flex w-full overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' } as CSSProperties}>
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
-          <header className="relative shrink-0 z-40 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+          <header className="relative flex-none z-50 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]" style={{ contain: 'layout paint style', transform: 'translate3d(0,0,0)', WebkitBackfaceVisibility: 'hidden' }}>
             <div className="min-w-0 flex items-center justify-self-start">
               <EmployerLogoSidebarTrigger />
             </div>
