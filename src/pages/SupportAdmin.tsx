@@ -67,7 +67,7 @@ const SupportAdmin = () => {
       
       // Hämta användardata separat
       if (ticketsData && ticketsData.length > 0) {
-        const userIds = [...new Set(ticketsData.map(t => t.user_id))];
+        const userIds = [...new Set(ticketsData.map(t => t.user_id))].filter((id): id is string => !!id);
         const { data: profilesData } = await supabase
           .from('profiles')
           .select('user_id, first_name, last_name')
@@ -101,7 +101,7 @@ const SupportAdmin = () => {
       
       // Hämta användardata separat för meddelanden
       if (messagesData && messagesData.length > 0) {
-        const userIds = [...new Set(messagesData.filter(m => m.user_id).map(m => m.user_id))];
+        const userIds = [...new Set(messagesData.filter(m => m.user_id).map(m => m.user_id))].filter((id): id is string => !!id);
         let profilesData: any[] = [];
         
         if (userIds.length > 0) {
@@ -233,7 +233,7 @@ const SupportAdmin = () => {
     }
   };
 
-  const getCategoryLabel = (category: string) => {
+  const getCategoryLabel = (category: string | null) => {
     const categoryMap: { [key: string]: string } = {
       'technical': 'Teknisk support',
       'billing': 'Fakturering',
