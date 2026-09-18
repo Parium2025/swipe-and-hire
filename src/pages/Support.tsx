@@ -22,10 +22,10 @@ import { readCachedSupportTickets, writeCachedSupportTickets } from '@/lib/suppo
 
 interface SupportTicket {
   id: string;
-  category: string;
+  category: string | null;
   subject: string;
   message: string;
-  status: string;
+  status: string | null;
   created_at: string;
   updated_at: string;
 }

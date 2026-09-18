@@ -32,9 +32,9 @@ import type { CandidateList } from '@/hooks/useCandidateLists';
 
 interface TeamMember {
   userId: string;
-  firstName: string;
-  lastName: string;
-  profileImageUrl?: string;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl?: string | null;
 }
 
 interface MyCandidatesHeaderProps {

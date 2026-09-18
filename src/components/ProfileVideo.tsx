@@ -11,7 +11,7 @@ import {
 } from '@/lib/profileVideoDecoders';
 
 interface ProfileVideoProps {
-  videoUrl: string;
+  videoUrl: string | null;
   coverImageUrl?: string;
   /** Automatgenererad posterbild ur videon. Används när ingen cover finns. */
   posterUrl?: string | null;

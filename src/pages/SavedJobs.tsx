@@ -155,7 +155,7 @@ const SavedJobs = () => {
     return new Date(expiresAt) < new Date();
   };
 
-  const hasRenderableJobPosting = useCallback((entry: SavedJob) => {
+  const hasRenderableJobPosting = useCallback((entry: SavedJob): entry is SavedJob & { job_postings: NonNullable<SavedJob['job_postings']> } => {
     const posting = entry.job_postings;
     return !!(
       posting &&
