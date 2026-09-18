@@ -429,7 +429,7 @@ export const WizardListPreview = memo(function WizardListPreview({
 
       {/* Info-block — under bilden, syns när man scrollar */}
       <div className="flex min-h-full w-full items-center bg-card-parium backdrop-blur-sm border-t border-white/10 px-3 py-2 snap-start">
-        <div className="space-y-1.5">
+        <div className="w-full space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Arbetstider" value={workingHours || '–'} />
@@ -449,12 +449,23 @@ export const WizardListPreview = memo(function WizardListPreview({
 
 
 function PreviewRow({ label, value }: { label: string; value: ReactNode }) {
+  // Samma radmall som i den riktiga annonsen: etikett med kolon till vänster,
+  // värdet tar resten av bredden, kapas på en rad och visar hela texten i en
+  // tooltip om det inte får plats.
+  const text = typeof value === 'string' ? value : undefined;
   return (
-    <div className="flex items-start justify-between gap-2">
-      <span className="text-[11px] leading-snug text-white">{label}</span>
-      <span className="text-[11px] leading-snug text-white font-medium text-right max-w-[62%] break-words">
-        {value}
-      </span>
+    <div className="flex w-full items-center justify-between gap-2">
+      <span className="text-[11px] leading-snug text-white flex-shrink-0">{label}:</span>
+      {text !== undefined ? (
+        <TruncatedText
+          text={text}
+          className="min-w-0 flex-1 truncate text-right text-[11px] leading-snug text-white font-medium"
+        />
+      ) : (
+        <span className="min-w-0 flex-1 truncate text-right text-[11px] leading-snug text-white font-medium">
+          {value}
+        </span>
+      )}
     </div>
   );
 }
