@@ -52,3 +52,4 @@
 - [x] Centrera frågefiltret mot telefonens synliga skärmyta utan att påverka datorvyn
 - [x] Lås frågefiltrets bredd och interna rullning på dator utan att ändra mobilvyn
 - [x] Ge datorns frågefilter en verklig mushjulsrullning och separera den fasta nederdelen från frågelistan
+- [x]Verifiera frågefiltrets centrering i förhandsvisningen och ge panelen 12 px andningsmarginal mot skärmens underkant
