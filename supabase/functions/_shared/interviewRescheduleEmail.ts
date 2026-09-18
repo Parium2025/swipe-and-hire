@@ -44,7 +44,7 @@ export async function sendInterviewRescheduleEmail(
 
   const { data: interview, error } = await supabase
     .from("interviews")
-    .select("id, applicant_id, employer_id, job_id, scheduled_at, duration_minutes, location_type, location_details, status, revision")
+    .select("id, applicant_id, employer_id, job_id, application_id, scheduled_at, duration_minutes, location_type, location_details, status, revision")
     .eq("id", interviewId)
     .maybeSingle();
   if (error) throw error;
@@ -61,7 +61,20 @@ export async function sendInterviewRescheduleEmail(
   ]);
   const job = (jobResult as { data: { title?: string } | null }).data;
 
-  const candidateEmail = candidate?.email as string | undefined;
+  // Adressen kan ligga på ansökan, på profilen eller bara på kontot.
+  let candidateEmail = (candidate?.email as string | null) ?? null;
+  if (!candidateEmail && interview.application_id) {
+    const { data: application } = await supabase
+      .from("job_applications")
+      .select("email")
+      .eq("id", interview.application_id)
+      .maybeSingle();
+    candidateEmail = (application?.email as string | null) ?? null;
+  }
+  if (!candidateEmail) {
+    const { data: authUser } = await supabase.auth.admin.getUserById(interview.applicant_id);
+    candidateEmail = authUser?.user?.email ?? null;
+  }
   if (!candidateEmail) return { skipped: "no_candidate_email" };
 
   const candidateName = [candidate?.first_name, candidate?.last_name].filter(Boolean).join(" ") || "där";
@@ -104,8 +117,8 @@ export async function sendInterviewRescheduleEmail(
   const locationType = interview.location_type === "office" ? "office" : "video";
 
   const result = await sendLoggedTemplateEmail("interview-rescheduled", candidateEmail, {
-    idempotencyKey: `interview-reschedule-${interviewId}-r${interview.revision ?? 0}`,
     fromName: `${companyName} via Parium`,
+    idempotencyKey: `interview-reschedule-${interviewId}-r${interview.revision ?? 0}`,
     templateData: {
       recipient_name: candidateName,
       company_name: companyName,
