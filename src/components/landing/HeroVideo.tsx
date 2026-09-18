@@ -121,9 +121,12 @@ const pickHeroSrc = () => {
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
-  const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
-  const [tier, setTier] = useState<HeroTier>(getTier);
-  const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
+  // Första renderingen måste vara identisk på server och klient, annars kastar
+  // React bort hydreringen (svart/tom hero). Riktiga värden sätts i en effekt
+  // direkt efter hydrering — se useEffect längre ner.
+  const [heroSrc, setHeroSrc] = useState<string>(landscapeLiteAsset.url);
+  const [tier, setTier] = useState<HeroTier>('landscape');
+  const [landscapePosition, setLandscapePosition] = useState<string>('center center');
   // iOS Lågeffektläge blockerar autoplay. Safari ritar då sin egen play-knapp
   // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
   // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
