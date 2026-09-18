@@ -1093,7 +1093,12 @@ All colors MUST be HSL.
 
     .question-filter-scroll {
       touch-action: pan-y;
+      overscroll-behavior-y: auto;
       scroll-padding-block: 0.5rem;
+    }
+
+    .question-filter-scroll-fade {
+      height: 1rem;
     }
 
     .mobile-touch-removal-action {
