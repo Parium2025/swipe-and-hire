@@ -6,6 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { writeApplicantMembershipCache } from '@/lib/applicantMembershipCache';
+import { fetchCandidateListsForOwner } from '@/hooks/useCandidateLists';
+import { fetchStageSettings } from '@/hooks/useStageSettings';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 
 /**
  * ❄️ KALLSTART — ARBETSGIVARENS ANNONSSIDOR
