@@ -467,7 +467,13 @@ const HeroVideo = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-black">
+    {/* Videon startar under iPhones statusrad: den ytan lämnas åt sidans grå
+        bakgrund (#2a2a2a) så iOS Safari samplar grått i stället för videons
+        svarta pixlar. Layouten i övrigt är oförändrad. */}
+    <div
+      className="absolute inset-0 z-0 overflow-hidden bg-black"
+      style={{ top: 'env(safe-area-inset-top, 0px)' }}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 1.06 }}
         animate={{ opacity: 1, scale: 1 }}
