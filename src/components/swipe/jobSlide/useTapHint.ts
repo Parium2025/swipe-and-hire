@@ -6,7 +6,7 @@ interface UseTapHintOptions {
   /** När overlayet öppnas ska hintet stängas direkt. */
   overlayOpen: boolean | undefined;
   /** Titel-elementet — används för att avgöra om texten är avklippt. */
-  titleRef: React.RefObject<HTMLElement>;
+  titleRef: React.RefObject<HTMLElement | null>;
 }
 
 /**

@@ -9,7 +9,7 @@ import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
 
 
 type LandingHeroProps = {
-  scrollContainerRef: RefObject<HTMLDivElement>;
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
