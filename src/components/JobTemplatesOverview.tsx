@@ -24,17 +24,17 @@ interface JobTemplate {
   id: string;
   name: string;
   title: string;
-  description: string;
-  requirements?: string;
-  location: string;
-  employment_type?: string;
-  work_schedule?: string;
-  salary_min?: number;
-  salary_max?: number;
-  contact_email?: string;
-  application_instructions?: string;
-  category?: string;
-  is_default: boolean;
+  description: string | null;
+  requirements?: string | null;
+  location: string | null;
+  employment_type?: string | null;
+  work_schedule?: string | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  contact_email?: string | null;
+  application_instructions?: string | null;
+  category?: string | null;
+  is_default: boolean | null;
   created_at: string;
   updated_at: string;
 }
