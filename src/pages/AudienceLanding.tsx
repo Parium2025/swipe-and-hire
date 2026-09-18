@@ -446,27 +446,6 @@ const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
   return null;
 };
 
-const useIsMobileLikeHeroLayout = () => {
-  // Samma deterministiska första värde på server och klient. Den verkliga
-  // mobil-layouten aktiveras synkront i effekten direkt efter hydration.
-  const [isMobileLike, setIsMobileLike] = useState(false);
-
-  useEffect(() => {
-    const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
-    sync();
-    window.addEventListener('resize', sync, { passive: true });
-    window.addEventListener('orientationchange', sync, { passive: true });
-    window.visualViewport?.addEventListener('resize', sync, { passive: true });
-    return () => {
-      window.removeEventListener('resize', sync);
-      window.removeEventListener('orientationchange', sync);
-      window.visualViewport?.removeEventListener('resize', sync);
-    };
-  }, []);
-
-  return isMobileLike;
-};
-
 /**
  * Mäter nav-pillrets verkliga bottenkant i runtime och returnerar en
  * padding-top i px som garanterar att hero-rubriken aldrig kan hamna
@@ -1388,7 +1367,6 @@ const IntroSplinePhone = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
   const mobileHeroMinHeight = useMobileHeroMinHeight();
-  const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
   const heroSafeTopPx = useHeroSafeTopPadding();
   // Jobbsökare: swipe-videon i hero (ritas direkt), Spline i intro (hinner ladda i lugn och ro).
   const heroPhoneVariant: 'spline' | 'video' = audience === 'job_seeker' ? 'video' : 'spline';
@@ -1403,14 +1381,13 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
       <section
         id="start"
         data-hero-intro-stage
-        className={`relative min-h-[100svh] w-full scroll-mt-24 ${isMobileLikeHeroLayout ? 'overflow-visible' : 'overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden'}`}
+        className="relative min-h-[100svh] w-full scroll-mt-24 overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:h-auto md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:min-h-[100svh] md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:overflow-visible"
       >
-        {/* Mobile hero — renderas endast i mobil-layout så att enbart EN <h1>
-            existerar i DOM samtidigt (SEO: undvik duplicate h1). */}
-        {isMobileLikeHeroLayout && (
+        {/* Båda layouterna finns redan i första HTML-svaret och CSS väljer rätt
+            innan första paint. Det förhindrar desktop→mobil-hopp vid hydration. */}
         <section
           data-mobile-hero-section
-          className="relative min-h-[100svh] w-screen overflow-hidden block"
+          className="relative min-h-[100svh] w-screen overflow-hidden block md:hidden md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:block"
           style={{
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
@@ -1436,11 +1413,8 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
           </motion.div>
           <InlineHeroPhone placement="mobile" className="mt-2" variant={heroPhoneVariant} />
         </section>
-        )}
 
-        {/* Desktop / tablet hero — renderas endast i desktop-layout (samma anledning). */}
-        {!isMobileLikeHeroLayout && (
-        <section className="relative h-full items-center justify-center overflow-hidden pb-16 pt-28 hidden md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
+        <section className="relative h-full items-center justify-center overflow-hidden pb-16 pt-28 hidden md:flex md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:hidden md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -1456,14 +1430,13 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
-              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
+              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" headingAs="div" />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
               <InlineHeroPhone placement="portraitTablet" variant={heroPhoneVariant} />
             </div>
           </div>
         </section>
-        )}
       </section>
 
       {/* Visuell paus mellan hero-telefonen och intro-sektionen */}
