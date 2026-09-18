@@ -44,7 +44,7 @@ function TemplatePreview({ title, entries }: { title: string; entries: PreviewEn
           onMouseLeave={() => setOpen(false)}
           onFocus={(e) => e.currentTarget.blur()}
           aria-label={`Visa texten som skickas: ${title}`}
-          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors hover:bg-white/10 focus:outline-hidden focus-visible:outline-hidden [-webkit-tap-highlight-color:transparent]"
+          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <Info className="h-3.5 w-3.5" />
         </button>

@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { prefetchSubscriptionPlans } from '@/lib/subscriptionPlansQuery';
-import { useNavigate, useLocation, Navigate } from '@/lib/router-compat';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import JobView from '@/pages/JobView';
 // smartSearchCandidates is applied inside useApplicationsData — not needed here
 import JobDetails from '@/pages/JobDetails';
@@ -262,7 +262,7 @@ const CandidatesContent = () => {
                   onMouseDown={(e) => e.preventDefault()}
                   className={`
                     flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
-                    border whitespace-nowrap min-w-0 shrink-0 active:scale-[0.97] touch-manipulation outline-hidden focus:outline-hidden
+                    border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none
                     ${selectionMode 
                       ? 'bg-white/20 border-white/30 text-white' 
                       : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
@@ -279,7 +279,7 @@ const CandidatesContent = () => {
                   <button
                     onClick={() => setSwipeOpen(true)}
                     onMouseDown={(e) => e.preventDefault()}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border whitespace-nowrap min-w-0 shrink-0 active:scale-[0.97] touch-manipulation outline-hidden focus:outline-hidden bg-secondary border-secondary/40 text-white shadow-lg shadow-secondary/30 hover:bg-secondary/90"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none bg-secondary border-secondary/40 text-white shadow-lg shadow-secondary/30 hover:bg-secondary/90"
                   >
                     <Layers className="h-4 w-4" />
                     <span>Swipe-läge</span>
@@ -328,7 +328,7 @@ const CandidatesContent = () => {
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
-                <Skeleton className="h-12 w-12 rounded-full bg-white/10 shrink-0" />
+                <Skeleton className="h-12 w-12 rounded-full bg-white/10 flex-shrink-0" />
                 <div className="flex-1 space-y-2 min-w-0">
                   <Skeleton className="h-4 w-40 max-w-full bg-white/10" />
                   <Skeleton className="h-3 w-24 bg-white/10" />

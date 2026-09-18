@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from '@/lib/router-compat';
+import { useLocation } from 'react-router-dom';
 
 /**
  * Chattsidan är en fullhöjdsvy utan extra bottenutrymme, övriga sidor har det.

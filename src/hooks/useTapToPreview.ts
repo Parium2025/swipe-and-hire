@@ -14,7 +14,7 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 export function useTapToPreview() {
   const isTouch = useTouchCapable();
   const [previewId, setPreviewId] = useState<string | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Cleanup on unmount
   useEffect(() => {

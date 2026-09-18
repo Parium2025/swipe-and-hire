@@ -67,7 +67,7 @@ export function ConversationItem({
   if (identityUnknown) {
     return (
       <div className="w-full flex items-start gap-3 p-3 rounded-lg border border-transparent">
-        <div className="relative shrink-0">
+        <div className="relative flex-shrink-0">
           <Skeleton className="h-12 w-12 rounded-full bg-white/10" />
         </div>
         <div className="flex-1 min-w-0 space-y-2 pt-1">
@@ -82,7 +82,7 @@ export function ConversationItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full min-w-0 max-w-full overflow-hidden flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-hidden focus-visible:outline-hidden",
+        "w-full min-w-0 max-w-full overflow-hidden flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
         isSelected
           ? "bg-white/15 border border-white/20"
           : "md:hover:bg-white/10 border border-transparent"
@@ -90,7 +90,7 @@ export function ConversationItem({
       tabIndex={-1}
     >
       {/* Avatar with category indicator */}
-      <div className="relative shrink-0">
+      <div className="relative flex-shrink-0">
         <ConversationAvatar
           profile={avatarProfile}
           isGroup={conversation.is_group}
@@ -126,7 +126,7 @@ export function ConversationItem({
           >
             {displayName}
           </span>
-          <span className="text-pure-white text-xs shrink-0 flex items-center gap-1">
+          <span className="text-pure-white text-xs flex-shrink-0 flex items-center gap-1">
             {conversation.is_muted && <BellOff className="h-3 w-3" aria-label="Tystad" />}
             {formatTime(conversation.last_message_at)}
           </span>

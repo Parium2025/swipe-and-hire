@@ -173,13 +173,13 @@ export const StageColumn = ({
       style={{ width: `calc((100% - ${gapTotal}) / ${totalStageCount})` }}
     >
       <div
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 shrink-0 ${
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 flex-shrink-0 ${
           isOver ? 'ring-2 ring-white/40' : ''
         }`}
         style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-white shrink-0" />
+          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -193,7 +193,7 @@ export const StageColumn = ({
             </Tooltip>
           </TooltipProvider>
           <span
-            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full shrink-0"
+            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
           >
             {/* Sant totalantal från servern — nedladdade rader kan vara färre. */}
@@ -256,7 +256,7 @@ export const StageColumn = ({
             <div className="space-y-1.5" aria-label="Laddar fler kandidater">
               {[0, 1, 2].map((item) => (
                 <div key={item} className="flex min-h-14 items-center gap-2 rounded-md bg-white/5 px-2 py-1.5">
-                  <Skeleton className="h-9 w-9 shrink-0 rounded-full bg-white/10" />
+                  <Skeleton className="h-9 w-9 flex-shrink-0 rounded-full bg-white/10" />
                   <div className="min-w-0 flex-1 space-y-1.5">
                     <Skeleton className="h-3 w-2/3 bg-white/10" />
                     <Skeleton className="h-2.5 w-1/2 bg-white/10" />

@@ -32,7 +32,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
-import { useNavigate, useLocation } from '@/lib/router-compat';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { uploadMedia, getMediaUrl, getOriginalImageUrl, uploadOriginalImage } from '@/lib/mediaManager';
 import { formatBytes, formatTimeRemaining, UploadAbortedError, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
 import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';
@@ -250,7 +250,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           <Bot className="h-4 w-4 text-white" />
           <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
         </div>
-        <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-md p-4 flex items-center gap-2 text-white">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 flex items-center gap-2 text-white">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm">{analyzing ? 'Analyserar ditt dokument…' : 'Laddar sammanfattning…'}</span>
         </div>
@@ -265,7 +265,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           <Bot className="h-4 w-4 text-white" />
           <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
         </div>
-        <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-md p-4 text-white text-sm space-y-3">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white text-sm space-y-3">
           <p className="text-white">
             Vår AI-tjänst är tillfälligt otillgänglig. Ditt CV är sparat och syns för arbetsgivare —
             analysen görs automatiskt så snart tjänsten är tillbaka.
@@ -295,7 +295,7 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           <Bot className="h-4 w-4 text-white" />
           <Label className="text-base font-medium text-white">AI-analys av ditt CV</Label>
         </div>
-        <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-md p-4 text-white text-sm">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 text-white text-sm">
           <p>Analysen är på väg. Den dyker upp här inom någon minut — du behöver inte göra något.</p>
         </div>
       </div>
@@ -316,11 +316,11 @@ const CvSummarySection = ({ userId, cvUrl, refreshKey }: { userId?: string; cvUr
           </Badge>
         )}
       </div>
-      <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-md p-4 space-y-3">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-4 space-y-3">
         {/* Document type indicator */}
         {!summary.is_valid_cv && (
           <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
-            <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 shrink-0" />
+            <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-yellow-200">
               <p className="font-medium">Det här ser inte ut som ett CV.</p>
               {summary.document_type && (
@@ -2182,7 +2182,7 @@ const Profile = () => {
 
       <div className="space-y-6">
         {/* Profile Image/Video Card */}
-        <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
           <div className="p-4 space-y-2">
             {!isEmployer && (
               <ProfileSwitcherRail
@@ -2241,7 +2241,7 @@ const Profile = () => {
                     e.stopPropagation();
                     deleteProfileMedia();
                   }}
-                  className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-hidden transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                  className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                   aria-label="Ta bort profilmedia"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -2284,7 +2284,7 @@ const Profile = () => {
             {!isUploadingMedia && (
               <div className="mt-2 flex w-full flex-col items-center gap-3">
                 <div className="flex w-full max-w-sm flex-wrap items-center justify-center gap-2" aria-label="Status för profilmedia">
-                  <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-xs">
+                  <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
                     <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
                       {displayIsVideo ? 'Video' : `Bild${displayImagePath ? '' : ' saknas'}`}
                     </span>
@@ -2293,7 +2293,7 @@ const Profile = () => {
                     </span>
                   </div>
                   {displayIsVideo && (
-                    <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-xs">
+                    <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
                       <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
                         Cover-bild{displayCoverPath ? '' : ' saknas'}
                       </span>
@@ -2425,7 +2425,7 @@ const Profile = () => {
         </div>
 
         {/* Profile Information */}
-        <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
           <div className="p-4 border-b border-white/10">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <User className="h-4 w-4" />
@@ -2456,7 +2456,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.firstName}
-                      className={`h-11 !min-h-0 bg-white/5 backdrop-blur-xs border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.firstName ? 'border-red-400' : ''}`}
+                      className={`h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-sm text-red-300">{errors.firstName}</p>}
                   </div>
@@ -2477,7 +2477,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.lastName}
-                      className={`h-11 !min-h-0 bg-white/5 backdrop-blur-xs border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.lastName ? 'border-red-400' : ''}`}
+                      className={`h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-sm text-red-300">{errors.lastName}</p>}
                   </div>
@@ -2521,7 +2521,7 @@ const Profile = () => {
                         }}
                         onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
-                        className={`h-11 !min-h-0 pl-10 bg-white/5 backdrop-blur-xs border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.phone ? 'border-red-400' : ''}`}
+                        className={`h-11 !min-h-0 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
                     {errors.phone && <p className="text-sm text-red-300">{errors.phone}</p>}
@@ -2534,7 +2534,7 @@ const Profile = () => {
                 <Label className="text-white text-sm">E-post</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
-                  <div className="flex h-11 !min-h-0 w-full rounded-md border bg-white/5 backdrop-blur-xs border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 transition-all duration-150">
+                  <div className="flex h-11 !min-h-0 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 transition-all duration-150">
                     <TruncatedText
                       text={user?.email || ''}
                       className="truncate min-w-0 max-w-full"
@@ -2572,7 +2572,7 @@ const Profile = () => {
                   value={bio}
                   onChange={(e) => handleBioChange(e.target.value)}
                   rows={4}
-                  className="bg-white/5 backdrop-blur-xs border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                 />
                 <div className="flex justify-end">
                   <span className="text-sm text-white">
@@ -2599,7 +2599,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                           <Button
                             variant="outlineNeutral"
-                            className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-xs border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                            className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                           >
                               <span className="truncate">
                                 {employmentStatus ? (
@@ -2615,7 +2615,7 @@ const Profile = () => {
                                   } as Record<string, string>)[employmentStatus]
                                 ) : 'Välj din nuvarande situation'}
                               </span>
-                              <ChevronDown className="h-4 w-4 shrink-0" />
+                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
@@ -2663,7 +2663,7 @@ const Profile = () => {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-xs border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                                className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                               >
                                 <span className="truncate">
                                   {workingHours ? (
@@ -2674,7 +2674,7 @@ const Profile = () => {
                                     } as Record<string, string>)[workingHours]
                                   ) : 'Välj arbetstid/omfattning'}
                                 </span>
-                                <ChevronDown className="h-4 w-4 shrink-0" />
+                                <ChevronDown className="h-4 w-4 flex-shrink-0" />
                               </Button>
                             </DropdownMenuTrigger>
                              <DropdownMenuContent 
@@ -2710,7 +2710,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-xs border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                              className="w-full h-11 !min-h-0 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                             >
                               <span className="truncate">
                                 {availability ? (
@@ -2724,7 +2724,7 @@ const Profile = () => {
                                   } as Record<string, string>)[availability]
                                 ) : 'Välj din tillgänglighet'}
                               </span>
-                              <ChevronDown className="h-4 w-4 shrink-0" />
+                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
@@ -2765,13 +2765,13 @@ const Profile = () => {
                     </div>
                     
                     {cvUrl ? (
-                      <div className="w-full min-h-11 py-[11.2px] bg-white/5 backdrop-blur-xs border border-white/10 rounded-md flex items-center px-3 gap-2">
+                      <div className="w-full min-h-11 py-[11.2px] bg-white/5 backdrop-blur-sm border border-white/10 rounded-md flex items-center px-3 gap-2">
                         <button
                           type="button"
                           onClick={() => setCvOpen(true)}
                           className="flex items-center gap-2 text-white transition-colors flex-1"
                         >
-                          <FileText className="h-4 w-4 text-white shrink-0" />
+                          <FileText className="h-4 w-4 text-white flex-shrink-0" />
                           <span className="text-sm">Visa CV</span>
                         </button>
                         <button
@@ -2849,7 +2849,7 @@ const Profile = () => {
                         placeholder="Mitt Företag AB"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        className="bg-white/5 backdrop-blur-xs border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                       />
                     </div>
 
@@ -2860,7 +2860,7 @@ const Profile = () => {
                         placeholder="556123-4567"
                         value={orgNumber}
                         onChange={(e) => setOrgNumber(e.target.value)}
-                        className="bg-white/5 backdrop-blur-xs border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                       />
                     </div>
                   </div>

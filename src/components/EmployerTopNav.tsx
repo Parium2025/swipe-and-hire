@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
-import { NavLink, useNavigate, useLocation } from "@/lib/router-compat";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';

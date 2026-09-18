@@ -29,10 +29,10 @@ export const PillButton = React.forwardRef<HTMLButtonElement, PillButtonProps>(
       className={cn(
         'flex items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/5 text-white',
         'transition-all duration-200 hover:bg-white/10 hover:border-white/50',
-        'outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0',
+        'outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0',
         'touch-manipulation [-webkit-tap-highlight-color:transparent]',
         shape === 'text'
-          ? 'px-4 h-9 text-xs font-medium whitespace-nowrap shrink-0'
+          ? 'px-4 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0'
           : 'h-9 w-9',
         menu && 'data-[state=open]:bg-white/20 data-[state=open]:border-white/30',
         className,

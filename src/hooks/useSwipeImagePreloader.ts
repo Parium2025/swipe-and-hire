@@ -5,16 +5,16 @@ import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { JOB_VIEW_HERO_TRANSFORM, SWIPE_CARD_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
 
 interface PreloadableJob {
-  job_image_url?: string | null;
-  company_logo_url?: string | null;
-  updated_at?: string | null;
+  job_image_url?: string;
+  company_logo_url?: string;
+  updated_at?: string;
   image_updated_at?: string | null;
 }
 
-const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at ?? undefined;
+const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at;
 
 
-function resolveUrl(url: string | null | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
+function resolveUrl(url: string | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
   const { data } = supabase.storage.from(bucket).getPublicUrl(url, transform ? { transform } : undefined);
@@ -22,10 +22,10 @@ function resolveUrl(url: string | null | undefined, bucket: string, transform?: 
 }
 
 // Helpers som matchar exakt vad JobSlide renderar
-const resolveSwipeImg = (u?: string | null) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
-const resolveSwipeLogo = (u?: string | null) => resolveUrl(u, 'company-logos', { width: 64, height: 64, quality: 80, resize: 'contain' });
+const resolveSwipeImg = (u?: string) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
+const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', { width: 64, height: 64, quality: 80, resize: 'contain' });
 
-function resolveJobViewVariant(url: string | null | undefined): string | null {
+function resolveJobViewVariant(url: string | undefined): string | null {
   if (!url) return null;
   // Already a remote URL → use as-is (swipe doesn't transform foreign URLs)
   if (url.startsWith('http')) return null;

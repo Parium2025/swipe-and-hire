@@ -1,9 +1,14 @@
-import {
-  getBrowserChromeColor,
-  isLandingVideoPath,
-} from '@/lib/browserChromeConfig';
-
+const LANDING_CHROME_COLOR = '#2a2a2a';
+const PARIUM_CHROME_COLOR = '#00193D';
+const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
+// Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.
+const AUTH_CHROME_COLOR = '#062B5E';
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
+
+const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
+const isAudienceLandingPath = (pathname: string) =>
+  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
+const isAuthPath = (pathname: string) => pathname === '/auth';
 
 const removeLegacySentinels = () => {
   ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
@@ -12,7 +17,18 @@ const removeLegacySentinels = () => {
   });
 };
 
+const nudgeColor = (color: string) => {
+  // Minimal färgskillnad (osynlig för ögat) som tvingar Safari att se
+  // theme-color som "ändrad" och därmed re-sampla URL-/verktygsbaren.
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return color;
+  const b = parseInt(hex.slice(4, 6), 16);
+  const nb = (b === 255 ? b - 1 : b + 1).toString(16).padStart(2, '0');
+  return `#${hex.slice(0, 4)}${nb}`;
+};
+
 const THEME_META_ID = 'parium-theme-color';
+let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
   // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
@@ -37,7 +53,23 @@ const writeThemeColor = (color: string) => {
 };
 
 const setThemeColor = (color: string) => {
-  writeThemeColor(color);
+  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(pendingThemeFrame);
+    pendingThemeFrame = null;
+  }
+
+  // Skriv först en nästan identisk färg, sedan målfärgen på nästa frame.
+  // iOS Safari ignorerar annars ibland en uppdatering vid back-navigation
+  // eftersom värdet uppfattas som oförändrat sedan förra samplingen.
+  writeThemeColor(nudgeColor(color));
+  if (typeof requestAnimationFrame === 'function') {
+    pendingThemeFrame = requestAnimationFrame(() => {
+      pendingThemeFrame = null;
+      writeThemeColor(color);
+    });
+  } else {
+    writeThemeColor(color);
+  }
 };
 
 
@@ -67,7 +99,15 @@ let pendingSyncTimers: number[] = [];
 
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
-  const color = getBrowserChromeColor(pathname);
+  const isAudienceLanding = isAudienceLandingPath(pathname);
+  const isAuth = isAuthPath(pathname);
+  const color = isLandingVideo
+    ? LANDING_CHROME_COLOR
+    : isAudienceLanding
+      ? AUDIENCE_LANDING_CHROME_COLOR
+      : isAuth
+        ? AUTH_CHROME_COLOR
+        : PARIUM_CHROME_COLOR;
 
   removeLegacySentinels();
 

@@ -32,9 +32,9 @@ import type { CandidateList } from '@/hooks/useCandidateLists';
 
 interface TeamMember {
   userId: string;
-  firstName: string | null;
-  lastName: string | null;
-  profileImageUrl?: string | null;
+  firstName: string;
+  lastName: string;
+  profileImageUrl?: string;
 }
 
 interface MyCandidatesHeaderProps {
@@ -114,7 +114,7 @@ export const MyCandidatesHeader = ({
     : activeListName;
 
   return (
-    <div className="mb-6 bg-white/5 backdrop-blur-xs border border-white/20 rounded-lg p-3 md:p-4">
+    <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4">
       {/* Title and description */}
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 min-w-0">
@@ -124,15 +124,15 @@ export const MyCandidatesHeader = ({
                 aria-label="Byt lista"
                 className="flex items-center gap-2 min-w-0 max-w-full text-xl md:text-2xl font-semibold text-white tracking-tight transition-colors md:hover:text-white/80 active:scale-[0.99] touch-manipulation"
               >
-                {isViewingColleague && <Eye className="h-5 w-5 shrink-0 text-fuchsia-400" />}
+                {isViewingColleague && <Eye className="h-5 w-5 flex-shrink-0 text-fuchsia-400" />}
                 <TruncatedText
                   text={title}
                   className="truncate min-w-0 text-white"
                   side="bottom"
                 />
-                <span className="text-white shrink-0">({totalCount})</span>
+                <span className="text-white flex-shrink-0">({totalCount})</span>
                 <ChevronDown
-                  className={`h-4 w-4 text-white shrink-0 transition-transform duration-300 ease-out ${listMenuOpen ? 'rotate-180' : 'rotate-0'}`}
+                  className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 ease-out ${listMenuOpen ? 'rotate-180' : 'rotate-0'}`}
                 />
               </button>
             </DropdownMenuTrigger>
@@ -153,12 +153,12 @@ export const MyCandidatesHeader = ({
                     className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-white/15' : ''}`}
                   >
                     {isActive ? (
-                      <Check className="h-4 w-4 shrink-0" />
+                      <Check className="h-4 w-4 flex-shrink-0" />
                     ) : (
-                      <UserCheck className="h-4 w-4 shrink-0 text-white/70" />
+                      <UserCheck className="h-4 w-4 flex-shrink-0 text-white/70" />
                     )}
                     <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive />
-                    <span className="ml-auto pl-2 shrink-0 text-white tabular-nums">
+                    <span className="ml-auto pl-2 flex-shrink-0 text-white tabular-nums">
                       ({countByList[list.id] ?? 0})
                     </span>
                   </DropdownMenuItem>
@@ -168,7 +168,7 @@ export const MyCandidatesHeader = ({
                 onClick={onManageLists}
                 className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors"
               >
-                <Settings2 className="h-4 w-4 shrink-0 text-white/70" />
+                <Settings2 className="h-4 w-4 flex-shrink-0 text-white/70" />
                 Hantera listor
               </DropdownMenuItem>
 
@@ -184,7 +184,7 @@ export const MyCandidatesHeader = ({
                         firstName={member.firstName}
                         lastName={member.lastName}
                         size="xs"
-                        className="shrink-0"
+                        className="flex-shrink-0"
                       />
                     );
 
@@ -252,7 +252,7 @@ export const MyCandidatesHeader = ({
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="dashboard-icon-control absolute right-1.5 top-1/2 flex !min-h-0 !min-w-0 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors focus:outline-hidden"
+                className="dashboard-icon-control absolute right-1.5 top-1/2 flex !min-h-0 !min-w-0 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors focus:outline-none"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -264,7 +264,7 @@ export const MyCandidatesHeader = ({
             <button
               onClick={() => displayedCandidatesCount > 0 ? onToggleSelectionMode() : undefined}
               onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-full px-6 py-2.5 flex items-center justify-center gap-2 outline-hidden focus:outline-hidden transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
+              className={`rounded-full px-6 py-2.5 flex items-center justify-center gap-2 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
                 isSelectionMode 
                   ? 'bg-white/15 ring-white/60' 
                   : displayedCandidatesCount > 0 
@@ -272,7 +272,7 @@ export const MyCandidatesHeader = ({
                     : 'bg-white/5 ring-white/10 opacity-40 cursor-default'
               }`}
             >
-              <CheckSquare className="h-4 w-4 text-white shrink-0" />
+              <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
               <span className="text-white text-sm font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
             </button>
           </div>
@@ -281,7 +281,7 @@ export const MyCandidatesHeader = ({
             <button
               onClick={() => displayedCandidatesCount > 0 ? onToggleSelectionMode() : undefined}
               onMouseDown={(e) => e.preventDefault()}
-              className={`rounded-full px-5 py-2 flex items-center justify-center gap-2 outline-hidden focus:outline-hidden transition-all duration-200 min-w-0 overflow-hidden ${
+              className={`rounded-full px-5 py-2 flex items-center justify-center gap-2 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
                 isSelectionMode 
                   ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
                   : displayedCandidatesCount > 0 
@@ -289,7 +289,7 @@ export const MyCandidatesHeader = ({
                     : 'bg-white/5 opacity-40 cursor-default'
               }`}
             >
-              <CheckSquare className="h-4 w-4 text-white shrink-0" />
+              <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
               <span className="text-white text-sm font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
             </button>
           </div>
@@ -317,13 +317,13 @@ export const MyCandidatesHeader = ({
                 <button
                   key={stage}
                   onClick={() => onStageFilterChange(isActive ? 'all' : stage)}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-xs max-w-[200px] min-w-0 inline-flex items-center gap-1"
+                  className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1"
                   style={{
                     backgroundColor: isActive ? `${settings?.color}66` : 'rgba(255,255,255,0.05)',
                   }}
                 >
                   <span className="truncate min-w-0">{label}</span>
-                  <span className="shrink-0">({count})</span>
+                  <span className="flex-shrink-0">({count})</span>
                 </button>
               );
               

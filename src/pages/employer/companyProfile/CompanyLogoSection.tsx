@@ -92,7 +92,7 @@ export const CompanyLogoSection = ({
               <button
                 type="button"
                 onClick={onEditExistingLogo}
-                className="bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
               >
                 Anpassa din bild
               </button>

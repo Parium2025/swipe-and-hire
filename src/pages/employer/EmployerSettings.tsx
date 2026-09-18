@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { useLocation } from '@/lib/router-compat';
+import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
@@ -254,7 +254,7 @@ const EmployerSettings = () => {
             ref={section.value === 'notifications' ? notificationSettingsRef : undefined}
             className="border-0 scroll-mt-6"
           >
-            <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-xs px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors data-[state=open]:rounded-b-none">
+            <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors data-[state=open]:rounded-b-none">
               {section.label}
             </AccordionTrigger>
             <AccordionContent className="pb-0 pt-4">

@@ -13,28 +13,28 @@ import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface SupportTicket {
   id: string;
-  category: string | null;
+  category: string;
   subject: string;
   message: string;
-  status: string | null;
+  status: string;
   created_at: string;
   updated_at: string;
   profiles?: {
-    first_name: string | null;
-    last_name: string | null;
-  } | null;
+    first_name: string;
+    last_name: string;
+  };
 }
 
 interface SupportMessage {
   id: string;
-  ticket_id: string | null;
+  ticket_id: string;
   message: string;
-  is_admin_reply: boolean | null;
+  is_admin_reply: boolean;
   created_at: string;
   profiles?: {
-    first_name: string | null;
-    last_name: string | null;
-  } | null;
+    first_name: string;
+    last_name: string;
+  };
 }
 
 const SupportAdmin = () => {
@@ -67,7 +67,7 @@ const SupportAdmin = () => {
       
       // Hämta användardata separat
       if (ticketsData && ticketsData.length > 0) {
-        const userIds = [...new Set(ticketsData.map(t => t.user_id))].filter((id): id is string => !!id);
+        const userIds = [...new Set(ticketsData.map(t => t.user_id))];
         const { data: profilesData } = await supabase
           .from('profiles')
           .select('user_id, first_name, last_name')
@@ -101,7 +101,7 @@ const SupportAdmin = () => {
       
       // Hämta användardata separat för meddelanden
       if (messagesData && messagesData.length > 0) {
-        const userIds = [...new Set(messagesData.filter(m => m.user_id).map(m => m.user_id))].filter((id): id is string => !!id);
+        const userIds = [...new Set(messagesData.filter(m => m.user_id).map(m => m.user_id))];
         let profilesData: any[] = [];
         
         if (userIds.length > 0) {
@@ -137,7 +137,7 @@ const SupportAdmin = () => {
 
       toast({
         title: "Status uppdaterad",
-        description: `Ärendet har markerats som ${getStatusLabel(status)?.toLowerCase()}`
+        description: `Ärendet har markerats som ${getStatusLabel(status).toLowerCase()}`
       });
 
       fetchTickets();
@@ -194,7 +194,7 @@ const SupportAdmin = () => {
     }
   };
 
-  const getStatusIcon = (status: string | null) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'open':
         return <AlertCircle className="h-4 w-4 text-yellow-500" />;
@@ -207,7 +207,7 @@ const SupportAdmin = () => {
     }
   };
 
-  const getStatusColor = (status: string | null) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
         return 'bg-yellow-500/20 text-yellow-300';
@@ -220,7 +220,7 @@ const SupportAdmin = () => {
     }
   };
 
-  const getStatusLabel = (status: string | null) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case 'open':
         return 'Öppen';
@@ -233,7 +233,7 @@ const SupportAdmin = () => {
     }
   };
 
-  const getCategoryLabel = (category: string | null) => {
+  const getCategoryLabel = (category: string) => {
     const categoryMap: { [key: string]: string } = {
       'technical': 'Teknisk support',
       'billing': 'Fakturering',
@@ -241,7 +241,7 @@ const SupportAdmin = () => {
       'feature': 'Funktionsfrågor',
       'other': 'Övrigt'
     };
-    return (category && categoryMap[category]) || category || '';
+    return categoryMap[category] || category;
   };
 
   if (loading) {
@@ -265,7 +265,7 @@ const SupportAdmin = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Ärendelista */}
         <div className="lg:col-span-1">
-          <Card className="bg-white/10 backdrop-blur-xs border-white/20">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
@@ -308,7 +308,7 @@ const SupportAdmin = () => {
         {/* Ärendedetaljer */}
         <div className="lg:col-span-2">
           {selectedTicket ? (
-            <Card className="bg-white/10 backdrop-blur-xs border-white/20">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardHeader>
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -322,7 +322,7 @@ const SupportAdmin = () => {
                       {getStatusLabel(selectedTicket.status)}
                     </Badge>
                     <Select
-                      value={selectedTicket.status ?? undefined}
+                      value={selectedTicket.status}
                       onValueChange={(value) => updateTicketStatus(selectedTicket.id, value)}
                     >
                       <SelectTrigger className="w-32 h-8 text-sm bg-white/10 border-white/20 hover:border-white/50 text-white">
@@ -431,7 +431,7 @@ const SupportAdmin = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-white/10 backdrop-blur-xs border-white/20">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="flex items-center justify-center h-96">
                 <p className="text-white">Välj ett ärende för att visa detaljer.</p>
               </CardContent>

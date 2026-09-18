@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo, useMemo, useRef, startTransition } from "react";
-import { NavLink, useNavigate, useLocation } from "@/lib/router-compat";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -405,7 +405,7 @@ export function EmployerSidebar() {
                         if (item.url === '/candidates') prefetchApplications();
                       }}
                       onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && (
@@ -463,7 +463,7 @@ export function EmployerSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -500,7 +500,7 @@ export function EmployerSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -520,7 +520,7 @@ export function EmployerSidebar() {
                       if (isMobile) setOpenMobile(false);
                       (e.currentTarget as HTMLButtonElement).blur();
                     }}
-                    className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                    className="flex items-center gap-3 w-full outline-none focus:outline-none"
                   >
                     <Lightbulb className="h-4 w-4" />
                     {!collapsed && <span className="font-medium">Hjälp &amp; tips</span>}
@@ -553,7 +553,7 @@ export function EmployerSidebar() {
                     >
                       <button
                         onClick={(e) => { handleNavigation('/admin'); (e.currentTarget as HTMLButtonElement).blur(); }}
-                        className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                        className="flex items-center gap-3 w-full outline-none focus:outline-none"
                       >
                         <Settings className="h-4 w-4" />
                         {!collapsed && <span className="font-medium">Admin Panel</span>}

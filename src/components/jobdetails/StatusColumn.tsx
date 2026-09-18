@@ -170,17 +170,17 @@ export const StatusColumn = memo(({
       style={{ width: `calc((100% - ${gapTotal}) / ${slots})` }}
     >
       <div 
-        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
+        className={`group rounded-md px-2 py-1.5 mb-2 transition-all ring-1 ring-inset ring-white/20 flex-shrink-0 ${isOver ? 'ring-2 ring-white/40' : ''}`}
         style={{ backgroundColor: `${displayColor}33` }}
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-white shrink-0" />
+          <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
           <TruncatedText
             text={stageConfig.label}
             className="font-medium text-xs text-white truncate flex-1 min-w-0"
           />
           <span 
-            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full shrink-0"
+            className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}
           >
             {displayCount}

@@ -260,7 +260,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
               return (
                 <div key={activity.id} className="flex gap-3 bg-white/5 rounded-lg p-2.5">
                   {hasAvatar ? (
-                    <div className="shrink-0">
+                    <div className="flex-shrink-0">
                       <TeamMemberAvatar
                         profileImageUrl={activity.user_profile_image_url}
                         firstName={activity.user_first_name}
@@ -270,7 +270,7 @@ export function CandidateActivityLog({ applicantId }: CandidateActivityLogProps)
                       />
                     </div>
                   ) : (
-                    <div className="shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
+                    <div className="flex-shrink-0 h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
                       <Icon className="h-3.5 w-3.5 text-white" />
                     </div>
                   )}

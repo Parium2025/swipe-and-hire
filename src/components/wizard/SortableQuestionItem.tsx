@@ -66,7 +66,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
         style={style}
         className={`group select-none rounded-lg border p-2.5 transition-colors duration-150 ${
           isDragging
-            ? 'border-white/30 bg-white/10 shadow-xs'
+            ? 'border-white/30 bg-white/10 shadow-sm'
             : 'border-white/10 bg-white/5 md:hover:border-white/20 md:hover:bg-white/8'
         }`}
       >
@@ -78,7 +78,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
               data-dnd-draggable="true"
               {...attributes}
               {...listeners}
-              className="-m-1 flex h-9 w-9 shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
+              className="-m-1 flex h-9 w-9 flex-shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-full text-white transition-colors active:cursor-grabbing md:hover:bg-white/10"
             >
               <GripVertical className="h-4 w-4" />
             </div>
@@ -92,7 +92,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
             </TruncatedText>
 
             {/* Desktop: inline buttons */}
-            <div className="hidden md:flex items-center gap-0.5 shrink-0">
+            <div className="hidden md:flex items-center gap-0.5 flex-shrink-0">
               <button
                 type="button"
                 onPointerDown={stopPropagation}
@@ -155,7 +155,7 @@ const SortableQuestionItemComponent = ({ question, onEdit, onDelete }: SortableQ
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContentNoFocus
           elevated
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

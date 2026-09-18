@@ -1270,7 +1270,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     return (
       <div className="space-y-6">
         <div className="text-center mb-8">
-          <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
+          <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
             <FileText className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">CV</h2>
@@ -1346,21 +1346,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
               <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.2s'}}>
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-xs transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Sparkles className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Nästa generation av jobbsök är här</h3>
               </div>
 
               <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.4s'}}>
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-xs transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Hitta rätt. Snabbt. Enkelt.</h3>
               </div>
 
               <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.6s'}}>
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-xs transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Heart className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Hitta jobb på ett helt nytt sätt</h3>
@@ -1368,7 +1368,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
 
             <div className="text-center mt-8">
-              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-xs font-semibold">Låt oss skapa din profil tillsammans.</p>
+              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans.</p>
             </div>
           </div>
         );
@@ -1377,7 +1377,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <User className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Låt oss lära känna dig</h2>
@@ -1525,7 +1525,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
 
             {/* Profile Image/Video Card - matching structure from Profile.tsx */}
-            <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
               <div className="p-6 md:p-4 space-y-2">
 
                 
@@ -1533,7 +1533,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="flex items-center justify-center space-x-4">
                   {/* Video option */}
                   <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-xs">
+                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
                       <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                         <Video className="h-5 w-5 text-white" />
                       </div>
@@ -1541,13 +1541,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </div>
 
                   {/* "eller" text */}
-                  <div className="text-white text-sm font-medium shrink-0">
+                  <div className="text-white text-sm font-medium flex-shrink-0">
                     eller
                   </div>
 
                   {/* Image option */}
                   <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-xs">
+                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
                       <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                         <Camera className="h-5 w-5 text-white" />
                       </div>
@@ -1597,7 +1597,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         deleteProfileMedia();
                       }}
-                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-hidden [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                       aria-label="Ta bort profilmedia"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -1647,7 +1647,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <button
                           type="button"
                           onClick={handleEditExistingProfile}
-                          className="bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+                          className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
                           Anpassa din bild
                         </button>
@@ -1662,7 +1662,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         restoreProfileMedia();
                       }}
-                      className="mx-auto flex items-center gap-2 bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+                      className="mx-auto flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
                     >
                       <RotateCcw className="h-4 w-4" />
                       Ångra borttagning
@@ -1680,7 +1680,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <button
                           type="button"
                           onClick={handleEditExistingCover}
-                          className="bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px] focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+                          className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-[180px] focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
                           Anpassa din bild
                         </button>
@@ -1692,7 +1692,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                           type="button"
                           onClick={() => document.getElementById('coverImage')?.click()}
                           disabled={isUploadingCover}
-                          className="bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+                          className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
                           {formData.coverImageUrl ? 'Byt cover-bild' : 'Lägg till cover-bild'}
                         </button>
@@ -1704,7 +1704,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                               e.stopPropagation();
                               deleteCoverImage();
                             }}
-                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-hidden transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                            className="absolute -right-12 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                             aria-label="Ta bort cover-bild"
                             title="Ta bort cover-bild"
                           >
@@ -1721,7 +1721,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                             e.stopPropagation();
                             restoreCoverImage();
                           }}
-                          className="flex items-center gap-2 bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+                          className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
                           <RotateCcw className="h-4 w-4" />
                           Ångra borttagning
@@ -1765,7 +1765,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Din presentation</h2>
@@ -1778,7 +1778,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Textarea
                   id="bio"
                   rows={6}
-                  className="welcome-tunnel-bio mt-1.5 min-h-[140px] text-base bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 hover:border-white/50 resize-none"
+                  className="welcome-tunnel-bio mt-1.5 min-h-[140px] text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 resize-none"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Till exempel: Jag är 24 år, serviceinriktad och van vid högt tempo. Har jobbat två år inom butik och trivs bäst i team. Söker nu ett deltidsjobb i Stockholm."
@@ -1793,7 +1793,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xs p-4">
+              <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4">
                 <p className="text-sm font-medium text-white mb-2.5">Tips på vad du kan nämna:</p>
                 <ul className="space-y-2">
                   {[
@@ -1818,14 +1818,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Users className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-xl md:text-2xl font-semibold mb-2 text-white tracking-tight">Dela din information</h2>
             </div>
 
             <div className="max-w-md mx-auto space-y-6">
-              <div className="bg-white/10 backdrop-blur-xs rounded-lg p-6 space-y-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
                 <h3 className="text-white font-semibold mb-3">Detta kommer att delas med arbetsgivare:</h3>
                 <div className="space-y-2 text-sm text-white">
                   {[
@@ -1840,7 +1840,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     'Dina svar på arbetsgivarens frågor i ansökan',
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                      <Check className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
                       <span className="break-words">{item}</span>
                     </div>
                   ))}
@@ -1858,7 +1858,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       case 6:
         return (
           <div className="text-center space-y-8">
-            <div className="bg-green-500/20 backdrop-blur-xs p-6 rounded-full w-fit mx-auto mb-6">
+            <div className="bg-green-500/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
               <Check className="h-12 w-12 text-green-400" />
             </div>
             <div className="space-y-4">
@@ -1869,7 +1869,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="rounded-full px-10 py-6 bg-green-600 text-white hover:bg-green-600/90 md:hover:bg-green-600/90 hover:text-white font-semibold text-lg shadow-2xl transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="rounded-full px-10 py-6 bg-green-600 text-white hover:bg-green-600/90 md:hover:bg-green-600/90 hover:text-white font-semibold text-lg shadow-2xl transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 {isSubmitting ? (
                   <>
@@ -1883,7 +1883,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 variant="outlineNeutral"
                 onClick={handlePrevious}
-                className="rounded-full px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:text-white md:hover:bg-white/10 md:hover:border-white/20 transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="rounded-full px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:text-white md:hover:bg-white/10 md:hover:border-white/20 transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -1896,7 +1896,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       case 7:
         return (
           <div className="text-center space-y-6">
-            <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
+            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
               <Check className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-xl font-semibold text-white">Profil skapad!</h2>
@@ -1982,7 +1982,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       <div className="relative z-10 flex-1 flex flex-col min-h-0">
         {/* Progress indicator */}
       {currentStep > 0 && currentStep < totalSteps - 1 && (
-        <div className="w-full max-w-md mx-auto pt-8 px-6 shrink-0">
+        <div className="w-full max-w-md mx-auto pt-8 px-6 flex-shrink-0">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 3}</span>
             <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
@@ -2011,7 +2011,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       {/* Navigation buttons – samma komponent/stil som jobbguiden */}
       {currentStep < totalSteps - 1 && currentStep < 6 && (
-        <div className="pb-[env(safe-area-inset-bottom)] shrink-0">
+        <div className="pb-[env(safe-area-inset-bottom)] flex-shrink-0">
           <WizardFooter
             currentStep={currentStep - 1}
             isLastStep={false}

@@ -8,7 +8,6 @@ type HeroTextProps = {
   subtitle: string;
   variant: 'mobile' | 'desktop';
   headingId?: string;
-  headingAs?: 'h1' | 'div';
 };
 
 /**
@@ -19,7 +18,7 @@ type HeroTextProps = {
  * endast utseende-skillnader (drop-shadow, fontstorlek, opacitet) som är
  * specifika per layout, så 100% visuell paritet bevaras.
  */
-export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId, headingAs = 'h1' }: HeroTextProps) => {
+export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId }: HeroTextProps) => {
   const isMobile = variant === 'mobile';
 
   const eyebrowClass = isMobile
@@ -50,35 +49,22 @@ export const HeroText = ({ eyebrow, headline, subtitle, variant, headingId, head
         {eyebrow}
       </motion.span>
 
-      {headingAs === 'h1' ? (
-        <motion.h1
-          id={headingId}
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          style={visibleStyle}
-          className={headlineClass}
-        >
-          {headline.map((line, i) => (
-            <span key={i} className={isMobile ? 'wave-text block' : 'wave-text block whitespace-nowrap'}>
-              {line}
-            </span>
-          ))}
-        </motion.h1>
-      ) : (
-        <motion.div
-          id={headingId}
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          style={visibleStyle}
-          className={headlineClass}
-        >
-          {headline.map((line, i) => (
-            <span key={i} className={isMobile ? 'wave-text block' : 'wave-text block whitespace-nowrap'}>
-              {line}
-            </span>
-          ))}
-        </motion.div>
-      )}
+      <motion.h1
+        id={headingId}
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
+        style={visibleStyle}
+        className={headlineClass}
+      >
+        {headline.map((line, i) => (
+          <span
+            key={i}
+            className={isMobile ? 'wave-text block' : 'wave-text block whitespace-nowrap'}
+          >
+            {line}
+          </span>
+        ))}
+      </motion.h1>
 
       <motion.p
         initial={false}

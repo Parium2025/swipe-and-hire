@@ -1,5 +1,5 @@
  import { useEffect, useState } from 'react';
- import { Link, useParams, useNavigate, Navigate } from '@/lib/router-compat';
+ import { Link, useParams, useNavigate, Navigate } from 'react-router-dom';
  import { Helmet } from 'react-helmet-async';
  import { motion } from 'framer-motion';
  import { supabase } from '@/integrations/supabase/client';

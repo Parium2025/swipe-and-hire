@@ -30,10 +30,18 @@ const SplitHeadline = ({
   delay = 0.05,
 }: Props) => {
   const reduce = useReducedMotion();
-  // SSR och klientens första render måste använda exakt samma variant. Viewporten
-  // läses först efter hydration; annars kan React lämna serverns suddiga hidden-
-  // stil kvar på iPhone trots att klienten valt den enklare touch-animationen.
-  const [isTouch, setIsTouch] = useState(false);
+  // 🛟 Synkron init: läs matchMedia direkt så vi ALDRIG hamnar i desktop-varianten
+  // (som har filter: blur(8px)) på en mobil första render. Om Framer Motion redan
+  // hunnit applicera hidden-varianten innan useEffect hann köra så fastnade rubriken
+  // som suddig — vilket också skapade ett stort tomrum där texten "gömdes".
+  const [isTouch, setIsTouch] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    try {
+      return window.matchMedia('(pointer: coarse), (max-width: 767px)').matches;
+    } catch {
+      return false;
+    }
+  });
   const words = text.split(/\s+/).filter(Boolean);
   const lastIdx = words.length - 1;
 

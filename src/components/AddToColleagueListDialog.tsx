@@ -74,7 +74,7 @@ export function AddToColleagueListDialog({
         .from('user_stage_settings')
         .select('stage_key, order_index')
         .eq('user_id', recruiterId)
-        .eq('list_id', listId as string)
+        .eq('list_id', listId)
         .gt('order_index', -1)
         .order('order_index', { ascending: true })
         .limit(1);
@@ -181,7 +181,7 @@ export function AddToColleagueListDialog({
   };
 
   const buttonClass =
-    'w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white transition-colors duration-300 outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]';
+    'w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white transition-colors duration-300 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]';
 
   const title = rows.length > 1 ? `Lägg till ${rows.length} kandidater` : 'Lägg till kandidat';
 
@@ -217,7 +217,7 @@ export function AddToColleagueListDialog({
                     onPointerDown={(e) => e.preventDefault()}
                     disabled={isAdding !== null}
                   >
-                    <UserCheck className="h-5 w-5 text-white shrink-0" />
+                    <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
                     <div className="min-w-0 flex-1 text-left">
                       <TruncatedText text={list.name} lines={2} className="font-medium" insideInteractive />
                       <div className="text-xs text-white">Min lista</div>
@@ -235,7 +235,7 @@ export function AddToColleagueListDialog({
                     onPointerDown={(e) => e.preventDefault()}
                     disabled={isAdding !== null}
                   >
-                    <UserCheck className="h-5 w-5 text-white shrink-0" />
+                    <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
                     <div className="text-left">
                       <div className="font-medium">Mina kandidater</div>
                       <div className="text-xs text-white">Min lista</div>
@@ -268,7 +268,7 @@ export function AddToColleagueListDialog({
                     src={member.profileImageUrl}
                     mediaType="profile-image"
                     fallback={`${member.firstName?.[0] || ''}${member.lastName?.[0] || ''}`}
-                    className="h-8 w-8 shrink-0"
+                    className="h-8 w-8 flex-shrink-0"
                     fallbackClassName="text-xs bg-white/20"
                   />
                    <div className="min-w-0 flex-1 text-left">

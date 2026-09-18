@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from '@/lib/router-compat';
+import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Search } from 'lucide-react';
 import { useJobCounts, getJobCount } from '@/hooks/useJobCounts';
 import { TooltipProvider } from '@/components/ui/tooltip';

@@ -278,7 +278,7 @@ export function SwipeFilterSheet({
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
-                      <Briefcase className="h-4 w-4 text-white shrink-0" />
+                      <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
                       <span className="text-[15px] text-white flex-1 truncate">
                         {selectedCategory === 'all-categories'
                           ? 'Alla yrkesområden'
@@ -328,7 +328,7 @@ export function SwipeFilterSheet({
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
-                        <Users className="h-4 w-4 text-white shrink-0" />
+                        <Users className="h-4 w-4 text-white flex-shrink-0" />
                         <span className="text-[15px] text-white flex-1 truncate">
                           {selectedSubcategories.length === 0
                             ? 'Alla roller'
@@ -399,7 +399,7 @@ export function SwipeFilterSheet({
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
-                      <Clock className="h-4 w-4 text-white shrink-0" />
+                      <Clock className="h-4 w-4 text-white flex-shrink-0" />
                       <span className="text-[15px] text-white flex-1 truncate">
                         {selectedEmploymentTypes.length === 0
                           ? 'Alla anställningar'
@@ -445,7 +445,7 @@ export function SwipeFilterSheet({
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
-                      <Wallet className="h-4 w-4 text-white shrink-0" />
+                      <Wallet className="h-4 w-4 text-white flex-shrink-0" />
                       <span className="text-[15px] text-white flex-1 truncate">
                         {SALARY_OPTIONS.find(o => o.value === salaryRange)?.label ?? 'Alla löner'}
                       </span>
@@ -516,7 +516,7 @@ export function SwipeFilterSheet({
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 text-left touch-manipulation">
-                      <ArrowUpDown className="h-4 w-4 text-white shrink-0" />
+                      <ArrowUpDown className="h-4 w-4 text-white flex-shrink-0" />
                       <span className="text-[15px] text-white flex-1">{sortLabels[sortBy]}</span>
                       <ChevronDown className="h-4 w-4 text-white" />
                     </button>

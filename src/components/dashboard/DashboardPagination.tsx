@@ -13,15 +13,15 @@ import { cn } from "@/lib/utils";
 
 // Match wizard footer button styling (Tillbaka / Nästa in "Skapa annons")
 const backButtonClasses =
-  'rounded-full bg-white/[0.07] border border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 [&_svg]:text-white focus:outline-hidden focus:ring-0 focus-visible:ring-0';
+  'rounded-full bg-white/[0.07] border border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 [&_svg]:text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
 
 const nextButtonClasses =
-  'rounded-full bg-secondary hover:bg-secondary/90 md:hover:bg-secondary/90 text-white px-8 py-2 border border-white/10 shadow-xs transition-colors duration-150 [&_svg]:text-white focus:outline-hidden focus:ring-0 focus-visible:ring-0';
+  'rounded-full bg-secondary hover:bg-secondary/90 md:hover:bg-secondary/90 text-white px-8 py-2 border border-white/10 shadow-sm transition-colors duration-150 [&_svg]:text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
 
 // Sifferknappar – ren text i vitt, ingen ruta, ingen hover-bakgrund.
 // Aktiv sida markeras med en mjuk underline.
 const pageNumberBaseClasses =
-  'inline-flex h-9 min-w-9 items-center justify-center px-2 text-sm text-white bg-transparent border-0 rounded-none cursor-pointer transition-opacity duration-150 hover:!bg-transparent hover:!text-white focus:outline-hidden focus:ring-0 focus-visible:ring-0';
+  'inline-flex h-9 min-w-9 items-center justify-center px-2 text-sm text-white bg-transparent border-0 rounded-none cursor-pointer transition-opacity duration-150 hover:!bg-transparent hover:!text-white focus:outline-none focus:ring-0 focus-visible:ring-0';
 
 interface DashboardPaginationProps {
   page: number;

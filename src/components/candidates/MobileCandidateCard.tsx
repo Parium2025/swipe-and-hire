@@ -75,13 +75,13 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
               const nextChecked = checked === true;
               if (nextChecked !== isSelected) onToggleSelect();
             }}
-            className="h-4 w-4 shrink-0 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
+            className="h-4 w-4 flex-shrink-0 border-white/50 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:border-white"
             onClick={(e) => e.stopPropagation()}
           />
         )}
 
         {/* Avatar */}
-        <div className="shrink-0">
+        <div className="flex-shrink-0">
           <CandidateAvatar
             profileImageUrl={application.profile_image_url}
             videoUrl={application.video_url}
@@ -101,7 +101,7 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
               className="flex-1 min-w-0 font-medium text-white text-sm"
             />
             {teamInfo && teamInfo.colleagues.length > 0 && (
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 shrink-0">
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
                 <Users className="h-2.5 w-2.5 text-purple-300" />
                 <span className="text-[9px] text-purple-300 font-medium">
                   {teamInfo.colleagues.length}
@@ -149,7 +149,7 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
         </div>
 
         {/* Right side: add/status button or chevron */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           {!isMyCandidatesLoading && !selectionMode && (
             isAlreadyAdded ? (
               <button
@@ -180,7 +180,7 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
             )
           )}
           {!selectionMode && (
-            <ChevronRight className="h-4 w-4 text-white shrink-0" />
+            <ChevronRight className="h-4 w-4 text-white flex-shrink-0" />
           )}
         </div>
       </div>

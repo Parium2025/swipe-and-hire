@@ -1,4 +1,4 @@
-import { Link } from '@/lib/router-compat';
+import { Link } from 'react-router-dom';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
 import { useAuth } from '@/hooks/useAuth';

@@ -202,7 +202,7 @@ function InfoHint({ text }: { text: string }) {
           <Info className="h-4 w-4" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[280px] border border-white/20 bg-white/10 text-white backdrop-blur-xs">
+      <TooltipContent side="top" className="max-w-[280px] border border-white/20 bg-white/10 text-white backdrop-blur-sm">
         <p className="text-xs leading-relaxed text-white">{text}</p>
       </TooltipContent>
     </Tooltip>
@@ -235,7 +235,7 @@ function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onIns
             type="button"
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => onInsert(`{${variable.key}}`)}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-transparent bg-white/[0.06] py-1 pl-2.5 pr-1.5 text-white [-webkit-tap-highlight-color:transparent] focus:outline-hidden focus-visible:outline-hidden md:transition-colors md:duration-150 md:hover:border-white/25 md:hover:bg-white/[0.1]"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-transparent bg-white/[0.06] py-1 pl-2.5 pr-1.5 text-white [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:transition-colors md:duration-150 md:hover:border-white/25 md:hover:bg-white/[0.1]"
           >
             <span className="text-[11px] font-medium leading-none text-white">{variable.label}</span>
             <span className="rounded-full bg-white/10 px-1.5 py-0.5 font-mono text-[9.5px] leading-none text-white/75">{`{${variable.key}}`}</span>
@@ -276,7 +276,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
           onPointerDown={(event) => event.preventDefault()}
           onClick={() => commit((Number(text) || 0) - 5)}
           aria-label="Minska med 5 minuter"
-          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-hidden focus-visible:outline-hidden md:hover:border-white/30"
+          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
         >
           −
         </button>
@@ -302,7 +302,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
           onPointerDown={(event) => event.preventDefault()}
           onClick={() => commit((Number(text) || 0) + 5)}
           aria-label="Öka med 5 minuter"
-          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-hidden focus-visible:outline-hidden md:hover:border-white/30"
+          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-white/5 text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none md:hover:border-white/30"
         >
           +
         </button>
@@ -314,7 +314,7 @@ function DelayField({ value, onChange }: { value: number; onChange: (value: numb
             type="button"
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => commit(preset.value)}
-            className={`rounded-full border px-3 py-1 text-[11px] text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-hidden focus-visible:outline-hidden ${
+            className={`rounded-full border px-3 py-1 text-[11px] text-white transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none ${
               (Number(text) || 0) === preset.value ? 'border-white/40 bg-white/15' : 'border-white/10 bg-white/5 md:hover:border-white/30'
             }`}
           >
@@ -1028,7 +1028,7 @@ export function MessageTemplatesSettings() {
 
     const { error } = await supabase.rpc('upsert_outreach_templates_atomic', {
       p_owner_user_id: user.id,
-      p_organization_id: organizationId as string,
+      p_organization_id: organizationId,
       p_trigger: trigger,
       p_templates: payload,
     });
@@ -1494,7 +1494,7 @@ export function MessageTemplatesSettings() {
           if (!open && !isDeleting) setPendingDeleteAction(null);
         }}
       >
-        <AlertDialogContentNoFocus className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xs sm:max-w-md sm:p-6">
+        <AlertDialogContentNoFocus className="w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:max-w-md sm:p-6">
           <AlertDialogHeader className="space-y-3 text-center">
             <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">
               {pendingDeleteAction?.title}
@@ -1508,7 +1508,7 @@ export function MessageTemplatesSettings() {
               disabled={isDeleting}
               onPointerDown={(event) => event.preventDefault()}
               onClick={() => setPendingDeleteAction(null)}
-              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white outline-hidden transition-colors duration-200 focus:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent] md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
+              className="mt-0 flex-1 rounded-full border-white/20 bg-white/10 text-sm text-white outline-none transition-colors duration-200 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent] md:hover:border-white/50 md:hover:bg-white/20 md:hover:text-white"
             >
               Avbryt
             </AlertDialogCancel>
@@ -1520,7 +1520,7 @@ export function MessageTemplatesSettings() {
                 event.preventDefault();
                 void handleConfirmDelete();
               }}
-              className="flex-1 rounded-full text-sm outline-hidden transition-colors duration-200 focus:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent]"
+              className="flex-1 rounded-full text-sm outline-none transition-colors duration-200 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 active:scale-100 [-webkit-tap-highlight-color:transparent]"
             >
               {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               Ta bort
@@ -1981,7 +1981,7 @@ export function MessageTemplatesSettings() {
 
                       className={[
                         'flex h-[var(--control-height-compact)] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-left text-xs text-white',
-                        'transition-none [-webkit-tap-highlight-color:transparent] focus:outline-hidden focus-visible:outline-hidden',
+                        'transition-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none',
                         'md:hover:border-white/20',
                       ].join(' ')}
 

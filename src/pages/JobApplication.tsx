@@ -1,7 +1,7 @@
 import { fetchMyProfile } from '@/lib/myProfile';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { recordJobView } from '@/lib/recordJobView';
-import { useParams, useNavigate } from '@/lib/router-compat';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -52,8 +52,8 @@ export const clearJobApplicationDraft = (jobId: string, userId: string) => {
 interface JobPosting {
   id: string;
   title: string;
-  description: string | null;
-  location: string | null;
+  description: string;
+  location: string;
   workplace_name?: string | null;
 }
 
@@ -62,11 +62,11 @@ interface JobQuestion {
   question_text: string;
   question_type: string;
   options?: string[] | any;
-  is_required: boolean | null;
-  order_index: number | null;
-  placeholder_text?: string | null;
-  min_value?: number | null;
-  max_value?: number | null;
+  is_required: boolean;
+  order_index: number;
+  placeholder_text?: string;
+  min_value?: number;
+  max_value?: number;
 }
 
 const JobApplication = () => {
@@ -242,7 +242,7 @@ const JobApplication = () => {
       const { data: jobData, error: jobError } = await supabase
         .from('job_postings')
         .select('*')
-        .eq('id', jobId as string)
+        .eq('id', jobId)
         .eq('is_active', true)
         .maybeSingle();
 
@@ -264,7 +264,7 @@ const JobApplication = () => {
       const { data: questionsData, error: questionsError } = await supabase
         .from('job_questions')
         .select('*')
-        .eq('job_id', jobId as string)
+        .eq('job_id', jobId)
         .order('order_index');
 
       if (questionsError) throw questionsError;
@@ -599,11 +599,11 @@ const JobApplication = () => {
         return (
           <Input
             type="number"
-            placeholder={question.placeholder_text ?? undefined}
+            placeholder={question.placeholder_text}
             value={value}
             onChange={(e) => handleCustomAnswerChange(question.id, e.target.value)}
-            min={question.min_value ?? undefined}
-            max={question.max_value ?? undefined}
+            min={question.min_value}
+            max={question.max_value}
           />
         );
 
@@ -653,7 +653,7 @@ const JobApplication = () => {
       default:
         return (
           <Input
-            placeholder={question.placeholder_text ?? undefined}
+            placeholder={question.placeholder_text}
             value={value}
             onChange={(e) => handleCustomAnswerChange(question.id, e.target.value)}
           />
@@ -715,7 +715,7 @@ const JobApplication = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
-      <div className="bg-white/5 backdrop-blur-xs text-white p-4 sticky top-0 z-10 border-b border-white/10">
+      <div className="bg-white/5 backdrop-blur-sm text-white p-4 sticky top-0 z-10 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button

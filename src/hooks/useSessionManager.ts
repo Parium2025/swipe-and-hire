@@ -249,7 +249,7 @@ export function useSessionManager(
         const { data, error } = await supabase.rpc('register_session', {
           p_session_token: token,
           p_device_label: getDeviceLabel(),
-          p_ip_address: undefined,
+          p_ip_address: null,
           p_user_agent: navigator.userAgent.substring(0, 200),
         });
 

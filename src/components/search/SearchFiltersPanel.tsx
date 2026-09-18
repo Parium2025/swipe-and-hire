@@ -145,7 +145,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             placeholder="Sök yrke, företag eller plats…"
             autoComplete="off"
             spellCheck={false}
-            className="w-full h-12 pl-10 pr-10 rounded-md text-base bg-white/5 border border-white/10 hover:border-white/50 text-white placeholder:text-white/60 focus:outline-hidden focus-visible:outline-hidden focus:ring-2 focus:ring-white/25 transition-colors"
+            className="w-full h-12 pl-10 pr-10 rounded-md text-base bg-white/5 border border-white/10 hover:border-white/50 text-white placeholder:text-white/60 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-white/25 transition-colors"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white pointer-events-none" />
           {searchInput && (
@@ -300,7 +300,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {/* Location Filter */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                <MapPin className="h-4 w-4 shrink-0" />
+                <MapPin className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Plats</span>
               </Label>
               <LocationSearchInput
@@ -315,13 +315,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {/* Yrkesområde Filter */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                <Briefcase className="h-4 w-4 shrink-0" />
+                <Briefcase className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Yrkesområde</span>
               </Label>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-hidden focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj yrkesområde"
                   >
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
@@ -344,7 +344,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         <X className="h-4 w-4" />
                       </button>
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-white shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                     )}
                   </button>
                 </DropdownMenuTrigger>
@@ -400,7 +400,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-hidden focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj specifik roll"
                   >
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
@@ -412,7 +412,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         : `${selectedSubcategories.length} roller valda`
                       }
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
@@ -476,13 +476,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {/* Employment Type */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                <Clock className="h-4 w-4 shrink-0" />
+                <Clock className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Anställning</span>
               </Label>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-hidden focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj anställningstyp"
                   >
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
@@ -494,7 +494,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                         : `${selectedEmploymentTypes.length} valda`
                       }
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white max-h-80 overflow-y-auto [-webkit-overflow-scrolling:touch] overscroll-contain [will-change:scroll-position]">
@@ -535,13 +535,13 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {/* Lön */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                <Wallet className="h-4 w-4 shrink-0" />
+                <Wallet className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Lön</span>
               </Label>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-hidden focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj lön"
                   >
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">
@@ -561,7 +561,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
                       </span>
 
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-white shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                     )}
                   </button>
                 </DropdownMenuTrigger>
@@ -585,18 +585,18 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
             {/* Sort Dropdown */}
             <div className="space-y-2 md:col-span-2">
               <Label className="text-sm font-medium text-white inline-flex items-center gap-2 leading-none pl-3">
-                <ArrowDownWideNarrow className="h-4 w-4 shrink-0" />
+                <ArrowDownWideNarrow className="h-4 w-4 flex-shrink-0" />
                 <span className="leading-none">Sortering</span>
               </Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-hidden focus:ring-2 focus:ring-white/20 touch-manipulation"
+                    className="group w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation"
                     aria-label="Välj sortering"
                   >
                     <span className="text-[15px] md:text-sm text-white flex-1 truncate leading-tight py-0.5 min-w-0">{sortLabels[sortBy]}</span>
 
-                    <ChevronDown className="h-4 w-4 text-white shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[var(--radix-dropdown-menu-trigger-width)] z-[10000] bg-slate-900 border border-white/20 rounded-md shadow-lg text-white">
@@ -653,7 +653,7 @@ export const SearchFiltersPanel = memo(function SearchFiltersPanel({
           {/* Clear all filters button */}
           <div className="pt-2 flex justify-center">
             <button 
-              className="h-11 px-6 flex items-center justify-center bg-white/10 border border-white/20 hover:bg-white/15 rounded-full text-sm text-white transition-all duration-300 active:scale-[0.97] touch-manipulation focus:outline-hidden"
+              className="h-11 px-6 flex items-center justify-center bg-white/10 border border-white/20 hover:bg-white/15 rounded-full text-sm text-white transition-all duration-300 active:scale-[0.97] touch-manipulation focus:outline-none"
               onClick={onClearAll}
             >
               Rensa alla filter

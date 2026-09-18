@@ -9,12 +9,12 @@ type SplashListener = (visible: boolean) => void;
 type AuthSplashRole = 'job_seeker' | 'employer';
 
 import { syncBrowserChrome } from '@/lib/browserChrome';
-import { BROWSER_CHROME_COLORS } from '@/lib/browserChromeConfig';
 
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
 let currentRole: AuthSplashRole | null = null;
 const TRANSITION_GATE_ID = 'parium-auth-transition-gate';
+const AUTH_CHROME_COLOR = '#062B5E';
 
 const removeGateElement = () => {
   if (typeof document === 'undefined') return;
@@ -47,8 +47,8 @@ const mountImmediateGate = () => {
     // Samma solida färg som /auth använder för browser chrome. Safari kan
     // sampla html/body mitt under logout; en separat, mörkare gate-färg blir
     // då kvar i browserfältet tills nästa fulla sidladdning.
-    document.documentElement.style.setProperty('background-color', BROWSER_CHROME_COLORS.auth, 'important');
-    document.body.style.setProperty('background-color', BROWSER_CHROME_COLORS.auth, 'important');
+    document.documentElement.style.setProperty('background-color', AUTH_CHROME_COLOR, 'important');
+    document.body.style.setProperty('background-color', AUTH_CHROME_COLOR, 'important');
     if (document.getElementById(TRANSITION_GATE_ID)) return;
     const gate = document.createElement('div');
     gate.id = TRANSITION_GATE_ID;
@@ -57,7 +57,7 @@ const mountImmediateGate = () => {
       'position:fixed',
       'inset:0',
       'z-index:2147483646',
-      `background:${BROWSER_CHROME_COLORS.auth}`,
+      `background:${AUTH_CHROME_COLOR}`,
       'pointer-events:auto',
       'opacity:1',
       'transform:translateZ(0)',

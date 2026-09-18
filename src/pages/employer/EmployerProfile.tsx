@@ -509,7 +509,7 @@ const EmployerProfile = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Min Profil</h1>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg p-6 md:p-4">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
             {/* Profilbild-sektion - matchar jobbsökarsidans stil */}
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
@@ -559,7 +559,7 @@ const EmployerProfile = () => {
                       e.stopPropagation();
                       restoreProfileImage();
                     }}
-                    className="absolute -top-3 -right-3 z-20 pointer-events-auto bg-white/20 hover:bg-white/30 backdrop-blur-xs text-white rounded-full p-2 shadow-lg transition-colors"
+                    className="absolute -top-3 -right-3 z-20 pointer-events-auto bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
                     title="Återställ profilbild"
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -599,7 +599,7 @@ const EmployerProfile = () => {
                     <button 
                       type="button"
                       onClick={handleEditExistingImage}
-                      className="bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
                     >
                       Anpassa din bild
                     </button>
@@ -653,7 +653,7 @@ const EmployerProfile = () => {
               <button
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
-                className="bg-white/5 backdrop-blur-xs border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-11 !min-h-0 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-11 !min-h-0 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>

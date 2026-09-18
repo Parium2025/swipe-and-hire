@@ -128,7 +128,7 @@ const WorkplacePostalCodeSelector = ({
             onChange={handlePostalCodeChange}
             placeholder="XXX XX"
             inputMode="numeric"
-            className="bg-white/5 backdrop-blur-xs border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm pl-10 transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-hidden focus:border-white/50"
+            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm pl-10 transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-none focus:border-white/50"
             maxLength={6}
             autoComplete="off"
             autoCorrect="off"
@@ -160,7 +160,7 @@ const WorkplacePostalCodeSelector = ({
           value={cityValue}
           onChange={() => {}}
           placeholder="Fylls i automatiskt"
-          className="bg-white/5 backdrop-blur-xs border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-hidden focus:border-white/50"
+          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white h-11 !min-h-0 text-sm transition-colors duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 focus:ring-0 focus:outline-none focus:border-white/50"
           readOnly
           autoComplete="off"
           autoCorrect="off"
@@ -170,9 +170,9 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Resultat-kort när location hittas */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-white/5 backdrop-blur-xs border border-white/10 p-3 animate-fade-in col-span-2">
+        <Card className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 animate-fade-in col-span-2">
           <div className="flex items-center space-x-2">
-            <div className="shrink-0">
+            <div className="flex-shrink-0">
               <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">
                 <Check className="w-3 h-3 text-green-400" />
               </div>
@@ -191,7 +191,7 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Om postnummer är giltigt men inte hittat */}
       {isValid && !foundLocation && !isLoading && postalCodeValue && postalCodeValue.replace(/\D/g, '').length === 5 && (
-        <Card className="bg-white/5 backdrop-blur-xs border border-white/10 p-3 col-span-2">
+        <Card className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 col-span-2">
           <div className="flex items-center">
             <div className="flex-1">
               <p className="text-sm text-white font-medium">
@@ -207,9 +207,9 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Loading state med proffsig indikator */}
       {isLoading && (
-        <Card className="bg-white/5 backdrop-blur-xs border border-white/10 p-3 col-span-2">
+        <Card className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 col-span-2">
           <div className="flex items-center space-x-2">
-            <div className="shrink-0">
+            <div className="flex-shrink-0">
               <Loader2 className="h-4 w-4 animate-spin text-white" />
             </div>
             <div className="flex-1">

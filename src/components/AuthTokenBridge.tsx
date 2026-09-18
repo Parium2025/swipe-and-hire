@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from '@/lib/router-compat';
+import { useLocation } from 'react-router-dom';
 
 // This bridge detects Supabase auth/recovery tokens anywhere in the app
 // and forwards them to /auth so the Auth page can handle the flow.

@@ -95,7 +95,7 @@ export const ProfileActions = ({
                     prevStage ? 'text-white bg-white/10 hover:bg-white/20' : 'opacity-40 text-white/50'
                   }`}
                 >
-                  <ChevronLeft className="h-4 w-4 shrink-0" />
+                  <ChevronLeft className="h-4 w-4 flex-shrink-0" />
                   <span className="truncate min-w-0">Till {(prevLabel || 'föregående').replace('?', '')}</span>
                 </button>
                 <div className="flex-shrink min-w-0 max-w-[40%] px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium truncate text-center">
@@ -109,7 +109,7 @@ export const ProfileActions = ({
                   }`}
                 >
                   <span className="truncate min-w-0">Till {(nextLabel || 'nästa').replace('?', '')}</span>
-                  <ChevronRight className="h-4 w-4 shrink-0" />
+                  <ChevronRight className="h-4 w-4 flex-shrink-0" />
                 </button>
               </div>
             </div>

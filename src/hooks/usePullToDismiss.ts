@@ -3,7 +3,7 @@ import { useCallback, useRef, useState, type RefObject, type TouchEvent } from '
 interface UsePullToDismissOptions {
   /** Element that the user touches (the page wrapper). Used to find its
    *  scrollable ancestor so the gesture only fires when scrolled to top. */
-  wrapperRef: RefObject<HTMLElement | null>;
+  wrapperRef: RefObject<HTMLElement>;
   /** Called after the slide-down animation finishes when the user has
    *  pulled past the dismiss threshold. */
   onDismiss: () => void;

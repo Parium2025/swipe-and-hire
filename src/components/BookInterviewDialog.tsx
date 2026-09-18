@@ -385,12 +385,6 @@ export const BookInterviewDialog = ({
         throw error;
       }
 
-      if (!interviewRow) {
-        // Skyddsnät: utan rad kan varken mejl eller kalender kopplas rätt.
-        throw new Error('Intervjun kunde inte sparas. Försök igen.');
-      }
-
-
 
       // Spara länken som standard om rekryteraren bad om det.
       if (locationType === 'video' && saveVideoLinkAsDefault && videoLinkIsValid && videoLinkDiffersFromDefault) {
@@ -492,7 +486,7 @@ export const BookInterviewDialog = ({
   };
 
   // Generate time options (every 15 min, full 24 hours)
-  const allTimeOptions: string[] = [];
+  const allTimeOptions = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
       const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
@@ -560,7 +554,7 @@ export const BookInterviewDialog = ({
         <AnimatedBackground showBubbles={false} />
 
         <div className="relative z-10 flex min-w-0 max-w-full flex-col max-h-[85vh] overflow-x-hidden">
-          <div className="relative flex items-center justify-center p-4 border-b border-white/20 shrink-0 bg-background/10">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <h2 className="text-white text-lg font-semibold flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
                 {isReschedule ? 'Boka om intervju' : 'Boka intervju'}
@@ -649,7 +643,7 @@ export const BookInterviewDialog = ({
               <Label className="text-white">Tid</Label>
               <Select value={time} onValueChange={setTime}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
-                  <Clock className="mr-1.5 h-4 w-4 shrink-0" />
+                  <Clock className="mr-1.5 h-4 w-4 flex-shrink-0" />
                   <span className="flex-1 text-left truncate text-sm">{time} →{endTime}</span>
                 </SelectTrigger>
                 <SelectContent 
@@ -697,7 +691,7 @@ export const BookInterviewDialog = ({
               <button
                 type="button"
                 className={cn(
-                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-hidden focus:ring-0",
+                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
                   locationType === 'video'
                     ? "bg-white/20 border-white/40 text-white"
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
@@ -712,7 +706,7 @@ export const BookInterviewDialog = ({
               <button
                 type="button"
                 className={cn(
-                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-hidden focus:ring-0",
+                  "h-11 inline-flex items-center justify-center gap-2 px-3 rounded-md border text-sm transition-colors duration-300 focus:outline-none focus:ring-0",
                   locationType === 'office'
                     ? "bg-white/20 border-white/40 text-white"
                     : "bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30"
@@ -759,7 +753,7 @@ export const BookInterviewDialog = ({
                     onClick={() => setVideoLinkEditing(true)}
                     onMouseDown={(e) => e.currentTarget.blur()}
                     onMouseUp={(e) => e.currentTarget.blur()}
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-2.5 py-1.5 text-xs text-white transition-colors hover:bg-white/20 focus:outline-hidden focus:ring-0"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-2.5 py-1.5 text-xs text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-0"
                   >
                     <Pencil className="h-3 w-3" />
                     Ändra
@@ -799,7 +793,7 @@ export const BookInterviewDialog = ({
                   onClick={() => setSaveVideoLinkAsDefault((v) => !v)}
                   onMouseDown={(e) => e.currentTarget.blur()}
                   onMouseUp={(e) => e.currentTarget.blur()}
-                  className="flex items-center gap-2 text-xs text-white transition-colors focus:outline-hidden focus:ring-0"
+                  className="flex items-center gap-2 text-xs text-white transition-colors focus:outline-none focus:ring-0"
                 >
                   <span
                     className={cn(
@@ -867,7 +861,7 @@ export const BookInterviewDialog = ({
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isSubmitting || !date || lockedByColleague}
-                className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-hidden focus:ring-0 ${
+                className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
                   !isSubmitting && date && !lockedByColleague ? 'border border-white/30' : ''
                 }`}
               >
@@ -885,7 +879,7 @@ export const BookInterviewDialog = ({
                 onClick={() => handleOpenChange(false)}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="min-h-[44px] rounded-full transition-colors duration-300 focus:outline-hidden focus:ring-0"
+                className="min-h-[44px] rounded-full transition-colors duration-300 focus:outline-none focus:ring-0"
               >
                 Avbryt
               </Button>

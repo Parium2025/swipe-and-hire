@@ -1,5 +1,5 @@
 import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition } from 'react';
-import { useLocation, useNavigate, useSearchParams } from '@/lib/router-compat';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -851,7 +851,7 @@ const EmployerDashboard = memo(() => {
                           className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
                             selectedIds.has(job.id)
                               ? 'bg-white border-white'
-                              : 'bg-white/15 border-white/60 backdrop-blur-xs'
+                              : 'bg-white/15 border-white/60 backdrop-blur-sm'
                           }`}
                         >
                           {selectedIds.has(job.id) && <Check className="h-4 w-4 text-primary" />}
@@ -951,7 +951,7 @@ const EmployerDashboard = memo(() => {
                           className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
                             selectedIds.has(job.id)
                               ? 'bg-white border-white'
-                              : 'bg-white/15 border-white/60 backdrop-blur-xs'
+                              : 'bg-white/15 border-white/60 backdrop-blur-sm'
                           }`}
                         >
                           {selectedIds.has(job.id) && <Check className="h-4 w-4 text-primary" />}
@@ -970,9 +970,9 @@ const EmployerDashboard = memo(() => {
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
         >
-          <AlertDialogHeader className="space-y-4 text-center shrink-0">
+          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
                 <AlertTriangle className="h-4 w-4 text-white" />
@@ -1000,7 +1000,7 @@ const EmployerDashboard = memo(() => {
             )}
           </div>
 
-          <AlertDialogFooter className="flex-row gap-2 sm:justify-center shrink-0">
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
@@ -1025,9 +1025,9 @@ const EmployerDashboard = memo(() => {
 
       <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => { if (!bulkDeleting) setBulkDeleteOpen(o); }}>
         <AlertDialogContentNoFocus
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
         >
-          <AlertDialogHeader className="space-y-4 text-center shrink-0">
+          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
                 <AlertTriangle className="h-4 w-4 text-white" />
@@ -1042,7 +1042,7 @@ const EmployerDashboard = memo(() => {
               Du är på väg att ta bort {selectedIds.size} {activeTab === 'draft' ? 'utkast' : 'utgångna annonser'}. Ansökningar och statistik för dessa annonser försvinner från dina vyer. Denna åtgärd går inte att ångra.
             </AlertDialogDescription>
           </div>
-          <AlertDialogFooter className="flex-row gap-2 sm:justify-center shrink-0">
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
             <AlertDialogCancel
               disabled={bulkDeleting}
               onClick={() => setBulkDeleteOpen(false)}

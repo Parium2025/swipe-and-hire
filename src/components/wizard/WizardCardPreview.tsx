@@ -406,16 +406,16 @@ export const WizardListPreview = memo(function WizardListPreview({
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-900/50 to-slate-900/70 flex flex-col items-center justify-center gap-2 px-3 py-4">
             {companyLogoUrl ? (
-              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img src={companyLogoUrl} alt="" className="w-full h-full object-cover" draggable={false} />
               </div>
             ) : (
-              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">
                 <span className="text-[11px] font-bold text-white/60 tracking-wide">{initials}</span>
               </div>
             )}
             <div className="text-[9px] px-2 py-[2px] border border-white/15 bg-black/40 leading-snug inline-flex items-center max-w-[85%] rounded-full" style={overlayStyle}>
-              <Building2 className="h-2.5 w-2.5 mr-1 shrink-0" />
+              <Building2 className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
               <span className="truncate font-medium">{companyName || 'Företag'}</span>
             </div>
             <TruncatedText
@@ -435,7 +435,7 @@ export const WizardListPreview = memo(function WizardListPreview({
       </div>
 
       {/* Info-block — under bilden, syns när man scrollar */}
-      <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-xs border-t border-white/10 px-3 py-2">
+      <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-sm border-t border-white/10 px-3 py-2">
         <div className="space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />

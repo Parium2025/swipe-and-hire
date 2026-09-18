@@ -597,7 +597,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   };
 
   const formatSalaryInfo = () => {
-    const parts: string[] = [];
+    const parts = [];
     
     if (formData.salary_min || formData.salary_max) {
       if (formData.salary_min && formData.salary_max) {
@@ -867,7 +867,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         question_text: q.question_text,
         question_type: q.question_type as any,
         options: q.options as string[] || [],
-        is_required: q.is_required ?? false,
+        is_required: q.is_required,
         order_index: q.order_index,
         min_value: q.min_value || undefined,
         max_value: q.max_value || undefined,
@@ -1059,7 +1059,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       
       // Set search terms for dropdowns to show correct labels
       setOccupationSearchTerm(job.occupation || '');
-      setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type!))?.label || '' : '');
+      setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type))?.label || '' : '');
       setSalaryTypeSearchTerm(job.salary_type ? salaryTypes.find(t => t.value === job.salary_type)?.label || '' : '');
       const normalizedSalaryTransparency = normalizeSalaryTransparency(job.salary_transparency);
       setSalaryTransparencySearchTerm(normalizedSalaryTransparency ? salaryTransparencyOptions.find(t => t.value === normalizedSalaryTransparency)?.label || '' : '');
@@ -1113,8 +1113,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     setIsSavingAndLeaving(true);
     try {
       // Save as draft WITHOUT publishing — keep is_active as-is
-      let workplaceCounty: string | null = null;
-      let workplaceMunicipality: string | null = null;
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
       if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
         const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
         if (postalInfo) {
@@ -1846,8 +1846,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     setLoading(true);
     try {
       // Hämta län och kommun från postnummer
-      let workplaceCounty: string | null = null;
-      let workplaceMunicipality: string | null = null;
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
       if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
         const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
         if (postalInfo) {
@@ -2049,7 +2049,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                     handleClose();
                   }}
                   onTouchEnd={(e) => e.currentTarget.blur()}
-                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-hidden md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -2057,7 +2057,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
             </div>
 
             {/* Progress Bar */}
-            <div className="px-4 py-2 shrink-0">
+            <div className="px-4 py-2 flex-shrink-0">
               <Progress 
                 value={progress} 
                 className="h-1 bg-white/20 [&>div]:bg-white"
@@ -2185,7 +2185,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               return (
                                 <span
                                   key={benefitValue}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-xs"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-sm"
                                 >
                                   {label}
                                   <button
@@ -2225,7 +2225,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 setCustomBenefitInput('');
                               }
                             }}
-                            className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
+                            className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
                           >
                             <Plus className="h-4 w-4 block" />
                           </button>
@@ -2379,7 +2379,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                           onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
-                         className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-hidden focus:ring-0"
+                         className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
@@ -2388,7 +2388,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                           onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
-                          className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-hidden focus:ring-0"
+                          className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
                         >
                           <Plus className="h-4 w-4" />
                         </button>
@@ -2624,7 +2624,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               onMouseDown={(e) => e.currentTarget.blur()}
                               onMouseUp={(e) => e.currentTarget.blur()}
                               size="sm"
-                              className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full focus:outline-hidden focus:ring-0"
+                              className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full focus:outline-none focus:ring-0"
                             >
                               Lägg till fråga
                               <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -2679,7 +2679,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 setQuestionSearchTerm('');
                               }}
                               onTouchEnd={(e) => e.currentTarget.blur()}
-                              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-hidden md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                             >
                               <X className="h-4 w-4" />
                             </button>
@@ -2700,7 +2700,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             onMouseDown={(e) => e.currentTarget.blur()}
                             onMouseUp={(e) => e.currentTarget.blur()}
                             size="sm"
-                            className="bg-primary hover:bg-primary/90 text-white touch-border-white rounded-full focus:outline-hidden focus:ring-0"
+                            className="bg-primary hover:bg-primary/90 text-white touch-border-white rounded-full focus:outline-none focus:ring-0"
                           >
                             Skapa ny fråga
                             <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -2750,7 +2750,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         {templates.map((template) => (
                                            <div
                                             key={template.id}
-                                            className="w-full bg-white/5 backdrop-blur-xs rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group cursor-pointer active:scale-[0.98]"
+                                            className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group cursor-pointer active:scale-[0.98]"
                                             onClick={(e) => {
                                               if ((e.target as HTMLElement).closest('button')) return;
                                               useQuestionTemplate(template);
@@ -2775,7 +2775,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                   }}
                                                   onMouseDown={(e) => e.currentTarget.blur()}
                                                   onMouseUp={(e) => e.currentTarget.blur()}
-                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97] focus:outline-hidden focus:ring-0"
+                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
                                                 >
                                                   <Pencil className="h-3.5 w-3.5" />
                                                   <span>Redigera</span>
@@ -2789,7 +2789,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                   }}
                                                   onMouseDown={(e) => e.currentTarget.blur()}
                                                   onMouseUp={(e) => e.currentTarget.blur()}
-                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-hidden focus:ring-0"
+                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
                                                 >
                                                   <Trash2 className="h-3.5 w-3.5" />
                                                   <span>Ta bort</span>
@@ -2808,7 +2808,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
 
                           <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => { if (!open) setDeleteTemplateId(null); }}>
                             <AlertDialogContentNoFocus
-                              className="mx-0 w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-xs sm:w-[28rem] sm:max-w-md sm:p-6"
+                              className="mx-0 w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:w-[28rem] sm:max-w-md sm:p-6"
                             >
                               <AlertDialogHeader className="space-y-4 text-center">
                                 <div className="flex items-center justify-center gap-2.5">
@@ -2879,7 +2879,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               setShowQuestionTemplates(true);
                             }}
                             onTouchEnd={(e) => e.currentTarget.blur()}
-                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-hidden md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors focus:outline-none md:bg-transparent md:hover:bg-white/20 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -3012,7 +3012,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         onClick={() => removeOption(index)}
                                         onMouseDown={(e) => e.currentTarget.blur()}
                                         onMouseUp={(e) => e.currentTarget.blur()}
-                                        className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-hidden focus:ring-0"
+                                        className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
                                       >
                                         <Trash2 className="h-4 w-4" />
                                       </button>
@@ -3024,7 +3024,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                       onMouseDown={(e) => e.currentTarget.blur()}
                                       onMouseUp={(e) => e.currentTarget.blur()}
                                       size="sm"
-                                      className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-300 mt-2 focus:outline-hidden focus:ring-0"
+                                      className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-300 mt-2 focus:outline-none focus:ring-0"
                                     >
                                       Lägg till alternativ
                                       <Plus className="h-3.5 w-3.5 ml-1.5" />
@@ -3047,7 +3047,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   onMouseDown={(e) => e.currentTarget.blur()}
                                   onMouseUp={(e) => e.currentTarget.blur()}
                                   disabled={!editingQuestion?.question_text?.trim()}
-                                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-300 focus:outline-hidden focus:ring-0"
+                                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-300 focus:outline-none focus:ring-0"
                                 >
                                   Spara fråga
                                 </Button>
@@ -3125,7 +3125,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-card-parium">
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                                     <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 shrink-0 rounded-t-[1.6rem] gap-1">
+                                     <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
                                        <div className="text-[10px] font-bold text-white truncate min-w-0">Ansökan</div>
                                       <div className="relative">
                                         {showCompanyTooltip && isScrolledTop && (
@@ -3143,7 +3143,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                             </div>
                                           </div>
                                         )}
-                                        <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
+                                        <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
                                       </div>
                                     </div>
 
@@ -3208,7 +3208,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                   const [, bullet, text] = bulletMatch;
                                                   return (
                                                     <div key={index} className="flex">
-                                                      <span className="shrink-0 mr-1">{bullet}</span>
+                                                      <span className="flex-shrink-0 mr-1">{bullet}</span>
                                                       <span className="flex-1 break-words">{text}</span>
                                                     </div>
                                                   );
@@ -3313,7 +3313,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                              <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                                {formData.benefits.map((benefit, idx) => (
                                                  <div key={idx} className="flex items-start">
-                                                   <span className="shrink-0 mr-1">•</span>
+                                                   <span className="flex-shrink-0 mr-1">•</span>
                                                    <span className="break-words">{benefit}</span>
                                                  </div>
                                                ))}
@@ -3398,7 +3398,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                'Tillgänglighet',
                                              ].map((label, idx) => (
                                                <div key={idx} className="text-xs flex">
-                                                 <span className="shrink-0 mr-1 text-white">•</span>
+                                                 <span className="flex-shrink-0 mr-1 text-white">•</span>
                                                  <span className="flex-1 text-white leading-tight break-words">{label}</span>
                                                </div>
                                              ))}
@@ -3431,7 +3431,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                     {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
                                                         <textarea
-                                                          className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-hidden focus:border-white/40 max-h-[120px] overflow-y-auto"
+                                                          className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
                                                          placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                          rows={2}
                                                          onInput={(e) => {
@@ -3539,7 +3539,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                                 : 'bg-white/10 border-white/20 hover:bg-white/15'
                                                             }`}
                                                           >
-                                                            <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center shrink-0 ${
+                                                            <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
                                                               selected ? 'border-secondary bg-secondary' : 'border-white/40'
                                                             }`} />
                                                             <span className="text-xs text-white text-left flex-1">{option}</span>
@@ -3662,7 +3662,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   {/* Application Form View (when clicked) */}
                                   {showDesktopApplicationForm && (
                                     <div className="flex flex-col h-full">
-                                      <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 shrink-0">
+                                      <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 flex-shrink-0">
                                         <div className="text-sm font-bold text-white">Ansökningsformulär</div>
                                         <div className="flex items-center gap-2">
                                           {/* Tooltip pointing at X button */}
@@ -3873,7 +3873,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                               <div className="text-xs text-white space-y-0.5">
                                                 {formData.benefits.map((benefit, idx) => (
                                                   <div key={idx} className="flex items-start">
-                                                    <span className="shrink-0 mr-1">•</span>
+                                                    <span className="flex-shrink-0 mr-1">•</span>
                                                     <span>{benefit}</span>
                                                   </div>
                                                 ))}
@@ -3929,7 +3929,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                 'Tillgänglighet',
                                               ].map((label, idx) => (
                                                 <div key={idx} className="text-xs flex">
-                                                  <span className="shrink-0 mr-1 text-white">•</span>
+                                                  <span className="flex-shrink-0 mr-1 text-white">•</span>
                                                   <span className="flex-1 text-white leading-tight">{label}</span>
                                                 </div>
                                               ))}
@@ -3962,7 +3962,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                      {/* Input förhandsvisning baserat på frågetyp */}
                                                      {question.question_type === 'text' && (
                                                         <textarea
-                                                          className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-hidden focus:border-white/40 max-h-[120px] overflow-y-auto"
+                                                          className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
                                                           placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                           rows={2}
                                                           value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
@@ -4067,8 +4067,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                               >
                                                                 <div className={
                                                                   selected
-                                                                    ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary shrink-0'
-                                                                    : 'w-1.5 h-1.5 rounded-full border border-white/40 shrink-0'
+                                                                    ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                                                                    : 'w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0'
                                                                 } />
                                                                 <span className="text-xs text-white">{option}</span>
                                                               </button>
@@ -4100,7 +4100,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                     {question.question_type === 'date' && (
                                                       <input
                                                         type="date"
-                                                        className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-hidden focus:border-white/40"
+                                                        className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-none focus:border-white/40"
                                                         value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                         onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                       />

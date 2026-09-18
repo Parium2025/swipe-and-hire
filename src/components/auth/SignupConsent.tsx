@@ -1,4 +1,4 @@
-import { Link } from '@/lib/router-compat';
+import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 
 type SignupConsentProps = {

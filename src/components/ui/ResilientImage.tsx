@@ -11,7 +11,7 @@ const EMPTY_FALLBACK_SRCS: Array<string | null | undefined> = [];
  *
  * Usage: <ResilientImage src={url} alt="..." className="..." />
  */
-interface ResilientImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
+interface ResilientImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src?: string | null;
   fallbackSrcs?: Array<string | null | undefined>;
   fallbackClassName?: string;

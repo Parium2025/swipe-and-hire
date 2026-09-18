@@ -713,7 +713,7 @@ export function useMyCandidatesData(
         .from('user_stage_settings')
         .select('stage_key, order_index')
         .eq('user_id', user.id)
-        .eq('list_id', insertListId as string)
+        .eq('list_id', insertListId)
         .gt('order_index', -1)
         .order('order_index', { ascending: true })
         .limit(1);
@@ -808,7 +808,7 @@ export function useMyCandidatesData(
         .from('user_stage_settings')
         .select('stage_key, order_index, custom_label')
         .eq('user_id', user.id)
-        .eq('list_id', insertListId as string)
+        .eq('list_id', insertListId)
         .gt('order_index', -1) // Exclude deleted stages
         .order('order_index', { ascending: true })
         .limit(1);
@@ -1017,7 +1017,7 @@ export function useMyCandidatesData(
       } else {
         queryClient.setQueryData(queryKey, context?.previousCandidates);
         if (user && context?.removedApplicantId) {
-          addApplicantMembershipCacheEntry((user as { id: string }).id, context.removedApplicantId);
+          addApplicantMembershipCacheEntry(user.id, context.removedApplicantId);
         }
         toast.error('Kunde inte ta bort kandidaten');
       }

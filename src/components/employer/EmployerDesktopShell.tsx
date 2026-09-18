@@ -6,8 +6,8 @@ import { FloatingBubbles } from '@/components/FloatingBubbles';
 
 interface EmployerDesktopShellProps {
   children: ReactNode;
-  createJobButtonRef: RefObject<HTMLButtonElement | null>;
-  mainScrollRef: RefObject<HTMLElement | null>;
+  createJobButtonRef: RefObject<HTMLButtonElement>;
+  mainScrollRef: RefObject<HTMLElement>;
   onJobCreated: () => void;
 }
 

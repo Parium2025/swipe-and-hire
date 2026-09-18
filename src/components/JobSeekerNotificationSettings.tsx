@@ -51,7 +51,7 @@ export const JobSeekerNotificationSettings = () => {
 
 
   return (
-    <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg p-4">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
       <div className="space-y-4 md:space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Bell className="h-4 w-4 text-white" />
@@ -82,7 +82,7 @@ export const JobSeekerNotificationSettings = () => {
                 variant="glass"
                 onClick={(e) => { e.currentTarget.blur(); handleResubscribe(); }}
                 disabled={updatingSubscription}
-                className="mt-1 h-10 rounded-full px-5 text-sm text-white transition-none hover:bg-white/10 hover:text-white active:scale-100 focus:outline-hidden focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="mt-1 h-10 rounded-full px-5 text-sm text-white transition-none hover:bg-white/10 hover:text-white active:scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 {updatingSubscription ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

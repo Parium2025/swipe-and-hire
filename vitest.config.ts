@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { createRequire } from "module";
 
@@ -9,9 +10,7 @@ const reactDir = path.dirname(require.resolve("react/package.json"));
 const reactDomDir = path.dirname(require.resolve("react-dom/package.json"));
 
 export default defineConfig({
-  esbuild: {
-    jsx: "automatic",
-  },
+  plugins: [react()],
   test: {
     environment: "jsdom",
     globals: true,

@@ -22,7 +22,7 @@ export const JobViewSkeleton = ({ asOverlay = false }: JobViewSkeletonProps) => 
     >
       <div className="jobview-container py-4">
         {/* Header pill: back + share */}
-        <div className="flex items-center mb-4 bg-white/10 backdrop-blur-xs p-3 rounded-lg gap-3 justify-between">
+        <div className="flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg gap-3 justify-between">
           <div className={`h-11 w-28 rounded-full ${SHAPE}`} />
           <div className={`h-11 w-11 rounded-full ${SHAPE}`} />
         </div>
@@ -46,7 +46,7 @@ export const JobViewSkeleton = ({ asOverlay = false }: JobViewSkeletonProps) => 
         </div>
 
         {/* Detail rows with dividers */}
-        <div className="bg-white/5 backdrop-blur-xs rounded-xl overflow-hidden">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden">
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i}>
               <div className="flex items-center justify-between px-4 py-3">

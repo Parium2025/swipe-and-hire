@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, Navigate } from '@/lib/router-compat';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -145,7 +145,7 @@ export default function Checkout() {
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 20 20"
-                    className="mt-0.5 h-4 w-4 shrink-0 text-secondary"
+                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-secondary"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"

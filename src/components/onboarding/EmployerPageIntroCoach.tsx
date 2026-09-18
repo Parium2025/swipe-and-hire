@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation, useNavigate } from '@/lib/router-compat';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   X, Check, Briefcase, Users, UserCheck, MessageCircle, Building2,
   BarChart3, CreditCard, HelpCircle, ArrowRight, UserPlus,
@@ -445,7 +445,7 @@ const EmployerPageIntroCoach = () => {
         type="button"
         aria-label="Stäng tipset"
         onClick={endGuide}
-        className="absolute inset-0 bg-black/45 backdrop-blur-[2px] focus:outline-hidden"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[2px] focus:outline-none"
       />
 
       <div
@@ -458,7 +458,7 @@ const EmployerPageIntroCoach = () => {
           type="button"
           onClick={backToOverview}
           aria-label="Stäng tipset och visa översikten"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
         >
           <X className="h-4 w-4" />
         </button>
@@ -499,7 +499,7 @@ const EmployerPageIntroCoach = () => {
               <button
                 type="button"
                 onClick={restartGuide}
-                className="inline-flex min-w-36 max-w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
+                className="inline-flex min-w-36 max-w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
                 <span className="truncate">Börja om från början</span>
               </button>
@@ -508,7 +508,7 @@ const EmployerPageIntroCoach = () => {
               <button
                 type="button"
                 onClick={() => dismiss(primaryPath, isGuidedTour && Boolean(primaryPath))}
-                className="inline-flex min-w-36 max-w-full items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
+                className="inline-flex min-w-36 max-w-full items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
                 <span className="truncate">{primaryLabel}</span>
                 {primaryPath && <ArrowRight className="h-4 w-4 shrink-0" />}
@@ -518,7 +518,7 @@ const EmployerPageIntroCoach = () => {
               <button
                 type="button"
                 onClick={endGuide}
-                className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
+                className="rounded-full border border-white/20 bg-white/10 px-6 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
                 Avsluta guiden
               </button>

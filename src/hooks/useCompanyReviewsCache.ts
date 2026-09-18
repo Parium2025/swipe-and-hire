@@ -6,15 +6,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
 export interface CachedReview {
-  id: string | null;
-  user_id: string | null;
-  rating: number | null;
+  id: string;
+  user_id: string;
+  rating: number;
   comment: string | null;
-  is_anonymous: boolean | null;
-  created_at: string | null;
+  is_anonymous: boolean;
+  created_at: string;
   profiles?: {
-    first_name?: string | null;
-    last_name?: string | null;
+    first_name?: string;
+    last_name?: string;
   };
 }
 
@@ -79,7 +79,7 @@ async function fetchReviewsPage(companyId: string, from: number, to: number): Pr
   if (error) throw error;
   if (!reviews || reviews.length === 0) return [];
 
-  const userIds = reviews.filter(r => !r.is_anonymous).map(r => r.user_id).filter((id): id is string => !!id);
+  const userIds = reviews.filter(r => !r.is_anonymous).map(r => r.user_id);
   if (userIds.length === 0) return reviews as CachedReview[];
 
   const { data: profiles } = await supabase
@@ -92,7 +92,7 @@ async function fetchReviewsPage(companyId: string, from: number, to: number): Pr
   const profileMap = new Map(profiles.map(p => [p.user_id, p]));
   return reviews.map(r => ({
     ...r,
-    profiles: profileMap.get(r.user_id as string) || undefined,
+    profiles: profileMap.get(r.user_id) || undefined,
   })) as CachedReview[];
 }
 
@@ -285,10 +285,9 @@ export function useBatchPrefetchReviews() {
       allReviews
         .filter(r => !r.is_anonymous)
         .map(r => r.user_id)
-        .filter((id): id is string => !!id)
     )];
 
-    let profileMap = new Map<string, { first_name?: string | null; last_name?: string | null }>();
+    let profileMap = new Map<string, { first_name?: string; last_name?: string }>();
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
         .from('profiles')
@@ -313,13 +312,12 @@ export function useBatchPrefetchReviews() {
     // Group reviews by company and update cache
     const reviewsByCompany = new Map<string, CachedReview[]>();
     allReviews.forEach(r => {
-      const companyKey = r.company_id as string;
-      if (!reviewsByCompany.has(companyKey)) {
-        reviewsByCompany.set(companyKey, []);
+      if (!reviewsByCompany.has(r.company_id)) {
+        reviewsByCompany.set(r.company_id, []);
       }
-      reviewsByCompany.get(companyKey)!.push({
+      reviewsByCompany.get(r.company_id)!.push({
         ...r,
-        profiles: profileMap.get(r.user_id as string) || undefined,
+        profiles: profileMap.get(r.user_id) || undefined,
       });
     });
 
@@ -331,7 +329,7 @@ export function useBatchPrefetchReviews() {
       const result: CompanyReviewsData = {
         reviews,
         avgRating: stats?.avg ?? (reviews.length > 0
-          ? reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length
+          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
           : undefined),
         reviewCount: stats?.total ?? reviews.length,
       };

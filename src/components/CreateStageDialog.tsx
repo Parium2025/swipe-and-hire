@@ -131,7 +131,7 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
                   onClick={() => setSelectedIcon(name)}
                   onMouseDown={(e) => e.currentTarget.blur()}
                   onMouseUp={(e) => e.currentTarget.blur()}
-                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-hidden focus:ring-0 active:scale-95 touch-manipulation ${
+                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-none focus:ring-0 active:scale-95 touch-manipulation ${
                     selectedIcon === name 
                       ? 'bg-white/30 text-white ring-1 ring-white/40' 
                       : 'bg-white/5 hover:bg-white/15 text-white/70'
@@ -151,13 +151,13 @@ export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStag
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-xs inline-flex items-center gap-2 transition-colors max-w-full cursor-default"
+                    className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors max-w-full cursor-default"
                     style={{ backgroundColor: `${selectedColor}33` }}
                   >
-                    <IconComponent className="h-4 w-4 text-white shrink-0" />
+                    <IconComponent className="h-4 w-4 text-white flex-shrink-0" />
                     <div className="min-w-0 max-w-[240px]"><TruncatedText text={label || 'Nytt steg'} className="font-medium text-sm text-white" /></div>
                     <span 
-                      className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors shrink-0"
+                      className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0"
                       style={{ backgroundColor: `${selectedColor}66` }}
                     >
                       0

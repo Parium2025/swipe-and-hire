@@ -74,7 +74,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white min-h-[120px] resize-none focus:outline-hidden focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white min-h-[120px] resize-none focus:outline-none focus:border-white/40"
           />
         );
 
@@ -146,8 +146,8 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
                 >
                   <div className={
                     isSelected
-                      ? 'w-3 h-3 rounded-full border border-secondary bg-secondary shrink-0'
-                      : 'w-3 h-3 rounded-full border border-white/40 shrink-0'
+                      ? 'w-3 h-3 rounded-full border border-secondary bg-secondary flex-shrink-0'
+                      : 'w-3 h-3 rounded-full border border-white/40 flex-shrink-0'
                   } />
                   <span className="text-lg text-white text-left flex-1">{option}</span>
                 </button>
@@ -191,7 +191,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             type="date"
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white h-12 text-lg focus:outline-hidden focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white h-12 text-lg focus:outline-none focus:border-white/40"
           />
         );
 
@@ -217,7 +217,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             value={currentAnswer || ''}
             onChange={(e) => handleAnswerChange(questionId, e.target.value)}
             placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white h-12 text-lg focus:outline-hidden focus:border-white/40"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white h-12 text-lg focus:outline-none focus:border-white/40"
           />
         );
     }
@@ -323,7 +323,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               </Button>
               <Button 
                 size="lg" 
-                className="flex-1 bg-white/20 hover:bg-white/30 text-white h-14 text-lg backdrop-blur-xs"
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white h-14 text-lg backdrop-blur-sm"
               >
                 <Heart className="h-6 w-6 mr-2" />
                 {jobData.questions.length > 0 ? 'Börja ansöka' : 'Intresserad'}

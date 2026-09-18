@@ -9,7 +9,9 @@
 import realPosters from '@/assets/landing/jobseeker-real-1.jpg';
 import realPoster2 from '@/assets/landing/jobseeker-real-2.jpg';
 import phonePoster from '@/assets/showcase-jobseeker-poster.jpg.asset.json';
-import { prefetchSplineAssets, shouldDeferSplineAssets } from '@/lib/splinePreload';
+import { isLowPowerDevice, prefersLightweightVideo } from '@/lib/videoPlatform';
+
+const SPLINE_SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
 let started = false;
 
@@ -18,6 +20,8 @@ let started = false;
  * under-fold-assets hämtas: Windows (varierande GPU), Android (svag decode)
  * och allt i sparläge/svag uppkoppling.
  */
+const shouldDeferHeavyAssets = () => prefersLightweightVideo() || isLowPowerDevice();
+
 const addLink = (rel: string, href: string, as?: string, priority?: 'high' | 'low') => {
   if (typeof document === 'undefined') return;
   const exists = Array.from(document.head.querySelectorAll<HTMLLinkElement>(`link[rel="${rel}"]`)).some(
@@ -60,7 +64,7 @@ export const preloadAudienceLandingAssets = () => {
 
   // 2. Spline-scenen: på Windows väntar vi tills hero-videon fått spela stabilt
   //    först. Annars konkurrerar prefetch + lazy chunks med video-LCP på laptops.
-  if (!shouldDeferSplineAssets()) prefetchSplineAssets();
+  if (!shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
 
   // Dekoda telefonens poster omedelbart (inte i idle) så bilden är klar att
   // ritas i samma frame som hero visas.
@@ -75,13 +79,16 @@ export const preloadAudienceLandingAssets = () => {
     // Prefetch lazy-chunkarna i bakgrunden — på Windows fördröjs detta så hero-
     // videon inte delar CPU/GPU/network med under-fold work första sekunderna.
     const importUnderFold = () => {
-      prefetchSplineAssets();
+      if (shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
+      // Förvärm Spline-runtimen i bakgrunden. Annars börjar nedladdningen av
+      // ~1 MB JS först när intro-sektionen monteras, och telefonen känns seg.
+      import('@splinetool/runtime').catch(() => {});
       import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => {});
       import('@/components/landing/audience/BouncyFooter').catch(() => {});
       import('@/components/landing/SiteFooter').catch(() => {});
     };
 
-    if (shouldDeferSplineAssets()) {
+    if (shouldDeferHeavyAssets()) {
       // Windows-kallstarten är känslig: om galleriet/Spline/lazy chunks börjar
       // laddas efter en fast timeout kan de landa exakt när hero-videon avkodar
       // sina första sekunder. Vänta därför på faktisk första `playing` från

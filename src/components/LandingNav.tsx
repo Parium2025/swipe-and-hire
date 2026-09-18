@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from '@/lib/router-compat';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -178,12 +178,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   return (
     <>
       <nav
-        className={cn(
-          'fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-200',
-          scrolled
-            ? 'border-white/10 bg-primary/95 md:border-transparent md:bg-transparent'
-            : 'border-transparent bg-transparent',
-        )}
+        className="fixed top-0 left-0 right-0 z-50 bg-transparent"
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)' }}
         aria-label="Huvudnavigation"
       >
@@ -219,7 +214,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-colors duration-200 hover:border-white/80 focus:outline-hidden focus-visible:outline-hidden ${
+                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-colors duration-200 hover:border-white/80 focus:outline-none focus-visible:outline-none ${
                         isLightSection
                           ? 'border-primary/10 bg-background/80 text-primary'
                           : 'border-white bg-white/[0.045] text-white'

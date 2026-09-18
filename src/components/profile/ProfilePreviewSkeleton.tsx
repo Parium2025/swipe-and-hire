@@ -14,7 +14,7 @@ export const ProfilePreviewSkeleton = () => (
     </div>
 
     {/* Card with avatar + name */}
-    <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-2xl p-6 mb-4">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-4">
       <div className="flex flex-col items-center gap-3">
         <div className={`h-32 w-32 rounded-full ${SHAPE}`} />
         <div className={`h-6 w-48 rounded ${SHAPE}`} />
@@ -36,7 +36,7 @@ export const ProfilePreviewSkeleton = () => (
     </div>
 
     {/* Info rows */}
-    <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-2xl overflow-hidden">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
       {[0, 1, 2, 3, 4].map((i) => (
         <div key={i}>
           <div className="flex items-center justify-between px-4 py-3">

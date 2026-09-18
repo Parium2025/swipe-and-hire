@@ -170,7 +170,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
             )}
             <button
               onClick={this.handleReload}
-              className="inline-flex w-full items-center justify-center rounded-full px-4 py-2 bg-secondary text-white font-medium hover:bg-secondary/90 transition-colors outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="inline-flex w-full items-center justify-center rounded-full px-4 py-2 bg-secondary text-white font-medium hover:bg-secondary/90 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Ladda om
             </button>

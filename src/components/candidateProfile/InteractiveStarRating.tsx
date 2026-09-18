@@ -39,7 +39,7 @@ export const InteractiveStarRating = ({
             e.stopPropagation();
             if (onChange) setHoverRating(i + 1);
           }}
-          className="p-0.5 focus:outline-hidden transition-transform hover:scale-110"
+          className="p-0.5 focus:outline-none transition-transform hover:scale-110"
         >
           <Star
             className={`h-5 w-5 transition-colors ${

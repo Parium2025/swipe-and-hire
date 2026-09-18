@@ -148,7 +148,7 @@ export const EmploymentTypeExtras: React.FC<EmploymentTypeExtrasProps> = ({
                 if (!isNaN(n) && n > 0) onDurationAmountChange(n);
               }
             }}
-            className="h-9 w-24 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/40 focus:outline-hidden focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="h-9 w-24 px-3 rounded-full bg-white/5 border border-white/15 text-white text-xs font-medium placeholder:text-white/40 focus:outline-none focus:border-white/40 transition-all duration-200 [font-size:16px] sm:[font-size:12px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span className="text-white text-xs font-medium">
             {durationAmount === 1 ? 'månad' : 'månader'}

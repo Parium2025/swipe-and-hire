@@ -121,7 +121,7 @@ export const JobSearchBar = memo(({
               }`}
             >
               <span className="truncate">{sortLabels[sortBy]}</span>
-              <ChevronDown className={`ml-auto h-3 w-3 shrink-0 text-white transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`ml-auto h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px] z-[10000] glass-panel rounded-md">
@@ -162,12 +162,12 @@ export const JobSearchBar = memo(({
             placeholder="Titel, Plats, Anställningstyp..."
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="dashboard-control-compact pl-11 pr-12 text-base font-medium text-left bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:text-left placeholder:font-normal focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+            className="dashboard-control-compact pl-11 pr-12 text-base font-medium text-left bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:text-left placeholder:font-normal focus:outline-none focus-visible:outline-none focus:ring-0"
           />
           {searchInput ? (
             <button
               onClick={() => onSearchChange('')}
-              className="dashboard-icon-control absolute right-1.5 top-1/2 flex !min-h-0 !min-w-0 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors focus:outline-hidden md:hover:bg-white/20"
+              className="dashboard-icon-control absolute right-1.5 top-1/2 flex !min-h-0 !min-w-0 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-white bg-white/10 transition-colors focus:outline-none md:hover:bg-white/20"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -176,7 +176,7 @@ export const JobSearchBar = memo(({
               <DropdownMenuTrigger asChild>
                   <button
                     aria-label="Sortera"
-                    className="dashboard-icon-control absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center text-white focus:outline-hidden"
+                    className="dashboard-icon-control absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center text-white focus:outline-none"
                   >
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
@@ -202,7 +202,7 @@ export const JobSearchBar = memo(({
                 variant="ghost" 
                 size="icon"
                 aria-label="Filtrera på rekryterare"
-                className="dashboard-icon-control shrink-0 text-white focus:outline-hidden focus-visible:outline-hidden focus:ring-0"
+                className="dashboard-icon-control flex-shrink-0 text-white focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <UserCheck className="h-4 w-4" />
               </Button>

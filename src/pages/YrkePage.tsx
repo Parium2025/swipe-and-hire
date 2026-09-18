@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link, useNavigate, useParams, Navigate } from '@/lib/router-compat';
+import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
 import SiteFooter from '@/components/landing/SiteFooter';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -182,7 +182,7 @@ const YrkePage = () => {
               <ul className="mt-5 space-y-3">
                 {occ.tasks.map((task) => (
                   <li key={task} className="flex items-start gap-3 text-white">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-white" />
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-white" />
                     <span>{task}</span>
                   </li>
                 ))}
@@ -195,7 +195,7 @@ const YrkePage = () => {
               <ul className="mt-5 space-y-3">
                 {occ.skills.map((skill) => (
                   <li key={skill} className="flex items-start gap-3 text-white">
-                    <Zap className="mt-0.5 h-5 w-5 shrink-0 text-white" />
+                    <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-white" />
                     <span>{skill}</span>
                   </li>
                 ))}

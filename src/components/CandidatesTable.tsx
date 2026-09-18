@@ -701,7 +701,7 @@ export function CandidatesTable({
       {selectionMode && (
         <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mb-3">
           <div className="flex items-center gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
-            <span className="text-white text-xs font-semibold whitespace-nowrap shrink-0">
+            <span className="text-white text-xs font-semibold whitespace-nowrap flex-shrink-0">
               {selectedIds.size > 0 
                 ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
                 : 'Välj kandidater'
@@ -709,7 +709,7 @@ export function CandidatesTable({
             </span>
             {selectedIds.size > 0 && (
               <>
-                <div className="w-px h-5 bg-white/20 shrink-0" />
+                <div className="w-px h-5 bg-white/20 flex-shrink-0" />
                 <PillButton onClick={() => setSelectedIds(new Set())}>
                   Avmarkera
                 </PillButton>
@@ -746,7 +746,7 @@ export function CandidatesTable({
                 </DropdownMenu>
               </>
             )}
-            <div className="w-px h-5 bg-white/20 shrink-0" />
+            <div className="w-px h-5 bg-white/20 flex-shrink-0" />
             <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection}>
               <X className="h-4 w-4" />
             </PillButton>
@@ -937,7 +937,7 @@ export function CandidatesTable({
                     <TableCell className="text-white whitespace-nowrap">
                       {application.last_active_at ? (
                         <span className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 shrink-0" />
+                          <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                           {formatTimeAgo(application.last_active_at)}
                         </span>
                       ) : '-'}
@@ -970,7 +970,7 @@ export function CandidatesTable({
                             variant="ghost"
                             size="sm"
                             aria-label="Lägg till i kandidatlista"
-                            className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                            className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
                             disabled={addCandidate.isPending}
                             onPointerDown={(e) => e.preventDefault()}
                             onClick={(e) => {

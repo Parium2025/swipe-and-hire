@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams, useLocation, Navigate } from '@/lib/router-compat';
+import { useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
@@ -574,14 +574,14 @@ const Auth = () => {
                 onChange={(e) => setEmailForReset(e.target.value)}
                 required
                 disabled={resending}
-                className="bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white"
               />
               <Button type="submit" variant="glass" className="w-full" disabled={resending}>
                 {resending ? 'Skickar...' : 'Skicka ny länk'}
               </Button>
             </form>
             {resendMessage && (
-              <div className="bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 rounded-lg p-4">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-4">
                 <p className="text-sm text-white whitespace-pre-line">{resendMessage}</p>
               </div>
             )}

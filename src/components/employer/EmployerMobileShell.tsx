@@ -1,5 +1,5 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import EmployerSidebar from '@/components/EmployerSidebar';
@@ -14,8 +14,8 @@ interface EmployerMobileShellProps {
   children: ReactNode;
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  createJobButtonRef: RefObject<HTMLButtonElement | null>;
-  mainScrollRef: RefObject<HTMLElement | null>;
+  createJobButtonRef: RefObject<HTMLButtonElement>;
+  mainScrollRef: RefObject<HTMLElement>;
   onJobCreated: () => void;
 }
 

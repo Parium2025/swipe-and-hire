@@ -251,7 +251,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const isPdf = /\.pdf($|\?)/i.test(currentFile.url) || /\.pdf($|\?)/i.test(currentFile.name || '');
 
     return (
-      <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-xs space-y-3">
+      <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-sm space-y-3">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2 min-w-0 flex-1">
 
@@ -359,7 +359,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         className={`${dropzoneClassName ?? `border-2 border-dashed rounded-lg p-3 sm:p-4 ${
           isDragActive
             ? 'border-primary bg-primary/5'
-            : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-xs'
+            : 'border-white/20 md:hover:border-white/40 md:hover:bg-white/10 bg-white/5 backdrop-blur-sm'
         }`} text-center cursor-pointer transition-all duration-300 ${uploading ? 'pointer-events-none' : ''}`}
         onClick={(e) => {
           e.preventDefault();
@@ -395,7 +395,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {uploadError && (
         <div
           role="alert"
-          className="mt-3 flex items-start gap-3 rounded-2xl border border-red-400/40 bg-red-500/10 backdrop-blur-xs px-3.5 py-3 animate-fade-in"
+          className="mt-3 flex items-start gap-3 rounded-2xl border border-red-400/40 bg-red-500/10 backdrop-blur-sm px-3.5 py-3 animate-fade-in"
         >
           <div className="mt-0.5 shrink-0 rounded-full bg-red-500/20 p-1.5">
             {navigator.onLine ? (

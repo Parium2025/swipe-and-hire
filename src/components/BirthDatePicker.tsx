@@ -127,7 +127,7 @@ export function BirthDatePicker({
           ref={triggerRef}
           variant="outlineNeutral"
           className={cn(
-            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal rounded-md bg-white/5 backdrop-blur-xs border border-white/10 !text-white md:hover:!bg-white/10 md:hover:!text-white md:hover:!border-white/50 active:!scale-100 active:!bg-white/5 focus:!bg-white/5 focus-visible:!bg-white/5 data-[state=open]:!bg-white/5 justify-start focus:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0",
+            "w-full h-11 !min-h-0 pl-3 pr-3 text-left text-sm font-normal rounded-md bg-white/5 backdrop-blur-sm border border-white/10 !text-white md:hover:!bg-white/10 md:hover:!text-white md:hover:!border-white/50 active:!scale-100 active:!bg-white/5 focus:!bg-white/5 focus-visible:!bg-white/5 data-[state=open]:!bg-white/5 justify-start focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
             !selectedDate && "placeholder:text-white",
             className
           )}
@@ -149,12 +149,12 @@ export function BirthDatePicker({
                 <Button
                   ref={yearRef}
                   variant="outlineNeutral"
-                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors focus:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <span>
                     {selectedDate ? selectedDate.getFullYear() : "År"}
                   </span>
-                  <ChevronDown className="h-4 w-4 shrink-0 text-white" />
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
@@ -181,12 +181,12 @@ export function BirthDatePicker({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outlineNeutral"
-                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors focus:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <span>
                     {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
                   </span>
-                  <ChevronDown className="h-4 w-4 shrink-0 text-white" />
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
@@ -224,7 +224,7 @@ export function BirthDatePicker({
             className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/30 [&_.rdp-nav_button:hover]:bg-white/10 [&_.rdp-nav_button:hover]:text-white"
             classNames={{
               day: "h-9 w-9 p-0 font-normal text-white hover:bg-white/20",
-              day_selected: "!bg-transparent !border !border-white !outline-hidden !shadow-none !text-white font-semibold hover:!bg-white/10",
+              day_selected: "!bg-transparent !border !border-white !outline-none !shadow-none !text-white font-semibold hover:!bg-white/10",
               day_today: "bg-transparent text-white font-normal",
             }}
           />

@@ -162,7 +162,7 @@ const ProfileSetup = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-accent/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-card/90 backdrop-blur-xs border-white/10 shadow-2xl">
+      <Card className="w-full max-w-2xl bg-card/90 backdrop-blur-sm border-white/10 shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-foreground">Skapa din profil</CardTitle>
           <CardDescription className="text-muted-foreground">

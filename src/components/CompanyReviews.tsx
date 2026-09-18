@@ -193,7 +193,7 @@ const CompanyReviews = () => {
   if (!company) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="bg-white/10 backdrop-blur-xs border border-white/10 rounded-lg p-8 text-center">
+        <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-lg p-8 text-center">
           <Building2 className="h-12 w-12 text-white mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">
             Företagsinformation saknas
@@ -216,7 +216,7 @@ const CompanyReviews = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg p-6">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ const CompanyReviews = () => {
           <div className="grid gap-2.5">
             {company.website && (
               <div className="flex items-center gap-2.5">
-                <Globe className="h-4 w-4 text-white shrink-0" />
+                <Globe className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-white">Webbplats</p>
                   <a 
@@ -280,7 +280,7 @@ const CompanyReviews = () => {
 
             {company.industry && (
               <div className="flex items-center gap-2.5">
-                <Briefcase className="h-4 w-4 text-white shrink-0" />
+                <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-white">Bransch</p>
                   <p className="text-sm text-white">{company.industry}</p>
@@ -290,7 +290,7 @@ const CompanyReviews = () => {
 
             {company.employee_count && (
               <div className="flex items-center gap-2.5">
-                <Users className="h-4 w-4 text-white shrink-0" />
+                <Users className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-white">Företagsstorlek</p>
                   <p className="text-sm text-white">{company.employee_count}</p>
@@ -300,7 +300,7 @@ const CompanyReviews = () => {
 
             {company.address && (
               <div className="flex items-center gap-2.5">
-                <MapPin className="h-4 w-4 text-white shrink-0" />
+                <MapPin className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-white">Huvudkontor</p>
                   <p className="text-sm text-white">{company.address}</p>
@@ -342,7 +342,7 @@ const CompanyReviews = () => {
                   
                   return (
                     <div key={index} className="flex items-center gap-2.5">
-                      <Icon className="h-4 w-4 text-white shrink-0" />
+                      <Icon className="h-4 w-4 text-white flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white">{getPlatformLabel()}</p>
                         <a 
@@ -353,7 +353,7 @@ const CompanyReviews = () => {
                           className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 truncate"
                         >
                           <span className="truncate">{link.url}</span>
-                          <ExternalLink className="h-3 w-3 shrink-0" />
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
                         </a>
                       </div>
                     </div>

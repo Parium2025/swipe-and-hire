@@ -1,6 +1,6 @@
 import { TEXT_LIMITS } from '@/lib/textLimits';
 import { useState, useEffect } from 'react';
-import { useSearchParams } from '@/lib/router-compat';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,10 +22,10 @@ import { readCachedSupportTickets, writeCachedSupportTickets } from '@/lib/suppo
 
 interface SupportTicket {
   id: string;
-  category: string | null;
+  category: string;
   subject: string;
   message: string;
-  status: string | null;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -194,7 +194,7 @@ const Support = () => {
     { value: 'other', label: 'Övrigt' },
   ];
 
-  const getStatusIcon = (status: string | null) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'open':
         return <AlertCircle className="h-4 w-4 text-yellow-500" />;
@@ -207,7 +207,7 @@ const Support = () => {
     }
   };
 
-  const getStatusColor = (status: string | null) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
         return 'bg-yellow-500/20 text-yellow-300';
@@ -220,7 +220,7 @@ const Support = () => {
     }
   };
 
-  const getStatusLabel = (status: string | null) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case 'open':
         return 'Öppen';
@@ -262,7 +262,7 @@ const Support = () => {
                     <span className="truncate text-left flex-1 px-1">
                       {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
                     </span>
-                    <ChevronDown className={`h-4 w-4 shrink-0 text-white ml-2 transition-transform duration-200 ${categoryOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-200 ${categoryOpen ? 'rotate-180' : ''}`} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -341,13 +341,13 @@ const Support = () => {
                   className="flex items-center justify-between gap-3 p-3 border border-white/10 rounded-lg bg-white/5 animate-pulse"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="h-4 w-4 rounded-full bg-white/10 shrink-0" />
+                    <div className="h-4 w-4 rounded-full bg-white/10 flex-shrink-0" />
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="h-3.5 w-2/5 rounded bg-white/10" />
                       <div className="h-3 w-3/5 rounded bg-white/10" />
                     </div>
                   </div>
-                  <div className="h-5 w-20 rounded-full bg-white/10 shrink-0" />
+                  <div className="h-5 w-20 rounded-full bg-white/10 flex-shrink-0" />
                 </div>
               ))}
             </div>
@@ -367,7 +367,7 @@ const Support = () => {
               {tickets.map((ticket) => (
                 <div key={ticket.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-white/10 rounded-lg bg-white/5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="shrink-0">
+                    <div className="flex-shrink-0">
                       {getStatusIcon(ticket.status)}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -377,7 +377,7 @@ const Support = () => {
                       </p>
                     </div>
                   </div>
-                  <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-sm self-start sm:self-center shrink-0`}>
+                  <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-sm self-start sm:self-center flex-shrink-0`}>
                     {getStatusLabel(ticket.status)}
                   </Badge>
                 </div>

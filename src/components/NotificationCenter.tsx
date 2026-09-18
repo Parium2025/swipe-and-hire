@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
 import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp } from 'lucide-react';
@@ -224,7 +224,7 @@ function NotificationItem({
             <span className="text-sm font-medium text-white break-words leading-snug line-clamp-2">{notification.title}</span>
           </ClampTooltip>
           {!notification.is_read && (
-            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-xs shadow-red-500/30" />
+            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
         {notification.body && (
@@ -316,7 +316,7 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
             </span>
           )}
           {!item.is_read && (
-            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-xs shadow-red-500/30" />
+            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
           )}
         </div>
         {item.body && (
@@ -620,7 +620,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
 
       <AlertDialog open={confirmClearOpen} onOpenChange={setConfirmClearOpen}>
         <AlertDialogContentNoFocus
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

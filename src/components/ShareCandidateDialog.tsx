@@ -130,7 +130,7 @@ export function ShareCandidateDialog({
                       onClick={() => handleShare(member.userId, fullName)}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="shrink-0 transition-colors duration-300 focus:outline-hidden focus:ring-0"
+                      className="shrink-0 transition-colors duration-300 focus:outline-none focus:ring-0"
                     >
                       {isSharing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -156,7 +156,7 @@ export function ShareCandidateDialog({
             onClick={() => onOpenChange(false)}
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
-            className="transition-colors duration-300 focus:outline-hidden focus:ring-0"
+            className="transition-colors duration-300 focus:outline-none focus:ring-0"
           >
             Stäng
           </Button>

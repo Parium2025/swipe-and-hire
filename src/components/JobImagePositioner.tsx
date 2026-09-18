@@ -84,7 +84,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity ${
           isDragging ? 'opacity-0' : 'opacity-100'
         }`}>
-          <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-xs text-white text-xs font-medium px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
             <Move className="h-3.5 w-3.5" />
             Dra för att justera
           </div>

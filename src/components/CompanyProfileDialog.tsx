@@ -606,7 +606,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                               ))}
                             </div>
                             <span className="text-sm text-white">
-                              {new Date(review.created_at ?? Date.now()).toLocaleDateString("sv-SE")}
+                              {new Date(review.created_at).toLocaleDateString("sv-SE")}
                             </span>
                           </div>
                         </div>

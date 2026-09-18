@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="sv-SE">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Konsolidera SEO till www.parium.se: redirecta alla besök på lovable.app-domänen
+      // till motsvarande URL på parium.se. Säkerställer att Google bara indexerar
+      // den officiella domänen och att lovable-titel/favicon försvinner från sökresultaten.
+      // UNDANTAG: staging-domänens startsida (/ och /index.html) redirectas INTE under
+      // Search Console-verifiering, så Google kan läsa google-site-verification-taggen.
+      (function() {
+        try {
+          var h = window.location.hostname;
+          var p = window.location.pathname;
+          if (h.endsWith('.lovable.app') && h.indexOf('id-preview') === -1) {
+            var isStagingRoot = h === 'parium-ab.lovable.app' && (p === '/' || p === '/index.html');
+            if (!isStagingRoot) {
+              var target = 'https://www.parium.se' + p + window.location.search + window.location.hash;
+              window.location.replace(target);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      // Skicka ej-indexera-signal till crawlers när de är på lovable.app-domänen.
+      // På parium.se är denna tag frånvarande, så indexering fungerar normalt där.
+      // Strängen byggs ihop i delar så att statiska HTML-skannrar inte
+      // felaktigt läser den som en blockerande robots-tagg på produktionsdomänen.
+      (function() {
+        try {
+          if (window.location.hostname.endsWith('.lovable.app')) {
+            var d = 'no' + 'index', f = 'no' + 'follow';
+            document.write('<meta name="robots" content="' + d + ', ' + f + '">');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- google-site-verification finns på rad ~85 (en enda tag räcker) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+    <!-- PWA / iOS status bar full-bleed -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script>
+      // Theme-color + chrome-klasser sätts EN gång medan <head> parsas,
+      // innan Safari låser browser-UI:t. Ingen dubblering senare.
+      (function() {
+        try {
+          var path = window.location.pathname;
+          var isLandingVideoRoute = path === '/' || path === '';
+          var isAudienceLandingRoute = path === '/jobbsokare' || path === '/arbetsgivare';
+          var isAuthRoute = path === '/auth';
+          var chromeColor = isLandingVideoRoute
+            ? '#2a2a2a'
+            : (isAudienceLandingRoute ? '#001F3D' : (isAuthRoute ? '#062B5E' : '#00193D'));
+          document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+          document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+          // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
+          // Inline-style har högre specificity än <style>-block → överrider safe default.
+          document.documentElement.style.backgroundColor = chromeColor;
+          // EN stabil theme-color-nod (samma id som browserChrome.ts återanvänder).
+          // Media-varianter skapade konflikt i iOS Safari vid SPA-navigering.
+          document.write('<meta id="parium-theme-color" name="theme-color" content="' + chromeColor + '">');
+
+          // KRITISKT: Injicera en inline <style> som tvingar html/body till rätt
+          // bakgrundsfärg vid FÖRSTA paint. Utan denna samplar iOS Safari sin
+          // bottenverktygsbar mot CSS-defaulten (mörkblå) på landningssidan,
+          // vilket gör att bottenbaren blir BLÅ vid refresh trots att toppen
+          // och vår BottomChromeStrip är grå. Sätts INNAN body parsas så att
+          // Safari aldrig hinner sampla fel färg.
+          document.write(
+            '<style id="parium-initial-chrome-bg">html,body{background-color:' +
+            chromeColor + ' !important;' +
+            (isLandingVideoRoute ? 'background-image:none !important;' : '') +
+            '}</style>'
+          );
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.toggle('landing-video-chrome', isLandingVideoRoute);
+            document.body.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
+            document.body.style.backgroundColor = chromeColor;
+            // Ta bort tvångs-stylen så att resten av appens CSS (gradienter på
+            // icke-landningssidor) kan ta över när React har mounted.
+            // På landningssidan låter vi den ligga kvar — body.landing-video-chrome
+            // har samma färg så det blir ingen visuell skillnad.
+            if (!isLandingVideoRoute) {
+              var initial = document.getElementById('parium-initial-chrome-bg');
+              if (initial) initial.remove();
+            }
+          }, { once: true });
+        } catch (e) {
+          document.write('<meta name="theme-color" content="#00193D">');
+        }
+      })();
+    </script>
+   <title>Parium – Hitta jobb som passar dig &amp; rekrytera rätt</title>
+    <meta name="google-site-verification" content="sT_ifEq3gWpYLlAA7K8O_I4xOyHau2g-FUa6j5C5y_E" />
+    <meta name="google-site-verification" content="BmLp4Z31QrCWzPg_3lxUkSRFOCryhQCg2mqfCcRqvoE" />
+    <!-- Sitewide Organization + WebSite schema (brand box, sitelinks search) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.parium.se/#organization",
+          "name": "Parium",
+          "legalName": "Parium AB",
+          "url": "https://www.parium.se",
+          "logo": "https://www.parium.se/parium-icon-v3-512.png",
+          "description": "Parium är en svensk jobbapp där du hittar lediga jobb som passar dig och där arbetsgivare hittar rätt kandidater. Skapa profil gratis, sök jobb och chatta direkt."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.parium.se/#website",
+          "url": "https://www.parium.se",
+          "name": "Parium",
+          "inLanguage": "sv-SE",
+          "publisher": { "@id": "https://www.parium.se/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.parium.se/jobb/{search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
+    <meta name="description" content="Hitta lediga jobb som passar dig och chatta direkt med arbetsgivare – eller rekrytera rätt kandidater till ditt team. Gratis att komma igång.">
+    <meta name="keywords" content="rekrytering, lediga jobb, hitta jobb, jobbapp, jobbsajt, jobbsökare, söka jobb">
+    <!-- Canonical sätts per rutt via react-helmet-async (se Landing.tsx, AudienceSEO.tsx, JobView.tsx). Ingen statisk canonical här för att undvika dubbla canonicals. -->
+    <meta name="author" content="Parium" />
+    <meta http-equiv="Content-Language" content="sv-SE" />
+    <!-- Build-version injiceras av vite.config.ts versionJsonPlugin -->
+    <!--PARIUM_BUILD_VERSION-->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <script>
+      // (Theme-color + chrome-klasser sätts redan i första <script>-blocket ovan.
+      // Ingen dubblering här — det orsakade kapplöpningar mot Safari.)
+
+      // 🚨 CANONICAL DOMAIN REDIRECT + NOINDEX på staging
+      // 1) Skriver ej-indexera + canonical till www.parium.se INNAN React mountar,
+      //    så Googlebot (som inte alltid följer JS-redirects) ändå konsoliderar
+      //    alla signaler till parium.se och slutar visa lovable.app i SERP.
+      // 2) Tvingar samtidigt full redirect för riktiga användare.
+      // UNDANTAG: staging-domänens startsida (/ och /index.html) redirectas INTE
+      // under Search Console-verifiering, så Google kan läsa meta-taggen.
+      (function() {
+        try {
+          var h = window.location.hostname;
+          var p = window.location.pathname;
+          var isLovableHost = h === 'parium-ab.lovable.app' || (h.endsWith('.lovable.app') && h.indexOf('parium-ab') === 0);
+          if (!isLovableHost) return;
+          var pariumUrl = 'https://www.parium.se' + p + window.location.search + window.location.hash;
+          // Canonical mot produktionsdomänen. (robots-taggen sätts redan i blocket ovan
+          // för alla lovable.app-värdar — därför ingen dubblett här.)
+          document.write('<link rel="canonical" href="' + pariumUrl.split('#')[0] + '">');
+
+          var isStagingRootForVerification = h === 'parium-ab.lovable.app' && (p === '/' || p === '/index.html');
+          if (isStagingRootForVerification) return;
+          // Hard redirect för riktiga besökare.
+          window.location.replace(pariumUrl);
+        } catch (e) { /* noop */ }
+      })();
+
+
+
+
+      // 🚨 PUBLIC DOMAIN HARD-LOAD / CACHE KILL-SWITCH
+      // Runs before React on every public route. It does NOT trust old
+      // localStorage/sessionStorage markers: if any Service Worker/controller or
+      // Cache Storage bucket exists, it unregisters/deletes everything and
+      // reloads once with a unique cache-bust URL.
+      (function() {
+        try {
+          var host = window.location.hostname;
+          var isPublicHost = host === 'parium.se' || host === 'www.parium.se' || host === 'parium-ab.lovable.app';
+          if (!isPublicHost) return;
+
+          var resetVersion = 'domain-hard-load-2026-04-26-v9-no-sw-no-cache';
+          var resetParam = '_hard_reload';
+          var attemptKey = 'parium_domain_hard_reload_attempt_' + resetVersion;
+          var maxAttempts = 3;
+          var url = new URL(window.location.href);
+          var attempts = 0;
+          try { attempts = parseInt(sessionStorage.getItem(attemptKey) || '0', 10) || 0; } catch (e) {}
+
+          var cleanupTasks = [];
+          var hadBlockingCache = false;
+
+          try {
+            if (window.caches && caches.keys) {
+              cleanupTasks.push(caches.keys().then(function(keys) {
+                if (keys && keys.length) hadBlockingCache = true;
+                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+              }).catch(function() {}));
+            }
+          } catch (e) {}
+
+          try {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              if (navigator.serviceWorker.controller) hadBlockingCache = true;
+              cleanupTasks.push(navigator.serviceWorker.getRegistrations().then(function(regs) {
+                if (regs && regs.length) hadBlockingCache = true;
+                return Promise.all(regs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
+              }).catch(function() {}));
+            }
+          } catch (e) {}
+
+          if (!cleanupTasks.length) return;
+
+          Promise.all(cleanupTasks).finally(function() {
+            try {
+              if (hadBlockingCache && attempts < maxAttempts) {
+                sessionStorage.setItem(attemptKey, String(attempts + 1));
+                var next = new URL(window.location.href);
+                next.searchParams.set(resetParam, resetVersion + '-' + Date.now());
+                window.location.replace(next.toString());
+                return;
+              }
+
+              if (url.searchParams.has(resetParam)) {
+                url.searchParams.delete(resetParam);
+                window.history.replaceState({}, document.title, url.toString());
+              }
+            } catch (e) {
+              try { window.location.reload(); } catch (e2) {}
+            }
+          });
+        } catch (e) { /* noop */ }
+      })();
+
+      // 🚨 FIRST-PAINT VERSION CHECK
+      // Körs FÖRE allt annat. Om Safari har cachat en gammal index.html men servern
+      // har en ny version → reload omedelbart med cache-bust. Detta är den enda
+      // mekanismen som fungerar mot iOS Safaris aggressiva disk-cache.
+      (function() {
+        try {
+          var meta = document.querySelector('meta[name="parium-build"]');
+          if (!meta) return; // dev — ingen build-version
+          var clientVersion = meta.getAttribute('content');
+          if (!clientVersion) return;
+
+          // Skydd mot loop — max 1 reload per 30s
+          var loopKey = 'parium_version_check_loop';
+          var lastReload = sessionStorage.getItem(loopKey);
+          if (lastReload && (Date.now() - parseInt(lastReload, 10)) < 30000) return;
+
+          fetch('/version.json', { cache: 'no-store', credentials: 'omit' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+              if (!data || !data.version) return;
+              if (data.version === clientVersion) return; // matchar — allt bra
+
+              // Mismatch → Safari serverar gammal index.html. Töm SW/Cache först,
+              // vänta tills det är klart och navigera sedan. Annars kan iOS Safari
+              // hinna låta den gamla service workern svara på reloaden igen.
+              sessionStorage.setItem(loopKey, String(Date.now()));
+              var cleanupTasks = [];
+              try {
+                if (window.caches && caches.keys) {
+                  cleanupTasks.push(caches.keys().then(function(keys) {
+                    return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                  }).catch(function() {}));
+                }
+              } catch (e) {}
+              try {
+                if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                  cleanupTasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
+                    return Promise.all(rs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
+                  }).catch(function() {}));
+                }
+              } catch (e) {}
+              Promise.all(cleanupTasks).finally(function() { try {
+                var url = new URL(window.location.href);
+                url.searchParams.set('_v', data.version.slice(0, 10));
+                window.location.replace(url.toString());
+              } catch (e) {
+                try { window.location.reload(); } catch (e2) {}
+              }});
+            })
+            .catch(function() { /* offline — strunta */ });
+        } catch (e) { /* noop */ }
+      })();
+    </script>
+    <!-- Google Fonts - Inter for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Preconnect to Supabase storage (avatars, logos, media) — saves 100-300ms on first image -->
+    <link rel="preconnect" href="https://jrjaegapuujushsiofoi.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://jrjaegapuujushsiofoi.supabase.co">
+    <!-- Preconnect to Spline CDN (3D scene assets) -->
+    <link rel="preconnect" href="https://prod.spline.design" crossorigin>
+    <link rel="dns-prefetch" href="https://prod.spline.design">
+    <!-- Fonterna hämtas i EN request och är INTE renderblockerande. Tidigare låg
+         två separata <link rel="stylesheet"> här: Safari höll då tillbaka första
+         paint tills båda CSS-filerna hämtats från fonts.googleapis.com (två extra
+         round trips på mobilnät → "sidan laddar länge"-känslan vid refresh).
+         media="print" gör länken icke-blockerande; onload växlar tillbaka till all.
+         display=swap gör att texten redan idag ritas i fallback först, så det finns
+         ingen visuell skillnad — bara snabbare first paint. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap"
+      media="print"
+      onload="this.media='all';this.onload=null;"
+    >
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap">
+    </noscript>
+
+    <!-- Preload den vanligaste vikten (400) som WOFF2 så LCP-texten renderas utan FOIT-flimmer -->
+    
+    <!-- Preload Parium logos for instant rendering (logo-rings preloadas via main.tsx med hashad asset-URL) -->
+    <link rel="preload" as="image" href="/parium-auth-logo.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
+    <!-- 🎯 Route-scoped preloads: undviker att slösa bandbredd genom att ladda
+         landing-videon på /jobbsokare eller Spline-scenen på /. Detta gör att
+         varje rutt får just ihjäl-snabb LCP utan att betala för andras assets. -->
+    <script>
+      (function() {
+        try {
+          var path = window.location.pathname;
+          var head = document.head;
+          var add = function(attrs) {
+            var l = document.createElement('link');
+            for (var k in attrs) l.setAttribute(k, attrs[k]);
+            head.appendChild(l);
+          };
+          if (path === '/' || path === '') {
+            var _r = (window.innerWidth && window.innerHeight) ? (window.innerWidth / window.innerHeight) : 1.78;
+            // Tre geometriska nivåer — matchar pickHeroSrc() i HeroVideo.tsx exakt.
+            // Telefon: smal viewport (<= 700 px) OCH telefonlik proportion
+            // (< 0,72). iPad i porträtt (0,73–0,75) ska till surfplattespåret.
+            var _phone = (_r < 0.66) || (window.innerWidth <= 700 && _r < 0.72);
+            var _tier = _phone ? 'portrait' : (_r < 1.25 ? 'tablet' : 'landscape');
+            add({ rel: 'preload', as: 'image', href: _tier === 'portrait'
+              ? '/__l5e/assets-v1/8fe1c07c-74c7-43c0-8b39-d0a69dd5345b/hero12-poster-portrait.jpg'
+              : '/__l5e/assets-v1/9d937ee2-32b4-4b59-b8b6-d306ffb3b191/hero10-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+            add({ rel: 'preload', as: 'image', href: '/assets/hero-woman-left-hand-verified.webp', type: 'image/webp', fetchpriority: 'high' });
+            // Hoppa över video-preload för datasparläge / långsamma nät — användaren ser poster istället.
+            var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+            var saveData = !!(conn && conn.saveData);
+            var slowNet = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ''));
+            if (!saveData && !slowNet) {
+            // Regeln MÅSTE stämma med pickHeroSrc() i HeroVideo.tsx,
+            // annars laddas två filer och bara den lilla spelas.
+            var vw = window.innerWidth, vh = window.innerHeight;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var wantsHighRes = (vw * dpr) >= 1280;
+            var lightUa = /Windows NT|Android/i.test(navigator.userAgent || '');
+            var videoHref = _tier === 'portrait'
+              ? '/__l5e/assets-v1/ef6b8689-0c38-42d7-a4e9-b46d09d87ff5/hero12-portrait.mp4'
+              : _tier === 'tablet'
+                ? '/__l5e/assets-v1/6919750b-0b51-4e02-9869-2e1d932251a4/hero10-desktop.mp4'
+                : (wantsHighRes && !lightUa)
+                  ? '/__l5e/assets-v1/6919750b-0b51-4e02-9869-2e1d932251a4/hero10-desktop.mp4'
+                  : '/__l5e/assets-v1/4598f514-ba42-461f-b2b7-d0eaaef637a1/hero10-landscape-lite.mp4';
+
+            // <link rel="preload" as="video"> stöds av Safari, men inte Chrome/Edge.
+            // Chrome loggar en varning och ignorerar länken, så vi sparar bara den för Safari.
+            var isSafari = /Safari/.test(navigator.userAgent || '') && !/Chrome|Chromium|Edg\//.test(navigator.userAgent || '');
+            if (isSafari) {
+              add({ rel: 'preload', as: 'video', href: videoHref, type: 'video/mp4', fetchpriority: 'high' });
+            }
+
+            }
+          } else if (path === '/jobbsokare' || path === '/arbetsgivare') {
+            if (path === '/jobbsokare') {
+              // Hero-telefonen på /jobbsokare är en video → postern är LCP-kandidat
+              // och videon ska ligga i cachen innan React ens har hydrerat.
+              add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/53aa145c-808f-404d-aae7-633806c3aa3b/showcase-jobseeker-poster.jpg', type: 'image/jpeg', fetchpriority: 'high' });
+              var c2 = (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+              var save2 = !!(c2 && c2.saveData);
+              var slow2 = !!(c2 && /(^|-)2g$/.test(c2.effectiveType || ''));
+              if (!save2 && !slow2) {
+                // Välj exakt samma källa som <video> kommer att välja, annars dubbel-fetch.
+                // HEVC endast till Apple-Safari — Windows-browsers rapporterar stöd
+                // men saknar hårdvaruavkodning → hackig uppspelning.
+                var ua = navigator.userAgent;
+                var appleSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
+                var probe = document.createElement('video');
+                var hevcOk = appleSafari && probe.canPlayType && probe.canPlayType('video/mp4; codecs="hvc1"') === 'probably';
+                // Samma upplösningsstege som <video>: välj mastern vars bredd
+                // ligger närmast telefonens CSS-bredd x devicePixelRatio, så att
+                // browsern slipper skala ned (Chrome/Edge på Windows skalar med
+                // ett bilinjärt filter som suddar ut texten).
+                var vw = window.innerWidth;
+                var cssW = vw >= 1280 ? 285 : vw >= 1024 ? 260 : vw >= 768 ? 230 : vw >= 640 ? 215 : Math.min(190, vw - 48);
+                var dpr = Math.min(window.devicePixelRatio || 1, 3);
+                var target = cssW * dpr;
+                var isWin = /Windows NT/i.test(ua);
+                var mem = navigator.deviceMemory || 8;
+                var cores = navigator.hardwareConcurrency || 8;
+                var lowPowerWin = isWin && (mem <= 4 || cores <= 4);
+                var rung = target <= 456
+                  ? '/__l5e/assets-v1/9af23a07-0091-45b0-a439-cf420ec678f5/showcase-jobseeker-fit432.mp4'
+                  : target <= 672
+                    ? '/__l5e/assets-v1/9705fd9e-5a48-42d4-bfe6-57eb0196ef24/showcase-jobseeker-win-crisp.mp4'
+                    : '/__l5e/assets-v1/1cfd4117-8f8e-421f-82e5-ee879b5c7c7d/showcase-jobseeker-hi-crisp.mp4';
+                // Windows använder 60 fps Baseline-mastern utan B-frames;
+                // Android använder den lättare 30 fps-mastern.
+                // Preload måste vara exakt samma URL, annars hämtar browsern en
+                // oanvänd MP4 parallellt med den källa som faktiskt spelas.
+                var isAndroid = /Android/i.test(ua);
+                var safe60Ok = isWin && probe.canPlayType && probe.canPlayType('video/mp4; codecs="avc1.42C020"') !== '';
+                var showcaseHref = isWin
+                  ? (safe60Ok
+                    ? '/__l5e/assets-v1/eb09446f-4134-4310-a95e-73e5a4f82631/showcase-jobseeker-windows-safe60.mp4'
+                    : '/__l5e/assets-v1/43bca5d6-8e25-4573-95c4-539b38f07e12/showcase-jobseeker-windows-lite.mp4')
+                  : isAndroid
+                    ? '/__l5e/assets-v1/43bca5d6-8e25-4573-95c4-539b38f07e12/showcase-jobseeker-windows-lite.mp4'
+                    : rung;
+                // Video-preload med as="video" stöds bara i Safari. I Chrome/Edge
+                // genererar det bara en varning och ingen faktisk preloading.
+                if (appleSafari) {
+                  add(hevcOk
+                    ? { rel: 'preload', as: 'video', href: '/__l5e/assets-v1/f7919f37-bcfe-44d3-9aa6-12eccc18f4eb/showcase-jobseeker.hevc.mp4', type: 'video/mp4; codecs="hvc1"', fetchpriority: 'high' }
+                    : { rel: 'preload', as: 'video', href: showcaseHref, type: 'video/mp4', fetchpriority: 'high' });
+                }
+
+              }
+            }
+            var uaStr = typeof ua === 'string' ? ua : (navigator.userAgent || '');
+            var deferSpline = /Windows NT/i.test(uaStr) || /Android/i.test(uaStr);
+            if (!(path === '/jobbsokare' && deferSpline)) {
+              add({ rel: 'preload', as: 'fetch', href: '/spline/parium-phone-scene.splinecode', crossorigin: 'anonymous', fetchpriority: 'low' });
+            }
+
+          } else if (path === '/om-oss') {
+            add({ rel: 'preload', as: 'image', href: '/__l5e/assets-v1/95a6e9aa-759c-48fc-8a0f-ee4ae6239167/om-oss-banner.png', type: 'image/png', fetchpriority: 'high' });
+          }
+        } catch (e) { /* never block paint */ }
+      })();
+    </script>
+
+ 
+      
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="sv_SE" />
+    <meta property="og:site_name" content="Parium" />
+    <meta property="og:url" content="https://www.parium.se/" />
+    <meta property="og:image" content="https://www.parium.se/og-image.jpg" />
+    <meta property="og:image:width" content="1216" />
+    <meta property="og:image:height" content="640" />
+    <meta property="og:image:alt" content="Parium – jobbappen där du hittar lediga jobb och arbetsgivare hittar rätt kandidater" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://www.parium.se/og-image.jpg" />
+    <meta name="twitter:site" content="@parium_se" />
+
+    <meta property="og:title" content="Parium – Hitta jobb som passar dig &amp; rekrytera rätt">
+    <meta name="twitter:title" content="Parium – Hitta jobb som passar dig &amp; rekrytera rätt">
+    <meta property="og:description" content="Hitta lediga jobb som passar dig och chatta direkt med arbetsgivare – eller rekrytera rätt kandidater till ditt team. Gratis att komma igång.">
+    <meta name="twitter:description" content="Hitta lediga jobb som passar dig och chatta direkt med arbetsgivare – eller rekrytera rätt kandidater till ditt team. Gratis att komma igång.">
+
+    <!-- Organization/WebSite-schema definieras en gång högre upp i <head>. Dubblett borttagen för att undvika motstridiga beskrivningar. -->
+  <link rel="manifest" href="/manifest.json?v=20260721-1">
+  <!-- Favicon: transparent bakgrund så att ikonen matchar webbläsarens flik.
+       Google kommer också att använda denna version i sökresultatet. -->
+  <link rel="shortcut icon" href="/parium-favicon-v3.ico?v=20260824-2" sizes="any">
+  <link rel="icon" href="/parium-favicon-v3.ico?v=20260824-2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/parium-favicon-v3-32.png?v=20260824-2">
+  <link rel="icon" type="image/png" sizes="48x48" href="/parium-favicon-v3-48.png?v=20260824-2">
+  <link rel="icon" type="image/png" sizes="512x512" href="/parium-icon-v3-512.png?v=20260824-2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/parium-touch-icon-v3.png?v=20260824-2">
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/parium-touch-icon-v3.png?v=20260824-2">
+
+
+  <style>
+    /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
+       - På "/" → #2a2a2a (matchar landningssidans video + topp-URL-bar)
+       - Överallt annat → #00193D (matchar Parium-blå topp-URL-bar)
+       iOS Safaris bottenverktygsfält samplar body's computed background-color,
+       så inline-style på body ändrar bottenfältet automatiskt vid SPA-nav.
+       Vi sätter en safe default här (blå) för first paint innan JS hinner köra,
+       UTAN !important så syncBrowserChrome's inline-style vinner. */
+    html, body {
+      background-color: #00193D;
+    }
+
+    /* App content sits above any background layer */
+    #root { position: relative; z-index: 1; }
+
+    /* Global CSS var to offset decorations in PWA */
+    :root { --pwa-top-offset: 0px; }
+
+    /* In standalone (Add to Home Screen) let content flow naturally under
+       the status bar — no padding that creates a visible band on top. */
+    @media (display-mode: standalone) {
+      html, body { 
+        min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
+      }
+      :root { --pwa-top-offset: 0px; }
+    }
+    /* iOS hint: keep Tailwind bounce but reduce initial blur */
+    .animate-bounce { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
+    /* Portrait-only overlay - show message in landscape mode */
+    #portrait-warning {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: hsl(215 100% 12%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* Only show on touch devices (phones/tablets), not desktop with mouse */
+    @media (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
+      #portrait-warning {
+        display: flex;
+      }
+      #root {
+        visibility: hidden;
+      }
+    }
+    /* ===== AUTH SPLASH SCREEN (hard refresh only on /auth) ===== */
+    #auth-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      /* Desktop: py-8 (32px) + center av 260px container */
+      padding-top: 50px;
+      background: hsl(215, 100%, 12%);
+      /* Start fully visible to block content immediately */
+      opacity: 1;
+      transition: opacity 0.4s ease-out;
+      transform: translateZ(0);
+      will-change: opacity;
+    }
+    /* Content elements fade in separately */
+    #auth-splash-logo,
+    #auth-splash-tagline,
+    #auth-splash-dots {
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
+    }
+    /* When splash is ready, fade in content */
+    #auth-splash.content-ready #auth-splash-logo,
+    #auth-splash.content-ready #auth-splash-tagline,
+    #auth-splash.content-ready #auth-splash-dots {
+      opacity: 1;
+    }
+    /* Mobile: safe-area + pt-6 (24px) */
+    @media (max-width: 640px) {
+      #auth-splash { padding-top: calc(env(safe-area-inset-top, 0px) + 24px); }
+    }
+    #auth-splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #auth-splash-logo {
+      /* Matchar AuthSplashScreen EXAKT: desktop h-56 (224px) */
+      height: 224px;
+      width: auto;
+      margin-bottom: 0;
+      transform: translateZ(0);
+    }
+    /* lg breakpoint: h-64 (256px) */
+    @media (min-width: 1024px) {
+      #auth-splash-logo { height: 256px; }
+    }
+    /* Mobile: h-40 * scale-125 = 200px */
+    @media (max-width: 640px) {
+      #auth-splash-logo { height: 200px; }
+    }
+    #auth-splash-tagline {
+      color: white;
+      /* Desktop: text-xl (1.25rem), lg: text-2xl (1.5rem) */
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-top: 8px;
+      margin-bottom: 40px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    @media (min-width: 1024px) {
+      #auth-splash-tagline { font-size: 1.5rem; }
+    }
+    /* Mobile: text-2xl */
+    @media (max-width: 640px) {
+      #auth-splash-tagline { font-size: 1.5rem; margin-top: 4px; }
+    }
+    #auth-splash-dots {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: opacity 0.4s ease-out;
+    }
+    #auth-splash-dots.fading {
+      opacity: 0;
+    }
+    #auth-splash-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      transform: translateZ(0);
+      will-change: opacity, transform;
+      animation: authSplashDotPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    #auth-splash-dots span:nth-child(1) { animation-delay: -1.7s; }
+    #auth-splash-dots span:nth-child(2) { animation-delay: -1.3s; }
+    #auth-splash-dots span:nth-child(3) { animation-delay: -0.9s; }
+    @keyframes authSplashDotPulse {
+      0%, 100% { 
+        opacity: 0.4; 
+        transform: translateZ(0) scale(1); 
+      }
+      50% { 
+        opacity: 1; 
+        transform: translateZ(0) scale(1.15); 
+      }
+    }
+  </style>
+</head>
+
+  <body>
+    <!-- AUTH SPLASH SCREEN - Only shown on /auth hard refresh -->
+    <div id="auth-splash" aria-label="Laddar Parium">
+      <!-- PNG preloadad (se <link preload> i head) för instant visning -->
+      <img 
+        id="auth-splash-logo" 
+        src="/parium-auth-logo.png" 
+        alt="Parium"
+        decoding="sync"
+        fetchpriority="high"
+      />
+      <p id="auth-splash-tagline">Din karriärresa börjar här</p>
+      <div id="auth-splash-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <script>
+      // Show auth splash ONLY on /auth route during hard refresh (NOT SPA navigation)
+      (function() {
+        try {
+          var path = window.location.pathname;
+          // Skip splash if coming from landing page (SPA navigation)
+          var skipSplash = false;
+          try {
+            skipSplash = sessionStorage.getItem('parium-skip-splash') === '1';
+          } catch(e) {}
+          
+          if ((path === '/auth' || path === '/auth/') && !skipSplash) {
+            var splash = document.getElementById('auth-splash');
+            var logo = document.getElementById('auth-splash-logo');
+            var tagline = document.getElementById('auth-splash-tagline');
+            // Byt tagline baserat på senast kända roll (satt av useAuth.tsx)
+            // så arbetsgivare får en anpassad text vid in-/utloggning.
+            try {
+              if (tagline && localStorage.getItem('parium-last-role') === 'employer') {
+                tagline.textContent = 'Bygg ditt drömteam här';
+              }
+            } catch(e) {}
+            if (splash && logo) {
+              // Display container IMMEDIATELY with dark background to block auth content
+              splash.style.display = 'flex';
+              
+              // Function to fade in content (not the container)
+              function showContent() {
+                requestAnimationFrame(function() {
+                  splash.classList.add('content-ready');
+                });
+              }
+              
+              // Wait for logo to load, then fade in content
+              if (logo.complete && logo.naturalHeight !== 0) {
+                // Already loaded (cached)
+                showContent();
+              } else {
+                logo.onload = showContent;
+                // Fallback if image fails
+                logo.onerror = showContent;
+              }
+              
+              // Fade dots first (0.5s before splash fades)
+              setTimeout(function() {
+                var dots = document.getElementById('auth-splash-dots');
+                if (dots) dots.classList.add('fading');
+              }, 1500);
+              
+              // Fade out entire splash after 2 seconds
+              setTimeout(function() {
+                splash.classList.add('fade-out');
+                // Remove from DOM after fade
+                setTimeout(function() {
+                  splash.style.display = 'none';
+                }, 500);
+              }, 2000);
+            }
+          }
+        } catch(e) {}
+      })();
+    </script>
+
+    <!-- Portrait-only warning -->
+    <div id="portrait-warning" role="alert" aria-live="polite">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2rem; opacity: 0.9;">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+        <line x1="12" y1="18" x2="12.01" y2="18"/>
+      </svg>
+      <p role="heading" aria-level="2" style="color: white; font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; font-family: Inter, sans-serif;">
+        Rotera din enhet
+      </p>
+      <p style="color: rgb(255,255,255); font-size: 1rem; font-family: Inter, sans-serif; max-width: 320px;">
+        Parium fungerar bäst i porträttläge. Vrid tillbaka din telefon för att fortsätta
+      </p>
+    </div>
+    
+    
+    <!-- Hidden hero preloader for Safari/iOS -->
+    <img src="/assets/hero-woman-left-hand-verified.webp" alt="" aria-hidden="true" decoding="sync" fetchpriority="high" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;" />
+    <div id="root"></div>
+    <script>
+      (function() {
+        try {
+          var isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+          // iOS specific fallback
+          // @ts-ignore
+          if (!isStandalone && typeof navigator !== 'undefined' && navigator.standalone) {
+            isStandalone = true;
+          }
+          if (isStandalone) {
+            var base = 88; // default offset for status area in standalone
+            document.documentElement.style.setProperty('--pwa-top-offset', base + 'px');
+            document.body.style.setProperty('--pwa-top-offset', base + 'px');
+          }
+        } catch (e) { /* noop */ }
+      })();
+    </script>
+    <!-- Service Worker endast i produktion för att undvika störande reloads i utveckling -->
+    <script>
+      // SW disabled in preview - handled by main.tsx in production only
+      // This prevents SW from interfering with HMR and causing slow reloads on touch devices
+    </script>
+    <script type="module" src="/src/main.tsx?v=20251004-1510" onerror="window.__pariumBundleFailed && window.__pariumBundleFailed()"></script>
+    <!-- 🩺 BOOT-WATCHDOG (självläkande): en blank skärm får aldrig bli permanent
+         och användaren ska aldrig behöva trycka på något.
+         - Bundle-fel (404 efter deploy, tappat nät, stale cache) upptäcks direkt.
+         - Innan omladdning görs en nätprob: är nätet nere väntar vi tyst och
+           laddar om automatiskt så fort anslutningen är tillbaka.
+         - Omladdningar sker med cache-bust + rensad SW/Cache Storage, med
+           växande backoff så vi aldrig loopar hårt.
+         - iOS Safari stryper timers i bakgrunden, därför kontrolleras även
+           pageshow (bfcache), visibilitychange och online.
+         - Manuell knapp visas först som absolut sista utväg, men automatiken
+           fortsätter jobba i bakgrunden även då. -->
+    <script>
+      (function() {
+        try {
+          var ATTEMPT_KEY = 'parium_boot_watchdog_attempt';
+          var attempts = 0;
+          try { attempts = parseInt(sessionStorage.getItem(ATTEMPT_KEY) || '0', 10) || 0; } catch (e) {}
+
+          var booted = false;      // React har mountat
+          var recovering = false;  // en återhämtning pågår just nu
+          var messageShown = false;
+          var mainStartedWaits = 0; // hur länge vi väntat på en bundle som "startat"
+
+          var clearAttempts = function() {
+            try { sessionStorage.removeItem(ATTEMPT_KEY); } catch (e) {}
+          };
+
+          var root = function() { return document.getElementById('root'); };
+
+          // VIKTIGT: vaktens egen statusruta ligger också i #root. Den får
+          // ALDRIG räknas som "appen har startat" — då slutade automatiken
+          // försöka och användaren fastnade på "Väntar på anslutning".
+          var isBooted = function() {
+            if (window.__pariumBooted === true) return true;
+            var el = root();
+            if (!el || el.childElementCount === 0) return false;
+            return !el.querySelector('[data-parium-boot-status]');
+          };
+
+          // Diskret, självförklarande status — ingen knapp, inget att trycka på.
+          var showStatus = function(offline) {
+            var el = root();
+            if (!el || isBooted()) return;
+            messageShown = true;
+            el.innerHTML =
+              '<div data-parium-boot-status="1" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
+              '<div style="width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);border-top-color:#FFFFFF;animation:parium-boot-spin 0.9s linear infinite;"></div>' +
+
+              '<p style="margin:0;font-size:16px;font-weight:600;">' + (offline ? 'Väntar på anslutning' : 'Startar Parium') + '</p>' +
+              '<p style="margin:0;font-size:14px;line-height:1.5;max-width:300px;">' +
+              (offline
+                ? 'Appen fortsätter automatiskt så fort du är online igen.'
+                : 'Det tar längre tid än vanligt. Vi försöker igen automatiskt.') +
+              '</p>' +
+              '<style>@keyframes parium-boot-spin{to{transform:rotate(360deg)}}</style>' +
+              '</div>';
+          };
+
+          var showManualFallback = function() {
+            var el = root();
+            if (!el || isBooted()) return;
+            el.innerHTML =
+              '<div data-parium-boot-status="1" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#FFFFFF;">' +
+              '<p style="margin:0;font-size:18px;font-weight:600;">Sidan kunde inte laddas</p>' +
+              '<p style="margin:0;font-size:15px;line-height:1.5;max-width:320px;">Vi fortsätter försöka i bakgrunden. Du kan också ladda om direkt.</p>' +
+              '<button id="parium-boot-retry" style="margin-top:8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);color:#FFFFFF;font-size:16px;font-weight:600;">Ladda om</button>' +
+              '</div>';
+            var btn = document.getElementById('parium-boot-retry');
+            if (btn) {
+              btn.addEventListener('click', function() {
+                clearAttempts();
+                hardReload();
+              });
+            }
+          };
+
+          var hardReload = function() {
+            var tasks = [];
+            try {
+              if (window.caches && caches.keys) {
+                tasks.push(caches.keys().then(function(keys) {
+                  return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                }).catch(function() {}));
+              }
+            } catch (e) {}
+            try {
+              if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                tasks.push(navigator.serviceWorker.getRegistrations().then(function(rs) {
+                  return Promise.all(rs.map(function(r) { try { return r.unregister(); } catch (e) { return false; } }));
+                }).catch(function() {}));
+              }
+            } catch (e) {}
+
+            Promise.all(tasks).catch(function() {}).then(function() {
+              try {
+                var u = new URL(window.location.href);
+                u.searchParams.set('_boot', String(Date.now()));
+                window.location.replace(u.toString());
+              } catch (e) {
+                try { window.location.reload(); } catch (e2) {}
+              }
+            });
+          };
+
+          // Nätprob: ladda aldrig om rakt in i en ny blank skärm.
+          var probeNetwork = function() {
+            if (navigator.onLine === false) return Promise.resolve(false);
+            try {
+              return fetch('/favicon-parium.png?_probe=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+                .then(function(r) { return !!r; })
+                .catch(function() { return false; });
+            } catch (e) {
+              return Promise.resolve(false);
+            }
+          };
+
+          var backoffMs = function(n) {
+            if (n <= 1) return 0;
+            if (n === 2) return 2000;
+            if (n === 3) return 5000;
+            if (n === 4) return 10000;
+            return 15000;
+          };
+
+          var recover = function() {
+            if (booted || recovering) return;
+            if (isBooted()) { booted = true; clearAttempts(); return; }
+            recovering = true;
+
+            probeNetwork().then(function(online) {
+              if (isBooted()) { booted = true; recovering = false; clearAttempts(); return; }
+
+              if (!online) {
+                // Vänta tyst — 'online'-lyssnaren och nästa poll tar över.
+                showStatus(true);
+                recovering = false;
+                setTimeout(function() { if (!isBooted()) recover(); }, 5000);
+                return;
+              }
+
+              // Bundlen HAR laddats och kör — appen är på väg upp men tar tid
+              // (tung första laddning, långsam enhet). Vi visar ALLTID en synlig
+              // status så användaren aldrig möts av en tom blå skärm, och efter
+              // ett tag ger vi upp väntan och laddar om ändå — annars kunde en
+              // krasch i uppstarten låsa oss i en tyst evighetsloop.
+              if (window.__pariumMainStarted === true && mainStartedWaits < 2) {
+                mainStartedWaits += 1;
+                showStatus(false);
+                recovering = false;
+                setTimeout(function() { if (!isBooted()) recover(); }, 2500);
+                return;
+              }
+
+
+              attempts += 1;
+              try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
+
+              if (attempts > 5) {
+                // Sista utvägen: visa knapp — men automatiken fortsätter ändå,
+                // nu i lugnare takt (var 30:e sekund) så vi aldrig loopar hårt.
+                showManualFallback();
+                recovering = false;
+                setTimeout(function() { if (!isBooted()) hardReload(); }, 30000);
+                return;
+              }
+
+
+              if (attempts >= 2 && !messageShown) showStatus(false);
+              // Guard: hinner appen starta under backoffen får vi ALDRIG
+              // rycka undan sidan med en omladdning.
+              setTimeout(function() {
+                if (isBooted()) { booted = true; recovering = false; clearAttempts(); return; }
+                hardReload();
+              }, backoffMs(attempts));
+
+            });
+          };
+
+          var check = function() {
+            if (isBooted()) { booted = true; clearAttempts(); return; }
+            recover();
+          };
+
+          // Bundlen kunde inte hämtas → vänta inte ut hela timeouten.
+          window.__pariumBundleFailed = function() { setTimeout(check, 300); };
+
+          // Synlig laddstatus redan efter 1,5 s — en tom blå skärm får aldrig
+          // vara det enda användaren ser medan appen startar.
+          setTimeout(function() {
+            if (!isBooted()) showStatus(navigator.onLine === false);
+          }, 1500);
+
+          setTimeout(check, 3500);
+
+          window.addEventListener('pageshow', function() { setTimeout(check, 1500); });
+          document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') setTimeout(check, 1500);
+          });
+          window.addEventListener('online', function() {
+            if (!isBooted()) { recovering = false; setTimeout(check, 300); }
+          });
+        } catch (e) { /* noop */ }
+      })();
+
+    </script>
+
+
+  </body>
+</html>

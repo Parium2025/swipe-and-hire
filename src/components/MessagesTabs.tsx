@@ -43,7 +43,7 @@ export function MessagesTabs({
   }, [activeTab, candidateUnread, colleagueUnread]);
 
   return (
-    <div className="relative flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/10 mb-3 gap-0.5 shrink-0">
+    <div className="relative flex bg-white/5 backdrop-blur-[2px] rounded-lg p-1 border border-white/10 mb-3 gap-0.5 flex-shrink-0">
       {/* Sliding background */}
       <motion.div
         className="absolute top-1 bottom-1 bg-parium-navy rounded-md"

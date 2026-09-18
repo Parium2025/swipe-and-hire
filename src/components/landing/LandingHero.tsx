@@ -1,17 +1,15 @@
-import { type PointerEvent, type RefObject, useEffect, useRef } from 'react';
-import { useNavigate } from '@/lib/router-compat';
-import { useRouter } from '@tanstack/react-router';
+import { type PointerEvent, type RefObject, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
-import { prefetchSplineAssets, shouldDeferSplineAssets } from '@/lib/splinePreload';
 
 
 
 type LandingHeroProps = {
-  scrollContainerRef: RefObject<HTMLDivElement | null>;
+  scrollContainerRef: RefObject<HTMLDivElement>;
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -37,23 +35,35 @@ type AudienceRole = (typeof audienceOptions)[number]['role'];
 // från landing → /jobbsokare eller /arbetsgivare blir ögonblicklig.
 // Triggas på pointerenter/focus/touchstart över valkorten. Idempotent.
 const preloadedRoles = new Set<AudienceRole>();
-const preloadAudienceAssets = (role: AudienceRole, immediate = false) => {
+const preloadAudienceAssets = (role: AudienceRole) => {
   if (typeof window === 'undefined') return;
   if (preloadedRoles.has(role)) return;
   preloadedRoles.add(role);
   const load = () => {
-    prefetchSplineAssets();
-    void import('@/components/landing/audience/content').catch(() => undefined);
+    // Spline-scenen (samma url för båda rollerna)
+    try {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'fetch';
+      link.href = '/spline/parium-phone-scene.splinecode';
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    } catch { /* no-op */ }
+    // Warm up spline-runtime + audience-data
+    Promise.all([
+      import('@splinetool/runtime').catch(() => null),
+      import('@/components/landing/audience/content').catch(() => null),
+    ]).catch(() => undefined);
   };
 
   // Hover/touch fick tidigare kringgå Windows/Android-spärren och startade
   // WebGL-runtime + scenhämtning mitt under hero-videons kallstart. Apple
   // behåller sin omedelbara preload helt oförändrad.
-  if (!immediate && shouldDeferSplineAssets()) {
+  if (isWindowsDevice() || isAndroidDevice()) {
     window.setTimeout(load, 4000);
     return;
   }
-  void load();
+  load();
 };
 
 const AudienceCard = ({
@@ -61,12 +71,14 @@ const AudienceCard = ({
   sublabel,
   role,
   icon: Icon,
+  selectedRole,
   onChoose,
 }: {
   label: string;
   sublabel: string;
   role: AudienceRole;
   icon: typeof Search;
+  selectedRole: AudienceRole | null;
   onChoose: (role: AudienceRole) => void;
 }) => {
   const pointerX = useMotionValue(0.5);
@@ -77,9 +89,12 @@ const AudienceCard = ({
   const rotateY = useTransform(smoothX, [0, 1], [-3.8, 3.8]);
   const innerX = useTransform(smoothX, [0, 1], [-3, 3]);
   const innerY = useTransform(smoothY, [0, 1], [-2, 2]);
+  const isSelected = selectedRole === role;
+  const isOtherSelected = selectedRole && selectedRole !== role;
 
   const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     preloadAudienceAssets(role);
+    if (selectedRole) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     pointerX.set((event.clientX - bounds.left) / bounds.width);
     pointerY.set((event.clientY - bounds.top) / bounds.height);
@@ -93,8 +108,7 @@ const AudienceCard = ({
   return (
     <motion.button
       type="button"
-      onClick={() => onChoose(role)}
-      onPointerDown={() => preloadAudienceAssets(role, true)}
+      onPointerDown={() => onChoose(role)}
       onPointerEnter={() => preloadAudienceAssets(role)}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
@@ -104,10 +118,11 @@ const AudienceCard = ({
         hidden: { opacity: 0, y: 34, scale: 0.96, filter: 'blur(12px)' },
         show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
       }}
-      whileTap={{ scale: 0.985 }}
+      animate={isSelected ? { scale: 1.035, y: -3 } : isOtherSelected ? { opacity: 0.2, scale: 0.94 } : undefined}
+      whileTap={!selectedRole ? { scale: 0.985 } : undefined}
       transition={{ duration: 0.68, ease }}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-      className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-hidden sm:w-[300px]"
+      className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
     >
       <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
       <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
@@ -135,8 +150,7 @@ const AudienceCard = ({
 
 const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
-  const router = useRouter();
-  const navigatingRef = useRef(false);
+  const [selectedRole, setSelectedRole] = useState<AudienceRole | null>(null);
 
   // Premium-prefetch: när huvudtråden är ledig, ladda tunga audience-assets
   // (Spline-scen + runtime + gallery-modul + content) för BÅDA rollerna i
@@ -170,25 +184,22 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     return () => window.clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    void router.preloadRoute({ to: '/jobbsokare' });
-    void router.preloadRoute({ to: '/arbetsgivare' });
-  }, [router]);
-
 
 
 
   const handleChoice = (role: AudienceRole) => {
-    if (navigatingRef.current) return;
-    navigatingRef.current = true;
+    if (selectedRole) return;
+    preloadAudienceAssets(role);
+    setSelectedRole(role);
     const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
-    preloadAudienceAssets(role, true);
-    void router.preloadRoute({ to: target });
     sessionStorage.setItem('parium-skip-splash', '1');
-    // Byt sida direkt. Den tidigare 860 ms långa exit-animationen tonade bort
-    // videon innan målsidan monterades och skapade en grå mellanbild på mobil.
-    navigate(target);
+    window.setTimeout(() => {
+      // SPA-nav: chrome-färgen synkas centralt först efter route-bytet,
+      // så toppremsan byter färg när målsidan faktiskt har landat.
+      navigate(target);
+    }, 860);
   };
+  const exitX = selectedRole === 'job_seeker' ? '-105vw' : selectedRole === 'employer' ? '105vw' : 0;
 
   return (
     <section
@@ -203,10 +214,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       }}
       aria-labelledby="landing-hero-heading"
     >
-      {/* Background video — stays fully painted until the destination commits. */}
-      <div className="absolute inset-0 z-0">
-        <HeroVideo />
-      </div>
+      {/* Background video — fills entire viewport including safe areas */}
+      <HeroVideo />
 
       {/* iOS Safari bottom-toolbar färg styrs via body.landing-video-chrome
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
@@ -215,6 +224,8 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       {/* Stacked hero: heading/text/CTAs stay in one responsive flow */}
       <motion.div
         className="pointer-events-none relative z-10 mx-auto min-h-[100svh] max-w-[1180px] px-5 text-center sm:px-6 md:px-12 lg:px-24"
+        animate={selectedRole ? { x: exitX, opacity: 0.2, scale: 0.96 } : { x: 0, opacity: 1, scale: 1 }}
+        transition={{ duration: 0.86, ease }}
         style={{ perspective: 650 }}
       >
         {/* Heading must sit below the chin in the hero image on all devices */}
@@ -262,6 +273,7 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
                 sublabel={option.sublabel}
                 role={option.role}
                 icon={option.icon}
+                selectedRole={selectedRole}
                 onChoose={handleChoice}
               />
             ))}

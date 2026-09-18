@@ -140,10 +140,10 @@ const Billing = () => {
         {/* Betalningsmetod */}
         <div>
           <h2 className="text-base font-semibold text-white mb-3">Betalningsmetod</h2>
-          <div className="bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-8 bg-white/10 rounded flex items-center justify-center shrink-0">
+                <div className="w-10 h-8 bg-white/10 rounded flex items-center justify-center flex-shrink-0">
                   <CreditCard className="h-4 w-4 text-white" />
                 </div>
                 <div className="min-w-0">
@@ -180,7 +180,7 @@ const Billing = () => {
               {paymentHistory.map((monthData) => (
                 <div
                   key={monthData.month}
-                  className="bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 rounded-lg"
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg"
                 >
                   <div
                     className="p-3 cursor-pointer hover:bg-white/5 hover:border-white/50 transition-colors rounded-lg"
@@ -188,7 +188,7 @@ const Billing = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <Calendar className="h-4 w-4 text-white shrink-0" />
+                        <Calendar className="h-4 w-4 text-white flex-shrink-0" />
                         <div className="min-w-0">
                           <h3 className="font-medium text-white text-sm truncate">
                             {monthData.monthName}
@@ -199,7 +199,7 @@ const Billing = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <div className="text-right">
                           <p className="font-semibold text-white text-sm">
                             {getTotalForMonth(monthData.payments).toLocaleString('sv-SE')} kr
@@ -251,7 +251,7 @@ const Billing = () => {
               ))}
             </div>
           ) : isError ? (
-            <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg p-6 md:p-4 text-center">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4 text-center">
               <CreditCard className="h-10 w-10 text-white mx-auto mb-4" />
               <h3 className="font-medium text-white mb-2 text-sm">Kunde inte hämta betalningshistoriken</h3>
               <p className="text-sm text-white mb-4">
@@ -265,7 +265,7 @@ const Billing = () => {
               </button>
             </div>
           ) : (
-            <div className="bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4 text-center">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4 text-center">
               <CreditCard className="h-10 w-10 text-white mx-auto mb-4" />
               <h3 className="font-medium text-white mb-2 text-sm">Ingen betalningshistorik</h3>
               <p className="text-sm text-white">

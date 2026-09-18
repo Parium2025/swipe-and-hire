@@ -865,7 +865,7 @@ const JobSeekerVideoShowcase = ({
                 aria-hidden
                 decoding="sync"
                 loading="eager"
-                fetchPriority="high"
+                {...({ fetchpriority: 'high' } as Record<string, string>)}
                 className={cn(
                   'pointer-events-none absolute inset-0 h-full w-full object-cover',
                   posterTransition,

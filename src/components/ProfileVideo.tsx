@@ -11,8 +11,8 @@ import {
 } from '@/lib/profileVideoDecoders';
 
 interface ProfileVideoProps {
-  videoUrl: string | null;
-  coverImageUrl?: string | null;
+  videoUrl: string;
+  coverImageUrl?: string;
   /** Automatgenererad posterbild ur videon. Används när ingen cover finns. */
   posterUrl?: string | null;
   alt?: string;
@@ -430,7 +430,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
         >
           <div
             ref={progressBarRef}
-            className="h-1.5 md:h-2 bg-white/40 backdrop-blur-xs cursor-pointer hover:h-2 hover:bg-white/50 md:hover:h-3 transition-all rounded-full overflow-hidden shadow-lg touch-none"
+            className="h-1.5 md:h-2 bg-white/40 backdrop-blur-sm cursor-pointer hover:h-2 hover:bg-white/50 md:hover:h-3 transition-all rounded-full overflow-hidden shadow-lg touch-none"
             onPointerDown={handleProgressPointerDown}
             onPointerMove={handleProgressPointerMove}
             onPointerUp={handleProgressPointerUp}

@@ -121,12 +121,9 @@ const pickHeroSrc = () => {
 const HeroVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [skipVideo] = useState<boolean>(shouldSkipVideo);
-  // Första renderingen måste vara identisk på server och klient, annars kastar
-  // React bort hydreringen (svart/tom hero). Riktiga värden sätts i en effekt
-  // direkt efter hydrering — se useEffect längre ner.
-  const [heroSrc, setHeroSrc] = useState<string>(landscapeLiteAsset.url);
-  const [tier, setTier] = useState<HeroTier>('landscape');
-  const [landscapePosition, setLandscapePosition] = useState<string>('center center');
+  const [heroSrc, setHeroSrc] = useState<string>(pickHeroSrc);
+  const [tier, setTier] = useState<HeroTier>(getTier);
+  const [landscapePosition, setLandscapePosition] = useState<string>(landscapeObjectPosition);
   // iOS Lågeffektläge blockerar autoplay. Safari ritar då sin egen play-knapp
   // ovanpå <video> (kan inte alltid CSS-döljas). Vi döljer hela videoelementet
   // och visar postern som vanlig <img> — ser ut som en still, inte en trasig spelare.
@@ -156,28 +153,6 @@ const HeroVideo = () => {
   //     visa fel utsnitt. Nivåbyte = direkt, upplösningsbyte = debounce:at.
   const tierRef = useRef<HeroTier>(tier);
   tierRef.current = tier;
-
-  // Buffringsstrategin sätts efter hydrering: markupen renderas alltid med
-  // "metadata" så server och klient matchar, och porträtt/tablet växlar sedan
-  // till "auto" (hel buffert) utan att React klagar på attributskillnad.
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.preload = tier === 'landscape' ? 'metadata' : 'auto';
-  }, [tier]);
-
-  // Väljer rätt videomaster/utsnitt för den faktiska skärmen så fort appen
-  // hydrerats (kan inte göras under render — servern känner inte skärmen).
-  useEffect(() => {
-    const nextTier = getTier();
-    tierRef.current = nextTier;
-    setTier(nextTier);
-    setLandscapePosition(landscapeObjectPosition());
-    setHeroSrc(pickHeroSrc());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -532,9 +507,7 @@ const HeroVideo = () => {
             // Porträtt (mobil): Chrome/Android ignorerar
             // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
             // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
-            // Sätts stabilt vid SSR och justeras efter hydrering i en effekt nedan
-            // (annars skiljer sig serverns och klientens attribut → hydration mismatch).
-            preload="metadata"
+            preload={tier === 'landscape' ? 'metadata' : 'auto'}
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"

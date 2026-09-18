@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -280,7 +280,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                         onEdit(job);
                       }
                     }}
-                    className={`${compactActions ? 'h-11 w-11 shrink-0 px-0' : 'flex-1 min-w-0 h-11 text-sm'} transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40`}
+                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11 text-sm'} transition-[background-color,border-color] duration-150 hover:bg-blue-500/20 hover:border-blue-500/40`}
                   >
                     <Edit className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
                     {!compactActions && <span className="truncate">Redigera</span>}
@@ -296,7 +296,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                       e.stopPropagation();
                       onRepublish(job);
                     }}
-                    className={`${compactActions ? 'h-11 w-11 shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]`}
+                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 !bg-green-500 hover:!bg-green-600 text-white transition-[background-color,transform] duration-150 active:scale-[0.97]`}
                   >
                     <RotateCcw className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
                     {!compactActions && <span className="truncate">Återpublicera</span>}
@@ -310,7 +310,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                     size="sm"
                     aria-label="Förhandsgranska annons"
                     onClick={handlePreviewClick}
-                    className={`${readOnly && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
+                    className={`${readOnly && !compactActions ? 'flex-1 min-w-0 px-3' : 'h-11 w-11 flex-shrink-0 px-0'} transition-[background-color,border-color] duration-150 hover:bg-white/20`}
                   >
                     <Eye className="h-4 w-4" />
                     {readOnly && !compactActions && <span className="text-sm truncate">Visa annons</span>}
@@ -327,7 +327,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                       e.stopPropagation();
                       onDelete(job);
                     }}
-                    className={`${compactActions ? 'h-11 w-11 shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 bg-red-500/80 text-white transition-[transform] duration-150 hover:bg-red-500/80 hover:text-white active:scale-[0.97]`}
+                    className={`${compactActions ? 'h-11 w-11 flex-shrink-0 px-0' : 'flex-1 min-w-0 h-11'} rounded-full border-0 bg-red-500/80 text-white transition-[transform] duration-150 hover:bg-red-500/80 hover:text-white active:scale-[0.97]`}
                   >
                     <Trash2 className={`h-4 w-4 ${compactActions ? '' : 'mr-2'}`} />
                     {!compactActions && <span className="truncate">Ta bort</span>}
@@ -369,7 +369,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                 <div className="flex items-center justify-between">
                   <span className="text-sm leading-snug text-white">Ansökningar:</span>
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
-                    <Users className="h-3.5 w-3.5 shrink-0" />
+                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
                     {job.applications_count || 0}
                     {unviewedCount > 0 && (
                       <span className="ml-1 rounded-full bg-blue-500 px-2 py-0.5 text-[11px] font-semibold text-white">
@@ -386,28 +386,28 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Rekryterare:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
                   <TruncatedText
                     text={recruiterName || '–'}
                     className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Anställningsform:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
                   <TruncatedText
                     text={job.employment_type ? [getEmploymentTypeLabel(job.employment_type), formatEmploymentDetails(job as any)].filter(Boolean).join(' · ') : '–'}
                     className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Plats:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
                   <TruncatedText
                     text={job.location || '–'}
                     className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Startdatum:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
                   <span className="text-sm leading-snug text-white font-medium text-right">
                     {(job as any).start_date
                       ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })

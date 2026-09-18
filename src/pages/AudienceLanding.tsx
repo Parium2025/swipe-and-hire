@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useNavigationType } from '@/lib/router-compat';
+import { Link, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { syncBrowserChrome } from '@/lib/browserChrome';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -45,7 +46,7 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
       >
         <span>{q}</span>
         <motion.span
-          className="ml-4 text-secondary text-xl leading-none shrink-0"
+          className="ml-4 text-secondary text-xl leading-none flex-shrink-0"
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.35, ease }}
         >
@@ -163,7 +164,7 @@ function PlanFeatures({
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 20 20"
-                    className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
+                    className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -341,10 +342,7 @@ const isMobileAnimationPrearmed = () => {
 };
 
 const useIsMobileLandingMotion = () => {
-  // SSR och den första klientrenderingen måste börja identiskt. Läs viewporten
-  // först efter hydration; annars byggs helt olika träd på mobil och React
-  // kasserar den serverrenderade landningssidan.
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)');
@@ -445,6 +443,25 @@ const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
   return null;
 };
 
+const useIsMobileLikeHeroLayout = () => {
+  const [isMobileLike, setIsMobileLike] = useState(isMobileLikeHeroViewport);
+
+  useEffect(() => {
+    const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
+    sync();
+    window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('orientationchange', sync, { passive: true });
+    window.visualViewport?.addEventListener('resize', sync, { passive: true });
+    return () => {
+      window.removeEventListener('resize', sync);
+      window.removeEventListener('orientationchange', sync);
+      window.visualViewport?.removeEventListener('resize', sync);
+    };
+  }, []);
+
+  return isMobileLike;
+};
+
 /**
  * Mäter nav-pillrets verkliga bottenkant i runtime och returnerar en
  * padding-top i px som garanterar att hero-rubriken aldrig kan hamna
@@ -455,25 +472,73 @@ const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
  * den befintliga clampen redan är tillräckligt stor. Är navet större
  * (t.ex. nya menyrader) tar mätvärdet över och håller rubriken fri.
  */
+const useHeroSafeTopPadding = () => {
+  // Lazy initializer: kör en synkron baseline-beräkning av den responsiva
+  // clampen vid första render så vi aldrig får en frame utan padding.
+  // Nav-mätningen läggs ovanpå i useLayoutEffect innan paint.
+  const [topPx, setTopPx] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    const w = window.innerWidth;
+    const h = getSizingViewportSize().height;
+    const rem = 16;
+    const clamp = (min: number, pref: number, max: number) =>
+      Math.max(min, Math.min(max, pref));
+    if (w >= 768) return Math.ceil(clamp(7.5 * rem, 0.16 * h, 9.5 * rem));
+    if (w >= 640) return Math.ceil(clamp(6.5 * rem, 0.14 * h, 8 * rem));
+    return Math.ceil(clamp(5.25 * rem, 0.12 * h, 6 * rem));
+  });
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    const GAP_PX = 16;
+    const measure = () => {
+      const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+      const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+      const w = window.innerWidth;
+      const h = getSizingViewportSize().height;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      // Speglar Tailwind-clampen för att bevara nuvarande utseende:
+      // base:  clamp(5.25rem, 12svh, 6rem)
+      // sm:    clamp(6.5rem,  14svh, 8rem)
+      // md:    clamp(7.5rem,  16svh, 9.5rem)
+      const clamp = (min: number, pref: number, max: number) =>
+        Math.max(min, Math.min(max, pref));
+      let responsive: number;
+      if (w >= 768) responsive = clamp(7.5 * rem, 0.16 * h, 9.5 * rem);
+      else if (w >= 640) responsive = clamp(6.5 * rem, 0.14 * h, 8 * rem);
+      else responsive = clamp(5.25 * rem, 0.12 * h, 6 * rem);
+      setTopPx(Math.ceil(Math.max(responsive, navBottom + GAP_PX)));
+    };
+    measure();
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(measure) : null;
+    const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
+    if (nav && ro) ro.observe(nav);
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('orientationchange', measure, { passive: true });
+    window.visualViewport?.addEventListener('resize', measure, { passive: true });
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('orientationchange', measure);
+      window.visualViewport?.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  return topPx;
+};
+
+
+
+
 // Vilken telefonvariant hero använder just nu (video för jobbsökare, Spline för
 // arbetsgivare). Sätts av HeroIntroStage så att alla mätfunktioner – även de som
 // körs utanför React-trädet – räknar på rätt mockup.
 let currentHeroPhoneVariant: 'spline' | 'video' = 'spline';
 
-type InlinePhoneMetrics = {
-  height: number;
-  width: number;
-  zoom: number;
-  yOffset?: number;
-  canvasHeight?: number;
-  canvasBottomTrim?: number;
-  topGap?: number;
-};
-
 const calculateInlinePhoneMetrics = (
   variant: 'spline' | 'video' = currentHeroPhoneVariant,
   hostTop?: number | null,
-): InlinePhoneMetrics => {
+) => {
   if (typeof window === 'undefined') {
     return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
   }
@@ -515,9 +580,11 @@ const calculateInlinePhoneMetrics = (
       };
     }
 
-    // Håll mobilens första och följande render identiska. Att mäta textblocket
-    // efter font-/hydrationsstart ändrade telefonens storlek synligt.
-    const tBottom = clamp(height * 0.45, 260, 380);
+    const anchorEl = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
+    const heroEl = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
+    const tBottom = anchorEl && heroEl
+      ? anchorEl.getBoundingClientRect().bottom - heroEl.getBoundingClientRect().top
+      : height * 0.45;
     const available = Math.max(220, height - tBottom - bottomSafe);
     // Bredden är deterministisk (samma viewport ⇒ samma telefon), höjden följer.
     let w = Math.round(clamp(width * 0.46, 150, 208));
@@ -560,7 +627,15 @@ const calculateInlinePhoneMetrics = (
   // sedan marginTop med halva extra-höjden för att hålla samma position.
   const canvasVerticalPadding = isPortraitTablet ? clamp(height * 0.08, 72, 118) : clamp(height * 0.18, 96, 160);
   const canvasHeight = safeHeight + canvasVerticalPadding;
-  const textBottom = mobileTextReserve;
+  const textAnchor = !isPortraitTablet
+    ? document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null
+    : null;
+  const mobileHero = !isPortraitTablet
+    ? document.querySelector('[data-mobile-hero-section]') as HTMLElement | null
+    : null;
+  const textBottom = textAnchor && mobileHero
+    ? textAnchor.getBoundingClientRect().bottom - mobileHero.getBoundingClientRect().top
+    : mobileTextReserve;
   const centeredMobileGap = (height - textBottom - canvasHeight) / 2;
   const desiredMobileGap = Math.max(centeredMobileGap, clamp(height * 0.09, 58, 96));
   const mobileTopGap = Math.max(clamp(height * 0.035, 28, 46), desiredMobileGap - canvasVerticalPadding * 0.18);
@@ -582,30 +657,19 @@ const calculateInlinePhoneMetrics = (
   };
 };
 
-// Måste vara identisk i SSR och under klientens allra första render. De
-// viewportanpassade måtten appliceras först i effekten efter hydration.
-const INITIAL_INLINE_PHONE_METRICS: InlinePhoneMetrics = {
-  height: 320,
-  width: 320 * PHONE_ASPECT,
-  zoom: 0.44,
-  yOffset: 28,
-};
-
 const InlineHeroPhone = ({
   placement,
   className = '',
   variant = 'spline',
 }: { placement: 'mobile' | 'portraitTablet'; className?: string; variant?: 'spline' | 'video' }) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  // Samma DOM vid SSR och första klientrenderingen. Förälderns responsiva CSS
-  // väljer synlig layout redan före hydration; runtime finjusterar bara aktivitet.
-  const [enabled, setEnabled] = useState(true);
-  const [active, setActive] = useState(true);
-  const [metrics, setMetrics] = useState(INITIAL_INLINE_PHONE_METRICS);
+  const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
+  const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
+  const [metrics, setMetrics] = useState(() => calculateInlinePhoneMetrics(variant));
 
   
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     let frame = 0;
     const measureTop = () => {
       const el = wrapperRef.current;
@@ -712,6 +776,61 @@ const InlineHeroPhone = ({
   );
 };
 
+
+const calculateMobileHeroMinHeight = () => {
+  if (typeof window === 'undefined' || getInlinePhonePlacement() !== 'mobile') return null;
+
+  const hero = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
+  const anchor = hero?.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
+  if (!hero || !anchor) return null;
+
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+  const { height } = getSizingViewportSize();
+  const heroTop = hero.getBoundingClientRect().top;
+  const anchorBottom = anchor.getBoundingClientRect().bottom - heroTop;
+  const metrics = calculateInlinePhoneMetrics();
+  const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0) - (metrics.canvasBottomTrim ?? 0);
+  const bottomSafe = clamp(height * 0.02, 12, 24);
+
+  return Math.ceil(anchorBottom + phoneBlockHeight + bottomSafe);
+};
+
+const useMobileHeroMinHeight = () => {
+  const [minHeight, setMinHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const sync = () => {
+      frame = 0;
+      setMinHeight(calculateMobileHeroMinHeight());
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(sync);
+    };
+
+    schedule();
+    const timers = [80, 180, 360, 720].map((delay) => window.setTimeout(schedule, delay));
+    const anchor = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
+    const observer = anchor ? new ResizeObserver(schedule) : null;
+    if (anchor) observer?.observe(anchor);
+    document.fonts?.ready.then(schedule).catch(() => undefined);
+    window.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
+    };
+  }, []);
+
+  return minHeight;
+};
 
 type HeroPhoneMetrics = {
   isDesktop: boolean;
@@ -930,16 +1049,8 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
-  // Undvik att läsa window/document i den första klientrenderingen. Servern
-  // använder samma startmått; därefter räknar effekten fram exakt viewport.
-  const [phoneMetrics, setPhoneMetrics] = useState<HeroPhoneMetrics>({
-    isDesktop: true,
-    top: 0,
-    height: 660,
-    zoom: 0.68,
-    yOffset: 0,
-  });
-  const [isInlinePhone, setIsInlinePhone] = useState(false);
+  const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
+  const [isInlinePhone, setIsInlinePhone] = useState(() => getInlinePhonePlacement() !== null);
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
@@ -1040,7 +1151,7 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-40 hidden h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:flex md:items-center md:px-12 md:pb-16 md:pt-28 md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:hidden lg:px-24"
+      className="pointer-events-none fixed inset-0 z-40 flex h-[100svh] items-start justify-center overflow-hidden px-5 sm:px-6 md:items-center md:px-12 md:pb-16 md:pt-28 lg:px-24"
       aria-hidden="true"
     >
       <div
@@ -1263,6 +1374,9 @@ const IntroSplinePhone = () => {
 // data-hero-intro-stage och döljs när användaren scrollar förbi.
 // ─────────────────────────────────────────────────────────────────────────────
 const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroStageProps) => {
+  const mobileHeroMinHeight = useMobileHeroMinHeight();
+  const isMobileLikeHeroLayout = useIsMobileLikeHeroLayout();
+  const heroSafeTopPx = useHeroSafeTopPadding();
   // Jobbsökare: swipe-videon i hero (ritas direkt), Spline i intro (hinner ladda i lugn och ro).
   const heroPhoneVariant: 'spline' | 'video' = audience === 'job_seeker' ? 'video' : 'spline';
   currentHeroPhoneVariant = heroPhoneVariant;
@@ -1276,22 +1390,25 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
       <section
         id="start"
         data-hero-intro-stage
-        className="relative min-h-[100svh] w-full scroll-mt-24 overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:h-auto md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:min-h-[100svh] md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:overflow-visible"
+        className={`relative min-h-[100svh] w-full scroll-mt-24 ${isMobileLikeHeroLayout ? 'overflow-visible' : 'overflow-visible md:h-[100svh] md:min-h-0 md:overflow-hidden'}`}
       >
-        {/* Båda layouterna finns redan i första HTML-svaret och CSS väljer rätt
-            innan första paint. Det förhindrar desktop→mobil-hopp vid hydration. */}
+        {/* Mobile hero — renderas endast i mobil-layout så att enbart EN <h1>
+            existerar i DOM samtidigt (SEO: undvik duplicate h1). */}
+        {isMobileLikeHeroLayout && (
         <section
           data-mobile-hero-section
-          className="relative min-h-[100svh] w-screen overflow-hidden block md:hidden md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:block"
+          className="relative min-h-[100svh] w-screen overflow-hidden block"
           style={{
             marginLeft: 'calc(50% - 50vw)',
             marginRight: 'calc(50% - 50vw)',
+            minHeight: mobileHeroMinHeight ? `${mobileHeroMinHeight}px` : undefined,
           }}
           aria-labelledby="audience-hero-heading-mobile"
         >
           <motion.div
             data-hero-phone-anchor
-            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 pt-[clamp(5.25rem,12svh,6rem)] text-center sm:pt-[clamp(6.5rem,14svh,8rem)]"
+            className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[1180px] flex-col items-center px-5 text-center"
+            style={heroSafeTopPx ? { paddingTop: `${heroSafeTopPx}px` } : undefined}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.2 } } }}
@@ -1306,8 +1423,11 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
           </motion.div>
           <InlineHeroPhone placement="mobile" className="mt-2" variant={heroPhoneVariant} />
         </section>
+        )}
 
-        <section className="relative h-full items-center justify-center overflow-hidden pb-16 pt-28 hidden md:flex md:[@media_(pointer:coarse)_and_(orientation:portrait)_and_(max-width:1024px)]:hidden md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
+        {/* Desktop / tablet hero — renderas endast i desktop-layout (samma anledning). */}
+        {!isMobileLikeHeroLayout && (
+        <section className="relative h-full items-center justify-center overflow-hidden pb-16 pt-28 hidden md:flex md:[@media_(orientation:portrait)]:items-start md:[@media_(orientation:portrait)]:pt-[clamp(7rem,12svh,9rem)] lg:[@media_(orientation:portrait)]:items-center lg:[@media_(orientation:portrait)]:pt-28">
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -top-40 right-[-25%] h-[640px] w-[640px] rounded-full bg-secondary/[0.06] blur-[180px]"
@@ -1323,13 +1443,14 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } } }}
             >
-              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" headingAs="div" />
+              <HeroText eyebrow={c.eyebrow} headline={c.hero.headline} subtitle={c.hero.subtitle} variant="desktop" />
             </motion.div>
             <div aria-hidden className="relative mx-auto flex w-full items-start justify-center pt-8 xl:pt-10">
               <InlineHeroPhone placement="portraitTablet" variant={heroPhoneVariant} />
             </div>
           </div>
         </section>
+        )}
       </section>
 
       {/* Visuell paus mellan hero-telefonen och intro-sektionen */}
@@ -1394,7 +1515,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               onClick={onIntroCta}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className="mt-16 inline-flex self-center items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
+              className="mt-16 inline-flex self-center items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
             >
               {introCtaLabel ?? 'Skapa min profil idag'}
             </motion.button>
@@ -1727,6 +1848,8 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
   useEffect(() => {
+    syncBrowserChrome(window.location.pathname);
+
     const isSeeker = audience === 'job_seeker';
     const title = isSeeker
       ? 'Hitta jobb som passar dig | Parium – för jobbsökare'
@@ -2350,6 +2473,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
             id="kontakt"
             aria-labelledby="kontakt-heading"
             className="relative scroll-mt-24 overflow-hidden px-5 py-14 sm:px-6 sm:py-16 md:px-12 md:py-20 lg:px-24"
+            style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 600px' }}
           >
             <motion.div
               initial={{ opacity: 0, y: 50 }}

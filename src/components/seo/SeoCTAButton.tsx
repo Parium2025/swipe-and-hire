@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Link, useNavigate } from '@/lib/router-compat';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -86,7 +86,7 @@ const SeoCTAButton = forwardRef<HTMLAnchorElement, SeoCTAButtonProps>(
         className={cn(
           'inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-tight',
           'transition-all duration-200 active:scale-[0.98] hover:scale-[1.02]',
-          'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(215_100%_12%)]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(215_100%_12%)]',
           disabled && 'opacity-50 pointer-events-none',
           sizing,
           variantClasses,

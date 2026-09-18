@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -197,7 +197,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       <div className="job-card-mobile-body flex h-full flex-col gap-0.5 py-0.5 cursor-pointer" onClick={handleBodyClick}>
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
-          <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
+          <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
             <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/70 tracking-wide">{initials}</span>
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
@@ -251,7 +251,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                 <div className="flex items-center justify-between">
                   <span className="text-sm leading-snug text-white">Ansökningar:</span>
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm leading-snug text-white font-medium">
-                    <Users className="h-3.5 w-3.5 shrink-0" />
+                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
                     {job.applications_count || 0}
                     {unviewedCount > 0 && (
                       <span className="ml-1 rounded-full bg-blue-500 px-2 py-0.5 text-[11px] font-semibold text-white">
@@ -281,7 +281,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
                 {/* 3. Recruiter — ownership */}
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Rekryterare:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Rekryterare:</span>
                   <TruncatedText
                     text={recruiterName || '–'}
                     className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
@@ -290,7 +290,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
                 {/* 4. Employment type */}
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Anställningsform:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Anställningsform:</span>
                   {(() => {
                     const details = formatEmploymentDetails({
                       employment_type: job.employment_type,
@@ -312,7 +312,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
                 {/* 5. Location */}
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Plats:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Plats:</span>
                   <TruncatedText
                     text={job.location || '–'}
                     className="min-w-0 flex-1 truncate text-right text-sm leading-snug text-white font-medium"
@@ -321,7 +321,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
 
                 {/* 6. Start date */}
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm leading-snug text-white shrink-0">Startdatum:</span>
+                  <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
                   <span className="text-sm leading-snug text-white font-medium text-right">
                     {(job as any).start_date
                       ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -345,7 +345,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                   });
                   return (
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm leading-snug text-white shrink-0">Lön:</span>
+                      <span className="text-sm leading-snug text-white flex-shrink-0">Lön:</span>
                       <TruncatedText
                         text={salaryText || '–'}
                         className="text-sm leading-snug text-white font-medium text-right truncate min-w-0 flex-1"

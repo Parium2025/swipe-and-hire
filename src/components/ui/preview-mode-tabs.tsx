@@ -7,7 +7,7 @@ interface PreviewModeTabsProps {
   activeMode: PreviewMode;
   onModeChange: (mode: PreviewMode) => void;
   /** Optional ref to a swipeable container area below the tabs */
-  swipeContainerRef?: React.RefObject<HTMLElement | null>;
+  swipeContainerRef?: React.RefObject<HTMLElement>;
 }
 
 export const PreviewModeTabs = memo(function PreviewModeTabs({ activeMode, onModeChange, swipeContainerRef }: PreviewModeTabsProps) {

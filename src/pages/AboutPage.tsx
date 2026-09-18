@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
@@ -247,7 +247,7 @@ const AboutPage = () => {
 
           {/* Bolaget */}
           <motion.div
-            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur-sm sm:p-12"
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
@@ -270,7 +270,7 @@ const AboutPage = () => {
 
           {/* Kontakt */}
           <motion.div
-            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur-sm sm:p-12"
+            className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.06] p-10 text-center backdrop-blur sm:p-12"
             variants={fadeUp}
             initial="hidden"
             whileInView="show"

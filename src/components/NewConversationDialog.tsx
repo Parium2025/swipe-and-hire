@@ -98,9 +98,9 @@ export function NewConversationDialog({
         firstName: candidate.first_name,
         lastName: candidate.last_name,
         profileImageUrl: candidate.profile_image_url,
-        jobTitle: candidate.job_title ?? undefined,
+        jobTitle: candidate.job_title,
         applicationId: candidate.application_id,
-        jobId: candidate.job_id ?? undefined,
+        jobId: candidate.job_id,
         userId: candidate.applicant_id, // Actual user ID for conversation creation
       });
     });

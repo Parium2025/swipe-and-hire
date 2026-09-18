@@ -56,7 +56,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             <div
               key={tab.key}
               aria-hidden={!isVisible}
-              {...(!isVisible ? { inert: true } : {})}
+              {...(!isVisible ? { inert: '' } : {})}
               style={isVisible ? undefined : {
                 position: 'absolute',
                 inset: 0,
@@ -75,7 +75,7 @@ function VirtualJobGridImpl<T extends JobPosting>({
             // tvingar Safari att rita om (transform/backdrop-filter) vid flikbyte.
             className={`${gridClassName} ${countLayoutClass} job-card-grid-no-entry`}
             aria-hidden={!isVisible}
-            {...(!isVisible ? { inert: true } : {})}
+            {...(!isVisible ? { inert: '' } : {})}
             // Inaktiva paneler layoutas och rasteriseras i förväg så bilder,
             // knappstorlekar och färger redan är klara vid flikbytet. De är
             // samtidigt helt osynliga, inerta och borttagna ur dokumentflödet.

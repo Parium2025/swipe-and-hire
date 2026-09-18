@@ -44,7 +44,7 @@ function asString(v: unknown): string | null {
 function sanitize(input: unknown): Entry[] {
   if (!Array.isArray(input)) return [];
   return input
-    .map((item): Entry | null => {
+    .map((item) => {
       if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
       const r = item as Record<string, unknown>;
       const id = asString(r.id);

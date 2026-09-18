@@ -93,7 +93,7 @@ export async function connectCalendar(connectorId: CalendarConnector): Promise<v
       body: { origin: window.location.origin, connector_id: connectorId },
     });
     if (error) {
-      const details = FunctionsHttpErrorLike(error) ? await readErrorDetails(error) : error.message;
+      const details = error instanceof FunctionsHttpErrorLike ? await readErrorDetails(error) : error.message;
       throw new Error(details || 'Kunde inte starta kopplingen.');
     }
     if (!data?.authorizationUrl) throw new Error('Kunde inte starta kopplingen.');
@@ -124,7 +124,7 @@ export async function disconnectCalendar(connectorId: CalendarConnector): Promis
     body: { connector_id: connectorId },
   });
   if (error) {
-    const details = FunctionsHttpErrorLike(error) ? await readErrorDetails(error) : error.message;
+    const details = error instanceof FunctionsHttpErrorLike ? await readErrorDetails(error) : error.message;
     throw new Error(details || 'Kunde inte koppla från.');
   }
 }

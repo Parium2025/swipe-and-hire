@@ -148,7 +148,7 @@ interface OccupationBadgeProps {
 }
 
 /**
- * Solid mörk chip längst upp till vänster. Ingen backdrop-blur-sm — det
+ * Solid mörk chip längst upp till vänster. Ingen backdrop-blur — det
  * orsakade synligt flimmer varje gång underliggande bild/animation
  * ändrades (filter måste re-samplas per frame). bg-black/45 + text-shadow
  * ger samma premium-läsbarhet utan resampling.

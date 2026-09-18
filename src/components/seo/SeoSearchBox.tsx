@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { Search, Clock, TrendingUp, X, ArrowRight } from 'lucide-react';
 import { useRecentSearches } from '@/lib/recentSearches';
 
@@ -135,7 +135,7 @@ export default function SeoSearchBox({
           onBlur={onBlur}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
-          className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-10 text-base text-white placeholder:text-white/50 outline-hidden focus:border-white/30 focus:bg-white/[0.10] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-results-button]:appearance-none [&::-webkit-search-results-decoration]:appearance-none"
+          className="w-full min-h-11 rounded-full border border-white/15 bg-white/[0.07] pl-11 pr-10 text-base text-white placeholder:text-white/50 outline-none focus:border-white/30 focus:bg-white/[0.10] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-results-button]:appearance-none [&::-webkit-search-results-decoration]:appearance-none"
           style={{ fontSize: '16px' }}
           aria-expanded={open}
           aria-autocomplete="list"

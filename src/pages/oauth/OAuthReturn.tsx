@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from '@/lib/router-compat';
+import { useParams } from 'react-router-dom';
 import { isCalendarConnector } from '@/lib/calendarConnection';
 
 /**

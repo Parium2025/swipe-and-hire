@@ -1,5 +1,5 @@
 /**
- * Håller preload-URL:erna i src/routes/__root.tsx synkade med assets.
+ * Håller <link rel="preload">-URL:erna i index.html synkade med assets.
  *
  * Bakgrund: index.html är statisk och kan inte importera `*.asset.json`, så
  * varje video-/poster-URL står hårdkodad där. När en fil kodas om får den ett
@@ -15,7 +15,7 @@ import { readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ASSETS_DIR = 'src/assets';
-const INDEX = 'src/routes/__root.tsx';
+const INDEX = 'index.html';
 
 type Asset = { url?: string; original_filename?: string };
 

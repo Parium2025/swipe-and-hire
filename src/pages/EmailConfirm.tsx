@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from '@/lib/router-compat';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,7 +79,7 @@ const EmailConfirm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <Card className="w-full max-w-md bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 shadow-2xl rounded-3xl">
+      <Card className="w-full max-w-md bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 shadow-2xl rounded-3xl">
         <CardContent className="p-8 text-center">
           {status === 'loading' && (
             <>

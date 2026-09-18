@@ -785,10 +785,10 @@ export function ChatView({
   const currentSearchMatchId = searchMatchIds[searchIndex] || null;
 
   return (
-    <div ref={rootRef} className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs overflow-hidden">
+    <div ref={rootRef} className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-white/20 shrink-0">
+      <div className="flex items-center gap-3 p-4 border-b border-white/20 flex-shrink-0">
         <button
           type="button"
           onClick={onBack}
@@ -798,7 +798,7 @@ export function ChatView({
         </button>
 
         {displayName === 'Okänd användare' ? (
-          <Skeleton className="h-10 w-10 rounded-full bg-white/10 shrink-0" />
+          <Skeleton className="h-10 w-10 rounded-full bg-white/10 flex-shrink-0" />
         ) : (
           <ConversationAvatar
             profile={avatarProfile}
@@ -899,7 +899,7 @@ export function ChatView({
       </div>
 
       <AlertDialog open={confirmAction !== null} onOpenChange={(open) => !open && setConfirmAction(null)}>
-        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0">
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
@@ -980,10 +980,10 @@ export function ChatView({
                 autoFocus
               />
               {searchingDb && (
-                <Loader2 className="h-3.5 w-3.5 text-pure-white animate-spin shrink-0" />
+                <Loader2 className="h-3.5 w-3.5 text-pure-white animate-spin flex-shrink-0" />
               )}
               {!searchingDb && searchMatchIds.length > 0 && (
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <span className="text-pure-white text-xs whitespace-nowrap">
                     {searchIndex + 1}/{searchMatchIds.length}
                     {olderMatchCount > 0 && (
@@ -1009,7 +1009,7 @@ export function ChatView({
                 type="button"
                 onClick={closeSearch}
                 aria-label="Stäng sökfältet"
-                className="p-1.5 rounded-full text-pure-white md:hover:bg-white/10 active:scale-95 transition shrink-0"
+                className="p-1.5 rounded-full text-pure-white md:hover:bg-white/10 active:scale-95 transition flex-shrink-0"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1032,7 +1032,7 @@ export function ChatView({
           <div className="space-y-4 p-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className={`flex gap-3 ${i % 2 === 0 ? '' : 'flex-row-reverse'}`}>
-                <Skeleton className="h-8 w-8 rounded-full bg-white/10 shrink-0" />
+                <Skeleton className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0" />
                 <div className={`flex-1 space-y-2 ${i % 2 === 0 ? '' : 'flex flex-col items-end'}`}>
                   <Skeleton className={`h-4 ${i % 2 === 0 ? 'w-3/4' : 'w-2/3'} bg-white/10`} />
                   <Skeleton className={`h-12 ${i % 2 === 0 ? 'w-2/3' : 'w-1/2'} rounded-xl bg-white/10`} />
@@ -1163,11 +1163,11 @@ export function ChatView({
         <div className="px-4 py-2 border-t border-white/10 flex min-w-0 items-center gap-2">
           <div className="flex flex-col gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex-1 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <Paperclip className="h-3.5 w-3.5 text-pure-white shrink-0" />
+              <Paperclip className="h-3.5 w-3.5 text-pure-white flex-shrink-0" />
               <span className="block min-w-0 flex-1 truncate text-sm text-pure-white">
                 {pendingFile.name}
               </span>
-              <span className="text-pure-white text-xs shrink-0">
+              <span className="text-pure-white text-xs flex-shrink-0">
                 {pendingFile.size >= 1024 * 1024
                   ? `${(pendingFile.size / (1024 * 1024)).toFixed(1)} MB`
                   : `${(pendingFile.size / 1024).toFixed(0)} KB`}
@@ -1199,7 +1199,7 @@ export function ChatView({
       {/* Edit indicator */}
       {editingMessageId && (
         <div className="px-4 py-2 border-t border-white/10 flex items-center gap-2">
-          <Pencil className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+          <Pencil className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
           <span className="min-w-0 flex-1 truncate text-sm text-pure-white">Redigerar meddelande</span>
           <button
             onClick={handleCancelEdit}
@@ -1211,13 +1211,13 @@ export function ChatView({
       )}
 
       {/* Input */}
-      <div className="p-4 border-t border-white/10 shrink-0">
+      <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
           {/* File attach button - hidden during edit */}
           {!editingMessageId && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="h-11 w-11 shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
+              className="h-11 w-11 flex-shrink-0 flex items-center justify-center rounded-xl text-pure-white md:hover:bg-white/10 active:scale-95 transition-all"
               aria-label="Bifoga fil"
             >
               <Paperclip className="h-5 w-5" />
@@ -1260,7 +1260,7 @@ export function ChatView({
                 : (!newMessage.trim() && !pendingFile) || sending
             }
             className={cn(
-              "h-11 w-11 shrink-0 transition-all duration-200",
+              "h-11 w-11 flex-shrink-0 transition-all duration-200",
               editingMessageId
                 // Bocken lyser upp först när något faktiskt har ändrats — suddar
                 // man tillbaka till originaltexten slocknar den igen.

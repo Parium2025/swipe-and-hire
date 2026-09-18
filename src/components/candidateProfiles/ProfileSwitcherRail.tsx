@@ -99,7 +99,7 @@ function ProfileChip({
       <button
         type="button"
         onClick={onSelect}
-        className="block w-full outline-hidden focus:outline-hidden focus-visible:outline-hidden"
+        className="block w-full outline-none focus:outline-none focus-visible:outline-none"
         aria-pressed={active}
       >
         <span className="mx-auto block w-14">
@@ -414,7 +414,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0">
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
@@ -532,7 +532,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-hidden transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 active:bg-destructive/30"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 active:bg-destructive/30"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -597,7 +597,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
     <div className="space-y-2">
       <div
         ref={railRef}
-        className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0"
+        className="relative mx-auto h-[128px] w-full max-w-[460px] rounded-2xl outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
         role="listbox"
         aria-label="Välj profil"
         aria-activedescendant={`profile-slot-${slots[activeIndex]?.key ?? 'base'}`}
@@ -631,7 +631,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                   type="button"
                   onClick={openNew}
                   aria-label="Lägg till profil"
-                  className="w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white outline-hidden transition-all duration-200 md:hover:bg-white/10 active:scale-[0.97] touch-manipulation focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0"
+                  className="w-[104px] rounded-2xl border border-dashed border-white/20 bg-white/5 p-2.5 text-center text-white outline-none transition-all duration-200 md:hover:bg-white/10 active:scale-[0.97] touch-manipulation focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
                 >
                   <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10">
                     <Plus className="h-5 w-5" />
@@ -659,7 +659,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-hidden transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4" />
           </button>

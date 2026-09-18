@@ -69,8 +69,7 @@ export function useEmployerPrefetch() {
 
           const userIds = reviews
             .filter(r => !r.is_anonymous)
-            .map(r => r.user_id)
-            .filter((id): id is string => !!id);
+            .map(r => r.user_id);
 
           if (userIds.length > 0) {
             const { data: profiles } = await supabase
@@ -82,7 +81,7 @@ export function useEmployerPrefetch() {
               const profileMap = new Map(profiles.map(p => [p.user_id, p]));
               return reviews.map(r => ({
                 ...r,
-                profiles: profileMap.get(r.user_id as string) || undefined,
+                profiles: profileMap.get(r.user_id) || undefined,
               }));
             }
           }

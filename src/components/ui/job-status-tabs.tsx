@@ -31,7 +31,7 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
   const hasSnappedRef = useRef(false);
 
   const updateIndicator = useCallback(() => {
-    const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement | null>> = {
+    const refs: Record<JobStatusTab, React.RefObject<HTMLButtonElement>> = {
       active: activeRef,
       expired: expiredRef,
       draft: draftRef,

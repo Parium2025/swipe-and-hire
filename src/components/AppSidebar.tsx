@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
-import { useNavigate, useLocation } from "@/lib/router-compat";
+import { useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -288,7 +288,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <div className="relative">
                         <item.icon className="h-4 w-4" />
@@ -301,8 +301,8 @@ export function AppSidebar() {
                           {item.title === 'Meddelanden' ? (
                             <>
                               {item.title}
-                              {(item.count ?? 0) > 0 && (
-                                <CountBadge count={item.count ?? 0} className="static shrink-0" />
+                              {item.count > 0 && (
+                                <CountBadge count={item.count} className="static shrink-0" />
                               )}
                             </>
                           ) : item.count !== undefined ? (
@@ -348,7 +348,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -385,7 +385,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -422,7 +422,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -442,7 +442,7 @@ export function AppSidebar() {
                        (e.currentTarget as HTMLButtonElement).blur();
                        if (isMobile) setOpenMobile(false);
                      }}
-                     className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
+                     className="flex items-center gap-3 w-full outline-none focus:outline-none"
                    >
                      <Lightbulb className="h-4 w-4" />
                      {!collapsed && <span className="font-medium">Hjälp &amp; tips</span>}

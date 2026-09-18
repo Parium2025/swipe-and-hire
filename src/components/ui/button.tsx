@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex appearance-none select-none items-center justify-center gap-2 whitespace-nowrap text-sm font-medium outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0 active:outline-hidden active:ring-0 active:ring-offset-0 active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transition-all duration-150 [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]",
+  "inline-flex appearance-none select-none items-center justify-center gap-2 whitespace-nowrap text-sm font-medium outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none active:ring-0 active:ring-offset-0 active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transition-all duration-150 [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]",
   {
     variants: {
       variant: {
@@ -25,25 +25,25 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 md:hover:underline active:opacity-70",
         // 🎨 Glassmorphism oval style - with touch feedback
         glass:
-          "rounded-full bg-white/[0.07] border border-white/20 text-white [transform:translateZ(0)] [backface-visibility:hidden] focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:border-white/30",
+          "rounded-full bg-white/[0.07] border border-white/20 text-white [transform:translateZ(0)] [backface-visibility:hidden] focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:border-white/30",
         // Glass variant with amber accent (for save/warning actions)
         glassAmber:
-          "rounded-full bg-amber-500/20 backdrop-blur-xs border border-amber-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:bg-amber-500/40",
+          "rounded-full bg-amber-500/20 backdrop-blur-sm border border-amber-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-amber-500/40",
         // Glass variant with green accent (for success/confirm actions)
         glassGreen:
-          "rounded-full bg-green-500/20 backdrop-blur-xs border border-green-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:bg-green-500/40",
+          "rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-green-500/40",
         // Glass variant with red accent (for destructive actions)
         glassRed:
-          "rounded-full bg-red-500/20 backdrop-blur-xs border border-red-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:bg-red-500/40",
+          "rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-red-500/40",
         // Glass variant with blue accent (for info/primary actions)
         glassBlue:
-          "rounded-full bg-blue-500/20 backdrop-blur-xs border border-blue-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:bg-blue-500/40",
+          "rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-blue-500/40",
         // Glass variant with yellow accent (for warning/reviewing actions)
         glassYellow:
-          "rounded-full bg-yellow-500/20 backdrop-blur-xs border border-yellow-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:bg-yellow-500/40",
+          "rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-yellow-500/40",
         // Glass variant with purple accent (for messaging/communication actions)
         glassPurple:
-          "rounded-full bg-purple-500/20 backdrop-blur-xs border border-purple-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden active:scale-[0.97] active:bg-purple-500/40",
+          "rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-purple-500/40",
       },
       size: {
         default: "h-[var(--control-height)] px-4 py-2",

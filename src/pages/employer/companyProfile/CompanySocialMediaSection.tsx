@@ -122,9 +122,9 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
           {links.map((link, index) => {
             const Icon = getPlatformIcon(link.platform);
             return (
-              <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
+              <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <Icon className="h-4 w-4 text-white shrink-0" />
+                  <Icon className="h-4 w-4 text-white flex-shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
                     <a 
@@ -138,7 +138,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
                       <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">
                         {link.url}
                       </span>
-                      <ExternalLink className="h-3 w-3 shrink-0" />
+                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
                     </a>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
                     e.stopPropagation();
                     onRemoveLinkClick(index);
                   }}
-                  className="border-destructive/40 bg-destructive/20 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white shrink-0"
+                  className="border-destructive/40 bg-destructive/20 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white flex-shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -169,7 +169,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
               <span className="text-sm text-white truncate">
                 {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
               </span>
-              <ChevronDown className="h-4 w-4 text-white shrink-0" />
+              <ChevronDown className="h-4 w-4 text-white flex-shrink-0" />
             </div>
             
             {platformMenuOpen && (
@@ -186,10 +186,10 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
                       }}
                       className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors flex items-center gap-3"
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
+                      <Icon className="h-4 w-4 flex-shrink-0" />
                       <span className="flex-1 font-medium">{platform.label}</span>
                       {newSocialLink.platform === platform.value && (
-                        <Check className="h-4 w-4 text-green-400 shrink-0" />
+                        <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
                       )}
                     </button>
                   );

@@ -80,7 +80,7 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
   const salaryValue = formatSalary(salaryMin, salaryMax, salaryType);
 
   return (
-    <div className="bg-white/10 backdrop-blur-xs rounded-lg p-4 overflow-hidden">
+    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
       <h2 className="text-section-title mb-2">Detaljer om tjänsten</h2>
       <div className="flex flex-col">
         <div className={rowClass}>

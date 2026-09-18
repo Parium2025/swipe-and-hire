@@ -70,7 +70,7 @@ const QuestionItem = memo(({
           : 'text-white hover:text-white'
       }`}
     >
-      <MessageSquare className="h-3.5 w-3.5 mt-0.5 shrink-0 text-white" />
+      <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-white" />
       <div className="flex-1 min-w-0">
         <p ref={textRef} className="min-w-0 flex-1 truncate text-sm leading-tight text-white">{question.question_text}</p>
         {isSelected && (
@@ -276,7 +276,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
 
   // Dropdown styling matching nav dropdowns - left aligned
   const dropdownContentClass = "min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0";
-  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15  focus-visible:bg-white/15 focus:outline-hidden rounded-md px-3 py-3 text-sm transition-colors min-h-[44px]";
+  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15  focus-visible:bg-white/15 focus:outline-none rounded-md px-3 py-3 text-sm transition-colors min-h-[44px]";
 
   // chipsOnly mode: only render the filter chips
   if (chipsOnly) {
@@ -289,7 +289,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           return (
             <button
               key={filter.question}
-              className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-xs max-w-[240px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
+              className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[240px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
             >
               <TruncatedText
                 text={fullText}
@@ -301,7 +301,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                   e.stopPropagation();
                   removeFilter(filter.question);
                 }}
-                className="ml-0.5 hover:text-red-400 transition-colors shrink-0 cursor-pointer"
+                className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
               >
                 <X className="h-3 w-3" />
               </span>
@@ -323,7 +323,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           <button
             className={`
               flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
-              border whitespace-nowrap min-w-0 shrink-0
+              border whitespace-nowrap min-w-0 flex-shrink-0
               ${open || hasFilters 
                 ? 'bg-white/20 border-white/30 text-white' 
                 : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
@@ -351,7 +351,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                 placeholder="Sök efter fråga..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-7 pr-2 py-1 bg-transparent border-0 text-white placeholder:text-white/50 text-sm focus:outline-hidden focus:ring-0"
+                className="w-full pl-7 pr-2 py-1 bg-transparent border-0 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-0"
               />
             </div>
           </div>
@@ -409,7 +409,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                               {/* Alla option */}
                                 <button
                                 onClick={() => setAllAnswers(question.question_text)}
-                                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-hidden min-h-[40px] ${
+                                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-none min-h-[40px] ${
                                   allSelected
                                     ? 'bg-white/15 text-white'
                                     : 'hover:bg-white/15  focus-visible:bg-white/15 text-white'
@@ -429,7 +429,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                                   <button
                                     key={option}
                                     onClick={() => toggleAnswer(question.question_text, option, options)}
-                                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-hidden min-h-[40px] ${
+                                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-none min-h-[40px] ${
                                       isOptionSelected
                                         ? 'bg-white/15 text-white'
                                         : 'hover:bg-white/15  focus-visible:bg-white/15 text-white'
@@ -499,18 +499,18 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
         const chipContent = (
           <button
             key={filter.question}
-            className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-xs max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
+            className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
           >
             <span className="truncate min-w-0">
               {filter.question}
             </span>
-            <span className="shrink-0 text-white">: {displayText}</span>
+            <span className="flex-shrink-0 text-white">: {displayText}</span>
             <span
               onClick={(e) => {
                 e.stopPropagation();
                 removeFilter(filter.question);
               }}
-              className="ml-0.5 hover:text-red-400 transition-colors shrink-0 cursor-pointer"
+              className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
             >
               <X className="h-3 w-3" />
             </span>

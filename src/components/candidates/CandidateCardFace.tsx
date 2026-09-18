@@ -92,11 +92,11 @@ export const CandidateCardFace = memo(function CandidateCardFace({
               posterUrl={posterUrl || undefined}
               userInitials={initials}
               alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
-              circleClassName={`${circleClass} bg-white/10 backdrop-blur-xs`}
+              circleClassName={`${circleClass} bg-white/10 backdrop-blur-sm`}
               barClassName="w-[min(56vw,14rem)]"
             />
           ) : stillImage ? (
-            <Avatar className={`${circleClass} bg-white/10 backdrop-blur-xs`}>
+            <Avatar className={`${circleClass} bg-white/10 backdrop-blur-sm`}>
               <AvatarImage
                 src={stillImage}
                 alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
@@ -107,7 +107,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="flex h-[min(56vw,14rem)] w-[min(56vw,14rem)] items-center justify-center overflow-hidden rounded-full border-4 border-white/30 bg-white/10 shadow-2xl backdrop-blur-xs">
+            <div className="flex h-[min(56vw,14rem)] w-[min(56vw,14rem)] items-center justify-center overflow-hidden rounded-full border-4 border-white/30 bg-white/10 shadow-2xl backdrop-blur-sm">
               <span className="text-5xl font-bold text-white">{initials}</span>
             </div>
           )}

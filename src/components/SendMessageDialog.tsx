@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Mail, MessageSquare, Send, Smartphone, X } from 'lucide-react';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCreateConversation } from '@/hooks/useConversations';
-import { useNavigate } from '@/lib/router-compat';
+import { useNavigate } from 'react-router-dom';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import {
   AlertDialog,
@@ -315,7 +315,7 @@ export function SendMessageDialog({
           <AnimatedBackground showBubbles={false} />
 
           <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
-            <div className="relative flex items-center justify-center p-4 border-b border-white/20 shrink-0 bg-background/10">
+            <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
               <h2 className="text-white text-lg font-semibold flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
                 {dialogTitle}
@@ -405,7 +405,7 @@ export function SendMessageDialog({
                 value={message}
                 onChange={(e) => handleMessageChange(e.target.value)}
                   placeholder="Skriv ditt meddelande..."
-                  className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 focus:border-white/20 text-white placeholder:text-white/50 resize-y text-base outline-hidden focus:outline-hidden focus-visible:outline-hidden ring-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 transition-none"
+                  className="h-[180px] md:h-[220px] min-h-[180px] md:min-h-[220px] bg-white/10 border-white/20 focus:border-white/20 text-white placeholder:text-white/50 resize-y text-base outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 transition-none"
               />
               </div>
 
@@ -440,7 +440,7 @@ export function SendMessageDialog({
       <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
         <AlertDialogContentNoFocus
           elevated={elevated}
-          className="max-w-lg bg-white/10 backdrop-blur-xs border-white/20 text-white shadow-lg overflow-hidden"
+          className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden"
         >
           <AlertDialogHeader className="text-center">
             <AlertDialogTitle className="text-center">Osparade ändringar</AlertDialogTitle>
@@ -453,7 +453,7 @@ export function SendMessageDialog({
             <AlertDialogCancel
               onClick={() => setShowDiscardConfirm(false)}
               {...noFocusRingProps}
-              className="order-2 sm:order-first w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 outline-hidden focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="order-2 sm:order-first w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-white/5 backdrop-blur-[2px] border-white/20 text-white transition-all duration-300 md:hover:bg-white/15 md:hover:text-white md:hover:border-white/50 mt-0 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Fortsätt skriva
             </AlertDialogCancel>
@@ -461,7 +461,7 @@ export function SendMessageDialog({
             <AlertDialogAction
               onClick={handleDiscardAndClose}
               {...noFocusRingProps}
-              className="order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-xs text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap outline-hidden focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Lämna utan att spara
             </AlertDialogAction>

@@ -13,9 +13,9 @@ export interface HrNewsItem {
   gradient: string | null;
   news_date: string;
   created_at: string;
-  order_index: number | null;
+  order_index: number;
   published_at: string | null;
-  is_translated?: boolean | null;
+  is_translated?: boolean;
 }
 
 // LocalStorage cache for instant load - syncs based on cron schedule

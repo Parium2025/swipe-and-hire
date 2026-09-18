@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { useLocation, useNavigationType } from '@/lib/router-compat';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import {
   getRestorableScrollContainer,
   readPositions,

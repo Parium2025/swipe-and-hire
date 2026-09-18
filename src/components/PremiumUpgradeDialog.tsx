@@ -42,9 +42,9 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="bg-parium-gradient backdrop-blur-xs border-2 border-primary/40 text-white max-w-sm mx-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <DialogContentNoFocus className="bg-parium-gradient backdrop-blur-sm border-2 border-primary/40 text-white max-w-sm mx-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-primary/20 backdrop-blur-xs flex items-center justify-center border border-white/20">
+          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
             <Crown className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-xl font-bold text-white">
@@ -56,7 +56,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
               <span className="font-medium text-sm leading-relaxed block text-white">
                 För att uppgradera till Premium,<br className="sm:hidden" /> besök vår webbplats
               </span>
-              <div className="bg-white/10 backdrop-blur-xs rounded-lg p-3 border border-primary/40 mx-auto w-fit">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-primary/40 mx-auto w-fit">
                 <p className="text-lg font-bold text-white tracking-wide">
                   parium.se
                 </p>
@@ -69,7 +69,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
                 <p className="text-sm leading-relaxed">
                   Du kan uppgradera direkt här på webben eller besöka:
                 </p>
-                <div className="bg-white/10 backdrop-blur-xs rounded-lg p-3 border border-primary/40 mx-auto w-fit">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-primary/40 mx-auto w-fit">
                   <p className="text-lg font-bold text-white tracking-wide">
                     parium.se
                   </p>
@@ -90,7 +90,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
                 onClick={() => onOpenChange(false)}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="flex-1 text-sm py-2 transition-colors duration-300 focus:outline-hidden focus:ring-0"
+                className="flex-1 text-sm py-2 transition-colors duration-300 focus:outline-none focus:ring-0"
               >
                 Stäng
               </Button>
@@ -99,7 +99,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
                 onClick={handleUpgrade}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="flex-1 text-sm py-2 transition-colors duration-300 focus:outline-hidden focus:ring-0"
+                className="flex-1 text-sm py-2 transition-colors duration-300 focus:outline-none focus:ring-0"
               >
                 Nu kör vi!
               </Button>
@@ -110,7 +110,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
               onClick={() => onOpenChange(false)}
               onMouseDown={(e) => e.currentTarget.blur()}
               onMouseUp={(e) => e.currentTarget.blur()}
-              className="w-full text-sm py-2 transition-colors duration-300 focus:outline-hidden focus:ring-0"
+              className="w-full text-sm py-2 transition-colors duration-300 focus:outline-none focus:ring-0"
             >
               Nu kör vi!
             </Button>
