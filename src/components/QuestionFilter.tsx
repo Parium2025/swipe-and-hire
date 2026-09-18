@@ -159,9 +159,15 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
       const content = popoverContentRef.current;
       if (!content) return;
 
+      // Inside an embedded preview frame visualViewport can describe the outer
+      // browser window instead of this document, which would shift the panel
+      // sideways. Only trust it when it matches this document's own width.
       const viewport = window.visualViewport;
-      const viewportLeft = viewport?.offsetLeft ?? 0;
-      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const layoutWidth = document.documentElement.clientWidth || window.innerWidth;
+      const trustVisualViewport =
+        !!viewport && Math.abs(viewport.width - layoutWidth) <= 40;
+      const viewportLeft = trustVisualViewport ? viewport!.offsetLeft : 0;
+      const viewportWidth = trustVisualViewport ? viewport!.width : layoutWidth;
       const bounds = content.getBoundingClientRect();
       const currentShift = Number.parseFloat(content.style.getPropertyValue('--question-filter-mobile-shift')) || 0;
       const nextShift = currentShift + viewportLeft + viewportWidth / 2 - (bounds.left + bounds.width / 2);

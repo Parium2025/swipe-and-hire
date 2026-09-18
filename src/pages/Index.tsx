@@ -251,12 +251,13 @@ const CandidatesContent = () => {
                   onChange={setQuestionFilters}
                   hideChips
                 />
+                {/* Exakt samma struktur som "Filtrera på frågor" så knapparna
+                    beter sig identiskt och aldrig blinkar vid tryck utanför. */}
                 <button
                   onClick={() => setSelectionMode(prev => !prev)}
-                  onMouseDown={(e) => e.preventDefault()}
                   className={`
                     flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all
-                    border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none
+                    border whitespace-nowrap min-w-0 flex-shrink-0
                     ${selectionMode 
                       ? 'bg-white/20 border-white/30 text-white' 
                       : 'bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/50'
