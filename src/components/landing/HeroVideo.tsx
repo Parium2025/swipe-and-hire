@@ -467,9 +467,9 @@ const HeroVideo = () => {
   }, []);
 
   return (
-    // Videon startar under iPhones statusrad: den ytan lämnas åt sidans grå
-    // bakgrund (#2a2a2a) så iOS Safari samplar grått i stället för videons
-    // svarta pixlar. Layouten i övrigt är oförändrad.
+    // Videon startar under iPhones statusrad. LandingHero ligger nu vid
+    // viewportens verkliga topp, så avståndet upphävs inte av en negativ
+    // safe-area-marginal och Safari ser sidans grå bakgrund ovanför videon.
     <div
       className="absolute inset-0 z-0 overflow-hidden bg-black"
       style={{ top: 'env(safe-area-inset-top, 0px)' }}
