@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback, memo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -145,6 +145,41 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const popoverContentRef = useRef<HTMLDivElement>(null);
+
+  // Radix keeps the popover beside its trigger. On narrow touch screens that
+  // can leave the wide panel visually off-centre, so centre only this mobile
+  // overlay against the visible viewport (including the iOS keyboard viewport).
+  useLayoutEffect(() => {
+    if (!open || !window.matchMedia('(any-pointer: coarse), (hover: none), (any-hover: none)').matches) return;
+
+    let frameId: number | null = null;
+    const centerPopover = () => {
+      const content = popoverContentRef.current;
+      if (!content) return;
+
+      const viewport = window.visualViewport;
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const bounds = content.getBoundingClientRect();
+      const currentShift = Number.parseFloat(content.style.getPropertyValue('--question-filter-mobile-shift')) || 0;
+      const nextShift = currentShift + viewportLeft + viewportWidth / 2 - (bounds.left + bounds.width / 2);
+      content.style.setProperty('--question-filter-mobile-shift', `${nextShift}px`);
+    };
+
+    centerPopover();
+    frameId = requestAnimationFrame(centerPopover);
+    window.addEventListener('resize', centerPopover);
+    window.visualViewport?.addEventListener('resize', centerPopover);
+    window.visualViewport?.addEventListener('scroll', centerPopover);
+
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', centerPopover);
+      window.visualViewport?.removeEventListener('resize', centerPopover);
+      window.visualViewport?.removeEventListener('scroll', centerPopover);
+    };
+  }, [open]);
 
   // Throttled scroll indicator to avoid excessive re-renders on touch
   const scrollRAF = useRef<number | null>(null);
@@ -362,6 +397,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           </button>
         </PopoverTrigger>
         <PopoverContent 
+          ref={popoverContentRef}
           align="start" 
           className={dropdownContentClass}
           sideOffset={8}

@@ -1080,6 +1080,7 @@ All colors MUST be HSL.
       height: min(30rem, var(--radix-popover-content-available-height));
       max-height: var(--radix-popover-content-available-height);
       min-height: 0;
+      translate: var(--question-filter-mobile-shift, 0px) 0;
     }
 
     .question-filter-header,
