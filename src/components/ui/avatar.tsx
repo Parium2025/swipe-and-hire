@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Building2, UserRound } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { fetchPriority } from '@/lib/fetchPriority';
@@ -133,7 +132,7 @@ interface AvatarFallbackProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
-  ({ className, delayMs, fallbackType = 'person', children: _children, ...props }, ref) => {
+  ({ className, delayMs, fallbackType: _fallbackType, children, ...props }, ref) => {
     const context = React.useContext(AvatarContext);
     const [showFallback, setShowFallback] = React.useState(!delayMs);
     
@@ -175,11 +174,7 @@ const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
         )}
         {...props}
       >
-        {fallbackType === 'company' ? (
-          <Building2 className="h-[45%] w-[45%]" aria-hidden="true" />
-        ) : (
-          <UserRound className="h-[48%] w-[48%]" aria-hidden="true" />
-        )}
+        {children}
       </span>
     );
   }

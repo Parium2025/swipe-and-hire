@@ -386,8 +386,8 @@ function JobSeekerTopNav() {
                     </AvatarFallback>
                   </Avatar>
                 ) : profile ? (
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-white ring-2 ring-white/20 relative z-10">
-                    <User className="h-3.5 w-3.5" aria-hidden="true" />
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20 relative z-10">
+                    {getUserInitials()}
                   </div>
                 ) : (
                   <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20 relative z-10" />
@@ -416,8 +416,8 @@ function JobSeekerTopNav() {
                     </AvatarFallback>
                   </Avatar>
                 ) : (
-                  <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white ring-2 ring-white/20">
-                    <User className="h-5 w-5" aria-hidden="true" />
+                  <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold text-white ring-2 ring-white/20">
+                    {getUserInitials()}
                   </div>
                 )}
               <div>
