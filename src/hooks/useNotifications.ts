@@ -36,6 +36,20 @@ const getCached = (userId: string): AppNotification[] | null => {
   return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
 };
 
+/**
+ * Klockan ska vara på plats direkt vid uppstart — inte några sekunder efter.
+ * Auth tar en stund att lösa ut, och tidigare låg cacheläsningen bakom `user`,
+ * så badgen var tom tills sessionen var klar. Cachen rensas vid utloggning
+ * (se useEagerRatingsPreload), så den tillhör alltid det konto som är på väg in.
+ * Skulle auth ändå lösa ut ett annat konto nollställs den direkt i effekten nedan.
+ */
+const getCachedBeforeAuth = (): AppNotification[] | null => {
+  const cached = safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
+    return typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
+  });
+  return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
+};
+
 const setCache = (userId: string, items: AppNotification[]) => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ userId, items, ts: Date.now() }));
@@ -51,11 +65,11 @@ export function useNotifications() {
   }, [user?.id]);
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     if (user) return getCached(user.id) || [];
-    return [];
+    return getCachedBeforeAuth() || [];
   });
   const [unreadCount, setUnreadCount] = useState(() => {
-    if (!user) return 0;
-    return (getCached(user.id) || []).filter(n => !n.is_read).length;
+    const seed = user ? getCached(user.id) : getCachedBeforeAuth();
+    return (seed || []).filter(n => !n.is_read).length;
   });
 
   // Hydrate from cache on user change
