@@ -1109,6 +1109,16 @@ All colors MUST be HSL.
     }
   }
 
+  /* Centre the full-width question filter panel on every narrow screen,
+     regardless of pointer type — desktop browsers previewing the mobile
+     layout use a mouse, so pointer-only rules would leave the panel
+     anchored beside its trigger instead of centred. */
+  @media (max-width: 639.98px) {
+    .question-filter-content {
+      translate: var(--question-filter-mobile-shift, 0px) 0;
+    }
+  }
+
   /* Desktop-only question filter sizing. A definite height is required here:
      max-height alone lets the question list keep its natural height, which
      clips it inside the popover instead of giving the mouse wheel a scroll
