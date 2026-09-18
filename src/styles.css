@@ -1057,7 +1057,7 @@
      We previously used these to hard-lock scrolling on /auth for pull-to-refresh.
      That caused persistent “stuck scroll” issues across devices/browsers.
      Keep selectors for backwards compatibility, but never block scrolling here. */
-  &html {
+  html& {
     position: static;
     inset: auto;
     width: auto;
@@ -1078,7 +1078,7 @@
     -webkit-overflow-scrolling: touch;
   }
   @media (display-mode: standalone) {
-    &html {
+    html& {
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     & body {
