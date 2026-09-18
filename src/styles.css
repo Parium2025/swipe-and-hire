@@ -150,26 +150,26 @@
 }
 
 @utility h-11 {
-  .premium-edit-shell &input {
+  .premium-edit-shell input& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
   }
 
-  .premium-edit-shell &div.cursor-pointer:not(.aspect-square) {
+  .premium-edit-shell div.cursor-pointer:not(.aspect-square)& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
 
-  .premium-edit-shell &button:not(.aspect-square) {
+  .premium-edit-shell button:not(.aspect-square)& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
 }
 
 @utility cursor-pointer {
-  .premium-edit-shell &div.h-11:not(.aspect-square) {
+  .premium-edit-shell div.h-11:not(.aspect-square)& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
@@ -1057,7 +1057,7 @@
      We previously used these to hard-lock scrolling on /auth for pull-to-refresh.
      That caused persistent “stuck scroll” issues across devices/browsers.
      Keep selectors for backwards compatibility, but never block scrolling here. */
-  &html {
+  html& {
     position: static;
     inset: auto;
     width: auto;
@@ -1078,7 +1078,7 @@
     -webkit-overflow-scrolling: touch;
   }
   @media (display-mode: standalone) {
-    &html {
+    html& {
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     & body {

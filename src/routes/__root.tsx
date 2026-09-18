@@ -774,26 +774,24 @@ const AppShell = () => {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
-    <RootShell>
-      <GlobalErrorBoundary>
-        <HelmetProvider>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <ConversationsProvider>
-                <OnlineStatusProvider>
-                  <TooltipProvider delayDuration={0}>
-                    <Toaster />
-                    <AppFailureMonitor />
-                    <CriteriaEvalProgress />
-                    <AppShell />
-                  </TooltipProvider>
-                </OnlineStatusProvider>
-              </ConversationsProvider>
-            </AuthProvider>
-          </QueryClientProvider>
-        </HelmetProvider>
-      </GlobalErrorBoundary>
-    </RootShell>
+    <GlobalErrorBoundary>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ConversationsProvider>
+              <OnlineStatusProvider>
+                <TooltipProvider delayDuration={0}>
+                  <Toaster />
+                  <AppFailureMonitor />
+                  <CriteriaEvalProgress />
+                  <AppShell />
+                </TooltipProvider>
+              </OnlineStatusProvider>
+            </ConversationsProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </GlobalErrorBoundary>
   );
 }
 
@@ -806,30 +804,28 @@ function RootErrorComponent({ error, reset }: { error: Error; reset: () => void 
   }, [error]);
 
   return (
-    <RootShell>
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center bg-background text-foreground">
-        <h1 className="text-xl font-semibold text-white">Något gick fel</h1>
-        <p className="text-sm text-white max-w-xs">
-          Sidan kunde inte visas just nu. Försök igen eller gå tillbaka till startsidan.
-        </p>
-        <div className="flex gap-3 mt-2">
-          <button
-            className="px-6 py-3 rounded-full border border-white/25 bg-white/10 text-white font-semibold"
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-          >
-            Försök igen
-          </button>
-          <a
-            className="px-6 py-3 rounded-full border border-white/25 text-white font-semibold"
-            href="/"
-          >
-            Till startsidan
-          </a>
-        </div>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center bg-background text-foreground">
+      <h1 className="text-xl font-semibold text-white">Något gick fel</h1>
+      <p className="text-sm text-white max-w-xs">
+        Sidan kunde inte visas just nu. Försök igen eller gå tillbaka till startsidan.
+      </p>
+      <div className="flex gap-3 mt-2">
+        <button
+          className="px-6 py-3 rounded-full border border-white/25 bg-white/10 text-white font-semibold"
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
+        >
+          Försök igen
+        </button>
+        <a
+          className="px-6 py-3 rounded-full border border-white/25 text-white font-semibold"
+          href="/"
+        >
+          Till startsidan
+        </a>
       </div>
-    </RootShell>
+    </div>
   );
 }
