@@ -331,7 +331,7 @@ export function useBatchPrefetchReviews() {
       const result: CompanyReviewsData = {
         reviews,
         avgRating: stats?.avg ?? (reviews.length > 0
-          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          ? reviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / reviews.length
           : undefined),
         reviewCount: stats?.total ?? reviews.length,
       };

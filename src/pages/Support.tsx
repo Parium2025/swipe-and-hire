@@ -194,7 +194,7 @@ const Support = () => {
     { value: 'other', label: 'Övrigt' },
   ];
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string | null) => {
     switch (status) {
       case 'open':
         return <AlertCircle className="h-4 w-4 text-yellow-500" />;
@@ -207,7 +207,7 @@ const Support = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'open':
         return 'bg-yellow-500/20 text-yellow-300';
@@ -220,7 +220,7 @@ const Support = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string | null) => {
     switch (status) {
       case 'open':
         return 'Öppen';

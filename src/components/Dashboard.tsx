@@ -327,7 +327,7 @@ const Dashboard = memo(() => {
         selectedRecruiterId={selectedRecruiterId}
         onRecruiterChange={setSelectedRecruiterId}
         placeholder="Sök efter titel, plats, anställningstyp, rekryterare..."
-        companyName={profile?.company_name}
+        companyName={profile?.company_name ?? undefined}
         hasDrafts={false}
       />
 

@@ -242,7 +242,7 @@ const JobApplication = () => {
       const { data: jobData, error: jobError } = await supabase
         .from('job_postings')
         .select('*')
-        .eq('id', jobId)
+        .eq('id', jobId as string)
         .eq('is_active', true)
         .maybeSingle();
 
@@ -599,11 +599,11 @@ const JobApplication = () => {
         return (
           <Input
             type="number"
-            placeholder={question.placeholder_text}
+            placeholder={question.placeholder_text ?? undefined}
             value={value}
             onChange={(e) => handleCustomAnswerChange(question.id, e.target.value)}
-            min={question.min_value}
-            max={question.max_value}
+            min={question.min_value ?? undefined}
+            max={question.max_value ?? undefined}
           />
         );
 
@@ -653,7 +653,7 @@ const JobApplication = () => {
       default:
         return (
           <Input
-            placeholder={question.placeholder_text}
+            placeholder={question.placeholder_text ?? undefined}
             value={value}
             onChange={(e) => handleCustomAnswerChange(question.id, e.target.value)}
           />

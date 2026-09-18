@@ -323,7 +323,7 @@ const JobTemplatesOverview = () => {
                 
                 <div className="grid grid-cols-2 gap-4 text-sm text-white">
                   <div>
-                    <span className="font-medium">Lön:</span> {formatSalary(template.salary_min, template.salary_max)}
+                    <span className="font-medium">Lön:</span> {formatSalary(template.salary_min ?? undefined, template.salary_max ?? undefined)}
                   </div>
                   <div>
                     <span className="font-medium">Anställningsform:</span> {template.employment_type || 'Ej angivet'}
