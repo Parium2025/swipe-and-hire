@@ -3993,6 +3993,14 @@ export type Database = {
         Args: { answer: Json }
         Returns: boolean
       }
+      application_matches_question_filters: {
+        Args: {
+          p_custom_answers: Json
+          p_filters: Json
+          p_questions_snapshot: Json
+        }
+        Returns: boolean
+      }
       auth_email_registered: {
         Args: { _email: string }
         Returns: {
