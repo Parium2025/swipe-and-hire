@@ -385,6 +385,12 @@ export const BookInterviewDialog = ({
         throw error;
       }
 
+      if (!interviewRow) {
+        // Skyddsnät: utan rad kan varken mejl eller kalender kopplas rätt.
+        throw new Error('Intervjun kunde inte sparas. Försök igen.');
+      }
+
+
 
       // Spara länken som standard om rekryteraren bad om det.
       if (locationType === 'video' && saveVideoLinkAsDefault && videoLinkIsValid && videoLinkDiffersFromDefault) {
