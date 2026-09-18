@@ -111,31 +111,39 @@ export function useNotifications() {
 
   useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
-  const loadMutedTypes = useCallback(async () => {
-    if (!user) return;
+  const loadMutedTypes = useCallback(async (): Promise<Set<string>> => {
+    if (!user) return mutedTypesRef.current;
     const { data } = await supabase
       .from('notification_preferences')
       .select('notification_type, in_app_enabled')
       .eq('user_id', user.id);
-    mutedTypesRef.current = new Set(
+    const next = new Set(
       (data ?? []).filter((p) => p.in_app_enabled === false).map((p) => p.notification_type)
     );
+    mutedTypesRef.current = next;
+    return next;
   }, [user]);
+
+  // Skyddar mot att en avstängd typ triggar oändliga omhämtningar.
+  const mutedRetryRef = useRef(false);
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     try {
-      await loadMutedTypes();
-      const excluded = Array.from(
-        new Set([...mutedTypesRef.current, ...HIDDEN_TYPES])
-      );
+      // Tidigare väntade vi på avstängda typer INNAN notiserna ens började
+      // hämtas — ett extra serverhopp framför varje laddning. Nu körs alla tre
+      // frågorna parallellt med senast kända avstängda typer, och skulle de ha
+      // ändrats görs exakt en omhämtning.
+      const knownMuted = new Set(mutedTypesRef.current);
+      const mutedPromise = loadMutedTypes();
+      const excluded = Array.from(new Set([...knownMuted, ...HIDDEN_TYPES]));
       let query = supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id);
       if (excluded.length) query = query.not('type', 'in', `(${excluded.join(',')})`);
 
-      const [{ data, error }, countRes] = await Promise.all([
+      const [{ data, error }, countRes, freshMuted] = await Promise.all([
         query.order('created_at', { ascending: false }).order('id', { ascending: false }).limit(PAGE_SIZE),
         (() => {
           let c = supabase
@@ -146,6 +154,7 @@ export function useNotifications() {
           if (excluded.length) c = c.not('type', 'in', `(${excluded.join(',')})`);
           return c;
         })(),
+        mutedPromise.catch(() => knownMuted),
       ]);
 
       if (error) throw error;
@@ -157,11 +166,26 @@ export function useNotifications() {
       setHasMore(items.length === PAGE_SIZE);
       setCache(user.id, items);
       setHasError(false);
+
+      const changed =
+        freshMuted.size !== knownMuted.size ||
+        Array.from(freshMuted).some((t) => !knownMuted.has(t));
+      if (changed && !mutedRetryRef.current) {
+        mutedRetryRef.current = true;
+        try {
+          await fetchNotificationsRef.current?.();
+        } finally {
+          mutedRetryRef.current = false;
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
       setHasError(true);
     }
   }, [user, loadMutedTypes]);
+
+  const fetchNotificationsRef = useRef<(() => Promise<void>) | null>(null);
+  useEffect(() => { fetchNotificationsRef.current = fetchNotifications; }, [fetchNotifications]);
 
   // Oändlig scroll: hämta nästa sida med keyset-paginering (created_at + id),
   // vilket håller sig snabbt även vid tiotusentals notiser.
