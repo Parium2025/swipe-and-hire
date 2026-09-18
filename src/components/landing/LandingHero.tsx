@@ -216,8 +216,18 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       }}
       aria-labelledby="landing-hero-heading"
     >
-      {/* Background video — fills entire viewport including safe areas */}
-      <HeroVideo />
+      {/* Background video — fills entire viewport including safe areas.
+          Tonas ut tillsammans med exit-animationen: annars blir videon ensam
+          kvar helskärm i några bildrutor mellan att texten glidit ut och att
+          målsidan monteras — synligt som en blixt vid knapptrycket. */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ opacity: 1 }}
+        animate={selectedRole ? { opacity: 0 } : { opacity: 1 }}
+        transition={{ duration: 0.55, ease }}
+      >
+        <HeroVideo />
+      </motion.div>
 
       {/* iOS Safari bottom-toolbar färg styrs via body.landing-video-chrome
           regeln i index.css — den färgar body grå så Safari samplar grått. */}
