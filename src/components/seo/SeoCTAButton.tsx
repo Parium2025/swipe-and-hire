@@ -1,11 +1,11 @@
 import { forwardRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
 interface SeoCTAButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'children' | 'href'> {
   /** Knapptext. Default: "Skapa min profil idag" */
   label?: string;
   /** Vart användaren ska. Default: /auth */
@@ -18,14 +18,17 @@ interface SeoCTAButtonProps
   variant?: 'primary' | 'ghost';
   /** React Router state att skicka med (t.ex. { mode: 'signup' }) */
   navState?: Record<string, unknown>;
+  /** Inaktiverad. Behålls för bakåtkompatibilitet. */
+  disabled?: boolean;
 }
 
 /**
  * Pariums STANDARD CTA-knapp för alla SEO-landningssidor.
  * Exakt samma stil som hero-knappen på /jobbsokare ("Skapa min profil idag").
- * Använd för alla primära konverteringspunkter på publika sidor.
+ * Renderas som en riktig länk (<a>) så att sökmotorer kan följa den och
+ * användaren kan öppna i ny flik — utseendet är identiskt med tidigare knapp.
  */
-const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
+const SeoCTAButton = forwardRef<HTMLAnchorElement, SeoCTAButtonProps>(
   (
     {
       label = 'Skapa min profil idag',
@@ -36,6 +39,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
       navState,
       className,
       onClick,
+      disabled,
       ...rest
     },
     ref
@@ -46,6 +50,7 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
     const { user } = useAuth();
     const isAuthed = !!user;
     const resolvedLabel = isAuthed ? 'Öppna Parium' : label;
+    const target = isAuthed ? '/dashboard' : to;
     const sizing =
       size === 'lg'
         ? 'min-h-[52px] px-8 text-base sm:text-lg'
@@ -56,24 +61,33 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
         ? 'bg-secondary text-white focus-visible:ring-secondary'
         : 'border border-white/25 bg-white/5 text-white focus-visible:ring-white/40';
 
+    // Öppna i ny flik/fönster ska fungera som på vilken länk som helst.
+    const isModified = (e: React.MouseEvent | React.PointerEvent) =>
+      e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || ('button' in e && e.button !== 0);
+
     return (
-      <button
+      <Link
         ref={ref}
-        type="button"
+        to={target}
+        state={!isAuthed && navState ? navState : undefined}
+        aria-disabled={disabled || undefined}
         onPointerDown={(e) => {
           // Snabbare svar än onClick (mobile premium-ergonomi)
-          if (rest.disabled) return;
+          if (disabled || isModified(e)) return;
           e.preventDefault();
           if (isAuthed) navigate('/dashboard');
-          else if (onClick) onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
+          else if (onClick) onClick(e as unknown as React.MouseEvent<HTMLAnchorElement>);
           else navigate(to, navState ? { state: navState } : undefined);
         }}
-        onClick={(e) => e.preventDefault()}
+        onClick={(e) => {
+          if (isModified(e)) return;
+          e.preventDefault();
+        }}
         className={cn(
           'inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-tight',
           'transition-all duration-200 active:scale-[0.98] hover:scale-[1.02]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(215_100%_12%)]',
-          'disabled:opacity-50 disabled:pointer-events-none',
+          disabled && 'opacity-50 pointer-events-none',
           sizing,
           variantClasses,
           className
@@ -83,10 +97,11 @@ const SeoCTAButton = forwardRef<HTMLButtonElement, SeoCTAButtonProps>(
       >
         {resolvedLabel}
         {showArrow && <ArrowRight className="h-4 w-4" />}
-      </button>
+      </Link>
     );
   }
 );
 SeoCTAButton.displayName = 'SeoCTAButton';
 
 export default SeoCTAButton;
+
