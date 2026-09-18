@@ -81,11 +81,11 @@ const TopChromeStrip = () => {
   // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
   // exakt över statusradens safe-area som sidorna redan paddingar för.
   const shouldShowStrip = isTouch;
-  // Toppen behöver ett något djupare överlapp än botten. iOS Safari kan annars
-  // klippa precis i mötet mellan statusytan och sidans första bildruta, vilket
-  // får samma yta att upplevas som två separata ränder. De extra 8 px ligger
-  // ovanpå sidinnehållet och flyttar därför varken navigation eller video.
-  const stripInset = isStandalone ? '30px' : '22px';
+  // Remsan täcker EXAKT statusradens safe-area i webbläsaren. Varje extra
+  // pixel nedanför safe-area lägger en andra färgad rand ovanpå sidans egen
+  // bakgrund — det var precis det som såg ut som "två ränder". I installerat
+  // app-läge finns ingen webbläsarchrome, så där behålls ett litet påslag.
+  const stripInset = isStandalone ? '8px' : '0px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
