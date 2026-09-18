@@ -238,26 +238,28 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       if (templateToEdit) return;
       
       if (data?.company_name && !formData.workplace_name) {
+        const companyName = data.company_name;
         setFormData(prev => ({
           ...prev,
-          workplace_name: data.company_name
+          workplace_name: companyName
         }));
         // Also update initialFormData to prevent false "unsaved changes"
         setInitialFormData(prev => prev ? ({
           ...prev,
-          workplace_name: data.company_name
+          workplace_name: companyName
         }) : prev);
       }
       
       if (!formData.contact_email && user.email) {
+        const email = user.email;
         setFormData(prev => ({
           ...prev,
-          contact_email: user.email
+          contact_email: email
         }));
         // Also update initialFormData to prevent false "unsaved changes"
         setInitialFormData(prev => prev ? ({
           ...prev,
-          contact_email: user.email
+          contact_email: email
         }) : prev);
       }
     };
@@ -1039,8 +1041,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
     try {
       // Hämta län och kommun från postnummer
-      let workplaceCounty = null;
-      let workplaceMunicipality = null;
+      let workplaceCounty: string | null = null;
+      let workplaceMunicipality: string | null = null;
       if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
         const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
         if (postalInfo) {

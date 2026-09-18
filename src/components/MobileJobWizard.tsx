@@ -1276,27 +1276,29 @@ const MobileJobWizard = ({
     
     // Auto-fill workplace name with company name (only for new jobs)
     if (data?.company_name && !formData.workplace_name) {
+      const companyName = data.company_name;
       setFormData(prev => ({
         ...prev,
-        workplace_name: data.company_name
+        workplace_name: companyName
       }));
       // Also update initialFormData to prevent false "unsaved changes"
       setInitialFormData(prev => prev ? ({
         ...prev,
-        workplace_name: data.company_name
+        workplace_name: companyName
       }) : prev);
     }
     
     // Auto-fill contact email if not already set (only for new jobs)
     if (!formData.contact_email && user.email) {
+      const email = user.email;
       setFormData(prev => ({
         ...prev,
-        contact_email: user.email
+        contact_email: email
       }));
       // Also update initialFormData to prevent false "unsaved changes"
       setInitialFormData(prev => prev ? ({
         ...prev,
-        contact_email: user.email
+        contact_email: email
       }) : prev);
     }
   };
