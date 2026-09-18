@@ -2540,7 +2540,7 @@ All colors MUST be HSL.
    popovers, notification centers etc.
    Standardises the bg-slate-900/85 + backdrop-blur pattern.
    ============================================ */
-.glass-panel {
+@utility glass-panel {
   @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg;
 }
 
