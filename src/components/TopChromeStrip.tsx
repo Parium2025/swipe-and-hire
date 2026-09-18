@@ -22,10 +22,9 @@ const isAuthPath = (pathname: string) => pathname === '/auth';
  * Samma problem som bottenremsan löser, samma lösning: en fixed remsa som
  * lyssnar på react-router location och alltid målar rätt ruttfärg.
  *
- * I vanlig webbläsare täcker remsan exakt safe-area (statusraden) — sidorna
- * lägger själva sin safe-area-padding, så ingen content-offset behövs.
- * I installerat app-läge (standalone) får remsan +8px extra och skjuter
- * innehållet ner via --top-chrome-content-offset (oförändrat beteende).
+ * Remsan ligger ovanför appens innehåll. Samma höjd sätts därför alltid som
+ * content-offset på touch-enheter, så att den aldrig kan täcka eller klippa
+ * toppmenyn när en webbläsare rapporterar 0 px safe-area.
  *
  * Synlig endast på touch-enheter (telefon/surfplatta). Desktop slipper.
  */
@@ -77,9 +76,9 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  // Remsan visas på alla touch-enheter. Content-offset (som skjuter ner
-  // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
-  // exakt över statusradens safe-area som sidorna redan paddingar för.
+  // Remsan visas på alla touch-enheter och dess fulla höjd reserveras ovanför
+  // appens toppmeny. Annars täcker 14 px-överlappet ikonernas överkant när
+  // Safari rapporterar safe-area som 0.
   const shouldShowStrip = isTouch;
   // Samma 14 px överlapp som BottomChromeStrip. Safe-area kan rapporteras
   // som 0 i vanlig iPhone-Safari; överlappet ser då till att remsan ändå
@@ -90,7 +89,7 @@ const TopChromeStrip = () => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isTouch && isStandalone) {
+    if (isTouch) {
       root.style.setProperty('--top-chrome-content-offset', chromeOffset);
     } else {
       root.style.removeProperty('--top-chrome-content-offset');

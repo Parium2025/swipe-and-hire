@@ -38,7 +38,7 @@ export const EmployerLogoSidebarTrigger = memo(() => {
         <div
           role="img"
           aria-label="Parium"
-          className="h-10 w-40 bg-contain bg-left bg-no-repeat pointer-events-none"
+          className="h-10 w-12 bg-contain bg-left bg-no-repeat pointer-events-none"
           style={{ backgroundImage: `url(${pariumLogoRings})` }}
         />
       </button>
