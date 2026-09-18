@@ -40,6 +40,31 @@ Deno.serve(async (req) => {
   const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders);
   if (authResp) return authResp;
 
+  // Realtidsgren: databastriggern anropar den här funktionen i samma ögonblick
+  // som en intervjutid ändras (i appen eller i arbetsgivarens kalender) och
+  // kandidaten får då direkt ett "ny tid"-mejl med ja/nej-knappar.
+  // Grenen rör inte den vanliga minutkörningen nedan.
+  try {
+    const cloned = req.clone();
+    const body = await cloned.json().catch(() => null) as
+      | { reschedule_interview_id?: string; old_scheduled_at?: string | null }
+      | null;
+    if (body?.reschedule_interview_id) {
+      const result = await sendInterviewRescheduleEmail(
+        body.reschedule_interview_id,
+        body.old_scheduled_at ?? null,
+      );
+      return new Response(JSON.stringify(result), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  } catch (rescheduleError) {
+    console.error("Ny tid-mejl misslyckades", rescheduleError);
+    return new Response(JSON.stringify({ error: "reschedule_email_failed" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   console.log("Interview reminders cron job started");
 
