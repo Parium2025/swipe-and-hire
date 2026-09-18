@@ -12,7 +12,7 @@ import {
 
 interface ProfileVideoProps {
   videoUrl: string | null;
-  coverImageUrl?: string;
+  coverImageUrl?: string | null;
   /** Automatgenererad posterbild ur videon. Används när ingen cover finns. */
   posterUrl?: string | null;
   alt?: string;
