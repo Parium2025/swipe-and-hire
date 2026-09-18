@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
+  redirect,
   HeadContent,
   Outlet,
   Scripts,
@@ -582,6 +583,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { type: "application/ld+json", children: ORG_JSONLD },
     ],
   }),
+  beforeLoad: ({ location }) => {
+    // Legacy-alias: /index renderade samma vy som /home i gamla SPA-routern,
+    // men "index" är ett reserverat filnamn i den filbaserade routern.
+    if (location.pathname === "/index") {
+      throw redirect({ to: "/home", replace: true });
+    }
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFound,
