@@ -40,18 +40,18 @@ const EmployerMobileShell = ({
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
-          <header className="shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
-            <div className="flex items-center">
+          <header className="relative shrink-0 z-40 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]" style={{ contain: 'layout style', transform: 'translateZ(0)' }}>
+            <div className="min-w-0 flex items-center justify-self-start">
               <EmployerLogoSidebarTrigger />
             </div>
             <button
               onClick={() => navigate('/home')}
-              className="absolute left-1/2 -translate-x-1/2 text-white text-base font-semibold tracking-tight select-none hover:opacity-80 active:scale-[0.97] transition-all"
+              className="min-w-0 max-w-full truncate px-2 text-white text-base font-semibold tracking-tight select-none hover:opacity-80 active:scale-[0.97] transition-all"
               aria-label="Gå till startsidan"
             >
               Parium
             </button>
-            <div className="flex items-center gap-2">
+            <div className="min-w-0 flex items-center justify-self-end gap-1 sm:gap-2">
               <button
                 onClick={() => createJobButtonRef.current?.click()}
                 className="flex items-center justify-center h-9 w-9 rounded-full text-white hover:bg-white/10 transition-colors"

@@ -10,8 +10,8 @@ import TopChromeStrip from '../TopChromeStrip';
  * färgens färg kvar högst upp. TopChromeStrip målar därför alltid rätt
  * ruttfärg över safe-area på touch-enheter — precis som BottomChromeStrip.
  *
- * Content-offset (som skjuter ner innehållet) får bara sättas i installerat
- * app-läge (standalone) — i webbläsaren hanterar sidorna safe-area själva.
+ * Content-offset ska alltid motsvara remsans höjd på touch-enheter, annars
+ * täcker överlappet toppmenyn när webbläsaren rapporterar 0 px safe-area.
  */
 const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   vi.stubGlobal(
@@ -44,7 +44,7 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar remsa över safe-area i vanlig mobilwebbläsare, utan content-offset', () => {
+  it('renderar remsa över safe-area i vanlig mobilwebbläsare med content-offset', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
     const strip = container.firstChild as HTMLElement;
@@ -54,7 +54,7 @@ describe('TopChromeStrip', () => {
     expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
-    ).toBe('');
+    ).toContain('safe-area-inset-top');
   });
 
   it('renderar ingen remsa på desktop', () => {

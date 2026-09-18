@@ -172,8 +172,8 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
-          <header className="relative shrink-0 z-40 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-            <div className="flex items-center">
+          <header className="relative shrink-0 z-40 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]">
+            <div className="min-w-0 flex items-center justify-self-start">
               <LogoSidebarTrigger />
             </div>
             {/* Centered brand name — acts as home button */}
@@ -190,13 +190,13 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
                  navigate('/home');
               }}
               aria-label="Gå till startsidan"
-               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[46%] truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
+                className="min-w-0 max-w-full truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-2 py-1 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
                style={{ WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
             >
               Parium
             </button>
 
-            <div className="relative z-10 flex items-center gap-2">
+            <div className="relative z-10 min-w-0 flex items-center justify-self-end gap-1 sm:gap-2">
 
               {/* Search button - hidden on /search-jobs */}
               {location.pathname !== '/search-jobs' && (

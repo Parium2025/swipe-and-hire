@@ -87,13 +87,13 @@ const SkeletonChrome = memo(function SkeletonChrome() {
   return (
     <>
       {/* MOBILE chrome — mirrors EmployerMobileShell header exactly:
-          logo (h-10 w-40 bg image) | absolute-centered "Parium" text |
+          logo (h-10 w-12 bg image) | centered "Parium" text |
           [Plus 9x9] [Notification 9x9] [Avatar 8x8 ring-2 rounded-full] */}
       {!isDesktop && (
-      <header className="relative shrink-0 min-h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
-        <div className={`h-10 w-40 rounded-md ${SHAPE}`} />
-        <div className={`absolute left-1/2 -translate-x-1/2 h-4 w-14 rounded ${SHAPE}`} />
-        <div className="flex items-center gap-2">
+      <header className="relative shrink-0 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]">
+        <div className={`h-10 w-12 rounded-md justify-self-start ${SHAPE}`} />
+        <div className={`h-4 w-14 rounded ${SHAPE}`} />
+        <div className="flex items-center justify-self-end gap-1 sm:gap-2">
           <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
           <div className={`h-9 w-9 rounded-full ${SHAPE}`} />
           <div className={`h-8 w-8 rounded-full ring-2 ring-white/20 ${SHAPE}`} />
