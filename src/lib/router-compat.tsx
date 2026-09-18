@@ -156,3 +156,23 @@ export const Outlet = TSOutlet;
 // ---------- NavLink (minimal) ----------
 
 export const NavLink = Link;
+
+// ---------- useNavigationType (react-router-dom compat) ----------
+
+let lastNavType: "POP" | "PUSH" | "REPLACE" = "POP";
+const subscribedHistories = new WeakSet<object>();
+
+export function useNavigationType(): "POP" | "PUSH" | "REPLACE" {
+  const router = useRouter();
+  if (typeof window !== "undefined" && router.history && !subscribedHistories.has(router.history)) {
+    subscribedHistories.add(router.history);
+    router.history.subscribe((ev: { action?: { type?: string } }) => {
+      const t = ev?.action?.type;
+      // TanStack history reports BACK/FORWARD/GO — react-router calls all of those POP.
+      lastNavType = t === "PUSH" ? "PUSH" : t === "REPLACE" ? "REPLACE" : "POP";
+    });
+  }
+  // Subscribe to location changes so callers re-render on navigation.
+  tsLocation();
+  return lastNavType;
+}
