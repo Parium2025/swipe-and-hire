@@ -14,7 +14,7 @@ function CompanyAvatarBase({ companyLogoUrl, companyName, initials }: CompanyAva
         src={companyLogoUrl || ''}
         alt={`${companyName || "Företag"} logotyp`}
       />
-      <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={150}>
+      <AvatarFallback fallbackType="company" className="bg-white/20 text-white font-semibold" delayMs={150}>
         {initials}
       </AvatarFallback>
     </Avatar>

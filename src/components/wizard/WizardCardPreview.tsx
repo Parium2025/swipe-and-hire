@@ -113,7 +113,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -158,9 +157,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               </div>
             ) : (
               <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                <span className="text-[9px] font-bold text-white/70 tracking-wide">
-                  {initials}
-                </span>
+                <Building2 className="h-3 w-3 text-white/70" aria-hidden="true" />
               </div>
             )}
           </div>
@@ -373,15 +370,14 @@ export const WizardListPreview = memo(function WizardListPreview({
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
-  const initials = useMemo(() => getInitials(companyName || 'Företag'), [companyName]);
 
   return (
     <div
-      className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain"
+      className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-none bg-card-parium snap-y snap-mandatory"
       onClick={onOpenForm}
     >
       {/* Bild-header — täcker hela monitorns vy (16/10) */}
-      <div className="relative w-full aspect-[16/10] overflow-hidden">
+      <div className="relative w-full min-h-full overflow-hidden snap-start">
         {imageUrl ? (
           <>
             <img
@@ -411,7 +407,7 @@ export const WizardListPreview = memo(function WizardListPreview({
               </div>
             ) : (
               <div className="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-[11px] font-bold text-white/60 tracking-wide">{initials}</span>
+                <Building2 className="h-4 w-4 text-white/60" aria-hidden="true" />
               </div>
             )}
             <div className="text-[9px] px-2 py-[2px] border border-white/15 bg-black/40 leading-snug inline-flex items-center max-w-[85%] rounded-full" style={overlayStyle}>
@@ -435,7 +431,7 @@ export const WizardListPreview = memo(function WizardListPreview({
       </div>
 
       {/* Info-block — under bilden, syns när man scrollar */}
-      <div className="w-full bg-[hsl(215,85%,10%)]/95 backdrop-blur-sm border-t border-white/10 px-3 py-2">
+      <div className="flex min-h-full w-full items-center bg-card-parium backdrop-blur-sm border-t border-white/10 px-3 py-2 snap-start">
         <div className="space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />

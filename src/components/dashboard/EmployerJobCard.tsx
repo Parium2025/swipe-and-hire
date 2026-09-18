@@ -135,7 +135,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       <div className="job-card-mobile-media relative w-full overflow-hidden cursor-pointer" onClick={handleMediaClick}>
 
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
@@ -198,7 +198,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
           <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
-            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/70 tracking-wide">{initials}</span>
+            <Building2 className="h-6 w-6 text-white/70" aria-hidden="true" />
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}

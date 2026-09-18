@@ -31,4 +31,7 @@
 - [x] Kalender: stoppa anrop till ej konfigurerad Outlook-klient utan 500/felruta
 - [x] Kalender: ta bort hover-effekt från samtliga kopplingsknappar
 - [x] Kalender: verifiera Google-kopplingens återkomstsida utan 404
+- [ ] Ersätt bokstavsersättningar och trasiga bildikoner med neutrala person-/företagssymboler
+- [ ] Lås datorförhandsvisningens rullning till hela, avsiktliga skärmlägen utan tom bakgrund
+- [ ] Granska kvarvarande abrupta vybyten för jobbsökare och arbetsgivare och verifiera ändringarna
 

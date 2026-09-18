@@ -19,6 +19,7 @@ import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { ResilientImage } from '@/components/ui/ResilientImage';
 
 const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -178,10 +179,10 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
       >
 
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
-          <img
+          <ResilientImage
             src={displayUrl ?? TRANSPARENT_IMAGE_SRC}
             alt={displayUrl ? job.title : ''}
             aria-hidden={displayUrl ? undefined : true}
@@ -197,6 +198,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
             loading={cardIndex < 6 ? 'eager' : 'lazy'}
             {...fetchPriority(cardIndex < 3 ? 'high' : 'auto')}
             onError={handleImageError}
+            fallbackClassName="w-full h-full"
           />
         </div>
         <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${displayUrl ? 'opacity-100' : 'opacity-0'}`} />
@@ -240,8 +242,8 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
       >
         <div className="flex justify-center mt-1 mb-1">
           <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
-            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/80 tracking-wide">{initials}</span>
-            <img
+            <Building2 className="h-6 w-6 text-white/80" aria-hidden="true" />
+            <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}
               aria-hidden={logoUrl ? undefined : true}
@@ -250,6 +252,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
               decoding="sync"
               loading="eager"
               onError={handleLogoError}
+              fallbackClassName="absolute inset-0 w-full h-full"
             />
           </div>
         </div>

@@ -218,7 +218,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       {/* Visual header — both layers stay mounted so image ↔ initials never changes layout/compositing structure */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
@@ -316,7 +316,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             onKeyDown={canOpenCompanyProfile ? handleCompanyKeyDown : undefined}
             style={canOpenCompanyProfile ? { cursor: 'pointer' } : undefined}
           >
-            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/80 tracking-wide">{initials}</span>
+            <Building2 className="h-6 w-6 text-white/80" aria-hidden="true" />
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}
