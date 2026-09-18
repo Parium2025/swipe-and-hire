@@ -299,7 +299,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const hasFilters = value.length > 0;
 
   // Dropdown styling matching nav dropdowns - left aligned
-  const dropdownContentClass = "w-[calc(100vw-2rem)] min-w-0 sm:w-auto sm:min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0 flex max-h-[min(480px,var(--radix-popover-content-available-height))] flex-col overflow-hidden";
+  const dropdownContentClass = "question-filter-content w-[calc(100vw-2rem)] min-w-0 sm:w-auto sm:min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0 flex max-h-[min(480px,var(--radix-popover-content-available-height))] flex-col overflow-hidden";
   const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white md:hover:bg-white/15 focus-visible:bg-white/15 focus:outline-none rounded-md px-3 py-3 text-sm transition-colors min-h-[44px] touch-manipulation [-webkit-tap-highlight-color:transparent]";
 
   // chipsOnly mode: only render the filter chips
@@ -367,7 +367,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="px-2.5 py-1.5 border-b border-white/10">
+          <div className="flex-none px-2.5 py-1.5 border-b border-white/10">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
               <input
@@ -380,11 +380,11 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-1">
+          <div className="relative min-h-0 flex-1 overflow-hidden">
             <div 
               ref={scrollContainerRef}
               onScroll={updateScrollIndicator}
-              className="no-chrome-pad h-full min-h-0 overflow-y-auto scrollbar-none overscroll-contain [-webkit-overflow-scrolling:touch]"
+              className="question-filter-scroll no-chrome-pad h-full min-h-0 overflow-y-auto scrollbar-none overscroll-contain [-webkit-overflow-scrolling:touch]"
             >
               {isLoading ? (
                 <div className="p-4 text-center text-white text-sm">
@@ -485,13 +485,13 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
 
           {/* Total question count */}
           {questions && questions.length > 0 && (
-            <div className="px-2.5 py-1.5 border-t border-white/10 text-xs text-white text-center">
+            <div className="flex-none px-2.5 py-1.5 border-t border-white/10 text-xs text-white text-center">
               Totalt {questions.length} {questions.length === 1 ? 'fråga' : 'frågor'}
             </div>
           )}
 
           {hasFilters && (
-            <div className="p-2 border-t border-white/10">
+            <div className="flex-none p-2 border-t border-white/10">
               <Button
                 variant="ghost"
                 size="sm"

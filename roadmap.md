@@ -48,3 +48,4 @@
 - [x] Håll frågefiltrets nederkant och rensa-knapp nåbara när svarsalternativ expanderas på mobil
 - [x] Ta bort kvarhängande touchmarkering från frågor och svarsalternativ
 - [x] Låt den gröna kandidatstatusen även erbjuda säker borttagning från den egna listan
+- [x] Centrera och runda mobilens borttagningsåtgärd samt ge frågefiltret en verklig rullyta med fast topp och botten

@@ -343,7 +343,7 @@ export function AddToColleagueListDialog({
           {canRemoveFromOwnList && rows.length === 1 && (
             <Button
               variant="outline"
-              className="w-full justify-start gap-3 h-auto py-3 bg-destructive/20 border-destructive/40 text-white hover:bg-destructive/30 hover:text-white"
+              className="mobile-touch-removal-action w-full justify-start gap-3 h-auto py-3 bg-destructive/20 border-destructive/40 text-white hover:bg-destructive/30 hover:text-white"
               onClick={() => setRemoveConfirmOpen(true)}
               disabled={isAdding !== null || isRemoving}
             >
