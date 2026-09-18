@@ -9,13 +9,24 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { TeamMember } from '@/hooks/useTeamMembers';
-import { UserCheck, Users } from 'lucide-react';
+import { AlertTriangle, Trash2, UserCheck, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCandidateLists, useTeamCandidateLists } from '@/hooks/useCandidateLists';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { removeApplicantMembershipCacheEntry } from '@/lib/applicantMembershipCache';
 
 export interface CandidateToAdd {
   applicationId: string;
@@ -37,6 +48,7 @@ interface AddToColleagueListDialogProps {
   onAdded?: () => void;
   /** Höjer dialogen ovanför svepvyn (z-[110]). */
   elevated?: boolean;
+  canRemoveFromOwnList?: boolean;
 }
 
 export function AddToColleagueListDialog({
@@ -50,10 +62,13 @@ export function AddToColleagueListDialog({
   candidates,
   onAdded,
   elevated,
+  canRemoveFromOwnList = false,
 }: AddToColleagueListDialogProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState<string | null>(null);
+  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const rows: CandidateToAdd[] = useMemo(() => {
     if (candidates && candidates.length > 0) return candidates;
@@ -180,14 +195,50 @@ export function AddToColleagueListDialog({
     }
   };
 
+  const handleRemoveFromOwnList = async () => {
+    if (!user || rows.length !== 1 || isRemoving) return;
+    setIsRemoving(true);
+    try {
+      const { data, error } = await supabase
+        .from('my_candidates')
+        .delete()
+        .eq('recruiter_id', user.id)
+        .eq('applicant_id', rows[0].applicantId)
+        .select('id');
+
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error('Kandidaten kunde inte tas bort');
+
+      removeApplicantMembershipCacheEntry(user.id, rows[0].applicantId);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['applicant-membership', user.id] }),
+        queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] }),
+        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] }),
+        queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] }),
+        queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] }),
+      ]);
+      toast.success('Kandidat borttagen från din lista');
+      setRemoveConfirmOpen(false);
+      onAdded?.();
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Kunde inte ta bort kandidaten');
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
   const buttonClass =
     'w-full justify-start gap-3 h-auto py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white transition-colors duration-300 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]';
 
-  const title = rows.length > 1 ? `Lägg till ${rows.length} kandidater` : 'Lägg till kandidat';
+  const title = rows.length > 1
+    ? `Lägg till ${rows.length} kandidater`
+    : canRemoveFromOwnList ? 'Hantera kandidat' : 'Lägg till kandidat';
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus elevated={elevated} className="bg-card-parium border-white/20 max-w-sm">
+      <DialogContentNoFocus elevated={elevated} className="bg-card-parium border-white/20 max-w-sm max-h-[calc(100dvh-2rem)] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -198,13 +249,15 @@ export function AddToColleagueListDialog({
               <>Välj vilken lista kandidaterna ska läggas till i.</>
             ) : (
               <>
-                Välj vilken lista <span className="font-medium text-white">{candidateName}</span> ska läggas till i.
+                {canRemoveFromOwnList ? 'Flytta eller ta bort ' : 'Välj vilken lista '}
+                <span className="font-medium text-white">{candidateName}</span>
+                {canRemoveFromOwnList ? ' från dina listor.' : ' ska läggas till i.'}
               </>
             )}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 mt-4 max-h-[55vh] overflow-y-auto pr-1">
+        <div className="no-chrome-pad space-y-2 mt-4 min-h-0 overflow-y-auto pr-1">
           {/* Egna listor */}
           {user &&
             (ownLists.length > 0
@@ -286,8 +339,51 @@ export function AddToColleagueListDialog({
               );
             });
           })}
+
+          {canRemoveFromOwnList && rows.length === 1 && (
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-3 bg-destructive/20 border-destructive/40 text-white hover:bg-destructive/30 hover:text-white"
+              onClick={() => setRemoveConfirmOpen(true)}
+              disabled={isAdding !== null || isRemoving}
+            >
+              <Trash2 className="h-5 w-5 flex-shrink-0 text-white" />
+              <span className="font-medium">Ta bort från min lista</span>
+            </Button>
+          )}
         </div>
       </DialogContentNoFocus>
     </Dialog>
+    <AlertDialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
+      <AlertDialogContentNoFocus elevated className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
+        <AlertDialogHeader className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="bg-destructive/20 p-2 rounded-full">
+              <AlertTriangle className="h-4 w-4 text-white" />
+            </div>
+            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">Ta bort från listan</AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-white text-sm leading-relaxed">
+            Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">&quot;{candidateName}&quot;</span> från din lista? Ansökan och kandidatens historik finns kvar.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+          <AlertDialogCancel disabled={isRemoving} className="btn-dialog-action flex-1 mt-0 rounded-full bg-white/10 border-white/20 text-white text-sm">Avbryt</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(event) => {
+              event.preventDefault();
+              void handleRemoveFromOwnList();
+            }}
+            disabled={isRemoving}
+            variant="destructiveSoft"
+            className="btn-dialog-action flex-1 text-sm rounded-full"
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            {isRemoving ? 'Tar bort…' : 'Ta bort från listan'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContentNoFocus>
+    </AlertDialog>
+    </>
   );
 }

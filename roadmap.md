@@ -45,3 +45,6 @@
 - [x] Stabil frågefiltrering utan felplacerad laddare eller fyrkantiga avatarartefakter
 - [x] Visa aktiva frågefilter genom hela Swipe-läget och blockera öppning innan resultatet är färdigt
 - [x] Förtydliga att borttagen annonsfråga behåller kandidatens historiska svar
+- [x] Håll frågefiltrets nederkant och rensa-knapp nåbara när svarsalternativ expanderas på mobil
+- [x] Ta bort kvarhängande touchmarkering från frågor och svarsalternativ
+- [x] Låt den gröna kandidatstatusen även erbjuda säker borttagning från den egna listan
