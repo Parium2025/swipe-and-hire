@@ -132,7 +132,7 @@ const JobTemplatesOverview = () => {
       await supabase
         .from('job_templates')
         .update({ is_default: false })
-        .eq('employer_id', user?.id);
+        .eq('employer_id', user?.id as string);
 
       // Then set the selected template as default
       const { error } = await supabase
