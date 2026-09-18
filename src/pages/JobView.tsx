@@ -483,7 +483,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const allRequiredQuestionsAnswered = () => {
     const requiredQuestions = jobQuestions.filter(q => q.is_required);
     return requiredQuestions.every(q => {
-      const answer = answers[q.id];
+      const answer = answers[q.id!];
       if (answer === undefined || answer === null || answer === '') return false;
       if (typeof answer === 'string' && answer.trim() === '') return false;
       return true;
@@ -532,7 +532,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
     const missingRequired = jobQuestions
       .filter(q => q.is_required)
-      .find(q => !answers[q.id] || answers[q.id] === '');
+      .find(q => !answers[q.id!] || answers[q.id!] === '');
 
     if (missingRequired) {
       toast({
@@ -610,7 +610,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       }
       const snapshotCvUrl = candidateProfile ? candidateProfile.cv_url ?? null : profile?.cv_url || null;
 
-      let age = null;
+      let age: number | null = null;
       if (profile?.birth_date) {
         const birthYear = new Date(profile.birth_date).getFullYear();
         age = new Date().getFullYear() - birthYear;
@@ -618,7 +618,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       
       const applicationPayload: JobApplicationInsert = {
         job_id: jobId,
-        applicant_id: user?.id,
+        applicant_id: user?.id as string,
         first_name: profile?.first_name || null,
         last_name: profile?.last_name || null,
         email: user?.email || profile?.email || null,
@@ -670,7 +670,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       if (snapshotCvUrl) {
         supabase.functions.invoke('generate-cv-summary', {
-          body: { applicant_id: user?.id, job_id: jobId },
+          body: { applicant_id: user?.id as string, job_id: jobId },
         }).catch(err => console.warn('Background CV summary generation failed:', err));
       }
 
@@ -787,6 +787,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       </div>
     );
   }
+
+  if (!job) return null;
 
   const handlePullTouchStart = (e: React.TouchEvent) => {
     const el = contentRef.current;
