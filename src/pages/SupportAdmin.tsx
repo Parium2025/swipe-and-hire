@@ -13,28 +13,28 @@ import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface SupportTicket {
   id: string;
-  category: string;
+  category: string | null;
   subject: string;
   message: string;
-  status: string;
+  status: string | null;
   created_at: string;
   updated_at: string;
   profiles?: {
-    first_name: string;
-    last_name: string;
-  };
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
 }
 
 interface SupportMessage {
   id: string;
-  ticket_id: string;
+  ticket_id: string | null;
   message: string;
-  is_admin_reply: boolean;
+  is_admin_reply: boolean | null;
   created_at: string;
   profiles?: {
-    first_name: string;
-    last_name: string;
-  };
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
 }
 
 const SupportAdmin = () => {
