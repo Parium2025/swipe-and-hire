@@ -867,7 +867,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         question_text: q.question_text,
         question_type: q.question_type as any,
         options: q.options as string[] || [],
-        is_required: q.is_required,
+        is_required: q.is_required ?? true,
         order_index: q.order_index,
         min_value: q.min_value || undefined,
         max_value: q.max_value || undefined,
@@ -1113,8 +1113,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     setIsSavingAndLeaving(true);
     try {
       // Save as draft WITHOUT publishing — keep is_active as-is
-      let workplaceCounty = null;
-      let workplaceMunicipality = null;
+      let workplaceCounty: string | null = null;
+      let workplaceMunicipality: string | null = null;
       if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
         const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
         if (postalInfo) {
@@ -1846,8 +1846,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     setLoading(true);
     try {
       // Hämta län och kommun från postnummer
-      let workplaceCounty = null;
-      let workplaceMunicipality = null;
+      let workplaceCounty: string | null = null;
+      let workplaceMunicipality: string | null = null;
       if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
         const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
         if (postalInfo) {
