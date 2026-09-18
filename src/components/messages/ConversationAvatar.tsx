@@ -6,10 +6,6 @@ import { Users } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
 
-// Transparent 1x1 reserv så bildytan alltid finns kvar — ingen strukturbyte
-// när ett konto saknar bild eller när bilden dyker upp senare.
-const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-
 // Adresser som redan laddats i den här sessionen ritas direkt vid remount.
 const loadedAvatarUrls = new Set<string>();
 
