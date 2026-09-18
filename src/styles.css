@@ -360,19 +360,6 @@
     }
   }
 
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad)::after {
-    content: '';
-    display: block;
-    flex-shrink: 0;
-    width: 100%;
-    height: var(--chrome-strip-pad);
-    pointer-events: none;
-  }
-
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad) {
-    scroll-padding-bottom: var(--chrome-strip-pad) !important;
-  }
-
   /* === Undantag: flytande overlays ska ALDRIG få chrome-strip-utrymme ===
      Tooltips, popovers, dropdowns, select-listor och toasts renderas i portaler
      ovanpå sidan – de ligger inte i sidans scrollflöde.
@@ -425,19 +412,6 @@
     }
   }
 
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad)::after {
-    content: '';
-    display: block;
-    flex-shrink: 0;
-    width: 100%;
-    height: var(--chrome-strip-pad);
-    pointer-events: none;
-  }
-
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad) {
-    scroll-padding-bottom: var(--chrome-strip-pad) !important;
-  }
-
   [data-radix-popper-content-wrapper] &::after {
     content: none !important;
     height: 0 !important;
@@ -463,19 +437,6 @@
     }
   }
 
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad)::after {
-    content: '';
-    display: block;
-    flex-shrink: 0;
-    width: 100%;
-    height: var(--chrome-strip-pad);
-    pointer-events: none;
-  }
-
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad) {
-    scroll-padding-bottom: var(--chrome-strip-pad) !important;
-  }
-
   [data-radix-popper-content-wrapper] &::after {
     content: none !important;
     height: 0 !important;
@@ -496,14 +457,6 @@
     }
   }
 
-  :root[data-touch-chrome='true']
-    main[data-main-scroll-container='true']
-    &:not(.no-chrome-pad) {
-    padding-bottom: max(
-      var(--chrome-strip-pad),
-      calc(env(safe-area-inset-bottom, 0px) + 50px)
-    ) !important;
-  }
 }
 
 @utility jobview-container {
@@ -516,12 +469,6 @@
     }
   }
 
-  :root[data-touch-chrome='true'] &:not(.no-chrome-pad) {
-    padding-bottom: max(
-      var(--chrome-strip-pad),
-      calc(env(safe-area-inset-bottom, 0px) + 50px)
-    ) !important;
-  }
 }
 
 @utility dashboard-page-stack {
@@ -2017,10 +1964,6 @@ All colors MUST be HSL.
     }
   }
 
-  :root[data-touch-chrome="true"] body,
-  :root[data-touch-chrome="true"] #root {
-    padding-bottom: var(--chrome-strip-pad) !important;
-  }
 }
 
 @layer utilities {

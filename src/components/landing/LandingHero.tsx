@@ -6,6 +6,7 @@ import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
+import { prefetchSplineAssets, shouldDeferSplineAssets } from '@/lib/splinePreload';
 
 
 
@@ -41,28 +42,14 @@ const preloadAudienceAssets = (role: AudienceRole, immediate = false) => {
   if (preloadedRoles.has(role)) return;
   preloadedRoles.add(role);
   const load = () => {
-    // Spline-scenen (samma url för båda rollerna)
-    try {
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.as = 'fetch';
-      link.href = '/spline/parium-phone-scene.splinecode';
-      link.crossOrigin = 'anonymous';
-      document.head.appendChild(link);
-    } catch { /* no-op */ }
-    // Warm up spline-runtime + audience-data
-    void Promise.all([
-      // import.meta.env.SSR: håll Spline-runtimen utanför SSR-bundlen —
-      // den kör new Function vid modul-evaluering → 500 på edge/SSR.
-      import.meta.env.SSR ? Promise.resolve(null) : import('@splinetool/runtime').catch(() => null),
-      import('@/components/landing/audience/content').catch(() => null),
-    ]).catch(() => undefined);
+    prefetchSplineAssets();
+    void import('@/components/landing/audience/content').catch(() => undefined);
   };
 
   // Hover/touch fick tidigare kringgå Windows/Android-spärren och startade
   // WebGL-runtime + scenhämtning mitt under hero-videons kallstart. Apple
   // behåller sin omedelbara preload helt oförändrad.
-  if (!immediate && (isWindowsDevice() || isAndroidDevice())) {
+  if (!immediate && shouldDeferSplineAssets()) {
     window.setTimeout(load, 4000);
     return;
   }

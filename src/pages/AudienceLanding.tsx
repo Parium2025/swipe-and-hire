@@ -3,7 +3,6 @@ import { Link, useNavigate, useNavigationType } from '@/lib/router-compat';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { syncBrowserChrome } from '@/lib/browserChrome';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -456,73 +455,25 @@ const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
  * den befintliga clampen redan är tillräckligt stor. Är navet större
  * (t.ex. nya menyrader) tar mätvärdet över och håller rubriken fri.
  */
-const useHeroSafeTopPadding = () => {
-  // Lazy initializer: kör en synkron baseline-beräkning av den responsiva
-  // clampen vid första render så vi aldrig får en frame utan padding.
-  // Nav-mätningen läggs ovanpå i useLayoutEffect innan paint.
-  const [topPx, setTopPx] = useState<number>(() => {
-    if (typeof window === 'undefined') return 0;
-    const w = window.innerWidth;
-    const h = getSizingViewportSize().height;
-    const rem = 16;
-    const clamp = (min: number, pref: number, max: number) =>
-      Math.max(min, Math.min(max, pref));
-    if (w >= 768) return Math.ceil(clamp(7.5 * rem, 0.16 * h, 9.5 * rem));
-    if (w >= 640) return Math.ceil(clamp(6.5 * rem, 0.14 * h, 8 * rem));
-    return Math.ceil(clamp(5.25 * rem, 0.12 * h, 6 * rem));
-  });
-
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined') return;
-    const GAP_PX = 16;
-    const measure = () => {
-      const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
-      const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
-      const w = window.innerWidth;
-      const h = getSizingViewportSize().height;
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-      // Speglar Tailwind-clampen för att bevara nuvarande utseende:
-      // base:  clamp(5.25rem, 12svh, 6rem)
-      // sm:    clamp(6.5rem,  14svh, 8rem)
-      // md:    clamp(7.5rem,  16svh, 9.5rem)
-      const clamp = (min: number, pref: number, max: number) =>
-        Math.max(min, Math.min(max, pref));
-      let responsive: number;
-      if (w >= 768) responsive = clamp(7.5 * rem, 0.16 * h, 9.5 * rem);
-      else if (w >= 640) responsive = clamp(6.5 * rem, 0.14 * h, 8 * rem);
-      else responsive = clamp(5.25 * rem, 0.12 * h, 6 * rem);
-      setTopPx(Math.ceil(Math.max(responsive, navBottom + GAP_PX)));
-    };
-    measure();
-    const ro = 'ResizeObserver' in window ? new ResizeObserver(measure) : null;
-    const nav = document.querySelector<HTMLElement>('nav[aria-label="Huvudnavigation"]');
-    if (nav && ro) ro.observe(nav);
-    window.addEventListener('resize', measure, { passive: true });
-    window.addEventListener('orientationchange', measure, { passive: true });
-    window.visualViewport?.addEventListener('resize', measure, { passive: true });
-    return () => {
-      ro?.disconnect();
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('orientationchange', measure);
-      window.visualViewport?.removeEventListener('resize', measure);
-    };
-  }, []);
-
-  return topPx;
-};
-
-
-
-
 // Vilken telefonvariant hero använder just nu (video för jobbsökare, Spline för
 // arbetsgivare). Sätts av HeroIntroStage så att alla mätfunktioner – även de som
 // körs utanför React-trädet – räknar på rätt mockup.
 let currentHeroPhoneVariant: 'spline' | 'video' = 'spline';
 
+type InlinePhoneMetrics = {
+  height: number;
+  width: number;
+  zoom: number;
+  yOffset?: number;
+  canvasHeight?: number;
+  canvasBottomTrim?: number;
+  topGap?: number;
+};
+
 const calculateInlinePhoneMetrics = (
   variant: 'spline' | 'video' = currentHeroPhoneVariant,
   hostTop?: number | null,
-) => {
+): InlinePhoneMetrics => {
   if (typeof window === 'undefined') {
     return { height: 320, width: 320 * PHONE_ASPECT, zoom: 0.44, yOffset: 28 };
   }
@@ -631,6 +582,15 @@ const calculateInlinePhoneMetrics = (
   };
 };
 
+// Måste vara identisk i SSR och under klientens allra första render. De
+// viewportanpassade måtten appliceras först i effekten efter hydration.
+const INITIAL_INLINE_PHONE_METRICS: InlinePhoneMetrics = {
+  height: 320,
+  width: 320 * PHONE_ASPECT,
+  zoom: 0.44,
+  yOffset: 28,
+};
+
 const InlineHeroPhone = ({
   placement,
   className = '',
@@ -641,7 +601,7 @@ const InlineHeroPhone = ({
   // väljer synlig layout redan före hydration; runtime finjusterar bara aktivitet.
   const [enabled, setEnabled] = useState(true);
   const [active, setActive] = useState(true);
-  const [metrics, setMetrics] = useState(() => calculateInlinePhoneMetrics(variant));
+  const [metrics, setMetrics] = useState(INITIAL_INLINE_PHONE_METRICS);
 
   
 
@@ -752,61 +712,6 @@ const InlineHeroPhone = ({
   );
 };
 
-
-const calculateMobileHeroMinHeight = () => {
-  if (typeof window === 'undefined' || getInlinePhonePlacement() !== 'mobile') return null;
-
-  const hero = document.querySelector('[data-mobile-hero-section]') as HTMLElement | null;
-  const anchor = hero?.querySelector('[data-hero-phone-anchor]') as HTMLElement | null;
-  if (!hero || !anchor) return null;
-
-  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-  const { height } = getSizingViewportSize();
-  const heroTop = hero.getBoundingClientRect().top;
-  const anchorBottom = anchor.getBoundingClientRect().bottom - heroTop;
-  const metrics = calculateInlinePhoneMetrics();
-  const phoneBlockHeight = (metrics.canvasHeight ?? metrics.height) + (metrics.topGap ?? 0) - (metrics.canvasBottomTrim ?? 0);
-  const bottomSafe = clamp(height * 0.02, 12, 24);
-
-  return Math.ceil(anchorBottom + phoneBlockHeight + bottomSafe);
-};
-
-const useMobileHeroMinHeight = () => {
-  const [minHeight, setMinHeight] = useState<number | null>(null);
-
-  useEffect(() => {
-    let frame = 0;
-
-    const sync = () => {
-      frame = 0;
-      setMinHeight(calculateMobileHeroMinHeight());
-    };
-
-    const schedule = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(sync);
-    };
-
-    schedule();
-    const timers = [80, 180, 360, 720].map((delay) => window.setTimeout(schedule, delay));
-    const anchor = document.querySelector('[data-mobile-hero-section] [data-hero-phone-anchor]') as HTMLElement | null;
-    const observer = anchor ? new ResizeObserver(schedule) : null;
-    if (anchor) observer?.observe(anchor);
-    document.fonts?.ready.then(schedule).catch(() => undefined);
-    window.addEventListener('resize', schedule, { passive: true });
-    window.visualViewport?.addEventListener('resize', schedule, { passive: true });
-
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      timers.forEach((timer) => window.clearTimeout(timer));
-      observer?.disconnect();
-      window.removeEventListener('resize', schedule);
-      window.visualViewport?.removeEventListener('resize', schedule);
-    };
-  }, []);
-
-  return minHeight;
-};
 
 type HeroPhoneMetrics = {
   isDesktop: boolean;
@@ -1822,8 +1727,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
   useEffect(() => {
-    syncBrowserChrome(window.location.pathname);
-
     const isSeeker = audience === 'job_seeker';
     const title = isSeeker
       ? 'Hitta jobb som passar dig | Parium – för jobbsökare'
