@@ -342,7 +342,10 @@ const isMobileAnimationPrearmed = () => {
 };
 
 const useIsMobileLandingMotion = () => {
-  const [isMobile, setIsMobile] = useState(isMobileAnimationPrearmed);
+  // SSR och den första klientrenderingen måste börja identiskt. Läs viewporten
+  // först efter hydration; annars byggs helt olika träd på mobil och React
+  // kasserar den serverrenderade landningssidan.
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 767px), (pointer: coarse) and (orientation: portrait) and (max-width: 1024px)');
@@ -444,7 +447,9 @@ const getInlinePhonePlacement = (): 'mobile' | 'portraitTablet' | null => {
 };
 
 const useIsMobileLikeHeroLayout = () => {
-  const [isMobileLike, setIsMobileLike] = useState(isMobileLikeHeroViewport);
+  // Samma deterministiska första värde på server och klient. Den verkliga
+  // mobil-layouten aktiveras synkront i effekten direkt efter hydration.
+  const [isMobileLike, setIsMobileLike] = useState(false);
 
   useEffect(() => {
     const sync = () => setIsMobileLike(isMobileLikeHeroViewport());
@@ -1049,8 +1054,16 @@ const FixedPhoneLayer = ({ variant = 'spline' }: { variant?: 'spline' | 'video' 
   };
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState(true);
-  const [phoneMetrics, setPhoneMetrics] = useState(calculatePhoneMetrics);
-  const [isInlinePhone, setIsInlinePhone] = useState(() => getInlinePhonePlacement() !== null);
+  // Undvik att läsa window/document i den första klientrenderingen. Servern
+  // använder samma startmått; därefter räknar effekten fram exakt viewport.
+  const [phoneMetrics, setPhoneMetrics] = useState<HeroPhoneMetrics>({
+    isDesktop: true,
+    top: 0,
+    height: 660,
+    zoom: 0.68,
+    yOffset: 0,
+  });
+  const [isInlinePhone, setIsInlinePhone] = useState(false);
   const lastVisibleRef = useRef(true);
 
   useEffect(() => {
