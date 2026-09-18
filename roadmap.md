@@ -36,4 +36,7 @@
 - [x] Ta bort den rektangulära bakgrunden bakom initialer i chattlistans profilringar, inklusive det tomma bildlagret
 - [x] Anpassa Swipe Mode-förhandsvisningen på små skärmar så knappar, publiceringstid och telefonkanter aldrig överlappar
 - [ ] Granska kvarvarande abrupta vybyten för jobbsökare och arbetsgivare och verifiera ändringarna
-
+- [x] Gör mobilens frågefilter direkt på tryck och visa trunkerad fråga med långtryck
+- [x] Filtrera kandidater via fråge-ID och exakta svar; Alla kräver ett sparat svar
+- [x] Låt kandidatlista, räknare, pagination och Swipe Mode dela samma korrigerade resultat
+- [x] Förtydliga historisk frågetext och ta bort dubbelt avstånd i återpubliceringsdialogen
