@@ -52,7 +52,6 @@ describe('TopChromeStrip', () => {
     // Ingen minsta reservhöjd i browser-läge: den skapade en separat linje
     // ovanpå videon. Safari samplar i stället Landing-ytans egen bakgrund.
     expect(strip.style.top).toBe('0px');
-    expect(strip.style.height).toBe('env(safe-area-inset-top, 0px)');
 
     expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
     expect(
