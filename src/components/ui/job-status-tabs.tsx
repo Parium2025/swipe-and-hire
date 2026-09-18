@@ -36,7 +36,9 @@ export const JobStatusTabs = memo(function JobStatusTabs({ activeTab, onTabChang
       expired: expiredRef,
       draft: draftRef,
     };
-    const ref = refs[activeTab]?.current;
+    // Om den valda fliken inte finns (t.ex. Utkast döljs) faller vi tillbaka
+    // på första fliken så indikatorn aldrig blir kvar på en försvunnen knapp.
+    const ref = refs[activeTab]?.current ?? activeRef.current;
     if (ref && ref.offsetWidth > 0) {
       setIndicatorStyle({
         x: ref.offsetLeft,
