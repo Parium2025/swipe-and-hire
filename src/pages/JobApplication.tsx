@@ -52,8 +52,8 @@ export const clearJobApplicationDraft = (jobId: string, userId: string) => {
 interface JobPosting {
   id: string;
   title: string;
-  description: string;
-  location: string;
+  description: string | null;
+  location: string | null;
   workplace_name?: string | null;
 }
 
@@ -62,11 +62,11 @@ interface JobQuestion {
   question_text: string;
   question_type: string;
   options?: string[] | any;
-  is_required: boolean;
-  order_index: number;
-  placeholder_text?: string;
-  min_value?: number;
-  max_value?: number;
+  is_required: boolean | null;
+  order_index: number | null;
+  placeholder_text?: string | null;
+  min_value?: number | null;
+  max_value?: number | null;
 }
 
 const JobApplication = () => {
