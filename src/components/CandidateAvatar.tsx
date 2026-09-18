@@ -24,7 +24,6 @@ function CandidateAvatarBase({
   stopPropagation = false
 }: CandidateAvatarProps) {
   const [avatarError, setAvatarError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   
   // Use useMediaUrl hook properly at component level
   // These will generate signed URLs for private bucket files
@@ -40,7 +39,6 @@ function CandidateAvatarBase({
   useEffect(() => {
     if (resolvedImageUrl) {
       setAvatarError(false);
-      setImageLoaded(false);
     }
   }, [resolvedImageUrl]);
 
@@ -53,9 +51,9 @@ function CandidateAvatarBase({
 
   const handleClick = stopPropagation ? (e: React.MouseEvent) => e.stopPropagation() : undefined;
 
-  // Media är på väg (path finns men signerad URL/video är inte klar än) →
-  // visa en neutral platta istället för initialer, så att inga bokstäver
-  // hinner blinka förbi innan bilden/videon renderas.
+  // Media är på väg (path finns men signerad URL/video är inte klar än).
+  // Samma cirkulära Avatar-skal används i alla tillstånd så Safari aldrig
+  // komponerar om porträttet som en fyrkant under filterbyten.
   const mediaPending =
     (!!profileImageUrl && !resolvedImageUrl && !avatarError) ||
     (!!isProfileVideo && !!videoUrl && !resolvedVideoUrl);
@@ -93,24 +91,24 @@ function CandidateAvatarBase({
 
   if (mediaPending && !pendingTimedOut) {
     return (
-      <div
-        className="h-10 w-10 rounded-full bg-white/10 ring-2 ring-inset ring-white/20 transform-gpu"
+      <Avatar
+        className="h-10 w-10 bg-white/10 ring-2 ring-inset ring-white/20 transform-gpu"
         aria-label={`${firstName || ''} ${lastName || ''}`.trim() || undefined}
-        style={{ contain: 'paint' }}
-      />
+      >
+        <span className="h-full w-full rounded-full bg-white/10" aria-hidden="true" />
+      </Avatar>
     );
   }
 
 
   return (
-    <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+    <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu">
       <AvatarImage
         src={resolvedImageUrl || ''}
         alt={`${firstName || ''} ${lastName || ''}`}
         loading="eager"
         decoding="async"
         onError={() => setAvatarError(true)}
-        onLoad={() => setImageLoaded(true)}
       />
       <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={hasImage ? 1200 : 0}>
         {initials || '?'}
