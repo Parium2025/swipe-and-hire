@@ -135,6 +135,10 @@ function KeepAliveCached({
   // Nycklar som monterats i den här renderingen och alltså aldrig visats förut.
   // Endast de ska tona in; redan besökta vyer byts synkront utan animation.
   const freshKeysRef = useRef<Set<string>>(new Set());
+  // Återbesök tonar in kort och lågt (280ms) medan aldrig sedda vyer får den
+  // längre intoningen (500ms). Utan detta blev återbesök ett hårt hopp.
+  const [isFastEnter, setIsFastEnter] = React.useState(false);
+  const revisitAnimRef = useRef<string | null>(null);
 
   // -------------------------------------------------------------------------
   // Scrollminne per vy
