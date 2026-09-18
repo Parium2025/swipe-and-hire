@@ -595,7 +595,7 @@ function KeepAliveCached({
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
                 : ''
             }
             aria-hidden={!isDisplayed}
