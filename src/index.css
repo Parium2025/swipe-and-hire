@@ -1109,6 +1109,36 @@ All colors MUST be HSL.
     }
   }
 
+  /* Desktop-only question filter sizing. A definite height is required here:
+     max-height alone lets the question list keep its natural height, which
+     clips it inside the popover instead of giving the mouse wheel a scroll
+     container. Keep the search and both footer rows outside that scroll area. */
+  @media (pointer: fine) and (hover: hover) {
+    .question-filter-content {
+      height: min(30rem, var(--radix-popover-content-available-height));
+      max-height: var(--radix-popover-content-available-height);
+      min-height: 0;
+    }
+
+    .question-filter-header,
+    .question-filter-footer {
+      flex: none;
+    }
+
+    .question-filter-list {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .question-filter-scroll {
+      height: 100%;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+  }
+
 
   /* Dashboard layout system */
   .dashboard-page-stack {
