@@ -429,7 +429,7 @@ export const WizardListPreview = memo(function WizardListPreview({
 
       {/* Info-block — under bilden, syns när man scrollar */}
       <div className="flex min-h-full w-full items-center bg-card-parium backdrop-blur-sm border-t border-white/10 px-3 py-2 snap-start">
-        <div className="space-y-1.5">
+        <div className="w-full space-y-1.5">
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Arbetstider" value={workingHours || '–'} />
