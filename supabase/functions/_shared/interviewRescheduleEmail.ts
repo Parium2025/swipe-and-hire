@@ -117,6 +117,7 @@ export async function sendInterviewRescheduleEmail(
   const locationType = interview.location_type === "office" ? "office" : "video";
 
   const result = await sendLoggedTemplateEmail("interview-rescheduled", candidateEmail, {
+    fromName: `${companyName} via Parium`,
     idempotencyKey: `interview-reschedule-${interviewId}-r${interview.revision ?? 0}`,
     templateData: {
       recipient_name: candidateName,
