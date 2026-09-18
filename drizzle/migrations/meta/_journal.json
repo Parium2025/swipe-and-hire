@@ -22,6 +22,13 @@
       "when": 1789758227160,
       "tag": "0002_fix_candidate_question_filters",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789758397465,
+      "tag": "0003_support_legacy_candidate_question_filters",
+      "breakpoints": true
     }
   ]
 }
