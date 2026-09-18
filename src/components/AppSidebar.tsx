@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "@/lib/router-compat";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";

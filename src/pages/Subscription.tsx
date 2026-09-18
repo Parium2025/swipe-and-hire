@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';

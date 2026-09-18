@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
 import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp } from 'lucide-react';

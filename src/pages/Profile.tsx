@@ -32,7 +32,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '@/lib/router-compat';
 import { uploadMedia, getMediaUrl, getOriginalImageUrl, uploadOriginalImage } from '@/lib/mediaManager';
 import { formatBytes, formatTimeRemaining, UploadAbortedError, type UploadProgress as UploadProgressInfo } from '@/lib/uploadWithProgress';
 import { useOfflineMediaQueue } from '@/hooks/useOfflineMediaQueue';

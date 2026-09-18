@@ -6,7 +6,7 @@ import { useFitScale } from '@/hooks/useFitScale';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { StartDatePicker } from '@/components/StartDatePicker';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { useHasActivePlan } from '@/hooks/useHasActivePlan';
 import { supabase } from '@/integrations/supabase/client';

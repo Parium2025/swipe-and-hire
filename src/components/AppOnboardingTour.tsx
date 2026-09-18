@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import {
   Building, User, FileText, Heart, ArrowRight, Check, MessageCircle,
   CreditCard, HelpCircle, Briefcase, ChevronLeft, Eye,

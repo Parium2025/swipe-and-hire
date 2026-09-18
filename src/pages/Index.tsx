@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { prefetchSubscriptionPlans } from '@/lib/subscriptionPlansQuery';
-import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from '@/lib/router-compat';
 import JobView from '@/pages/JobView';
 // smartSearchCandidates is applied inside useApplicationsData — not needed here
 import JobDetails from '@/pages/JobDetails';

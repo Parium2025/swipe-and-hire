@@ -1,5 +1,5 @@
 import { type PointerEvent, type RefObject, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';

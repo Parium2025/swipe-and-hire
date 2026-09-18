@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo, useMemo, useRef, startTransition } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "@/lib/router-compat";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";

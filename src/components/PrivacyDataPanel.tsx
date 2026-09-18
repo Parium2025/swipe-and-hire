@@ -4,7 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShieldCheck, Download, Loader2, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { buildDataExportPdf } from '@/lib/dataExportPdf';
 import { clearAllAppCaches } from '@/hooks/useEagerRatingsPreload';
 import {

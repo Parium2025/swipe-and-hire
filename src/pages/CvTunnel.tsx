@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@/lib/router-compat';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 

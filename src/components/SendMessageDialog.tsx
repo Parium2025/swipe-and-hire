@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Mail, MessageSquare, Send, Smartphone, X } from 'lucide-react';
 import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCreateConversation } from '@/hooks/useConversations';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import {
   AlertDialog,

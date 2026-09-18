@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, Navigate } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';

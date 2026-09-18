@@ -1,5 +1,5 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import EmployerSidebar from '@/components/EmployerSidebar';

@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback, type ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '@/lib/router-compat';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote, Clock } from 'lucide-react';

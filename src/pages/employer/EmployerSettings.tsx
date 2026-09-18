@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from '@/lib/router-compat';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';

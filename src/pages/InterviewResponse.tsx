@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { CalendarCheck, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";

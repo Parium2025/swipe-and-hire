@@ -1,5 +1,5 @@
 import { useCapacitorPush } from '@/hooks/useCapacitorPush';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { useCallback } from 'react';
 
 /**

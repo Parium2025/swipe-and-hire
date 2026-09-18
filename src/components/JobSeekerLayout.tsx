@@ -1,5 +1,5 @@
 import { ReactNode, memo, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';

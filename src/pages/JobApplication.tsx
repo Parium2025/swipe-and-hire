@@ -1,7 +1,7 @@
 import { fetchMyProfile } from '@/lib/myProfile';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { recordJobView } from '@/lib/recordJobView';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';

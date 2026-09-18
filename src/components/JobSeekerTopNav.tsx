@@ -1,5 +1,5 @@
 import React, { memo, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";

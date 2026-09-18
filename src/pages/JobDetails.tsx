@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from '@/lib/router-compat';
 import { usePullToDismiss } from '@/hooks/usePullToDismiss';
 import { requestScrollRestore } from '@/lib/scrollRestoration';
 import { useAuth } from '@/hooks/useAuth';

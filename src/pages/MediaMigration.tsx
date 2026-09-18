@@ -1,7 +1,7 @@
 import { MediaMigrationControl } from '@/components/MediaMigrationControl';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 
 export default function MediaMigration() {
   const navigate = useNavigate();

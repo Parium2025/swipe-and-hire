@@ -1,5 +1,5 @@
 import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransition } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';

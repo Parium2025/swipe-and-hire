@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, startTransition } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { SignupConsent } from '@/components/auth/SignupConsent';
 import { PRIVACY_POLICY_VERSION, DPA_VERSION } from '@/lib/consentVersions';
 import { useAuth } from '@/hooks/useAuth';
