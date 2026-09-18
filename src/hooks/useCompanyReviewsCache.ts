@@ -6,15 +6,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 
 export interface CachedReview {
-  id: string;
-  user_id: string;
-  rating: number;
+  id: string | null;
+  user_id: string | null;
+  rating: number | null;
   comment: string | null;
-  is_anonymous: boolean;
-  created_at: string;
+  is_anonymous: boolean | null;
+  created_at: string | null;
   profiles?: {
-    first_name?: string;
-    last_name?: string;
+    first_name?: string | null;
+    last_name?: string | null;
   };
 }
 
