@@ -154,6 +154,16 @@ const HeroVideo = () => {
   const tierRef = useRef<HeroTier>(tier);
   tierRef.current = tier;
 
+  // Buffringsstrategin sätts efter hydrering: markupen renderas alltid med
+  // "metadata" så server och klient matchar, och porträtt/tablet växlar sedan
+  // till "auto" (hel buffert) utan att React klagar på attributskillnad.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    el.preload = tier === 'landscape' ? 'metadata' : 'auto';
+  }, [tier]);
+
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let settleTimer: number | null = null;
