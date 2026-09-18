@@ -1717,7 +1717,7 @@ const MobileJobWizard = ({
 
   // Format salary information for display (without transparency - shown separately)
   const formatSalaryInfo = () => {
-    const parts = [];
+    const parts: string[] = [];
     
     // Add salary range if provided
     if (formData.salary_min || formData.salary_max) {

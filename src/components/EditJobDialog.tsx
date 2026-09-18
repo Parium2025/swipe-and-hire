@@ -597,7 +597,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   };
 
   const formatSalaryInfo = () => {
-    const parts = [];
+    const parts: string[] = [];
     
     if (formData.salary_min || formData.salary_max) {
       if (formData.salary_min && formData.salary_max) {

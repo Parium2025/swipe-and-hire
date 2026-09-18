@@ -486,7 +486,7 @@ export const BookInterviewDialog = ({
   };
 
   // Generate time options (every 15 min, full 24 hours)
-  const allTimeOptions = [];
+  const allTimeOptions: string[] = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 15) {
       const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
