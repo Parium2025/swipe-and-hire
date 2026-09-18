@@ -285,6 +285,7 @@ export function useBatchPrefetchReviews() {
       allReviews
         .filter(r => !r.is_anonymous)
         .map(r => r.user_id)
+        .filter((id): id is string => !!id)
     )];
 
     let profileMap = new Map<string, { first_name?: string | null; last_name?: string | null }>();
@@ -312,10 +313,11 @@ export function useBatchPrefetchReviews() {
     // Group reviews by company and update cache
     const reviewsByCompany = new Map<string, CachedReview[]>();
     allReviews.forEach(r => {
-      if (!reviewsByCompany.has(r.company_id)) {
-        reviewsByCompany.set(r.company_id, []);
+      const companyKey = r.company_id as string;
+      if (!reviewsByCompany.has(companyKey)) {
+        reviewsByCompany.set(companyKey, []);
       }
-      reviewsByCompany.get(r.company_id)!.push({
+      reviewsByCompany.get(companyKey)!.push({
         ...r,
         profiles: profileMap.get(r.user_id as string) || undefined,
       });
