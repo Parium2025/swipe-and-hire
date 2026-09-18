@@ -301,8 +301,8 @@ export function AppSidebar() {
                           {item.title === 'Meddelanden' ? (
                             <>
                               {item.title}
-                              {item.count > 0 && (
-                                <CountBadge count={item.count} className="static shrink-0" />
+                              {(item.count ?? 0) > 0 && (
+                                <CountBadge count={item.count ?? 0} className="static shrink-0" />
                               )}
                             </>
                           ) : item.count !== undefined ? (

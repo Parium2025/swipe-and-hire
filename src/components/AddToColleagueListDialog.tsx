@@ -74,7 +74,7 @@ export function AddToColleagueListDialog({
         .from('user_stage_settings')
         .select('stage_key, order_index')
         .eq('user_id', recruiterId)
-        .eq('list_id', listId)
+        .eq('list_id', listId as string)
         .gt('order_index', -1)
         .order('order_index', { ascending: true })
         .limit(1);

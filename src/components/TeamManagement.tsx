@@ -269,7 +269,7 @@ const TeamManagement = () => {
         .from('user_roles')
         .update({ is_active: false })
         .eq('user_id', memberId)
-        .eq('organization_id', organizationId);
+        .eq('organization_id', organizationId as string);
 
       if (error) throw error;
 
@@ -313,7 +313,7 @@ const TeamManagement = () => {
         .from('user_roles')
         .update({ role: newRole })
         .eq('user_id', memberId)
-        .eq('organization_id', organizationId);
+        .eq('organization_id', organizationId as string);
 
       if (error) throw error;
 
