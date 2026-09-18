@@ -72,15 +72,22 @@ export function useNotifications() {
     return (seed || []).filter(n => !n.is_read).length;
   });
 
+  // Har vi någon gång sett ett inloggat konto? Först då betyder `user === null`
+  // utloggning/kontobyte. Vid uppstart betyder det bara "auth är inte klar än",
+  // och då ska den förvärmda badgen få ligga kvar.
+  const hasHadUserRef = useRef(false);
+
   // Hydrate from cache on user change
   useEffect(() => {
     if (!user) {
+      if (!hasHadUserRef.current) return; // auth laddar fortfarande
       // Vid utloggning/kontobyte får föregående kontos notiser aldrig ligga kvar
       // i klockan.
       setNotifications([]);
       setUnreadCount(0);
       return;
     }
+    hasHadUserRef.current = true;
     const cached = getCached(user.id);
     if (cached) {
       setNotifications(cached);
