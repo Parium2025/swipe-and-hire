@@ -341,6 +341,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                     companyLogoUrl={preloadedCompanyLogoUrl}
                     companyName={profile.company_name}
                     initials={getCompanyInitials(profile.company_name)}
+                    className="relative z-10 h-6 w-6 ring-0"
                   />
                 ) : profile ? (
                   <Building className="h-4 w-4 relative z-10" />

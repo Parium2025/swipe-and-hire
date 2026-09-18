@@ -33,7 +33,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12 flex-shrink-0">
                 <AvatarImage src={company.logo || ''} alt={company.name} />
-                <AvatarFallback className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
+                <AvatarFallback fallbackType="company" className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
                   {getCompanyInitials(company.name)}
                 </AvatarFallback>
               </Avatar>

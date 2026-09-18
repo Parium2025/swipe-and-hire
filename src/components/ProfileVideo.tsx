@@ -4,6 +4,7 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { Play, Pause } from 'lucide-react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { UserRound } from 'lucide-react';
 import {
   acquireProfileVideoDecoder,
   releaseProfileVideoDecoder,
@@ -333,7 +334,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
           aria-label={alt}
           className={`w-full h-full bg-[hsl(210,35%,22%)] flex items-center justify-center text-white font-semibold text-2xl transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
         >
-          {userInitials}
+          <UserRound className="h-1/2 w-1/2" aria-hidden="true" />
         </div>
       )}
       

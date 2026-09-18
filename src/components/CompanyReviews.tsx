@@ -227,7 +227,7 @@ const CompanyReviews = () => {
                 loading="eager"
                 decoding="async"
               />
-              <AvatarFallback className="bg-transparent" delayMs={150}>
+              <AvatarFallback fallbackType="company" className="bg-transparent" delayMs={150}>
                 <Building2 className="h-8 w-8 text-white" />
               </AvatarFallback>
             </Avatar>
