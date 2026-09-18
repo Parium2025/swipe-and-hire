@@ -114,7 +114,9 @@ const TopChromeStrip = () => {
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
-        transition: 'background-color 200ms ease-out',
+        // Ingen färgövergång: remsan måste byta färg i samma frame som
+        // sidinnehållet. En 200 ms-fade lämnade en grå efterbild över det
+        // blå när man bytte från landningssidan till hem.
       }}
     />
   );
