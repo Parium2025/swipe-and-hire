@@ -19,7 +19,7 @@ interface UseTapHintOptions {
 export function useTapHint({ overlayOpen, titleRef }: UseTapHintOptions) {
   const [showTapHint, setShowTapHint] = useState(false);
   const [tapHintSource, setTapHintSource] = useState<TapHintSource>(null);
-  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const tapHintTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const isTitleTruncated = useCallback(() => {
     const el = titleRef.current;

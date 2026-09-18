@@ -333,8 +333,8 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     } catch { /* noop */ }
   }, [jobId, activeTab]);
   const [previewStage, setPreviewStage] = useState<string | null>(null);
-  const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const previewDelayRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastTouchTapRef = useRef<{ stage: string; time: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
@@ -342,7 +342,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [scrollIndicator, setScrollIndicator] = useState<number>(0);
   const [showIndicator, setShowIndicator] = useState(false);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Auto-scroll the tab strip to keep the active tab visible
   useEffect(() => {

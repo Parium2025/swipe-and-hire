@@ -124,7 +124,7 @@ interface NotesToolbarProps {
 export const NotesToolbar = ({ editor, className, compact = false, large = false, showUndoRedo = true }: NotesToolbarProps) => {
   const isTouch = useTouchCapable();
   const [previewingId, setPreviewingId] = useState<string | null>(null);
-  const previewTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const previewTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const handleTapPreview = useCallback((id: string) => {
     if (previewTimeout.current) clearTimeout(previewTimeout.current);
