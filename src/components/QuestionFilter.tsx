@@ -12,7 +12,8 @@ import { TruncatedText } from '@/components/ui/truncated-text';
 import { Filter, Search, X, ChevronDown, MessageSquare } from 'lucide-react';
 import { useOrganizationQuestions, OrganizationQuestion } from '@/hooks/useOrganizationQuestions';
 
-// Component for question item with smart tooltip + tap-to-preview on touch
+// Question rows open immediately on tap. A deliberate long-press previews
+// truncated text on touch without also opening or closing the answer choices.
 const QuestionItem = memo(({ 
   question, 
   isSelected, 
@@ -34,6 +35,8 @@ const QuestionItem = memo(({
   const [isTruncated, setIsTruncated] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggeredRef = useRef(false);
 
   // Check truncation once on mount and when text changes
   useEffect(() => {
@@ -47,23 +50,48 @@ const QuestionItem = memo(({
   useEffect(() => {
     return () => {
       if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+      if (longPressTimeoutRef.current) clearTimeout(longPressTimeoutRef.current);
     };
   }, []);
 
   const handleClick = useCallback(() => {
-    if (isTruncated && !showTooltip) {
-      setShowTooltip(true);
-      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
-      tooltipTimeoutRef.current = setTimeout(() => setShowTooltip(false), 2500);
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
       return;
     }
     setShowTooltip(false);
     onToggle();
-  }, [isTruncated, showTooltip, onToggle]);
+  }, [onToggle]);
+
+  const clearLongPress = useCallback(() => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== 'touch' || !isTruncated) return;
+    longPressTriggeredRef.current = false;
+    clearLongPress();
+    longPressTimeoutRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      setShowTooltip(true);
+      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = setTimeout(() => setShowTooltip(false), 2500);
+    }, 500);
+  }, [clearLongPress, isTruncated]);
 
   const buttonContent = (
     <button
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={clearLongPress}
+      onPointerCancel={clearLongPress}
+      onPointerLeave={clearLongPress}
+      onContextMenu={(event) => {
+        if (isTruncated) event.preventDefault();
+      }}
       className={`${dropdownItemClass} w-full text-left ${
         isSelected 
           ? 'bg-white/15 text-white' 
