@@ -14,8 +14,8 @@ interface EmployerMobileShellProps {
   children: ReactNode;
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  createJobButtonRef: RefObject<HTMLButtonElement>;
-  mainScrollRef: RefObject<HTMLElement>;
+  createJobButtonRef: RefObject<HTMLButtonElement | null>;
+  mainScrollRef: RefObject<HTMLElement | null>;
   onJobCreated: () => void;
 }
 
