@@ -1072,6 +1072,42 @@ All colors MUST be HSL.
     scroll-padding-bottom: 0 !important;
   }
 
+  /* Touch-only overlay ergonomics. The question filter gets a definite
+     viewport-bound height so its middle row becomes the sole scroll area;
+     search, count and clear action always remain visible. */
+  @media (any-pointer: coarse), (hover: none), (any-hover: none) {
+    .question-filter-content {
+      height: min(30rem, var(--radix-popover-content-available-height));
+      max-height: var(--radix-popover-content-available-height);
+      min-height: 0;
+    }
+
+    .question-filter-header,
+    .question-filter-footer {
+      flex: none;
+    }
+
+    .question-filter-list {
+      overflow: hidden;
+    }
+
+    .question-filter-scroll {
+      touch-action: pan-y;
+      overscroll-behavior-y: auto;
+      scroll-padding-block: 0.5rem;
+    }
+
+    .question-filter-scroll-fade {
+      height: 1rem;
+    }
+
+    .mobile-touch-removal-action {
+      justify-content: center;
+      border-radius: 9999px;
+      text-align: center;
+    }
+  }
+
 
   /* Dashboard layout system */
   .dashboard-page-stack {
