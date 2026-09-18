@@ -602,6 +602,7 @@ function KeepAliveCached({
             onTransitionEnd={(e) => {
               if (!isDisplayed) return;
               if (e.propertyName !== 'opacity') return;
+              revisitAnimRef.current = null;
               setIsAnimating(false);
               setIsEntered(true);
             }}
