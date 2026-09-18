@@ -117,8 +117,8 @@ export const EmployerInterviewsCard = memo(() => {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <TruncatedText text={interview.candidate_name} className="text-xs font-semibold text-white" insideInteractive />
-                        <TruncatedText text={interview.job_title} className="text-[10px] text-white" insideInteractive />
+                        <TruncatedText text={interview.candidate_name ?? ""} className="text-xs font-semibold text-white" insideInteractive />
+                        <TruncatedText text={interview.job_title ?? ""} className="text-[10px] text-white" insideInteractive />
                       </div>
                       <span className={cn(
                         "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap text-white",

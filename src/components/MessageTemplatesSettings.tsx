@@ -1028,7 +1028,7 @@ export function MessageTemplatesSettings() {
 
     const { error } = await supabase.rpc('upsert_outreach_templates_atomic', {
       p_owner_user_id: user.id,
-      p_organization_id: organizationId,
+      p_organization_id: organizationId as string,
       p_trigger: trigger,
       p_templates: payload,
     });

@@ -29,7 +29,7 @@ import { useTapToPreview } from '@/hooks/useTapToPreview';
 
 interface CreateJobSimpleDialogProps {
   onJobCreated: (job: JobPosting) => void;
-  triggerRef?: React.RefObject<HTMLButtonElement>;
+  triggerRef?: React.RefObject<HTMLButtonElement | null>;
   triggerClassName?: string;
 }
 

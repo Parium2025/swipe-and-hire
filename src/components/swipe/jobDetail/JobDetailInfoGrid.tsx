@@ -88,7 +88,7 @@ export const JobDetailInfoGrid = memo(function JobDetailInfoGrid({
           <div className="flex text-white text-[15px] sm:text-sm min-w-0">
             <span className="shrink-0 w-[110px] text-white">Bolagsnamn:</span>
             <TruncatedText
-              text={cap(displayCompanyName)}
+              text={cap(displayCompanyName) ?? ""}
               className="font-medium min-w-0 flex-1 [overflow-wrap:anywhere]"
               tooltipSide="top"
               style={{
