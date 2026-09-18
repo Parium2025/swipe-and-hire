@@ -89,7 +89,12 @@ export const useOrganizationQuestions = () => {
       return result;
     },
     enabled: !!user,
-    staleTime: Infinity,
+    // Frågelistan måste kunna ändras mellan enheter: cachen visas direkt men
+    // uppdateras alltid i bakgrunden, annars kan en enhet fastna på en gammal
+    // lista (t.ex. 8 frågor på datorn medan mobilen ser 9).
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
     // 🔥 Instant-load from localStorage cache
     initialData: () => {
       if (!user) return undefined;
