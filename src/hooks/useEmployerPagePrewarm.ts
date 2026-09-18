@@ -6,6 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { writeApplicantMembershipCache } from '@/lib/applicantMembershipCache';
+import { fetchCandidateListsForOwner } from '@/hooks/useCandidateLists';
+import { fetchStageSettings } from '@/hooks/useStageSettings';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 
 /**
  * ❄️ KALLSTART — ARBETSGIVARENS ANNONSSIDOR
@@ -70,6 +73,33 @@ export function useEmployerPagePrewarm() {
       // "X nya"-siffran på jobbkorten: värm direkt så den aldrig poppar in
       // efter att kortet redan syns.
       void prefetchUnviewedApplicationCounts(queryClient, userId);
+
+      // "Mina kandidater" bygger på en kedja: listor → aktiv lista → steg →
+      // kandidater. Vid kallstart väntade varje led på föregående, vilket är
+      // den långa laddningen användaren märker. Här värms de två första leden
+      // så att tavlan kan hämta sina kandidater direkt vid första besöket.
+      void (async () => {
+        const lists = await queryClient.fetchQuery({
+          queryKey: ['candidate-lists', userId],
+          queryFn: () => fetchCandidateListsForOwner(userId, { ensureDefault: true, writeCache: true }),
+          staleTime: 5 * 60 * 1000,
+        });
+        if (cancelled) return;
+        const activeId =
+          getActiveCandidateListId(userId) ||
+          lists.find((l) => l.is_default)?.id ||
+          lists[0]?.id ||
+          null;
+        if (!activeId) return;
+        await queryClient.prefetchQuery({
+          queryKey: ['stage-settings', userId, activeId],
+          queryFn: () => fetchStageSettings(userId, activeId),
+          staleTime: Infinity,
+        });
+      })().catch(() => {
+        // Sidan hämtar själv om förvärmningen inte går igenom.
+      });
+
 
       // Antal och statistik har egna query-nycklar och ingår inte i
       // route-prefetchen. Värm båda scopes parallellt så inga siffror poppar in

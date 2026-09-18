@@ -32,6 +32,9 @@ import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 const TAB_STORAGE_KEY = 'parium:messages:tab';
 
+// Längden på chattens in-/utglidning på mobil (iOS-lik kurva nedan).
+const MOBILE_SLIDE_MS = 320;
+
 function readStoredTab(): ConversationTab | null {
   try {
     const value = localStorage.getItem(TAB_STORAGE_KEY);
@@ -260,9 +263,21 @@ export default function Messages() {
     setShowMobileChat(true);
   };
 
+  // Chatten glider ut åt höger på mobil. Konversationen får därför inte
+  // nollställas direkt — då hade panelen varit tom under utglidningen.
+  const backTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (backTimerRef.current) window.clearTimeout(backTimerRef.current);
+  }, []);
+
   const handleBackToList = () => {
     setShowMobileChat(false);
-    if (isMobile) setSelectedConversationId(null);
+    if (!isMobile) return;
+    if (backTimerRef.current) window.clearTimeout(backTimerRef.current);
+    backTimerRef.current = window.setTimeout(() => {
+      setSelectedConversationId(null);
+      backTimerRef.current = null;
+    }, MOBILE_SLIDE_MS);
   };
 
   // Visa skelett när context fortfarande hämtar och vi saknar cachad data
@@ -284,8 +299,17 @@ export default function Messages() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col messages-container overflow-x-hidden">
-      {/* Header */}
-      <div className={cn("flex items-center justify-center mb-4 flex-shrink-0 relative", showMobileChat && "hidden md:flex")}>
+      {/* Header — kollapsar mjukt i takt med att chatten glider in på mobil */}
+      <div
+        className={cn(
+          "flex-shrink-0 overflow-hidden md:!max-h-none md:!opacity-100 md:!mb-4",
+          "transition-[max-height,opacity,margin] ease-[cubic-bezier(0.32,0.72,0,1)]",
+          showMobileChat ? "max-h-0 opacity-0 mb-0" : "max-h-24 opacity-100 mb-4"
+        )}
+        style={{ transitionDuration: `${MOBILE_SLIDE_MS}ms` }}
+        aria-hidden={showMobileChat && isMobile}
+      >
+        <div className="flex items-center justify-center relative">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-white" />
@@ -307,14 +331,31 @@ export default function Messages() {
             <span className="sm:hidden">Ny</span>
           </Button>
         )}
+        </div>
       </div>
 
       {/* Main content - Split view on desktop, stacked on mobile */}
-      <div className="flex-1 flex gap-4 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {/* Mobil: lista och chatt ligger sida vid sida i ett spår som glider.
+            Desktop: oförändrad delad vy. */}
+        <div
+          data-messages-track
+          className={cn(
+            "flex h-full min-h-0 md:gap-4",
+            isMobile && "w-full transform-gpu transition-transform ease-[cubic-bezier(0.32,0.72,0,1)]"
+          )}
+          style={
+            isMobile
+              ? {
+                  transitionDuration: `${MOBILE_SLIDE_MS}ms`,
+                  transform: showMobileChat ? 'translateX(-100%)' : 'translateX(0)',
+                }
+              : undefined
+          }
+        >
         {/* Conversation List */}
         <div className={cn(
-          "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
-          showMobileChat ? "hidden md:flex" : ""
+          "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col"
         )}>
           <div className="flex-shrink-0">
             {hasTeam ? (
@@ -460,8 +501,8 @@ export default function Messages() {
 
         {/* Chat View */}
         <div className={cn(
-          "flex-1 flex flex-col min-w-0",
-          !showMobileChat && "hidden md:flex"
+          "flex flex-col min-w-0",
+          isMobile ? "w-full flex-shrink-0" : "flex-1"
         )}>
           {selectedConversation ? (
             <ChatView
@@ -479,6 +520,7 @@ export default function Messages() {
               contentRef={rightEmptyContentRef}
             />
           )}
+        </div>
         </div>
       </div>
 

@@ -36,6 +36,20 @@ const getCached = (userId: string): AppNotification[] | null => {
   return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
 };
 
+/**
+ * Klockan ska vara på plats direkt vid uppstart — inte några sekunder efter.
+ * Auth tar en stund att lösa ut, och tidigare låg cacheläsningen bakom `user`,
+ * så badgen var tom tills sessionen var klar. Cachen rensas vid utloggning
+ * (se useEagerRatingsPreload), så den tillhör alltid det konto som är på väg in.
+ * Skulle auth ändå lösa ut ett annat konto nollställs den direkt i effekten nedan.
+ */
+const getCachedBeforeAuth = (): AppNotification[] | null => {
+  const cached = safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
+    return typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
+  });
+  return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
+};
+
 const setCache = (userId: string, items: AppNotification[]) => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ userId, items, ts: Date.now() }));
@@ -51,22 +65,29 @@ export function useNotifications() {
   }, [user?.id]);
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     if (user) return getCached(user.id) || [];
-    return [];
+    return getCachedBeforeAuth() || [];
   });
   const [unreadCount, setUnreadCount] = useState(() => {
-    if (!user) return 0;
-    return (getCached(user.id) || []).filter(n => !n.is_read).length;
+    const seed = user ? getCached(user.id) : getCachedBeforeAuth();
+    return (seed || []).filter(n => !n.is_read).length;
   });
+
+  // Har vi någon gång sett ett inloggat konto? Först då betyder `user === null`
+  // utloggning/kontobyte. Vid uppstart betyder det bara "auth är inte klar än",
+  // och då ska den förvärmda badgen få ligga kvar.
+  const hasHadUserRef = useRef(false);
 
   // Hydrate from cache on user change
   useEffect(() => {
     if (!user) {
+      if (!hasHadUserRef.current) return; // auth laddar fortfarande
       // Vid utloggning/kontobyte får föregående kontos notiser aldrig ligga kvar
       // i klockan.
       setNotifications([]);
       setUnreadCount(0);
       return;
     }
+    hasHadUserRef.current = true;
     const cached = getCached(user.id);
     if (cached) {
       setNotifications(cached);
@@ -90,31 +111,39 @@ export function useNotifications() {
 
   useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
-  const loadMutedTypes = useCallback(async () => {
-    if (!user) return;
+  const loadMutedTypes = useCallback(async (): Promise<Set<string>> => {
+    if (!user) return mutedTypesRef.current;
     const { data } = await supabase
       .from('notification_preferences')
       .select('notification_type, in_app_enabled')
       .eq('user_id', user.id);
-    mutedTypesRef.current = new Set(
+    const next = new Set(
       (data ?? []).filter((p) => p.in_app_enabled === false).map((p) => p.notification_type)
     );
+    mutedTypesRef.current = next;
+    return next;
   }, [user]);
+
+  // Skyddar mot att en avstängd typ triggar oändliga omhämtningar.
+  const mutedRetryRef = useRef(false);
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     try {
-      await loadMutedTypes();
-      const excluded = Array.from(
-        new Set([...mutedTypesRef.current, ...HIDDEN_TYPES])
-      );
+      // Tidigare väntade vi på avstängda typer INNAN notiserna ens började
+      // hämtas — ett extra serverhopp framför varje laddning. Nu körs alla tre
+      // frågorna parallellt med senast kända avstängda typer, och skulle de ha
+      // ändrats görs exakt en omhämtning.
+      const knownMuted = new Set(mutedTypesRef.current);
+      const mutedPromise = loadMutedTypes();
+      const excluded = Array.from(new Set([...knownMuted, ...HIDDEN_TYPES]));
       let query = supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id);
       if (excluded.length) query = query.not('type', 'in', `(${excluded.join(',')})`);
 
-      const [{ data, error }, countRes] = await Promise.all([
+      const [{ data, error }, countRes, freshMuted] = await Promise.all([
         query.order('created_at', { ascending: false }).order('id', { ascending: false }).limit(PAGE_SIZE),
         (() => {
           let c = supabase
@@ -125,6 +154,7 @@ export function useNotifications() {
           if (excluded.length) c = c.not('type', 'in', `(${excluded.join(',')})`);
           return c;
         })(),
+        mutedPromise.catch(() => knownMuted),
       ]);
 
       if (error) throw error;
@@ -136,11 +166,26 @@ export function useNotifications() {
       setHasMore(items.length === PAGE_SIZE);
       setCache(user.id, items);
       setHasError(false);
+
+      const changed =
+        freshMuted.size !== knownMuted.size ||
+        Array.from(freshMuted).some((t) => !knownMuted.has(t));
+      if (changed && !mutedRetryRef.current) {
+        mutedRetryRef.current = true;
+        try {
+          await fetchNotificationsRef.current?.();
+        } finally {
+          mutedRetryRef.current = false;
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
       setHasError(true);
     }
   }, [user, loadMutedTypes]);
+
+  const fetchNotificationsRef = useRef<(() => Promise<void>) | null>(null);
+  useEffect(() => { fetchNotificationsRef.current = fetchNotifications; }, [fetchNotifications]);
 
   // Oändlig scroll: hämta nästa sida med keyset-paginering (created_at + id),
   // vilket håller sig snabbt även vid tiotusentals notiser.

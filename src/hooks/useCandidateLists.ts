@@ -29,6 +29,43 @@ export const MAX_CANDIDATE_LISTS = 10;
  * bara ligga i en lista i taget. Alla befintliga kandidater ligger i
  * standardlistan "Mina kandidater", som inte går att ta bort.
  */
+/**
+ * Samma hämtning som hooken använder, men anropbar utanför React så att
+ * listorna kan förvärmas direkt efter inloggning. Utan förvärmning startar
+ * "Mina kandidater" en kedja (listor → aktiv lista → steg → kandidater) där
+ * varje led väntar på föregående vid kallstart.
+ */
+export async function fetchCandidateListsForOwner(
+  ownerId: string,
+  opts?: { ensureDefault?: boolean; writeCache?: boolean },
+): Promise<CandidateList[]> {
+  const fetchLists = async () => {
+    const { data, error } = await supabase
+      .from('candidate_lists')
+      .select('id, owner_id, name, order_index, is_default, created_at')
+      .eq('owner_id', ownerId)
+      .order('order_index', { ascending: true })
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data || []) as CandidateList[];
+  };
+
+  let result = await fetchLists();
+
+  // Nya användare har ingen lista än — skapa standardlistan direkt.
+  if (result.length === 0 && opts?.ensureDefault) {
+    const { error } = await supabase.rpc('ensure_default_candidate_list', { p_owner_id: ownerId });
+    if (!error) result = await fetchLists();
+  }
+
+  if (opts?.writeCache) {
+    writeCachedCandidateLists(ownerId, result.map(({ id, name, order_index, is_default }) => ({
+      id, name, order_index, is_default,
+    })));
+  }
+  return result;
+}
+
 export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault?: boolean }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -39,32 +76,7 @@ export function useCandidateLists(ownerId: string | null, opts?: { ensureDefault
     queryKey: ['candidate-lists', ownerId],
     queryFn: async () => {
       if (!ownerId) return [];
-
-      const fetchLists = async () => {
-        const { data, error } = await supabase
-          .from('candidate_lists')
-          .select('id, owner_id, name, order_index, is_default, created_at')
-          .eq('owner_id', ownerId)
-          .order('order_index', { ascending: true })
-          .order('created_at', { ascending: true });
-        if (error) throw error;
-        return (data || []) as CandidateList[];
-      };
-
-      let result = await fetchLists();
-
-      // Nya användare har ingen lista än — skapa standardlistan direkt.
-      if (result.length === 0 && ensureDefault) {
-        const { error } = await supabase.rpc('ensure_default_candidate_list', { p_owner_id: ownerId });
-        if (!error) result = await fetchLists();
-      }
-
-      if (isOwn) {
-        writeCachedCandidateLists(ownerId, result.map(({ id, name, order_index, is_default }) => ({
-          id, name, order_index, is_default,
-        })));
-      }
-      return result;
+      return fetchCandidateListsForOwner(ownerId, { ensureDefault, writeCache: isOwn });
     },
     enabled: !!ownerId,
     staleTime: 5 * 60 * 1000,

@@ -140,6 +140,29 @@ function writeCachedSettings(userId: string, settings: DbStageSetting[], listId:
  * `listId = null` betyder "innan listan hunnit laddas" och läser då alla
  * användarens steg, precis som före listfunktionen.
  */
+/**
+ * Samma hämtning som hooken, men anropbar utanför React så att stegen kan
+ * förvärmas direkt efter inloggning i stället för att hämtas först när
+ * "Mina kandidater" öppnas.
+ */
+export async function fetchStageSettings(
+  userId: string,
+  listId: string | null = null,
+): Promise<DbStageSetting[]> {
+  let query = supabase
+    .from('user_stage_settings')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (listId) query = query.eq('list_id', listId);
+
+  const { data, error } = await query.order('order_index', { ascending: true });
+  if (error) throw error;
+  const settings = (data || []) as DbStageSetting[];
+  writeCachedSettings(userId, settings, listId);
+  return settings;
+}
+
 export function useStageSettings(listId: string | null = null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -151,23 +174,7 @@ export function useStageSettings(listId: string | null = null) {
     queryKey: ['stage-settings', user?.id, listId],
     queryFn: async () => {
       if (!user) return [];
-
-      let query = supabase
-        .from('user_stage_settings')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (listId) query = query.eq('list_id', listId);
-
-      const { data, error } = await query.order('order_index', { ascending: true });
-
-      if (error) throw error;
-      const settings = (data || []) as DbStageSetting[];
-      
-      // Cache for instant display on next visit
-      writeCachedSettings(user.id, settings, listId);
-      
-      return settings;
+      return fetchStageSettings(user.id, listId);
     },
     enabled: !!user,
     staleTime: Infinity,

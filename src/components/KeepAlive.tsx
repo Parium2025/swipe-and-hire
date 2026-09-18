@@ -135,6 +135,10 @@ function KeepAliveCached({
   // Nycklar som monterats i den här renderingen och alltså aldrig visats förut.
   // Endast de ska tona in; redan besökta vyer byts synkront utan animation.
   const freshKeysRef = useRef<Set<string>>(new Set());
+  // Återbesök tonar in kort och lågt (280ms) medan aldrig sedda vyer får den
+  // längre intoningen (500ms). Utan detta blev återbesök ett hårt hopp.
+  const [isFastEnter, setIsFastEnter] = React.useState(false);
+  const revisitAnimRef = useRef<string | null>(null);
 
   // -------------------------------------------------------------------------
   // Scrollminne per vy
@@ -434,10 +438,34 @@ function KeepAliveCached({
     if (isFirstActivationRef.current) return;
     if (activeKey === displayedKey) return;
     if (freshKeysRef.current.has(activeKey)) return; // ny vy → tona in nedan
+    // Bytet sker fortfarande före paint (ingen blixt), men vyn börjar
+    // osynlig och tonar in kort så att återbesök inte hoppar fram hårt.
+    revisitAnimRef.current = activeKey;
     setDisplayedKey(activeKey);
-    setIsEntered(true);
-    setIsAnimating(false);
+    setIsFastEnter(true);
+    setIsEntered(false);
+    setIsAnimating(true);
   }, [activeKey, displayedKey]);
+
+  // Flippar återbesöket till slut-state efter att start-framen committats.
+  useEffect(() => {
+    if (revisitAnimRef.current !== displayedKey) return;
+    let raf1 = 0;
+    let raf2 = 0;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setIsEntered(true));
+    });
+    const safety = window.setTimeout(() => {
+      setIsEntered(true);
+      setIsAnimating(false);
+      revisitAnimRef.current = null;
+    }, 600);
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      window.clearTimeout(safety);
+    };
+  }, [displayedKey]);
 
   useEffect(() => {
     if (isFirstActivationRef.current) {
@@ -451,6 +479,8 @@ function KeepAliveCached({
     }
 
     if (activeKey === displayedKey) {
+      // En pågående återbesöks-intoning får inte avbrytas här.
+      if (revisitAnimRef.current === displayedKey) return;
       // Säkerhet: garantera att vi alltid är fully entered om vi inte byter route
       setIsEntered(true);
       return;
@@ -458,11 +488,12 @@ function KeepAliveCached({
 
     // Redan besökta vyer hanteras synkront i layout-effekten ovan.
     if (!freshKeysRef.current.has(activeKey)) {
-      setDisplayedKey(activeKey);
-      setIsEntered(true);
-      setIsAnimating(false);
       return;
     }
+
+    setIsFastEnter(false);
+    revisitAnimRef.current = null;
+
 
     let raf1 = 0;
     let raf2 = 0;
@@ -546,7 +577,10 @@ function KeepAliveCached({
         const isDisplayed = key === displayedKey;
         const enterClasses = isEntered
           ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-2 pointer-events-none';
+          : isFastEnter
+            ? 'opacity-0 translate-y-1 pointer-events-none'
+            : 'opacity-0 translate-y-2 pointer-events-none';
+        const durationClass = isFastEnter ? 'duration-[280ms]' : 'duration-500';
         return (
           <div
             key={key}
@@ -561,13 +595,14 @@ function KeepAliveCached({
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
                 : ''
             }
             aria-hidden={!isDisplayed}
             onTransitionEnd={(e) => {
               if (!isDisplayed) return;
               if (e.propertyName !== 'opacity') return;
+              revisitAnimRef.current = null;
               setIsAnimating(false);
               setIsEntered(true);
             }}
