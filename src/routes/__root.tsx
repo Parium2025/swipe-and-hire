@@ -617,8 +617,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
             src="/parium-auth-logo.png"
             alt="Parium"
             decoding="sync"
-            // @ts-expect-error React 19 lowercases fetchpriority
-            fetchpriority="high"
+            fetchPriority="high"
           />
           <p id="auth-splash-tagline">Din karriärresa börjar här</p>
           <div id="auth-splash-dots">
@@ -676,8 +675,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
           alt=""
           aria-hidden="true"
           decoding="sync"
-          // @ts-expect-error React 19 lowercases fetchpriority
-          fetchpriority="high"
+          fetchPriority="high"
           style={{
             position: "absolute",
             width: 0,
