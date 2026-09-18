@@ -105,7 +105,16 @@ const CHROME_COLOR_SCRIPT = `(function() {
     document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
     document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
     document.documentElement.style.backgroundColor = chromeColor;
+    // VIKTIGT: iOS Safari samplar theme-color vid själva HTML-parsningen.
+    // En meta-tagg som skapas via DOM efteråt (createElement) missas på vissa
+    // iOS-versioner och statusraden blir svart vid kallstart. document.write
+    // under pågående parsning gör taggen till en del av det parsade
+    // dokumentet — samma teknik som före TanStack-migreringen.
     var tc = document.getElementById('parium-theme-color');
+    if (!tc && document.readyState === 'loading') {
+      document.write('<meta id="parium-theme-color" name="theme-color" content="' + chromeColor + '">');
+      tc = document.getElementById('parium-theme-color');
+    }
     if (!tc) {
       tc = document.createElement('meta');
       tc.id = 'parium-theme-color';
