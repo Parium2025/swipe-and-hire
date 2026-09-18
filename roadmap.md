@@ -50,3 +50,4 @@
 - [x] Låt den gröna kandidatstatusen även erbjuda säker borttagning från den egna listan
 - [x] Centrera och runda mobilens borttagningsåtgärd samt ge frågefiltret en verklig rullyta med fast topp och botten
 - [x] Centrera frågefiltret mot telefonens synliga skärmyta utan att påverka datorvyn
+- [x] Lås frågefiltrets bredd och interna rullning på dator utan att ändra mobilvyn
