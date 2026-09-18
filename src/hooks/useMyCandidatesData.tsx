@@ -1017,7 +1017,7 @@ export function useMyCandidatesData(
       } else {
         queryClient.setQueryData(queryKey, context?.previousCandidates);
         if (user && context?.removedApplicantId) {
-          addApplicantMembershipCacheEntry(user.id, context.removedApplicantId);
+          addApplicantMembershipCacheEntry((user as { id: string }).id, context.removedApplicantId);
         }
         toast.error('Kunde inte ta bort kandidaten');
       }

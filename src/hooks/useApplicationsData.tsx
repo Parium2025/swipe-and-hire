@@ -683,8 +683,10 @@ export const useApplicationsData = (
         state.key = applicantIdsKey;
         state.lastAt = Date.now();
 
-        if (updatedItems && updatedItems.length > 0) {
-          writeSnapshot(user.id, updatedItems);
+        // TS ser inte tilldelningen inne i setQueryData-callbacken
+        const snapshotItems = updatedItems as ApplicationData[] | null;
+        if (snapshotItems && snapshotItems.length > 0) {
+          writeSnapshot(user.id, snapshotItems);
         }
       } finally {
         lastActiveRefreshStateRef.current.inFlight = false;
