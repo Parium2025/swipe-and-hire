@@ -14,7 +14,7 @@ interface PreloadableJob {
 const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at ?? undefined;
 
 
-function resolveUrl(url: string | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
+function resolveUrl(url: string | null | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
   if (!url) return null;
   if (url.startsWith('http')) return url;
   const { data } = supabase.storage.from(bucket).getPublicUrl(url, transform ? { transform } : undefined);
@@ -22,10 +22,10 @@ function resolveUrl(url: string | undefined, bucket: string, transform?: typeof 
 }
 
 // Helpers som matchar exakt vad JobSlide renderar
-const resolveSwipeImg = (u?: string) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
-const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', { width: 64, height: 64, quality: 80, resize: 'contain' });
+const resolveSwipeImg = (u?: string | null) => resolveUrl(u, 'job-images', SWIPE_CARD_TRANSFORM);
+const resolveSwipeLogo = (u?: string | null) => resolveUrl(u, 'company-logos', { width: 64, height: 64, quality: 80, resize: 'contain' });
 
-function resolveJobViewVariant(url: string | undefined): string | null {
+function resolveJobViewVariant(url: string | null | undefined): string | null {
   if (!url) return null;
   // Already a remote URL → use as-is (swipe doesn't transform foreign URLs)
   if (url.startsWith('http')) return null;
