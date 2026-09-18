@@ -166,6 +166,18 @@ const HeroVideo = () => {
     el.preload = tier === 'landscape' ? 'metadata' : 'auto';
   }, [tier]);
 
+  // Väljer rätt videomaster/utsnitt för den faktiska skärmen så fort appen
+  // hydrerats (kan inte göras under render — servern känner inte skärmen).
+  useEffect(() => {
+    const nextTier = getTier();
+    tierRef.current = nextTier;
+    setTier(nextTier);
+    setLandscapePosition(landscapeObjectPosition());
+    setHeroSrc(pickHeroSrc());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
