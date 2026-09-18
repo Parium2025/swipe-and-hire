@@ -13,9 +13,21 @@ const isAudienceLandingPath = (pathname: string) =>
 const isAuthPath = (pathname: string) => pathname === '/auth';
 
 /**
- * Tunn färgremsa längst upp — speglar BottomChromeStrip för iOS safe-area.
- * Färgen byts automatiskt vid SPA-nav eftersom komponenten lyssnar på
- * react-router location (samma mönster som botten).
+ * Tunn färgremsa längst upp — speglar BottomChromeStrip exakt.
+ *
+ * Med `viewport-fit=cover` sträcker sig sidan in bakom iOS statusrad.
+ * iOS Safari samplar body's bakgrundsfärg EN gång vid sidladdning och
+ * uppdaterar inte vid SPA-navigering — om man landade på startsidan
+ * (grå #2a2a2a) och navigerar till /auth syns en mörk rand kvar högst upp.
+ * Samma problem som bottenremsan löser, samma lösning: en fixed remsa som
+ * lyssnar på react-router location och alltid målar rätt ruttfärg.
+ *
+ * I vanlig webbläsare täcker remsan exakt safe-area (statusraden) — sidorna
+ * lägger själva sin safe-area-padding, så ingen content-offset behövs.
+ * I installerat app-läge (standalone) får remsan +8px extra och skjuter
+ * innehållet ner via --top-chrome-content-offset (oförändrat beteende).
+ *
+ * Synlig endast på touch-enheter (telefon/surfplatta). Desktop slipper.
  */
 const TopChromeStrip = () => {
   const location = useLocation();
@@ -25,8 +37,8 @@ const TopChromeStrip = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(pointer: coarse)');
-    const apply = () => setIsTouch(mq.matches);
+    const mq = window.matchMedia('(any-pointer: coarse), (hover: none), (any-hover: none)');
+    const apply = () => setIsTouch(mq.matches || navigator.maxTouchPoints > 0);
     apply();
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
@@ -64,18 +76,18 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
-  // I vanlig iOS Safari börjar viewporten nedanför den native statusraden.
-  // En fixed remsa här målar sig INNE i sidan och blir ett synligt mörkt band
-  // mot sidans glödgradient. Native chrome färgas i stället via theme-color.
-  // Endast installerat app-läge (standalone) behöver en egen safe-area-yta.
-  const shouldShowStrip = isTouch && isStandalone;
-  const stripInset = '8px';
+
+  // Remsan visas på alla touch-enheter. Content-offset (som skjuter ner
+  // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
+  // exakt över statusradens safe-area som sidorna redan paddingar för.
+  const shouldShowStrip = isTouch;
+  const stripInset = isStandalone ? '8px' : '0px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (shouldShowStrip) {
+    if (isTouch && isStandalone) {
       root.style.setProperty('--top-chrome-content-offset', chromeOffset);
     } else {
       root.style.removeProperty('--top-chrome-content-offset');
@@ -83,13 +95,9 @@ const TopChromeStrip = () => {
     return () => {
       root.style.removeProperty('--top-chrome-content-offset');
     };
-  }, [shouldShowStrip, chromeOffset]);
+  }, [isTouch, isStandalone, chromeOffset]);
 
   if (!shouldShowStrip) return null;
-
-  // Höjd på toppremsan: standalone PWA får en tunn 8px-remsa ovanför
-  // safe-area; i vanlig browser renderas ingen remsa alls (theme-color räcker).
-  const stripHeight = chromeOffset;
 
   return (
     <div
@@ -99,7 +107,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        height: stripHeight,
+        height: chromeOffset,
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
