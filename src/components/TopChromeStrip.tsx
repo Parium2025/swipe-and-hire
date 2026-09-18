@@ -81,13 +81,12 @@ const TopChromeStrip = () => {
   // sidinnehållet) gäller bara i standalone — i webbläsaren ligger remsan
   // exakt över statusradens safe-area som sidorna redan paddingar för.
   const shouldShowStrip = isTouch;
-  // Safari kan rapportera safe-area som 0 i vanlig webbläsarvy. Då blev remsan
-  // osynlig och den svarta native-ytan syntes. `max` ger minst 14 px färg men
-  // adderar inget ovanpå en riktig safe-area, vilket undviker den dubbla rand
-  // som `calc(safe-area + 14px)` skapade.
+  // Måla endast den verkliga safe-area-ytan. En minsta CSS-höjd här skapar en
+  // andra remsa ovanpå sidans redan full-bleed bakgrund när Safari rapporterar
+  // safe-area som 0. Den native ytan färgas i stället av theme-color + body.
   const chromeOffset = isStandalone
     ? 'calc(env(safe-area-inset-top, 0px) + 8px)'
-    : 'max(env(safe-area-inset-top, 0px), 14px)';
+    : 'env(safe-area-inset-top, 0px)';
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
