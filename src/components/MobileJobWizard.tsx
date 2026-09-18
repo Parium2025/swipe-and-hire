@@ -2751,7 +2751,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="px-4 py-2 flex-shrink-0">
+          <div className="px-4 py-2 shrink-0">
             <Progress 
               value={progress} 
               className="h-1 bg-white/20 [&>div]:bg-white"
@@ -2899,7 +2899,7 @@ const MobileJobWizard = ({
                         return (
                           <span
                             key={benefitValue}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-sm"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-xs"
                           >
                             {label}
                             <button
@@ -2939,7 +2939,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
+                      className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
                     >
                       <Plus className="h-4 w-4 block" />
                     </button>
@@ -3094,14 +3094,14 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
+                      className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -3350,7 +3350,7 @@ const MobileJobWizard = ({
                           onMouseUp={(e) => e.currentTarget.blur()}
                           onClick={addCustomQuestion}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-4 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 whitespace-nowrap"
+                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-4 font-medium rounded-full transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0 whitespace-nowrap"
                         >
                           Lägg till
                           <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -3406,7 +3406,7 @@ const MobileJobWizard = ({
                           setQuestionSearchTerm('');
                         }}
                         onTouchEnd={(e) => e.currentTarget.blur()}
-                        className="relative flex h-[var(--icon-button-size-sm)] w-[var(--icon-button-size-sm)] !min-h-0 !min-w-0 shrink-0 aspect-square items-center justify-center overflow-hidden rounded-full bg-white/10 p-0 text-white transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:hover:bg-white/20 md:hover:text-white touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                        className="relative flex h-[var(--icon-button-size-sm)] w-[var(--icon-button-size-sm)] !min-h-0 !min-w-0 shrink-0 aspect-square items-center justify-center overflow-hidden rounded-full bg-white/10 p-0 text-white transition-colors outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 md:hover:bg-white/20 md:hover:text-white touch-manipulation [-webkit-tap-highlight-color:transparent]"
                       >
                         <X className={dialogCloseIconClassName} />
                       </button>
@@ -3431,7 +3431,7 @@ const MobileJobWizard = ({
                         onMouseUp={(e) => e.currentTarget.blur()}
                         onClick={createNewQuestion}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -3481,7 +3481,7 @@ const MobileJobWizard = ({
                                   {templates.map((template) => (
                                     <div
                                       key={template.id}
-                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group cursor-pointer active:scale-[0.98]"
+                                      className="w-full bg-white/5 backdrop-blur-xs rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group cursor-pointer active:scale-[0.98]"
                                       onClick={(e) => {
                                         // Don't trigger if clicking Edit or Delete buttons
                                         if ((e.target as HTMLElement).closest('button')) return;
@@ -3537,7 +3537,7 @@ const MobileJobWizard = ({
                     {/* Delete Template Confirmation */}
                     <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => { if (!open) setDeleteTemplateId(null); }}>
                       <AlertDialogContentNoFocus
-                        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+                        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
                       >
                         <AlertDialogHeader className="space-y-4 text-center">
                           <div className="flex items-center justify-center gap-2.5">
@@ -3753,7 +3753,7 @@ const MobileJobWizard = ({
                                   }}
                                   onMouseUp={(e) => e.currentTarget.blur()}
                                   onClick={() => removeOption(index)}
-                                  className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
+                                  className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-hidden focus:ring-0"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
@@ -3769,7 +3769,7 @@ const MobileJobWizard = ({
                               onMouseUp={(e) => e.currentTarget.blur()}
                               onClick={addOption}
                               size="sm"
-                              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-150 mt-2 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                              className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-150 mt-2 focus:outline-hidden focus:ring-0 focus-visible:ring-0"
                             >
                               Lägg till alternativ
                               <Plus className="h-3.5 w-3.5 ml-1.5" />
@@ -3800,7 +3800,7 @@ const MobileJobWizard = ({
                           onMouseUp={(e) => e.currentTarget.blur()}
                           onClick={saveCustomQuestion}
                           disabled={!editingQuestion?.question_text?.trim()}
-                          className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0"
                         >
                           Spara fråga
                         </Button>
@@ -3884,7 +3884,7 @@ const MobileJobWizard = ({
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
+                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 relative z-10 shrink-0 rounded-t-[1.6rem] gap-1">
                                <div className="text-[10px] font-bold text-white truncate min-w-0">Ansökan</div>
                                <div className="relative">
                                  {showCompanyTooltip && isScrolledTop && (
@@ -3902,7 +3902,7 @@ const MobileJobWizard = ({
                                      </div>
                                    </div>
                                  )}
-                                 <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
+                                 <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
                                </div>
                              </div>
 
@@ -3946,7 +3946,7 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer leading-tight text-left min-w-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                       className="text-xs font-bold text-white hover:text-white transition-colors cursor-pointer leading-tight text-left min-w-0 outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                      >
                                        <TruncatedText text={profile?.company_name || 'Företagsnamn'} className="line-clamp-2 text-xs font-bold text-white leading-tight" tooltipSide="bottom" />
                                      </button>
@@ -3985,7 +3985,7 @@ const MobileJobWizard = ({
                                           const [, bullet, text] = bulletMatch;
                                           return (
                                             <div key={index} className="flex">
-                                              <span className="flex-shrink-0 mr-1">{bullet}</span>
+                                              <span className="shrink-0 mr-1">{bullet}</span>
                                               <span className="flex-1 break-words">{text}</span>
                                             </div>
                                           );
@@ -4124,7 +4124,7 @@ const MobileJobWizard = ({
                                        <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                          {formData.benefits.map((benefit, idx) => (
                                            <div key={idx} className="flex items-start">
-                                             <span className="flex-shrink-0 mr-1">•</span>
+                                             <span className="shrink-0 mr-1">•</span>
                                              <span>{benefit}</span>
                                            </div>
                                          ))}
@@ -4182,7 +4182,7 @@ const MobileJobWizard = ({
                                       'Tillgänglighet',
                                     ].map((label, idx) => (
                                       <div key={idx} className="text-xs flex">
-                                        <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                        <span className="shrink-0 mr-1 text-white">•</span>
                                         <span className="flex-1 text-white leading-tight break-words">{label}</span>
                                       </div>
                                     ))}
@@ -4215,7 +4215,7 @@ const MobileJobWizard = ({
                                           {/* Input förhandsvisning baserat på frågetyp */}
                                             {question.question_type === 'text' && (
                                              <textarea
-                                               className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
+                                               className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-hidden focus:border-white/40 max-h-[120px] overflow-y-auto"
                                                placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                rows={2}
                                                value={previewAnswers[question.id || `q_${index}`] || ''}
@@ -4311,7 +4311,7 @@ const MobileJobWizard = ({
                                                       : 'bg-white/10 border-white/20 hover:bg-white/15'
                                                   }`}
                                                 >
-                                                  <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                                  <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center shrink-0 ${
                                                     selected ? 'border-secondary bg-secondary' : 'border-white/40'
                                                   }`} />
                                                   <span className="text-xs text-white text-left flex-1">{option}</span>
@@ -4343,7 +4343,7 @@ const MobileJobWizard = ({
                                         {question.question_type === 'date' && (
                                           <input
                                             type="date"
-                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-none focus:border-white/40"
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-hidden focus:border-white/40"
                                             value={previewAnswers[question.id || `q_${index}`] || ''}
                                             onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                           />
@@ -4429,7 +4429,7 @@ const MobileJobWizard = ({
                             {/* Application Form View (when clicked) - IDENTICAL to mobile */}
                             {showDesktopApplicationForm && (
                               <div className="flex flex-col h-full">
-                                <div className="flex items-center justify-between px-4 py-2 bg-black/20 flex-shrink-0">
+                                <div className="flex items-center justify-between px-4 py-2 bg-black/20 shrink-0">
                                   <div className="text-sm font-bold text-white">Ansökningsformulär</div>
                                   <div className="flex items-center gap-2">
                                     {/* Tooltip pointing at X button */}
@@ -4530,7 +4530,7 @@ const MobileJobWizard = ({
                                               const [, bullet, text] = bulletMatch;
                                               return (
                                                 <div key={index} className="flex">
-                                                  <span className="flex-shrink-0 mr-1">{bullet}</span>
+                                                  <span className="shrink-0 mr-1">{bullet}</span>
                                                   <span className="flex-1 break-words">{text}</span>
                                                 </div>
                                               );
@@ -4666,7 +4666,7 @@ const MobileJobWizard = ({
                                         <div className="text-xs text-white space-y-0.5">
                                           {formData.benefits.map((benefit, idx) => (
                                             <div key={idx} className="flex items-start">
-                                              <span className="flex-shrink-0 mr-1">•</span>
+                                              <span className="shrink-0 mr-1">•</span>
                                               <span>{benefit}</span>
                                             </div>
                                           ))}
@@ -4722,7 +4722,7 @@ const MobileJobWizard = ({
                                           'Tillgänglighet',
                                         ].map((label, idx) => (
                                           <div key={idx} className="text-xs flex">
-                                            <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                            <span className="shrink-0 mr-1 text-white">•</span>
                                             <span className="flex-1 text-white leading-tight">{label}</span>
                                           </div>
                                         ))}
@@ -4755,7 +4755,7 @@ const MobileJobWizard = ({
                                               {/* Input förhandsvisning baserat på frågetyp */}
                                               {question.question_type === 'text' && (
                                                 <textarea
-                                                  className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
+                                                  className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-hidden focus:border-white/40 max-h-[120px] overflow-y-auto"
                                                   placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                   rows={2}
                                                   value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
@@ -4860,8 +4860,8 @@ const MobileJobWizard = ({
                                                         >
                                                           <div className={
                                                             selected
-                                                              ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary flex-shrink-0'
-                                                              : 'w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0'
+                                                              ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary shrink-0'
+                                                              : 'w-1.5 h-1.5 rounded-full border border-white/40 shrink-0'
                                                           } />
                                                           <span className="text-xs text-white">{option}</span>
                                                         </button>
@@ -4893,7 +4893,7 @@ const MobileJobWizard = ({
                                               {question.question_type === 'date' && (
                                                 <input
                                                   type="date"
-                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-none focus:border-white/40"
+                                                  className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-hidden focus:border-white/40"
                                                   value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
                                                   onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
                                                 />

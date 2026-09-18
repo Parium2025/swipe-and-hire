@@ -288,7 +288,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
                     >
                       <div className="relative">
                         <item.icon className="h-4 w-4" />
@@ -348,7 +348,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -385,7 +385,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -422,7 +422,7 @@ export function AppSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={() => handlePrefetch(item.url)}
                       onTouchStart={() => handlePrefetch(item.url)}
-                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                      className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -442,7 +442,7 @@ export function AppSidebar() {
                        (e.currentTarget as HTMLButtonElement).blur();
                        if (isMobile) setOpenMobile(false);
                      }}
-                     className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                     className="flex items-center gap-3 w-full outline-hidden focus:outline-hidden"
                    >
                      <Lightbulb className="h-4 w-4" />
                      {!collapsed && <span className="font-medium">Hjälp &amp; tips</span>}

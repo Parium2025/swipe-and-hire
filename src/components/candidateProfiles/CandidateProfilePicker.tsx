@@ -102,7 +102,7 @@ export function CandidateProfilePicker({ profiles, selectedId, onSelect, basePro
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className={`group flex min-h-[64px] w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left transition-colors touch-manipulation outline-none focus:outline-none focus-visible:outline-none ${shell}`}
+              className={`group flex min-h-[64px] w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left transition-colors touch-manipulation outline-hidden focus:outline-hidden focus-visible:outline-hidden ${shell}`}
               aria-label="Byt profil för ansökan"
             >
               <ProfileAvatar imagePath={current.profile_image_url} hasVideo={!!current.video_url} size={44} />

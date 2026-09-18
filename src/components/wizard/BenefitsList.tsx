@@ -36,7 +36,7 @@ export const BenefitsList = memo(({ selectedBenefits, onToggle }: BenefitsListPr
             type="button"
             onClick={() => onToggle(benefit.value)}
             aria-pressed={isSelected}
-            className={`relative w-full px-3 pr-10 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${isSelected ? 'bg-white/20' : 'hover:bg-white/20'}`}
+            className={`relative w-full px-3 pr-10 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${isSelected ? 'bg-white/20' : 'hover:bg-white/20'}`}
           >
             <span className="block truncate font-medium">{benefit.label}</span>
             {isSelected && (

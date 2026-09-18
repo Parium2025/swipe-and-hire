@@ -109,7 +109,7 @@ export default function CvTunnel() {
 
   return (
     <div className="min-h-screen w-screen bg-background text-foreground flex flex-col">
-      <header className="flex items-center justify-between p-3 border-b border-border/20 bg-background/80 backdrop-blur">
+      <header className="flex items-center justify-between p-3 border-b border-border/20 bg-background/80 backdrop-blur-sm">
         <div className="text-sm opacity-80">CV‑visning</div>
         <div className="flex items-center gap-2">
           {blobUrl && (

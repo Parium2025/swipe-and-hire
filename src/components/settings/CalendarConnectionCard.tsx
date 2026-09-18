@@ -78,7 +78,7 @@ const CalendarConnectionCard = () => {
   };
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4">
+    <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-xs px-6 md:px-4 py-4">
       <h3 className="text-sm font-semibold text-white">Kalender</h3>
       <p className="mt-1 text-sm text-white break-words">
         Koppla din kalender så läggs bokade intervjuer in automatiskt. Alla intervjuer kan

@@ -569,7 +569,7 @@ const AuthTablet = ({
           paddingBottom: 'env(safe-area-inset-bottom, 0px)'
         }}
       >
-        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-xs border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
           </CardHeader>
@@ -584,7 +584,7 @@ const AuthTablet = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                  className="bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                 />
               </div>
               <div>
@@ -597,7 +597,7 @@ const AuthTablet = ({
                   onPaste={(e) => e.preventDefault()}
                   onCopy={(e) => e.preventDefault()}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                  className="bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                 />
               </div>
                 <Button type="submit" variant="glass" className="w-full" disabled={loading} onMouseDown={(e) => e.preventDefault()}>
@@ -693,7 +693,7 @@ const AuthTablet = ({
                            enterKeyHint="next"
                           spellCheck={false}
                           autoCapitalize="none"
-                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                          className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
@@ -712,11 +712,11 @@ const AuthTablet = ({
                             name="auth-password"
                             autoComplete="current-password"
                              enterKeyHint="go"
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                            className="bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                           <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-hidden focus:outline-hidden active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -869,7 +869,7 @@ const AuthTablet = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                                className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                               />
                             </div>
                              <div>
@@ -886,7 +886,7 @@ const AuthTablet = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                                className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                               />
                             </div>
                          </div>
@@ -908,11 +908,11 @@ const AuthTablet = ({
                              inputMode="email"
                              spellCheck={false}
                              autoCapitalize="none"
-                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                             className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                            />
                             <AuthFieldNotice show={role === 'employer' && !!(employerData.email || '').trim()}>
                               <div className="flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
-                                <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 flex-shrink-0" />
+                                <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 shrink-0" />
                                 <p className="text-xs text-white leading-snug">
                                   Ange företagets officiella e-post. Denna mail kommer att visas för jobbsökarna i annonsen under "kontakt".
                                 </p>
@@ -944,7 +944,7 @@ const AuthTablet = ({
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
-                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                                    className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                     placeholder="T.ex. 070-123 45 67"
                                     required
                                   />
@@ -972,7 +972,7 @@ const AuthTablet = ({
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                                   className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1013,7 +1013,7 @@ const AuthTablet = ({
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                                   className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1029,7 +1029,7 @@ const AuthTablet = ({
                                    value={employerData.website}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                                   className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                                    required
                                  />
                               </div>
@@ -1041,7 +1041,7 @@ const AuthTablet = ({
                                   value={employerData.companyDescription}
                                   onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
                                   placeholder="Beskriv vad ert företag gör..."
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white resize-none"
+                                  className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white resize-none"
                                   rows={2}
                                 />
                              </div>
@@ -1063,11 +1063,11 @@ const AuthTablet = ({
                             minLength={7}
                             name={`new-password-${role}`}
                             autoComplete="new-password"
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                            className="bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                           />
                            <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-hidden focus:outline-hidden active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -1130,11 +1130,11 @@ const AuthTablet = ({
                               required
                               name={`confirm-password-${role}`}
                               autoComplete="new-password"
-                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white"
+                              className="bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 placeholder:text-white"
                             />
                             <button
                               type="button"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white hover:text-white transition-colors bg-transparent border-0 outline-hidden focus:outline-hidden active:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
                               onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                               onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -1171,7 +1171,7 @@ const AuthTablet = ({
                  </Tabs>
 
                 {showResend && (
-                  <div className="mt-4 p-4 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg text-center">
+                  <div className="mt-4 p-4 bg-primary/10 backdrop-blur-xs border border-primary/20 rounded-lg text-center">
                     <p className="text-sm mb-1 text-white font-semibold">
                       {isLogin ? "Fick du inte bekräftelsemejlet?" : "Kolla din e-post för bekräftelselänk"}
                     </p>
@@ -1192,7 +1192,7 @@ const AuthTablet = ({
                         onChange={(e) => setResendEmail(e.target.value)}
                         required
                         placeholder="din@epost.se"
-                        className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
+                        className="mt-1 bg-white/5 backdrop-blur-xs border-white/20 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white"
                       />
                     </div>
                     <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">

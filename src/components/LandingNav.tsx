@@ -214,7 +214,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
                     <button
                       type="button"
                       aria-label="Öppna sektionsmeny"
-                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-colors duration-200 hover:border-white/80 focus:outline-none focus-visible:outline-none ${
+                      className={`group relative inline-flex h-11 items-center gap-1.5 overflow-hidden rounded-full border px-5 text-[15px] font-medium transition-colors duration-200 hover:border-white/80 focus:outline-hidden focus-visible:outline-hidden ${
                         isLightSection
                           ? 'border-primary/10 bg-background/80 text-primary'
                           : 'border-white bg-white/[0.045] text-white'

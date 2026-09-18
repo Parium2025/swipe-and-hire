@@ -101,7 +101,7 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
             type="button"
             onClick={onUndo}
             data-swipe-action-button
-            className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+            className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
           >
             <Undo2 className="w-4.5 h-4.5 text-white" />
             <span className="text-sm text-white font-medium">Ångra</span>

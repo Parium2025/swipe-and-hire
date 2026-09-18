@@ -285,7 +285,7 @@ export default function Messages() {
   return (
     <div className="flex-1 min-h-0 flex flex-col messages-container overflow-x-hidden">
       {/* Header */}
-      <div className={cn("flex items-center justify-center mb-4 flex-shrink-0 relative", showMobileChat && "hidden md:flex")}>
+      <div className={cn("flex items-center justify-center mb-4 shrink-0 relative", showMobileChat && "hidden md:flex")}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-white" />
@@ -313,10 +313,10 @@ export default function Messages() {
       <div className="flex-1 flex gap-4 min-h-0 overflow-hidden">
         {/* Conversation List */}
         <div className={cn(
-          "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col",
+          "w-full md:w-80 lg:w-96 shrink-0 flex flex-col",
           showMobileChat ? "hidden md:flex" : ""
         )}>
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {hasTeam ? (
               <div
                 onTouchStart={(e) => { tabSwipeStartX.current = e.touches[0].clientX; }}

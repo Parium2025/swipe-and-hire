@@ -183,7 +183,7 @@ const TunnelBirthDateField = ({
                 classNames={{
                   day: 'h-9 w-9 p-0 font-normal text-white hover:bg-white/20',
                   day_selected:
-                    '!bg-transparent !border !border-white !outline-none !shadow-none !text-white font-semibold hover:!bg-white/10',
+                    '!bg-transparent !border !border-white !outline-hidden !shadow-none !text-white font-semibold hover:!bg-white/10',
                   day_today: 'bg-transparent text-white font-normal',
                 }}
               />

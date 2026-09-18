@@ -240,7 +240,7 @@ const JobbCityYrke = () => {
               <ul className="mt-4 space-y-2.5">
                 {occ.tasks.slice(0, 5).map((task) => (
                   <li key={task} className="flex items-start gap-2.5 text-sm text-white">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-white" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-white" />
                     <span>{task}</span>
                   </li>
                 ))}
@@ -253,7 +253,7 @@ const JobbCityYrke = () => {
               <ul className="mt-4 space-y-2.5">
                 {occ.skills.slice(0, 5).map((skill) => (
                   <li key={skill} className="flex items-start gap-2.5 text-sm text-white">
-                    <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-white" />
+                    <Zap className="mt-0.5 h-4 w-4 shrink-0 text-white" />
                     <span>{skill}</span>
                   </li>
                 ))}

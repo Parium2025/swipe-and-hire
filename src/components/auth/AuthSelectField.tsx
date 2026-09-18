@@ -95,7 +95,7 @@ const AuthSelectField = ({
                   placeholder={searchPlaceholder}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-transparent pl-10 pr-3 py-2.5 text-sm text-white placeholder:text-white outline-none border-0"
+                  className="w-full bg-transparent pl-10 pr-3 py-2.5 text-sm text-white placeholder:text-white outline-hidden border-0"
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -113,7 +113,7 @@ const AuthSelectField = ({
                   className="w-full px-3 py-2.5 text-left text-white text-sm border-b border-white/10 last:border-b-0 transition-colors hover:bg-white/20 flex items-center justify-between"
                 >
                   <span className="font-medium flex-1 pr-2">{option}</span>
-                  {value === option && <Check className="h-4 w-4 text-green-400 flex-shrink-0" />}
+                  {value === option && <Check className="h-4 w-4 text-green-400 shrink-0" />}
                 </button>
               ))}
 

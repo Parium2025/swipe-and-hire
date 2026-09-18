@@ -29,10 +29,10 @@ export const RemovedApplicantsInfo = memo(({ count }: RemovedApplicantsInfoProps
             type="button"
             onClick={stop}
             aria-label="Vad betyder raderade konton?"
-            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-md px-1.5 -mr-1.5 text-sm font-medium leading-snug text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-md px-1.5 -mr-1.5 text-sm font-medium leading-snug text-white transition-colors hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40"
           >
             {count}
-            <Info className="h-3.5 w-3.5 flex-shrink-0 opacity-80" />
+            <Info className="h-3.5 w-3.5 shrink-0 opacity-80" />
           </button>
         </PopoverTrigger>
         <PopoverContent
@@ -78,7 +78,7 @@ export const RemovedApplicantsBadge = memo(({ count }: RemovedApplicantsInfoProp
             setOpen((v) => !v);
           }}
           aria-label="Varför har antalet ansökningar minskat?"
-          className="ml-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-white/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 md:hover:text-white"
+          className="ml-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-white/80 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40 md:hover:text-white"
         >
           <Info className="h-3.5 w-3.5" />
         </button>

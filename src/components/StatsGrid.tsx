@@ -61,7 +61,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             }
           },
           className:
-            'cursor-pointer transition-colors hover:bg-white/[0.06] active:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-lg',
+            'cursor-pointer transition-colors hover:bg-white/[0.06] active:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40 rounded-lg',
         }
       : {};
 
@@ -118,7 +118,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           className={`h-full ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
         >
           <CardHeader className="flex flex-row items-center justify-center gap-1 md:gap-2 space-y-0 p-1.5 sm:p-2 md:p-3 min-w-0 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-            <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white flex-shrink-0" />
+            <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white shrink-0" />
             <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
               {stat.title}
             </span>

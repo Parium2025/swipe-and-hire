@@ -235,7 +235,7 @@ const JobTemplatesOverview = () => {
           onClick={() => setShowCreateDialog(true)}
           onMouseDown={(e) => e.currentTarget.blur()}
           onMouseUp={(e) => e.currentTarget.blur()}
-          className="flex items-center gap-2 transition-colors duration-300 focus:outline-none focus:ring-0"
+          className="flex items-center gap-2 transition-colors duration-300 focus:outline-hidden focus:ring-0"
         >
           Skapa ny mall
           <Plus size={16} />
@@ -255,7 +255,7 @@ const JobTemplatesOverview = () => {
                 onClick={() => setShowCreateDialog(true)}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="transition-colors duration-300 focus:outline-none focus:ring-0"
+                className="transition-colors duration-300 focus:outline-hidden focus:ring-0"
               >
                 Skapa första mallen
                 <Plus size={16} className="ml-2" />
@@ -286,7 +286,7 @@ const JobTemplatesOverview = () => {
                       onClick={() => toggleDefault(template.id)}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 focus:outline-none focus:ring-0"
+                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 focus:outline-hidden focus:ring-0"
                       title={template.is_default ? "Ta bort som standard" : "Sätt som standard"}
                     >
                       {template.is_default ? <StarOff size={14} /> : <Star size={14} />}
@@ -297,7 +297,7 @@ const JobTemplatesOverview = () => {
                       onClick={() => startEdit(template)}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/20 focus:outline-none focus:ring-0"
+                      className="bg-white/10 border-white/20 text-white transition-colors duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/20 focus:outline-hidden focus:ring-0"
                     >
                       <Edit size={14} className="mr-1" />
                       Redigera
@@ -308,7 +308,7 @@ const JobTemplatesOverview = () => {
                       onClick={() => setDeleteTarget({ id: template.id, name: template.name })}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="border-destructive/40 bg-destructive/20 text-white transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
+                      className="border-destructive/40 bg-destructive/20 text-white transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-hidden focus:ring-0"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Ta bort

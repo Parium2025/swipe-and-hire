@@ -10,7 +10,7 @@ export const JobViewBenefits = memo(function JobViewBenefits({ benefits }: JobVi
   if (!benefits || benefits.length === 0) return null;
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
+    <div className="bg-white/10 backdrop-blur-xs rounded-lg p-4 overflow-hidden">
       <h2 className="text-section-title mb-3">Förmåner</h2>
       <div className="flex flex-wrap gap-2">
         {benefits.map((benefit, index) => (

@@ -53,12 +53,12 @@ export function UnsavedChangesDialog({
   };
 
   const noFocusRing =
-    "outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0";
+    "outline-hidden focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContentNoFocus
-        className="max-w-lg bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg overflow-hidden"
+        className="max-w-lg bg-white/10 backdrop-blur-xs border-white/20 text-white shadow-lg overflow-hidden"
       >
         <AlertDialogHeader className="text-center">
           <AlertDialogTitle className="text-center">Osparade ändringar</AlertDialogTitle>
@@ -83,7 +83,7 @@ export function UnsavedChangesDialog({
                 void onSaveAndLeave();
               }}
               disabled={isSaving}
-              className={`order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-amber-500/20 backdrop-blur-sm text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
+              className={`order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-amber-500/20 backdrop-blur-xs text-white border border-amber-500/40 md:hover:bg-amber-500/30 md:hover:border-amber-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
             >
               {isSaving ? (
                 <>
@@ -104,7 +104,7 @@ export function UnsavedChangesDialog({
               onConfirm();
             }}
             disabled={isSaving}
-            className={`order-2 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
+            className={`order-2 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-xs text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap ${noFocusRing}`}
           >
             Lämna utan att spara
           </AlertDialogAction>

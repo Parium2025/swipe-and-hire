@@ -85,13 +85,13 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
             onClick={handleClick}
             disabled={disabled}
             className={cn(
-              "flex-shrink-0 flex items-center justify-center rounded-xl caret-transparent",
+              "shrink-0 flex items-center justify-center rounded-xl caret-transparent",
               "transition-[background-color,box-shadow,transform] duration-150",
               large ? "w-9 h-9" : compact ? "p-1" : "w-8 h-8",
               "bg-transparent md:hover:bg-white/20",
               "active:scale-90",
               "disabled:opacity-30 disabled:cursor-not-allowed",
-              isActive ? "bg-white/30 ring-1 ring-white/40 shadow-sm" : "border border-transparent"
+              isActive ? "bg-white/30 ring-1 ring-white/40 shadow-xs" : "border border-transparent"
             )}
           >
             <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4 w-4" : "h-4 w-4", "text-pure-white")} />
@@ -175,12 +175,12 @@ export const NotesToolbar = ({ editor, className, compact = false, large = false
       <ToolbarButton onClick={handleBold} icon={Bold} title="Fet" isActive={editor.isActive('bold')} compact={compact} large={large} buttonId="bold" {...tapProps} />
       <ToolbarButton onClick={handleItalic} icon={Italic} title="Kursiv" isActive={editor.isActive('italic')} compact={compact} large={large} buttonId="italic" {...tapProps} />
       <ToolbarButton onClick={handleStrikethrough} icon={Strikethrough} title="Genomstruken" isActive={editor.isActive('strike')} compact={compact} large={large} buttonId="strike" {...tapProps} />
-      <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-px" : "h-4 mx-1")} />
+      <div className={cn("w-px bg-white/20 shrink-0", large ? "h-5 mx-1.5" : compact ? "h-3 mx-px" : "h-4 mx-1")} />
       <ToolbarButton onClick={handleBulletList} icon={List} title="Punktlista" isActive={editor.isActive('bulletList')} compact={compact} large={large} buttonId="bulletList" {...tapProps} />
       <ToolbarButton onClick={handleCheckbox} icon={CheckSquare} title="Checkbox" isActive={editor.isActive('taskList')} compact={compact} large={large} buttonId="taskList" {...tapProps} />
       {showUndoRedo && !compact && (
         <>
-          <div className={cn("w-px bg-white/20 flex-shrink-0", large ? "h-5 mx-1.5" : "h-4 mx-1")} />
+          <div className={cn("w-px bg-white/20 shrink-0", large ? "h-5 mx-1.5" : "h-4 mx-1")} />
           <ToolbarButton onClick={handleUndo} icon={Undo} title="Ångra" disabled={!editor.can().undo()} large={large} buttonId="undo" {...tapProps} />
           <ToolbarButton onClick={handleRedo} icon={Redo} title="Gör om" disabled={!editor.can().redo()} large={large} buttonId="redo" {...tapProps} />
         </>
@@ -231,7 +231,7 @@ export const RichNotesEditor = memo(forwardRef<RichNotesEditorHandle, RichNotesE
           "bg-white/10 rounded-lg p-2 pr-4",
           "text-sm leading-relaxed",
           "text-pure-white",
-          "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30",
+          "focus:outline-hidden focus-visible:ring-1 focus-visible:ring-white/30",
           "touch-auto",
           "min-h-[100px]",
           "pb-4",

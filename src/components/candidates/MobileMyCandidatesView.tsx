@@ -130,7 +130,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
       )}
 
       {/* Avatar */}
-      <div className="h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 [&_.h-10]:h-10 [&_.w-10]:w-10">
+      <div className="h-10 w-10 shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 [&_.h-10]:h-10 [&_.w-10]:w-10">
         <CandidateAvatar
           profileImageUrl={candidate.profile_image_url}
           videoUrl={candidate.video_url}
@@ -186,7 +186,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
       {/* Right side: checkbox in selection mode, otherwise move stage dropdown */}
       {isSelectionMode ? (
-        <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
+        <div className="shrink-0" onClick={e => e.stopPropagation()}>
           <Checkbox
             checked={isSelected}
             onCheckedChange={() => onToggleSelect?.()}
@@ -200,7 +200,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
               ref={triggerRef}
               onPointerDownCapture={measureMenuMetrics}
               onClick={e => e.stopPropagation()}
-              className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors flex-shrink-0"
+              className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors shrink-0"
               aria-label="Flytta kandidat"
             >
               <ChevronRight className="h-4 w-4 text-white/60" />
@@ -478,12 +478,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 onClick={() => handleStageClick(stage)}
                 onContextMenu={(e) => { if (isTouchCapable) e.preventDefault(); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 cursor-pointer max-w-[180px] border outline-hidden focus:outline-hidden focus-visible:outline-hidden [outline:none!important] ${
                   isActive ? 'shadow-lg border-white/50' : 'border-transparent'
                 }`}
                 style={{ backgroundColor: `${cfg.color}55` }}
               >
-                <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <Icon className="h-3.5 w-3.5 text-white shrink-0" />
               {cfg.label.length > 10 ? (
                   <TooltipProvider delayDuration={200}>
                     <Tooltip
@@ -502,7 +502,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <span className="truncate min-w-0">{cfg.label}</span>
                 )}
                 <span
-                  className="text-[10px] leading-none h-[18px] w-[18px] flex items-center justify-center rounded-full text-white flex-shrink-0 text-center"
+                  className="text-[10px] leading-none h-[18px] w-[18px] flex items-center justify-center rounded-full text-white shrink-0 text-center"
                   style={{ backgroundColor: `${cfg.color}88` }}
                 >
                   {count}
@@ -594,7 +594,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 <div className="space-y-2" aria-label="Laddar fler kandidater">
                   {[0, 1, 2].map((item) => (
                     <div key={item} className="flex min-h-touch items-center gap-3 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/10">
-                      <Skeleton className="h-10 w-10 flex-shrink-0 rounded-full bg-white/10" />
+                      <Skeleton className="h-10 w-10 shrink-0 rounded-full bg-white/10" />
                       <div className="min-w-0 flex-1 space-y-2">
                         <Skeleton className="h-3.5 w-2/3 bg-white/10" />
                         <Skeleton className="h-2.5 w-1/2 bg-white/10" />

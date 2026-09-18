@@ -515,13 +515,13 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
             <div className="space-y-3">
               {Array.from({ length: candidateCount }).map((_, index) => (
                 <div key={index} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
-                  <div className={`h-12 w-12 flex-shrink-0 rounded-full ${SHAPE}`} />
+                  <div className={`h-12 w-12 shrink-0 rounded-full ${SHAPE}`} />
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className={`h-4 w-40 max-w-full rounded ${SHAPE}`} />
                     <div className={`h-3 w-24 rounded ${SHAPE}`} />
                     <div className={`h-3 w-56 max-w-full rounded ${SHAPE}`} />
                   </div>
-                  <div className={`h-8 w-8 flex-shrink-0 rounded-full ${SHAPE}`} />
+                  <div className={`h-8 w-8 shrink-0 rounded-full ${SHAPE}`} />
                 </div>
               ))}
             </div>
@@ -556,7 +556,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
         <div className="flex-1 min-h-0 overflow-hidden p-3">
           <div className="responsive-container-wide space-y-4 h-full flex flex-col">
             {/* Header — mirrors Messages page icon/title group + optional new conversation action */}
-            <div className="flex items-center justify-center flex-shrink-0 relative">
+            <div className="flex items-center justify-center shrink-0 relative">
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-full ${SHAPE}`} />
                 <div className="space-y-2">
@@ -567,7 +567,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
               <div className={`absolute right-0 h-10 w-12 sm:w-40 rounded-lg ${SHAPE}`} />
             </div>
             <div className="flex-1 min-h-0 flex gap-4 overflow-hidden">
-              <div className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0">
+              <div className="w-full md:w-80 lg:w-96 shrink-0 flex flex-col min-h-0">
                 {/* Tabs */}
                 <div className="flex justify-center gap-2 mb-3">
                   <div className={`h-9 w-20 rounded-full ${SHAPE}`} />

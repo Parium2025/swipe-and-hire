@@ -224,9 +224,9 @@ export function MessageBubble({
         className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 md:hover:bg-white/10 transition-colors min-h-touch"
       >
         {message.attachment_type?.includes('pdf') ? (
-          <FileText className="h-4 w-4 text-red-400 flex-shrink-0" />
+          <FileText className="h-4 w-4 text-red-400 shrink-0" />
         ) : (
-          <Paperclip className="h-4 w-4 text-pure-white flex-shrink-0" />
+          <Paperclip className="h-4 w-4 text-pure-white shrink-0" />
         )}
         <span className="block min-w-0 flex-1 truncate text-sm text-pure-white">
           {message.attachment_name || 'Fil'}
@@ -245,7 +245,7 @@ export function MessageBubble({
         onTouchMove={handleTouchMove}
       >
         {/* Avatar space */}
-        <div className="w-8 flex-shrink-0">
+        <div className="w-8 shrink-0">
           {showAvatar && !isOwn && (
             <ConversationAvatar
               profile={senderAvatarProfile}

@@ -34,7 +34,7 @@ const LogoSidebarTrigger = () => {
     <button
       onClick={toggleSidebar}
       onPointerUp={(e) => e.currentTarget.blur()}
-      className="flex items-center hover:opacity-80 active:opacity-80 transition-opacity duration-150 shrink-0 touch-manipulation outline-none focus:outline-none"
+      className="flex items-center hover:opacity-80 active:opacity-80 transition-opacity duration-150 shrink-0 touch-manipulation outline-hidden focus:outline-hidden"
       style={{ WebkitTapHighlightColor: 'transparent' }}
       aria-label="Öppna meny"
     >
@@ -190,7 +190,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
                  navigate('/home');
               }}
               aria-label="Gå till startsidan"
-               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[46%] truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 touch-manipulation outline-none focus:outline-none focus-visible:outline-none"
+               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[46%] truncate text-white text-base font-semibold tracking-tight select-none rounded-full px-3 py-1 touch-manipulation outline-hidden focus:outline-hidden focus-visible:outline-hidden"
                style={{ WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
             >
               Parium

@@ -95,12 +95,12 @@ export function StartDatePicker({
             onMouseDown={(e) => e.currentTarget.blur()}
             onMouseUp={(e) => e.currentTarget.blur()}
             className={cn(
-              "w-full h-11 !min-h-0 pl-3 text-left text-sm font-normal bg-white/10 backdrop-blur-sm border-white/20 !text-white justify-start",
+              "w-full h-11 !min-h-0 pl-3 text-left text-sm font-normal bg-white/10 backdrop-blur-xs border-white/20 !text-white justify-start",
               selectedDate ? "pr-10" : "pr-3",
               // Håll glaset mörkt i alla states – aldrig vit yta vid tryck/öppen popover
               "hover:bg-white/15 hover:!text-white hover:border-white/40 md:hover:bg-white/15 md:hover:!text-white md:hover:border-white/40",
               "active:bg-white/10 active:!text-white data-[state=open]:bg-white/15 data-[state=open]:!text-white data-[state=open]:border-white/40",
-              "outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:bg-white/10 focus-visible:bg-white/10 transition-colors",
+              "outline-hidden focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:bg-white/10 focus-visible:bg-white/10 transition-colors",
               className
             )}
           >
@@ -146,7 +146,7 @@ export function StartDatePicker({
                   className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 justify-between transition-colors"
                 >
                   <span>{selectedDate ? selectedDate.getFullYear() : "År"}</span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white" />
+                  <ChevronDown className="h-4 w-4 shrink-0 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -176,7 +176,7 @@ export function StartDatePicker({
                   <span>
                     {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
                   </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white" />
+                  <ChevronDown className="h-4 w-4 shrink-0 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -212,7 +212,7 @@ export function StartDatePicker({
             classNames={{
               day: "h-9 w-9 p-0 font-normal text-white hover:bg-white/20",
               day_selected:
-                "!bg-transparent !border !border-white !outline-none !shadow-none !text-white font-semibold hover:!bg-white/10",
+                "!bg-transparent !border !border-white !outline-hidden !shadow-none !text-white font-semibold hover:!bg-white/10",
               day_today: "bg-transparent text-white font-normal",
               day_disabled: "text-white/30",
             }}

@@ -715,7 +715,7 @@ const JobApplication = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
-      <div className="bg-white/5 backdrop-blur-sm text-white p-4 sticky top-0 z-10 border-b border-white/10">
+      <div className="bg-white/5 backdrop-blur-xs text-white p-4 sticky top-0 z-10 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button

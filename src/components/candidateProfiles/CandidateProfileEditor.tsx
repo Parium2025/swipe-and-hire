@@ -26,7 +26,7 @@ interface Props {
 }
 
 /** Samma solida kortyta som profilsidans sektioner – ingen streckad ram. */
-const DROPZONE = 'rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-5 md:hover:bg-white/10';
+const DROPZONE = 'rounded-xl border border-white/10 bg-white/5 backdrop-blur-xs px-4 py-5 md:hover:bg-white/10';
 
 /** Dialog för att skapa eller redigera en kandidatprofil (namn, CV, media). */
 export function CandidateProfileEditor({ open, onOpenChange, profile, saving, onSave }: Props) {
@@ -293,7 +293,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             </div>
 
             {/* Bild och video är två separata, kombinerbara tillgångar. */}
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 space-y-4">
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xs p-4 space-y-4">
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
                   {hasVideo ? (
@@ -330,7 +330,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         setCoverUrl(null);
                       }}
                       aria-label="Ta bort media"
-                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
+                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-hidden transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -354,7 +354,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     <button
                       type="button"
                       onClick={() => mediaInputRef.current?.click()}
-                      className="h-auto max-w-full cursor-pointer whitespace-normal bg-transparent px-2 py-1 text-center text-sm text-white outline-none [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0"
+                      className="h-auto max-w-full cursor-pointer whitespace-normal bg-transparent px-2 py-1 text-center text-sm text-white outline-hidden [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0"
                     >
                       Välj en profilbild, profilvideo eller båda (video max 60 sekunder).
                     </button>
@@ -391,7 +391,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
 
                 {!uploading && (
                   <div className="flex w-full max-w-sm flex-wrap items-center justify-center gap-2" aria-label="Status för profilmedia">
-                    <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
+                    <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-xs">
                       <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
                         {hasVideo ? 'Video' : `Bild${hasImage ? '' : ' saknas'}`}
                       </span>
@@ -400,7 +400,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       </span>
                     </div>
                     {hasVideo && (
-                      <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
+                      <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-xs">
                         <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
                           Cover-bild{coverUrl ? '' : ' saknas'}
                         </span>
@@ -528,7 +528,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               type="button"
               disabled={!labelFilled || saving || uploading}
               onClick={() => void handleSaveProfile()}
-              className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm font-medium text-white rounded-full bg-green-600/80 md:hover:bg-green-600 border border-transparent transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:bg-green-600/60 disabled:opacity-70"
+              className="w-full h-11 px-5 inline-flex items-center justify-center gap-2 text-sm font-medium text-white rounded-full bg-green-600/80 md:hover:bg-green-600 border border-transparent transition-colors duration-150 touch-manipulation outline-hidden ring-0 focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0 disabled:bg-green-600/60 disabled:opacity-70"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
               {saving ? 'Sparar…' : 'Spara profil'}
@@ -536,7 +536,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
             <button
               type="button"
               onClick={() => handleOpenChange(false)}
-              className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/10 transition-colors duration-150 touch-manipulation outline-none ring-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="w-full h-11 px-5 inline-flex items-center justify-center text-sm text-white rounded-full bg-white/5 border border-white/20 md:hover:bg-white/10 transition-colors duration-150 touch-manipulation outline-hidden ring-0 focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt
             </button>

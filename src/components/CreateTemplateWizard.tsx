@@ -68,7 +68,7 @@ const TemplateDeleteButton = ({ templateId, onDelete }: { templateId?: string; o
         onClick={() => setShowConfirm(true)}
         onMouseDown={(e) => e.currentTarget.blur()}
         onMouseUp={(e) => e.currentTarget.blur()}
-        className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
+        className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-hidden focus:ring-0"
       >
         <Trash2 className="h-3.5 w-3.5" />
         <span>Ta bort</span>
@@ -76,7 +76,7 @@ const TemplateDeleteButton = ({ templateId, onDelete }: { templateId?: string; o
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContentNoFocus
           elevated
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
@@ -1424,7 +1424,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         {/* Content container */}
         <div className="flex flex-col h-full max-h-[90vh] relative z-10 overflow-hidden">
           {/* Header */}
-          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 shrink-0 bg-background/10">
             <DialogHeader className="text-center sm:text-center">
               <DialogTitle className="text-white text-lg">
                 {showQuestionForm ? 'Lägg till fråga' : (templateToEdit ? 'Redigera mall' : steps[currentStep].title)}
@@ -1438,7 +1438,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {!showQuestionForm && !showQuestionTemplates && (
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-hidden"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1449,7 +1449,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   setShowQuestionForm(false);
                   setEditingQuestion(null);
                 }}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-hidden"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1458,7 +1458,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
           {/* Progress Bar */}
           {!showQuestionForm && (
-            <div className="px-4 py-2 flex-shrink-0">
+            <div className="px-4 py-2 shrink-0">
               <Progress 
                 value={progress} 
                 className="h-1 bg-white/20 [&>div]:bg-white"
@@ -1591,7 +1591,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                               onClick={() => removeOption(index)}
                               onMouseDown={(e) => e.currentTarget.blur()}
                               onMouseUp={(e) => e.currentTarget.blur()}
-                              className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
+                              className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-hidden focus:ring-0"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -1603,7 +1603,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
                           size="sm"
-                          className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-300 mt-2 focus:outline-none focus:ring-0"
+                          className="bg-white/10 border border-white/30 text-white hover:bg-white/20 md:hover:bg-white/20 px-4 py-1.5 rounded-full transition-colors duration-300 mt-2 focus:outline-hidden focus:ring-0"
                         >
                           Lägg till alternativ
                           <Plus className="h-3.5 w-3.5 ml-1.5" />
@@ -1627,7 +1627,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     onMouseDown={(e) => e.currentTarget.blur()}
                     onMouseUp={(e) => e.currentTarget.blur()}
                     disabled={!editingQuestion.question_text?.trim()}
-                    className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-300 focus:outline-none focus:ring-0"
+                    className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 rounded-full touch-border-white transition-colors duration-300 focus:outline-hidden focus:ring-0"
                   >
                     Spara fråga
                   </Button>
@@ -1762,7 +1762,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         return (
                           <span
                             key={benefitValue}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-sm"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-white text-xs rounded-full border border-white/20 backdrop-blur-xs"
                           >
                             {label}
                             <button
@@ -1802,7 +1802,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
+                      className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square inline-flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors leading-none p-0"
                     >
                       <Plus className="h-4 w-4 block" />
                     </button>
@@ -1938,7 +1938,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onClick={() => handleInputChange('positions_count', Math.max(1, (parseInt(formData.positions_count) || 1) - 1).toString())}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
+                      className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-hidden focus:ring-0"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -1947,7 +1947,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onClick={() => handleInputChange('positions_count', ((parseInt(formData.positions_count) || 1) + 1).toString())}
                       onMouseDown={(e) => e.currentTarget.blur()}
                       onMouseUp={(e) => e.currentTarget.blur()}
-                      className="h-11 w-11 min-w-[2.75rem] flex-shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-0"
+                      className="h-11 w-11 min-w-[2.75rem] shrink-0 aspect-square flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors focus:outline-hidden focus:ring-0"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -2160,7 +2160,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           onMouseDown={(e) => e.currentTarget.blur()}
                           onMouseUp={(e) => e.currentTarget.blur()}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-4 font-medium rounded-full focus:outline-none focus:ring-0 whitespace-nowrap"
+                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-4 font-medium rounded-full focus:outline-hidden focus:ring-0 whitespace-nowrap"
                         >
                           Lägg till
                           <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -2210,7 +2210,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         onMouseUp={(e) => e.currentTarget.blur()}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0"
+                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-hidden focus:ring-0"
                       >
                         <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -2231,7 +2231,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         onMouseDown={(e) => e.currentTarget.blur()}
                         onMouseUp={(e) => e.currentTarget.blur()}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full focus:outline-none focus:ring-0"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium rounded-full focus:outline-hidden focus:ring-0"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -2281,7 +2281,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                   {templates.map((template) => (
                                     <div
                                       key={template.id}
-                                      className="w-full bg-white/5 backdrop-blur-sm rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
+                                      className="w-full bg-white/5 backdrop-blur-xs rounded-lg p-2.5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-200 group"
                                     >
                                       <div className="flex flex-col gap-1.5">
                                         <button
@@ -2305,7 +2305,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                             }}
                                             onMouseDown={(e) => e.currentTarget.blur()}
                                             onMouseUp={(e) => e.currentTarget.blur()}
-                                            className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
+                                            className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] text-white text-xs bg-white/10 hover:bg-white/15 rounded-full transition-all duration-300 active:scale-[0.97] focus:outline-hidden focus:ring-0"
                                           >
                                             <Pencil className="h-3.5 w-3.5" />
                                             <span>Redigera</span>

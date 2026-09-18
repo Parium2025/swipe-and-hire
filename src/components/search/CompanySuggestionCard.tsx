@@ -31,7 +31,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
         <Card className="bg-white/5 border-white/20 transition-all duration-300 hover:bg-white/10 hover:border-white/30 cursor-pointer">
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12 flex-shrink-0">
+              <Avatar className="h-12 w-12 shrink-0">
                 <AvatarImage src={company.logo || ''} alt={company.name} />
                 <AvatarFallback className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
                   {getCompanyInitials(company.name)}
@@ -39,7 +39,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-white flex-shrink-0" />
+                  <Building2 className="h-4 w-4 text-white shrink-0" />
                   <span className="text-xs text-white uppercase tracking-wide">Företag</span>
                 </div>
                 <h3 className="text-base font-semibold text-white mt-1 min-w-0 break-words [overflow-wrap:anywhere] line-clamp-2">
@@ -59,7 +59,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
                   )}
                 </div>
               </div>
-              <ChevronDown className="h-5 w-5 text-white -rotate-90 flex-shrink-0" />
+              <ChevronDown className="h-5 w-5 text-white -rotate-90 shrink-0" />
             </div>
           </CardContent>
         </Card>

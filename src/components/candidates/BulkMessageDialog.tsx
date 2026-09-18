@@ -41,12 +41,12 @@ export function BulkMessageDialog({ open, onOpenChange, count, onSend, progress 
   const progressPct = progress ? Math.round((progress.current / progress.total) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => !isSending && onOpenChange(false)}>
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-xs" onClick={() => !isSending && onOpenChange(false)}>
       <div 
         className="w-[min(90vw,400px)] bg-card-parium backdrop-blur-md border border-white/20 rounded-[24px] sm:rounded-xl shadow-lg overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        <div className="bg-white/10 backdrop-blur-sm border-white/20 p-6 relative">
+        <div className="bg-white/10 backdrop-blur-xs border-white/20 p-6 relative">
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-white flex-1 text-center text-xl font-semibold">
@@ -69,7 +69,7 @@ export function BulkMessageDialog({ open, onOpenChange, count, onSend, progress 
             value={message}
             onChange={e => setMessage(e.target.value)}
             placeholder="Skriv ditt meddelande..."
-            className="w-full h-32 bg-white/5 border border-white/20 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:ring-1 focus:ring-white/30 placeholder:text-white/30"
+            className="w-full h-32 bg-white/5 border border-white/20 rounded-lg p-3 text-white text-sm resize-none focus:outline-hidden focus:ring-1 focus:ring-white/30 placeholder:text-white/30"
             autoFocus
             disabled={isSending}
           />

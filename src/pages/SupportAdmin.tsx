@@ -265,7 +265,7 @@ const SupportAdmin = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Ärendelista */}
         <div className="lg:col-span-1">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-white/10 backdrop-blur-xs border-white/20">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
@@ -308,7 +308,7 @@ const SupportAdmin = () => {
         {/* Ärendedetaljer */}
         <div className="lg:col-span-2">
           {selectedTicket ? (
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/10 backdrop-blur-xs border-white/20">
               <CardHeader>
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -431,7 +431,7 @@ const SupportAdmin = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/10 backdrop-blur-xs border-white/20">
               <CardContent className="flex items-center justify-center h-96">
                 <p className="text-white">Välj ett ärende för att visa detaljer.</p>
               </CardContent>

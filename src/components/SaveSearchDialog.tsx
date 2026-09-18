@@ -111,7 +111,7 @@ export function SaveSearchDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="T.ex. Utvecklarjobb i Stockholm"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none"
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus:outline-hidden focus-visible:outline-hidden"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && name.trim()) {
                   handleSave();

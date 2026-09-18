@@ -150,7 +150,7 @@ export function PrivacyDataPanel({ showDpaLink = false, isEmployer = false }: Pr
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
+    <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg p-4">
       <div className="space-y-5 md:space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <ShieldCheck className="h-4 w-4 text-white" />
@@ -168,7 +168,7 @@ export function PrivacyDataPanel({ showDpaLink = false, isEmployer = false }: Pr
           variant="glass"
           onClick={(e) => { e.currentTarget.blur(); handleDownload(); }}
           disabled={downloading}
-          className="h-10 rounded-full px-5 text-sm text-white transition-none hover:bg-white/10 hover:text-white active:scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-10 rounded-full px-5 text-sm text-white transition-none hover:bg-white/10 hover:text-white active:scale-100 focus:outline-hidden focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
         >
           {downloading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -187,7 +187,7 @@ export function PrivacyDataPanel({ showDpaLink = false, isEmployer = false }: Pr
           <div className="flex justify-center">
             <Button
               onClick={(e) => { e.currentTarget.blur(); setConfirmText(''); setDeleteOpen(true); }}
-              className="h-10 rounded-full px-5 text-sm border-0 !bg-red-500/80 !text-white transition-none hover:!bg-red-500/80 hover:!text-white md:hover:!bg-red-500/80 md:hover:!text-white active:!bg-red-500/80 active:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-10 rounded-full px-5 text-sm border-0 !bg-red-500/80 !text-white transition-none hover:!bg-red-500/80 hover:!text-white md:hover:!bg-red-500/80 md:hover:!text-white active:!bg-red-500/80 active:!text-white active:!scale-100 focus:outline-hidden focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Radera mitt konto
@@ -234,14 +234,14 @@ export function PrivacyDataPanel({ showDpaLink = false, isEmployer = false }: Pr
             onChange={(e) => setConfirmText(e.target.value.replace(/\s/g, ''))}
             placeholder="RADERA"
             autoComplete="off"
-            className="w-full h-11 !min-h-0 rounded-md bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm placeholder:text-white/60 focus:border-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="w-full h-11 !min-h-0 rounded-md bg-white/5 backdrop-blur-xs border-white/10 text-white text-sm placeholder:text-white/60 focus:border-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
             disabled={deleting}
           />
 
           <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-center">
             <AlertDialogCancel
               disabled={deleting}
-              className="w-full sm:w-auto h-10 px-5 rounded-full text-sm !bg-white/5 !text-white !border-white/10 backdrop-blur-sm !transition-none hover:!bg-white/10 hover:!text-white active:!scale-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="w-full sm:w-auto h-10 px-5 rounded-full text-sm !bg-white/5 !text-white !border-white/10 backdrop-blur-xs !transition-none hover:!bg-white/10 hover:!text-white active:!scale-100 focus:outline-hidden focus-visible:outline-hidden focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Avbryt
             </AlertDialogCancel>

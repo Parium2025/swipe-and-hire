@@ -278,7 +278,7 @@ export default function ProfilePreview() {
       return (
         <div className="w-full h-full flex flex-col bg-transparent relative">
           {/* Header med stäng-knapp */}
-          <div className="relative px-3 pt-4 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
+          <div className="relative px-3 pt-4 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 shrink-0">
             <button
               onClick={() => setShowDetailedView(false)}
               className="absolute right-3 top-2 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors"
@@ -336,7 +336,7 @@ export default function ProfilePreview() {
                               onClick={handleEmailClick}
                               className="flex items-center gap-1 min-w-0 w-full transition-colors text-white"
                             >
-                              <Mail className="h-3 w-3 flex-shrink-0 text-white" />
+                              <Mail className="h-3 w-3 shrink-0 text-white" />
                               <span className="text-xs truncate block flex-1 min-w-0 text-white">{user.email}</span>
                             </button>
                           </TooltipTrigger>
@@ -434,9 +434,9 @@ export default function ProfilePreview() {
                     onClick={handleCvClick}
                     className="flex items-center gap-1.5 text-white hover:text-white transition-colors w-full"
                   >
-                    <FileText className="h-3 w-3 text-white flex-shrink-0" />
+                    <FileText className="h-3 w-3 text-white shrink-0" />
                     <span className="text-xs">Visa CV</span>
-                    <ExternalLink className="h-3 w-3 text-white ml-auto flex-shrink-0" />
+                    <ExternalLink className="h-3 w-3 text-white ml-auto shrink-0" />
                   </button>
                 </div>
               </div>
@@ -625,7 +625,7 @@ export default function ProfilePreview() {
           <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl min-w-0 overflow-hidden">
               <CardHeader className="pb-1.5 pt-2 px-2 sm:px-4">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <User className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                  <User className="h-3.5 w-3.5 text-white shrink-0" />
                   <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white min-w-0 break-words [overflow-wrap:anywhere]">
                     Personlig information
                   </h3>
@@ -674,7 +674,7 @@ export default function ProfilePreview() {
             <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl min-w-0 overflow-hidden">
               <CardHeader className="pb-1.5 pt-2 px-2 sm:px-4">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                  <Briefcase className="h-3.5 w-3.5 text-white shrink-0" />
                   <h3 className="text-[10px] sm:text-xs font-semibold leading-snug tracking-tight text-white min-w-0 break-words [overflow-wrap:anywhere]">
                     Anställningsinformation
                   </h3>
@@ -730,7 +730,7 @@ export default function ProfilePreview() {
           <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
             <CardHeader className="pb-1.5 pt-2">
               <div className="flex items-center gap-1.5">
-                <FileText className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <FileText className="h-3.5 w-3.5 text-white shrink-0" />
                 <h3 className="text-xs font-semibold leading-snug tracking-tight text-white">
                   CV
                 </h3>
@@ -743,9 +743,9 @@ export default function ProfilePreview() {
                     onClick={handleCvClick}
                     className="flex items-center gap-2 text-white hover:text-white transition-colors w-full"
                   >
-                    <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                    <FileText className="h-4 w-4 text-white shrink-0" />
                     <span className="text-xs">Visa CV</span>
-                    <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
+                    <ExternalLink className="h-4 w-4 text-white ml-auto shrink-0" />
                   </button>
                 </div>
               ) : (

@@ -26,7 +26,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       >
         <span>{q}</span>
         <motion.span
-          className="text-secondary text-2xl leading-none flex-shrink-0"
+          className="text-secondary text-2xl leading-none shrink-0"
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.35, ease }}
         >
@@ -168,7 +168,7 @@ const GuidePage = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white backdrop-blur"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white backdrop-blur-sm"
             >
               {guide.category}
             </motion.p>

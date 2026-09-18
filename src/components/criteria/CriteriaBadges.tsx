@@ -76,7 +76,7 @@ export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
 
   return (
     <span className={`inline-flex min-w-0 max-w-full items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg} ring-1 ring-inset ${border}`}>
-      <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
+      <Icon className={`h-3 w-3 ${iconColor} shrink-0`} />
       <span className="text-white/80 truncate min-w-0" title={title}>{title}</span>
     </span>
   );

@@ -122,7 +122,7 @@ const AudienceCard = ({
       whileTap={!selectedRole ? { scale: 0.985 } : undefined}
       transition={{ duration: 0.68, ease }}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-      className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-none sm:w-[300px]"
+      className="group relative min-h-touch w-full max-w-[300px] rounded-full bg-transparent p-0 text-left outline-hidden sm:w-[300px]"
     >
       <span className="pointer-events-none absolute -inset-3 rounded-full bg-secondary/24 opacity-0 blur-2xl transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />
       <span className="pointer-events-none absolute -inset-px rounded-full bg-[linear-gradient(135deg,hsl(var(--secondary)/0.65),hsl(var(--secondary)/0.14)_44%,hsl(var(--primary)/0.34))] opacity-45 transition-opacity duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100" />

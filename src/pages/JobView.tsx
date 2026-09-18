@@ -764,11 +764,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         style={{ isolation: 'isolate' }}
       >
         <div className="jobview-container py-4">
-          <div className="flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+          <div className="flex items-center mb-4 bg-white/10 backdrop-blur-xs p-3 rounded-lg">
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation"
+              className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-xs border border-white/15 touch-manipulation"
             >
               <ArrowLeft className="h-4 w-4" />
               Tillbaka
@@ -932,12 +932,12 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
         <div className="jobview-container py-4">
           {/* Header */}
-          <div className="flex items-center mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg gap-3 justify-between">
+          <div className="flex items-center mb-4 bg-white/10 backdrop-blur-xs p-3 rounded-lg gap-3 justify-between">
             {user ? (
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-sm border border-white/15 touch-manipulation shrink-0"
+                className="flex items-center gap-2 h-11 px-5 rounded-full bg-white/10 [@media(hover:hover)]:hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all text-white text-sm font-medium backdrop-blur-xs border border-white/15 touch-manipulation shrink-0"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Tillbaka
@@ -962,7 +962,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                   toast({ title: 'Länk kopierad!', description: 'Annonsens länk har kopierats till urklipp' });
                 }
               }}
-              className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all backdrop-blur-sm border border-white/15 touch-manipulation"
+              className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:bg-white/15 active:scale-[0.97] transition-all backdrop-blur-xs border border-white/15 touch-manipulation"
               aria-label="Dela annons"
             >
               <Share2 className="h-5 w-5 text-white" />
@@ -998,7 +998,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             )}
 
             {/* Company profile + title - matchar arbetsgivar-preview */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden space-y-3">
+            <div className="bg-white/10 backdrop-blur-xs rounded-lg px-4 py-4 overflow-hidden space-y-3">
               <button
                 onClick={handleOpenCompanyProfile}
                 className="flex flex-col items-center gap-2 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 rounded-xl transition-all"
@@ -1037,7 +1037,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             </div>
 
             {/* Description */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
+            <div className="bg-white/10 backdrop-blur-xs rounded-lg p-4 overflow-hidden">
               <h2 className="text-section-title mb-3">Om tjänsten</h2>
               <p className="text-body whitespace-pre-wrap break-words overflow-hidden">
                 {job.description}
@@ -1111,7 +1111,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
                 {/* No questions - direct submit */}
                 {jobQuestions.length === 0 && !isJobExpired && applicationStatusKnown && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
+                  <div className="bg-white/10 backdrop-blur-xs rounded-xl p-6 text-center space-y-4">
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
                     <p className="text-sm text-white">Detta jobb kräver inga extra frågor.</p>
 
@@ -1139,7 +1139,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                           onMouseUp={(e) => e.currentTarget.blur()}
                           onClick={(e) => { e.currentTarget.blur(); handleApplicationSubmit(); }}
                           disabled={applying || !canSubmitApplication}
-                          className={`px-8 rounded-full bg-green-500 hover:bg-green-500 active:bg-green-500 text-white shadow-lg shadow-green-500/30 transition-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${!canSubmitApplication ? 'opacity-50' : ''}`}
+                          className={`px-8 rounded-full bg-green-500 hover:bg-green-500 active:bg-green-500 text-white shadow-lg shadow-green-500/30 transition-none focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${!canSubmitApplication ? 'opacity-50' : ''}`}
                         >
 
                           {applying ? 'Skickar...' : (

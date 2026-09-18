@@ -133,7 +133,7 @@ const KommunHub = () => {
               placeholder="Sök kommun eller län"
               autoComplete="off"
               inputMode="search"
-              className="w-full rounded-2xl border border-white/15 bg-white/[0.06] py-3.5 pl-11 pr-4 text-base text-white placeholder:text-white/50 focus:border-white/30 focus:outline-none"
+              className="w-full rounded-2xl border border-white/15 bg-white/[0.06] py-3.5 pl-11 pr-4 text-base text-white placeholder:text-white/50 focus:border-white/30 focus:outline-hidden"
               style={{ fontSize: '16px' }}
             />
           </label>

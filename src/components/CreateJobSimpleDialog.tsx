@@ -512,7 +512,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           <AnimatedBackground showBubbles={false} />
 
           <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
-            <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
+            <div className="relative flex items-center justify-center p-4 border-b border-white/20 shrink-0 bg-background/10">
               <h2 className="text-white text-lg font-semibold">Skapa jobb</h2>
               <Button
                 variant="ghost"
@@ -548,7 +548,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                     setHasUnsavedChanges(titleChanged || templateChanged);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/5 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-base h-12 !min-h-0 font-normal outline-none ring-0 focus:ring-0 focus:outline-none"
+                  className="bg-white/5 border-white/20 hover:border-white/30 focus:border-white/40 text-white placeholder:text-white transition-colors duration-150 text-base h-12 !min-h-0 font-normal outline-hidden ring-0 focus:ring-0 focus:outline-hidden"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -584,7 +584,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                       <DropdownMenuTrigger asChild>
                         <button
                           type="button"
-                          className="w-full bg-white/5 border border-white/20 text-white h-12 py-2 px-3 rounded-md overflow-hidden min-w-0 text-left focus:outline-none focus:ring-0 active:bg-white/10 [-webkit-tap-highlight-color:transparent]"
+                          className="w-full bg-white/5 border border-white/20 text-white h-12 py-2 px-3 rounded-md overflow-hidden min-w-0 text-left focus:outline-hidden focus:ring-0 active:bg-white/10 [-webkit-tap-highlight-color:transparent]"
                           title={selectedTemplate?.name || 'Välj mall...'}
                         >
                           <div className="flex items-center gap-2 w-full min-w-0">
@@ -592,7 +592,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                               text={selectedTemplate?.name || 'Välj mall...'}
                               className="text-base truncate font-normal text-white flex-1 min-w-0 text-left"
                             />
-                            <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
+                            <ChevronDown className={`h-4 w-4 shrink-0 text-white transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                           </div>
                         </button>
                       </DropdownMenuTrigger>
@@ -637,7 +637,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                 }}
                                 onMouseDown={(e) => e.currentTarget.blur()}
                                 onMouseUp={(e) => e.currentTarget.blur()}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10  focus:outline-none focus:ring-0"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors md:hover:text-white md:hover:bg-white/10  focus:outline-hidden focus:ring-0"
                                 type="button"
                               >
                                 <X className="h-4 w-4" />
@@ -755,7 +755,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                      });
                                    }}
                                   onPointerDown={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 bg-white/5 backdrop-blur-[2px] border-white/20 text-white text-xs transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-none focus:ring-0"
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 bg-white/5 backdrop-blur-[2px] border-white/20 text-white text-xs transition-colors duration-300 hover:bg-white/15 hover:border-white/50 active:scale-95 focus:outline-hidden focus:ring-0"
                                   aria-label={`Redigera mall ${template.name}`}
                                 >
                                   <Edit size={13} />
@@ -769,7 +769,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                     setTemplateToDelete(template);
                                   }}
                                   onPointerDown={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white text-xs transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white text-xs transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-hidden focus:ring-0"
                                   aria-label={`Ta bort mall ${template.name}`}
                                 >
                                   <Trash2 size={13} />
@@ -810,7 +810,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
               </div>
             </div>
 
-            <div className="flex gap-3 px-5 py-4 border-t border-white/20 flex-shrink-0 bg-background/10">
+            <div className="flex gap-3 px-5 py-4 border-t border-white/20 shrink-0 bg-background/10">
               <Button 
                 onMouseDown={(e) => {
                   e.currentTarget.blur();
@@ -893,7 +893,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
 
       <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

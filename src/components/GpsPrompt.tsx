@@ -226,7 +226,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
                   <div className="flex items-center gap-2 mt-3">
                     <button
                       onClick={handleEnableGps}
-                      className={`px-4 py-2 text-xs font-medium rounded-full backdrop-blur-sm border transition-all duration-300 active:scale-95 ${
+                      className={`px-4 py-2 text-xs font-medium rounded-full backdrop-blur-xs border transition-all duration-300 active:scale-95 ${
                         isDenied
                           ? 'bg-amber-500/20 border-amber-500/40 text-white hover:bg-amber-500/30 hover:border-amber-500/50'
                           : 'bg-teal-500/20 border-teal-500/40 text-white hover:bg-teal-500/30 hover:border-teal-500/50'
@@ -237,7 +237,7 @@ const GpsPrompt = memo(({ onEnableGps, weatherAvailable = false }: GpsPromptProp
                     {!isDenied && (
                       <button
                         onClick={handleDismiss}
-                        className="px-4 py-2 text-xs font-medium rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white hover:bg-white/15 hover:backdrop-blur-sm hover:border-white/50 active:scale-95 transition-all duration-300"
+                        className="px-4 py-2 text-xs font-medium rounded-full bg-white/5 backdrop-blur-[2px] border border-white/20 text-white hover:bg-white/15 hover:backdrop-blur-xs hover:border-white/50 active:scale-95 transition-all duration-300"
                       >
                         Inte nu
                       </button>

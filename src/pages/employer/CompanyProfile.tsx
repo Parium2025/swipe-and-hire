@@ -778,7 +778,7 @@ const CompanyProfile = () => {
           </div>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+        <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg p-6 md:p-4">
           <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-5 md:space-y-3">
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
@@ -841,7 +841,7 @@ const CompanyProfile = () => {
                     <span className="text-sm text-white truncate">
                       {formData.industry || 'Välj bransch'}
                     </span>
-                    <ChevronDown className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-200 ${industryMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
+                    <ChevronDown className={`h-4 w-4 text-white shrink-0 transition-transform duration-200 ${industryMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                   </div>
                   
                   {industryMenuOpen && (
@@ -876,7 +876,7 @@ const CompanyProfile = () => {
                             >
                               <span className="font-medium">{industryOption}</span>
                               {formData.industry === industryOption && (
-                                <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                <Check className="h-4 w-4 text-green-400 shrink-0" />
                               )}
                             </button>
                           ))}
@@ -936,7 +936,7 @@ const CompanyProfile = () => {
                         >
                           <span className="font-medium">{option.label}</span>
                           {formData.employee_count === option.value && (
-                            <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                            <Check className="h-4 w-4 text-green-400 shrink-0" />
                           )}
                         </button>
                       ))}

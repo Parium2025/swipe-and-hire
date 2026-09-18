@@ -207,7 +207,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
         type="button"
         aria-label="Stäng"
         onClick={() => close()}
-        className="absolute inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-none"
+        className="absolute inset-0 bg-black/55 backdrop-blur-[2px] focus:outline-hidden"
       />
 
       <div
@@ -269,14 +269,14 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
                 <button
                   type="button"
                   onClick={() => close()}
-                  className="w-full sm:w-auto rounded-full border border-white/20 bg-white/10 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                  className="w-full sm:w-auto rounded-full border border-white/20 bg-white/10 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/[0.16] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   Vi utforskar själva
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-green-600 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   Visa oss var vi börjar
                   <ArrowRight className="h-4 w-4" />
@@ -303,7 +303,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
                       key={item.path}
                       type="button"
                       onClick={() => startGuide(item.path)}
-                      className="group flex w-full items-center gap-3.5 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-left transition-colors duration-150 hover:bg-white/[0.12] active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="group flex w-full items-center gap-3.5 rounded-2xl border border-white/12 bg-white/[0.06] p-4 text-left transition-colors duration-150 hover:bg-white/[0.12] active:scale-[0.99] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       <span className="w-5 shrink-0 text-[13px] font-semibold tabular-nums text-white">
                         {index + 1}
@@ -336,7 +336,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
                 <button
                   type="button"
                   onClick={() => setStep(0)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/[0.16] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Tillbaka

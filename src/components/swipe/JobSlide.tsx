@@ -271,7 +271,7 @@ export const JobSlide = memo(function JobSlide({
           {/* Applied stamp */}
           {applied && (
             <div className="absolute top-4 left-4 z-30 pointer-events-none">
-              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+              <div className="-rotate-[12deg] border-[3px] border-green-500 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-xs">
                 <span className="text-green-500 text-lg font-black tracking-widest uppercase">SÖKT ✓</span>
               </div>
             </div>
@@ -280,7 +280,7 @@ export const JobSlide = memo(function JobSlide({
           {/* Skipped stamp */}
           {skipped && !applied && (
             <div className="absolute top-4 left-4 z-30 pointer-events-none">
-              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-sm">
+              <div className="-rotate-[12deg] border-[3px] border-white/40 rounded-lg px-4 py-1.5 bg-black/30 backdrop-blur-xs">
                 <span className="text-white/60 text-lg font-black tracking-widest uppercase">SKIPPAD</span>
               </div>
             </div>
@@ -313,7 +313,7 @@ export const JobSlide = memo(function JobSlide({
 
         {/* Swipe-indikatorer ligger UTANFÖR kortet så de står still medan
             kortet dras undan — de dyker upp i den yta som frilagts.
-            ⚡️ Ingen backdrop-blur här: en live-blur ovanpå ett kort som
+            ⚡️ Ingen backdrop-blur-sm här: en live-blur ovanpå ett kort som
             rör sig tvingar iOS att omrasterisera hela ytan varje frame.
             Endast opacity/scale = ren GPU-komposit. Renderas bara för
             det aktiva kortet. */}
