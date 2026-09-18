@@ -92,11 +92,7 @@ const QuestionItem = memo(({
       onContextMenu={(event) => {
         if (isTruncated) event.preventDefault();
       }}
-      className={`${dropdownItemClass} w-full text-left ${
-        isSelected 
-          ? 'bg-white/15 text-white' 
-          : 'text-white hover:text-white'
-      }`}
+      className={`${dropdownItemClass} w-full text-left text-white`}
     >
       <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-white" />
       <div className="flex-1 min-w-0">
@@ -303,8 +299,8 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const hasFilters = value.length > 0;
 
   // Dropdown styling matching nav dropdowns - left aligned
-  const dropdownContentClass = "min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0";
-  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white hover:bg-white/15  focus-visible:bg-white/15 focus:outline-none rounded-md px-3 py-3 text-sm transition-colors min-h-[44px]";
+  const dropdownContentClass = "w-[calc(100vw-2rem)] min-w-0 sm:w-auto sm:min-w-[280px] glass-panel shadow-xl z-[10000] rounded-lg p-0 flex max-h-[min(480px,calc(100dvh-1rem))] flex-col overflow-hidden";
+  const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white md:hover:bg-white/15 focus-visible:bg-white/15 focus:outline-none rounded-md px-3 py-3 text-sm transition-colors min-h-[44px] touch-manipulation [-webkit-tap-highlight-color:transparent]";
 
   // chipsOnly mode: only render the filter chips
   if (chipsOnly) {
@@ -384,11 +380,11 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative min-h-0 flex-1">
             <div 
               ref={scrollContainerRef}
               onScroll={updateScrollIndicator}
-              className="max-h-[320px] overflow-y-auto scrollbar-none overscroll-contain [-webkit-overflow-scrolling:touch]"
+              className="no-chrome-pad h-full min-h-0 overflow-y-auto scrollbar-none overscroll-contain [-webkit-overflow-scrolling:touch]"
             >
               {isLoading ? (
                 <div className="p-4 text-center text-white text-sm">
@@ -437,11 +433,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                               {/* Alla option */}
                                 <button
                                 onClick={() => setAllAnswers(question.question_text)}
-                                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-none min-h-[40px] ${
-                                  allSelected
-                                    ? 'bg-white/15 text-white'
-                                    : 'hover:bg-white/15  focus-visible:bg-white/15 text-white'
-                                }`}
+                                className="w-full flex min-h-[40px] touch-manipulation items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm text-white transition-colors [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:bg-white/15 md:hover:bg-white/15"
                               >
                                 <Checkbox 
                                   checked={allSelected}
@@ -457,11 +449,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
                                   <button
                                     key={option}
                                     onClick={() => toggleAnswer(question.question_text, option, options)}
-                                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-left text-sm transition-colors focus:outline-none min-h-[40px] ${
-                                      isOptionSelected
-                                        ? 'bg-white/15 text-white'
-                                        : 'hover:bg-white/15  focus-visible:bg-white/15 text-white'
-                                    }`}
+                                    className="w-full flex min-h-[40px] touch-manipulation items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm text-white transition-colors [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:bg-white/15 md:hover:bg-white/15"
                                   >
                                     <Checkbox 
                                       checked={isOptionSelected}

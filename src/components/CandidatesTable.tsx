@@ -1090,6 +1090,8 @@ export function CandidatesTable({
           applicantId={selectedApplicationForTeam.applicant_id}
           jobId={selectedApplicationForTeam.job_id}
           candidateName={`${selectedApplicationForTeam.first_name || ''} ${selectedApplicationForTeam.last_name || ''}`.trim() || 'Kandidat'}
+          canRemoveFromOwnList={isApplicantAdded(selectedApplicationForTeam.applicant_id)}
+          onAdded={onUpdate}
         />
       )}
 
