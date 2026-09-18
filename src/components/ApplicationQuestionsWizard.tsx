@@ -98,7 +98,7 @@ export function ApplicationQuestionsWizard({
     }
   }, [currentStep]);
 
-  const renderQuestionInput = (question: JobQuestion) => {
+  const renderQuestionInput = (question: ResolvedJobQuestion) => {
     const answer = answers[question.id];
     const isLocked = hasAlreadyApplied || previewMode;
 
@@ -111,7 +111,7 @@ export function ApplicationQuestionsWizard({
               onChange={(e) => !isLocked && onAnswerChange(question.id, e.target.value)}
               readOnly={isLocked}
               placeholder={question.placeholder_text || 'Skriv ditt svar här...'}
-              className={'bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] max-h-[120px] resize-none text-sm focus:outline-none focus:border-white/40' + (isLocked ? ' opacity-70 cursor-default' : '')}
+              className={'bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] max-h-[120px] resize-none text-sm focus:outline-hidden focus:border-white/40' + (isLocked ? ' opacity-70 cursor-default' : '')}
             />
           </div>
         );
@@ -220,7 +220,7 @@ export function ApplicationQuestionsWizard({
                 disabled={isLocked || numValue <= minValue}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="h-11 w-11 min-w-[2.75rem] flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-40 disabled:cursor-default active:scale-[0.97]"
+                className="h-11 w-11 min-w-[2.75rem] flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0 disabled:opacity-40 disabled:cursor-default active:scale-[0.97]"
                 aria-label="Minska"
               >
                 <Minus className="h-4 w-4" />
@@ -249,7 +249,7 @@ export function ApplicationQuestionsWizard({
                 disabled={isLocked || numValue >= maxValue}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className="h-11 w-11 min-w-[2.75rem] flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white transition-colors duration-150 focus:outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-40 disabled:cursor-default active:scale-[0.97]"
+                className="h-11 w-11 min-w-[2.75rem] flex items-center justify-center bg-white/10 border border-white/20 rounded-full text-white transition-colors duration-150 focus:outline-hidden focus:ring-0 focus-visible:ring-0 disabled:opacity-40 disabled:cursor-default active:scale-[0.97]"
                 aria-label="Öka"
               >
                 <Plus className="h-4 w-4" />
@@ -335,13 +335,13 @@ export function ApplicationQuestionsWizard({
 
   // Shared button styles (copy-pasted from WizardFooter, only px adjusted for compact size)
   const backButtonClasses = 
-    'rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+    'rounded-full bg-white/5 backdrop-blur-xs border-white/20 text-white px-4 py-2 text-sm transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const nextButtonClasses = 
-    'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 py-2 text-sm touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
+    'rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 py-2 text-sm touch-border-white transition-colors duration-150 focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   const submitButtonClasses = 
-    'rounded-full bg-green-500 hover:bg-green-500 md:hover:bg-green-500 active:bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 transition-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
+    'rounded-full bg-green-500 hover:bg-green-500 md:hover:bg-green-500 active:bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 transition-none focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50';
 
   const navRef = useRef<HTMLDivElement>(null);
   const wizardMinHeightClass = isSubmitStep ? 'min-h-0' : 'min-h-[320px] sm:min-h-[360px]';
@@ -354,7 +354,7 @@ export function ApplicationQuestionsWizard({
           type="button"
           onClick={() => setCurrentStep(questions.length)}
           aria-label="Tillbaka till granskning"
-          className="absolute top-0 right-0 w-9 h-9 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white inline-grid place-items-center leading-none transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 z-10"
+          className="absolute top-0 right-0 w-9 h-9 p-0 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white inline-grid place-items-center leading-none transition-colors duration-150 active:scale-95 focus:outline-hidden focus:ring-0 z-10"
         >
           <X className="block w-5 h-5" />
         </button>
@@ -533,7 +533,7 @@ export function ApplicationQuestionsWizard({
           type="button"
           disabled
           className={
-            'rounded-full bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 cursor-default focus:outline-none focus:ring-0 focus-visible:ring-0' +
+            'rounded-full bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 cursor-default focus:outline-hidden focus:ring-0 focus-visible:ring-0' +
             (buttonIsSubmitStep && hasAlreadyApplied && !previewMode ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >

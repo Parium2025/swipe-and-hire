@@ -33,7 +33,7 @@ const SmallCandidateAvatarWrapper = memo(({ application }: { application: JobApp
 
   return (
     <div 
-      className="h-8 w-8 flex-shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      className="h-8 w-8 shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
       onClick={hasVideo ? (e) => {
         e.stopPropagation();
       } : undefined}
@@ -149,7 +149,7 @@ export const ApplicationCardContent = memo(({
           <StarRating rating={application.rating} />
           {isRejected && (
             <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded-full bg-red-500/15 ring-1 ring-inset ring-red-400/30 text-red-300 text-[9px] font-medium w-fit">
-              <XCircle className="h-2.5 w-2.5 flex-shrink-0" />
+              <XCircle className="h-2.5 w-2.5 shrink-0" />
               Avslagen
             </span>
           )}

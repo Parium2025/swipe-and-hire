@@ -25,7 +25,7 @@ const FaqAccordion = ({ q, a }: FaqAccordionProps) => {
       >
         <span>{q}</span>
         <motion.span
-          className="ml-4 text-secondary text-xl leading-none flex-shrink-0"
+          className="ml-4 text-secondary text-xl leading-none shrink-0"
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.35, ease }}
         >

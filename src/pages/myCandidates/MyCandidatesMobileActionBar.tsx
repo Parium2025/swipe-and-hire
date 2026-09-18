@@ -122,19 +122,19 @@ export const MyCandidatesMobileActionBar = ({
     <TooltipProvider delayDuration={300}>
       <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mt-2">
         <div ref={barRef} className="flex items-center gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
-          <span className="text-white text-xs font-semibold whitespace-nowrap flex-shrink-0">
+          <span className="text-white text-xs font-semibold whitespace-nowrap shrink-0">
             {selectedCount}/{totalVisibleCount}
           </span>
-          <div className="w-px h-5 bg-white/20 flex-shrink-0" />
+          <div className="w-px h-5 bg-white/20 shrink-0" />
           <button
             onClick={onToggleAllVisible}
             onMouseDown={(e) => e.preventDefault()}
-            className="flex items-center justify-center px-2.5 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0 text-white outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
+            className="flex items-center justify-center px-2.5 h-9 text-xs font-medium whitespace-nowrap shrink-0 text-white outline-hidden focus:outline-hidden transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation"
           >
             {allVisibleSelected ? <Square className="h-4 w-4 mr-1.5" /> : <CheckSquare className="h-4 w-4 mr-1.5" />}
             {allVisibleSelected ? 'Avmarkera' : 'Välj alla'}
           </button>
-          <div className="w-px h-5 bg-white/20 flex-shrink-0" />
+          <div className="w-px h-5 bg-white/20 shrink-0" />
 
           <DropdownMenu
             onOpenChange={(open) => {
@@ -147,7 +147,7 @@ export const MyCandidatesMobileActionBar = ({
                 ref={moveButtonRef}
                 disabled={selectedCount === 0}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`flex items-center px-2.5 h-9 text-xs font-medium whitespace-nowrap flex-shrink-0 outline-none focus:outline-none transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation ${
+                className={`flex items-center px-2.5 h-9 text-xs font-medium whitespace-nowrap shrink-0 outline-hidden focus:outline-hidden transition-all duration-200 rounded-md active:scale-[0.97] touch-manipulation ${
                   selectedCount === 0 ? 'text-white/30 cursor-not-allowed' : 'text-white'
                 }`}
               >
@@ -196,8 +196,8 @@ export const MyCandidatesMobileActionBar = ({
                           }}
                           className="text-white hover:text-white cursor-pointer min-h-[44px]"
                         >
-                          <div className="h-2 w-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: settings?.color || '#6366F1' }} />
-                          <Icon className="h-4 w-4 mr-2 text-white/70 flex-shrink-0" />
+                          <div className="h-2 w-2 rounded-full mr-2 shrink-0" style={{ backgroundColor: settings?.color || '#6366F1' }} />
+                          <Icon className="h-4 w-4 mr-2 text-white/70 shrink-0" />
                           <span
                             ref={(node) => { stageLabelRefs.current[stage] = node; }}
                             className="truncate min-w-0"
@@ -224,7 +224,7 @@ export const MyCandidatesMobileActionBar = ({
                         onSelect={() => onBulkMoveToList(list.id, list.name)}
                         className="text-white hover:text-white cursor-pointer min-h-[44px]"
                       >
-                        <ListChecks className="h-4 w-4 mr-2 text-white/70 flex-shrink-0" />
+                        <ListChecks className="h-4 w-4 mr-2 text-white/70 shrink-0" />
                         <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive />
                       </DropdownMenuItem>
                     ))}
@@ -233,14 +233,14 @@ export const MyCandidatesMobileActionBar = ({
               </TooltipProvider>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="w-px h-5 bg-white/20 flex-shrink-0" />
+          <div className="w-px h-5 bg-white/20 shrink-0" />
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 disabled={selectedCount === 0}
                 onClick={onBulkDeleteClick}
                 onMouseDown={(e) => e.preventDefault()}
-                className={`flex h-9 w-9 items-center justify-center rounded-full outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation ${
+                className={`flex h-9 w-9 items-center justify-center rounded-full outline-hidden focus:outline-hidden transition-all duration-200 active:scale-[0.97] touch-manipulation ${
                   selectedCount === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
                 }`}
               >

@@ -283,7 +283,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
                 <Upload className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Lägg till er företagslogga</h2>
@@ -304,7 +304,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                    <div className="w-40 h-40 bg-white/20 backdrop-blur-sm rounded-full border-2 border-white/20 flex items-center justify-center overflow-hidden">
+                    <div className="w-40 h-40 bg-white/20 backdrop-blur-xs rounded-full border-2 border-white/20 flex items-center justify-center overflow-hidden">
                       <img 
                         src={formData.companyLogoUrl} 
                         alt="Företagslogga" 
@@ -370,7 +370,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto mb-4">
                 <Video className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Er möteslänk för intervjuer</h2>
@@ -395,13 +395,13 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
               {link && linkValid && (
                 <p className="text-sm text-green-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
                   Giltig möteslänk — den fylls i automatiskt vid videointervjuer.
                 </p>
               )}
               {link && !linkValid && (
                 <p className="text-sm text-amber-400 flex items-start gap-1.5">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span className="break-words">
                     Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex,
                     Whereby eller liknande. Ni kan spara ändå och ändra senare.
@@ -409,7 +409,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 </p>
               )}
 
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+              <div className="bg-white/10 backdrop-blur-xs p-4 rounded-xl border border-white/20">
                 <p className="text-sm text-white break-words">
                   <strong>Tips:</strong> Använd er personliga möteslänk (Teams: Kalender → Nytt möte,
                   Google Meet: ”Skapa ett möte för senare”, Zoom: Personal Meeting ID). Ni kan alltid
@@ -425,7 +425,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         return (
           <div className="space-y-8 py-8">
             <div className="text-center space-y-4">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
+              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto">
                 <MessageSquare className="h-10 w-10 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-white">Standardmeddelanden</h2>
@@ -463,7 +463,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 />
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+              <div className="bg-white/10 backdrop-blur-xs p-4 rounded-xl border border-white/20">
                 <p className="text-sm text-white break-words">
                   <strong>Tips:</strong> Ni kan hoppa över det här och fylla i senare under
                   Företag → Företagsprofil → Intervjuinställningar.
@@ -477,7 +477,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
+              <div className="bg-white/20 backdrop-blur-xs p-4 rounded-full w-fit mx-auto">
                 <CheckCircle className="h-10 w-10 text-white" />
               </div>
               
@@ -489,7 +489,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 max-w-md mx-auto">
+            <div className="bg-white/10 backdrop-blur-xs p-6 rounded-xl border border-white/20 max-w-md mx-auto">
               <p className="text-sm text-white">
                 <strong className="text-white">Tips:</strong> Börja med att skapa din första jobbannons för att locka kvalificerade kandidater till ditt företag.
               </p>
@@ -500,7 +500,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="py-4 px-8 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
+                className="py-4 px-8 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-hidden focus:ring-0"
               >
                 {isSubmitting ? (
                   <>
@@ -609,7 +609,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               
               <Button
                 onClick={handleNext}
-                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
+                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-hidden focus:ring-0"
               >
                 Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />

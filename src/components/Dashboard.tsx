@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useRef, useEffect, useCallback, startTransitio
 import { Skeleton } from '@/components/ui/skeleton';
 import { Briefcase, Users, Eye, TrendingUp, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { MobileJobCard } from '@/components/MobileJobCard';
@@ -327,7 +327,7 @@ const Dashboard = memo(() => {
         selectedRecruiterId={selectedRecruiterId}
         onRecruiterChange={setSelectedRecruiterId}
         placeholder="Sök efter titel, plats, anställningstyp, rekryterare..."
-        companyName={profile?.company_name}
+        companyName={profile?.company_name ?? undefined}
         hasDrafts={false}
       />
 

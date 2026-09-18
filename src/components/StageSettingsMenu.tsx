@@ -185,7 +185,7 @@ export function StageSettingsMenu({
         <DropdownMenuTrigger asChild>
           <button
             className={`${useJobDetailsTriggerStyle
-              ? 'p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
+              ? 'p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-hidden focus-visible:outline-hidden focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
               : 'p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100'
             }${disableTouchTrigger ? ' pointer-events-none' : ''}`}
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
@@ -328,16 +328,16 @@ export function StageSettingsMenu({
             <div className="space-y-2 pt-1 flex flex-col items-center">
               <Label className="text-white self-start">Förhandsvisning</Label>
               <div 
-                className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-sm inline-flex items-center gap-2 transition-colors max-w-full cursor-default"
+                className="rounded-md px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-xs inline-flex items-center gap-2 transition-colors max-w-full cursor-default"
                 style={{ backgroundColor: `${displayColor}33` }}
               >
                 {(() => {
                   const IconComp = getIconByName(currentConfig?.iconName || 'inbox');
-                  return <IconComp className="h-4 w-4 text-white flex-shrink-0" />;
+                  return <IconComp className="h-4 w-4 text-white shrink-0" />;
                 })()}
                 <div className="min-w-0 max-w-[240px]"><TruncatedText text={currentConfig?.label || stageKey} className="font-medium text-sm text-white" /></div>
                 <span 
-                  className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0"
+                  className="text-white text-[10px] px-1.5 py-0.5 rounded-full transition-colors shrink-0"
                   style={{ backgroundColor: `${displayColor}66` }}
                 >
                   {candidateCount}
@@ -377,7 +377,7 @@ export function StageSettingsMenu({
                     setIconDialogOpen(false);
                   }}
                   onMouseDown={(e) => e.currentTarget.blur()}
-                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-none focus:ring-0 active:scale-95 touch-manipulation ${
+                  className={`h-11 w-full rounded-lg flex items-center justify-center transition-colors duration-150 focus:outline-hidden focus:ring-0 active:scale-95 touch-manipulation ${
                     currentConfig.iconName === name 
                       ? 'bg-white/30 text-white ring-1 ring-white/40' 
                       : 'bg-white/5 hover:bg-white/15 text-white/70'
@@ -393,7 +393,7 @@ export function StageSettingsMenu({
       </Dialog>
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

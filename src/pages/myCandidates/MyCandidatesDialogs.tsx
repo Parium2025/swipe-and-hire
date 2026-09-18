@@ -42,7 +42,7 @@ export const RemoveCandidateDialog = ({ candidate, onOpenChange, onConfirm, onCa
   <AlertDialog open={!!candidate} onOpenChange={(open) => !open && onOpenChange(false)}>
     <AlertDialogContentNoFocus 
       elevated
-      className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+      className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
     >
       <AlertDialogHeader className="space-y-4 text-center">
         <div className="flex items-center justify-center gap-2.5">
@@ -94,7 +94,7 @@ export const BulkDeleteDialog = ({ open, selectedCount, onOpenChange, onConfirm 
   return (
   <AlertDialog open={open} onOpenChange={(o) => !o && onOpenChange(false)}>
     <AlertDialogContentNoFocus 
-      className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+      className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
     >
       <AlertDialogHeader className="space-y-4 text-center">
         <div className="flex items-center justify-center gap-2.5">

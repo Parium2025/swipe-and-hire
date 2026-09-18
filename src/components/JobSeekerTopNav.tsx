@@ -1,5 +1,5 @@
 import React, { memo, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -244,7 +244,7 @@ function JobSeekerTopNav() {
                     {showNewMatchBadge ? (
                       <span className="flex items-center gap-1.5">
                         {count !== null && <span className="text-white text-xs">({count})</span>}
-                        <span className="min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-sm">
+                        <span className="min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-xs">
                           {totalNewMatches > 9 ? '9+' : totalNewMatches}
                         </span>
                       </span>

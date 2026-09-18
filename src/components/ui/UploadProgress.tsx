@@ -162,7 +162,7 @@ export function UploadProgressOverlay({
   if (state.status === 'idle') return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="w-full max-w-sm space-y-4">
         {title && (
           <h3 className="text-base font-semibold text-white text-center">

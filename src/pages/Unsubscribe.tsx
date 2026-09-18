@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { Bell, ChevronRight, Mail } from "lucide-react";
 import { Helmet } from "react-helmet-async";

@@ -38,43 +38,43 @@ interface UserRoleData {
 interface Organization {
   id: string;
   name: string;
-  org_number?: string;
-  website?: string;
-  description?: string;
-  logo_url?: string;
-  subscription_plan: string;
-  max_recruiters: number;
+  org_number?: string | null;
+  website?: string | null;
+  description?: string | null;
+  logo_url?: string | null;
+  subscription_plan: string | null;
+  max_recruiters: number | null;
 }
 
 interface Profile {
   id: string;
   user_id: string;
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
-  company_name?: string;
-  org_number?: string;
-  industry?: string;
-  address?: string;
-  website?: string;
-  company_description?: string;
-  employee_count?: string;
-  bio?: string;
-  location?: string;
-  birth_date?: string;
-  profile_image_url?: string;
-  video_url?: string;
-  cover_image_url?: string;
-  cv_url?: string;
-  cv_filename?: string;
-  company_logo_url?: string;
-  employment_status?: string;
-  working_hours?: string;
-  availability?: string;
-  interests?: string | string[];
-  home_location?: string;
-  organization_id?: string;
-  onboarding_completed?: boolean;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  company_name?: string | null;
+  org_number?: string | null;
+  industry?: string | null;
+  address?: string | null;
+  website?: string | null;
+  company_description?: string | null;
+  employee_count?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  birth_date?: string | null;
+  profile_image_url?: string | null;
+  video_url?: string | null;
+  cover_image_url?: string | null;
+  cv_url?: string | null;
+  cv_filename?: string | null;
+  company_logo_url?: string | null;
+  employment_status?: string | null;
+  working_hours?: string | null;
+  availability?: string | null;
+  interests?: string | string[] | null;
+  home_location?: string | null;
+  organization_id?: string | null;
+  onboarding_completed?: boolean | null;
 }
 
 // SessionStorage keys för omedelbar visning (som arbetsgivarsidan)
@@ -929,7 +929,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               (async () => {
                 try {
                   // Använd retry-funktionen för stabilare hämtning
-                  const videoUrl = await fetchWithRetry(processedProfile.video_url, 'profile-video', 3000, 2);
+                  const videoUrl = await fetchWithRetry(processedProfile.video_url!, 'profile-video', 3000, 2);
                   if (videoUrl) {
                     // Spara till state OCH sessionStorage
                     setPreloadedVideoUrl(videoUrl);
@@ -1047,7 +1047,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: roleData?.id ?? `profile-role-${userId}`,
           user_id: userId,
           role: profileRole,
-          organization_id: membershipOrgId,
+          organization_id: membershipOrgId ?? undefined,
           is_active: roleData?.is_active ?? true,
         });
 
@@ -1085,8 +1085,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setOrganization(orgData);
         }
       } else if (orgResult.data) {
-        if (orgResult.error) {
-          console.error('Error fetching organization:', orgResult.error);
+        const orgErr = (orgResult as { error?: unknown }).error;
+        if (orgErr) {
+          console.error('Error fetching organization:', orgErr);
         } else {
           setOrganization(orgResult.data);
         }

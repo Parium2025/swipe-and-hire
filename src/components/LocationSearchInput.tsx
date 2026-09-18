@@ -179,10 +179,10 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
 
   const renderSelectionIndicator = (selected: boolean) => {
     if (selected) {
-      return <Check className="h-4 w-4 text-green-400 flex-shrink-0" />;
+      return <Check className="h-4 w-4 text-green-400 shrink-0" />;
     }
 
-    return <div className="h-4 w-4 flex-shrink-0" />;
+    return <div className="h-4 w-4 shrink-0" />;
   };
 
   return (
@@ -200,7 +200,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
         <PopoverTrigger asChild>
           <button
             className={cn(
-              'w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 touch-manipulation',
+              'w-full h-12 flex items-center gap-3 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg px-3 text-left transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 focus:outline-hidden focus:ring-2 focus:ring-white/20 touch-manipulation',
               values.length > 0 && 'border-white/20'
             )}
             aria-label="Välj plats"
@@ -212,7 +212,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
               insideInteractive
             />
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-white flex-shrink-0" />
+              <Loader2 className="h-4 w-4 animate-spin text-white shrink-0" />
             ) : values.length > 0 ? (
               <button
                 onClick={(event) => {
@@ -227,7 +227,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                 <X className="h-4 w-4" />
               </button>
             ) : (
-              <ChevronDown className={cn("h-4 w-4 text-white flex-shrink-0 transition-transform duration-200", open && "rotate-180")} />
+              <ChevronDown className={cn("h-4 w-4 text-white shrink-0 transition-transform duration-200", open && "rotate-180")} />
             )}
           </button>
         </PopoverTrigger>
@@ -251,7 +251,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                 autoCorrect="off"
                 spellCheck={false}
                 enterKeyHint="search"
-                className="flex h-full w-full bg-transparent text-[16px] leading-tight outline-none text-white placeholder:text-white/70"
+                className="flex h-full w-full bg-transparent text-[16px] leading-tight outline-hidden text-white placeholder:text-white/70"
               />
             </div>
 
@@ -342,11 +342,11 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                           onClick={() => setExpandedCounty(expandedCounty === county ? null : county)}
                           className="w-full flex items-center gap-3 px-2 py-3 md:py-2 text-left text-white active:bg-white/10 [@media(hover:hover)]:hover:bg-white/10 touch-manipulation"
                         >
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                          <MapPin className="h-4 w-4 shrink-0" />
                           <TruncatedText text={county} className="min-w-0 flex-1 truncate text-[15px] md:text-sm leading-tight py-0.5" insideInteractive />
                           <ChevronRight
                             className={cn(
-                              'h-4 w-4 flex-shrink-0 transition-transform duration-200',
+                              'h-4 w-4 shrink-0 transition-transform duration-200',
                               expandedCounty === county && 'rotate-90'
                             )}
                           />
@@ -374,9 +374,9 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
                                 {allSelected ? `Avmarkera alla i ${county}` : `Välj alla i ${county}`}
                               </span>
                               {allSelected ? (
-                                <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                <Check className="h-4 w-4 text-green-400 shrink-0" />
                               ) : (
-                                <div className="h-4 w-4 flex-shrink-0" />
+                                <div className="h-4 w-4 shrink-0" />
                               )}
                             </button>
                             <div className="h-px bg-white/20 mx-2" />
@@ -438,7 +438,7 @@ const LocationSearchInput = ({ values, onLocationsChange, className = '' }: Loca
               )}
             >
               <span className="font-medium leading-tight">{location}</span>
-              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+              <Check className="h-4 w-4 text-green-400 shrink-0" />
             </div>
           ))}
         </div>

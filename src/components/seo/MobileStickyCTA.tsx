@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 
 interface MobileStickyCTAProps {
   /** Knapptext, default "Skapa min profil idag" (samma som appens landning). */

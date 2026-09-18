@@ -5,7 +5,7 @@ interface UseJobViewTrackerOptions {
   jobId: string | undefined;
   userId: string | undefined;
   /** Element to observe for scroll completion */
-  contentRef: React.RefObject<HTMLElement>;
+  contentRef: React.RefObject<HTMLElement | null>;
   /** Threshold for considering content "read" (0-1, default 0.5 = 50% scrolled) */
   scrollThreshold?: number;
   /** Minimum time on page before counting view (ms, default 2000) */

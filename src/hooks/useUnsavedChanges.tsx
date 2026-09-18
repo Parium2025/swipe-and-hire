@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useRef, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '@/lib/router-compat';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { toast } from '@/hooks/use-toast';
 

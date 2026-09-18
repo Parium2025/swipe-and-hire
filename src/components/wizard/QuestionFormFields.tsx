@@ -77,7 +77,7 @@ export const QuestionFormFields = ({
                 <button
                   type="button"
                   onClick={() => onRemoveOption(index)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 text-white transition-colors duration-150 shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

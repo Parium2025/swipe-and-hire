@@ -28,7 +28,7 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
 
   return (
     <div
-      className="h-8 w-8 flex-shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
+      className="h-8 w-8 shrink-0 [&>*:first-child]:h-8 [&>*:first-child]:w-8 [&_.h-10]:h-8 [&_.w-10]:w-8 [&_.ring-2]:ring-1"
       onClick={hasVideo ? (e) => e.stopPropagation() : undefined}
     >
       <CandidateAvatar

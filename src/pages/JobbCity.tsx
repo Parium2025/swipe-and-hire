@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, Navigate } from 'react-router-dom';
+import { Link, useNavigate, useParams, Navigate } from '@/lib/router-compat';
 import SiteFooter from '@/components/landing/SiteFooter';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';

@@ -183,7 +183,7 @@ export function AttachmentImageViewer({ open, onClose, src, fileName }: Attachme
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black/90 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black/90 backdrop-blur-xs animate-fade-in">
       {/* Kontroller */}
       <div className="flex items-center gap-2 p-3 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
         <button

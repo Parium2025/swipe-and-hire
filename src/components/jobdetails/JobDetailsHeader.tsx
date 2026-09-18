@@ -5,7 +5,7 @@
  */
 import { memo, useState, useEffect, useRef } from 'react';
 import { requestScrollRestore } from '@/lib/scrollRestoration';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '@/lib/router-compat';
 import {
   X,
   Eye,
@@ -111,7 +111,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
-          className="relative z-50 flex h-7 w-7 !min-h-0 !min-w-0 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors touch-manipulation active:scale-95 focus:outline-none md:hover:bg-white/20"
+          className="relative z-50 flex h-7 w-7 !min-h-0 !min-w-0 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition-colors touch-manipulation active:scale-95 focus:outline-hidden md:hover:bg-white/20"
         >
           <X className="h-3.5 w-3.5 text-white" />
         </button>
@@ -144,13 +144,13 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
       <div className="mt-3 space-y-1.5 md:space-y-0">
         <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5 min-w-0">
           <div className="flex min-w-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-white/20 bg-white/5 px-2 py-1.5">
-            <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
+            <Eye className="h-3.5 w-3.5 text-white shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.views_count}</span>
             <span className="text-white text-xs truncate">Visn.</span>
           </div>
 
           <div className="flex min-w-0 items-center justify-center gap-1 overflow-hidden rounded-lg border border-white/20 bg-white/5 px-2 py-1.5">
-            <Users className="h-3.5 w-3.5 text-white flex-shrink-0" />
+            <Users className="h-3.5 w-3.5 text-white shrink-0" />
             <span className="text-white text-xs font-medium truncate">{job.applications_count}</span>
             <span className="text-white text-xs truncate">Ans.</span>
             <RemovedApplicantsBadge count={job.removed_applicants_count} />
@@ -189,7 +189,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           <button
             onClick={() => applicationsCount > 0 ? (isSelectionMode ? onExitSelectionMode() : onToggleSelectionMode()) : undefined}
             onMouseDown={(e) => e.preventDefault()}
-            className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden ${
+            className={`hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-hidden focus:outline-hidden transition-all duration-200 min-w-0 overflow-hidden ${
               isSelectionMode 
                 ? 'bg-white/10 ring-1 ring-white hover:bg-white/15' 
                 : applicationsCount > 0 
@@ -197,17 +197,17 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
                   : 'border border-white/20 bg-white/5 opacity-40 cursor-default'
             }`}
           >
-            <CheckSquare className="h-3.5 w-3.5 text-white flex-shrink-0" />
+            <CheckSquare className="h-3.5 w-3.5 text-white shrink-0" />
             <span className="text-white text-xs font-medium">{isSelectionMode ? 'Avbryt' : 'Välj'}</span>
           </button>
           <button
             onClick={openPublicPreview}
             onMouseDown={(e) => e.preventDefault()}
-            className="hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-none focus:outline-none transition-all duration-200 min-w-0 overflow-hidden border border-white/20 bg-white/5 hover:bg-white/10"
+            className="hidden md:flex rounded-lg px-2 py-1.5 items-center justify-center gap-1 outline-hidden focus:outline-hidden transition-all duration-200 min-w-0 overflow-hidden border border-white/20 bg-white/5 hover:bg-white/10"
             aria-label="Förhandsgranska annons"
             title="Förhandsgranska annons"
           >
-            <Eye className="h-3.5 w-3.5 text-white flex-shrink-0" />
+            <Eye className="h-3.5 w-3.5 text-white shrink-0" />
             <span className="text-white text-xs font-medium">Visa</span>
           </button>
           <div className="hidden md:flex min-w-0">
@@ -219,7 +219,7 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
           <button
             onClick={() => applicationsCount > 0 ? (isSelectionMode ? onExitSelectionMode() : onToggleSelectionMode()) : undefined}
             onMouseDown={(e) => e.preventDefault()}
-            className={`rounded-lg px-3 py-2.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
+            className={`rounded-lg px-3 py-2.5 flex items-center justify-center gap-1.5 outline-hidden focus:outline-hidden transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation ${
               isSelectionMode 
                 ? 'bg-white/[0.08] ring-white/70' 
                 : applicationsCount > 0 
@@ -227,18 +227,18 @@ export const JobDetailsHeader = memo(function JobDetailsHeader({
                   : 'bg-white/[0.04] ring-white/20 opacity-40 cursor-default'
             }`}
           >
-            <CheckSquare className="h-4 w-4 text-white flex-shrink-0" />
+            <CheckSquare className="h-4 w-4 text-white shrink-0" />
             <span className="text-white text-sm font-medium">Välj</span>
           </button>
 
           <button
             onClick={openPublicPreview}
             onMouseDown={(e) => e.preventDefault()}
-            className="rounded-lg px-3 py-2.5 flex items-center justify-center gap-1.5 outline-none focus:outline-none transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation bg-white/[0.045] ring-white/30"
+            className="rounded-lg px-3 py-2.5 flex items-center justify-center gap-1.5 outline-hidden focus:outline-hidden transition-all duration-200 ring-1 min-w-0 overflow-hidden active:scale-[0.97] touch-manipulation bg-white/[0.045] ring-white/30"
             aria-label="Förhandsgranska annons"
             title="Förhandsgranska annons"
           >
-            <Eye className="h-4 w-4 text-white flex-shrink-0" />
+            <Eye className="h-4 w-4 text-white shrink-0" />
             <span className="text-white text-sm font-medium">Visa</span>
           </button>
 

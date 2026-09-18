@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from '@/lib/router-compat';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -155,7 +155,7 @@ const SavedJobs = () => {
     return new Date(expiresAt) < new Date();
   };
 
-  const hasRenderableJobPosting = useCallback((entry: SavedJob) => {
+  const hasRenderableJobPosting = useCallback((entry: SavedJob): entry is SavedJob & { job_postings: NonNullable<SavedJob['job_postings']> } => {
     const posting = entry.job_postings;
     return !!(
       posting &&
@@ -349,7 +349,7 @@ const SavedJobs = () => {
       >
         <span
           className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${
-            checked ? 'bg-white border-white' : 'bg-white/15 border-white/60 backdrop-blur-sm'
+            checked ? 'bg-white border-white' : 'bg-white/15 border-white/60 backdrop-blur-xs'
           }`}
         >
           {checked && <Check className="h-4 w-4 text-primary" />}
@@ -742,7 +742,7 @@ const SavedJobs = () => {
       {/* Bekräftelsedialog för massrensning */}
       <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => { if (!bulkDeleting) setBulkDeleteOpen(open); }}>
         <AlertDialogContentNoFocus
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
@@ -783,7 +783,7 @@ const SavedJobs = () => {
       {/* Bekräftelsedialog för borttagning */}
       <AlertDialog open={!!jobToRemove} onOpenChange={(open) => { if (!open) setJobToRemove(null); }}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

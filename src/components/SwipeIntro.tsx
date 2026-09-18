@@ -52,7 +52,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
           <div className="flex flex-col items-center space-y-6">
             <div className="relative">
-              <div className="w-[140px] h-[260px] rounded-[1.8rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="w-[140px] h-[260px] rounded-[1.8rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-xs">
                 <div className="relative w-full h-full rounded-[1.4rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
                 {/* Ren animerad swipe-gest utan text */}
                 <div className="flex flex-col items-center space-y-3">
@@ -88,7 +88,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center justify-center w-full px-4">
           {/* Profile Image/Video Card - enlarged and centered */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg max-w-xl w-full">
+          <div className="bg-white/5 backdrop-blur-xs border border-white/10 rounded-lg max-w-xl w-full">
             <div className="p-8 space-y-4">
               <h3 className="text-lg font-semibold text-white text-center">
                 Profilbild/Profilvideo
@@ -101,7 +101,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               <div className="flex items-center justify-center space-x-6 pt-2">
                 {/* Video option */}
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full border-4 border-white/10 p-3 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                  <div className="w-24 h-24 rounded-full border-4 border-white/10 p-3 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-xs">
                     <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                       <Video className="h-8 w-8 text-white" />
                     </div>
@@ -112,13 +112,13 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 </div>
 
                 {/* "eller" text */}
-                <div className="text-white text-base font-medium flex-shrink-0">
+                <div className="text-white text-base font-medium shrink-0">
                   eller
                 </div>
 
                 {/* Image option */}
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full border-4 border-white/10 p-3 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                  <div className="w-24 h-24 rounded-full border-4 border-white/10 p-3 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-xs">
                     <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                       <Camera className="h-8 w-8 text-white" />
                     </div>

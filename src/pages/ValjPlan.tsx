@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SUBSCRIPTION_PLANS_KEY, fetchSubscriptionPlans, readPlansSnapshot } from '@/lib/subscriptionPlansQuery';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from '@/lib/router-compat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -82,7 +82,7 @@ function PlanFeatures({
             <ul className="mt-4 space-y-3">
               {features.map((feature) => (
                 <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white">
-                  <Check className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`} />
+                  <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`} />
                   <span>{feature}</span>
                 </li>
               ))}

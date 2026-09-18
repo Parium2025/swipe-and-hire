@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,31 +64,31 @@ interface Job {
   id: string;
   title: string;
   company_name: string;
-  workplace_name?: string;
-  company_logo_url?: string;
-  company_avg_rating?: number;
-  company_review_count?: number;
-  location: string;
-  workplace_city?: string;
-  workplace_postal_code?: string;
-  employment_type: string;
-  salary_min?: number;
-  salary_max?: number;
-  description: string;
+  workplace_name?: string | null;
+  company_logo_url?: string | null;
+  company_avg_rating?: number | null;
+  company_review_count?: number | null;
+  location: string | null;
+  workplace_city?: string | null;
+  workplace_postal_code?: string | null;
+  employment_type: string | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  description: string | null;
   created_at: string;
-  expires_at?: string;
+  expires_at?: string | null;
   is_active: boolean;
   views_count: number;
   applications_count: number;
-  job_image_url?: string;
-  job_image_desktop_url?: string;
-  image_focus_position?: string;
+  job_image_url?: string | null;
+  job_image_desktop_url?: string | null;
+  image_focus_position?: string | null;
   image_updated_at?: string | null;
   updated_at?: string | null;
-  employer_id?: string;
+  employer_id?: string | null;
   employer_profile?: {
-    first_name: string;
-    last_name: string;
+    first_name: string | null;
+    last_name: string | null;
   };
   profiles?: {
     company_name: string | null;
@@ -976,7 +976,7 @@ const SearchJobs = memo(() => {
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 text-white text-sm font-medium px-3 py-2 rounded-full bg-white/5 border border-white/10 active:scale-[0.97] touch-manipulation max-w-[200px]">
-                <Building className="h-4 w-4 text-white flex-shrink-0" />
+                <Building className="h-4 w-4 text-white shrink-0" />
                 <span className="truncate">{selectedCompanies.length > 0 ? `${selectedCompanies.length} företag` : `${uniqueCompanyCount} företag`}</span>
               </button>
             </DropdownMenuTrigger>
@@ -1220,7 +1220,7 @@ const SearchJobs = memo(() => {
       {/* Bekräftelsedialog för att avspara jobb */}
       <AlertDialog open={!!jobToUnsave} onOpenChange={(open) => { if (!open) setJobToUnsave(null); }}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">

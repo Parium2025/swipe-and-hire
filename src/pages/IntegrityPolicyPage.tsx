@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -125,7 +125,7 @@ export default function IntegrityPolicyPage() {
               type="button"
               onClick={handleClose}
               aria-label="Stäng och gå tillbaka"
-              className="group relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-white backdrop-blur-xl transition hover:bg-white/[0.12] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="group relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-white backdrop-blur-xl transition hover:bg-white/[0.12] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40"
             >
               <X className="h-5 w-5" strokeWidth={2.2} />
             </button>

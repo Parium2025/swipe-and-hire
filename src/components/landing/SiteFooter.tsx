@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from '@/lib/router-compat';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { preloadAboutPageAssets } from '@/lib/aboutPagePreload';
 import { saveScrollNow } from '@/lib/scrollRestoration';

@@ -269,7 +269,7 @@ const TeamManagement = () => {
         .from('user_roles')
         .update({ is_active: false })
         .eq('user_id', memberId)
-        .eq('organization_id', organizationId);
+        .eq('organization_id', organizationId as string);
 
       if (error) throw error;
 
@@ -313,7 +313,7 @@ const TeamManagement = () => {
         .from('user_roles')
         .update({ role: newRole })
         .eq('user_id', memberId)
-        .eq('organization_id', organizationId);
+        .eq('organization_id', organizationId as string);
 
       if (error) throw error;
 
@@ -347,7 +347,7 @@ const TeamManagement = () => {
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
+    <div className="bg-white/5 backdrop-blur-xs border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
       <div className="flex items-center gap-2 mb-6">
         <Users className="h-5 w-5 text-white" />
         <h2 className="text-lg font-semibold text-white">Team</h2>

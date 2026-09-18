@@ -282,7 +282,7 @@ export const getGalleryPreload = (): 'none' | 'metadata' => {
 /**
  * Ska tunga `backdrop-filter`-ytor ersättas med en statisk translucent yta?
  *
- * Varför: backdrop-blur måste räkna om suddningen av allt som ligger BAKOM
+ * Varför: backdrop-blur-sm måste räkna om suddningen av allt som ligger BAKOM
  * elementet varje gång bakgrunden rör sig. På landningssidan ligger korten
  * ovanpå en animerad gradient som rör sig konstant, så blurren räknas om varje
  * frame. macOS gör det på GPU med en optimerad separabel pass; Chrome/Edge på

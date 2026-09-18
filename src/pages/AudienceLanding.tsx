@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useNavigationType } from 'react-router-dom';
+import { Link, useNavigate, useNavigationType } from '@/lib/router-compat';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -46,7 +46,7 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
       >
         <span>{q}</span>
         <motion.span
-          className="ml-4 text-secondary text-xl leading-none flex-shrink-0"
+          className="ml-4 text-secondary text-xl leading-none shrink-0"
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.35, ease }}
         >
@@ -164,7 +164,7 @@ function PlanFeatures({
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 20 20"
-                    className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
+                    className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -1515,7 +1515,7 @@ const HeroIntroStage = ({ c, audience, onIntroCta, introCtaLabel }: HeroIntroSta
               onClick={onIntroCta}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className="mt-16 inline-flex self-center items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
+              className="mt-16 inline-flex self-center items-center justify-center rounded-full bg-secondary px-8 py-4 text-base font-semibold text-white transition-colors duration-200 hover:bg-secondary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:mt-20 sm:text-lg"
             >
               {introCtaLabel ?? 'Skapa min profil idag'}
             </motion.button>

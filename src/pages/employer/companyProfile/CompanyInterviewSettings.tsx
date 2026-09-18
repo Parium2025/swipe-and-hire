@@ -63,10 +63,10 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 />
                 
                 {formData.interview_video_link && isValidMeetingLink(formData.interview_video_link) && (
-                  <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
                 )}
                 {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
-                  <AlertCircle className="h-5 w-5 text-amber-400 flex-shrink-0" />
+                  <AlertCircle className="h-5 w-5 text-amber-400 shrink-0" />
                 )}
               </div>
               

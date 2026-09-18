@@ -463,7 +463,7 @@ export function SelectionCriteriaDialog({
   const dialogContent = (
     <div className="h-full flex flex-col min-h-0">
       {/* Header — centered */}
-      <div className="px-5 pt-5 pb-2 flex-shrink-0 text-center">
+      <div className="px-5 pt-5 pb-2 shrink-0 text-center">
         {isMobile ? (
           <DrawerHeader className="p-0">
             <DrawerTitle className="text-white text-base tracking-tight font-medium flex items-center justify-center gap-2">
@@ -524,7 +524,7 @@ export function SelectionCriteriaDialog({
                     </span>
                     <button
                       onClick={() => deleteCriterion(criterion.id)}
-                      className="rounded-full border border-red-500/40 bg-red-500/15 p-1.5 text-red-300 transition-colors md:hover:!border-red-500/60 md:hover:!bg-red-500/25 md:hover:!text-red-200 active:scale-[0.95] focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
+                      className="rounded-full border border-red-500/40 bg-red-500/15 p-1.5 text-red-300 transition-colors md:hover:!border-red-500/60 md:hover:!bg-red-500/25 md:hover:!text-red-200 active:scale-[0.95] focus:outline-hidden focus-visible:outline-hidden [-webkit-tap-highlight-color:transparent]"
                       aria-label="Ta bort kriterium"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -569,7 +569,7 @@ export function SelectionCriteriaDialog({
                   onMouseDown={(e) => e.preventDefault()}
                   className="w-auto mx-auto mt-1 py-2 px-5 rounded-full border border-white/20 md:hover:border-white/40
                     text-white md:hover:text-white flex items-center justify-center gap-1.5 transition-all
-                    active:scale-[0.97] active:duration-75 focus:outline-none focus-visible:outline-none
+                    active:scale-[0.97] active:duration-75 focus:outline-hidden focus-visible:outline-hidden
                     [-webkit-tap-highlight-color:transparent]"
                 >
                   <Plus className="h-4 w-4 text-white" />
@@ -608,11 +608,11 @@ export function SelectionCriteriaDialog({
 
         {/* Footer — Parium solid green pill (matches Skicka ansökan) */}
         {criteria.length > 0 && (
-          <div className="flex-shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
+          <div className="shrink-0 px-5 py-3 border-t border-white/[0.05] flex items-center justify-center">
             <button
               onClick={handleSaveAndActivate}
               disabled={isSaving || !hasValidCriteria || Object.keys(validationErrors).length > 0}
-              className="py-2.5 px-8 rounded-full bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-600 transition-all active:scale-[0.97] text-sm font-semibold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
+              className="py-2.5 px-8 rounded-full bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-600 transition-all active:scale-[0.97] text-sm font-semibold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-hidden focus-visible:outline-hidden [-webkit-tap-highlight-color:transparent]"
             >
               {isSaving ? (
                 <>

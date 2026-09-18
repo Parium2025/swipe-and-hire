@@ -131,7 +131,7 @@ export function useBulkCandidateOps({
           });
           toast.info('Flytten köad – synkas automatiskt', { duration: 3000 });
         } else {
-          queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', (user as { id?: string } | null)?.id] });
           toast.error('Kunde inte flytta kandidaterna');
         }
       }
@@ -192,7 +192,7 @@ export function useBulkCandidateOps({
           });
           toast.info('Borttagning köad – synkas automatiskt', { duration: 3000 });
         } else {
-          queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+          queryClient.invalidateQueries({ queryKey: ['my-candidates', (user as { id?: string } | null)?.id] });
           toast.error('Kunde inte ta bort kandidaterna');
         }
       }

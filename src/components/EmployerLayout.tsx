@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect, memo, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from '@/lib/router-compat';
 import { useQueryClient } from '@tanstack/react-query';
 import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { KanbanLayoutProvider, useKanbanLayout } from '@/hooks/useKanbanLayout';

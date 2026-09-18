@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from '@/hooks/useAuth';
 import { useMediaUrl } from '@/hooks/useMediaUrl';

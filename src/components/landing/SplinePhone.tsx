@@ -314,7 +314,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
           aria-label="Parium 3D-telefon"
           tabIndex={-1}
           data-spline-phone-canvas
-          className="relative h-full w-full cursor-grab bg-transparent outline-none active:cursor-grabbing"
+          className="relative h-full w-full cursor-grab bg-transparent outline-hidden active:cursor-grabbing"
           draggable={false}
           style={{
             colorScheme: 'normal',

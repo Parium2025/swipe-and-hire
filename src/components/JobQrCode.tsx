@@ -87,9 +87,9 @@ function JobQrCodeButton({ jobId, jobTitle }: JobQrCodeProps) {
     <div className="min-w-0 flex">
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full min-w-0 items-center justify-center gap-1.5 overflow-hidden rounded-lg ring-1 ring-white/30 bg-white/[0.045] px-3 py-2.5 transition-all duration-200 outline-none focus:outline-none active:scale-[0.97] touch-manipulation md:ring-0 md:border md:border-white/20 md:bg-white/5 md:px-2 md:py-1.5 md:hover:bg-white/10"
+        className="flex w-full min-w-0 items-center justify-center gap-1.5 overflow-hidden rounded-lg ring-1 ring-white/30 bg-white/[0.045] px-3 py-2.5 transition-all duration-200 outline-hidden focus:outline-hidden active:scale-[0.97] touch-manipulation md:ring-0 md:border md:border-white/20 md:bg-white/5 md:px-2 md:py-1.5 md:hover:bg-white/10"
       >
-        <QrCode className="h-4 w-4 md:h-3.5 md:w-3.5 text-white flex-shrink-0" />
+        <QrCode className="h-4 w-4 md:h-3.5 md:w-3.5 text-white shrink-0" />
         <span className="text-white text-sm md:text-xs md:inline">QR</span>
       </button>
 

@@ -95,11 +95,12 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
   // Load and render PDF
   useEffect(() => {
     if (!resolvedUrl) return;
+    const pdfUrl = resolvedUrl;
     let cancelled = false;
     async function render() {
       try {
         setLoading(true);
-        const pdf = await pdfjsLib.getDocument({ url: resolvedUrl }).promise;
+        const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
         if (cancelled) return;
         setNumPages(pdf.numPages);
 
@@ -404,7 +405,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
         </button>
         {numPages > 0 && (
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-medium leading-none text-white backdrop-blur-sm md:hidden"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-medium leading-none text-white backdrop-blur-xs md:hidden"
             aria-live="polite"
           >
             Sida {currentPage} av {numPages}
@@ -499,7 +500,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
 
         {/* Sidebar for page navigation - hidden on mobile */}
         {numPages > 0 && !isMobile && (
-          <div className="w-10 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-1.5 flex flex-col gap-1.5">
+          <div className="w-10 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-xs p-1.5 flex flex-col gap-1.5">
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}

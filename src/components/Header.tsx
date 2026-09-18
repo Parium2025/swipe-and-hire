@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import pariumLogoRings from "@/assets/parium-logo-rings.png";
 
 export const Header = () => {

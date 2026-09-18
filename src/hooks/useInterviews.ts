@@ -348,7 +348,7 @@ export const useCandidateInterviews = () => {
         .from('interviews')
         .update({ status: accept ? 'confirmed' : 'declined' })
         .eq('id', interviewId)
-        .eq('applicant_id', user?.id)
+        .eq('applicant_id', user?.id as string)
         .select('id');
 
       if (error) throw error;

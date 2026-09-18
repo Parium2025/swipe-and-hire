@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-compat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -74,7 +74,7 @@ function PlanFeatures({ features, isActive }: { features: string[]; isActive: bo
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 20 20"
-                    className={`mt-0.5 h-4 w-4 flex-shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
+                    className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? 'text-secondary' : 'text-white/70'}`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -289,7 +289,7 @@ const Subscription = () => {
       </div>
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
+        <AlertDialogContentNoFocus className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-xs rounded-xl shadow-lg mx-0">
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
               <Crown className="h-5 w-5 text-white" />
@@ -304,7 +304,7 @@ const Subscription = () => {
           </AlertDialogDescription>
 
           <AlertDialogFooter className="flex-row gap-2 sm:justify-center">
-            <AlertDialogCancel className="btn-dialog-action mt-0 flex-1 rounded-full border-white/20 !bg-white/10 !text-white backdrop-blur-sm md:hover:!bg-white/20 md:hover:!text-white">
+            <AlertDialogCancel className="btn-dialog-action mt-0 flex-1 rounded-full border-white/20 !bg-white/10 !text-white backdrop-blur-xs md:hover:!bg-white/20 md:hover:!text-white">
               Behåll Premium
             </AlertDialogCancel>
             <AlertDialogAction

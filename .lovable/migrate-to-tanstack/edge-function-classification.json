@@ -1,0 +1,333 @@
+{
+  "total": 65,
+  "migrated": 0,
+  "left_on_supabase": 65,
+  "rationale": "All 65 edge functions remain on Supabase: 19 are cron targets, several are webhook receivers (auth-email-hook, handle-email-events, outreach-open-track), several serve custom responses (public-sitemap XML, interview-response HTML, download-interview-ics, redirect-* 302s, auth), one is an MCP server, several are Deno-stdlib-dependent, and the rest are internal-only functions invoked via supabase.functions.invoke which continues to work unchanged from the TanStack Start client.",
+  "functions": [
+    {
+      "name": "app-exception-watchdog",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "app-user-connection-status",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "app-user-oauth-complete",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "app-user-oauth-disconnect",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "app-user-oauth-start",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "application-followup",
+      "classification": "Deno-only dependency",
+      "outcome": "left"
+    },
+    {
+      "name": "auth-email-hook",
+      "classification": "webhook receiver",
+      "outcome": "left"
+    },
+    {
+      "name": "auth",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "categorize-job-ai",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "check-email-availability",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "check-saved-searches",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "cleanup-expired-confirmations",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "cleanup-old-job-images",
+      "classification": "unknown",
+      "outcome": "left"
+    },
+    {
+      "name": "confirm-email",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "criteria-eval-worker",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "cron-health-watchdog",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "custom-signup",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "delete-my-account",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "delete-user",
+      "classification": "Deno-only dependency",
+      "outcome": "left"
+    },
+    {
+      "name": "download-interview-ics",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "email-confirm",
+      "classification": "Deno-only dependency",
+      "outcome": "left"
+    },
+    {
+      "name": "email-subscription",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "evaluate-candidate",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "export-my-data",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "fetch-career-tips",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "fetch-hr-news",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "fetch-link-preview",
+      "classification": "unknown",
+      "outcome": "left"
+    },
+    {
+      "name": "generate-cv-summary",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "get-storage-stats",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "handle-email-events",
+      "classification": "webhook receiver",
+      "outcome": "left"
+    },
+    {
+      "name": "inactive-account-retention",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "interview-reminders",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "interview-response",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "job-expiration-notifications",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "mcp",
+      "classification": "MCP server",
+      "outcome": "left"
+    },
+    {
+      "name": "migrate-job-images",
+      "classification": "unknown",
+      "outcome": "left"
+    },
+    {
+      "name": "migrate-media",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "migrate-profile-images",
+      "classification": "unknown",
+      "outcome": "left"
+    },
+    {
+      "name": "migrate-profile-media",
+      "classification": "unknown",
+      "outcome": "left"
+    },
+    {
+      "name": "news-health-watchdog",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "notify-support-ticket",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "outreach-dispatch",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "outreach-open-track",
+      "classification": "webhook receiver",
+      "outcome": "left"
+    },
+    {
+      "name": "preview-transactional-email",
+      "classification": "unknown",
+      "outcome": "left"
+    },
+    {
+      "name": "process-account-deletions",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "process-cv-queue",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "public-sitemap",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "purge-deleted-jobs",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "purge-orphaned-media",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "redirect-confirm",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "redirect-recovery",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "register-push-token",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "resend-confirmation",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "reset-redirect",
+      "classification": "custom response",
+      "outcome": "left"
+    },
+    {
+      "name": "saved-job-expiration-reminders",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "send-admin-alert",
+      "classification": "Deno-only dependency",
+      "outcome": "left"
+    },
+    {
+      "name": "send-application-confirmation",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "send-confirmation-email",
+      "classification": "Deno-only dependency",
+      "outcome": "left"
+    },
+    {
+      "name": "send-interview-invitation",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "send-push-notification",
+      "classification": "cron target",
+      "outcome": "left"
+    },
+    {
+      "name": "send-reset-password",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "team-invite-accept",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "team-invite",
+      "classification": "internal-only",
+      "outcome": "left"
+    },
+    {
+      "name": "update-job-locations",
+      "classification": "Deno-only dependency",
+      "outcome": "left"
+    },
+    {
+      "name": "weather-cache",
+      "classification": "internal-only",
+      "outcome": "left"
+    }
+  ]
+}

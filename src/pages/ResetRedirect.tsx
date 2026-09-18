@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from '@/lib/router-compat';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Smartphone, AlertTriangle, Copy, CheckCircle } from 'lucide-react';
@@ -145,7 +145,7 @@ const ResetRedirect = () => {
               <>
                 <div className="bg-primary-foreground/10 rounded-lg p-4 mb-4">
                   <div className="flex items-start space-x-3 text-left">
-                    <Smartphone className="h-5 w-5 text-primary-foreground mt-0.5 flex-shrink-0" />
+                    <Smartphone className="h-5 w-5 text-primary-foreground mt-0.5 shrink-0" />
                     <div className="text-sm text-primary-foreground/90">
                       <p className="font-semibold mb-1">Steg-för-steg:</p>
                       <ol className="list-decimal list-inside space-y-1">

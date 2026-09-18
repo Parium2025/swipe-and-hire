@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@/lib/router-compat';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { detectSalarySearch, scoreJobMatch } from '@/lib/smartSearch';
@@ -96,7 +96,7 @@ export const useJobFiltering = (jobs: FilterableJob[], options: UseJobFilteringO
       const { data: hits, error } = await supabase.rpc('search_employer_jobs', {
         p_search: searchTerm,
         p_status: 'all',
-        p_recruiter_id: effectiveRecruiterId,
+        p_recruiter_id: effectiveRecruiterId ?? undefined,
         p_sort: sortBy,
         p_limit: SERVER_SEARCH_LIMIT,
         p_offset: 0,

@@ -63,7 +63,7 @@ export function EmptyChatState({
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+      className="relative flex-1 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs"
     >
       <div ref={contentRef} className="flex flex-col items-center px-4 text-center">
         <div
