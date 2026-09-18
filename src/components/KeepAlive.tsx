@@ -577,7 +577,10 @@ function KeepAliveCached({
         const isDisplayed = key === displayedKey;
         const enterClasses = isEntered
           ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-2 pointer-events-none';
+          : isFastEnter
+            ? 'opacity-0 translate-y-1 pointer-events-none'
+            : 'opacity-0 translate-y-2 pointer-events-none';
+        const durationClass = isFastEnter ? 'duration-[280ms]' : 'duration-500';
         return (
           <div
             key={key}
