@@ -1569,16 +1569,18 @@ const MobileJobWizard = ({
     
     // Update workplace name if it's empty and we have company name
     if (!formData.workplace_name && profile?.company_name) {
-      setFormData(prev => ({ ...prev, workplace_name: profile.company_name }));
+      const companyName = profile.company_name;
+      setFormData(prev => ({ ...prev, workplace_name: companyName }));
       // Also update initialFormData to prevent false "unsaved changes"
-      setInitialFormData(prev => prev ? { ...prev, workplace_name: profile.company_name } : null);
+      setInitialFormData(prev => prev ? { ...prev, workplace_name: companyName } : null);
     }
     
     // Update contact email if it's empty and we have user email
     if (!formData.contact_email && user?.email) {
-      setFormData(prev => ({ ...prev, contact_email: user.email }));
+      const email = user.email;
+      setFormData(prev => ({ ...prev, contact_email: email }));
       // Also update initialFormData to prevent false "unsaved changes"
-      setInitialFormData(prev => prev ? { ...prev, contact_email: user.email } : null);
+      setInitialFormData(prev => prev ? { ...prev, contact_email: email } : null);
     }
   }, [open, profile?.company_name, user?.email, formData.workplace_name, formData.contact_email]);
 
