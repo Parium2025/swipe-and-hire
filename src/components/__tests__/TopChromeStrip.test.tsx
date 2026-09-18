@@ -49,7 +49,8 @@ describe('TopChromeStrip', () => {
     const { container } = renderStrip();
     const strip = container.firstChild as HTMLElement;
     expect(strip).not.toBeNull();
-    expect(strip.style.height).toContain('safe-area-inset-top');
+    // jsdom parsar inte env() i style-attributet — läs råsträngen.
+    expect(strip.getAttribute('style')).toContain('safe-area-inset-top');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('');
