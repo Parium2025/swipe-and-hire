@@ -526,16 +526,15 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           )}
 
           {hasFilters && (
-            <div className="question-filter-footer p-2 border-t border-white/10">
-              <Button
-                variant="ghost"
-                size="sm"
+            <div className="question-filter-footer flex justify-center p-2 border-t border-white/10">
+              <button
+                type="button"
                 onClick={clearAll}
-                className="w-full text-white hover:text-white hover:bg-white/10"
+                className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 md:hover:bg-white/20"
               >
-                <X className="h-3.5 w-3.5 mr-1" />
+                <X className="h-3.5 w-3.5" />
                 Rensa alla filter
-              </Button>
+              </button>
             </div>
           )}
         </PopoverContent>
