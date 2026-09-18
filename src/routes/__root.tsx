@@ -504,7 +504,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover",
       },
-      { id: "parium-theme-color", name: "theme-color", content: "#2a2a2a" },
       { title: "Parium – Hitta jobb som passar dig & rekrytera rätt" },
       {
         name: "description",

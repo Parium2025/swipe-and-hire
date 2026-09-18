@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Application as SplineApplication } from '@splinetool/runtime';
 import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
+import { SPLINE_SCENE_URL } from '@/lib/splinePreload';
 
 interface SplinePhoneProps {
   className?: string;
@@ -8,8 +9,6 @@ interface SplinePhoneProps {
   zoom?: number;
   active?: boolean;
 }
-
-const SCENE_URL = '/spline/parium-phone-scene.splinecode';
 
 export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: SplinePhoneProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -229,7 +228,7 @@ export const SplinePhone = ({ className, style, zoom = 0.78, active = true }: Sp
 
         app = new Application(canvas, { renderMode: 'auto' });
         appRef.current = app;
-        await app.load(SCENE_URL);
+        await app.load(SPLINE_SCENE_URL);
         try {
           // OBS: Splines interna renderer ligger på `_renderer` (den publika
           // `renderer` finns inte) — tidigare försök att höja pixel ratio
