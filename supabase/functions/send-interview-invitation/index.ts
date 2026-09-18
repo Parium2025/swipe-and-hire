@@ -92,6 +92,7 @@ const enqueueInvitation = async (
 ) => {
   return await sendLoggedTemplateEmail('interview-invitation', recipientEmail, {
     idempotencyKey,
+    fromName: `${payload.company_name} via Parium`,
     templateData: { ...payload, is_employer: isEmployer },
   });
 };
