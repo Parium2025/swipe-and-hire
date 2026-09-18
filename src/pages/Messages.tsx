@@ -260,9 +260,21 @@ export default function Messages() {
     setShowMobileChat(true);
   };
 
+  // Chatten glider ut åt höger på mobil. Konversationen får därför inte
+  // nollställas direkt — då hade panelen varit tom under utglidningen.
+  const backTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (backTimerRef.current) window.clearTimeout(backTimerRef.current);
+  }, []);
+
   const handleBackToList = () => {
     setShowMobileChat(false);
-    if (isMobile) setSelectedConversationId(null);
+    if (!isMobile) return;
+    if (backTimerRef.current) window.clearTimeout(backTimerRef.current);
+    backTimerRef.current = window.setTimeout(() => {
+      setSelectedConversationId(null);
+      backTimerRef.current = null;
+    }, MOBILE_SLIDE_MS);
   };
 
   // Visa skelett när context fortfarande hämtar och vi saknar cachad data
