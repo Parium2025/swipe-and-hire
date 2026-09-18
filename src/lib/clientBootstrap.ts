@@ -125,7 +125,9 @@ export function initClientBootstrap(): void {
   // 🚀 Warm up Spline-runtime chunk parallellt med hydration för routes
   // som faktiskt visar 3D-telefonen.
   if (currentPath === '/jobbsokare' || currentPath === '/arbetsgivare') {
-    void import('@splinetool/runtime').catch(() => { /* SplinePhone har egen fallback */ });
+    // import.meta.env.SSR låter SSR-bygget skära bort Spline-runtimen helt —
+    // den kör `new Function` vid modul-evaluering och kraschar edge/SSR.
+    if (!import.meta.env.SSR) void import('@splinetool/runtime').catch(() => { /* SplinePhone har egen fallback */ });
   }
 
   // Start both logo preloads immediately (parallel, never awaited)

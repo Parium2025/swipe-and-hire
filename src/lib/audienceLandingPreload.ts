@@ -82,7 +82,9 @@ export const preloadAudienceLandingAssets = () => {
       if (shouldDeferHeavyAssets()) addLink('prefetch', SPLINE_SCENE_URL, 'fetch', 'low');
       // Förvärm Spline-runtimen i bakgrunden. Annars börjar nedladdningen av
       // ~1 MB JS först när intro-sektionen monteras, och telefonen känns seg.
-      import('@splinetool/runtime').catch(() => {});
+      // import.meta.env.SSR håller runtimen utanför SSR-bundlen (new Function
+      // vid modul-evaluering är förbjudet på edge → annars 500 på landningen).
+      if (!import.meta.env.SSR) import('@splinetool/runtime').catch(() => {});
       import('@/components/landing/audience/PinnedHorizontalGallery').catch(() => {});
       import('@/components/landing/audience/BouncyFooter').catch(() => {});
       import('@/components/landing/SiteFooter').catch(() => {});

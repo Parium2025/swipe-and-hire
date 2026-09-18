@@ -51,7 +51,9 @@ const preloadAudienceAssets = (role: AudienceRole) => {
     } catch { /* no-op */ }
     // Warm up spline-runtime + audience-data
     Promise.all([
-      import('@splinetool/runtime').catch(() => null),
+      // import.meta.env.SSR: håll Spline-runtimen utanför SSR-bundlen —
+      // den kör new Function vid modul-evaluering → 500 på edge/SSR.
+      import.meta.env.SSR ? Promise.resolve(null) : import('@splinetool/runtime').catch(() => null),
       import('@/components/landing/audience/content').catch(() => null),
     ]).catch(() => undefined);
   };
