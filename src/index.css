@@ -1077,8 +1077,10 @@ All colors MUST be HSL.
      search, count and clear action always remain visible. */
   @media (any-pointer: coarse), (hover: none), (any-hover: none) {
     .question-filter-content {
-      height: min(30rem, var(--radix-popover-content-available-height));
-      max-height: var(--radix-popover-content-available-height);
+      /* 12px breathing room above the viewport edge so the footer never
+         sits flush against the screen bottom on touch devices. */
+      height: min(30rem, calc(var(--radix-popover-content-available-height) - 12px));
+      max-height: calc(var(--radix-popover-content-available-height) - 12px);
       min-height: 0;
       translate: var(--question-filter-mobile-shift, 0px) 0;
     }
