@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AiUsageRouteImport } from './routes/ai-usage'
 import { Route as AnnonserRouteImport } from './routes/annonser'
@@ -70,6 +71,11 @@ import { Route as JobbCitySlugIndexRouteImport } from './routes/jobb.$citySlug.i
 import { Route as JobbCitySlugOccupationSlugRouteImport } from './routes/jobb.$citySlug.$occupationSlug'
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth.$connector.return'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -373,6 +379,7 @@ const OauthConnectorReturnRoute = OauthConnectorReturnRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ai-usage': typeof AiUsageRoute
   '/annonser': typeof AnnonserRoute
@@ -435,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/jobb/$citySlug/': typeof JobbCitySlugIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ai-usage': typeof AiUsageRoute
   '/annonser': typeof AnnonserRoute
@@ -498,6 +506,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/ai-usage': typeof AiUsageRoute
   '/annonser': typeof AnnonserRoute
@@ -562,6 +571,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/admin'
     | '/ai-usage'
     | '/annonser'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/jobb/$citySlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/admin'
     | '/ai-usage'
     | '/annonser'
@@ -686,6 +697,7 @@ export interface FileRouteTypes {
     | '/jobb/$citySlug'
   id:
     | '__root__'
+    | '/'
     | '/admin'
     | '/ai-usage'
     | '/annonser'
@@ -749,6 +761,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AiUsageRoute: typeof AiUsageRoute
   AnnonserRoute: typeof AnnonserRoute
@@ -813,6 +826,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -1237,6 +1257,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AiUsageRoute: AiUsageRoute,
   AnnonserRoute: AnnonserRoute,
