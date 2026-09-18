@@ -867,7 +867,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         question_text: q.question_text,
         question_type: q.question_type as any,
         options: q.options as string[] || [],
-        is_required: q.is_required ?? true,
+        is_required: q.is_required ?? false,
         order_index: q.order_index,
         min_value: q.min_value || undefined,
         max_value: q.max_value || undefined,
@@ -1059,7 +1059,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
       
       // Set search terms for dropdowns to show correct labels
       setOccupationSearchTerm(job.occupation || '');
-      setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type))?.label || '' : '');
+      setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type!))?.label || '' : '');
       setSalaryTypeSearchTerm(job.salary_type ? salaryTypes.find(t => t.value === job.salary_type)?.label || '' : '');
       const normalizedSalaryTransparency = normalizeSalaryTransparency(job.salary_transparency);
       setSalaryTransparencySearchTerm(normalizedSalaryTransparency ? salaryTransparencyOptions.find(t => t.value === normalizedSalaryTransparency)?.label || '' : '');
