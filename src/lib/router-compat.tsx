@@ -12,6 +12,10 @@ import {
   Link as TSLink,
   Navigate as TSNavigate,
   Outlet as TSOutlet,
+  RouterProvider,
+  createRootRoute,
+  createRouter,
+  createMemoryHistory,
 } from "@tanstack/react-router";
 import { useMemo, useCallback, forwardRef, type ComponentProps, type ReactNode } from "react";
 
@@ -175,4 +179,25 @@ export function useNavigationType(): "POP" | "PUSH" | "REPLACE" {
   // Subscribe to location changes so callers re-render on navigation.
   tsLocation();
   return lastNavType;
+}
+
+// ---------- MemoryRouter (test-only compat) ----------
+// Renders children inside a real TanStack router backed by memory history,
+// so components using useLocation/useNavigate work in unit tests.
+export function MemoryRouter({
+  children,
+  initialEntries = ["/"],
+}: {
+  children?: ReactNode;
+  initialEntries?: string[];
+}) {
+  const router = useMemo(() => {
+    const rootRoute = createRootRoute({ component: () => <>{children}</> });
+    return createRouter({
+      routeTree: rootRoute,
+      history: createMemoryHistory({ initialEntries }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <RouterProvider router={router as never} />;
 }
