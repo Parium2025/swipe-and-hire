@@ -500,8 +500,8 @@ export default function Messages() {
 
         {/* Chat View */}
         <div className={cn(
-          "flex-1 flex flex-col min-w-0",
-          !showMobileChat && "hidden md:flex"
+          "flex flex-col min-w-0",
+          isMobile ? "w-full flex-shrink-0" : "flex-1"
         )}>
           {selectedConversation ? (
             <ChatView
