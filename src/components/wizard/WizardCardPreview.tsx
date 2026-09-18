@@ -26,6 +26,7 @@ import {
 } from '@/lib/jobOverlayText';
 import { formatDateShortSv } from '@/lib/date';
 import { ResilientImage } from '@/components/ui/ResilientImage';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 
 
@@ -149,7 +150,9 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               </div>
             ) : (
               <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                <Building2 className="h-3 w-3 text-white/70" aria-hidden="true" />
+                <span className="text-[8px] font-bold text-white/70">
+                  {getCompanyInitials(companyName)}
+                </span>
               </div>
             )}
           </div>
@@ -399,7 +402,9 @@ export const WizardListPreview = memo(function WizardListPreview({
               </div>
             ) : (
               <div className="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <Building2 className="h-4 w-4 text-white/60" aria-hidden="true" />
+                <span className="text-[10px] font-bold text-white/60">
+                  {getCompanyInitials(companyName)}
+                </span>
               </div>
             )}
             <div className="text-[9px] px-2 py-[2px] border border-white/15 bg-black/40 leading-snug inline-flex items-center max-w-[85%] rounded-full" style={overlayStyle}>

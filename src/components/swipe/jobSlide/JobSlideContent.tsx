@@ -1,5 +1,6 @@
 import { memo, type CSSProperties, type Ref } from 'react';
 import { Building2 } from 'lucide-react';
+import { getCompanyInitials } from './utils';
 import type { SwipeJob } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -62,7 +63,9 @@ export const JobSlideContent = memo(function JobSlideContent({
               </div>
             ) : (
               <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-95 transition-transform">
-                <Building2 className="h-6 w-6 text-white/40" aria-hidden="true" />
+                <span className="text-xl font-bold text-white/40 tracking-wide select-none">
+                  {getCompanyInitials(displayCompanyName)}
+                </span>
               </div>
             )}
           </div>

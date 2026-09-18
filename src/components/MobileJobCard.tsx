@@ -19,6 +19,7 @@ import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { ResilientImage } from '@/components/ui/ResilientImage';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -177,7 +178,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
       >
 
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
+          <span className="text-4xl font-bold text-white/70">{getCompanyInitials(companyName)}</span>
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
@@ -240,7 +241,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
       >
         <div className="flex justify-center mt-1 mb-1">
           <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
-            <Building2 className="h-6 w-6 text-white/80" aria-hidden="true" />
+            <span className="text-sm font-bold text-white/80">{getCompanyInitials(companyName)}</span>
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}

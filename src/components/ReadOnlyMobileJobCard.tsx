@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 import { hapticLight } from '@/lib/haptics';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 
 interface ReadOnlyMobileJobCardProps {
@@ -216,7 +217,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       {/* Visual header — both layers stay mounted so image ↔ initials never changes layout/compositing structure */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
+          <span className="text-4xl font-bold text-white/70">{getCompanyInitials(companyName)}</span>
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
@@ -314,7 +315,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             onKeyDown={canOpenCompanyProfile ? handleCompanyKeyDown : undefined}
             style={canOpenCompanyProfile ? { cursor: 'pointer' } : undefined}
           >
-            <Building2 className="h-6 w-6 text-white/80" aria-hidden="true" />
+            <span className="text-sm font-bold text-white/80">{getCompanyInitials(companyName)}</span>
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}

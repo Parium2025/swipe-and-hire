@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Bell, UserRound } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import NotificationCenter from '@/components/NotificationCenter';
 
@@ -80,8 +80,8 @@ const MobileProfileAvatar = () => {
           </AvatarFallback>
         </Avatar>
       ) : profile ? (
-        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-white ring-2 ring-white/20">
-          <UserRound className="h-4 w-4" aria-hidden="true" />
+        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20">
+          {initials}
         </div>
       ) : (
         <div className="h-8 w-8 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20" />

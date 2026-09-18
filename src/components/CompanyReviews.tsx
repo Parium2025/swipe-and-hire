@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
+import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
 
 interface SocialMediaLink {
@@ -227,8 +228,8 @@ const CompanyReviews = () => {
                 loading="eager"
                 decoding="async"
               />
-              <AvatarFallback fallbackType="company" className="bg-transparent" delayMs={150}>
-                <Building2 className="h-8 w-8 text-white" />
+              <AvatarFallback fallbackType="company" className="bg-transparent text-white font-semibold" delayMs={150}>
+                {getCompanyInitials(company.company_name)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">

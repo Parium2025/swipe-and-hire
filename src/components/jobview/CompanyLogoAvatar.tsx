@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchPriority } from '@/lib/fetchPriority';
-import { Building2 } from 'lucide-react';
+import { getCompanyInitials } from '@/lib/companyInitials';
 
 interface CompanyLogoAvatarProps {
   logoUrl?: string | null;
@@ -67,7 +67,7 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
         'relative h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 ring-2 ring-white/20 flex items-center justify-center active:scale-95 transition-transform'
       }
     >
-      <Building2 className="h-6 w-6 text-white" aria-hidden="true" />
+      <span className="text-sm font-semibold text-white">{getCompanyInitials(companyName)}</span>
 
       {src && (
         <img
