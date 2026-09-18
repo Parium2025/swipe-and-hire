@@ -61,7 +61,20 @@ export async function sendInterviewRescheduleEmail(
   ]);
   const job = (jobResult as { data: { title?: string } | null }).data;
 
-  const candidateEmail = candidate?.email as string | undefined;
+  // Adressen kan ligga på ansökan, på profilen eller bara på kontot.
+  let candidateEmail = (candidate?.email as string | null) ?? null;
+  if (!candidateEmail && interview.application_id) {
+    const { data: application } = await supabase
+      .from("job_applications")
+      .select("email")
+      .eq("id", interview.application_id)
+      .maybeSingle();
+    candidateEmail = (application?.email as string | null) ?? null;
+  }
+  if (!candidateEmail) {
+    const { data: authUser } = await supabase.auth.admin.getUserById(interview.applicant_id);
+    candidateEmail = authUser?.user?.email ?? null;
+  }
   if (!candidateEmail) return { skipped: "no_candidate_email" };
 
   const candidateName = [candidate?.first_name, candidate?.last_name].filter(Boolean).join(" ") || "där";
