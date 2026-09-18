@@ -207,12 +207,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       style={{
         marginLeft: 'calc(50% - 50vw)',
         marginRight: 'calc(50% - 50vw)',
-        // Videon får INTE gå upp bakom iPhones statusrad. Där ligger i stället
-        // sidans egna grå yta (#2a2a2a), som Safari samplar — annars blir
-        // statusraden svart av videons pixlar.
-        marginTop: '0px',
+        marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))',
         marginBottom: 'calc(-1 * env(safe-area-inset-bottom, 0px))',
-        paddingTop: '0px',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
       aria-labelledby="landing-hero-heading"
