@@ -51,3 +51,4 @@
 - [x] Centrera och runda mobilens borttagningsåtgärd samt ge frågefiltret en verklig rullyta med fast topp och botten
 - [x] Centrera frågefiltret mot telefonens synliga skärmyta utan att påverka datorvyn
 - [x] Lås frågefiltrets bredd och interna rullning på dator utan att ändra mobilvyn
+- [x] Ge datorns frågefilter en verklig mushjulsrullning och separera den fasta nederdelen från frågelistan
