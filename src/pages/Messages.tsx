@@ -32,6 +32,9 @@ import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 
 const TAB_STORAGE_KEY = 'parium:messages:tab';
 
+// Längden på chattens in-/utglidning på mobil (iOS-lik kurva nedan).
+const MOBILE_SLIDE_MS = 320;
+
 function readStoredTab(): ConversationTab | null {
   try {
     const value = localStorage.getItem(TAB_STORAGE_KEY);
