@@ -95,11 +95,12 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
   // Load and render PDF
   useEffect(() => {
     if (!resolvedUrl) return;
+    const pdfUrl = resolvedUrl;
     let cancelled = false;
     async function render() {
       try {
         setLoading(true);
-        const pdf = await pdfjsLib.getDocument({ url: resolvedUrl }).promise;
+        const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
         if (cancelled) return;
         setNumPages(pdf.numPages);
 
