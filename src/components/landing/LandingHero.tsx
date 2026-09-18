@@ -106,7 +106,8 @@ const AudienceCard = ({
   return (
     <motion.button
       type="button"
-      onPointerDown={() => onChoose(role)}
+      onClick={() => onChoose(role)}
+      onPointerDown={() => preloadAudienceAssets(role, true)}
       onPointerEnter={() => preloadAudienceAssets(role)}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}
