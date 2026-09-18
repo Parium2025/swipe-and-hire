@@ -713,7 +713,7 @@ export function useMyCandidatesData(
         .from('user_stage_settings')
         .select('stage_key, order_index')
         .eq('user_id', user.id)
-        .eq('list_id', insertListId)
+        .eq('list_id', insertListId as string)
         .gt('order_index', -1)
         .order('order_index', { ascending: true })
         .limit(1);
@@ -808,7 +808,7 @@ export function useMyCandidatesData(
         .from('user_stage_settings')
         .select('stage_key, order_index, custom_label')
         .eq('user_id', user.id)
-        .eq('list_id', insertListId)
+        .eq('list_id', insertListId as string)
         .gt('order_index', -1) // Exclude deleted stages
         .order('order_index', { ascending: true })
         .limit(1);

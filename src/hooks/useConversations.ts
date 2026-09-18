@@ -1637,7 +1637,7 @@ export function useCreateConversation() {
         const { error: switchError } = await supabase.rpc('switch_conversation_job_context', {
           p_conversation_id: conversationId,
           p_new_application_id: applicationId,
-          p_new_job_id: jobId,
+          p_new_job_id: jobId as string,
           p_job_title: jobTitle,
         });
 

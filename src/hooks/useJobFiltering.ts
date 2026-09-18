@@ -96,7 +96,7 @@ export const useJobFiltering = (jobs: FilterableJob[], options: UseJobFilteringO
       const { data: hits, error } = await supabase.rpc('search_employer_jobs', {
         p_search: searchTerm,
         p_status: 'all',
-        p_recruiter_id: effectiveRecruiterId,
+        p_recruiter_id: effectiveRecruiterId ?? undefined,
         p_sort: sortBy,
         p_limit: SERVER_SEARCH_LIMIT,
         p_offset: 0,
