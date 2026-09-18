@@ -507,7 +507,9 @@ const HeroVideo = () => {
             // Porträtt (mobil): Chrome/Android ignorerar
             // <link rel="preload" as="video">. Med "metadata" hann dekodern ta slut
             // på buffert → svart ruta mellan klippen. "auto" buffrar hela klippet.
-            preload={tier === 'landscape' ? 'metadata' : 'auto'}
+            // Sätts stabilt vid SSR och justeras efter hydrering i en effekt nedan
+            // (annars skiljer sig serverns och klientens attribut → hydration mismatch).
+            preload="metadata"
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload noplaybackrate nofullscreen"
