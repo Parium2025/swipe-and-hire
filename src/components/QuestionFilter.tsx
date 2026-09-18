@@ -147,11 +147,12 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const popoverContentRef = useRef<HTMLDivElement>(null);
 
-  // Radix keeps the popover beside its trigger. On narrow touch screens that
-  // can leave the wide panel visually off-centre, so centre only this mobile
-  // overlay against the visible viewport (including the iOS keyboard viewport).
+  // Radix keeps the popover beside its trigger. On narrow screens that can
+  // leave the full-width panel visually off-centre (including desktop browsers
+  // previewing the mobile layout, where the pointer is a mouse), so centre the
+  // panel against the visible viewport whenever it renders at mobile width.
   useLayoutEffect(() => {
-    if (!open || !window.matchMedia('(any-pointer: coarse), (hover: none), (any-hover: none)').matches) return;
+    if (!open || window.innerWidth >= 640) return;
 
     let frameId: number | null = null;
     const centerPopover = () => {
