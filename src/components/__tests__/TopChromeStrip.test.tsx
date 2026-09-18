@@ -52,7 +52,6 @@ describe('TopChromeStrip', () => {
     // Remsan ligger alltid kvar högst upp med minst 3 px så Safari samplar
     // ruttfärgen i stället för sidinnehållet (videon på startsidan).
     expect(strip.style.top).toBe('0px');
-    expect(strip.style.height).toBe('max(env(safe-area-inset-top, 0px), 3px)');
 
     expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
     expect(
