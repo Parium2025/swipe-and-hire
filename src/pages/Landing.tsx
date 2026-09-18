@@ -34,7 +34,7 @@ const Landing = () => {
       el.setAttribute('content', content);
     };
 
-    const desc = 'Upptäck lediga jobb eller kandidater som passar just dig. Med hjälp av vårt verktyg tar vi arbetsmarknaden framåt!';
+    const desc = 'Hitta lediga jobb som passar dig och chatta direkt med arbetsgivare – eller rekrytera rätt kandidater till ditt team. Gratis att komma igång.';
     setMeta('description', desc);
     setMeta('og:title', title, 'property');
     setMeta('og:description', desc, 'property');
