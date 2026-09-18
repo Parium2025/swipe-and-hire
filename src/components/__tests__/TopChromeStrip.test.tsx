@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, act } from '@testing-library/react';
 import { MemoryRouter } from '@/lib/router-compat';
 import TopChromeStrip from '../TopChromeStrip';
 
@@ -25,12 +25,17 @@ const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   );
 };
 
-const renderStrip = () =>
-  render(
+// TanStack Routers RouterProvider monterar asynkront (microtask) — flusha
+// initial-laddningen så att assertions ser det färdiga trädet.
+const renderStrip = async () => {
+  const result = render(
     <MemoryRouter initialEntries={['/']}>
       <TopChromeStrip />
     </MemoryRouter>
   );
+  await act(async () => {});
+  return result;
+};
 
 describe('TopChromeStrip', () => {
   afterEach(() => {
@@ -39,24 +44,24 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar ingen remsa i vanlig mobilwebbläsare', () => {
+  it('renderar ingen remsa i vanlig mobilwebbläsare', async () => {
     mockMatchMedia(false, true);
-    const { container } = renderStrip();
+    const { container } = await renderStrip();
     expect(container.firstChild).toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('');
   });
 
-  it('renderar ingen remsa på desktop', () => {
+  it('renderar ingen remsa på desktop', async () => {
     mockMatchMedia(false, false);
-    const { container } = renderStrip();
+    const { container } = await renderStrip();
     expect(container.firstChild).toBeNull();
   });
 
-  it('renderar remsa och offset i installerat app-läge', () => {
+  it('renderar remsa och offset i installerat app-läge', async () => {
     mockMatchMedia(true, true);
-    const { container } = renderStrip();
+    const { container } = await renderStrip();
     expect(container.firstChild).not.toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
