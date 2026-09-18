@@ -13,9 +13,9 @@ export interface CareerTipItem {
   gradient: string | null;
   news_date: string;
   created_at: string;
-  order_index: number;
+  order_index: number | null;
   published_at: string | null;
-  is_translated?: boolean;
+  is_translated?: boolean | null;
 }
 
 // LocalStorage cache for instant load - syncs based on cron schedule
