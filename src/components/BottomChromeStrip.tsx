@@ -108,7 +108,6 @@ const BottomChromeStrip = () => {
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
-        transition: 'background-color 200ms ease-out',
       }}
     />
   );

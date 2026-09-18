@@ -21,21 +21,11 @@ const TopChromeStrip = () => {
   const location = useLocation();
   const [isTouch, setIsTouch] = useState(false);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(pointer: coarse)');
     const apply = () => setIsTouch(mq.matches);
-    apply();
-    mq.addEventListener?.('change', apply);
-    return () => mq.removeEventListener?.('change', apply);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(display-mode: standalone)');
-    const apply = () => setIsStandalone(mq.matches);
     apply();
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
@@ -64,13 +54,10 @@ const TopChromeStrip = () => {
   }, []);
 
   const displayColor = forcedColor ?? color;
-  // I vanlig iOS Safari börjar viewporten nedanför den native statusraden.
-  // En fixed remsa här målar sig INNE i sidan och blir ett synligt mörkt band
-  // mot sidans glödgradient. Native chrome färgas i stället via theme-color.
-  // Endast installerat app-läge (standalone) behöver en egen safe-area-yta.
-  const shouldShowStrip = isTouch && isStandalone;
-  const stripInset = '8px';
-  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
+  // Spegla bottenremsan även i vanlig mobilwebbläsare. viewport-fit=cover gör
+  // att samma yta målar området bakom iOS statusrad i stället för svart.
+  const shouldShowStrip = isTouch;
+  const chromeOffset = 'calc(env(safe-area-inset-top, 0px) + 14px)';
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -87,8 +74,6 @@ const TopChromeStrip = () => {
 
   if (!shouldShowStrip) return null;
 
-  // Höjd på toppremsan: standalone PWA får en tunn 8px-remsa ovanför
-  // safe-area; i vanlig browser renderas ingen remsa alls (theme-color räcker).
   const stripHeight = chromeOffset;
 
   return (
@@ -103,7 +88,6 @@ const TopChromeStrip = () => {
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
-        transition: 'background-color 200ms ease-out',
       }}
     />
   );
