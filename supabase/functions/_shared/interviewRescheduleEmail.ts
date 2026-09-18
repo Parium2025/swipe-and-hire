@@ -44,7 +44,7 @@ export async function sendInterviewRescheduleEmail(
 
   const { data: interview, error } = await supabase
     .from("interviews")
-    .select("id, applicant_id, employer_id, job_id, scheduled_at, duration_minutes, location_type, location_details, status, revision")
+    .select("id, applicant_id, employer_id, job_id, application_id, scheduled_at, duration_minutes, location_type, location_details, status, revision")
     .eq("id", interviewId)
     .maybeSingle();
   if (error) throw error;
