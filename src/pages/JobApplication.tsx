@@ -264,7 +264,7 @@ const JobApplication = () => {
       const { data: questionsData, error: questionsError } = await supabase
         .from('job_questions')
         .select('*')
-        .eq('job_id', jobId)
+        .eq('job_id', jobId as string)
         .order('order_index');
 
       if (questionsError) throw questionsError;

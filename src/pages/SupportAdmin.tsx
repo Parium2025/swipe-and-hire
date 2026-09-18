@@ -137,7 +137,7 @@ const SupportAdmin = () => {
 
       toast({
         title: "Status uppdaterad",
-        description: `Ärendet har markerats som ${getStatusLabel(status).toLowerCase()}`
+        description: `Ärendet har markerats som ${getStatusLabel(status)?.toLowerCase()}`
       });
 
       fetchTickets();
@@ -241,7 +241,7 @@ const SupportAdmin = () => {
       'feature': 'Funktionsfrågor',
       'other': 'Övrigt'
     };
-    return categoryMap[category] || category;
+    return (category && categoryMap[category]) || category || '';
   };
 
   if (loading) {
@@ -322,7 +322,7 @@ const SupportAdmin = () => {
                       {getStatusLabel(selectedTicket.status)}
                     </Badge>
                     <Select
-                      value={selectedTicket.status}
+                      value={selectedTicket.status ?? undefined}
                       onValueChange={(value) => updateTicketStatus(selectedTicket.id, value)}
                     >
                       <SelectTrigger className="w-32 h-8 text-sm bg-white/10 border-white/20 hover:border-white/50 text-white">

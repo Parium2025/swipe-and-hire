@@ -5,9 +5,9 @@ import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { JOB_VIEW_HERO_TRANSFORM, SWIPE_CARD_TRANSFORM, isSlowOrMeteredConnection } from '@/lib/imageTransforms';
 
 interface PreloadableJob {
-  job_image_url?: string;
-  company_logo_url?: string;
-  updated_at?: string;
+  job_image_url?: string | null;
+  company_logo_url?: string | null;
+  updated_at?: string | null;
   image_updated_at?: string | null;
 }
 
