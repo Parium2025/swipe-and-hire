@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
-import { Users } from 'lucide-react';
-import { getCompanyInitials } from '@/lib/companyInitials';
+import { Building2, UserRound, Users } from 'lucide-react';
 import type { ConversationProfileData as ProfileData } from '@/types/conversation';
 
 // Transparent 1x1 reserv så bildytan alltid finns kvar — ingen strukturbyte
@@ -38,19 +37,6 @@ export function ConversationAvatar({
   // Avatarer i meddelandelistan är små (32-48px) → be om optimerad version
   // En gemensam transform för alla storlekar → prefetch och render delar cache-nyckel
   const resolvedUrl = useResolvedAvatarUrl(profile, CHAT_AVATAR_TRANSFORM);
-
-  const getInitials = () => {
-    if (isGroup && groupName) {
-      return groupName.substring(0, 2).toUpperCase();
-    }
-    if (!profile) return '··';
-    if (profile.role === 'employer' && profile.company_name) {
-      return getCompanyInitials(profile.company_name);
-    }
-    const first = profile.first_name?.[0] || '';
-    const last = profile.last_name?.[0] || '';
-    return (first + last).toUpperCase() || '··';
-  };
 
   const sizeClasses = {
     sm: 'h-8 w-8',
@@ -101,7 +87,11 @@ export function ConversationAvatar({
           fallbackClassName,
         )}
       >
-        {getInitials()}
+        {profile?.role === 'employer' ? (
+          <Building2 className={size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6'} aria-hidden="true" />
+        ) : (
+          <UserRound className={size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6'} aria-hidden="true" />
+        )}
       </span>
       <img
         src={resolvedUrl || TRANSPARENT_PIXEL}

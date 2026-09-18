@@ -47,6 +47,7 @@ export const CompanyLogoSection = ({
                 className="object-cover"
               />
               <AvatarFallback
+                fallbackType="company"
                 className="text-4xl font-semibold bg-white/20 text-white"
                 delayMs={150}
               >

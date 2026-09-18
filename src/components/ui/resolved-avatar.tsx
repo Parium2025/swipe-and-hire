@@ -51,6 +51,7 @@ export function ResolvedAvatar({
     <Avatar className={className}>
       <AvatarImage src={finalUrl || ''} alt={alt} />
       <AvatarFallback 
+        fallbackType={mediaType === 'company-logo' ? 'company' : 'person'}
         className={cn("bg-white/20 text-white", fallbackClassName)} 
         delayMs={delayMs}
       >

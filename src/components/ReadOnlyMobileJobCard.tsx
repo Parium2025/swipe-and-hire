@@ -16,7 +16,6 @@ import { imageCache } from '@/lib/imageCache';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
-import { getCompanyInitials } from '@/lib/companyInitials';
 import { hapticLight } from '@/lib/haptics';
 
 
@@ -119,7 +118,6 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';
   const { text: timeText, isExpired } = getTimeRemaining(job.created_at, job.expires_at);
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
-  const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const getCachedJobViewHeroUrl = useCallback(() => {
     const raw = job.job_image_url || (job as any).job_image_desktop_url;
@@ -218,7 +216,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       {/* Visual header — both layers stay mounted so image ↔ initials never changes layout/compositing structure */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
@@ -316,7 +314,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             onKeyDown={canOpenCompanyProfile ? handleCompanyKeyDown : undefined}
             style={canOpenCompanyProfile ? { cursor: 'pointer' } : undefined}
           >
-            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/80 tracking-wide">{initials}</span>
+            <Building2 className="h-6 w-6 text-white/80" aria-hidden="true" />
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}

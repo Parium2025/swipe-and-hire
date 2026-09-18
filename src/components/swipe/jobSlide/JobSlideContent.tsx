@@ -4,7 +4,6 @@ import type { SwipeJob } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
-import { getCompanyInitials } from './utils';
 import { JobSlideBadgesRow } from './JobSlideBadgesRow';
 
 interface JobSlideContentProps {
@@ -63,9 +62,7 @@ export const JobSlideContent = memo(function JobSlideContent({
               </div>
             ) : (
               <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center active:scale-95 transition-transform">
-                <span className="text-xl font-bold text-white/40 tracking-wide select-none">
-                  {getCompanyInitials(displayCompanyName)}
-                </span>
+                <Building2 className="h-6 w-6 text-white/40" aria-hidden="true" />
               </div>
             )}
           </div>

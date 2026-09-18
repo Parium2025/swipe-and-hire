@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Eye, Users, RotateCcw, UserPlus } from 'lucide-react';
+import { Building2, ChevronDown, Eye, Users, RotateCcw, UserPlus } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining, formatExpirationDateTime } from '@/lib/date';
@@ -14,7 +14,6 @@ import { useCardImage } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
-import { getCompanyInitials } from '@/lib/companyInitials';
 
 const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -105,7 +104,6 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
   const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
-  const initials = useMemo(() => getCompanyInitials(companyName), [companyName]);
 
   const handlePreviewClick = (e: MouseEvent) => {
     e.stopPropagation();
@@ -135,7 +133,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
       <div className="job-card-mobile-media relative w-full overflow-hidden cursor-pointer" onClick={handleMediaClick}>
 
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-6xl font-bold text-white/70 tracking-wide select-none">{initials}</span>
+          <Building2 className="h-16 w-16 text-white/70" aria-hidden="true" />
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
@@ -198,7 +196,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
         {/* Logo + Title */}
         <div className="flex flex-col items-center justify-start gap-1.5 px-2 pt-2">
           <div className="relative w-14 h-14 rounded-full bg-white/[0.12] border border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
-            <span className="absolute inset-0 flex items-center justify-center text-base font-bold text-white/70 tracking-wide">{initials}</span>
+            <Building2 className="h-6 w-6 text-white/70" aria-hidden="true" />
             <ResilientImage
               src={logoUrl ?? TRANSPARENT_IMAGE_SRC}
               alt={logoUrl ? companyName : ''}
