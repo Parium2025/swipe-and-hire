@@ -94,7 +94,9 @@ export function RepublishJobDialog({
           </div>
         </AlertDialogHeader>
 
-        <div className="overflow-y-auto flex-1 my-4">
+        {/* Ingen flex-1 här: innehållet ska bara ta den höjd det behöver,
+            annars uppstår ett tomt glapp ner till knapparna. */}
+        <div className="overflow-y-auto min-h-0 shrink my-4">
           <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
             {jobTitle ? (
               <>
