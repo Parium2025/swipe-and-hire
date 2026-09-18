@@ -150,26 +150,26 @@
 }
 
 @utility h-11 {
-  .premium-edit-shell &input {
+  .premium-edit-shell input& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
   }
 
-  .premium-edit-shell &div.cursor-pointer:not(.aspect-square) {
+  .premium-edit-shell div.cursor-pointer:not(.aspect-square)& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
 
-  .premium-edit-shell &button:not(.aspect-square) {
+  .premium-edit-shell button:not(.aspect-square)& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
 }
 
 @utility cursor-pointer {
-  .premium-edit-shell &div.h-11:not(.aspect-square) {
+  .premium-edit-shell div.h-11:not(.aspect-square)& {
     height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
     min-height: clamp(3rem, 2.96rem + 0.35vw, 3.25rem) !important;
   }
