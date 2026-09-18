@@ -438,10 +438,34 @@ function KeepAliveCached({
     if (isFirstActivationRef.current) return;
     if (activeKey === displayedKey) return;
     if (freshKeysRef.current.has(activeKey)) return; // ny vy → tona in nedan
+    // Bytet sker fortfarande före paint (ingen blixt), men vyn börjar
+    // osynlig och tonar in kort så att återbesök inte hoppar fram hårt.
+    revisitAnimRef.current = activeKey;
     setDisplayedKey(activeKey);
-    setIsEntered(true);
-    setIsAnimating(false);
+    setIsFastEnter(true);
+    setIsEntered(false);
+    setIsAnimating(true);
   }, [activeKey, displayedKey]);
+
+  // Flippar återbesöket till slut-state efter att start-framen committats.
+  useEffect(() => {
+    if (revisitAnimRef.current !== displayedKey) return;
+    let raf1 = 0;
+    let raf2 = 0;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setIsEntered(true));
+    });
+    const safety = window.setTimeout(() => {
+      setIsEntered(true);
+      setIsAnimating(false);
+      revisitAnimRef.current = null;
+    }, 600);
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      window.clearTimeout(safety);
+    };
+  }, [displayedKey]);
 
   useEffect(() => {
     if (isFirstActivationRef.current) {
@@ -455,6 +479,8 @@ function KeepAliveCached({
     }
 
     if (activeKey === displayedKey) {
+      // En pågående återbesöks-intoning får inte avbrytas här.
+      if (revisitAnimRef.current === displayedKey) return;
       // Säkerhet: garantera att vi alltid är fully entered om vi inte byter route
       setIsEntered(true);
       return;
@@ -462,11 +488,12 @@ function KeepAliveCached({
 
     // Redan besökta vyer hanteras synkront i layout-effekten ovan.
     if (!freshKeysRef.current.has(activeKey)) {
-      setDisplayedKey(activeKey);
-      setIsEntered(true);
-      setIsAnimating(false);
       return;
     }
+
+    setIsFastEnter(false);
+    revisitAnimRef.current = null;
+
 
     let raf1 = 0;
     let raf2 = 0;
