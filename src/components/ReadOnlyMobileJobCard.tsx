@@ -24,8 +24,8 @@ interface ReadOnlyMobileJobCardProps {
   job: {
     id: string;
     title: string;
-    location: string;
-    employment_type?: string;
+    location: string | null;
+    employment_type?: string | null;
     part_time_days?: string[] | null;
     part_time_shifts?: string[] | null;
     duration_amount?: number | null;
@@ -34,18 +34,18 @@ interface ReadOnlyMobileJobCardProps {
     views_count: number;
     applications_count: number;
     created_at: string;
-    expires_at?: string;
-    job_image_url?: string;
-    job_image_desktop_url?: string;
-    image_focus_position?: string;
-    company_name?: string;
-    workplace_name?: string;
-    employer_id?: string;
-    company_logo_url?: string;
+    expires_at?: string | null;
+    job_image_url?: string | null;
+    job_image_desktop_url?: string | null;
+    image_focus_position?: string | null;
+    company_name?: string | null;
+    workplace_name?: string | null;
+    employer_id?: string | null;
+    company_logo_url?: string | null;
     overlay_text_color?: string | null;
-    updated_at?: string;
+    updated_at?: string | null;
     image_updated_at?: string | null;
-    positions_count?: number;
+    positions_count?: number | null;
     salary_min?: number | null;
     salary_max?: number | null;
     salary_type?: string | null;
@@ -55,8 +55,8 @@ interface ReadOnlyMobileJobCardProps {
       company_name: string | null;
     };
     employer_profile?: {
-      first_name: string;
-      last_name: string;
+      first_name: string | null;
+      last_name: string | null;
     };
   };
   hasApplied?: boolean;
