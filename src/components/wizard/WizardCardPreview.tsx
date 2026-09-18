@@ -368,7 +368,7 @@ export const WizardListPreview = memo(function WizardListPreview({
 
   return (
     <div
-      className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-none bg-card-parium snap-y snap-mandatory"
+      className="no-chrome-pad absolute inset-0 z-10 overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-none bg-card-parium snap-y snap-mandatory"
       onClick={onOpenForm}
     >
       {/* Bild-header — täcker hela monitorns vy (16/10) */}

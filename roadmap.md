@@ -32,6 +32,6 @@
 - [x] Kalender: ta bort hover-effekt från samtliga kopplingsknappar
 - [x] Kalender: verifiera Google-kopplingens återkomstsida utan 404
 - [x] Behåll initialer som bildersättning och dölj trasiga bildikoner
-- [x] Lås datorförhandsvisningens rullning till hela, avsiktliga skärmlägen utan tom bakgrund
+- [x] Lås datorförhandsvisningens övre och nedre rullgräns till hela skärmlägen utan tom bakgrund
 - [ ] Granska kvarvarande abrupta vybyten för jobbsökare och arbetsgivare och verifiera ändringarna
 
