@@ -178,7 +178,12 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 bg-transparent"
+        className={cn(
+          'fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-200',
+          scrolled
+            ? 'border-white/10 bg-primary/95 md:border-transparent md:bg-transparent'
+            : 'border-transparent bg-transparent',
+        )}
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)' }}
         aria-label="Huvudnavigation"
       >
