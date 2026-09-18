@@ -4,9 +4,14 @@ import { MemoryRouter } from 'react-router-dom';
 import TopChromeStrip from '../TopChromeStrip';
 
 /**
- * Regressionsskydd: i vanlig mobil-Safari börjar viewporten UNDER statusraden.
- * En fixed toppremsa där målas inne i sidan och blir ett svart band mot
- * gradienten. Remsan får därför bara finnas i installerat app-läge.
+ * Regressionsskydd: med viewport-fit=cover sträcker sig sidan in bakom iOS
+ * statusrad, men Safari samplar body-färgen bara en gång vid sidladdning.
+ * Vid SPA-navigering (t.ex. startsida → /auth) lämnas en rand i den gamla
+ * färgens färg kvar högst upp. TopChromeStrip målar därför alltid rätt
+ * ruttfärg över safe-area på touch-enheter — precis som BottomChromeStrip.
+ *
+ * Content-offset (som skjuter ner innehållet) får bara sättas i installerat
+ * app-läge (standalone) — i webbläsaren hanterar sidorna safe-area själva.
  */
 const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   vi.stubGlobal(
@@ -39,10 +44,12 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar ingen remsa i vanlig mobilwebbläsare', () => {
+  it('renderar remsa över safe-area i vanlig mobilwebbläsare, utan content-offset', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
-    expect(container.firstChild).toBeNull();
+    const strip = container.firstChild as HTMLElement;
+    expect(strip).not.toBeNull();
+    expect(strip.style.height).toContain('safe-area-inset-top');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('');
