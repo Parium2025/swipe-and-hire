@@ -11,7 +11,7 @@ interface PreloadableJob {
   image_updated_at?: string | null;
 }
 
-const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at;
+const jobVersion = (j: PreloadableJob) => j.image_updated_at ?? j.updated_at ?? undefined;
 
 
 function resolveUrl(url: string | undefined, bucket: string, transform?: typeof SWIPE_CARD_TRANSFORM): string | null {
