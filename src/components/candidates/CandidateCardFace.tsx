@@ -78,8 +78,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   if (fullBleed) {
     return (
       <div
-        className="w-full h-full relative overflow-hidden select-none flex flex-col [-webkit-tap-highlight-color:transparent]"
+        className="w-full h-full relative overflow-hidden select-none flex flex-col [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]"
         onClick={onOpen}
+        onContextMenu={(event) => event.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
         style={{ cursor: onOpen ? 'pointer' : 'default' }}
       >
@@ -87,7 +88,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
         <div className="absolute inset-0">
         {showVideo ? (
-          <div className="h-full w-full" data-candidate-full-bleed-media>
+          <div className="h-full w-full touch-pan-y" data-candidate-full-bleed-media>
               <ProfileVideo
                 videoUrl={videoUrl as string}
                 coverImageUrl={coverImageUrl || profileImageUrl || undefined}

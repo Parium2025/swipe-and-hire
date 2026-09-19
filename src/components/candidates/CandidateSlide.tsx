@@ -179,8 +179,10 @@ export const CandidateSlide = memo(function CandidateSlide({
       <div className="relative min-h-0 flex-1">
         <motion.div
           data-candidate-swipe-card
-          className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent]"
+          className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
           style={{ x, opacity: exitOpacity, rotate, scale, touchAction: 'pan-y' }}
+          onContextMenuCapture={(event) => event.preventDefault()}
+          onDragStartCapture={(event) => event.preventDefault()}
           onTouchStartCapture={handleTouchStart}
           onTouchMoveCapture={handleTouchMove}
           onTouchEndCapture={handleTouchEnd}

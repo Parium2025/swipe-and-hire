@@ -275,6 +275,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             willChange: 'scroll-position',
             contain: 'layout style',
             scrollSnapType: 'y mandatory',
+            touchAction: 'pan-y',
           }}
         >
           <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
@@ -286,7 +287,12 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
               key={app.id}
               data-index={item.index}
               className="absolute left-0 top-0 w-full"
-              style={{ transform: `translateY(${item.start}px)`, height: `${slideHeight}px`, scrollSnapAlign: 'start' }}
+              style={{
+                transform: `translateY(${item.start}px)`,
+                height: `${slideHeight}px`,
+                scrollSnapAlign: 'start',
+                scrollSnapStop: 'always',
+              }}
             >
               <div className="h-full w-full">
               <CandidateSlide
