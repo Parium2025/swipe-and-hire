@@ -392,9 +392,25 @@ const Profile = () => {
   const cancelMediaUpload = useCallback(() => {
     mediaUploadAbortRef.current?.abort();
   }, []);
-  // Lämnar användaren sidan mitt i en uppladdning ska nätverksarbetet dö med
-  // sidan — annars fortsätter XHR:en och skriver state på en avmonterad vy.
-  useEffect(() => () => { mediaUploadAbortRef.current?.abort(); }, []);
+  // Lämnar användaren sidan mitt i en uppladdning ska den fortsätta i bakgrunden
+  // och skrivas direkt till databasen istället för att dö med vyn.
+  const isUnmountedRef = useRef(false);
+  useEffect(() => () => { isUnmountedRef.current = true; }, []);
+  const persistMediaInBackground = useCallback(async (
+    targetProfileId: string | null,
+    patch: { profile_image_url?: string; video_url?: string; cover_image_url?: string },
+  ) => {
+    try {
+      if (targetProfileId) {
+        await supabase.from('candidate_profiles').update(patch).eq('id', targetProfileId);
+      } else if (user?.id) {
+        await supabase.from('profiles').update(patch).eq('id', user.id);
+      }
+    } catch (error) {
+      console.error('Background media persist failed:', error);
+    }
+  }, [user?.id]);
+
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
@@ -960,7 +976,17 @@ const Profile = () => {
       if (uploadError) throw uploadError;
       uploadedStoragePath = storagePath;
 
+      // Användaren lämnade sidan medan filen laddades upp – spara direkt i databasen.
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(
+          targetProfileId,
+          isVideo ? { video_url: storagePath } : { profile_image_url: storagePath },
+        );
+        return;
+      }
+
       // Vald extraprofil: media sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(
@@ -1068,7 +1094,13 @@ const Profile = () => {
       if (uploadError) throw uploadError;
       uploadedStoragePath = storagePath;
 
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(targetProfileId, { cover_image_url: storagePath });
+        return;
+      }
+
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
@@ -1281,7 +1313,14 @@ const Profile = () => {
         await persistOriginalImage(pendingImageSrc, storagePath, 'profile-image');
       }
 
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(targetProfileId, { profile_image_url: storagePath });
+        if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
+        return;
+      }
+
       // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath });
@@ -1395,7 +1434,14 @@ const Profile = () => {
         await persistOriginalImage(pendingCoverSrc, storagePath, 'cover-image');
       }
 
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(targetProfileId, { cover_image_url: storagePath });
+        if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
+        return;
+      }
+
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
