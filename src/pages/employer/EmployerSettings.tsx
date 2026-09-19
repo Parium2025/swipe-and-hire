@@ -11,6 +11,7 @@ import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
 import CalendarConnectionCard from '@/components/settings/CalendarConnectionCard';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Switch } from '@/components/ui/switch';
 
 
 import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAccountEmailPanel';
