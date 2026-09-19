@@ -424,6 +424,7 @@ export const useApplicationsData = (
          {
            profile_image_url: string | null;
            video_url: string | null;
+           cover_image_url: string | null;
            is_profile_video: boolean | null;
            last_active_at: string | null;
          }
@@ -434,10 +435,11 @@ export const useApplicationsData = (
        if (batchMediaData && Array.isArray(batchMediaData)) {
          batchMediaData.forEach((row: any) => {
            profileMediaMap[row.applicant_id] = {
-             profile_image_url: row.profile_image_url,
-             video_url: row.video_url,
-             is_profile_video: row.is_profile_video,
-             last_active_at: row.last_active_at || null,
+              profile_image_url: row.profile_image_url,
+              video_url: row.video_url,
+              cover_image_url: row.cover_image_url ?? null,
+              is_profile_video: row.is_profile_video,
+              last_active_at: row.last_active_at || null,
            };
          });
        }
@@ -446,10 +448,11 @@ export const useApplicationsData = (
        applicantIds.forEach((id) => {
          if (!profileMediaMap[id]) {
            profileMediaMap[id] = {
-             profile_image_url: null,
-             video_url: null,
-             is_profile_video: null,
-             last_active_at: null,
+              profile_image_url: null,
+              video_url: null,
+              cover_image_url: null,
+              is_profile_video: null,
+              last_active_at: null,
            };
          }
        });

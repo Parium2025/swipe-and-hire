@@ -178,6 +178,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       profileMediaMap[row.applicant_id] = {
         profile_image_url: row.profile_image_url,
         video_url: row.video_url,
+        cover_image_url: row.cover_image_url ?? null,
         is_profile_video: row.is_profile_video,
         last_active_at: row.last_active_at,
       };

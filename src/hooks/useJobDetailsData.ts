@@ -214,7 +214,7 @@ async function hydrateApplications(
   // nätverksrundor innan kandidatkorten kunde ritas. Nu startar allt samtidigt.
   const mediaByApplicant = new Map<
     string,
-    { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }
+    { profile_image_url: string | null; video_url: string | null; cover_image_url: string | null; is_profile_video: boolean | null; city: string | null }
   >();
   const activityByApplicant = new Map<string, { last_active_at: string | null }>();
 
@@ -234,6 +234,7 @@ async function hydrateApplications(
           mediaByApplicant.set(row.applicant_id, {
             profile_image_url: row.profile_image_url,
             video_url: row.video_url,
+            cover_image_url: row.cover_image_url ?? null,
             is_profile_video: row.is_profile_video,
             city: row.city || null,
           });
@@ -283,7 +284,7 @@ async function hydrateApplications(
 
   return applicationsData.map((app) => {
     const liveMedia =
-      mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false, city: null };
+      mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, cover_image_url: null, is_profile_video: false, city: null };
     const media = resolveCandidateMedia(app as any, liveMedia);
     const evalId = evaluationByApplicant.get(app.applicant_id);
     const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];
