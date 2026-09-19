@@ -1569,7 +1569,7 @@ export function MessageTemplatesSettings() {
       </div>
 
       <Tabs value={activeStudioTab} onValueChange={(value) => goToStudioTab(value as StudioTab)} className="space-y-2.5">
-        <div ref={studioTabsRef} className="relative mx-auto flex w-fit gap-0.5 rounded-md border border-white/10 bg-white/5 p-1 scroll-mt-4" role="tablist" aria-label="Outreach sektioner">
+        <div ref={studioTabsRef} className="relative mx-auto flex w-fit max-w-full gap-0.5 overflow-x-auto rounded-md border border-white/10 bg-white/5 p-1 scroll-mt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Outreach sektioner">
           <motion.div
             className="absolute bottom-1 top-1 rounded-[5px] bg-parium-navy"
             initial={false}
