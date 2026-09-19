@@ -36,7 +36,16 @@ const EmployerMobileShell = ({
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
 
-      <div className="fixed inset-0 h-[100dvh] flex w-full overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' } as CSSProperties}>
+      <div
+        className="fixed left-0 right-0 flex w-full overflow-hidden"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          // Ankra mot den FAKTISKT synliga ytan på iOS. Annars kan Safari
+          // lämna toppraden ovanför skärmkanten utan att den kommer tillbaka.
+          top: 'var(--app-viewport-offset, 0px)',
+          height: 'var(--app-viewport-height, 100dvh)',
+        } as CSSProperties}
+      >
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
