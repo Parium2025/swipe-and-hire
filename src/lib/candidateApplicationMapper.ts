@@ -66,6 +66,7 @@ export function mapRawToApplicationData(
     ...resolveCandidateMedia(raw, {
       profile_image_url: opts.fallbackProfileImageUrl ?? null,
       video_url: opts.fallbackVideoUrl ?? null,
+      cover_image_url: opts.fallbackCoverImageUrl ?? null,
       is_profile_video: opts.fallbackIsProfileVideo ?? null,
     }),
   };
