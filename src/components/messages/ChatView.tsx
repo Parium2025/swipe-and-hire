@@ -789,10 +789,14 @@ export function ChatView({
 
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/20 flex-shrink-0">
+        {/* Tillbaka till chatlistan i enkolumnsläget. Appens brytpunkt är 1180 px
+            (samma som useDevice), inte Tailwinds md (768 px) — annars fanns ingen
+            väg tillbaka i fönster mellan 768 och 1180 px. */}
         <button
           type="button"
           onClick={onBack}
-          className="md:hidden text-pure-white active:scale-95 transition-transform p-2 -ml-2"
+          aria-label="Tillbaka till chattar"
+          className="min-[1180px]:hidden text-pure-white active:scale-95 transition-transform p-2 -ml-2"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
