@@ -166,8 +166,8 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
             </p>
             {errorDetails && (
               <details className="text-left mb-4">
-                <summary className="text-xs text-white/70 cursor-pointer mb-1">Visa teknisk info</summary>
-                <pre className="text-[10px] leading-tight text-white/80 bg-white/10 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+                <summary className="text-xs text-white cursor-pointer mb-1">Visa teknisk info</summary>
+                <pre className="text-[10px] leading-tight text-white bg-white/10 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
                   {errorDetails}
                   {errorStack && `\n\n${errorStack}`}
                   {componentStack && `\n\nComponent:\n${componentStack}`}
