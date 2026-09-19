@@ -61,7 +61,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             }
           },
           className:
-            'cursor-pointer transition-colors hover:bg-white/[0.06] active:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-lg',
+            'cursor-pointer transition-colors [@media(hover:hover)]:hover:bg-white/[0.06] [@media(hover:hover)]:active:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-lg',
         }
       : {};
 
