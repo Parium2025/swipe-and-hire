@@ -53,16 +53,58 @@ export async function resolveConversationIdsForCandidates(
   return map;
 }
 
-/** Find existing 1:1 conversation between current user and a candidate. */
+/**
+ * Resolve existing 1:1 conversations per APPLICATION (one thread per ansökan).
+ * Varje ansökan har sin egen frysta profil-snapshot, därför får varje ansökan
+ * sin egen tråd i stället för en gemensam kandidattråd.
+ */
+export async function resolveConversationIdsForApplications(
+  applicationIds: string[]
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const unique = Array.from(new Set(applicationIds.filter(Boolean)));
+  const CHUNK = 200;
+
+  for (let i = 0; i < unique.length; i += CHUNK) {
+    const chunk = unique.slice(i, i + CHUNK);
+    const { data, error } = await supabase
+      .from('conversations')
+      .select('id, application_id, updated_at')
+      .eq('is_group', false)
+      .in('application_id', chunk)
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+    for (const row of data || []) {
+      const aid = (row as any).application_id as string | null;
+      if (aid && !map.has(aid)) map.set(aid, (row as any).id as string);
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Find existing 1:1 conversation between current user and a candidate.
+ * När ett applicationId anges matchas ENDAST tråden för just den ansökan —
+ * aldrig en tråd från en annan ansökan/profil.
+ */
 export async function findExistingConversationId(
   userId: string,
-  candidateId: string
+  candidateId: string,
+  applicationId?: string | null
 ): Promise<string | null> {
-  const { data, error } = await supabase
+  let query = supabase
     .from('conversations')
     .select('id')
     .eq('is_group', false)
-    .eq('candidate_id', candidateId)
+    .eq('candidate_id', candidateId);
+
+  if (applicationId) {
+    query = query.eq('application_id', applicationId);
+  }
+
+  const { data, error } = await query
     .order('updated_at', { ascending: false })
     .limit(1);
 
