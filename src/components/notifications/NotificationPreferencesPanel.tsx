@@ -78,7 +78,7 @@ const NotificationPreferencesPanel = ({
               >
                 <div className="min-w-0 flex-1">
                   <Label className="block text-sm font-medium leading-snug text-white">
-                    {row.label}
+                    {row.label}:
                   </Label>
                   <p className="mt-0.5 text-[13px] leading-snug text-white/95 sm:text-sm">
                     {row.description}
