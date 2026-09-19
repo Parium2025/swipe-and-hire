@@ -4365,6 +4365,7 @@ export type Database = {
         Returns: {
           applicant_id: string
           city: string
+          cover_image_url: string
           image_updated_at: string
           is_profile_video: boolean
           last_active_at: string
