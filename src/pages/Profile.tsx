@@ -976,7 +976,17 @@ const Profile = () => {
       if (uploadError) throw uploadError;
       uploadedStoragePath = storagePath;
 
+      // Användaren lämnade sidan medan filen laddades upp – spara direkt i databasen.
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(
+          targetProfileId,
+          isVideo ? { video_url: storagePath } : { profile_image_url: storagePath },
+        );
+        return;
+      }
+
       // Vald extraprofil: media sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(
@@ -1084,7 +1094,13 @@ const Profile = () => {
       if (uploadError) throw uploadError;
       uploadedStoragePath = storagePath;
 
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(targetProfileId, { cover_image_url: storagePath });
+        return;
+      }
+
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
@@ -1297,7 +1313,14 @@ const Profile = () => {
         await persistOriginalImage(pendingImageSrc, storagePath, 'profile-image');
       }
 
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(targetProfileId, { profile_image_url: storagePath });
+        if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
+        return;
+      }
+
       // Vald extraprofil: bilden sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { profile_image_url: storagePath });
