@@ -1521,7 +1521,11 @@ export function useCreateConversation() {
       let needsJobContextSwitch = false;
       let previousApplicationId: string | null = null;
 
-      // For 1-1 chats, look for existing unified conversation with this candidate
+      // För 1-1-chattar: EN TRÅD PER ANSÖKAN. Varje ansökan bär sin egen frysta
+      // profil-snapshot (bild/video/namn), därför får varje ansökan sin egen
+      // konversation i stället för en gemensam kandidattråd som byter kontext.
+      // Utan applicationId (fristående kontakt) återanvänds den senaste
+      // kontextlösa tråden med kandidaten.
       // IMPORTANT: Must scope to conversations the current user is a member of,
       // otherwise two different employers messaging the same candidate would share a thread!
       if (!isGroup && memberIds.length === 1) {
@@ -1529,13 +1533,19 @@ export function useCreateConversation() {
         // rader vid många chattar) innan sökningen. Nu filtreras det i samma
         // indexerade fråga via inner join på medlemstabellen.
         if (!isInternal) {
-          const { data: existingByCandidate, error: existingError } = await supabase
+          let existingQuery = supabase
             .from('conversations')
             .select('id, application_id, conversation_members!inner(user_id)')
             .eq('candidate_id', candidateId)
             .not('candidate_id', 'is', null)
             .eq('kind', 'job')
-            .eq('conversation_members.user_id', user.id)
+            .eq('conversation_members.user_id', user.id);
+
+          existingQuery = applicationId
+            ? existingQuery.eq('application_id', applicationId)
+            : existingQuery.is('application_id', null);
+
+          const { data: existingByCandidate, error: existingError } = await existingQuery
             .order('updated_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -1546,11 +1556,6 @@ export function useCreateConversation() {
             conversationId = existingByCandidate.id;
             isExisting = true;
             previousApplicationId = existingByCandidate.application_id;
-
-            // Check if job context is changing
-            if (applicationId && applicationId !== previousApplicationId) {
-              needsJobContextSwitch = true;
-            }
           }
         }
 
