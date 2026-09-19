@@ -1837,6 +1837,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'cover_image_url')) {
+        const previousCoverImage = profile?.cover_image_url || null;
+        const nextCoverImage = typeof cleanedUpdates.cover_image_url === 'string'
+          ? cleanedUpdates.cover_image_url.trim() || null
+          : cleanedUpdates.cover_image_url ?? null;
+
+        if (previousCoverImage && previousCoverImage !== nextCoverImage) {
+          clearMediaUrlCache(previousCoverImage, 'cover-image');
+        }
+
+        setPreloadedCoverUrl(null);
+        try {
+          sessionStorage.removeItem(COVER_CACHE_KEY);
+          localStorage.removeItem(CACHED_PROFILE_KEY);
+        } catch {
+          // ignore cache cleanup failures
+        }
+
+        if (nextCoverImage) {
+          clearMediaUrlCache(nextCoverImage, 'cover-image');
+          const freshCoverUrl = await getMediaUrl(nextCoverImage, 'cover-image', 86400);
+          if (freshCoverUrl) {
+            setPreloadedCoverUrl(freshCoverUrl);
+            try { sessionStorage.setItem(COVER_CACHE_KEY, freshCoverUrl); } catch {}
+          }
+          void prefetchMediaUrl(nextCoverImage, 'cover-image').catch(() => {});
+        }
+      }
+
       // Refresh profile
       await fetchUserData(user.id);
       
