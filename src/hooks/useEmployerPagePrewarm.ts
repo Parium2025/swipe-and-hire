@@ -9,6 +9,7 @@ import { writeApplicantMembershipCache } from '@/lib/applicantMembershipCache';
 import { fetchCandidateListsForOwner } from '@/hooks/useCandidateLists';
 import { fetchStageSettings } from '@/hooks/useStageSettings';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
+import { fetchEmployerInterviewsForUser } from '@/hooks/useInterviews';
 
 /**
  * ❄️ KALLSTART — ARBETSGIVARENS ANNONSSIDOR
