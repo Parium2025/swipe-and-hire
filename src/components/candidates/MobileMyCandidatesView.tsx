@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback, useEffect, useRef, startTransition } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -352,23 +352,38 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const tabStripRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll the tab strip to keep the active tab visible
+  const setTabStripRef = useCallback((element: HTMLDivElement | null) => {
+    tabStripRef.current = element;
+    dragScrollRef(element);
+  }, [dragScrollRef]);
+
+  // Keep the active stage visible without scrollIntoView. On iOS, scrollIntoView
+  // can also move the surrounding page and its smooth animation can fight the
+  // user's next swipe, which caused the first stage change to flash/jump.
   useEffect(() => {
+    const strip = tabStripRef.current;
     const el = tabRefs.current[activeTab];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+    if (!strip || !el) return;
+
+    const stripRect = strip.getBoundingClientRect();
+    const tabRect = el.getBoundingClientRect();
+    if (tabRect.left >= stripRect.left && tabRect.right <= stripRect.right) return;
+
+    const centeredLeft = el.offsetLeft - (strip.clientWidth - el.offsetWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'auto' });
   }, [activeTab]);
 
-  // Swipe between stage tabs — bytet körs som låg prioritet så fingret aldrig blockeras.
+  // Swipe between stage tabs. Commit the selected stage immediately so the tab
+  // highlight and list can never render different stages for an intermediate frame.
   const swipeToNextStage = useCallback(() => {
     const idx = stages.indexOf(activeTab);
-    if (idx < stages.length - 1) startTransition(() => setActiveTab(stages[idx + 1]));
+    if (idx < stages.length - 1) setActiveTab(stages[idx + 1]);
   }, [activeTab, stages]);
   const swipeToPrevStage = useCallback(() => {
     const idx = stages.indexOf(activeTab);
-    if (idx > 0) startTransition(() => setActiveTab(stages[idx - 1]));
+    if (idx > 0) setActiveTab(stages[idx - 1]);
   }, [activeTab, stages]);
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
@@ -379,7 +394,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       return;
     }
     setPreviewStage(null);
-    startTransition(() => setActiveTab(stage));
+    setActiveTab(stage);
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
   }, []);
 
@@ -461,27 +476,16 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const stageCandidates = candidatesByStage[activeTab] || [];
 
   // Renderfönster: mobilen målar aldrig fler än så här många rader åt gången.
-  // Fönstret växer när du scrollar nära botten, så listan känns oändlig men
-  // DOM:en förblir liten även när steget innehåller tusentals kandidater.
+  // Fönstret växer först när användaren scrollar nära botten. Den tidigare
+  // automatiska utökningen två bildrutor efter varje stegbyte skapade en extra
+  // ommålning precis när det första svepet började.
   const RENDER_STEP = 40;
-  // Första målningen ritar bara det som får plats på skärmen – resten kommer
-  // direkt efter, så första svepet aldrig hackar av en stor DOM-uppbyggnad.
   const FIRST_PAINT_ROWS = 8;
   const [renderLimit, setRenderLimit] = useState(FIRST_PAINT_ROWS);
 
   // Nytt steg = nytt fönster (annars ärver nästa flik ett uppblåst fönster).
   useEffect(() => {
     setRenderLimit(FIRST_PAINT_ROWS);
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        startTransition(() => setRenderLimit((prev) => (prev < RENDER_STEP ? RENDER_STEP : prev)));
-      });
-    });
-    return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2) cancelAnimationFrame(raf2);
-    };
   }, [activeTab]);
 
   const currentCandidates = useMemo(
@@ -508,7 +512,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       <div className="flex flex-col gap-3 flex-1 min-h-0">
         {/* Horizontal scrollable stage tabs — free scroll on touch, no stage switching */}
         <div
-          ref={dragScrollRef}
+          ref={setTabStripRef}
           className={`flex gap-1.5 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 overscroll-x-contain ${
             isTouchCapable
               ? '[touch-action:pan-x] [-webkit-overflow-scrolling:touch]'
