@@ -4,8 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
-import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
-import { AutoMessagesPanel } from '@/components/employer/outreach/AutoMessagesPanel';
+import { OutreachSettingsHub } from '@/components/employer/outreach/OutreachSettingsHub';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
@@ -205,10 +204,7 @@ const EmployerSettings = () => {
       value: 'utskick',
       label: 'Automatiska utskick & mallar',
       content: (
-        <div className="space-y-8">
-          <AutoMessagesPanel />
-          <MessageTemplatesSettings />
-        </div>
+        <OutreachSettingsHub />
       ),
     },
     {

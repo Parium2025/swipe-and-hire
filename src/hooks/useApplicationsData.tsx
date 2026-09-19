@@ -26,6 +26,7 @@ export interface ApplicationData {
   work_schedule: string | null;
   availability: string | null;
   status: string | null;
+  rejected_at?: string | null;
   applied_at: string;
   updated_at: string;
   custom_answers: any;
@@ -394,7 +395,7 @@ export const useApplicationsData = (
          if (ids.length > 0) {
            const { data: snapRows } = await supabase
              .from('job_applications')
-              .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url')
+              .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url, rejected_at')
              .in('id', ids);
            (snapRows || []).forEach((row: any) => snapshotById.set(row.id, row));
          }
@@ -492,6 +493,7 @@ export const useApplicationsData = (
 
          return {
            ...item,
+            rejected_at: item.rejected_at ?? snap?.rejected_at ?? null,
            job_title: item.job_title || 'Okänt jobb',
            job_occupation: item.job_occupation || null,
            profile_image_url: media.profile_image_url,

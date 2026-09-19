@@ -48,6 +48,7 @@ interface SendMessageDialogProps {
   /** Render above z-[100] overlays (e.g. SwipeViewer) */
   elevated?: boolean;
   presetAction?: ManualOutreachActionKey | null;
+  onPresetSent?: (action: ManualOutreachActionKey) => void | Promise<void>;
 }
 
 export function SendMessageDialog({
@@ -60,6 +61,7 @@ export function SendMessageDialog({
   navigateToMessages = false,
   elevated,
   presetAction = null,
+  onPresetSent,
 }: SendMessageDialogProps) {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -257,6 +259,7 @@ export function SendMessageDialog({
       }
 
       toast.success(`Meddelande skickat till ${recipientName}`, { route: '/messages' } as Parameters<typeof toast.success>[1]);
+      if (presetAction) await onPresetSent?.(presetAction);
       setMessage('');
       clearMessageDraft();
       setSelectedChannels(['chat']);

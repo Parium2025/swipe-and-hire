@@ -57,6 +57,7 @@ import {
 import { notifyOutreachStudioUpdated, OUTREACH_STUDIO_UPDATED_EVENT, readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { AUTO_RULE_EVENTS } from '@/lib/outreachAutoRules';
+import { MANUAL_OUTREACH_ACTIONS } from '@/lib/outreachManualActions';
 
 // Namn+kanal för samtliga Parium-original (bibliotek + automatiska utskick).
 const STANDARD_TEMPLATE_KEYS = new Set<string>([
@@ -67,6 +68,13 @@ const STANDARD_TEMPLATE_KEYS = new Set<string>([
     ),
   ),
 ]);
+
+const isManualStandardTemplate = (template: OutreachTemplate) => {
+  const normalizedName = template.name.trim().toLocaleLowerCase('sv-SE');
+  return !template.trigger && Object.values(MANUAL_OUTREACH_ACTIONS).some((action) =>
+    action.keywords.some((keyword) => normalizedName.includes(keyword)),
+  );
+};
 
 // Alla Parium-original: biblioteksmallarna, de som Automatiska utskick skapar och de
 // manuella originalen (Gå vidare/Avslag) som styrs från kandidatprofilen. Dessa är låsta
@@ -1364,8 +1372,9 @@ export function MessageTemplatesSettings() {
     }),
   );
 
-  // Manuella utskick (Gå vidare, Avslag) styrs från kandidatprofilen och visas inte här.
-  const standardManualTemplates: OutreachTemplate[] = [];
+  // De sex manuella originalen ligger i databasen utan händelse och används
+  // uttryckligen från kandidatprofilens Gå vidare/Ge avslag-flöden.
+  const standardManualTemplates = templates.filter(isManualStandardTemplate);
 
   const standardTemplates = [...standardAutoTemplates, ...standardManualTemplates];
   const groupByChannel = (items: OutreachTemplate[]) =>

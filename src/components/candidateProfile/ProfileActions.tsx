@@ -77,6 +77,22 @@ export const ProfileActions = ({
           )}
         </div>
 
+        {quickActions.length > 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            {quickActions.map((action) => (
+              <Button
+                key={action.key}
+                {...noFocusRingProps}
+                onClick={action.onClick}
+                variant={action.variant}
+                className="h-9 min-w-0 rounded-full px-3 text-xs md:text-sm"
+              >
+                <span className="truncate">{action.label}</span>
+              </Button>
+            ))}
+          </div>
+        )}
+
         {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {
           const currentIndex = stageOrder.indexOf(currentStage);
           const prevStage = currentIndex > 0 ? stageOrder[currentIndex - 1] : null;
@@ -140,6 +156,15 @@ export const ProfileActions = ({
           </Button>
         )}
       </div>
+      {quickActions.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2">
+          {quickActions.map((action) => (
+            <Button key={action.key} {...noFocusRingProps} onClick={action.onClick} variant={action.variant} size="default">
+              {action.label}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
