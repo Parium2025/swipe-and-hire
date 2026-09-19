@@ -41,6 +41,7 @@ export interface JobApplication {
   viewed_at: string | null;
   profile_image_url: string | null;
   video_url: string | null;
+  cover_image_url: string | null;
   is_profile_video: boolean;
   rating: number;
   criterionResults?: CriterionResult[];
@@ -292,6 +293,7 @@ async function hydrateApplications(
       ...app,
       profile_image_url: media.profile_image_url,
       video_url: media.video_url,
+      cover_image_url: media.cover_image_url,
       is_profile_video: media.is_profile_video || false,
       rating: ratingsByApplicant.get(app.applicant_id) || 0,
       criterionResults,

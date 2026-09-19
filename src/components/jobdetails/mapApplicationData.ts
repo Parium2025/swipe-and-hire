@@ -33,6 +33,7 @@ export function mapToApplicationData(
     job_title: jobTitle,
     profile_image_url: app.profile_image_url,
     video_url: app.video_url,
+    cover_image_url: app.cover_image_url,
     is_profile_video: app.is_profile_video,
     viewed_at: app.viewed_at,
     last_active_at: app.last_active_at,
