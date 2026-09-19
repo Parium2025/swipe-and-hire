@@ -34,20 +34,9 @@ export const CandidateSlide = memo(function CandidateSlide({
   const exitOpacity = useMotionValue(1);
   const rotate = useTransform(x, [-220, 0, 220], [-6, 0, 6]);
   const scale = useTransform(x, [-220, 0, 220], [0.98, 1, 0.98]);
-  const touchRef = useRef<{
-    startX: number;
-    startY: number;
-    startTime: number;
-    horizontal: boolean;
-    cancelled: boolean;
-  } | null>(null);
   const suppressOpenRef = useRef(false);
-  const thresholdHapticRef = useRef(false);
   const exitTimerRef = useRef<number | null>(null);
 
-  const resetCard = useCallback(() => {
-    animate(x, 0, { type: 'spring', stiffness: 340, damping: 28, mass: 0.9 });
-  }, [x]);
 
   const commitSkip = useCallback(() => {
     if (exitTimerRef.current !== null) return;
