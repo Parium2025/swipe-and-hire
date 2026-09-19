@@ -511,27 +511,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
               >
                 {count}
               </span>
-              {/* Urvalskriterier (Sparkles) — only on first stage (Inkorg), matches desktop column header */}
-              {stageIdx === 0 && onOpenCriteriaDialog && (
-                <button
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenCriteriaDialog();
-                  }}
-                  className="relative p-1 rounded hover:bg-white/20 transition-colors text-white/90 hover:text-white flex-shrink-0"
-                  aria-label="Urvalskriterier"
-                  title="Urvalskriterier"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {criteriaCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-1 rounded-full bg-white text-[9px] font-semibold text-black flex items-center justify-center leading-none">
-                      {criteriaCount}
-                    </span>
-                  )}
-                </button>
-              )}
               {/* Stegen i en jobbannons är låsta standardsteg — hanteras i "Mina kandidater" */}
             </div>
           );

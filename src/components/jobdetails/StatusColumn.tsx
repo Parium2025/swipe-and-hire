@@ -186,15 +186,6 @@ export const StatusColumn = memo(({
             {displayCount}
           </span>
 
-          {onOpenCriteriaDialog && (
-            <button
-              onClick={onOpenCriteriaDialog}
-              className="p-1 rounded hover:bg-white/20 transition-colors text-white/80 hover:text-white"
-              title="Urvalskriterier"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-            </button>
-          )}
           {/* Stegen i en jobbannons är låsta standardsteg – de kan inte byggas
               om, döpas om eller raderas här. Vill man ha egna steg används
               "Mina kandidater". */}
