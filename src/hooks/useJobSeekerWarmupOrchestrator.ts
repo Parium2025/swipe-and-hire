@@ -2,6 +2,7 @@ import { useJobSeekerMediaWarmup } from '@/hooks/useJobSeekerMediaWarmup';
 import { useJobSearchProgressivePagination } from '@/hooks/useJobSearchProgressivePagination';
 import { useNotificationsPreload } from '@/hooks/useNotificationsPreload';
 import { useJobSeekerPagePrewarm } from '@/hooks/useJobSeekerPagePrewarm';
+import { useDefaultJobSearchPrewarm } from '@/hooks/useDefaultJobSearchPrewarm';
 
 /**
  * 🚀 JOB SEEKER WARMUP ORCHESTRATOR
