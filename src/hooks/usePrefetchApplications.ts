@@ -63,7 +63,7 @@ export const usePrefetchApplications = () => {
 
         applicantIds.forEach((id) => {
           if (!profileMediaMap[id]) {
-            profileMediaMap[id] = { profile_image_url: null, video_url: null, is_profile_video: null };
+            profileMediaMap[id] = { profile_image_url: null, video_url: null, cover_image_url: null, is_profile_video: null };
           }
         });
 

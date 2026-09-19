@@ -214,7 +214,7 @@ async function hydrateApplications(
   // nätverksrundor innan kandidatkorten kunde ritas. Nu startar allt samtidigt.
   const mediaByApplicant = new Map<
     string,
-    { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null; city: string | null }
+    { profile_image_url: string | null; video_url: string | null; cover_image_url: string | null; is_profile_video: boolean | null; city: string | null }
   >();
   const activityByApplicant = new Map<string, { last_active_at: string | null }>();
 
