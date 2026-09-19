@@ -48,7 +48,7 @@ describe('CandidateSlide employer swipe', () => {
     vi.useRealTimers();
   });
 
-  it('byter kandidat efter ett vänsterdrag som startar på medieytan', () => {
+  it('byter aldrig kandidat av ett drag i sidled', () => {
     vi.useFakeTimers();
     const onSkip = vi.fn();
     const { container } = render(
@@ -69,7 +69,14 @@ describe('CandidateSlide employer swipe', () => {
     fireEvent.touchEnd(card as Element, { changedTouches: [touch(190, 224)] });
     act(() => vi.advanceTimersByTime(250));
 
-    expect(onSkip).toHaveBeenCalledTimes(1);
+    expect(onSkip).not.toHaveBeenCalled();
+
+    fireEvent.touchStart(card as Element, { touches: [touch(120, 220)] });
+    fireEvent.touchMove(card as Element, { touches: [touch(320, 224)] });
+    fireEvent.touchEnd(card as Element, { changedTouches: [touch(320, 224)] });
+    act(() => vi.advanceTimersByTime(250));
+
+    expect(onSkip).not.toHaveBeenCalled();
   });
 
   it('använder alltid helkortsläget och aldrig den runda profilvarianten', () => {
