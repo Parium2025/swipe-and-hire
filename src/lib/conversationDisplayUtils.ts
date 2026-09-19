@@ -140,13 +140,18 @@ export function getConversationAvatarProfile(
     const liveProfile = displayMember?.profile;
     const liveImage =
       liveProfile && liveProfile.role !== 'employer' ? liveProfile.profile_image_url || null : null;
+    const media = resolveCandidateMedia(snapshot!, { profile_image_url: liveImage });
+    // Samma regel som kandidatlistan/CandidateAvatar: för videoprofiler är
+    // covern den bild kandidaten själv anpassat — profilbilden är fallback.
+    const avatarPath = media.is_profile_video
+      ? media.cover_image_url || media.profile_image_url
+      : media.profile_image_url || media.cover_image_url;
     return {
       role: 'job_seeker' as const,
       first_name: snapshot!.first_name,
       last_name: snapshot!.last_name,
       company_name: null,
-      profile_image_url: resolveCandidateMedia(snapshot!, { profile_image_url: liveImage })
-        .profile_image_url,
+      profile_image_url: avatarPath,
       company_logo_url: null,
     };
   }
