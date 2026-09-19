@@ -605,7 +605,7 @@ function KeepAliveCached({
         const enterClasses = isEntered
           ? 'opacity-100 translate-x-0 translate-y-0'
           : isFastEnter
-            ? `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-1' : 'translate-y-1'}`
+                ? `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-1' : 'translate-y-1'}`
             : `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-2' : 'translate-y-2'}`;
         const durationClass = mobileSlideNavigation
           ? isFastEnter
@@ -628,7 +628,7 @@ function KeepAliveCached({
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none motion-reduce:transform-none ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none motion-reduce:transform-none ${enterClasses}`
                 : ''
             }
             aria-hidden={!isDisplayed}
