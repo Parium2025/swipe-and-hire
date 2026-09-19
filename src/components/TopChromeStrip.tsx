@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
 
@@ -101,7 +101,7 @@ const TopChromeStrip = () => {
   const stripInset = isStandalone ? '22px' : '14px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
     if (isTouch) {
