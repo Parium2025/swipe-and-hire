@@ -32,8 +32,6 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
-  const rotate = useTransform(x, [-220, 0, 220], [-6, 0, 6]);
-  const scale = useTransform(x, [-220, 0, 220], [0.98, 1, 0.98]);
   const suppressOpenRef = useRef(false);
   const exitTimerRef = useRef<number | null>(null);
 
