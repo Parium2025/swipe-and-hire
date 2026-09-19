@@ -456,7 +456,7 @@ export function ApplicationQuestionsWizard({
                         setNavigatedBack(true);
                         setCurrentStep(idx);
                       }}
-                      className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
+                      className="w-full text-left p-3.5 rounded-xl bg-white/[0.05] [@media(hover:hover)]:hover:bg-white/[0.08] border border-white/[0.08] [@media(hover:hover)]:hover:border-white/[0.14] transition-all duration-150 group active:scale-[0.99]"
                     >
                       <p className="text-[11px] uppercase tracking-wider text-white mb-1">
                         Fråga {idx + 1}
