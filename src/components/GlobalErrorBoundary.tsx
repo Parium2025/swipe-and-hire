@@ -179,7 +179,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
                 type="button"
                 variant="glass"
                 onClick={this.handleReload}
-                className="w-full border-white/25 bg-white/10 text-white md:hover:bg-white/15"
+                className="w-full"
               >
                 Försök igen
               </Button>
@@ -187,7 +187,7 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
                 type="button"
                 variant="glass"
                 onClick={this.handleGoHome}
-                className="w-full border-white/25 bg-white/10 text-white md:hover:bg-white/15"
+                className="w-full"
               >
                 Till startsidan
               </Button>

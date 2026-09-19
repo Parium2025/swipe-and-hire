@@ -702,11 +702,13 @@ All colors MUST be HSL.
     :root {
       --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 14px);
     }
+  }
 
-    @media (display-mode: standalone) {
-      :root {
-        --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 22px);
-      }
+  @media (display-mode: standalone) and (any-pointer: coarse),
+    (display-mode: standalone) and (hover: none),
+    (display-mode: standalone) and (any-hover: none) {
+    :root {
+      --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 22px);
     }
   }
 
