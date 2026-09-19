@@ -28,7 +28,7 @@ let channelInstance = 0;
  */
 export function createRealtimeChannel(topic: string, options?: ChannelOptions) {
   channelInstance += 1;
-  const uniqueTopic = `${topic}:${runtimeId}:${channelInstance}`;
+  const uniqueTopic = `${topic}:${getRuntimeId()}:${channelInstance}`;
   return options
     ? supabase.channel(uniqueTopic, options)
     : supabase.channel(uniqueTopic);
