@@ -4,7 +4,8 @@ import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import TeamManagement from '@/components/TeamManagement';
 import { Capacitor } from '@capacitor/core';
-import { OutreachSettingsHub } from '@/components/employer/outreach/OutreachSettingsHub';
+import { AutoMessagesPanel } from '@/components/employer/outreach/AutoMessagesPanel';
+import { MessageTemplatesSettings } from '@/components/MessageTemplatesSettings';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { ActiveSessionsSettings } from '@/components/ActiveSessionsSettings';
 import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
@@ -201,10 +202,32 @@ const EmployerSettings = () => {
       ),
     },
     {
-      value: 'utskick',
-      label: 'Automatiska utskick & mallar',
+      value: 'automatiska-floden',
+      label: 'Automatiska flöden',
+      content: <AutoMessagesPanel />,
+    },
+    {
+      value: 'manuella-besked',
+      label: 'Manuella besked & mallar',
+      content: <MessageTemplatesSettings />,
+    },
+    {
+      value: 'systemutskick',
+      label: 'Systemutskick',
       content: (
-        <OutreachSettingsHub />
+        <div className="space-y-3">
+          <p className="text-sm text-white">Dessa meddelanden är låsta och hanteras av Parium. De kan inte redigeras eller stängas av här.</p>
+          <ul className="space-y-2">
+            {[
+              'Intervjukallelse med svarsknappar och kalenderlänk.',
+              'Påminnelse till dig efter 14 dagar om en kandidat väntar på besked.',
+              'Påminnelser om sparade jobb och jobb som snart går ut.',
+              'Konto-, säkerhets- och supportmeddelanden.',
+            ].map((message) => (
+              <li key={message} className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">{message}</li>
+            ))}
+          </ul>
+        </div>
       ),
     },
     {
