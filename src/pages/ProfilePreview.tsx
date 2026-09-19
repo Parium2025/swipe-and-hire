@@ -471,14 +471,11 @@ export default function ProfilePreview() {
   const DesktopListView = () => {
     const { toast } = useToast();
 
-    // Helper: Desktop video with countdown rendered outside the circular clip
+    // Helper: Desktop video med spolningslist under den runda videon
     const DesktopVideoWithCountdown = () => {
-      const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-      const [countdown, setCountdown] = useState<number | null>(null);
-
       return (
         <div 
-          className="relative h-[140px] w-[140px]"
+          className="relative"
           onClick={(e) => e.stopPropagation()}
         >
           <ProfileVideoCircle
