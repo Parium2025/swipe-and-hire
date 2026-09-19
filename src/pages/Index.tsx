@@ -901,11 +901,6 @@ const Index = () => {
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
           resetScrollOnNavigation
-          slideInFromRight={
-            device !== 'desktop'
-            && employerKeepKey === '/reports'
-            && location.state?.mobileSidebarTransition === 'slide-in-right'
-          }
         />
         {showEmployerTourOverlay ? (
           <EmployerOnboardingTour
