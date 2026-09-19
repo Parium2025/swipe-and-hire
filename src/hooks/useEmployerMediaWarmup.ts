@@ -140,6 +140,14 @@ export function useEmployerMediaWarmup() {
             prefetchMediaUrl(p, 'profile-image', 86400).catch(() => {}),
           ),
         );
+        // Kandidatlistans videoavatar använder samma cover i 40 px-format.
+        // Värm exakt den varianten också, annars visas en placeholder trots
+        // att helkortsversionen redan finns i cachen.
+        Promise.allSettled(
+          limitedCovers.map((p) =>
+            prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}),
+          ),
+        );
         // Videos (poster frame)
         Promise.allSettled(
           limitedVideos.map((p) => prefetchMediaUrl(p, 'profile-video').catch(() => {})),

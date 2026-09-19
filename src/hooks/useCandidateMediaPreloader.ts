@@ -51,11 +51,11 @@ export function useCandidateMediaPreloader(
 
     paths.forEach((path) => {
       loadedRef.current.add(`visible:${path}`);
-      void prefetchMediaUrl(path, 'profile-image').catch(() => {});
+      void prefetchMediaUrl(path, 'profile-image', 86400, undefined, 'high').catch(() => {});
     });
     if (current.video_url) {
       loadedRef.current.add(`visible-video:${current.video_url}`);
-      void prefetchMediaUrl(current.video_url, 'profile-video').catch(() => {});
+      void prefetchMediaUrl(current.video_url, 'profile-video', 86400, undefined, 'high').catch(() => {});
     }
   }, [applications, currentIndex, enabled]);
 
