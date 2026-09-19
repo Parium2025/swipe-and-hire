@@ -2888,9 +2888,8 @@ const Profile = () => {
       </div>
 
 
-      {/* Image Editors — speglar arbetsgivarsidans exakta struktur:
-          aspectRatio, isCircular och onRestoreOriginal så att "Spara" utan
-          ändringar BEHÅLLER originalet istället för att re-encoda. */}
+      {/* Bildredigerare. Spara ska alltid skapa och lagra den visade beskärningen,
+          även när användaren inte har flyttat eller zoomat bilden. */}
       <ImageEditor
         isOpen={imageEditorOpen}
         onClose={() => {
@@ -2900,7 +2899,6 @@ const Profile = () => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
-        onRestoreOriginal={isEditingExistingProfileImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
         aspectRatio={1}
         isCircular={true}
       />
@@ -2914,7 +2912,6 @@ const Profile = () => {
         }}
         imageSrc={pendingCoverSrc}
         onSave={handleCoverImageSave}
-        onRestoreOriginal={isEditingExistingCoverImage ? async () => { /* behåll original — ingen åtgärd */ } : undefined}
         aspectRatio={1}
         isCircular
       />
