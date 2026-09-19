@@ -5,7 +5,6 @@ import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { hapticLight, hapticMedium } from '@/lib/haptics';
 import { CandidateCardFace } from './CandidateCardFace';
-import { CandidateSlideActions } from './CandidateSlideActions';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
 interface CandidateSlideProps {
@@ -14,11 +13,9 @@ interface CandidateSlideProps {
   onOpenFullProfile: () => void;
   onRemoveFromList?: () => void;
   isVisible: boolean;
-  /** Åtgärdsraden visas bara när svepvyn kan hantera åtgärderna. */
-  showActions?: boolean;
-  saved?: boolean;
-  onSave?: () => void;
+  isActive: boolean;
   onSkip?: () => void;
+  onRegisterSkip?: (skip: (() => void) | null) => void;
   /** Urvalskriterier med AI-resultat för kandidaten. */
   criteria?: { criterion_id: string; title: string; result: 'match' | 'no_match' | 'no_data' }[];
 }
@@ -27,10 +24,9 @@ export const CandidateSlide = memo(function CandidateSlide({
   application,
   onOpenFullProfile,
   isVisible,
-  showActions = false,
-  saved = false,
-  onSave,
+  isActive,
   onSkip,
+  onRegisterSkip,
   criteria,
 }: CandidateSlideProps) {
 
@@ -72,6 +68,12 @@ export const CandidateSlide = memo(function CandidateSlide({
       window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
     }, 240);
   }, [exitOpacity, onSkip, x]);
+
+  useEffect(() => {
+    if (!onRegisterSkip || !isActive) return;
+    onRegisterSkip(commitSkip);
+    return () => onRegisterSkip(null);
+  }, [commitSkip, isActive, onRegisterSkip]);
 
   useEffect(() => () => {
     if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
@@ -195,28 +197,13 @@ export const CandidateSlide = memo(function CandidateSlide({
             videoUrl={videoUrl}
             hasVideo={Boolean(isProfileVideo)}
             ctaLabel="Tryck för mer info"
-            contentBottomClassName={showActions ? 'pb-24' : 'pb-6'}
+            contentBottomClassName="pb-24"
             criteria={criteria}
             onOpen={handleOpen}
 
           />
         </motion.div>
 
-        {showActions && (
-          <div
-            className="pointer-events-none absolute inset-x-0 z-20 px-5"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
-          >
-            <div className="pointer-events-auto flex justify-center">
-              <CandidateSlideActions
-                saved={saved}
-                onSave={() => onSave?.()}
-                onSkip={commitSkip}
-                onOpenInfo={onOpenFullProfile}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

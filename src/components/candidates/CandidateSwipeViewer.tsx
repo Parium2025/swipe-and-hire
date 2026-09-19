@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
+import { CandidateSlideActions } from './CandidateSlideActions';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
@@ -54,6 +55,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const activeSkipRef = useRef<(() => void) | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
@@ -62,17 +64,17 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   useEffect(() => {
     if (!open || typeof window === 'undefined') return;
-    const el = scrollRef.current;
     const apply = () => {
-      const h = el?.clientHeight || window.innerHeight;
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;pointer-events:none;visibility:hidden;';
+      document.body.appendChild(probe);
+      const h = probe.getBoundingClientRect().height || window.innerHeight;
+      document.body.removeChild(probe);
       setSlideHeight(prev => (Math.abs(prev - h) > 1 ? h : prev));
     };
     apply();
-    const ro = el ? new ResizeObserver(apply) : null;
-    if (el && ro) ro.observe(el);
     window.addEventListener('orientationchange', apply);
     return () => {
-      ro?.disconnect();
       window.removeEventListener('orientationchange', apply);
     };
   }, [open]);
@@ -153,6 +155,16 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const handleSkip = useCallback(() => {
     goToIndex(currentIndex + 1);
   }, [currentIndex, goToIndex]);
+
+  const registerActiveSkip = useCallback((skip: (() => void) | null) => {
+    activeSkipRef.current = skip;
+  }, []);
+
+  const handleActionSkip = useCallback(() => {
+    activeSkipRef.current?.();
+  }, []);
+
+  const currentApplication = applications[currentIndex];
 
 
   // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
@@ -283,10 +295,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onOpenFullProfile={() => onOpenFullProfile(app)}
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
-                showActions
-                saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}
-                onSave={onSaveCandidate ? () => onSaveCandidate(app) : undefined}
+                isActive={item.index === currentIndex}
                 onSkip={handleSkip}
+                onRegisterSkip={registerActiveSkip}
 
               />
               </div>
@@ -295,6 +306,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           })}
           </div>
         </div>
+
+        {currentApplication && (
+          <div
+            className="pointer-events-none absolute inset-x-0 z-30 px-5"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
+          >
+            <div className="pointer-events-auto flex justify-center">
+              <CandidateSlideActions
+                saved={savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
+                onSave={() => onSaveCandidate?.(currentApplication)}
+                onSkip={handleActionSkip}
+                onOpenInfo={() => onOpenFullProfile(currentApplication)}
+              />
+            </div>
+          </div>
+        )}
 
       </motion.div>
     </AnimatePresence>,
