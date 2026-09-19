@@ -16,6 +16,8 @@ interface ProfileVideoCircleProps {
   barClassName?: string;
   showCountdown?: boolean;
   disablePlayback?: boolean;
+  /** Tvinga touch-kontroller även på musenheter (används i förhandsvisningar). */
+  forceTouchMode?: boolean;
 }
 
 /**
