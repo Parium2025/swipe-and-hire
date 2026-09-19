@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { measurePerformance } from '@/lib/performanceGuards';
+import { measurePerformance } from '@/lib/realtimePerformance';
 
 /**
  * 🚀 SWIPE MODE / SÖK KALLSTART-PREWARM
