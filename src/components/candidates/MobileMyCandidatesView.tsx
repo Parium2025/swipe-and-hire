@@ -128,7 +128,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   return (
     <div
-      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
+      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-transform duration-150 min-h-touch relative transform-gpu
         ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:scale-[0.98]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       ref={rowRef}
@@ -379,7 +379,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       return;
     }
     setPreviewStage(null);
-    setActiveTab(stage);
+    startTransition(() => setActiveTab(stage));
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
   }, []);
 
