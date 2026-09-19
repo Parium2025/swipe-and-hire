@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 interface State {
   hasError: boolean;
@@ -130,6 +131,11 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
     }
   };
 
+  handleGoHome = () => {
+    if (typeof window === 'undefined') return;
+    window.location.assign('/');
+  };
+
   render() {
     if (this.state.hasError || this.state.isStuck) {
       const message = this.state.isStuck 
@@ -168,12 +174,24 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
                 </pre>
               </details>
             )}
-            <button
-              onClick={this.handleReload}
-              className="inline-flex w-full items-center justify-center rounded-full px-4 py-2 bg-secondary text-white font-medium hover:bg-secondary/90 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              Ladda om
-            </button>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="glass"
+                onClick={this.handleReload}
+                className="w-full"
+              >
+                Försök igen
+              </Button>
+              <Button
+                type="button"
+                variant="glass"
+                onClick={this.handleGoHome}
+                className="w-full"
+              >
+                Till startsidan
+              </Button>
+            </div>
           </div>
         </div>
       );

@@ -123,6 +123,108 @@ const QuestionItem = memo(({
   return buttonContent;
 });
 
+const ActiveFilterChip = memo(({
+  fullText,
+  questionText,
+  className,
+  onRemove,
+}: {
+  fullText: string;
+  questionText: string;
+  className: string;
+  onRemove: () => void;
+}) => {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggeredRef = useRef(false);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  useEffect(() => {
+    const text = textRef.current;
+    if (!text) return;
+    const measure = () => setIsTruncated(text.scrollWidth > text.clientWidth + 1);
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(text);
+    return () => observer?.disconnect();
+  }, [fullText]);
+
+  useEffect(() => () => {
+    if (longPressRef.current) clearTimeout(longPressRef.current);
+    if (closeRef.current) clearTimeout(closeRef.current);
+  }, []);
+
+  const clearLongPress = useCallback(() => {
+    if (!longPressRef.current) return;
+    clearTimeout(longPressRef.current);
+    longPressRef.current = null;
+  }, []);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== 'touch' || !isTruncated) return;
+    longPressTriggeredRef.current = false;
+    clearLongPress();
+    longPressRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      setTooltipOpen(true);
+      if (closeRef.current) clearTimeout(closeRef.current);
+      closeRef.current = setTimeout(() => setTooltipOpen(false), 2500);
+    }, 500);
+  }, [clearLongPress, isTruncated]);
+
+  const chip = (
+    <button
+      type="button"
+      className={className}
+      onPointerDown={handlePointerDown}
+      onPointerUp={clearLongPress}
+      onPointerCancel={clearLongPress}
+      onPointerLeave={clearLongPress}
+      onClick={() => {
+        if (longPressTriggeredRef.current) longPressTriggeredRef.current = false;
+      }}
+      onContextMenu={(event) => {
+        if (isTruncated) event.preventDefault();
+      }}
+    >
+      <span ref={textRef} className="truncate min-w-0">{fullText}</span>
+      <span
+        role="button"
+        aria-label={`Ta bort filtret ${questionText}`}
+        tabIndex={0}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove();
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          event.stopPropagation();
+          onRemove();
+        }}
+        className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
+      >
+        <X className="h-3 w-3" />
+      </span>
+    </button>
+  );
+
+  if (!isTruncated) return chip;
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+        <TooltipTrigger asChild>{chip}</TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs bg-slate-900 border-white/20 text-white">
+          <p>{fullText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+});
+
 export interface QuestionFilterValue {
   question: string;
   answers: string[]; // empty array means "any answer", multiple values for multi-select
@@ -352,25 +454,13 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
           const fullText = `${filter.question}: ${displayText}`;
 
           return (
-            <button
+            <ActiveFilterChip
               key={filter.question}
+              fullText={fullText}
+              questionText={filter.question}
+              onRemove={() => removeFilter(filter.question)}
               className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[240px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
-            >
-              <TruncatedText
-                text={fullText}
-                className="truncate min-w-0"
-                insideInteractive
-              />
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeFilter(filter.question);
-                }}
-                className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
-              >
-                <X className="h-3 w-3" />
-              </span>
-            </button>
+            />
           );
         })}
 
@@ -551,44 +641,14 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
       {!hideChips && value.map((filter) => {
         const displayText = filter.answers.length === 0 ? 'Alla' : filter.answers.join(', ');
         const fullText = `${filter.question}: ${displayText}`;
-        const isTruncated = filter.question.length > 15;
-        
-        const chipContent = (
-          <button
-            key={filter.question}
-            className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
-          >
-            <span className="truncate min-w-0">
-              {filter.question}
-            </span>
-            <span className="flex-shrink-0 text-white">: {displayText}</span>
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                removeFilter(filter.question);
-              }}
-              className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
-            >
-              <X className="h-3 w-3" />
-            </span>
-          </button>
-        );
-        
-        if (!isTruncated) {
-          return <React.Fragment key={filter.question}>{chipContent}</React.Fragment>;
-        }
-        
         return (
-          <TooltipProvider key={filter.question} delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {chipContent}
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs bg-slate-900 border-white/20 text-white">
-                <p>{fullText}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <ActiveFilterChip
+            key={filter.question}
+            fullText={fullText}
+            questionText={filter.question}
+            onRemove={() => removeFilter(filter.question)}
+            className="px-3 py-1.5 text-xs font-medium rounded-full transition-all text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm max-w-[200px] min-w-0 inline-flex items-center gap-1 bg-white/10 hover:bg-white/15"
+          />
         );
       })}
     </div>
