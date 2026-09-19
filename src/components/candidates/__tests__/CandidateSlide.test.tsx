@@ -92,4 +92,27 @@ describe('CandidateSlide employer swipe', () => {
 
     expect(onSkip).not.toHaveBeenCalled();
   });
+
+  it('stoppar iOS långtrycksmeny och bilddragning på kortet', () => {
+    const { container } = render(
+      <CandidateSlide
+        application={application}
+        rating={0}
+        isVisible
+        isActive
+        onOpenFullProfile={vi.fn()}
+        onSkip={vi.fn()}
+      />,
+    );
+    const card = container.querySelector('[data-candidate-swipe-card]');
+    expect(card).not.toBeNull();
+
+    const contextMenu = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    const dragStart = new Event('dragstart', { bubbles: true, cancelable: true });
+    card?.dispatchEvent(contextMenu);
+    card?.dispatchEvent(dragStart);
+
+    expect(contextMenu.defaultPrevented).toBe(true);
+    expect(dragStart.defaultPrevented).toBe(true);
+  });
 });
