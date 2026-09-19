@@ -87,27 +87,27 @@ export const CandidateCardFace = memo(function CandidateCardFace({
 
         <div className="absolute inset-0">
           {showVideo ? (
-            <div className="h-full w-full" data-candidate-video-control>
+            <div className="h-full w-full">
               <ProfileVideo
-              videoUrl={videoUrl as string}
-              coverImageUrl={coverImageUrl || profileImageUrl || undefined}
-              posterUrl={posterUrl || undefined}
-              userInitials={initials}
-              alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
+                videoUrl={videoUrl as string}
+                coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+                posterUrl={posterUrl || undefined}
+                userInitials={initials}
+                alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
                 className="h-full w-full rounded-none"
                 countdownVariant="default"
                 showCountdown
                 showProgressBar
-            />
+              />
             </div>
           ) : stillImage && !fullBleedImageFailed ? (
-              <img
-                src={stillImage}
-                alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
-                className="h-full w-full object-cover"
-                draggable={false}
-                onError={() => setFullBleedImageFailed(true)}
-              />
+            <img
+              src={stillImage}
+              alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
+              className="h-full w-full object-cover"
+              draggable={false}
+              onError={() => setFullBleedImageFailed(true)}
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-white/10">
               <span className="text-6xl font-bold text-white">{initials}</span>

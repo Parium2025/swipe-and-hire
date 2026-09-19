@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef, type TouchEvent } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -78,10 +78,10 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const isInteractiveTarget = (target: EventTarget | null) =>
     target instanceof Element && Boolean(
-      target.closest('button, a, input, [role="button"], [data-swipe-action-button], [data-candidate-video-control]'),
+      target.closest('button, a, input, [role="button"], [data-swipe-action-button]'),
     );
 
-  const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
     if (!onSkip || event.touches.length !== 1 || isInteractiveTarget(event.target)) return;
     const touch = event.touches[0];
     touchRef.current = {
@@ -93,7 +93,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     thresholdHapticRef.current = false;
   }, [onSkip]);
 
-  const handleTouchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchMove = useCallback((event: TouchEvent<HTMLDivElement>) => {
     const gesture = touchRef.current;
     if (!gesture || gesture.cancelled || event.touches.length !== 1) return;
     const touch = event.touches[0];
@@ -119,7 +119,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     }
   }, [x]);
 
-  const handleTouchEnd = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
     const gesture = touchRef.current;
     touchRef.current = null;
     if (!gesture || gesture.cancelled || !gesture.horizontal) return;
