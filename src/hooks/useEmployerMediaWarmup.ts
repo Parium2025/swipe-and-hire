@@ -5,7 +5,7 @@ import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { imageCache } from '@/lib/imageCache';
-import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
+import { AVATAR_TRANSFORM, CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 /**
  * Bildfälten i databasen innehåller redan fulla URL:er. Utan den här vakten
@@ -224,15 +224,16 @@ export function useEmployerMediaWarmup() {
         if (avatars.length > 0) {
           Promise.allSettled(
             avatars.map((p) =>
-              prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}),
+              prefetchMediaUrl(p, 'profile-image', 86400, CHAT_AVATAR_TRANSFORM).catch(() => {}),
             ),
           );
         }
         if (logos.length > 0) {
-          const LOGO_TRANSFORM = { width: 80, height: 80, resize: 'cover' as const };
           Promise.allSettled(
             logos.map((p) =>
-              prefetchMediaUrl(p, 'company-logo', 86400, LOGO_TRANSFORM).catch(() => {}),
+              // ConversationAvatar renderar loggor utan transform. Samma nyckel
+              // krävs här, annars missar kallstarten den redan förvärmda filen.
+              prefetchMediaUrl(p, 'company-logo', 86400).catch(() => {}),
             ),
           );
         }

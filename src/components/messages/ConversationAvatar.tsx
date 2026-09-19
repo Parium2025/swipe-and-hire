@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
@@ -72,6 +72,12 @@ export function ConversationAvatar({
     setLoaded(hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:')));
   }, [resolvedUrl, hasImageUrl]);
 
+  const attachImage = useCallback((node: HTMLImageElement | null) => {
+    if (!node || !resolvedUrl || !node.complete || node.naturalWidth <= 0) return;
+    loadedAvatarUrls.add(resolvedUrl);
+    setLoaded(true);
+  }, [resolvedUrl]);
+
   return (
     <div
       className={cn(
@@ -91,6 +97,7 @@ export function ConversationAvatar({
       </span>
       {hasImageUrl && (
         <img
+          ref={attachImage}
           src={resolvedUrl}
           alt=""
           aria-hidden="true"
