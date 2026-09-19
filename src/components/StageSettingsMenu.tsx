@@ -226,7 +226,11 @@ export function StageSettingsMenu({
             <MoreVertical className={useJobDetailsTriggerStyle ? 'h-4 w-4' : 'h-4 w-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]'} />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 border-white/20">
+        <DropdownMenuContent
+          align={useJobDetailsTriggerStyle ? 'center' : 'end'}
+          sideOffset={6}
+          className="w-48 border-white/20"
+        >
           <DropdownMenuItem 
             onClick={handleOpenRenameDialog}
             className="cursor-pointer"
