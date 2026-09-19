@@ -275,7 +275,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   // Save edited image
   const handleSaveClick = async () => {
-    if (isSaving || !canvasRef.current) {
+    const canvas = canvasRef.current;
+    if (isSaving || !canvas || !imageLoaded) {
       console.log('ImageEditor: Already saving or no canvas');
       return;
     }
@@ -301,7 +302,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     try {
       // Use WebP format with 95% quality for optimal balance
       const blob = await new Promise<Blob | null>((resolve) => {
-        canvasRef.current!.toBlob((result) => {
+        canvas.toBlob((result) => {
           resolve(result);
         }, 'image/webp', 0.95);
       });
@@ -421,7 +422,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             <Button 
               type="button"
               onClick={handleSaveClick}
-              disabled={isSaving}
+              disabled={isSaving || !imageLoaded}
               className="flex-1 rounded-full !transition-none !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/10 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10 disabled:opacity-50 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
               variant="outline"
             >
