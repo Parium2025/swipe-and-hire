@@ -78,8 +78,19 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
     const rowRect = rowEl.getBoundingClientRect();
     const triggerRect = triggerEl.getBoundingClientRect();
-    const nextWidth = Math.round(rowRect.width);
-    const nextAlignOffset = Math.round(rowRect.left - triggerRect.left);
+    const viewportWidth =
+      (typeof window !== 'undefined' && window.visualViewport?.width) ||
+      (typeof window !== 'undefined' ? window.innerWidth : rowRect.width);
+    const margin = 8;
+    // Menyn får aldrig bli bredare än kortet – och aldrig bredare än skärmen.
+    const nextWidth = Math.round(Math.min(rowRect.width, viewportWidth - margin * 2));
+    // Centrera menyn mot kortet och håll den innanför skärmkanterna.
+    const centeredLeft = rowRect.left + (rowRect.width - nextWidth) / 2;
+    const clampedLeft = Math.min(
+      Math.max(centeredLeft, margin),
+      Math.max(margin, viewportWidth - margin - nextWidth),
+    );
+    const nextAlignOffset = Math.round(clampedLeft - triggerRect.left);
 
     setMenuMetrics((prev) =>
       prev.width === nextWidth && prev.alignOffset === nextAlignOffset
