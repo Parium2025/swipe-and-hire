@@ -178,7 +178,10 @@ const queryClient = new QueryClient({
 // 🌐 Initialize connectivity manager with ping-based detection
 // This replaces the unreliable navigator.onLine with actual server pings
 // and integrates with React Query's onlineManager for automatic pause/resume
-initConnectivityManager(queryClient);
+// Gardera för SSR (Workers): timers/fetch/listeners är förbjudna i global scope.
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  initConnectivityManager(queryClient);
+}
 
 // Minimal loading fallback - just gradient background, no spinner
 const LazyFallback = () => <PageLoader />;
