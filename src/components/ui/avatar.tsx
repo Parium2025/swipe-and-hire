@@ -115,6 +115,9 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         onLoad={handleLoad}
         onError={handleError}
         className={cn("aspect-square h-full w-full object-cover", className)}
+        // Håll bilden osynlig tills den laddats klart — annars kan WebKit hinna
+        // rita sin egen trasig-bild-symbol ovanpå initialerna.
+        style={status === 'loaded' ? props.style : { ...(props.style ?? {}), visibility: 'hidden' }}
         data-state={status}
         loading="eager"
         decoding="async"
