@@ -78,7 +78,7 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const isInteractiveTarget = (target: EventTarget | null) =>
     target instanceof Element && Boolean(
-      target.closest('button, a, input, [role="button"], [data-swipe-action-button]'),
+      target.closest('button, a, input, [role="slider"], [data-swipe-action-button]'),
     );
 
   const handleTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
