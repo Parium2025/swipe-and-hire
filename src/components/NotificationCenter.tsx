@@ -503,8 +503,8 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
   };
 
   const triggerClass = variant === 'rect'
-    ? 'relative flex items-center justify-center px-3 h-10 rounded-lg text-white hover:bg-white/10 transition-colors'
-    : 'relative flex items-center justify-center h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square rounded-full text-white hover:bg-white/10 transition-colors';
+    ? 'relative flex items-center justify-center px-3 h-10 rounded-lg text-white [@media(hover:hover)]:hover:bg-white/10 transition-colors'
+    : 'relative flex items-center justify-center h-[var(--icon-button-size-compact)] w-[var(--icon-button-size-compact)] shrink-0 aspect-square text-white bg-transparent active:bg-transparent focus:bg-transparent [@media(hover:hover)]:rounded-full [@media(hover:hover)]:hover:bg-white/10 transition-colors';
 
   return (
     <div className="relative">
