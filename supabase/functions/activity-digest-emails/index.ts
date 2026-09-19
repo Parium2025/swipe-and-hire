@@ -8,6 +8,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
+import { requireServiceRoleOrCronSecret } from '../_shared/service-auth.ts'
 
 const admin = createClient(
   Deno.env.get('SUPABASE_URL')!,
