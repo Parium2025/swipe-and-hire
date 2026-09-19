@@ -105,7 +105,11 @@ export function useBulkMessageSync() {
             await new Promise(resolve => setTimeout(resolve, delay));
           }
           try {
-            let convId = await findExistingConversationId(user.id, item.applicant_id);
+            let convId = await findExistingConversationId(
+              user.id,
+              item.applicant_id,
+              item.application_id || null
+            );
 
             if (!convId) {
               convId = await createConversationForCandidate(
