@@ -64,6 +64,13 @@
       "when": 1789817348622,
       "tag": "0008_skip_reminders_for_expired_jobs",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789820110801,
+      "tag": "0009_notification_digest_state",
+      "breakpoints": true
     }
   ]
 }
