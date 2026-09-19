@@ -121,6 +121,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
     try {
       el.pause();
       if (el.readyState >= 1) el.currentTime = 0;
+      // Nollställ även externa kontroller så listen inte står kvar i slutet.
+      setProgress(0);
+      onTimeChange?.(0, el.duration || 0);
       if (shouldReleaseDecoderOnStop()) {
         // pause() räcker inte på Windows/Android – elementet håller kvar
         // hårdvarudekodern. load() släpper den tillbaka till poolen.
@@ -159,6 +162,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
       if (videoRef.current) {
         try {
           videoRef.current.currentTime = 0;
+          setProgress(0);
+          onTimeChange?.(0, videoRef.current.duration || 0);
           const playPromise = videoRef.current.play();
           if (playPromise && typeof (playPromise as any).catch === 'function') {
             await (playPromise as Promise<void>);
