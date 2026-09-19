@@ -559,7 +559,11 @@ export const useApplicationsData = (
     staleTime: isDefaultView ? Infinity : 0,
     // Search/sort combinations must not accumulate forever during long recruiter sessions.
     gcTime: 15 * 60 * 1000,
-    refetchOnMount: !isDefaultView,
+    // Standardvyn visas direkt från localStorage-snapshoten, men den kan vara
+    // upp till en timme gammal (t.ex. gammal profilbild). Därför hämtas alltid
+    // färsk data i bakgrunden vid mount — listan syns instant och uppdateras
+    // tyst när svaret kommer. Utan detta låg gammal media kvar till omladdning.
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     initialData: () => {
       if (!user) return undefined;
