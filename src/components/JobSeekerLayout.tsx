@@ -52,11 +52,17 @@ const LogoSidebarTrigger = () => {
 const MobileProfileAvatar = () => {
   const { profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
-  const fallbackUrl = useMediaUrl(
-    (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null,
+  const fallbackCoverUrl = useMediaUrl(
+    !preloadedCoverUrl ? profile?.cover_image_url : null,
+    'cover-image'
+  );
+  const fallbackAvatarUrl = useMediaUrl(
+    (!preloadedCoverUrl && !fallbackCoverUrl && !preloadedAvatarUrl) ? profile?.profile_image_url : null,
     'profile-image'
   );
-  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null;
+  // Profilkortet visar videons cover. Toppikonen ska följa samma bild direkt
+  // efter sparning, och endast falla tillbaka till den separata profilbilden.
+  const avatarUrl = preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackAvatarUrl || null;
   
   const initials = (() => {
     const f = profile?.first_name || '';

@@ -80,10 +80,9 @@ export function AppSidebar() {
     prefetchRoute(url);
   }, [isMobile, prefetchRoute]);
 
-  // Använd preloadedAvatarUrl som primär källa, fallback till profile.profile_image_url, sedan cover_image_url
+  // Samma bild som profilkortet: cover först, separat profilbild som fallback.
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
-    // Prioritera cache först (identiskt med arbetsgivarsidan)
-    return preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
+    return preloadedCoverUrl || profile?.cover_image_url || preloadedAvatarUrl || profile?.profile_image_url || null;
   });
   // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
   const [videoUrl, setVideoUrl] = useState<string | null>(() => preloadedVideoUrl ?? null);
@@ -97,9 +96,8 @@ export function AppSidebar() {
   
   // Håll avatar i synk med preloader/profile, med cover som fallback
   useEffect(() => {
-    // Prioritera i rätt ordning: preloaded → profile → cover
-    const newAvatarUrl = preloadedAvatarUrl || preloadedCoverUrl || profile?.profile_image_url || profile?.cover_image_url || null;
-    if (newAvatarUrl && newAvatarUrl !== avatarUrl) {
+    const newAvatarUrl = preloadedCoverUrl || profile?.cover_image_url || preloadedAvatarUrl || profile?.profile_image_url || null;
+    if (newAvatarUrl !== avatarUrl) {
       setAvatarUrl(newAvatarUrl);
     }
   }, [preloadedAvatarUrl, preloadedCoverUrl, profile?.profile_image_url, profile?.cover_image_url]);
