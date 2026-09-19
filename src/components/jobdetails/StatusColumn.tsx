@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef, memo } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ChevronDown, Sparkles } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { SortableApplicationCard } from './ApplicationCard';
