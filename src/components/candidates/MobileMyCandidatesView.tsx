@@ -516,7 +516,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 onClick={() => handleStageClick(stage)}
                 onContextMenu={(e) => { if (isTouchCapable) e.preventDefault(); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-all duration-150 active:scale-95 shrink-0 cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap transition-[border-color,box-shadow] duration-150 [@media(hover:hover)]:active:scale-95 shrink-0 cursor-pointer max-w-[180px] border outline-none focus:outline-none focus-visible:outline-none [outline:none!important] transform-gpu ${
                   isActive ? 'shadow-lg border-white/50' : 'border-transparent'
                 }`}
                 style={{ backgroundColor: `${cfg.color}55` }}
