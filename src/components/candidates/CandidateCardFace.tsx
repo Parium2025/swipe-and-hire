@@ -1,8 +1,9 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ProfileVideoCircle from '@/components/ProfileVideoCircle';
+import ProfileVideo from '@/components/ProfileVideo';
 import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/criteria/CriteriaBadges';
 
 import { TruncatedText } from '@/components/TruncatedText';
@@ -66,14 +67,15 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const showVideo = Boolean(hasVideo && videoUrl);
   const stillImage = profileImageUrl || coverImageUrl || '';
+  const [fullBleedImageFailed, setFullBleedImageFailed] = useState(false);
 
-  // Helskärmsläge: bild, video och initialer använder samma cirkulära medieyta.
-  // Det gör att samma kandidat aldrig byter kortstruktur beroende på vilken
-  // ansökans snapshot som råkar vara den aktuella i vyn.
+  useEffect(() => {
+    setFullBleedImageFailed(false);
+  }, [stillImage]);
+
+  // Helskärmsläge för arbetsgivarens swipe-vy: kandidatens bild eller video
+  // täcker hela kortet. Initialerna använder exakt samma yta när media saknas.
   if (fullBleed) {
-    const circleClass =
-      'h-[min(56vw,14rem)] w-[min(56vw,14rem)] overflow-hidden rounded-full border-4 border-white/30 shadow-2xl';
-
     return (
       <div
         className="w-full h-full relative overflow-hidden select-none flex flex-col [-webkit-tap-highlight-color:transparent]"
@@ -83,39 +85,39 @@ export const CandidateCardFace = memo(function CandidateCardFace({
       >
         <div className="absolute inset-0 bg-parium-gradient" />
 
-        {/* Mediazon — cirkeln lever i eget flödesutrymme och kan aldrig nå namnet */}
-        <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-6 pt-10 pb-4">
+        <div className="absolute inset-0">
           {showVideo ? (
-            <ProfileVideoCircle
+            <div className="h-full w-full" data-candidate-video-control>
+              <ProfileVideo
               videoUrl={videoUrl as string}
               coverImageUrl={coverImageUrl || profileImageUrl || undefined}
               posterUrl={posterUrl || undefined}
               userInitials={initials}
               alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
-              circleClassName={`${circleClass} bg-white/10 backdrop-blur-sm`}
-              barClassName="w-[min(56vw,14rem)]"
+                className="h-full w-full rounded-none"
+                countdownVariant="default"
+                showCountdown
+                showProgressBar
             />
-          ) : stillImage ? (
-            <Avatar className={`${circleClass} bg-white/10 backdrop-blur-sm`}>
-              <AvatarImage
+            </div>
+          ) : stillImage && !fullBleedImageFailed ? (
+              <img
                 src={stillImage}
                 alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
-                className="object-cover"
+                className="h-full w-full object-cover"
+                draggable={false}
+                onError={() => setFullBleedImageFailed(true)}
               />
-              <AvatarFallback className="bg-white/10 text-5xl font-bold text-white">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
           ) : (
-            <div className="flex h-[min(56vw,14rem)] w-[min(56vw,14rem)] items-center justify-center overflow-hidden rounded-full border-4 border-white/30 bg-white/10 shadow-2xl backdrop-blur-sm">
-              <span className="text-5xl font-bold text-white">{initials}</span>
+            <div className="flex h-full w-full items-center justify-center bg-white/10">
+              <span className="text-6xl font-bold text-white">{initials}</span>
             </div>
           )}
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/10 pointer-events-none" />
 
-        <div className={`relative z-10 shrink-0 px-5 text-left pointer-events-none ${contentBottomClassName}`}>
+        <div className={`absolute inset-x-0 bottom-0 z-10 px-5 text-left pointer-events-none ${contentBottomClassName}`}>
           <TruncatedText text={fullName} className="two-line-ellipsis two-line-ellipsis-nopad block w-full">
             <NameAutoFit
               text={fullName}
