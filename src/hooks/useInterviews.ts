@@ -67,6 +67,45 @@ function writeEmployerInterviewsCache(userId: string, interviews: Interview[]): 
   }
 }
 
+/**
+ * Kanonisk hämtare för arbetsgivarens intervjuer — delas av hooken och
+ * förvärmningen så att en prefetch får exakt samma form och nyckel.
+ */
+export async function fetchEmployerInterviewsForUser(userId: string): Promise<Interview[]> {
+  // Fetch interviews with candidate and job info
+  const { data, error } = await supabase
+    .from('interviews')
+    .select(`
+      *,
+      job_postings(title),
+      job_applications(first_name, last_name)
+    `)
+    .eq('employer_id', userId)
+    // Hämta även möten som just startat – ett pågående möte får inte
+    // försvinna från kortet mitt under intervjun. isInterviewOver städar bort.
+    .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
+    .in('status', ['pending', 'confirmed'])
+    .order('scheduled_at', { ascending: true })
+    // Tak: ett stort företag kan ha tusentals bokade möten framåt.
+    // Kortet visar bara de närmaste – hämta aldrig hela historiken.
+    .limit(200);
+
+  if (error) throw error;
+
+  const result = (data || []).map((interview: any) => ({
+    ...interview,
+    candidate_name: interview.job_applications
+      ? `${interview.job_applications.first_name || ''} ${interview.job_applications.last_name || ''}`.trim() || 'Okänd'
+      : 'Okänd',
+    job_title: interview.job_postings?.title || 'Okänd tjänst',
+  })) as Interview[];
+
+  // 🔥 Cache for instant-load on next visit
+  writeEmployerInterviewsCache(userId, result);
+
+  return result;
+}
+
 export const useInterviews = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -79,39 +118,7 @@ export const useInterviews = () => {
     queryKey: ['interviews', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-
-      // Fetch interviews with candidate and job info
-      const { data, error } = await supabase
-        .from('interviews')
-        .select(`
-          *,
-          job_postings(title),
-          job_applications(first_name, last_name)
-        `)
-        .eq('employer_id', user.id)
-        // Hämta även möten som just startat – ett pågående möte får inte
-        // försvinna från kortet mitt under intervjun. isInterviewOver städar bort.
-        .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
-        .in('status', ['pending', 'confirmed'])
-        .order('scheduled_at', { ascending: true })
-        // Tak: ett stort företag kan ha tusentals bokade möten framåt.
-        // Kortet visar bara de närmaste – hämta aldrig hela historiken.
-        .limit(200);
-
-      if (error) throw error;
-
-      const result = (data || []).map((interview: any) => ({
-        ...interview,
-        candidate_name: interview.job_applications 
-          ? `${interview.job_applications.first_name || ''} ${interview.job_applications.last_name || ''}`.trim() || 'Okänd'
-          : 'Okänd',
-        job_title: interview.job_postings?.title || 'Okänd tjänst',
-      })) as Interview[];
-
-      // 🔥 Cache for instant-load on next visit
-      writeEmployerInterviewsCache(user.id, result);
-
-      return result;
+      return fetchEmployerInterviewsForUser(user.id);
     },
     enabled: !!user?.id,
     staleTime: 0, // Always consider stale so invalidateQueries triggers refetch
