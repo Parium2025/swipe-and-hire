@@ -234,6 +234,7 @@ async function hydrateApplications(
           mediaByApplicant.set(row.applicant_id, {
             profile_image_url: row.profile_image_url,
             video_url: row.video_url,
+            cover_image_url: row.cover_image_url ?? null,
             is_profile_video: row.is_profile_video,
             city: row.city || null,
           });
@@ -283,7 +284,7 @@ async function hydrateApplications(
 
   return applicationsData.map((app) => {
     const liveMedia =
-      mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, is_profile_video: false, city: null };
+      mediaByApplicant.get(app.applicant_id) || { profile_image_url: null, video_url: null, cover_image_url: null, is_profile_video: false, city: null };
     const media = resolveCandidateMedia(app as any, liveMedia);
     const evalId = evaluationByApplicant.get(app.applicant_id);
     const criterionResults = evalId ? resultsByEvaluation.get(evalId) || [] : [];

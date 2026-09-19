@@ -217,7 +217,7 @@ export function useColleagueCandidates(
 
       // Fetch profile media for all applicants in ONE batch call (scales to millions)
       const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
-      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; is_profile_video: boolean | null }> = {};
+      const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; cover_image_url: string | null; is_profile_video: boolean | null }> = {};
 
       // Single batch RPC call instead of N individual calls
       const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
@@ -230,6 +230,7 @@ export function useColleagueCandidates(
           profileMediaMap[row.applicant_id] = {
             profile_image_url: row.profile_image_url,
             video_url: row.video_url,
+            cover_image_url: row.cover_image_url ?? null,
             is_profile_video: row.is_profile_video,
           };
         });
@@ -241,6 +242,7 @@ export function useColleagueCandidates(
           profileMediaMap[id] = {
             profile_image_url: null,
             video_url: null,
+            cover_image_url: null,
             is_profile_video: null,
           };
         }
