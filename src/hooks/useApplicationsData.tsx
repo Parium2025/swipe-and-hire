@@ -424,6 +424,7 @@ export const useApplicationsData = (
          {
            profile_image_url: string | null;
            video_url: string | null;
+           cover_image_url: string | null;
            is_profile_video: boolean | null;
            last_active_at: string | null;
          }
