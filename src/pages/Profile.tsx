@@ -584,7 +584,7 @@ const Profile = () => {
   const profileImagePathChangedLocally = !!profileImageUrl && profileImageUrl !== ((profile as any)?.profile_image_url || '');
   const coverImagePathChangedLocally = !!coverImageUrl && coverImageUrl !== ((profile as any)?.cover_image_url || '');
   const signedProfileImageUrl = effectiveProfileImagePath
-    ? (profileImagePathChangedLocally ? fallbackProfileImageUrl : (preloadedAvatarUrl || fallbackProfileImageUrl))
+    ? (profileImageUrl ? fallbackProfileImageUrl : (preloadedAvatarUrl || fallbackProfileImageUrl))
     : null;
   const signedCoverUrl = effectiveCoverImagePath
     ? (coverImagePathChangedLocally ? fallbackCoverUrl : (preloadedCoverUrl || fallbackCoverUrl))
@@ -2097,14 +2097,11 @@ const Profile = () => {
   const submitRef = useRef(handleSubmit);
   submitRef.current = handleSubmit;
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (savedResetRef.current) clearTimeout(savedResetRef.current); }, []);
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (loading || isUploadingMedia || isUploadingCover) return;
     if (isDiscardingChangesRef.current) return;
     const t = setTimeout(async () => {
-      if (savedResetRef.current) clearTimeout(savedResetRef.current);
       setSaveStatus('saving');
       try {
         await submitRef.current(undefined, { silent: true });
@@ -2112,7 +2109,6 @@ const Profile = () => {
         // (t.ex. ogiltiga obligatoriska fält) återgår statusen tyst.
         if (lastSaveOkRef.current) {
           setSaveStatus('saved');
-          savedResetRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
         } else {
           setSaveStatus('idle');
         }
