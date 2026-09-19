@@ -1434,7 +1434,14 @@ const Profile = () => {
         await persistOriginalImage(pendingCoverSrc, storagePath, 'cover-image');
       }
 
+      if (isUnmountedRef.current) {
+        await persistMediaInBackground(targetProfileId, { cover_image_url: storagePath });
+        if (pendingCoverSrc) URL.revokeObjectURL(pendingCoverSrc);
+        return;
+      }
+
       // Vald extraprofil: cover sparas direkt i dess egen tunnel.
+
       if (targetProfileId) {
         if (!profileRailRef.current) throw new Error('Profilväljaren är inte tillgänglig.');
         await profileRailRef.current.updateProfileById(targetProfileId, { cover_image_url: storagePath });
