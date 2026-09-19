@@ -86,6 +86,8 @@ interface KeepAliveProps {
   enterDelayMs?: number;
   /** Start each ordinary route visit at the top; explicit detail-overlay returns still restore. */
   resetScrollOnNavigation?: boolean;
+  /** Use the same right-to-left mobile entrance as the conversation view. */
+  mobileSlideNavigation?: boolean;
 }
 
 /**
@@ -101,7 +103,7 @@ interface KeepAliveProps {
  * verbatim. Previously the active node was re-created on every render, which
  * defeated the whole purpose of caching.
  */
-export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, resetScrollOnNavigation = false }: KeepAliveProps) {
+export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, resetScrollOnNavigation = false, mobileSlideNavigation = false }: KeepAliveProps) {
   // No caching mode: just render the active view (legacy behaviour)
   if (!keepKeys || keepKeys.length === 0) {
     return (
@@ -120,6 +122,7 @@ export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, reset
       keepKeys={keepKeys}
       enterDelayMs={enterDelayMs}
       resetScrollOnNavigation={resetScrollOnNavigation}
+      mobileSlideNavigation={mobileSlideNavigation}
     />
   );
 }
@@ -130,7 +133,8 @@ function KeepAliveCached({
   keepKeys,
   enterDelayMs,
   resetScrollOnNavigation,
-}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs' | 'resetScrollOnNavigation'>>) {
+  mobileSlideNavigation,
+}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs' | 'resetScrollOnNavigation' | 'mobileSlideNavigation'>>) {
   // Persistent cache of mounted nodes — survives the entire session
   const cacheRef = useRef<Map<string, React.ReactNode>>(new Map());
   // Track which keys we've ever mounted (so we can render in stable order)
@@ -599,11 +603,15 @@ function KeepAliveCached({
       {mountedKeysRef.current.map((key) => {
         const isDisplayed = key === displayedKey;
         const enterClasses = isEntered
-          ? 'opacity-100 translate-y-0'
+          ? 'opacity-100 translate-x-0 translate-y-0'
           : isFastEnter
-            ? 'opacity-0 translate-y-1 pointer-events-none'
-            : 'opacity-0 translate-y-2 pointer-events-none';
-        const durationClass = isFastEnter ? 'duration-[280ms]' : 'duration-500';
+            ? `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-1' : 'translate-y-1'}`
+            : `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-2' : 'translate-y-2'}`;
+        const durationClass = mobileSlideNavigation
+          ? 'duration-[320ms] lg:duration-[280ms]'
+          : isFastEnter
+            ? 'duration-[280ms]'
+            : 'duration-500';
         return (
           <div
             key={key}
@@ -618,7 +626,7 @@ function KeepAliveCached({
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none motion-reduce:transform-none ${enterClasses}`
                 : ''
             }
             aria-hidden={!isDisplayed}
