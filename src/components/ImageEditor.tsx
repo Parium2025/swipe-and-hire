@@ -147,21 +147,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Save context for clipping
     ctx.save();
-    
-    // Create clipping path
-    if (isCircular) {
-      const radius = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) / 2 - 2;
-      ctx.beginPath();
-      ctx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, radius, 0, Math.PI * 2);
-      ctx.clip();
-    } else {
-      // Rectangular clipping
-      ctx.beginPath();
-      ctx.rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.clip();
-    }
+
+    // Spara alltid hela ytan (fyrkant). Den runda formen är endast visuell
+    // (CSS) så att arbetsgivarens Swipe Mode kan fylla hela kortet.
+    ctx.beginPath();
+    ctx.rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.clip();
     
     // Calculate image position and size
     const scaledWidth = img.width * scale;
@@ -178,18 +170,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     
     // Restore context
     ctx.restore();
-    
-    // Draw border
-    ctx.strokeStyle = '#e5e7eb';
-    ctx.lineWidth = 2;
-    if (isCircular) {
-      ctx.beginPath();
-      const radius = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) / 2 - 1;
-      ctx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, radius, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    // Ingen border för rektangulära bilder - ta bort de vita kanterna
-  }, [scale, position, imageLoaded, isCircular]);
+    // Ingen border ritas in i bilden - kanter hanteras visuellt i UI
+  }, [scale, position, imageLoaded, CANVAS_WIDTH, CANVAS_HEIGHT]);
 
   // Redraw when properties change
   useEffect(() => {
