@@ -168,23 +168,33 @@ async function runSearchScenario(ctx: VirtualUserContext): Promise<string> {
 }
 
 async function runMatchScenario(ctx: VirtualUserContext): Promise<string> {
-  const { data: jobs, error: jobsError } = await ctx.client
-    .from('job_postings')
-    .select('id,title,created_at,employer_id,applications_count,views_count')
-    .eq('is_active', true)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(25);
+  // Anonymous clients cannot read job_postings directly (RLS/grants by design),
+  // so the match scenario mirrors the app: search_jobs + get_public_job.
+  const { data: jobs, error: jobsError } = await ctx.client.rpc('search_jobs', {
+    p_search_query: null,
+    p_city: null,
+    p_county: null,
+    p_employment_types: null,
+    p_category: null,
+    p_salary_min: null,
+    p_salary_max: null,
+    p_limit: 25,
+    p_offset: 0,
+    p_cursor_created_at: null,
+    p_employer_ids: null,
+    p_created_after: null,
+    p_sort: 'newest',
+    p_cursor_id: null,
+    p_cursor_rank: null,
+    p_cursor_views: null,
+  } as any);
 
   if (jobsError) throw jobsError;
-  const job = jobs?.[Math.floor(Math.random() * Math.max(jobs.length, 1))];
-  if (!job) return 'no-jobs';
+  const list = (jobs || []) as any[];
+  const job = list[Math.floor(Math.random() * Math.max(list.length, 1))];
+  if (!job?.id) return 'no-jobs';
 
-  const detail = await ctx.client
-    .from('job_postings')
-    .select('id,title,description,requirements,workplace_city,employment_type,work_schedule')
-    .eq('id', job.id)
-    .single();
+  const detail = await ctx.client.rpc('get_public_job', { p_job_id: job.id } as any);
   if (detail.error) throw detail.error;
 
   if (ENABLE_WRITES && ctx.authenticated) {
