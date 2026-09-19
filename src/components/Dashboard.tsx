@@ -253,12 +253,11 @@ const Dashboard = memo(() => {
   useEffect(() => { setPage(1); }, [activeTab]);
   useEffect(() => { setPage(1); }, [searchTerm, sortBy, selectedRecruiterId]);
 
-  // Klick på ett statistikkort → byt flik och glid mjukt ner till listan
+  // Klick på ett statistikkort byter flik utan att flytta mobilvyn. scrollIntoView
+  // kunde även scrolla sidans yttre viewport i iOS Safari och skjuta den fasta
+  // headern bakom webbläsarens toppfält.
   const goToTab = useCallback((tab: JobStatusTab) => {
     setActiveTab(tab);
-    requestAnimationFrame(() => {
-      listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   }, [setActiveTab]);
 
   const statsCards = useMemo(() => {
