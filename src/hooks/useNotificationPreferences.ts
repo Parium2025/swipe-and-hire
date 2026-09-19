@@ -160,9 +160,9 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
           }
           return [...old, { 
             notification_type: type, 
-            is_enabled: channel === 'push' ? enabled : true,
-            email_enabled: channel === 'email' ? enabled : true,
-            in_app_enabled: channel === 'in_app' ? enabled : true,
+            is_enabled: channel === 'push' ? enabled : defaultFor(type, 'push'),
+            email_enabled: channel === 'email' ? enabled : defaultFor(type, 'email'),
+            in_app_enabled: channel === 'in_app' ? enabled : defaultFor(type, 'in_app'),
           }];
         }
       );
