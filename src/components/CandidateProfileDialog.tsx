@@ -17,7 +17,6 @@ import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { useOutreachManualActions } from '@/hooks/useOutreachManualActions';
 import { CvViewer } from '@/components/CvViewer';
 import { CandidateActivityLog } from '@/components/CandidateActivityLog';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -44,7 +43,6 @@ import {
   QUESTIONS_STORAGE_KEY,
 } from '@/components/candidateProfile';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
-import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
 
 function useProfileImageUrl(path: string | null | undefined) {
   // Ingen transform: porträttet renderas stort (192px CSS, upp till 3x på retina)
@@ -141,7 +139,6 @@ export const CandidateProfileDialog = ({
   );
   const [bookInterviewOpen, setBookInterviewOpen] = useState(false);
   const [sendMessageOpen, setSendMessageOpen] = useState(false);
-  const [sendMessagePreset, setSendMessagePreset] = useState<ManualOutreachActionKey | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
@@ -303,7 +300,6 @@ export const CandidateProfileDialog = ({
     cvUrl: activeApplication?.cv_url || null,
     open,
   });
-  const outreachManualActions = useOutreachManualActions(open);
 
   useEffect(() => {
     if (!application) return;
@@ -844,7 +840,6 @@ export const CandidateProfileDialog = ({
             variant={variant}
             hasTeam={hasTeam}
             onSendMessage={() => {
-              setSendMessagePreset(null);
               setSendMessageOpen(true);
             }}
             onBookInterview={() => setBookInterviewOpen(true)}
@@ -855,28 +850,6 @@ export const CandidateProfileDialog = ({
             stageOrder={stageOrder}
             stageConfig={stageConfig}
             onStageChange={onStageChange}
-            quickActions={[
-              {
-                key: 'progress',
-                label: 'Gå vidare',
-                variant: outreachManualActions.groups.progress.action.buttonVariant,
-                onClick: () => {
-                  setSendMessagePreset('progress');
-                  setSendMessageOpen(true);
-                },
-              },
-              ...(!displayApp.rejected_at && displayApp.status !== 'rejected' && displayApp.status !== 'hired'
-                ? [{
-                    key: 'rejection' as const,
-                    label: 'Ge avslag',
-                    variant: outreachManualActions.groups.rejection.action.buttonVariant,
-                    onClick: () => {
-                      setSendMessagePreset('rejection');
-                      setSendMessageOpen(true);
-                    },
-                  }]
-                : []),
-            ]}
           />
           </div>
 
@@ -995,26 +968,11 @@ export const CandidateProfileDialog = ({
         open={sendMessageOpen}
         onOpenChange={(nextOpen) => {
           setSendMessageOpen(nextOpen);
-          if (!nextOpen) setSendMessagePreset(null);
         }}
         recipientId={displayApp.applicant_id}
         recipientName={candidateName}
         jobId={displayApp.job_id}
         applicationId={displayApp.id}
-        presetAction={sendMessagePreset}
-        onPresetSent={async (action) => {
-          if (action !== 'rejection') return;
-          const rejectedAt = new Date().toISOString();
-          const { error } = await supabase
-            .from('job_applications')
-            .update({ rejected_at: rejectedAt })
-            .eq('id', displayApp.id);
-          if (error) {
-            toast.error('Beskedet skickades, men avslaget kunde inte registreras');
-            return;
-          }
-          onStatusUpdate();
-        }}
       />
     )}
 

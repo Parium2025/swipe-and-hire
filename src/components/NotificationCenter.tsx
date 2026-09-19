@@ -404,7 +404,7 @@ const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
   job_closed: 'job_closed',
   saved_search_match: 'saved_search_match',
   saved_job_expiring: 'saved_job_expiring',
-  application_decision_reminder: 'new_application',
+  application_decision_reminder: 'application_decision_reminder',
 };
 
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {
