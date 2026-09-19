@@ -31,12 +31,14 @@ export function mapRawToApplicationData(
     updated_at: string;
     profile_image_snapshot_url?: string | null;
     video_snapshot_url?: string | null;
+    cover_image_snapshot_url?: string | null;
     candidate_profile_label?: string | null;
   },
   opts: {
     jobTitle?: string;
     fallbackProfileImageUrl?: string | null;
     fallbackVideoUrl?: string | null;
+    fallbackCoverImageUrl?: string | null;
     fallbackIsProfileVideo?: boolean | null;
   } = {}
 ): ApplicationData {
