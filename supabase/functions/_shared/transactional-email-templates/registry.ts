@@ -37,4 +37,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'outreach-message': outreachMessage,
   'account-inactivity-warning': accountInactivityWarning,
   'team-invitation': teamInvitation,
+  'activity-digest': activityDigest,
 }
