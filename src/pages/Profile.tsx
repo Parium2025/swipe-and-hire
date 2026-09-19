@@ -26,7 +26,7 @@ import { Dialog, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { CvViewer } from '@/components/CvViewer';
 import FileUpload from '@/components/FileUpload';
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';

@@ -36,6 +36,7 @@ export function ProfileVideoCircle({
   barClassName = '',
   showCountdown = true,
   disablePlayback = false,
+  forceTouchMode = false,
 }: ProfileVideoCircleProps) {
   const [time, setTime] = useState({ current: 0, duration: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
