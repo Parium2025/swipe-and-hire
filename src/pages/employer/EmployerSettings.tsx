@@ -224,20 +224,6 @@ const EmployerSettings = () => {
               <p className="text-xs text-white">Skickas när en intervju bokas eller bokas om. Kandidaten får Ja/Nej-knappar, mötesinformation och kalenderlänk utan dubbla mejl.</p>
             </li>
             <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium text-white">Påminnelse efter 14 dagar</p>
-                  <p className="text-xs text-white">En samlad daglig notis när en ansökan är minst 14 dagar gammal och inte har markerats som Anställd eller Avslagen. Alla övriga steg räknas. Kandidaten får inget automatiskt avslag.</p>
-                </div>
-                <Switch
-                  checked={isEnabled('application_decision_reminder', 'in_app')}
-                  onCheckedChange={(checked) => toggle('application_decision_reminder', checked, 'in_app')}
-                  disabled={prefsLoading}
-                  aria-label="Påminnelse efter 14 dagar"
-                />
-              </div>
-            </li>
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
               <p className="font-medium text-white">Jobb som snart går ut</p>
               <p className="text-xs text-white">Arbetsgivaren påminns före annonsens slut. Jobbsökare kan få en påminnelse när ett sparat jobb snart går ut.</p>
             </li>

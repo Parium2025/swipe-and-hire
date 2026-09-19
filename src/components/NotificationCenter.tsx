@@ -2,7 +2,7 @@ import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
-import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp, Clock3 } from 'lucide-react';
+import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -33,7 +33,6 @@ const typeIcons: Record<string, typeof Bell> = {
   saved_search_match: Bell,
   candidate_deleted: UserX,
   message_reaction: ThumbsUp,
-  application_decision_reminder: Clock3,
 };
 
 
@@ -48,7 +47,6 @@ const typeColors: Record<string, string> = {
   saved_search_match: 'text-white',
   candidate_deleted: 'text-white',
   message_reaction: 'text-white',
-  application_decision_reminder: 'text-white',
 };
 
 
@@ -105,7 +103,6 @@ function resolveRoute(type: string, metadata?: Record<string, unknown> | null): 
     case 'new_message':
       return '/messages';
     case 'new_application':
-    case 'application_decision_reminder':
       if (applicationId) return `/candidates?application=${applicationId}`;
       return jobId ? `/job-details/${jobId}` : '/candidates';
     case 'application_status':
@@ -192,24 +189,6 @@ function NotificationItem({
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
-  const reminderStateId = notification.type === 'application_decision_reminder'
-    && typeof (notification.metadata as Record<string, unknown> | null)?.reminder_state_id === 'string'
-      ? String((notification.metadata as Record<string, unknown>).reminder_state_id)
-      : null;
-  const [snoozing, setSnoozing] = useState(false);
-
-  const snooze = async (event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (!reminderStateId || snoozing) return;
-    setSnoozing(true);
-    const { error } = await supabase.rpc('snooze_application_decision_reminder', {
-      _state_id: reminderStateId,
-      _days: 3,
-    });
-    setSnoozing(false);
-    if (error) return;
-    onRead(notification.id);
-  };
 
   return (
     <motion.div
@@ -271,18 +250,6 @@ function NotificationItem({
             >
               Rapportera
             </button>
-          )}
-          {reminderStateId && (
-            <Button
-              type="button"
-              variant="glass"
-              size="sm"
-              disabled={snoozing}
-              onClick={snooze}
-              className="ml-auto h-7 rounded-full px-3 text-[11px]"
-            >
-              {snoozing ? 'Sparar…' : 'Påminn om 3 dagar'}
-            </Button>
           )}
         </div>
       </div>
@@ -404,7 +371,6 @@ const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
   job_closed: 'job_closed',
   saved_search_match: 'saved_search_match',
   saved_job_expiring: 'saved_job_expiring',
-  application_decision_reminder: 'application_decision_reminder',
 };
 
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {

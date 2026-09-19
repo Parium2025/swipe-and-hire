@@ -64,3 +64,4 @@
 - [x] Verifiera att egna regler ersätter Pariums standardflöde utan dubbelutskick
 - [x] Förtydliga Systemutskick och 14-dagarsvillkor i inställningarna
 - [x] Säkerställ avslag per specifik ansökan utan påverkan på andra jobb
+- [x] 14-dagarspåminnelsen borttagen helt (notis, reglage, snooze, daglig körning)
