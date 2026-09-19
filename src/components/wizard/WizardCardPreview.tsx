@@ -433,7 +433,7 @@ export const WizardListPreview = memo(function WizardListPreview({
           <PreviewRow label="Anställningsform" value={employmentTypeLabel || '–'} />
           <PreviewRow label="Plats" value={location || '–'} />
           <PreviewRow label="Arbetstider" value={workingHours || '–'} />
-          <PreviewRow label="Startdatum" value={startDateLabel || '–'} />
+          <PreviewRow label="Startdatum" value={startDateLabel || 'Omgående'} />
           <PreviewRow label="Lön" value={salaryText || '–'} />
           <PreviewRow
             label="Förmåner"
@@ -578,7 +578,7 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     overlayTextColor: normalizeJobOverlayTextColor(input.overlayTextColor ?? DEFAULT_JOB_OVERLAY_TEXT_COLOR),
     recruiterName: input.recruiterName ?? null,
     publishedLabel,
-    startDateLabel: input.startDate ? formatDateShortSv(input.startDate) : null,
+    startDateLabel: input.startDate ? formatDateShortSv(input.startDate) : 'Omgående',
     questionsCount: input.questionsCount ?? 0,
     viewsCount: input.viewsCount ?? 0,
     isExpired,
