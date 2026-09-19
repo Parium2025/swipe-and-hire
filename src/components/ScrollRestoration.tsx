@@ -190,9 +190,11 @@ export function ScrollRestoration() {
     }
 
     const positions = readPositions();
+    // Vanliga sidbyten, även webbläsarens tillbaka/framåt, börjar högst upp.
+    // Endast uttryckliga returflöden får återställa läget: annons-overlayn och
+    // footer-navigationen, där användaren ska komma tillbaka till klickpunkten.
     const shouldRestore = !shouldForceTop
-      && (navigationType === 'POP'
-        || consumePendingFooterRestore(location.pathname)
+      && (consumePendingFooterRestore(location.pathname)
         || consumePendingScrollRestore(location.pathname));
     const storedPosition = shouldRestore ? positions[location.pathname] : undefined;
     const targetTop = storedPosition?.top ?? 0;

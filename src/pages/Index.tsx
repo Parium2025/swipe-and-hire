@@ -142,7 +142,14 @@ const CandidatesContent = () => {
   // Medan en ny sökning väntar/hämtas visar vi INTE ett nytt tomläge — annars
   // blinkar "Inga kandidater än" förbi när man rensar filter.
   const isSearchPending = searchQuery !== debouncedSearch;
-  const isBusy = isSearchPending || (isFetching && !isFetchingNextPage);
+  const hasActiveCandidateQuery = Boolean(
+    debouncedSearch.trim() || questionFilters.length > 0 || sortBy !== 'applied_at',
+  );
+  // Standardlistan hålls färsk tyst i bakgrunden. Den cacheade listan och
+  // Swipe-läget är redan användbara och ska därför aldrig täckas av
+  // ”Uppdaterar kandidater…” efter inloggning eller återbesök.
+  const isBusy = isSearchPending
+    || (hasActiveCandidateQuery && isFetching && !isFetchingNextPage);
   const stableSearchRef = useRef(debouncedSearch);
   if (!isBusy) stableSearchRef.current = debouncedSearch;
   const appliedSearch = stableSearchRef.current;
@@ -893,6 +900,7 @@ const Index = () => {
           render={(key) => renderEmployerContent(key)}
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
+          resetScrollOnNavigation
         />
         {showEmployerTourOverlay ? (
           <EmployerOnboardingTour

@@ -54,6 +54,10 @@ export function useCandidateMediaPreloader(
         loadedRef.current.add(`img:${app.profile_image_url}`);
         tasks.push({ path: app.profile_image_url, type: 'profile-image' });
       }
+      if (app?.cover_image_url && !loadedRef.current.has(`cover:${app.cover_image_url}`)) {
+        loadedRef.current.add(`cover:${app.cover_image_url}`);
+        tasks.push({ path: app.cover_image_url, type: 'profile-image' });
+      }
       if (app?.video_url && !loadedRef.current.has(`vid:${app.video_url}`)) {
         loadedRef.current.add(`vid:${app.video_url}`);
         tasks.push({ path: app.video_url, type: 'profile-video' });
@@ -100,6 +104,10 @@ export function useCandidateMediaPreloader(
       if (app?.profile_image_url && !loadedRef.current.has(`img:${app.profile_image_url}`)) {
         loadedRef.current.add(`img:${app.profile_image_url}`);
         tasks.push({ path: app.profile_image_url, type: 'profile-image' });
+      }
+      if (app?.cover_image_url && !loadedRef.current.has(`cover:${app.cover_image_url}`)) {
+        loadedRef.current.add(`cover:${app.cover_image_url}`);
+        tasks.push({ path: app.cover_image_url, type: 'profile-image' });
       }
       if (app?.video_url && !loadedRef.current.has(`vid:${app.video_url}`)) {
         loadedRef.current.add(`vid:${app.video_url}`);

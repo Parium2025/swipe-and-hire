@@ -84,6 +84,8 @@ interface KeepAliveProps {
   keepKeys?: string[];
   /** Optional enter delay to let surrounding UI transitions finish before content fades in. */
   enterDelayMs?: number;
+  /** Start each ordinary route visit at the top; explicit detail-overlay returns still restore. */
+  resetScrollOnNavigation?: boolean;
 }
 
 /**
@@ -99,7 +101,7 @@ interface KeepAliveProps {
  * verbatim. Previously the active node was re-created on every render, which
  * defeated the whole purpose of caching.
  */
-export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0 }: KeepAliveProps) {
+export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, resetScrollOnNavigation = false }: KeepAliveProps) {
   // No caching mode: just render the active view (legacy behaviour)
   if (!keepKeys || keepKeys.length === 0) {
     return (
@@ -112,7 +114,13 @@ export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0 }: Kee
   }
 
   return (
-    <KeepAliveCached activeKey={activeKey} render={render} keepKeys={keepKeys} enterDelayMs={enterDelayMs} />
+    <KeepAliveCached
+      activeKey={activeKey}
+      render={render}
+      keepKeys={keepKeys}
+      enterDelayMs={enterDelayMs}
+      resetScrollOnNavigation={resetScrollOnNavigation}
+    />
   );
 }
 
@@ -121,7 +129,8 @@ function KeepAliveCached({
   render,
   keepKeys,
   enterDelayMs,
-}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs'>>) {
+  resetScrollOnNavigation,
+}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs' | 'resetScrollOnNavigation'>>) {
   // Persistent cache of mounted nodes — survives the entire session
   const cacheRef = useRef<Map<string, React.ReactNode>>(new Map());
   // Track which keys we've ever mounted (so we can render in stable order)
@@ -377,13 +386,15 @@ function KeepAliveCached({
     // till den kortare detaljvyn och hinner måla listan i ett tillfälligt läge
     // innan scrollTop återställs. Höjdreserv + avstängd scroll anchoring gör
     // återgången atomisk utan att ändra användarens sparade position.
-    const incomingHeight = measuredHeightsRef.current.get(activeKey);
+    const incomingHeight = resetScrollOnNavigation
+      ? 0
+      : measuredHeightsRef.current.get(activeKey);
     if (rootRef.current) {
       rootRef.current.style.minHeight = incomingHeight && incomingHeight > 0
         ? `${incomingHeight}px`
         : '';
     }
-  }, [activeKey, displayedKey]);
+  }, [activeKey, displayedKey, resetScrollOnNavigation]);
 
   // Återställ även vid allra första monteringen (t.ex. efter en omladdning
   // eller när hela Index remountas) — annars tappas positionen helt.
@@ -397,6 +408,11 @@ function KeepAliveCached({
   useLayoutEffect(() => {
     const container = getScrollContainer();
     if (!container) return;
+    if (resetScrollOnNavigation) {
+      applyScroll(container, 0);
+      setKeepAliveScroll(displayedKey, 0);
+      return;
+    }
     const saved = getKeepAliveEntry(displayedKey);
     if (saved.top <= 0) return;
 
@@ -423,10 +439,17 @@ function KeepAliveCached({
     const sharedTarget = pendingRestore ? readPositions()[displayedKey]?.top : undefined;
     const target = typeof sharedTarget === 'number'
       ? sharedTarget
-      : getKeepAliveScroll(displayedKey);
+      : resetScrollOnNavigation
+        ? 0
+        : getKeepAliveScroll(displayedKey);
     if (pendingRestore) setKeepAliveScroll(displayedKey, target);
+    if (resetScrollOnNavigation && !pendingRestore) {
+      applyScroll(container, 0);
+      setKeepAliveScroll(displayedKey, 0);
+      return;
+    }
     holdPosition(container, target, { reservedHeight: getKeepAliveEntry(displayedKey).height });
-  }, [displayedKey]);
+  }, [displayedKey, resetScrollOnNavigation]);
 
 
   // 🚀 Synkron växling för redan besökta vyer (t.ex. krysset i en annonsvy →
