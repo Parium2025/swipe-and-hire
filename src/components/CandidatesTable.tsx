@@ -40,7 +40,7 @@ import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
   findExistingConversationId,
-  resolveConversationIdsForCandidates,
+  resolveConversationIdsForApplications,
   createConversationForCandidate,
   ensureConversationMemberships,
   isRetryableError,
@@ -396,10 +396,11 @@ export function CandidatesTable({
 
     // Pre-resolve existing conversations for ALL recipients in one round-trip
     // (instead of 1 lookup per candidate — critical at 100s/1000s of recipients).
+    // Trådarna slås upp per ANSÖKAN: varje ansökan har sin egen profil-snapshot.
     let existingConvIds = new Map<string, string>();
     try {
-      existingConvIds = await resolveConversationIdsForCandidates(
-        recipients.map(r => r.applicant_id)
+      existingConvIds = await resolveConversationIdsForApplications(
+        recipients.map(r => r.id)
       );
     } catch {
       // Fall back to per-candidate lookup below
@@ -408,13 +409,13 @@ export function CandidatesTable({
     const sendToCandidate = async (app: ApplicationData, attempt = 1): Promise<void> => {
       try {
         let conversationId =
-          existingConvIds.get(app.applicant_id) ??
-          (await findExistingConversationId(user.id, app.applicant_id));
+          existingConvIds.get(app.id) ??
+          (await findExistingConversationId(user.id, app.applicant_id, app.id));
 
         if (!conversationId) {
           conversationId = await createConversationForCandidate(user.id, app.applicant_id, app.job_id, app.id);
         }
-        existingConvIds.set(app.applicant_id, conversationId);
+        existingConvIds.set(app.id, conversationId);
 
         await ensureConversationMemberships(conversationId, user.id, app.applicant_id);
 

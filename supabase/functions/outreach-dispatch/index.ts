@@ -95,7 +95,13 @@ async function ensureConversation(ownerUserId: string, recipientUserId: string, 
   const ids = (memberships ?? []).map((row) => row.conversation_id);
 
   if (ids.length > 0) {
-    const { data: existing } = await admin.from('conversations').select('id').eq('candidate_id', recipientUserId).in('id', ids).order('updated_at', { ascending: false }).limit(1).maybeSingle();
+    // En tråd per ansökan: matcha exakt den ansökan utskicket gäller.
+    // Utan applicationId används den kontextlösa tråden med kandidaten.
+    let existingQuery = admin.from('conversations').select('id').eq('candidate_id', recipientUserId).in('id', ids);
+    existingQuery = applicationId
+      ? existingQuery.eq('application_id', applicationId)
+      : existingQuery.is('application_id', null);
+    const { data: existing } = await existingQuery.order('updated_at', { ascending: false }).limit(1).maybeSingle();
     if (existing?.id) return existing.id;
   }
 

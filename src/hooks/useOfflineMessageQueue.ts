@@ -128,7 +128,8 @@ export function useOfflineMessageQueue(userId: string | undefined) {
 
         conversationId = await findExistingConversationId(
           message.sender_id,
-          message.recipient_id
+          message.recipient_id,
+          message.application_id ?? null
         );
 
         if (!conversationId) {
