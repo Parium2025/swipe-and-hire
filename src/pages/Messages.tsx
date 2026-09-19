@@ -302,9 +302,10 @@ export default function Messages() {
       {/* Header — kollapsar mjukt i takt med att chatten glider in på mobil */}
       <div
         className={cn(
-          "flex-shrink-0 overflow-hidden md:!max-h-none md:!opacity-100 md:!mb-4",
+          "flex-shrink-0 overflow-hidden",
+          !isMobile && "max-h-none opacity-100 mb-4",
           "transition-[max-height,opacity,margin] ease-[cubic-bezier(0.32,0.72,0,1)]",
-          showMobileChat ? "max-h-0 opacity-0 mb-0" : "max-h-24 opacity-100 mb-4"
+          isMobile && (showMobileChat ? "max-h-0 opacity-0 mb-0" : "max-h-24 opacity-100 mb-4")
         )}
         style={{ transitionDuration: `${MOBILE_SLIDE_MS}ms` }}
         aria-hidden={showMobileChat && isMobile}
@@ -341,7 +342,8 @@ export default function Messages() {
         <div
           data-messages-track
           className={cn(
-            "flex h-full min-h-0 md:gap-4",
+            "flex h-full min-h-0",
+            !isMobile && "gap-4",
             isMobile && "w-full transform-gpu transition-transform ease-[cubic-bezier(0.32,0.72,0,1)]"
           )}
           style={
@@ -355,7 +357,8 @@ export default function Messages() {
         >
         {/* Conversation List */}
         <div className={cn(
-          "w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col"
+          "flex-shrink-0 flex flex-col",
+          isMobile ? "w-full" : "w-80 lg:w-96"
         )}>
           <div className="flex-shrink-0">
             {hasTeam ? (
