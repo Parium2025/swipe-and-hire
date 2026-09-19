@@ -29,6 +29,7 @@ export interface CandidateWarmupRow {
   job_id?: string | null;
   cv_url?: string | null;
   profile_image_url?: string | null;
+  cover_image_url?: string | null;
   video_url?: string | null;
 }
 

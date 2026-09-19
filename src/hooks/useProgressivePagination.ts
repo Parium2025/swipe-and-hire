@@ -31,6 +31,7 @@ interface InfinitePageData {
   pages: Array<{
     hasMore?: boolean;
     nextCursor?: string | number | null;
+    cursors?: Record<string, unknown>;
     items?: unknown[];
   }>;
   pageParams: unknown[];
@@ -49,6 +50,11 @@ function computeNextPageParam(
   // Cursor-baserad
   if (lastPage.nextCursor !== undefined && lastPage.nextCursor !== null) {
     return lastPage.nextCursor;
+  }
+  // Mina kandidater paginerar flera steg samtidigt och returnerar nästa
+  // markör som ett objekt. Fortsätt bara medan minst ett steg inte är klart.
+  if (lastPage.cursors && Object.values(lastPage.cursors).some((value) => value !== 'done')) {
+    return lastPage.cursors;
   }
   // Index-baserad: om lastPageParam är ett tal → öka med 1, annars null
   if (typeof lastPageParam === 'number') {

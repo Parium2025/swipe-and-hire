@@ -4,6 +4,7 @@ import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 interface RowWithMedia {
   profile_image_url?: string | null;
+  cover_image_url?: string | null;
   video_url?: string | null;
 }
 
@@ -57,6 +58,14 @@ export function useCandidateRowMediaWarmup(rows: RowWithMedia[] | undefined, ena
         imageCountRef.current += 1;
         touched = true;
         tasks.push(() => prefetchMediaUrl(img, 'profile-image', MEDIA_URL_TTL).catch(() => {}));
+      }
+
+      const cover = row?.cover_image_url?.trim();
+      if (cover && !warmed.has(`full:${cover}`) && imageCountRef.current < MAX_WARMED_IMAGES) {
+        warmed.add(`full:${cover}`);
+        imageCountRef.current += 1;
+        touched = true;
+        tasks.push(() => prefetchMediaUrl(cover, 'profile-image', MEDIA_URL_TTL).catch(() => {}));
       }
 
       const vid = row?.video_url?.trim();
