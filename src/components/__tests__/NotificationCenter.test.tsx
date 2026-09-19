@@ -48,4 +48,14 @@ describe('NotificationCenter', () => {
     expect(container.contains(heading)).toBe(false);
     expect(document.body.contains(heading)).toBe(true);
   });
+
+  it('har ingen rund touchbakgrund runt mobilklockan', () => {
+    render(<NotificationCenter />);
+    const trigger = screen.getByLabelText('Notifikationer');
+
+    expect(trigger.className).toContain('bg-transparent');
+    expect(trigger.className).toContain('md:rounded-full');
+    expect(trigger.className).not.toMatch(/(?:^|\s)rounded-full(?:\s|$)/);
+    expect(trigger.className).not.toMatch(/(?:^|\s)hover:bg-white\/10(?:\s|$)/);
+  });
 });
