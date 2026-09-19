@@ -70,7 +70,7 @@ const QuestionItem = memo(({
     }
   }, []);
 
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType !== 'touch' || !isTruncated) return;
     longPressTriggeredRef.current = false;
     clearLongPress();
@@ -162,7 +162,7 @@ const ActiveFilterChip = memo(({
     longPressRef.current = null;
   }, []);
 
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'touch' || !isTruncated) return;
     longPressTriggeredRef.current = false;
     clearLongPress();
