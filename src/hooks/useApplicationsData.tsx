@@ -734,6 +734,7 @@ export const useApplicationsData = (
   const jobIdsForRealtime = useMemo(() => {
     return [...new Set(applications.map(a => a.job_id))].filter(Boolean).sort();
   }, [applications]);
+  const applicationsInvalidateTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -755,24 +756,34 @@ export const useApplicationsData = (
     }
     // else: no filter — listen to all job_applications changes (RLS still protects data)
 
-    const channel = createRealtimeChannel(channelName)
-      .on('postgres_changes', filterConfig, () => {
+    const scheduleApplicationsInvalidate = () => {
+      if (applicationsInvalidateTimerRef.current) {
+        window.clearTimeout(applicationsInvalidateTimerRef.current);
+      }
+      applicationsInvalidateTimerRef.current = window.setTimeout(() => {
+        applicationsInvalidateTimerRef.current = null;
         queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-      })
+      }, 400);
+    };
+
+    const channel = createRealtimeChannel(channelName)
+      .on('postgres_changes', filterConfig, scheduleApplicationsInvalidate)
       // DELETE-payloads innehåller endast id (REPLICA IDENTITY DEFAULT) av
       // integritetsskäl, därför matchar de inte job_id-filtret ovan. Vi lyssnar
       // därför ofiltrerat på DELETE och invaliderar bara cachen (ingen PII läses).
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'job_applications' },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-        }
+        scheduleApplicationsInvalidate
       )
       .subscribe();
 
 
     return () => {
+      if (applicationsInvalidateTimerRef.current) {
+        window.clearTimeout(applicationsInvalidateTimerRef.current);
+        applicationsInvalidateTimerRef.current = null;
+      }
       supabase.removeChannel(channel);
     };
   }, [user, queryClient, jobIdsForRealtime]);
