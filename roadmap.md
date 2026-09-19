@@ -59,3 +59,8 @@
 - [x] Ta bort den felaktiga kopplingen mellan mallbiblioteket och Gå vidare/Ge avslag
 - [x] Ge den interna 14-dagarspåminnelsen ett eget av/på-reglage och en samlad daglig notis
 - [x] Verifiera mobil, desktop, tester, typer och utskicksloggar efter korrigeringen
+
+- [x] Säkerställ exakt 17 automatiska standardmallar (5 e-post, 6 push, 6 chatt) och korrekta räknare
+- [x] Verifiera att egna regler ersätter Pariums standardflöde utan dubbelutskick
+- [x] Förtydliga Systemutskick och 14-dagarsvillkor i inställningarna
+- [x] Säkerställ avslag per specifik ansökan utan påverkan på andra jobb

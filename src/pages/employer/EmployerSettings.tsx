@@ -219,12 +219,15 @@ const EmployerSettings = () => {
         <div className="space-y-3">
           <p className="text-sm text-white">Tekniska meddelanden som Parium sköter utanför de sex redigerbara händelserna.</p>
           <ul className="space-y-2">
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">Intervjukallelse med svarsknappar och kalenderlänk.</li>
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+              <p className="font-medium text-white">Intervjukallelse</p>
+              <p className="text-xs text-white">Skickas när en intervju bokas eller bokas om. Kandidaten får Ja/Nej-knappar, mötesinformation och kalenderlänk utan dubbla mejl.</p>
+            </li>
             <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium text-white">Påminnelse efter 14 dagar</p>
-                  <p className="text-xs text-white">En samlad daglig notis om kandidater som fortfarande väntar på besked. Kandidaten får inget automatiskt avslag.</p>
+                  <p className="text-xs text-white">En samlad daglig notis när en ansökan är minst 14 dagar gammal och inte har markerats som Anställd eller Avslagen. Alla övriga steg räknas. Kandidaten får inget automatiskt avslag.</p>
                 </div>
                 <Switch
                   checked={isEnabled('application_decision_reminder', 'in_app')}
@@ -234,8 +237,14 @@ const EmployerSettings = () => {
                 />
               </div>
             </li>
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">Påminnelser om sparade jobb och jobb som snart går ut.</li>
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">Konto-, säkerhets- och supportmeddelanden.</li>
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+              <p className="font-medium text-white">Jobb som snart går ut</p>
+              <p className="text-xs text-white">Arbetsgivaren påminns före annonsens slut. Jobbsökare kan få en påminnelse när ett sparat jobb snart går ut.</p>
+            </li>
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+              <p className="font-medium text-white">Konto, säkerhet och support</p>
+              <p className="text-xs text-white">Nödvändiga meddelanden för exempelvis e-postbekräftelse, återställning av lösenord och svar på supportärenden.</p>
+            </li>
           </ul>
         </div>
       ),

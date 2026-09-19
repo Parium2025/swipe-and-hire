@@ -50,6 +50,13 @@
       "when": 1789816080826,
       "tag": "0006_aggregate_decision_reminder_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789816634778,
+      "tag": "0007_exclude_rejected_applications_from_job_closed_outreach",
+      "breakpoints": true
     }
   ]
 }

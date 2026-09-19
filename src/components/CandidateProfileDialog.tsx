@@ -43,6 +43,16 @@ import {
   QUESTIONS_STORAGE_KEY,
 } from '@/components/candidateProfile';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 function useProfileImageUrl(path: string | null | undefined) {
   // Ingen transform: porträttet renderas stort (192px CSS, upp till 3x på retina)
@@ -80,6 +90,8 @@ interface CandidateProfileDialogProps {
   fromSwipe?: boolean;
   /** Visas när kandidaten ännu inte ligger i någon lista. */
   onAddToList?: () => void;
+  /** Avslag får bara erbjudas när profilen öppnats från en specifik annons. */
+  enableJobRejection?: boolean;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   candidateIndex?: number;
@@ -121,6 +133,7 @@ export const CandidateProfileDialog = ({
   onRemoveFromList,
   fromSwipe = false,
   onAddToList,
+  enableJobRejection = false,
   onNavigatePrev,
   onNavigateNext,
   candidateIndex,
@@ -141,6 +154,8 @@ export const CandidateProfileDialog = ({
   const [sendMessageOpen, setSendMessageOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [jobQuestions, setJobQuestions] = useState<Record<string, { text: string; order: number }>>(() => {
     const snapshot = getQuestionSnapshot(application);
@@ -597,6 +612,25 @@ export const CandidateProfileDialog = ({
   if (!application) return null;
 
   const displayApp = activeApplication || application;
+  const isRejectedForDisplayedJob = displayApp.status !== 'hired' && Boolean(displayApp.rejected_at || displayApp.status === 'rejected');
+  const rejectDisplayedApplication = async () => {
+    if (rejecting || isRejectedForDisplayedJob) return;
+    setRejecting(true);
+    const { data, error } = await supabase
+      .from('job_applications')
+      .update({ rejected_at: new Date().toISOString() })
+      .eq('id', displayApp.id)
+      .select('id')
+      .maybeSingle();
+    setRejecting(false);
+    if (error || !data) {
+      toast.error('Kunde inte registrera avslaget');
+      return;
+    }
+    setRejectConfirmOpen(false);
+    toast.success('Avslag registrerat för den här ansökan');
+    onStatusUpdate();
+  };
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
   // Kandidaten har media i databasen men den signerade URL:en är ännu inte löst.
@@ -846,6 +880,8 @@ export const CandidateProfileDialog = ({
             onShare={() => setShareDialogOpen(true)}
             onRemove={onRemoveFromList && !fromSwipe ? () => setRemoveConfirmOpen(true) : undefined}
             onAddToList={onAddToList}
+            onReject={enableJobRejection ? () => setRejectConfirmOpen(true) : undefined}
+            isRejected={isRejectedForDisplayedJob}
             currentStage={currentStage}
             stageOrder={stageOrder}
             stageConfig={stageConfig}
@@ -926,6 +962,24 @@ export const CandidateProfileDialog = ({
         </div>
       </DialogContentNoFocus>
     </Dialog>
+
+    {/* CV Dialog */}
+    <AlertDialog open={rejectConfirmOpen} onOpenChange={setRejectConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Ge avslag för detta jobb</AlertDialogTitle>
+          <AlertDialogDescription>
+            Avslaget gäller bara ansökan till {displayApp.job_title || 'detta jobb'}. Kandidatens andra ansökningar påverkas inte och kandidaten får inget ytterligare besked när den här annonsen stängs.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={rejecting}>Avbryt</AlertDialogCancel>
+          <AlertDialogAction variant="destructiveSoft" disabled={rejecting} onClick={() => void rejectDisplayedApplication()}>
+            {rejecting ? 'Registrerar…' : 'Ge avslag'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
     {/* CV Dialog */}
     <Dialog open={cvOpen} onOpenChange={setCvOpen}>
