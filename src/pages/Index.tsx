@@ -534,7 +534,6 @@ const Index = () => {
   const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const device = useDevice();
   // Mobilens sida börjar röra sig direkt bakom den stängande drawern. En
   // sekventiell väntan gav den tomma/hårda mellanbild användaren upplevde.
   const routeEnterDelayMs = 0;
