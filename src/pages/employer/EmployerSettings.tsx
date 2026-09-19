@@ -224,7 +224,7 @@ const EmployerSettings = () => {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium text-white">Påminnelse efter 14 dagar</p>
-                  <p className="text-xs text-white">En intern notis per kandidat som fortfarande väntar på besked. Kandidaten får inget automatiskt avslag.</p>
+                  <p className="text-xs text-white">En samlad daglig notis om kandidater som fortfarande väntar på besked. Kandidaten får inget automatiskt avslag.</p>
                 </div>
                 <Switch
                   checked={isEnabled('application_decision_reminder', 'in_app')}
