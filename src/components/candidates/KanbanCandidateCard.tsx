@@ -33,6 +33,7 @@ const SmallCandidateAvatar = ({ candidate }: { candidate: MyCandidateData }) => 
     >
       <CandidateAvatar
         profileImageUrl={candidate.profile_image_url}
+        coverImageUrl={candidate.cover_image_url}
         videoUrl={candidate.video_url}
         isProfileVideo={candidate.is_profile_video}
         firstName={candidate.first_name}
