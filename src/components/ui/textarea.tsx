@@ -24,9 +24,30 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     }, [ref, autoResize]);
 
     // Auto-resize on value changes (controlled components)
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       autoResize(internalRef.current);
     }, [props.value, autoResize]);
+
+    // Recalculate when a previously hidden accordion/tab becomes visible or
+    // changes width. Measuring while hidden can otherwise leave a fixed,
+    // internally scrolling textarea until its value changes again.
+    React.useEffect(() => {
+      const element = internalRef.current;
+      const container = element?.parentElement;
+      if (!element || !container || typeof ResizeObserver === 'undefined') return;
+
+      let frame: number | undefined;
+      const observer = new ResizeObserver(() => {
+        if (frame !== undefined) cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => autoResize(element));
+      });
+      observer.observe(container);
+
+      return () => {
+        observer.disconnect();
+        if (frame !== undefined) cancelAnimationFrame(frame);
+      };
+    }, [autoResize]);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       autoResize(e.currentTarget);
