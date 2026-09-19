@@ -9,6 +9,7 @@ import { writeApplicantMembershipCache } from '@/lib/applicantMembershipCache';
 import { fetchCandidateListsForOwner } from '@/hooks/useCandidateLists';
 import { fetchStageSettings } from '@/hooks/useStageSettings';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
+import { fetchEmployerInterviewsForUser } from '@/hooks/useInterviews';
 
 /**
  * ❄️ KALLSTART — ARBETSGIVARENS ANNONSSIDOR
@@ -73,6 +74,17 @@ export function useEmployerPagePrewarm() {
       // "X nya"-siffran på jobbkorten: värm direkt så den aldrig poppar in
       // efter att kortet redan syns.
       void prefetchUnviewedApplicationCounts(queryClient, userId);
+
+      // Intervjukortet på startsidan: samma nyckel och hämtare som kortet
+      // använder, så första besökets skelett försvinner.
+      void queryClient
+        .prefetchQuery({
+          queryKey: ['interviews', userId],
+          queryFn: () => fetchEmployerInterviewsForUser(userId),
+        })
+        .catch(() => {
+          // Kortet hämtar själv om förvärmningen inte går igenom.
+        });
 
       // "Mina kandidater" bygger på en kedja: listor → aktiv lista → steg →
       // kandidater. Vid kallstart väntade varje led på föregående, vilket är
