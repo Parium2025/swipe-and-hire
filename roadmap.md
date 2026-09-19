@@ -57,5 +57,5 @@
 ## Utskickssystem
 - [x] Samla de sex redigerbara händelserna i automatiska flöden samt mallar, regler och logg
 - [x] Ta bort den felaktiga kopplingen mellan mallbiblioteket och Gå vidare/Ge avslag
-- [ ] Ge den interna 14-dagarspåminnelsen ett eget av/på-reglage med backendstöd
-- [ ] Verifiera mobil, desktop, tester, typer och utskicksloggar efter korrigeringen
+- [x] Ge den interna 14-dagarspåminnelsen ett eget av/på-reglage och en samlad daglig notis
+- [x] Verifiera mobil, desktop, tester, typer och utskicksloggar efter korrigeringen
