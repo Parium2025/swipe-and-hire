@@ -109,6 +109,9 @@ export function useTypingIndicator(conversationId: string | null) {
     // Presence requires the shared conversation topic across different clients.
     const channel = supabase.channel(`typing-${conversationId}`, {
       config: {
+        // Privat kanal: Realtime Authorization (RLS på realtime.messages)
+        // släpper bara in medlemmar i konversationen.
+        private: true,
         broadcast: {
           ack: true,
         },

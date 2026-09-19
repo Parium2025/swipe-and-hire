@@ -257,7 +257,10 @@ export function useNotifications() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = createRealtimeChannel(`notifications-${user.id}`)
+    // Topic "user:<uid>" + privat kanal: Realtime Authorization (RLS på
+    // realtime.messages) släpper bara in ägaren — broadcast-synken mellan
+    // användarens enheter kan därmed varken avlyssnas eller förfalskas.
+    const channel = createRealtimeChannel(`user:${user.id}`, { config: { private: true } })
       .on(
         'postgres_changes',
         {
