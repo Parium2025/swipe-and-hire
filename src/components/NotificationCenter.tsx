@@ -192,24 +192,6 @@ function NotificationItem({
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: sv });
 
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
-  const reminderStateId = notification.type === 'application_decision_reminder'
-    && typeof (notification.metadata as Record<string, unknown> | null)?.reminder_state_id === 'string'
-      ? String((notification.metadata as Record<string, unknown>).reminder_state_id)
-      : null;
-  const [snoozing, setSnoozing] = useState(false);
-
-  const snooze = async (event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (!reminderStateId || snoozing) return;
-    setSnoozing(true);
-    const { error } = await supabase.rpc('snooze_application_decision_reminder', {
-      _state_id: reminderStateId,
-      _days: 3,
-    });
-    setSnoozing(false);
-    if (error) return;
-    onRead(notification.id);
-  };
 
   return (
     <motion.div
