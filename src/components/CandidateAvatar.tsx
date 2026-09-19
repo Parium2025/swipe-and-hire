@@ -6,6 +6,7 @@ import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 type CandidateAvatarProps = {
   profileImageUrl: string | null | undefined;
+  coverImageUrl?: string | null | undefined;
   videoUrl: string | null | undefined;
   isProfileVideo: boolean | null | undefined;
   firstName: string | null | undefined;
@@ -16,6 +17,7 @@ type CandidateAvatarProps = {
 
 function CandidateAvatarBase({ 
   profileImageUrl, 
+  coverImageUrl,
   videoUrl, 
   isProfileVideo, 
   firstName, 
@@ -29,6 +31,7 @@ function CandidateAvatarBase({
   // These will generate signed URLs for private bucket files
   // Avatarn renderas alltid 40x40 → be Supabase om en 40px-version (2x för retina) → ~95% mindre fil
   const resolvedImageUrl = useMediaUrl(profileImageUrl, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
+  const resolvedCoverUrl = useMediaUrl(coverImageUrl, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
   const resolvedVideoUrl = useMediaUrl(videoUrl, 'profile-video');
   
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
@@ -77,7 +80,7 @@ function CandidateAvatarBase({
       <div onClick={handleClick}>
         <ProfileVideo
           videoUrl={resolvedVideoUrl}
-          coverImageUrl={resolvedImageUrl || undefined}
+          coverImageUrl={resolvedCoverUrl || resolvedImageUrl || undefined}
           userInitials={initials}
           alt="Kandidatvideo"
           className="h-10 w-10 ring-2 ring-inset ring-white/20 rounded-full"
@@ -120,6 +123,7 @@ function CandidateAvatarBase({
 export const CandidateAvatar = React.memo(CandidateAvatarBase, (prev, next) => {
   return (
     prev.profileImageUrl === next.profileImageUrl &&
+    prev.coverImageUrl === next.coverImageUrl &&
     prev.videoUrl === next.videoUrl &&
     prev.isProfileVideo === next.isProfileVideo &&
     prev.firstName === next.firstName &&

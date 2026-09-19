@@ -264,6 +264,7 @@ export const CandidateProfileDialog = ({
 
   const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
   const profileThumbUrl = useProfileThumbUrl(activeApplication?.profile_image_url);
+  const coverImageUrl = useProfileImageUrl(activeApplication?.cover_image_url);
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
 
@@ -734,7 +735,7 @@ export const CandidateProfileDialog = ({
               {isProfileVideo && videoUrl ? (
                 <ProfileVideoCircle
                   videoUrl={videoUrl}
-                  coverImageUrl={profileImageUrl || profileThumbUrl || undefined}
+                  coverImageUrl={coverImageUrl || profileImageUrl || profileThumbUrl || undefined}
                   userInitials={initials}
                   circleClassName="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl"
                   barClassName="w-24 md:w-48"
