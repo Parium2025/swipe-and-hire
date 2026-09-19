@@ -484,7 +484,7 @@ export function ApplicationQuestionsWizard({
                 })}
               </div>
 
-              {!hasAlreadyApplied && profileSelector && <div className="mt-3 px-1">{profileSelector}</div>}
+              {!hasAlreadyApplied && profileSelector && <div className="mt-3 mb-4 px-1">{profileSelector}</div>}
 
             </div>
           ) : null}

@@ -810,7 +810,7 @@ export const CandidateProfileDialog = ({
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setJobDropdownOpen(false)} />
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[calc(100%+1rem)] max-w-sm rounded-lg border border-white/20 bg-slate-900/95 backdrop-blur-xl shadow-xl overflow-hidden">
-                      <div className="max-h-60 overflow-y-auto overscroll-contain">
+                      <div className="max-h-60 overflow-y-auto overscroll-contain divide-y divide-white/15">
                         {allApplications!.map((app) => {
                           const isActive = (selectedApplicationId || displayApp.id) === app.id;
                           return (
