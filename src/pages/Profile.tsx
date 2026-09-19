@@ -581,7 +581,6 @@ const Profile = () => {
   // 🔒 KRITISK FIX: Om användaren har lokala (osparade) ändringar på media-pathen,
   // FÅR vi INTE använda preloaded URL — den pekar på den gamla DB-bilden och gör att
   // "Anpassa din bild" / ny uppladdning inte syns i UI förrän man sparat.
-  const profileImagePathChangedLocally = !!profileImageUrl && profileImageUrl !== ((profile as any)?.profile_image_url || '');
   const coverImagePathChangedLocally = !!coverImageUrl && coverImageUrl !== ((profile as any)?.cover_image_url || '');
   const signedProfileImageUrl = effectiveProfileImagePath
     ? (profileImageUrl ? fallbackProfileImageUrl : (preloadedAvatarUrl || fallbackProfileImageUrl))
