@@ -10,7 +10,6 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const AUTO_CLOSE_BATCH_SIZE = 100;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {

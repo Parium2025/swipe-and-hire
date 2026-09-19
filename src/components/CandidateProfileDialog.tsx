@@ -90,6 +90,8 @@ interface CandidateProfileDialogProps {
   fromSwipe?: boolean;
   /** Visas när kandidaten ännu inte ligger i någon lista. */
   onAddToList?: () => void;
+  /** Avslag får bara erbjudas när profilen öppnats från en specifik annons. */
+  enableJobRejection?: boolean;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   candidateIndex?: number;
@@ -131,6 +133,7 @@ export const CandidateProfileDialog = ({
   onRemoveFromList,
   fromSwipe = false,
   onAddToList,
+  enableJobRejection = false,
   onNavigatePrev,
   onNavigateNext,
   candidateIndex,
@@ -877,7 +880,7 @@ export const CandidateProfileDialog = ({
             onShare={() => setShareDialogOpen(true)}
             onRemove={onRemoveFromList && !fromSwipe ? () => setRemoveConfirmOpen(true) : undefined}
             onAddToList={onAddToList}
-            onReject={() => setRejectConfirmOpen(true)}
+            onReject={enableJobRejection ? () => setRejectConfirmOpen(true) : undefined}
             isRejected={isRejectedForDisplayedJob}
             currentStage={currentStage}
             stageOrder={stageOrder}
