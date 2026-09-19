@@ -67,6 +67,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
   const rowRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 0 });
+  const [moveMenuOpen, setMoveMenuOpen] = useState(false);
 
   const measureMenuMetrics = useCallback(() => {
     const rowEl = rowRef.current;
@@ -120,7 +121,6 @@ const MyCandidateRow = memo(function MyCandidateRow({
       ref={rowRef}
       onClick={handleTap}
       onMouseEnter={onPrefetch}
-      onTouchStart={onPrefetch}
 
     >
       {!isSelectionMode && isUnread && (
@@ -194,12 +194,24 @@ const MyCandidateRow = memo(function MyCandidateRow({
           />
         </div>
       ) : (
-        <DropdownMenu onOpenChange={(open) => open && measureMenuMetrics()}>
+        <DropdownMenu
+          open={moveMenuOpen}
+          onOpenChange={(open) => {
+            if (open) measureMenuMetrics();
+            setMoveMenuOpen(open);
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <button
               ref={triggerRef}
-              onPointerDownCapture={measureMenuMetrics}
-              onClick={e => e.stopPropagation()}
+              onPointerDownCapture={(event) => {
+                measureMenuMetrics();
+                if (event.pointerType === 'touch') event.preventDefault();
+              }}
+              onClick={event => {
+                event.stopPropagation();
+                setMoveMenuOpen((open) => !open);
+              }}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors flex-shrink-0"
               aria-label="Flytta kandidat"
             >
@@ -226,6 +238,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
                       <DropdownMenuItem
                         onClick={e => {
                           e.stopPropagation();
+                          setMoveMenuOpen(false);
                           onMoveToStage(candidate.id, stage);
                         }}
                         className="gap-2 min-h-[44px] min-w-0"

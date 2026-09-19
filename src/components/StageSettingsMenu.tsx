@@ -77,6 +77,7 @@ export function StageSettingsMenu({
   const [newLabel, setNewLabel] = useState('');
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -191,12 +192,29 @@ export function StageSettingsMenu({
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onPointerDown={(e) => {
               e.stopPropagation();
+              if (e.pointerType === 'touch') {
+                e.preventDefault();
+                touchStartRef.current = { x: e.clientX, y: e.clientY };
+              }
               onTriggerPointerDown?.();
             }}
+            onPointerUp={(e) => {
+              if (e.pointerType !== 'touch') return;
+              e.stopPropagation();
+              const start = touchStartRef.current;
+              touchStartRef.current = null;
+              if (!start) return;
+              const moved = Math.hypot(e.clientX - start.x, e.clientY - start.y);
+              if (moved < 8) handleMenuOpenChange(!isMenuOpen);
+            }}
+            onPointerCancel={() => { touchStartRef.current = null; }}
             onMouseDown={(e) => {
               e.stopPropagation();
             }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              if ((e.nativeEvent as PointerEvent).pointerType === 'touch') e.preventDefault();
+            }}
             tabIndex={disableTouchTrigger ? -1 : undefined}
             aria-hidden={disableTouchTrigger ? true : undefined}
             onFocus={useJobDetailsTriggerStyle ? (e) => {
