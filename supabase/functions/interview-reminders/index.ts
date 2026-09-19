@@ -254,6 +254,8 @@ Deno.serve(async (req) => {
 
     // Arbetsgivaren äger besluten: har de stängt av "Före intervjun" helt
     // skickas ingenting till kandidaten – inte heller 10-minutersputten.
+    // Ligger deras egen regel nära 10 minuter (5–20 min) hoppas 10-minuters-
+    // putten också över, annars får kandidaten två påminnelser samtidigt.
     const employerAllowsCandidateReminder = new Map<string, boolean>();
     const candidateRemindersAllowed = async (employerId: string) => {
       if (employerAllowsCandidateReminder.has(employerId)) {
@@ -261,16 +263,21 @@ Deno.serve(async (req) => {
       }
       const { data } = await supabase
         .from("outreach_automations")
-        .select("id")
+        .select("id, delay_minutes")
         .eq("owner_user_id", employerId)
         .eq("trigger", "interview_before")
         .eq("recipient_type", "candidate")
-        .eq("is_enabled", true)
-        .limit(1);
-      const allowed = (data?.length ?? 0) > 0;
+        .eq("is_enabled", true);
+      const rules = (data ?? []) as Array<{ delay_minutes: number | null }>;
+      const collides = rules.some((rule) => {
+        const delay = rule.delay_minutes ?? 0;
+        return delay >= 5 && delay <= 20;
+      });
+      const allowed = rules.length > 0 && !collides;
       employerAllowsCandidateReminder.set(employerId, allowed);
       return allowed;
     };
+
 
     if (upcomingInterviews && upcomingInterviews.length > 0) {
       console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
