@@ -2,10 +2,18 @@ import { supabase } from '@/integrations/supabase/client';
 
 type ChannelOptions = Parameters<typeof supabase.channel>[1];
 
-const runtimeId =
-  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-    ? crypto.randomUUID()
-    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+// Lazy: random UUIDs are forbidden in Workers global scope (SSR), so the ID is
+// generated on first use instead of at module import.
+let runtimeId: string | null = null;
+const getRuntimeId = (): string => {
+  if (!runtimeId) {
+    runtimeId =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  }
+  return runtimeId;
+};
 
 let channelInstance = 0;
 
