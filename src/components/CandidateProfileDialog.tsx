@@ -855,6 +855,28 @@ export const CandidateProfileDialog = ({
             stageOrder={stageOrder}
             stageConfig={stageConfig}
             onStageChange={onStageChange}
+            quickActions={[
+              {
+                key: 'progress',
+                label: 'Gå vidare',
+                variant: outreachManualActions.groups.progress.action.buttonVariant,
+                onClick: () => {
+                  setSendMessagePreset('progress');
+                  setSendMessageOpen(true);
+                },
+              },
+              ...(!displayApp.rejected_at && displayApp.status !== 'rejected' && displayApp.status !== 'hired'
+                ? [{
+                    key: 'rejection' as const,
+                    label: 'Ge avslag',
+                    variant: outreachManualActions.groups.rejection.action.buttonVariant,
+                    onClick: () => {
+                      setSendMessagePreset('rejection');
+                      setSendMessageOpen(true);
+                    },
+                  }]
+                : []),
+            ]}
           />
           </div>
 
@@ -980,6 +1002,19 @@ export const CandidateProfileDialog = ({
         jobId={displayApp.job_id}
         applicationId={displayApp.id}
         presetAction={sendMessagePreset}
+        onPresetSent={async (action) => {
+          if (action !== 'rejection') return;
+          const rejectedAt = new Date().toISOString();
+          const { error } = await supabase
+            .from('job_applications')
+            .update({ rejected_at: rejectedAt })
+            .eq('id', displayApp.id);
+          if (error) {
+            toast.error('Beskedet skickades, men avslaget kunde inte registreras');
+            return;
+          }
+          onStatusUpdate();
+        }}
       />
     )}
 

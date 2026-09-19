@@ -26,6 +26,7 @@ export interface ApplicationData {
   work_schedule: string | null;
   availability: string | null;
   status: string | null;
+  rejected_at?: string | null;
   applied_at: string;
   updated_at: string;
   custom_answers: any;

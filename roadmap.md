@@ -53,3 +53,9 @@
 - [x] Lås frågefiltrets bredd och interna rullning på dator utan att ändra mobilvyn
 - [x] Ge datorns frågefilter en verklig mushjulsrullning och separera den fasta nederdelen från frågelistan
 - [x]Verifiera frågefiltrets centrering i förhandsvisningen och ge panelen 12 px andningsmarginal mot skärmens underkant
+
+## Utskickssystem
+- [x] Förenkla inställningssidan i automatiska, manuella och systemutskick
+- [x] Koppla Gå vidare och Ge avslag från kandidatprofilen
+- [x] Lägg intern 14-dagarspåminnelse med snooze och idempotens
+- [x] Verifiera mobil, desktop, tester, typer och utskicksloggar

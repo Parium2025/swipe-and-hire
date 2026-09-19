@@ -266,6 +266,44 @@ export type Database = {
         }
         Relationships: []
       }
+      application_decision_reminder_state: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          recipient_user_id: string
+          reminder_sent_at: string | null
+          snoozed_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          recipient_user_id: string
+          reminder_sent_at?: string | null
+          snoozed_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          recipient_user_id?: string
+          reminder_sent_at?: string | null
+          snoozed_until?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_decision_reminder_state_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_activities: {
         Row: {
           activity_type: string
@@ -4195,6 +4233,7 @@ export type Database = {
         Returns: number
       }
       county_for_postal_code: { Args: { p_code: string }; Returns: string }
+      create_application_decision_reminders: { Args: never; Returns: number }
       create_system_performance_alert: {
         Args: { _body: string; _metadata?: Json; _title: string }
         Returns: string
@@ -5051,6 +5090,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      snooze_application_decision_reminder: {
+        Args: { _days?: number; _state_id: string }
+        Returns: string
+      }
       start_criteria_eval_run: { Args: { p_job_id: string }; Returns: string }
       switch_conversation_job_context: {
         Args: {
