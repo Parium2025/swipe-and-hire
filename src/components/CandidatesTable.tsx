@@ -40,7 +40,7 @@ import { useCandidateBatchPrefetch } from '@/hooks/useCandidateBatchPrefetch';
 import { PillButton } from '@/components/ui/pill-button';
 import {
   findExistingConversationId,
-  resolveConversationIdsForCandidates,
+  resolveConversationIdsForApplications,
   createConversationForCandidate,
   ensureConversationMemberships,
   isRetryableError,
