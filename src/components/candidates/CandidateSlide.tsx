@@ -119,10 +119,6 @@ export const CandidateSlide = memo(function CandidateSlide({
           style={{ x, opacity: exitOpacity, rotate, scale, touchAction: 'pan-y' }}
           onContextMenuCapture={(event) => event.preventDefault()}
           onDragStartCapture={(event) => event.preventDefault()}
-          onTouchStartCapture={handleTouchStart}
-          onTouchMoveCapture={handleTouchMove}
-          onTouchEndCapture={handleTouchEnd}
-          onTouchCancelCapture={handleTouchCancel}
         >
           <CandidateCardFace
             fullBleed
