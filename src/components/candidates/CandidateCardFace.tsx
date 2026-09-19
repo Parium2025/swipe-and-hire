@@ -91,7 +91,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
           <div className="h-full w-full touch-pan-y overflow-hidden rounded-none">
               <ProfileVideo
                 videoUrl={videoUrl as string}
-                coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+                coverImageUrl={profileImageUrl || coverImageUrl || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
                 alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
@@ -175,7 +175,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             {showVideo ? (
               <ProfileVideoCircle
                 videoUrl={videoUrl as string}
-                coverImageUrl={coverImageUrl || profileImageUrl || undefined}
+                coverImageUrl={profileImageUrl || coverImageUrl || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
                 alt="Profilvideo"

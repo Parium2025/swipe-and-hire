@@ -772,6 +772,7 @@ const MyCandidates = () => {
     job_title: c.job_title || 'Okänt jobb',
     profile_image_url: c.profile_image_url,
     video_url: c.video_url,
+    cover_image_url: c.cover_image_url,
     is_profile_video: c.is_profile_video,
     viewed_at: c.viewed_at,
     last_active_at: c.last_active_at,

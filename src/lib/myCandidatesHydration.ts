@@ -26,7 +26,7 @@ export interface RawMyCandidateRow {
 const APPLICATION_FIELDS = `
   id, applicant_id, first_name, last_name, email, phone, location, bio,
   cv_url, age, employment_status, work_schedule, availability, custom_answers, questions_snapshot,
-  candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
+  candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url,
   status, applied_at, viewed_at, job_postings!inner(title)
 `;
 
@@ -139,6 +139,7 @@ export async function hydrateMyCandidateRows(
       job_title: app?.job_postings?.title || null,
       profile_image_url: media.profile_image_url,
       video_url: media.video_url,
+      cover_image_url: media.cover_image_url,
       is_profile_video: media.is_profile_video,
       applied_at: app?.applied_at || null,
       viewed_at: app?.viewed_at || null,

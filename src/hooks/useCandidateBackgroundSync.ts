@@ -152,6 +152,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       candidate_profile_label,
       profile_image_snapshot_url,
       video_snapshot_url,
+      cover_image_snapshot_url,
       status,
       applied_at,
       updated_at,
@@ -227,6 +228,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       job_occupation: item.job_postings?.occupation || null,
       profile_image_url: media.profile_image_url,
       video_url: media.video_url,
+      cover_image_url: media.cover_image_url,
       is_profile_video: media.is_profile_video || false,
       last_active_at: activity.last_active_at || liveMedia.last_active_at || null,
       latest_application_at: activity.latest_application_at || item.applied_at,
@@ -241,9 +243,9 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   // Jämför om datan har ändrats (baserat på updated_at + rating)
   // Viktigt: rating ligger i candidate_ratings och ändrar INTE job_applications.updated_at.
   // Därför måste rating vara med i signaturen, annars uppdateras aldrig UI:t.
-  const newSignature = items.map((i: any) => `${i.id}:${i.updated_at}:${i.rating ?? ''}`).join(',');
+  const newSignature = items.map((i: any) => `${i.id}:${i.updated_at}:${i.rating ?? ''}:${i.profile_image_url ?? ''}:${i.video_url ?? ''}:${i.cover_image_url ?? ''}`).join(',');
   const existingSignature = existingData?.pages?.[0]?.items
-    ?.map((i: any) => `${i.id}:${i.updated_at}:${i.rating ?? ''}`)
+    ?.map((i: any) => `${i.id}:${i.updated_at}:${i.rating ?? ''}:${i.profile_image_url ?? ''}:${i.video_url ?? ''}:${i.cover_image_url ?? ''}`)
     ?.join(',');
 
   if (newSignature !== existingSignature) {

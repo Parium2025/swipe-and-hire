@@ -80,7 +80,7 @@ function CandidateAvatarBase({
       <div onClick={handleClick}>
         <ProfileVideo
           videoUrl={resolvedVideoUrl}
-          coverImageUrl={resolvedCoverUrl || resolvedImageUrl || undefined}
+          coverImageUrl={resolvedImageUrl || resolvedCoverUrl || undefined}
           userInitials={initials}
           alt="Kandidatvideo"
           className="h-10 w-10 ring-2 ring-inset ring-white/20 rounded-full"

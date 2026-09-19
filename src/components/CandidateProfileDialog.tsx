@@ -735,7 +735,7 @@ export const CandidateProfileDialog = ({
               {isProfileVideo && videoUrl ? (
                 <ProfileVideoCircle
                   videoUrl={videoUrl}
-                  coverImageUrl={coverImageUrl || profileImageUrl || profileThumbUrl || undefined}
+                  coverImageUrl={profileImageUrl || profileThumbUrl || coverImageUrl || undefined}
                   userInitials={initials}
                   circleClassName="w-24 h-24 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/20 shadow-xl"
                   barClassName="w-24 md:w-48"
