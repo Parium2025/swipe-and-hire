@@ -79,72 +79,8 @@ export const CandidateSlide = memo(function CandidateSlide({
     if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
   }, []);
 
-  const isInteractiveTarget = (target: EventTarget | null) =>
-    target instanceof Element && Boolean(
-      target.closest('button, a, input, textarea, select, [role="slider"], [data-candidate-video-control], [data-swipe-action-button]'),
-    );
-
-  const handleTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    if (!onSkip || event.touches.length !== 1 || isInteractiveTarget(event.target)) return;
-    const touch = event.touches[0];
-    touchRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      startTime: Date.now(),
-      horizontal: false,
-      cancelled: false,
-    };
-    thresholdHapticRef.current = false;
-  }, [onSkip]);
-
-  const handleTouchMove = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    const gesture = touchRef.current;
-    if (!gesture || gesture.cancelled || event.touches.length !== 1) return;
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - gesture.startX;
-    const deltaY = touch.clientY - gesture.startY;
-
-    if (!gesture.horizontal) {
-      if (Math.abs(deltaX) < 12 && Math.abs(deltaY) < 12) return;
-      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
-        gesture.cancelled = true;
-        return;
-      }
-      gesture.horizontal = true;
-      suppressOpenRef.current = true;
-    }
-
-    if (event.cancelable) event.preventDefault();
-    // Högerdrag har motstånd eftersom endast vänsterdrag går vidare.
-    x.set(deltaX > 0 ? deltaX * 0.28 : deltaX);
-    if (!thresholdHapticRef.current && deltaX <= -100) {
-      thresholdHapticRef.current = true;
-      hapticLight();
-    }
-  }, [x]);
-
-  const handleTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    const gesture = touchRef.current;
-    touchRef.current = null;
-    if (!gesture || gesture.cancelled || !gesture.horizontal) return;
-    const touch = event.changedTouches[0];
-    const deltaX = touch.clientX - gesture.startX;
-    const elapsed = Math.max(1, Date.now() - gesture.startTime);
-    const velocityX = (deltaX / elapsed) * 1000;
-    if (deltaX <= -100 || velocityX <= -400) {
-      commitSkip();
-      return;
-    }
-    resetCard();
-    window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
-  }, [commitSkip, resetCard]);
-
-  const handleTouchCancel = useCallback(() => {
-    touchRef.current = null;
-    resetCard();
-    window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
-  }, [resetCard]);
-
+  // Kortet får medvetet INTE dras i sidled. Endast vertikal scroll/swipe
+  // mellan kandidater är tillåtet; hoppa över sker via knappen.
   const handleOpen = useCallback(() => {
     if (!suppressOpenRef.current) onOpenFullProfile();
   }, [onOpenFullProfile]);
