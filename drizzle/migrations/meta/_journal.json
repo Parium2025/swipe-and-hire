@@ -57,6 +57,13 @@
       "when": 1789816634778,
       "tag": "0007_exclude_rejected_applications_from_job_closed_outreach",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789817348622,
+      "tag": "0008_skip_reminders_for_expired_jobs",
+      "breakpoints": true
     }
   ]
 }
