@@ -901,6 +901,7 @@ const Index = () => {
           keepKeys={EMPLOYER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
           resetScrollOnNavigation
+          mobileSlideNavigation
         />
         {showEmployerTourOverlay ? (
           <EmployerOnboardingTour
