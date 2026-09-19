@@ -12,6 +12,19 @@ const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 const isAuthPath = (pathname: string) => pathname === '/auth';
 
+const detectTouch = () => {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(any-pointer: coarse), (hover: none), (any-hover: none)').matches ||
+    navigator.maxTouchPoints > 0
+  );
+};
+
+const detectStandalone = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(display-mode: standalone)').matches;
+};
+
 /**
  * Tunn färgremsa längst upp — speglar BottomChromeStrip exakt.
  *
@@ -30,9 +43,11 @@ const isAuthPath = (pathname: string) => pathname === '/auth';
  */
 const TopChromeStrip = () => {
   const location = useLocation();
-  const [isTouch, setIsTouch] = useState(false);
+  // Detect synchronously in the browser. Waiting for useEffect caused the
+  // top offset to appear one frame after login, which looked like a dark gap.
+  const [isTouch, setIsTouch] = useState(detectTouch);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(detectStandalone);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

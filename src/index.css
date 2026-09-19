@@ -696,6 +696,20 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  /* Reserve the mobile top strip before React mounts. This prevents the
+     header from shifting down one frame after login when touch detection runs. */
+  @media (any-pointer: coarse), (hover: none), (any-hover: none) {
+    :root {
+      --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 14px);
+    }
+
+    @media (display-mode: standalone) {
+      :root {
+        --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 22px);
+      }
+    }
+  }
+
   .seo-scroll-page {
     position: fixed;
     inset: 0;
