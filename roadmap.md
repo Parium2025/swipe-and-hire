@@ -68,4 +68,4 @@
 - [x] Säkerställ avslag per specifik ansökan utan påverkan på andra jobb
 - [x] 14-dagarspåminnelsen borttagen helt (notis, reglage, snooze, daglig körning)
 
-- [ ] Standardisera kandidatmedia och förvärmning i alla arbetsgivar- och jobbsökarvyer; eliminera personberoende kallstartsblink och verifiera
+- [x] Standardisera kandidatmedia och förvärmning i alla arbetsgivar- och jobbsökarvyer; eliminera personberoende kallstartsblink och verifiera
