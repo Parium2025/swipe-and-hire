@@ -749,7 +749,6 @@ const JobDetails = () => {
             onMoveToStage={handleMobileMove}
             onReject={(applicationId) => setRejectTargetIds([applicationId])}
             onMarkAsViewed={markApplicationAsViewed}
-            onOpenCriteriaDialog={() => setCriteriaDialogOpen(true)}
             isSelectionMode={isSelectionMode}
             selectedApplicationIds={selectedApplicationIds}
             onToggleSelect={toggleApplicationSelection}
@@ -809,7 +808,6 @@ const JobDetails = () => {
                     onOpenProfile={handleOpenProfile}
                     onMarkAsViewed={markApplicationAsViewed}
                     onPrefetch={handlePrefetchCandidate}
-                    onOpenCriteriaDialog={stageIndex === 0 ? () => setCriteriaDialogOpen(true) : undefined}
                     stageConfig={config}
                     totalStageCount={activeStages.length}
                     stageIndex={stageIndex}

@@ -291,7 +291,6 @@ interface MobileCandidateViewProps {
   onMoveToStage: (appId: string, stage: string) => void;
   onReject?: (appId: string) => void;
   onMarkAsViewed: (id: string) => void;
-  onOpenCriteriaDialog?: () => void;
   isSelectionMode?: boolean;
   selectedApplicationIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
@@ -309,7 +308,6 @@ export const MobileCandidateView = memo(function MobileCandidateView({
   onMoveToStage,
   onReject,
   onMarkAsViewed,
-  onOpenCriteriaDialog,
   isSelectionMode,
   selectedApplicationIds,
   onToggleSelect,

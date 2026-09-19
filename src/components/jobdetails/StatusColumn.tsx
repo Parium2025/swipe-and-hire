@@ -19,7 +19,6 @@ export interface StatusColumnProps {
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onPrefetch?: (app: JobApplication) => void;
-  onOpenCriteriaDialog?: () => void;
   stageConfig: {
     label: string;
     color: string;
@@ -48,7 +47,6 @@ export const StatusColumn = memo(({
   onOpenProfile, 
   onMarkAsViewed, 
   onPrefetch,
-  onOpenCriteriaDialog,
   stageConfig,
   totalStageCount,
   criteriaCount = 0,
