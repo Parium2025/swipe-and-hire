@@ -1,9 +1,9 @@
-import { memo, useCallback, useEffect, useRef, type TouchEvent } from 'react';
-import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
+import { memo, useCallback, useEffect, useRef } from 'react';
+import { animate, motion, useMotionValue } from 'framer-motion';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
-import { hapticLight, hapticMedium } from '@/lib/haptics';
+import { hapticMedium } from '@/lib/haptics';
 import { CandidateCardFace } from './CandidateCardFace';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
