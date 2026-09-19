@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { openCvFile } from '@/utils/cvUtils';
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';

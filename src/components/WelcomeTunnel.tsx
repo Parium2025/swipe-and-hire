@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
 import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import SwipeIntro from '@/components/SwipeIntro';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
