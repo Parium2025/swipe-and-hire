@@ -66,12 +66,16 @@ export const CandidateCardFace = memo(function CandidateCardFace({
   const fullName = `${firstName || ''} ${lastName || ''}`.trim();
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const showVideo = Boolean(hasVideo && videoUrl);
-  const stillImage = profileImageUrl || coverImageUrl || '';
+  // En video-cover är kandidatens uttryckligen anpassade stillbild. När video
+  // finns ska den därför vinna över den äldre profilbilden i alla kortlägen.
+  const displayImage = showVideo
+    ? (coverImageUrl || profileImageUrl || '')
+    : (profileImageUrl || coverImageUrl || '');
   const [fullBleedImageFailed, setFullBleedImageFailed] = useState(false);
 
   useEffect(() => {
     setFullBleedImageFailed(false);
-  }, [stillImage]);
+  }, [displayImage]);
 
   // Helskärmsläge för arbetsgivarens swipe-vy: kandidatens bild eller video
   // täcker hela kortet. Initialerna använder exakt samma yta när media saknas.
@@ -91,7 +95,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
           <div className="h-full w-full touch-pan-y overflow-hidden rounded-none">
               <ProfileVideo
                 videoUrl={videoUrl as string}
-                coverImageUrl={profileImageUrl || coverImageUrl || undefined}
+                coverImageUrl={displayImage || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
                 alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
@@ -101,9 +105,9 @@ export const CandidateCardFace = memo(function CandidateCardFace({
                 showProgressBar
               />
             </div>
-          ) : stillImage && !fullBleedImageFailed ? (
+          ) : displayImage && !fullBleedImageFailed ? (
             <img
-              src={stillImage}
+              src={displayImage}
               alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
               className="h-full w-full rounded-none object-cover"
               draggable={false}
@@ -175,7 +179,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             {showVideo ? (
               <ProfileVideoCircle
                 videoUrl={videoUrl as string}
-                coverImageUrl={profileImageUrl || coverImageUrl || undefined}
+                coverImageUrl={displayImage || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
                 alt="Profilvideo"

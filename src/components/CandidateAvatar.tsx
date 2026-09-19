@@ -37,6 +37,9 @@ function CandidateAvatarBase({
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const hasVideo = !!isProfileVideo && !!resolvedVideoUrl;
   const hasImage = !!resolvedImageUrl && !avatarError;
+  // För videoprofiler är covern den bild kandidaten själv har anpassat för
+  // visning. Profilbilden är endast fallback om cover saknas.
+  const videoCoverUrl = resolvedCoverUrl || resolvedImageUrl || undefined;
 
   // Reset error state when URL changes
   useEffect(() => {
@@ -80,7 +83,7 @@ function CandidateAvatarBase({
       <div onClick={handleClick}>
         <ProfileVideo
           videoUrl={resolvedVideoUrl}
-          coverImageUrl={resolvedImageUrl || resolvedCoverUrl || undefined}
+          coverImageUrl={videoCoverUrl}
           userInitials={initials}
           alt="Kandidatvideo"
           className="h-10 w-10 ring-2 ring-inset ring-white/20 rounded-full"
