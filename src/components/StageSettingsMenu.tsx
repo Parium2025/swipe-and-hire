@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { MoreVertical, Pencil, Palette, Image, Trash2, AlertTriangle, Info } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import {
@@ -194,6 +194,25 @@ export function StageSettingsMenu({
     setMenuAlignOffset(stageCenter - triggerCenter);
   };
 
+  // Radix mäter portalen när den öppnas. På touch öppnades den tidigare i samma
+  // render som offseten uppdaterades, så första positioneringen hann använda 0
+  // och menyn låg kvar centrerad under trepunktsknappen. Mät om synkront när
+  // den öppna portalen finns och vid viewportförändringar.
+  useLayoutEffect(() => {
+    if (!isMenuOpen || !centerOnStageCard) return;
+    updateMenuAlignment();
+
+    const handleViewportChange = () => updateMenuAlignment();
+    window.addEventListener('resize', handleViewportChange);
+    window.visualViewport?.addEventListener('resize', handleViewportChange);
+    window.visualViewport?.addEventListener('scroll', handleViewportChange);
+    return () => {
+      window.removeEventListener('resize', handleViewportChange);
+      window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+    };
+  }, [isMenuOpen, centerOnStageCard]);
+
   const handleMenuOpenChange = (nextOpen: boolean) => {
     if (nextOpen) updateMenuAlignment();
     if (open === undefined) {
@@ -254,6 +273,7 @@ export function StageSettingsMenu({
           align={useJobDetailsTriggerStyle ? 'center' : 'end'}
           alignOffset={centerOnStageCard ? menuAlignOffset : undefined}
           sideOffset={6}
+          avoidCollisions={!centerOnStageCard}
           className="w-48 border-white/20"
         >
           <DropdownMenuItem 

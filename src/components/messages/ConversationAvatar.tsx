@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
@@ -67,10 +67,22 @@ export function ConversationAvatar({
   const hasImageUrl = !!resolvedUrl;
   const isReady = hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:'));
   const [loaded, setLoaded] = useState(isReady);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const expectsImage = !!(
+    profile?.profile_image_url ||
+    (profile?.role === 'employer' && profile.company_logo_url)
+  );
 
   useEffect(() => {
     setLoaded(hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:')));
+    setLoadFailed(false);
   }, [resolvedUrl, hasImageUrl]);
+
+  const attachImage = useCallback((node: HTMLImageElement | null) => {
+    if (!node || !resolvedUrl || !node.complete || node.naturalWidth <= 0) return;
+    loadedAvatarUrls.add(resolvedUrl);
+    setLoaded(true);
+  }, [resolvedUrl]);
 
   return (
     <div
@@ -83,6 +95,7 @@ export function ConversationAvatar({
       <span
         className={cn(
           'absolute inset-0 flex items-center justify-center rounded-full bg-transparent text-pure-white font-medium',
+          expectsImage && !loadFailed && !loaded && 'animate-pulse bg-white/10 text-transparent',
           size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-base',
           fallbackClassName,
         )}
@@ -91,6 +104,7 @@ export function ConversationAvatar({
       </span>
       {hasImageUrl && (
         <img
+          ref={attachImage}
           src={resolvedUrl}
           alt=""
           aria-hidden="true"
@@ -103,7 +117,10 @@ export function ConversationAvatar({
             loadedAvatarUrls.add(resolvedUrl);
             setLoaded(true);
           }}
-          onError={() => setLoaded(false)}
+          onError={() => {
+            setLoaded(false);
+            setLoadFailed(true);
+          }}
         />
       )}
     </div>

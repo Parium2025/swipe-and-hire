@@ -9,7 +9,6 @@ import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
-const CONVERSATIONS_CACHE_KEY = 'parium_conversations_cache';
 // Ingen CACHE_MAX_AGE eller PERIODIC_REFRESH - vi förlitar oss på realtime subscriptions
 // Minsta tid tabben måste varit dold innan vi gör en full refetch vid återkomst
 const TAB_HIDDEN_THRESHOLD_MS = 30_000;
@@ -19,7 +18,6 @@ const TAB_HIDDEN_THRESHOLD_MS = 30_000;
 // Före: 100 rader/tabell × 4 tabeller × 1 000 samtidiga arbetsgivare = 400 000 rader/sek vid login-spike.
 // Nu:   20 rader/tabell × 4 tabeller × 1 000 samtidiga arbetsgivare = 80 000 rader/sek (5× lägre peak).
 const INITIAL_PAGE_SIZE = 18;
-const CONVERSATIONS_INITIAL_PAGE_SIZE = 25;
 
 /**
  * 🚀 EMPLOYER BACKGROUND SYNC ENGINE
@@ -177,39 +175,6 @@ export const useEmployerBackgroundSync = () => {
     }
   }, [queryClient]);
 
-  // 💬 Preload konversationer (alltid hämta färsk data - realtime synkar)
-  const preloadConversations = useCallback(async (userId: string) => {
-
-    const { data: memberships } = await supabase
-      .from('conversation_members')
-      .select('conversation_id, last_read_at')
-      .eq('user_id', userId);
-
-    if (!memberships || memberships.length === 0) return;
-
-    const conversationIds = memberships.map(m => m.conversation_id);
-    
-    const { data: conversations, error } = await supabase
-      .from('conversations')
-      .select(`*, job:job_id (title)`)
-      .in('id', conversationIds)
-      .order('last_message_at', { ascending: false, nullsFirst: false })
-      .limit(CONVERSATIONS_INITIAL_PAGE_SIZE);
-
-    if (!error && conversations) {
-      safeSetItem(CONVERSATIONS_CACHE_KEY, JSON.stringify({
-        userId,
-        conversations,
-        timestamp: Date.now(),
-      }));
-
-      // ⚠️ Skriv INTE direkt till queryClient här — denna data saknar `unread_count`
-      // som useConversations räknar fram via separat query. Att klobba cachen får
-      // chatt-badgen att flimra till 0 vid tab-refocus innan riktig data hinner ifatt.
-      // useConversations refetchar själv när den behöver (refetchOnWindowFocus + realtime).
-    }
-  }, []);
-
   // 🚀 HUVUDFUNKTION: Förladda ALL arbetsgivardata parallellt
   const preloadAllData = useCallback(async (force = false) => {
     if (!user || !isEmployer) return;
@@ -233,7 +198,6 @@ export const useEmployerBackgroundSync = () => {
       await Promise.all([
         preloadInterviews(userId),
         preloadMyCandidates(userId),
-        preloadConversations(userId),
       ]);
 
       hasPreloadedRef.current = true;
@@ -243,7 +207,7 @@ export const useEmployerBackgroundSync = () => {
     } finally {
       isPreloadingRef.current = false;
     }
-  }, [user, isEmployer, preloadInterviews, preloadMyCandidates, preloadConversations]);
+  }, [user, isEmployer, preloadInterviews, preloadMyCandidates]);
 
   // Exponera preload-funktionen globalt
   useEffect(() => {
