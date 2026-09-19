@@ -2239,14 +2239,14 @@ const Profile = () => {
           <div className="p-4 flex flex-col items-center space-y-4">
             <div className="relative">
               {displayIsVideo ? (
-                <ProfileVideo
+                <ProfileVideoCircle
                   videoUrl={displayVideoUrl}
                   coverImageUrl={activeCandidateProfile ? (activeExtraCoverUrl ?? undefined) : signedCoverUrl}
                   posterUrl={displayVideoPoster}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
-                  className="w-32 h-32 ring-4 ring-inset ring-white/10 rounded-full overflow-hidden"
-                  countdownVariant="circle"
+                  circleClassName="w-32 h-32 ring-4 ring-inset ring-white/10 rounded-full overflow-hidden"
+                  barClassName="w-32"
                 />
               ) : (
                 <div

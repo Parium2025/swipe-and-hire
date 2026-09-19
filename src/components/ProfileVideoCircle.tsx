@@ -64,6 +64,7 @@ export function ProfileVideoCircle({
           showCountdown={false}
           showProgressBar={false}
           disablePlayback={disablePlayback}
+          forceTouchMode={forceTouchMode}
           onPlayingChange={setIsPlaying}
           onTimeChange={handleTimeChange}
           seekRef={seekRef}
