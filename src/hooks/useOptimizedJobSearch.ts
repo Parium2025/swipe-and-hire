@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { COMPANY_LOGO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms';
 import { useAuth } from '@/hooks/useAuth';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 import { getTimeRemaining } from '@/lib/date';
@@ -62,19 +64,17 @@ function readSearchCache(key: string): SearchJob[] | null {
  * - Storage-path → konvertera via supabase.storage public URL
  * Returnerar null om vi inte kan ta fram en användbar URL.
  */
-function normalizeLogoUrl(raw: string | null | undefined): string | null {
+function normalizeLogoUrl(job: SearchJob): string | null {
+  const raw = job.company_logo_url;
   if (!raw || typeof raw !== 'string') return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    return trimmed.split('?')[0];
-  }
-  try {
-    const publicUrl = supabase.storage.from('company-logos').getPublicUrl(trimmed).data.publicUrl;
-    return publicUrl ? publicUrl.split('?')[0] : null;
-  } catch {
-    return null;
-  }
+  return buildCardImageUrl(
+    trimmed,
+    'company-logos',
+    getImageVersion(job),
+    COMPANY_LOGO_TRANSFORM,
+  );
 }
 
 /**
@@ -89,7 +89,7 @@ function warmCompanyLogos(jobs: SearchJob[]): void {
   const seen = new Set<string>();
   const urls: string[] = [];
   for (const job of jobs) {
-    const normalized = normalizeLogoUrl(job.company_logo_url);
+    const normalized = normalizeLogoUrl(job);
     if (normalized && !seen.has(normalized) && !imageCache.isCached(normalized)) {
       seen.add(normalized);
       urls.push(normalized);

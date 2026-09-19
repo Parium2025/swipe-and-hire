@@ -765,7 +765,10 @@ export const useApplicationsData = (
       }
       applicationsInvalidateTimerRef.current = window.setTimeout(() => {
         applicationsInvalidateTimerRef.current = null;
-        queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+        queryClient.invalidateQueries({
+          queryKey: ['applications', user.id],
+          refetchType: 'active',
+        });
       }, 400);
     };
 
@@ -821,7 +824,10 @@ export const useApplicationsData = (
           window.clearTimeout(profilesInvalidateTimerRef.current);
         }
         profilesInvalidateTimerRef.current = window.setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
+          queryClient.invalidateQueries({
+            queryKey: ['applications', user.id],
+            refetchType: 'active',
+          });
         }, 400);
       })
       .subscribe();

@@ -37,6 +37,28 @@ export function useCandidateMediaPreloader(
     }
   }, [enabled]);
 
+  // Kandidaten som faktiskt syns får alltid gå först och startar omedelbart.
+  // Den ska aldrig hamna bakom bulkförvärmningens lågprioriterade kö.
+  useEffect(() => {
+    if (!enabled) return;
+    const current = applications?.[currentIndex];
+    if (!current) return;
+
+    const paths = [
+      current.profile_image_url,
+      current.cover_image_url,
+    ].filter((path): path is string => typeof path === 'string' && path.trim() !== '');
+
+    paths.forEach((path) => {
+      loadedRef.current.add(`visible:${path}`);
+      void prefetchMediaUrl(path, 'profile-image', 86400, undefined, 'high').catch(() => {});
+    });
+    if (current.video_url) {
+      loadedRef.current.add(`visible-video:${current.video_url}`);
+      void prefetchMediaUrl(current.video_url, 'profile-video', 86400, undefined, 'high').catch(() => {});
+    }
+  }, [applications, currentIndex, enabled]);
+
   // One-time bulk preload of the first N candidates as soon as the viewer opens.
   useEffect(() => {
     if (!enabled) return;

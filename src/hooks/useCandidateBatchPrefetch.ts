@@ -37,6 +37,7 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
       const apps = await fetchApplicationsForApplicant(userId, seedApplication.applicant_id, {
         profile_image_url: seedApplication.profile_image_url,
         video_url: seedApplication.video_url,
+        cover_image_url: seedApplication.cover_image_url,
         is_profile_video: seedApplication.is_profile_video,
       });
       return apps.length > 0 ? apps : [seedApplication];
@@ -107,6 +108,7 @@ export function useCandidateBatchPrefetch(applications: ApplicationData[]) {
             {
               profile_image_url: seed.profile_image_url,
               video_url: seed.video_url,
+              cover_image_url: seed.cover_image_url,
               is_profile_video: seed.is_profile_video,
             },
           ]),

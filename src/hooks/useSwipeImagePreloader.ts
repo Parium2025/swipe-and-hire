@@ -27,8 +27,9 @@ const resolveSwipeLogo = (u?: string) => resolveUrl(u, 'company-logos', { width:
 
 function resolveJobViewVariant(url: string | undefined): string | null {
   if (!url) return null;
-  // Already a remote URL → use as-is (swipe doesn't transform foreign URLs)
-  if (url.startsWith('http')) return null;
+  // Externa URL:er kan inte transformeras, men originalet ska ändå vara varmt
+  // innan detaljvyn öppnas.
+  if (url.startsWith('http')) return url;
   const { data } = supabase.storage.from('job-images').getPublicUrl(url, { transform: JOB_VIEW_HERO_TRANSFORM });
   return data?.publicUrl || null;
 }

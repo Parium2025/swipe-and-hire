@@ -482,7 +482,8 @@ export async function prefetchMediaUrl(
   storagePath: string | null | undefined,
   mediaType: MediaType,
   expiresInSeconds: number = 86400,
-  transform?: ImageTransformOptions
+  transform?: ImageTransformOptions,
+  priority: LoadPriority = 'low',
 ): Promise<void> {
   if (!storagePath) return;
 
@@ -511,7 +512,7 @@ export async function prefetchMediaUrl(
   }
 
   try {
-    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform, 'low');
+    const signedUrl = await getOrCreateSignedUrlLoad(storagePath, mediaType, expiresInSeconds, transform, priority);
 
     if (!signedUrl) return;
 
