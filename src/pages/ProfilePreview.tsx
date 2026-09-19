@@ -484,7 +484,7 @@ export default function ProfilePreview() {
             posterUrl={videoPosterUrl}
             userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
             alt="Profilbild"
-            circleClassName="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
+            circleClassName="h-[140px] w-[140px] rounded-full ring-2 ring-white/20 shadow-xl overflow-hidden"
             barClassName="w-[140px]"
             forceTouchMode={true}
           />
