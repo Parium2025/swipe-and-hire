@@ -101,9 +101,11 @@ export const VideoScrubBar = memo(function VideoScrubBar({
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/25">
           <div className="h-full rounded-full bg-white" style={{ width: `${pct}%` }} />
         </div>
+        {/* Handtaget hålls alltid helt innanför listen – annars ser det ut att
+            fastna/klippas i slutet av videon. */}
         <div
           className="pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-md"
-          style={{ left: `${pct}%` }}
+          style={{ left: `calc(${pct}% + ${(7 - (pct * 14) / 100).toFixed(2)}px)` }}
         />
       </div>
       <div className="flex items-center justify-between text-[11px] font-medium tabular-nums leading-none text-white">
