@@ -464,11 +464,24 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   // Fönstret växer när du scrollar nära botten, så listan känns oändlig men
   // DOM:en förblir liten även när steget innehåller tusentals kandidater.
   const RENDER_STEP = 40;
-  const [renderLimit, setRenderLimit] = useState(RENDER_STEP);
+  // Första målningen ritar bara det som får plats på skärmen – resten kommer
+  // direkt efter, så första svepet aldrig hackar av en stor DOM-uppbyggnad.
+  const FIRST_PAINT_ROWS = 8;
+  const [renderLimit, setRenderLimit] = useState(FIRST_PAINT_ROWS);
 
   // Nytt steg = nytt fönster (annars ärver nästa flik ett uppblåst fönster).
   useEffect(() => {
-    setRenderLimit(RENDER_STEP);
+    setRenderLimit(FIRST_PAINT_ROWS);
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        startTransition(() => setRenderLimit((prev) => (prev < RENDER_STEP ? RENDER_STEP : prev)));
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
   }, [activeTab]);
 
   const currentCandidates = useMemo(
