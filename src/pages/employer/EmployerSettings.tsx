@@ -55,13 +55,29 @@ const EmployerSettings = () => {
   // paint, så återkomsten alltid är ett rent, hopfällt läge utan animation.
   const [accordionKey, setAccordionKey] = useState(0);
   const wasAwayRef = useRef(false);
+  const scrollTimerRef = useRef<number | null>(null);
   const handleSectionChange = (value: string) => {
     setOpenSection(value);
     try {
       if (value) sessionStorage.setItem(OPEN_SECTION_KEY, value);
       else sessionStorage.removeItem(OPEN_SECTION_KEY);
     } catch { /* privat läge m.m. — ignoreras */ }
+
+    // När en ny sektion öppnas efter att användaren scrollat ner kollapsar den
+    // gamla sektionen och rubriken hamnar långt utanför vyn. Vänta ut dragspels-
+    // animationen och scrolla sedan sektionens rubrik högst upp — samma läge
+    // som när man öppnar sektionen direkt från toppen.
+    if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
+    if (value) {
+      scrollTimerRef.current = window.setTimeout(() => {
+        scrollTimerRef.current = null;
+        document.getElementById(value)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }, 340);
+    }
   };
+  useEffect(() => () => {
+    if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
+  }, []);
 
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
   // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
