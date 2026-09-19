@@ -392,9 +392,25 @@ const Profile = () => {
   const cancelMediaUpload = useCallback(() => {
     mediaUploadAbortRef.current?.abort();
   }, []);
-  // Lämnar användaren sidan mitt i en uppladdning ska nätverksarbetet dö med
-  // sidan — annars fortsätter XHR:en och skriver state på en avmonterad vy.
-  useEffect(() => () => { mediaUploadAbortRef.current?.abort(); }, []);
+  // Lämnar användaren sidan mitt i en uppladdning ska den fortsätta i bakgrunden
+  // och skrivas direkt till databasen istället för att dö med vyn.
+  const isUnmountedRef = useRef(false);
+  useEffect(() => () => { isUnmountedRef.current = true; }, []);
+  const persistMediaInBackground = useCallback(async (
+    targetProfileId: string | null,
+    patch: { profile_image_url?: string; video_url?: string; cover_image_url?: string },
+  ) => {
+    try {
+      if (targetProfileId) {
+        await supabase.from('candidate_profiles').update(patch).eq('id', targetProfileId);
+      } else if (user?.id) {
+        await supabase.from('profiles').update(patch).eq('id', user.id);
+      }
+    } catch (error) {
+      console.error('Background media persist failed:', error);
+    }
+  }, [user?.id]);
+
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [coverProgressInfo, setCoverProgressInfo] = useState<UploadProgressInfo | null>(null);
   const [originalValues, setOriginalValues] = useState<ProfileFormValues | null>(null);
