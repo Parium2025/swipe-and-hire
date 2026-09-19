@@ -270,6 +270,9 @@ async function runNewApplications() {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
+  const authResp = await requireServiceRoleOrCronSecret(req, corsHeaders)
+  if (authResp) return authResp
+
   try {
     const [messageEmails, applicationEmails] = await Promise.all([
       runUnreadMessages(),
