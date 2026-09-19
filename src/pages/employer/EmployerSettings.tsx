@@ -205,36 +205,32 @@ const EmployerSettings = () => {
     {
       value: 'automatiska-floden',
       label: 'Automatiska flöden',
-      content: <AutoMessagesPanel />,
+      content: (
+        <div className="space-y-6">
+          <AutoMessagesPanel />
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-white">Systemutskick</p>
+            <p className="text-sm text-white">Tekniska meddelanden som Parium sköter automatiskt, utanför de sex redigerbara händelserna.</p>
+            <ul className="space-y-2">
+              <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+                <p className="font-medium text-white">Intervjukallelse</p>
+                <p className="text-xs text-white">Skickas när en intervju bokas eller bokas om. Kandidaten får Ja/Nej-knappar, mötesinformation och kalenderlänk utan dubbla mejl.</p>
+              </li>
+              <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+                <p className="font-medium text-white">Jobb som snart går ut</p>
+                <p className="text-xs text-white">Du får ett mejl med annonsens titel och hur lång tid som återstår när mindre än 8 timmar kvarstår. Jobbsökare kan separat få en påminnelse om ett sparat jobb som snart går ut.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      ),
     },
     {
       value: 'manuella-besked',
       label: 'Mallar, regler & utskick',
       content: <MessageTemplatesSettings />,
     },
-    {
-      value: 'systemutskick',
-      label: 'Systemutskick',
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-white">Tekniska meddelanden som Parium sköter utanför de sex redigerbara händelserna.</p>
-          <ul className="space-y-2">
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
-              <p className="font-medium text-white">Intervjukallelse</p>
-              <p className="text-xs text-white">Skickas när en intervju bokas eller bokas om. Kandidaten får Ja/Nej-knappar, mötesinformation och kalenderlänk utan dubbla mejl.</p>
-            </li>
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
-              <p className="font-medium text-white">Jobb som snart går ut</p>
-              <p className="text-xs text-white">Arbetsgivaren påminns före annonsens slut. Jobbsökare kan få en påminnelse när ett sparat jobb snart går ut.</p>
-            </li>
-            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
-              <p className="font-medium text-white">Konto, säkerhet och support</p>
-              <p className="text-xs text-white">Nödvändiga meddelanden för exempelvis e-postbekräftelse, återställning av lösenord och svar på supportärenden.</p>
-            </li>
-          </ul>
-        </div>
-      ),
-    },
+
     {
       value: 'kalender',
       label: 'Kalender',
