@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import NotificationCenter from '../NotificationCenter';
 
+const emptyArchive: never[] = [];
+
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
 vi.mock('@/hooks/useNotifications', () => ({
   useNotifications: () => ({
@@ -23,7 +25,7 @@ vi.mock('@/hooks/useNotificationPreferences', () => ({
 vi.mock('@/lib/toastArchive', () => ({
   toastArchive: {
     subscribe: () => () => undefined,
-    getSnapshot: () => [],
+    getSnapshot: () => emptyArchive,
     markAllAsRead: vi.fn(),
     markAsRead: vi.fn(),
     clear: vi.fn(),
