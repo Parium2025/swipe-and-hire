@@ -16,7 +16,7 @@ describe('CandidateAvatar media fallback', () => {
   afterEach(cleanup);
 
   it('visar covern när videoprofilens video tillfälligt saknas', () => {
-    render(
+    const { container } = render(
       <CandidateAvatar
         profileImageUrl={null}
         coverImageUrl="video-cover.jpg"
@@ -27,7 +27,7 @@ describe('CandidateAvatar media fallback', () => {
       />,
     );
 
-    expect(screen.getByRole('img').getAttribute('src')).toBe('video-cover.jpg');
+    expect(container.querySelector('img')?.getAttribute('src')).toBe('video-cover.jpg');
   });
 
   it('prioriterar covern framför profilbilden för videoprofiler', () => {
