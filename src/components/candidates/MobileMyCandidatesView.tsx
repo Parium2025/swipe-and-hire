@@ -590,6 +590,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       onMoveCandidatesAndDelete={onMoveCandidatesAndDelete}
                       useJobDetailsTriggerStyle
                       disableTouchTrigger={false}
+                      centerOnStageCard
                       onTriggerPointerDown={() => setActiveTab(stage)}
                       open={openStageMenu === stage}
                       onOpenChange={(nextOpen) => {

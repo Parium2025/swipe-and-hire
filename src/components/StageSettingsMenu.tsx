@@ -50,6 +50,7 @@ interface StageSettingsMenuProps {
   onOpenChange?: (open: boolean) => void;
   disableTouchTrigger?: boolean;
   onTriggerPointerDown?: () => void;
+  centerOnStageCard?: boolean;
 }
 
 export function StageSettingsMenu({
@@ -66,6 +67,7 @@ export function StageSettingsMenu({
   onOpenChange,
   disableTouchTrigger = false,
   onTriggerPointerDown,
+  centerOnStageCard = false,
 }: StageSettingsMenuProps) {
   const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
@@ -78,6 +80,8 @@ export function StageSettingsMenu({
   const [liveColor, setLiveColor] = useState<string | null>(null);
   const colorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [menuAlignOffset, setMenuAlignOffset] = useState(0);
   
   const currentConfig = stageConfig[stageKey];
   const defaultConfig = getDefaultConfig(stageKey);
@@ -173,7 +177,25 @@ export function StageSettingsMenu({
 
   const isMenuOpen = open ?? internalMenuOpen;
 
+  const updateMenuAlignment = () => {
+    if (!centerOnStageCard) {
+      setMenuAlignOffset(0);
+      return;
+    }
+
+    const trigger = triggerRef.current;
+    const stageCard = trigger?.closest<HTMLElement>('[data-stage-tab]');
+    if (!trigger || !stageCard) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const stageRect = stageCard.getBoundingClientRect();
+    const triggerCenter = triggerRect.left + triggerRect.width / 2;
+    const stageCenter = stageRect.left + stageRect.width / 2;
+    setMenuAlignOffset(stageCenter - triggerCenter);
+  };
+
   const handleMenuOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) updateMenuAlignment();
     if (open === undefined) {
       setInternalMenuOpen(nextOpen);
     }
@@ -185,6 +207,7 @@ export function StageSettingsMenu({
       <DropdownMenu modal={false} open={isMenuOpen} onOpenChange={handleMenuOpenChange}>
         <DropdownMenuTrigger asChild>
           <button
+            ref={triggerRef}
             className={`${useJobDetailsTriggerStyle
               ? 'p-2.5 -m-1.5 rounded-full md:hover:bg-white/20 transition-colors text-white touch-manipulation min-h-[44px] min-w-[44px] pointer-fine:min-h-0 pointer-fine:min-w-0 pointer-fine:h-7 pointer-fine:w-7 pointer-fine:p-1 pointer-fine:-m-0.5 flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 [outline:none!important] [box-shadow:none!important] [border:none!important]'
               : 'p-1 rounded hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100'
@@ -192,6 +215,7 @@ export function StageSettingsMenu({
             style={useJobDetailsTriggerStyle ? { outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent', border: 'none' } : undefined}
             onPointerDown={(e) => {
               e.stopPropagation();
+              updateMenuAlignment();
               if (e.pointerType === 'touch') {
                 e.preventDefault();
                 touchStartRef.current = { x: e.clientX, y: e.clientY };
@@ -228,6 +252,7 @@ export function StageSettingsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align={useJobDetailsTriggerStyle ? 'center' : 'end'}
+          alignOffset={centerOnStageCard ? menuAlignOffset : undefined}
           sideOffset={6}
           className="w-48 border-white/20"
         >
