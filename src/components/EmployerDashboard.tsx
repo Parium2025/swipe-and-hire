@@ -594,13 +594,12 @@ const EmployerDashboard = memo(() => {
     return total > 0 || expired > 0 || draft > 0;
   }, [serverCounts, jobs.length, expiredJobsCount, draftJobsCount]);
 
-  // Klick på ett statistikkort → byt flik och glid mjukt ner till listan
+  // Klick på ett statistikkort byter flik utan att flytta mobilvyn. scrollIntoView
+  // kunde även scrolla sidans yttre viewport i iOS Safari och skjuta den fasta
+  // headern bakom webbläsarens toppfält.
   const goToTab = useCallback((tab: JobStatusTab) => {
     setActiveTab(tab);
     setPage(1);
-    requestAnimationFrame(() => {
-      listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   }, [setActiveTab, setPage]);
 
   const statsCards = useMemo(() => {
