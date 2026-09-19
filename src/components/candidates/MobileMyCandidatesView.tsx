@@ -68,6 +68,8 @@ const MyCandidateRow = memo(function MyCandidateRow({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [menuMetrics, setMenuMetrics] = useState({ width: 0, alignOffset: 0 });
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
+  const menuTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const ignoreMenuClickRef = useRef(false);
 
   const measureMenuMetrics = useCallback(() => {
     const rowEl = rowRef.current;
@@ -206,10 +208,32 @@ const MyCandidateRow = memo(function MyCandidateRow({
               ref={triggerRef}
               onPointerDownCapture={(event) => {
                 measureMenuMetrics();
-                if (event.pointerType === 'touch') event.preventDefault();
+                if (event.pointerType === 'touch') {
+                  event.preventDefault();
+                  menuTouchStartRef.current = { x: event.clientX, y: event.clientY };
+                  ignoreMenuClickRef.current = true;
+                }
+              }}
+              onPointerUp={(event) => {
+                if (event.pointerType !== 'touch') return;
+                event.stopPropagation();
+                const start = menuTouchStartRef.current;
+                menuTouchStartRef.current = null;
+                if (!start) return;
+                const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+                if (moved < 8) setMoveMenuOpen((open) => !open);
+              }}
+              onPointerCancel={() => {
+                menuTouchStartRef.current = null;
+                ignoreMenuClickRef.current = false;
               }}
               onClick={event => {
                 event.stopPropagation();
+                if (ignoreMenuClickRef.current) {
+                  ignoreMenuClickRef.current = false;
+                  event.preventDefault();
+                  return;
+                }
                 setMoveMenuOpen((open) => !open);
               }}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 active:scale-[0.97] transition-colors flex-shrink-0"
