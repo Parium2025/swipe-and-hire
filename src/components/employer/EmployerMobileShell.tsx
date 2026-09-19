@@ -51,7 +51,11 @@ const EmployerMobileShell = ({
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
-          <header className="relative flex-none z-50 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]" style={{ contain: 'layout paint style', transform: 'translate3d(0,0,0)', WebkitBackfaceVisibility: 'hidden' }}>
+          {/* Keep the header on the shell's normal compositing layer. Combining
+              paint containment, a forced transform and backface hiding made
+              iOS Safari occasionally drop the header's children after an
+              internal momentum scroll, while the header border stayed visible. */}
+          <header className="relative flex-none z-50 h-14 min-h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/20 bg-transparent px-3 [padding-left:max(0.75rem,env(safe-area-inset-left,0px))] [padding-right:max(0.75rem,env(safe-area-inset-right,0px))]">
             <div className="min-w-0 flex items-center justify-self-start">
               <EmployerLogoSidebarTrigger />
             </div>

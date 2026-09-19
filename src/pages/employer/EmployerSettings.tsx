@@ -55,7 +55,56 @@ const EmployerSettings = () => {
   // paint, så återkomsten alltid är ett rent, hopfällt läge utan animation.
   const [accordionKey, setAccordionKey] = useState(0);
   const wasAwayRef = useRef(false);
-  const scrollTimerRef = useRef<number | null>(null);
+  const sectionRefs = useRef(new Map<string, HTMLDivElement>());
+  const scrollFrameRef = useRef<number | null>(null);
+
+  const scrollSectionToTop = (value: string, behavior: ScrollBehavior = 'smooth') => {
+    if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current);
+
+    const startedAt = performance.now();
+    let previousTop: number | null = null;
+    let previousHeight: number | null = null;
+    let stableFrames = 0;
+
+    const settleAndScroll = () => {
+      const target = sectionRefs.current.get(value);
+      const container = target?.closest<HTMLElement>('[data-main-scroll-container="true"]');
+      if (!target || !container) {
+        scrollFrameRef.current = null;
+        return;
+      }
+
+      const targetTop = target.getBoundingClientRect().top;
+      const contentHeight = container.scrollHeight;
+      if (
+        previousTop !== null &&
+        previousHeight !== null &&
+        Math.abs(targetTop - previousTop) < 1 &&
+        Math.abs(contentHeight - previousHeight) < 1
+      ) {
+        stableFrames += 1;
+      } else {
+        stableFrames = 0;
+      }
+      previousTop = targetTop;
+      previousHeight = contentHeight;
+
+      // Vänta tills både stängning och öppning har stabiliserat layouten.
+      // Maxgränsen gör att långsamt/laddande innehåll aldrig blockerar scrollen.
+      if (stableFrames >= 2 || performance.now() - startedAt >= 700) {
+        const containerTop = container.getBoundingClientRect().top;
+        const nextTop = Math.max(0, container.scrollTop + targetTop - containerTop);
+        container.scrollTo({ top: nextTop, behavior });
+        scrollFrameRef.current = null;
+        return;
+      }
+
+      scrollFrameRef.current = requestAnimationFrame(settleAndScroll);
+    };
+
+    scrollFrameRef.current = requestAnimationFrame(settleAndScroll);
+  };
+
   const handleSectionChange = (value: string) => {
     setOpenSection(value);
     try {
@@ -63,20 +112,12 @@ const EmployerSettings = () => {
       else sessionStorage.removeItem(OPEN_SECTION_KEY);
     } catch { /* privat läge m.m. — ignoreras */ }
 
-    // När en ny sektion öppnas efter att användaren scrollat ner kollapsar den
-    // gamla sektionen och rubriken hamnar långt utanför vyn. Vänta ut dragspels-
-    // animationen och scrolla sedan sektionens rubrik högst upp — samma läge
-    // som när man öppnar sektionen direkt från toppen.
-    if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
-    if (value) {
-      scrollTimerRef.current = window.setTimeout(() => {
-        scrollTimerRef.current = null;
-        document.getElementById(value)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-      }, 340);
-    }
+    // Scrolla endast den interna innehållsytan när accordionens verkliga höjd
+    // har stabiliserats. `scrollIntoView` kunde även flytta iOS viewport/shell.
+    if (value) scrollSectionToTop(value);
   };
   useEffect(() => () => {
-    if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
+    if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current);
   }, []);
 
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
@@ -97,7 +138,7 @@ const EmployerSettings = () => {
       wasAwayRef.current = false;
       setOpenSection('notifications');
       const frame = requestAnimationFrame(() => {
-        notificationSettingsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        scrollSectionToTop('notifications');
       });
       return () => cancelAnimationFrame(frame);
     }
@@ -287,7 +328,11 @@ const EmployerSettings = () => {
             key={section.value}
             value={section.value}
             id={section.value}
-            ref={section.value === 'notifications' ? notificationSettingsRef : undefined}
+            ref={(node) => {
+              if (node) sectionRefs.current.set(section.value, node);
+              else sectionRefs.current.delete(section.value);
+              if (section.value === 'notifications') notificationSettingsRef.current = node;
+            }}
             className="border-0 scroll-mt-6"
           >
             <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors">
