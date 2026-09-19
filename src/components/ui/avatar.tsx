@@ -120,6 +120,9 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         decoding="async"
         {...fetchPriority('high')}
         {...props}
+        // Håll bilden osynlig tills den laddats klart — annars kan WebKit hinna
+        // rita sin egen trasig-bild-symbol ovanpå initialerna.
+        style={status === 'loaded' ? props.style : { ...(props.style ?? {}), visibility: 'hidden' }}
       />
     );
   }

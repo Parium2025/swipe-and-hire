@@ -98,8 +98,12 @@ export function ResilientImage({
     setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   }, [sourceSignature]);
 
+  // Vilken exakt src som faktiskt ritats klart. Bilden visas först då.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+
   const handleLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setLoadedSrc(e.currentTarget.getAttribute('src'));
       setImageState((current) => (current.sourceSignature === sourceSignature && current.broken)
         ? { ...current, broken: false }
         : current);
@@ -107,6 +111,14 @@ export function ResilientImage({
     },
     [onLoad, sourceSignature]
   );
+
+  // Cachade bilder kan bli klara innan React hinner koppla onLoad → kolla
+  // direkt på elementet, annars skulle en färdig bild aldrig visas.
+  const attachRef = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.naturalWidth > 0) {
+      setLoadedSrc(node.getAttribute('src'));
+    }
+  }, []);
 
   if (!activeSrc) {
     return null;
@@ -141,17 +153,21 @@ export function ResilientImage({
       ? `${activeSrc}${activeSrc.includes("?") ? "&" : "?"}_r=${attempt}`
       : activeSrc;
 
+  // WebKit ritar sin egen trasig-bild-symbol ("?") så fort en src inte kan
+  // laddas — även innan onError hinner köra. Därför hålls bilden osynlig tills
+  // den FAKTISKT laddats klart. Initialerna under syns då istället, aldrig ett
+  // frågetecken.
+  const isReady = loadedSrc === finalSrc && !broken;
+
   return (
     <img
+      ref={attachRef}
       decoding="async"
       {...rest}
       src={finalSrc}
       alt={alt}
       className={className}
-      // A src that fails to load makes WebKit paint its own broken-image glyph
-      // on top of the card. Keep the element mounted (no layout change) but
-      // invisible while it is broken, so only the initials layer shows.
-      style={broken ? { ...(rest.style ?? {}), visibility: 'hidden' } : rest.style}
+      style={isReady ? rest.style : { ...(rest.style ?? {}), visibility: 'hidden' }}
       onLoad={handleLoad}
       onError={handleError}
     />
