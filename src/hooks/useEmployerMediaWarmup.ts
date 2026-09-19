@@ -46,6 +46,7 @@ const MAX_NEW_PER_UPDATE = 50;
 interface ItemWithMedia {
   applicant_id?: string;
   profile_image_url?: string | null;
+  cover_image_url?: string | null;
   video_url?: string | null;
   is_profile_video?: boolean | null;
 }
@@ -84,6 +85,7 @@ export function useEmployerMediaWarmup() {
       if (!data?.pages) return;
 
       const imagePaths: string[] = [];
+      const coverPaths: string[] = [];
       const videoPaths: string[] = [];
 
       for (const page of data.pages) {
@@ -94,6 +96,11 @@ export function useEmployerMediaWarmup() {
             warmed.add(`img:${img}`);
             imagePaths.push(img);
           }
+          const cover = item?.cover_image_url;
+          if (typeof cover === 'string' && cover.trim() !== '' && !warmed.has(`cover:${cover}`)) {
+            warmed.add(`cover:${cover}`);
+            coverPaths.push(cover);
+          }
           const vid = item?.video_url;
           if (typeof vid === 'string' && vid.trim() !== '' && !warmed.has(`vid:${vid}`)) {
             warmed.add(`vid:${vid}`);
@@ -102,10 +109,11 @@ export function useEmployerMediaWarmup() {
         }
       }
 
-      if (imagePaths.length === 0 && videoPaths.length === 0) return;
+      if (imagePaths.length === 0 && coverPaths.length === 0 && videoPaths.length === 0) return;
 
       // Begränsa per update för att skydda mot megalistor
       const limitedImages = imagePaths.slice(0, MAX_NEW_PER_UPDATE);
+      const limitedCovers = coverPaths.slice(0, 24);
       const limitedVideos = videoPaths.slice(0, Math.min(10, videoPaths.length));
 
       // Microtask så vi aldrig blockerar render
@@ -121,6 +129,14 @@ export function useEmployerMediaWarmup() {
         // förvärmningen bortkastad. Cap till 24 (≈ en full skärm) för att spara bandbredd.
         Promise.allSettled(
           limitedImages.slice(0, 24).map((p) =>
+            prefetchMediaUrl(p, 'profile-image', 86400).catch(() => {}),
+          ),
+        );
+        // Video-/Swipe-korten visar covern som första bildruta. Den måste vara
+        // färdigavkodad redan före öppning, annars blinkar kortet trots att
+        // själva profilbilden har värmts.
+        Promise.allSettled(
+          limitedCovers.map((p) =>
             prefetchMediaUrl(p, 'profile-image', 86400).catch(() => {}),
           ),
         );
