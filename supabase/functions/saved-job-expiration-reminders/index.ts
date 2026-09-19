@@ -56,7 +56,23 @@ const handler = async (req: Request): Promise<Response> => {
     let notificationsSent = 0;
 
     if (savedJobs && savedJobs.length > 0) {
+      // Har användaren redan sökt jobbet är "sök innan det är för sent" meningslöst –
+      // hen får i stället beskedet när annonsen avslutas. Hoppa över dessa.
+      const userIds = [...new Set(savedJobs.map((s) => s.user_id))];
+      const jobIds = [...new Set(savedJobs.map((s) => s.job_id))];
+      const { data: applications } = await supabase
+        .from("job_applications")
+        .select("applicant_id, job_id")
+        .in("applicant_id", userIds)
+        .in("job_id", jobIds);
+      const alreadyApplied = new Set(
+        (applications || []).map((a) => `${a.applicant_id}:${a.job_id}`)
+      );
+
       for (const saved of savedJobs) {
+        if (alreadyApplied.has(`${saved.user_id}:${saved.job_id}`)) {
+          continue;
+        }
         const job = saved.job_postings as any;
         const companyName = job.profiles?.company_name || "Företaget";
 
