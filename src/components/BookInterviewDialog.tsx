@@ -485,29 +485,51 @@ export const BookInterviewDialog = ({
     }
   };
 
-  // Generate time options (every 15 min, full 24 hours)
-  const allTimeOptions = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-      allTimeOptions.push(timeStr);
+  // Generate time options (every 15 min, full 24 hours) — stabil referens.
+  const allTimeOptions = React.useMemo(() => {
+    const options: string[] = [];
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        options.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+      }
     }
-  }
+    return options;
+  }, []);
+
+  // Klockan tickar med i minuttakt så listan aldrig visar en tid som redan
+  // passerat — och så att dagen byts korrekt när man sitter nära midnatt.
+  const [minuteTick, setMinuteTick] = useState(() => Date.now());
+  useEffect(() => {
+    if (!open) return;
+    const timer = setInterval(() => setMinuteTick(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, [open]);
 
   // Filter times if today is selected - only show future times
-  const timeOptions = date && isToday(date) 
-    ? allTimeOptions.filter(t => {
-        const [hours, minutes] = t.split(':').map(Number);
-        const now = new Date();
-        const timeDate = new Date();
-        timeDate.setHours(hours, minutes, 0, 0);
-        return timeDate > now;
-      })
-    : allTimeOptions;
+  const timeOptions = React.useMemo(() => {
+    if (!date || !isToday(date)) return allTimeOptions;
+    const now = new Date(minuteTick);
+    return allTimeOptions.filter(t => {
+      const [hours, minutes] = t.split(':').map(Number);
+      const timeDate = new Date(now);
+      timeDate.setHours(hours, minutes, 0, 0);
+      return timeDate > now;
+    });
+  }, [allTimeOptions, date, minuteTick]);
+
+  // Nära midnatt finns ingen tid kvar i dag. Då hoppar vi automatiskt fram till
+  // nästa dag i stället för att visa en tom, otryckbar lista.
+  React.useEffect(() => {
+    if (!date || !isToday(date) || timeOptions.length > 0) return;
+    const tomorrow = startOfDay(new Date(minuteTick));
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setDate(tomorrow);
+    setTime('09:00');
+  }, [date, timeOptions.length, minuteTick]);
 
   // Reset time if current selection is no longer valid
   React.useEffect(() => {
-    if (date && isToday(date) && !timeOptions.includes(time) && timeOptions.length > 0) {
+    if (date && isToday(date) && timeOptions.length > 0 && !timeOptions.includes(time)) {
       setTime(timeOptions[0]);
     }
   }, [date, timeOptions, time]);
