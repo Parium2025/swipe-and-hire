@@ -20,7 +20,7 @@ import { onlineManager, type QueryClient } from '@tanstack/react-query';
 
 // ─── State ────────────────────────────────────────────────────────
 
-let _isActuallyOnline = navigator.onLine;
+let _isActuallyOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 let _listeners = new Set<(online: boolean) => void>();
 let _heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
 let _queryClient: QueryClient | null = null;
