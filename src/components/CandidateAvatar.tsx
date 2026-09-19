@@ -36,17 +36,20 @@ function CandidateAvatarBase({
   
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   const hasVideo = !!isProfileVideo && !!resolvedVideoUrl;
-  const hasImage = !!resolvedImageUrl && !avatarError;
   // För videoprofiler är covern den bild kandidaten själv har anpassat för
   // visning. Profilbilden är endast fallback om cover saknas.
   const videoCoverUrl = resolvedCoverUrl || resolvedImageUrl || undefined;
+  const staticImageUrl = isProfileVideo
+    ? (resolvedCoverUrl || resolvedImageUrl)
+    : (resolvedImageUrl || resolvedCoverUrl);
+  const hasImage = !!staticImageUrl && !avatarError;
 
   // Reset error state when URL changes
   useEffect(() => {
-    if (resolvedImageUrl) {
+    if (staticImageUrl) {
       setAvatarError(false);
     }
-  }, [resolvedImageUrl]);
+  }, [staticImageUrl]);
 
   // Debug logging for troubleshooting (remove in production)
   useEffect(() => {
@@ -60,9 +63,8 @@ function CandidateAvatarBase({
   // Media är på väg (path finns men signerad URL/video är inte klar än).
   // Samma cirkulära Avatar-skal används i alla tillstånd så Safari aldrig
   // komponerar om porträttet som en fyrkant under filterbyten.
-  const mediaPending =
-    (!!profileImageUrl && !resolvedImageUrl && !avatarError) ||
-    (!!isProfileVideo && !!videoUrl && !resolvedVideoUrl);
+  const hasExpectedMedia = !!profileImageUrl || !!coverImageUrl || (!!isProfileVideo && !!videoUrl);
+  const mediaPending = hasExpectedMedia && !staticImageUrl && !resolvedVideoUrl && !avatarError;
 
   // Skyddsnät: om signeringen misslyckas (t.ex. rättighetsfel eller nätfel)
   // får kortet ALDRIG fastna i en tom platta för alltid — efter en kort stund
@@ -110,7 +112,7 @@ function CandidateAvatarBase({
   return (
     <Avatar className="h-10 w-10 ring-2 ring-inset ring-white/20 transform-gpu">
       <AvatarImage
-        src={resolvedImageUrl || ''}
+        src={staticImageUrl || ''}
         alt={`${firstName || ''} ${lastName || ''}`}
         loading="eager"
         decoding="async"

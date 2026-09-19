@@ -139,6 +139,7 @@ const CandidateRow = memo(function CandidateRow({
       <div className="h-10 w-10 flex-shrink-0 [&>*:first-child]:h-10 [&>*:first-child]:w-10 [&_.h-10]:h-10 [&_.w-10]:w-10">
         <CandidateAvatar
           profileImageUrl={app.profile_image_url}
+          coverImageUrl={app.cover_image_url}
           videoUrl={app.video_url}
           isProfileVideo={app.is_profile_video}
           firstName={app.first_name}

@@ -55,8 +55,13 @@ describe('resolveCandidateMedia', () => {
     expect(result).toEqual(live);
   });
 
-  it('behandlar ansökningar efter 2026-02-05 som snapshot-era även utan etikett', () => {
-    const result = resolveCandidateMedia({ applied_at: '2026-02-06T00:00:00Z' }, live);
+  it('faller tillbaka för tomma äldre snapshots från klienter före databasskyddet', () => {
+    const result = resolveCandidateMedia({ applied_at: '2026-08-06T17:43:00Z' }, live);
+    expect(result).toEqual(live);
+  });
+
+  it('behandlar tomma ansökningar efter databasskyddet som avsiktligt bildlösa', () => {
+    const result = resolveCandidateMedia({ applied_at: '2026-09-03T00:00:00Z' }, live);
     expect(result.profile_image_url).toBeNull();
     expect(result.video_url).toBeNull();
   });

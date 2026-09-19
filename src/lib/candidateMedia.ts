@@ -10,7 +10,11 @@
  * historiska kandidater inte plötsligt tappar bild/video.
  */
 
-const SNAPSHOT_ERA_START = Date.parse('2026-02-05T00:00:00Z');
+// Kolumnerna lades till i februari, men äldre klienter fortsatte skapa
+// ansökningar utan snapshot-data långt därefter. Först när databastriggern
+// infördes 2026-09-02 blev en helt tom snapshot ett tillförlitligt, avsiktligt
+// läge. Före det datumet måste tomma snapshots falla tillbaka på livemedia.
+const AUTHORITATIVE_EMPTY_SNAPSHOT_START = Date.parse('2026-09-02T08:17:57Z');
 
 export interface CandidateMedia {
   profile_image_url: string | null;
@@ -37,13 +41,16 @@ export function resolveCandidateMedia(
   const cover = app?.cover_image_snapshot_url ?? null;
 
   const appliedAt = app?.applied_at || app?.created_at || null;
-  const isSnapshotEra =
+  const hasExplicitSnapshot =
     Boolean(app?.candidate_profile_label) ||
     image !== null ||
     video !== null ||
-    (appliedAt ? Date.parse(appliedAt) >= SNAPSHOT_ERA_START : false);
+    cover !== null;
+  const hasAuthoritativeEmptySnapshot = appliedAt
+    ? Date.parse(appliedAt) >= AUTHORITATIVE_EMPTY_SNAPSHOT_START
+    : false;
 
-  if (isSnapshotEra) {
+  if (hasExplicitSnapshot || hasAuthoritativeEmptySnapshot) {
     return {
       profile_image_url: image,
       video_url: video,

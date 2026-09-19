@@ -40,6 +40,7 @@ const SmallCandidateAvatarWrapper = memo(({ application }: { application: JobApp
     >
       <CandidateAvatar
         profileImageUrl={application.profile_image_url}
+        coverImageUrl={application.cover_image_url}
         videoUrl={application.video_url}
         isProfileVideo={application.is_profile_video}
         firstName={application.first_name}
