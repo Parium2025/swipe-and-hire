@@ -430,6 +430,12 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
         >
           <div
             ref={progressBarRef}
+            data-candidate-video-control
+            role="slider"
+            aria-label="Sök i videon"
+            aria-valuemin={0}
+            aria-valuemax={Math.round(duration)}
+            aria-valuenow={Math.round(progress)}
             className="h-1.5 md:h-2 bg-white/40 backdrop-blur-sm cursor-pointer hover:h-2 hover:bg-white/50 md:hover:h-3 transition-all rounded-full overflow-hidden shadow-lg touch-none"
             onPointerDown={handleProgressPointerDown}
             onPointerMove={handleProgressPointerMove}

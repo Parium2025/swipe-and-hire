@@ -86,15 +86,15 @@ export const CandidateCardFace = memo(function CandidateCardFace({
         <div className="absolute inset-0 bg-parium-gradient" />
 
         <div className="absolute inset-0">
-          {showVideo ? (
-            <div className="h-full w-full">
+        {showVideo ? (
+          <div className="h-full w-full" data-candidate-full-bleed-media>
               <ProfileVideo
                 videoUrl={videoUrl as string}
                 coverImageUrl={coverImageUrl || profileImageUrl || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
                 alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
-                className="h-full w-full rounded-none"
+              className="h-full w-full rounded-none [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>video]:h-full [&>video]:w-full [&>video]:object-cover"
                 countdownVariant="default"
                 showCountdown
                 showProgressBar
