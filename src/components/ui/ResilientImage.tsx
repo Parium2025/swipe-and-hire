@@ -98,8 +98,12 @@ export function ResilientImage({
     setImageState({ sourceSignature, attempt: 0, sourceIndex: 0, failed: false, broken: false });
   }, [sourceSignature]);
 
+  // Vilken exakt src som faktiskt ritats klart. Bilden visas först då.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+
   const handleLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setLoadedSrc(e.currentTarget.getAttribute('src'));
       setImageState((current) => (current.sourceSignature === sourceSignature && current.broken)
         ? { ...current, broken: false }
         : current);
@@ -107,6 +111,14 @@ export function ResilientImage({
     },
     [onLoad, sourceSignature]
   );
+
+  // Cachade bilder kan bli klara innan React hinner koppla onLoad → kolla
+  // direkt på elementet, annars skulle en färdig bild aldrig visas.
+  const attachRef = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.naturalWidth > 0) {
+      setLoadedSrc(node.getAttribute('src'));
+    }
+  }, []);
 
   if (!activeSrc) {
     return null;
