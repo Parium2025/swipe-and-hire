@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FileUpload from '@/components/FileUpload';
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import ImageEditor from '@/components/ImageEditor';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 import { FileText, Camera, Trash2, Loader2, CheckCircle, Check, X, RotateCcw } from 'lucide-react';
@@ -297,13 +297,13 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
                   {hasVideo ? (
-                    <ProfileVideo
+                    <ProfileVideoCircle
                       videoUrl={signedVideo ?? ''}
                       coverImageUrl={signedCover ?? undefined}
                       posterUrl={posterUrl}
                       alt="Profilvideo"
-                      className="w-32 h-32 ring-4 ring-inset ring-white/10 rounded-full overflow-hidden"
-                      countdownVariant="circle"
+                      circleClassName="w-32 h-32 ring-4 ring-inset ring-white/10 rounded-full overflow-hidden"
+                      barClassName="w-32"
                     />
                   ) : (
                     <div className="cursor-pointer" onClick={() => mediaInputRef.current?.click()}>

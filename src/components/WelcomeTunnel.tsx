@@ -1558,14 +1558,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="p-4 flex flex-col items-center space-y-4">
                 <div className="relative">
                   {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
-                    <ProfileVideo
+                    <ProfileVideoCircle
                       videoUrl={signedProfileImageUrl || ''}
                       coverImageUrl={signedCoverUrl || ''}
                       userInitials=""
                       alt="Profile video"
-                      countdownVariant="circle"
-                      showProgressBar={false}
-                      className="w-32 h-32 border-4 border-white/10 transition-all rounded-full overflow-hidden"
+                      circleClassName="w-32 h-32 border-4 border-white/10 transition-all rounded-full overflow-hidden"
+                      barClassName="w-32"
                     />
 
                   ) : (

@@ -481,19 +481,15 @@ export default function ProfilePreview() {
           className="relative h-[140px] w-[140px]"
           onClick={(e) => e.stopPropagation()}
         >
-          <ProfileVideo
+          <ProfileVideoCircle
             videoUrl={effectiveVideoUrl}
             coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
             posterUrl={videoPosterUrl}
             userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
             alt="Profilbild"
-            className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-            countdownVariant="circle"
-            showCountdown={true}
-            disablePlayback={false}
+            circleClassName="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
+            barClassName="w-[140px]"
             forceTouchMode={true}
-            onPlayingChange={setIsVideoPlaying}
-            onRemainingChange={setCountdown}
           />
         </div>
       );
