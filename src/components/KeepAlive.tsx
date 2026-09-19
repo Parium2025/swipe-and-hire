@@ -549,7 +549,7 @@ function KeepAliveCached({
         setIsEntered(true);
         setIsAnimating(false);
       }, 800);
-    }, enterDelayMs);
+    }, slideInFromRight ? 0 : enterDelayMs);
 
     return () => {
       window.clearTimeout(delayTimer);
@@ -557,7 +557,7 @@ function KeepAliveCached({
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
-  }, [activeKey, displayedKey, enterDelayMs]);
+  }, [activeKey, displayedKey, enterDelayMs, slideInFromRight]);
 
   // Mount the active key on demand if it isn't cached yet
   useEffect(() => {
