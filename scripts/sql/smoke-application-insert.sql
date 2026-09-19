@@ -35,6 +35,7 @@ DECLARE
   v_job uuid;
   v_user uuid;
   v_new uuid;
+  v_answers jsonb;
 BEGIN
   SELECT jp.id INTO v_job
   FROM public.job_postings jp
@@ -59,12 +60,18 @@ BEGIN
     RETURN;
   END IF;
 
+  -- Svara "Ja" på annonsens alla frågor så att obligatoriska svar finns.
+  SELECT COALESCE(jsonb_object_agg(q.id::text, to_jsonb('Ja'::text)), '{}'::jsonb)
+    INTO v_answers
+  FROM public.job_questions q
+  WHERE q.job_id = v_job;
+
   PERFORM set_config('request.jwt.claims',
     json_build_object('sub', v_user::text, 'role', 'authenticated')::text, true);
   PERFORM set_config('role', 'authenticated', true);
 
-  INSERT INTO public.job_applications (job_id, applicant_id)
-  VALUES (v_job, v_user)
+  INSERT INTO public.job_applications (job_id, applicant_id, custom_answers)
+  VALUES (v_job, v_user, v_answers)
   RETURNING id INTO v_new;
 
   IF v_new IS NULL THEN
