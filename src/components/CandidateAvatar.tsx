@@ -51,13 +51,6 @@ function CandidateAvatarBase({
     }
   }, [staticImageUrl]);
 
-  // Debug logging for troubleshooting (remove in production)
-  useEffect(() => {
-    if (profileImageUrl && !resolvedImageUrl) {
-      console.debug('[CandidateAvatar] Waiting for signed URL:', profileImageUrl);
-    }
-  }, [profileImageUrl, resolvedImageUrl]);
-
   const handleClick = stopPropagation ? (e: React.MouseEvent) => e.stopPropagation() : undefined;
 
   // Media är på väg (path finns men signerad URL/video är inte klar än).
@@ -65,20 +58,6 @@ function CandidateAvatarBase({
   // komponerar om porträttet som en fyrkant under filterbyten.
   const hasExpectedMedia = !!profileImageUrl || !!coverImageUrl || (!!isProfileVideo && !!videoUrl);
   const mediaPending = hasExpectedMedia && !staticImageUrl && !resolvedVideoUrl && !avatarError;
-
-  // Skyddsnät: om signeringen misslyckas (t.ex. rättighetsfel eller nätfel)
-  // får kortet ALDRIG fastna i en tom platta för alltid — efter en kort stund
-  // visar vi initialerna i stället.
-  const [pendingTimedOut, setPendingTimedOut] = useState(false);
-  useEffect(() => {
-    if (!mediaPending) {
-      setPendingTimedOut(false);
-      return;
-    }
-    setPendingTimedOut(false);
-    const timer = setTimeout(() => setPendingTimedOut(true), 4000);
-    return () => clearTimeout(timer);
-  }, [mediaPending, profileImageUrl, videoUrl]);
 
   if (hasVideo) {
     return (
@@ -97,7 +76,7 @@ function CandidateAvatarBase({
     );
   }
 
-  if (mediaPending && !pendingTimedOut) {
+  if (mediaPending) {
     return (
       <Avatar
         className="h-10 w-10 bg-white/10 ring-2 ring-inset ring-white/20 transform-gpu"
@@ -119,7 +98,7 @@ function CandidateAvatarBase({
         onError={() => setAvatarError(true)}
       />
       <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={hasImage ? 1200 : 0}>
-        {initials || '?'}
+        {initials}
       </AvatarFallback>
     </Avatar>
   );
