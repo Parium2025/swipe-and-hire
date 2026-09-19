@@ -1,6 +1,7 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMessagesChrome } from '@/hooks/useMessagesChrome';
+import { useVisualViewportBounds } from '@/hooks/useVisualViewportBounds';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import EmployerSidebar from '@/components/EmployerSidebar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -31,6 +32,7 @@ const EmployerMobileShell = ({
   // Chattsidan är en fullhöjdsvy — extra bottenutrymme skulle lämna en tom yta.
   // Flaggan släpps först när vybytet är klart, annars klipps chatten mitt i övergången.
   const isMessages = useMessagesChrome();
+  useVisualViewportBounds();
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
