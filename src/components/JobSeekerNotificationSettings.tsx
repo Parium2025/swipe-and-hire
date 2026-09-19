@@ -20,7 +20,7 @@ const JOBSEEKER_ROWS: NotificationRow[] = [
     label: 'Intervjuer',
     description: 'Kallelse, ombokning, avbokning och påminnelsen strax före intervjun.',
     channels: ['in_app', 'push', 'email'],
-    locked: ['in_app', 'push'],
+    locked: ['in_app', 'push', 'email'],
   },
   {
     type: 'new_message',
