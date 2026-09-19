@@ -2,21 +2,11 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
-import { supabase } from '@/integrations/supabase/client';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { imageCache } from '@/lib/imageCache';
 import { AVATAR_TRANSFORM, CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
-
-/**
- * Bildfälten i databasen innehåller redan fulla URL:er. Utan den här vakten
- * byggdes ".../company-logos/https://..." → 400 och förvärmningen gav trasiga
- * bilder i stället för snabba.
- */
-const toPublicUrl = (bucket: 'job-images' | 'company-logos', raw: string): string | null => {
-  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw.split('?')[0];
-  const { data } = supabase.storage.from(bucket).getPublicUrl(raw);
-  return data?.publicUrl || null;
-};
+import { buildCardImageUrl } from '@/hooks/useCardImage';
+import { getImageVersion } from '@/lib/imageTransforms';
 
 /**
  * 🖼️ EMPLOYER MEDIA WARMUP
@@ -178,13 +168,26 @@ export function useEmployerMediaWarmup() {
       let scanned = 0;
       for (const job of jobs) {
         if (!job || typeof job !== 'object') continue;
-        const j = job as { job_image_url?: string | null; company_logo_url?: string | null };
+        const j = job as {
+          job_image_url?: string | null;
+          job_image_desktop_url?: string | null;
+          company_logo_url?: string | null;
+          image_updated_at?: string | null;
+          updated_at?: string | null;
+        };
+        const version = getImageVersion(j);
 
-        if (j.job_image_url && typeof j.job_image_url === 'string') {
-          const path = j.job_image_url.trim();
+        const imagePath = j.job_image_url ?? j.job_image_desktop_url;
+        if (imagePath && typeof imagePath === 'string') {
+          const path = imagePath.trim();
           if (path && !warmed.has(`job-img:${path}`)) {
             warmed.add(`job-img:${path}`);
-            const url = toPublicUrl('job-images', path);
+            const url = buildCardImageUrl(path, 'job-images', version, {
+              width: 600,
+              height: 400,
+              quality: 75,
+              resize: 'cover',
+            });
             if (url) urls.push(url);
           }
         }
@@ -192,7 +195,12 @@ export function useEmployerMediaWarmup() {
           const path = j.company_logo_url.trim();
           if (path && !warmed.has(`co-logo:${path}`)) {
             warmed.add(`co-logo:${path}`);
-            const url = toPublicUrl('company-logos', path);
+            const url = buildCardImageUrl(path, 'company-logos', version, {
+              width: 64,
+              height: 64,
+              quality: 80,
+              resize: 'contain',
+            });
             if (url) urls.push(url);
           }
         }
