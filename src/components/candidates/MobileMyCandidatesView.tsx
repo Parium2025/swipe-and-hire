@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect, useRef, startTransition } from 'react';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -78,8 +78,19 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
     const rowRect = rowEl.getBoundingClientRect();
     const triggerRect = triggerEl.getBoundingClientRect();
-    const nextWidth = Math.round(rowRect.width);
-    const nextAlignOffset = Math.round(rowRect.left - triggerRect.left);
+    const viewportWidth =
+      (typeof window !== 'undefined' && window.visualViewport?.width) ||
+      (typeof window !== 'undefined' ? window.innerWidth : rowRect.width);
+    const margin = 8;
+    // Menyn får aldrig bli bredare än kortet – och aldrig bredare än skärmen.
+    const nextWidth = Math.round(Math.min(rowRect.width, viewportWidth - margin * 2));
+    // Centrera menyn mot kortet och håll den innanför skärmkanterna.
+    const centeredLeft = rowRect.left + (rowRect.width - nextWidth) / 2;
+    const clampedLeft = Math.min(
+      Math.max(centeredLeft, margin),
+      Math.max(margin, viewportWidth - margin - nextWidth),
+    );
+    const nextAlignOffset = Math.round(clampedLeft - triggerRect.left);
 
     setMenuMetrics((prev) =>
       prev.width === nextWidth && prev.alignOffset === nextAlignOffset
@@ -117,7 +128,7 @@ const MyCandidateRow = memo(function MyCandidateRow({
 
   return (
     <div
-      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-all duration-150 min-h-touch relative
+      className={`bg-white/5 ring-1 ring-inset rounded-lg px-3 py-2.5 flex items-center gap-3 active:scale-[0.98] transition-transform duration-150 min-h-touch relative transform-gpu
         ${isSelected ? 'ring-white/40 bg-white/[0.10]' : 'ring-white/10 active:scale-[0.98]'}
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       ref={rowRef}
@@ -350,14 +361,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     }
   }, [activeTab]);
 
-  // Swipe between stage tabs
+  // Swipe between stage tabs — bytet körs som låg prioritet så fingret aldrig blockeras.
   const swipeToNextStage = useCallback(() => {
     const idx = stages.indexOf(activeTab);
-    if (idx < stages.length - 1) setActiveTab(stages[idx + 1]);
+    if (idx < stages.length - 1) startTransition(() => setActiveTab(stages[idx + 1]));
   }, [activeTab, stages]);
   const swipeToPrevStage = useCallback(() => {
     const idx = stages.indexOf(activeTab);
-    if (idx > 0) setActiveTab(stages[idx - 1]);
+    if (idx > 0) startTransition(() => setActiveTab(stages[idx - 1]));
   }, [activeTab, stages]);
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
 
@@ -368,7 +379,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       return;
     }
     setPreviewStage(null);
-    setActiveTab(stage);
+    startTransition(() => setActiveTab(stage));
     setOpenStageMenu((prev) => (prev && prev !== stage ? null : prev));
   }, []);
 
@@ -453,11 +464,24 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   // Fönstret växer när du scrollar nära botten, så listan känns oändlig men
   // DOM:en förblir liten även när steget innehåller tusentals kandidater.
   const RENDER_STEP = 40;
-  const [renderLimit, setRenderLimit] = useState(RENDER_STEP);
+  // Första målningen ritar bara det som får plats på skärmen – resten kommer
+  // direkt efter, så första svepet aldrig hackar av en stor DOM-uppbyggnad.
+  const FIRST_PAINT_ROWS = 8;
+  const [renderLimit, setRenderLimit] = useState(FIRST_PAINT_ROWS);
 
   // Nytt steg = nytt fönster (annars ärver nästa flik ett uppblåst fönster).
   useEffect(() => {
-    setRenderLimit(RENDER_STEP);
+    setRenderLimit(FIRST_PAINT_ROWS);
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        startTransition(() => setRenderLimit((prev) => (prev < RENDER_STEP ? RENDER_STEP : prev)));
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
   }, [activeTab]);
 
   const currentCandidates = useMemo(
