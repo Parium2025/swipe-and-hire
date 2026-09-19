@@ -627,6 +627,10 @@ export function useConversations() {
         if (conv.applicationSnapshot?.profile_image_snapshot_url) {
           void prefetchMediaUrl(conv.applicationSnapshot.profile_image_snapshot_url, 'profile-image', MEDIA_URL_TTL, CHAT_AVATAR_TRANSFORM).catch(() => {});
         }
+        // Videoprofiler visar covern som avatar — den måste värmas med samma transform.
+        if (conv.applicationSnapshot?.cover_image_snapshot_url) {
+          void prefetchMediaUrl(conv.applicationSnapshot.cover_image_snapshot_url, 'profile-image', MEDIA_URL_TTL, CHAT_AVATAR_TRANSFORM).catch(() => {});
+        }
         (conv.members || []).forEach((member) => {
           if (member.user_id !== user.id && member.profile) {
             const isEmployer = member.profile.role === 'employer';
