@@ -14,6 +14,10 @@ vi.mock('@/components/ProfileVideoCircle', () => ({
   ),
 }));
 
+vi.mock('@/components/NameAutoFit', () => ({
+  default: ({ text }: { text: string }) => <span>{text}</span>,
+}));
+
 describe('CandidateCardFace media priority', () => {
   afterEach(cleanup);
 
