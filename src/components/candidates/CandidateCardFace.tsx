@@ -86,16 +86,16 @@ export const CandidateCardFace = memo(function CandidateCardFace({
       >
         <div className="absolute inset-0 bg-parium-gradient" />
 
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 overflow-hidden rounded-none" data-candidate-full-bleed-media>
         {showVideo ? (
-          <div className="h-full w-full touch-pan-y" data-candidate-full-bleed-media>
+          <div className="h-full w-full touch-pan-y overflow-hidden rounded-none">
               <ProfileVideo
                 videoUrl={videoUrl as string}
                 coverImageUrl={coverImageUrl || profileImageUrl || undefined}
                 posterUrl={posterUrl || undefined}
                 userInitials={initials}
                 alt={fullName ? `Profilvideo för ${fullName}` : 'Profilvideo'}
-              className="h-full w-full rounded-none [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>video]:h-full [&>video]:w-full [&>video]:object-cover"
+                className="h-full w-full !rounded-none [&>img]:!h-full [&>img]:!w-full [&>img]:!rounded-none [&>img]:!object-cover [&>video]:!h-full [&>video]:!w-full [&>video]:!rounded-none [&>video]:!object-cover"
                 countdownVariant="default"
                 showCountdown
                 showProgressBar
@@ -105,7 +105,7 @@ export const CandidateCardFace = memo(function CandidateCardFace({
             <img
               src={stillImage}
               alt={fullName ? `Profilbild för ${fullName}` : 'Profilbild'}
-              className="h-full w-full object-cover"
+              className="h-full w-full rounded-none object-cover"
               draggable={false}
               onError={() => setFullBleedImageFailed(true)}
             />

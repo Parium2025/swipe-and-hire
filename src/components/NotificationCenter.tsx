@@ -1,4 +1,5 @@
 import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
@@ -479,6 +480,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const canUsePortal = typeof document !== 'undefined';
 
   // Close on outside click
   useEffect(() => {
@@ -517,7 +519,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
 
       </button>
 
-      <AnimatePresence>
+      {canUsePortal && createPortal(<AnimatePresence>
       {open && (
         <motion.div
           ref={panelRef}
@@ -618,7 +620,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           </div>
         </motion.div>
       )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
 
       <AlertDialog open={confirmClearOpen} onOpenChange={setConfirmClearOpen}>
         <AlertDialogContentNoFocus

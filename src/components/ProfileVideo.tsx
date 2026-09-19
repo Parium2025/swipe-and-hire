@@ -137,6 +137,11 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
   const handleTap = async (e?: React.MouseEvent) => {
     // If playback is disabled, do nothing (just act as thumbnail)
     if (disablePlayback) return;
+
+    // Uppspelning är en egen handling. Utan detta bubblar trycket vidare till
+    // kandidatkortet i arbetsgivarens Swipe Mode, öppnar detaljvyn och lämnar
+    // videon spelande bakom den.
+    e?.stopPropagation();
     
     // If custom onClick is provided, use that instead
     if (onClick && e) {
@@ -312,7 +317,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
       // Otherwise, stop propagation to allow inline playback without triggering dropdown
       onPointerDown={disablePlayback ? undefined : (e) => e.stopPropagation()}
       onMouseDown={disablePlayback ? undefined : (e) => e.stopPropagation()}
-      onClick={disablePlayback ? undefined : (e) => handleTap(e)}
+      onClick={disablePlayback ? undefined : (e) => { void handleTap(e); }}
       onMouseEnter={disablePlayback ? undefined : handleMouseEnter}
       onMouseLeave={disablePlayback ? undefined : handleMouseLeave}
       onTouchStart={disablePlayback ? undefined : handleTouchStart}
@@ -371,13 +376,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, posterUrl, alt = "Profile video
           aria-label={isPlaying ? 'Pausa video' : 'Spela video'}
           onClick={(e) => {
             e.stopPropagation();
-            handleTap();
+            void handleTap();
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
-              handleTap();
+              void handleTap();
             }
           }}
         >
