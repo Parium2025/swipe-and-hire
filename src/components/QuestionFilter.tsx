@@ -162,7 +162,7 @@ const ActiveFilterChip = memo(({
     longPressRef.current = null;
   }, []);
 
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'touch' || !isTruncated) return;
     longPressTriggeredRef.current = false;
     clearLongPress();
@@ -175,40 +175,32 @@ const ActiveFilterChip = memo(({
   }, [clearLongPress, isTruncated]);
 
   const chip = (
-    <button
-      type="button"
+    <div
       className={className}
       onPointerDown={handlePointerDown}
       onPointerUp={clearLongPress}
       onPointerCancel={clearLongPress}
       onPointerLeave={clearLongPress}
-      onClick={() => {
-        if (longPressTriggeredRef.current) longPressTriggeredRef.current = false;
-      }}
       onContextMenu={(event) => {
         if (isTruncated) event.preventDefault();
       }}
     >
       <span ref={textRef} className="truncate min-w-0">{fullText}</span>
-      <span
-        role="button"
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         aria-label={`Ta bort filtret ${questionText}`}
-        tabIndex={0}
         onClick={(event) => {
           event.stopPropagation();
+          longPressTriggeredRef.current = false;
           onRemove();
         }}
-        onKeyDown={(event) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          event.stopPropagation();
-          onRemove();
-        }}
-        className="ml-0.5 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
+        className="ml-0.5 !h-5 !w-5 min-h-0 flex-shrink-0 text-white hover:text-red-400"
       >
         <X className="h-3 w-3" />
-      </span>
-    </button>
+      </Button>
+    </div>
   );
 
   if (!isTruncated) return chip;

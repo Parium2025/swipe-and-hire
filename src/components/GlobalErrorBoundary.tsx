@@ -5,12 +5,10 @@ interface State {
   hasError: boolean;
   error?: Error;
   info?: React.ErrorInfo;
-  isStuck: boolean;
 }
 
 export default class GlobalErrorBoundary extends React.Component<React.PropsWithChildren, State> {
-  state: State = { hasError: false, isStuck: false };
-  private stuckTimer?: ReturnType<typeof setTimeout>;
+  state: State = { hasError: false };
 
   private clearCorruptLocalCaches() {
     if (typeof window === 'undefined') return;
@@ -45,34 +43,8 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
     }
   }
 
-  componentDidMount() {
-    // Detect if app is stuck (e.g., redirect loop in preview)
-    this.stuckTimer = setTimeout(() => {
-      // If component is still mounted after 5 seconds without user interaction,
-      // check if we're on a problematic URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const hasAuthTokens = urlParams.has('access_token') || 
-                           urlParams.has('token') || 
-                           urlParams.has('token_hash');
-      
-      const ownsTokenParameter =
-        window.location.pathname === '/unsubscribe' ||
-        window.location.pathname === '/unsubscribe/' ||
-        /^\/oauth\/(google_calendar|microsoft_outlook)\/return\/?$/.test(window.location.pathname);
-
-      if (hasAuthTokens && window.location.pathname !== '/auth' && !ownsTokenParameter) {
-        console.warn('[GlobalErrorBoundary] Detected potential stuck state');
-        this.setState({ isStuck: true });
-      }
-    }, 5000);
-  }
-
-  componentWillUnmount() {
-    if (this.stuckTimer) clearTimeout(this.stuckTimer);
-  }
-
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, isStuck: false };
+    return { hasError: true, error };
   }
 
   private isStaleBundleError(error?: Error) {
@@ -137,10 +109,8 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
   };
 
   render() {
-    if (this.state.hasError || this.state.isStuck) {
-      const message = this.state.isStuck 
-        ? "Appen verkar ha fastnat. Klicka för att ladda om."
-        : "Appen stötte på ett fel. Försök ladda om sidan.";
+    if (this.state.hasError) {
+      const message = "Appen stötte på ett fel. Försök ladda om sidan.";
 
       const errorDetails = this.state.error
         ? `${this.state.error.name}: ${this.state.error.message}`
@@ -166,8 +136,8 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
             </p>
             {errorDetails && (
               <details className="text-left mb-4">
-                <summary className="text-xs text-white/70 cursor-pointer mb-1">Visa teknisk info</summary>
-                <pre className="text-[10px] leading-tight text-white/80 bg-white/10 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+                <summary className="text-xs text-white cursor-pointer mb-1">Visa teknisk info</summary>
+                <pre className="text-[10px] leading-tight text-white bg-white/10 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
                   {errorDetails}
                   {errorStack && `\n\n${errorStack}`}
                   {componentStack && `\n\nComponent:\n${componentStack}`}

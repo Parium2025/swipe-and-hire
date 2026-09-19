@@ -12,6 +12,21 @@ const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 const isAuthPath = (pathname: string) => pathname === '/auth';
 
+const detectTouch = () => {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(any-pointer: coarse), (hover: none), (any-hover: none)').matches ||
+    navigator.maxTouchPoints > 0
+  );
+};
+
+const detectTabletLandscape = () => {
+  if (typeof window === 'undefined') return false;
+  return detectTouch() && window.matchMedia(
+    '(orientation: landscape) and (min-width: 768px) and (max-width: 1366px)'
+  ).matches;
+};
+
 /**
  * Tunn färgremsa längst ner — endast på mobil/touch.
  * Säkerställer att området bakom iOS Safaris bottenverktygsfält alltid har
@@ -22,8 +37,11 @@ const isAuthPath = (pathname: string) => pathname === '/auth';
  */
 const BottomChromeStrip = () => {
   const location = useLocation();
-  const [isTouch, setIsTouch] = useState(false);
-  const [isTabletLandscape, setIsTabletLandscape] = useState(false);
+  // Match the CSS reservation before first paint. Waiting for useEffect here
+  // made the bottom reservation appear one frame after login and could make
+  // the entire mobile shell look as though the top edge had jumped.
+  const [isTouch, setIsTouch] = useState(detectTouch);
+  const [isTabletLandscape, setIsTabletLandscape] = useState(detectTabletLandscape);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
