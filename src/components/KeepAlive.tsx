@@ -86,6 +86,8 @@ interface KeepAliveProps {
   enterDelayMs?: number;
   /** Start each ordinary route visit at the top; explicit detail-overlay returns still restore. */
   resetScrollOnNavigation?: boolean;
+  /** Use the same full-width mobile slide-in motion as the conversation view. */
+  slideInFromRight?: boolean;
 }
 
 /**
@@ -101,7 +103,7 @@ interface KeepAliveProps {
  * verbatim. Previously the active node was re-created on every render, which
  * defeated the whole purpose of caching.
  */
-export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, resetScrollOnNavigation = false }: KeepAliveProps) {
+export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, resetScrollOnNavigation = false, slideInFromRight = false }: KeepAliveProps) {
   // No caching mode: just render the active view (legacy behaviour)
   if (!keepKeys || keepKeys.length === 0) {
     return (
@@ -120,6 +122,7 @@ export function KeepAlive({ activeKey, render, keepKeys, enterDelayMs = 0, reset
       keepKeys={keepKeys}
       enterDelayMs={enterDelayMs}
       resetScrollOnNavigation={resetScrollOnNavigation}
+      slideInFromRight={slideInFromRight}
     />
   );
 }
@@ -130,7 +133,8 @@ function KeepAliveCached({
   keepKeys,
   enterDelayMs,
   resetScrollOnNavigation,
-}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs' | 'resetScrollOnNavigation'>>) {
+  slideInFromRight,
+}: Required<Pick<KeepAliveProps, 'activeKey' | 'render' | 'keepKeys' | 'enterDelayMs' | 'resetScrollOnNavigation' | 'slideInFromRight'>>) {
   // Persistent cache of mounted nodes — survives the entire session
   const cacheRef = useRef<Map<string, React.ReactNode>>(new Map());
   // Track which keys we've ever mounted (so we can render in stable order)
@@ -598,12 +602,18 @@ function KeepAliveCached({
     <div ref={rootRef} className="relative w-full h-full flex flex-col min-h-0">
       {mountedKeysRef.current.map((key) => {
         const isDisplayed = key === displayedKey;
+        const useMobileSlide = isDisplayed && slideInFromRight;
         const enterClasses = isEntered
-          ? 'opacity-100 translate-y-0'
-          : isFastEnter
-            ? 'opacity-0 translate-y-1 pointer-events-none'
-            : 'opacity-0 translate-y-2 pointer-events-none';
-        const durationClass = isFastEnter ? 'duration-[280ms]' : 'duration-500';
+          ? 'opacity-100 translate-x-0 translate-y-0'
+          : useMobileSlide
+            ? 'opacity-100 translate-x-full translate-y-0 pointer-events-none'
+            : isFastEnter
+              ? 'opacity-0 translate-x-0 translate-y-1 pointer-events-none'
+              : 'opacity-0 translate-x-0 translate-y-2 pointer-events-none';
+        const durationClass = useMobileSlide ? 'duration-[320ms]' : isFastEnter ? 'duration-[280ms]' : 'duration-500';
+        const timingClass = useMobileSlide
+          ? '[transition-timing-function:cubic-bezier(0.32,0.72,0,1)]'
+          : '[transition-timing-function:cubic-bezier(0.22,1,0.36,1)]';
         return (
           <div
             key={key}
@@ -618,7 +628,7 @@ function KeepAliveCached({
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu motion-reduce:transform-none motion-reduce:transition-none transition-[opacity,transform] ${durationClass} ${timingClass} ${enterClasses}`
                 : ''
             }
             aria-hidden={!isDisplayed}

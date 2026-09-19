@@ -293,7 +293,11 @@ export function EmployerSidebar() {
       navTimerRef.current?.();
       navTimerRef.current = navigateAfterSidebarClose(() => {
         startTransition(() => {
-          navigate(href);
+          navigate(href, {
+            state: href === '/reports'
+              ? { mobileSidebarTransition: 'slide-in-right' }
+              : undefined,
+          });
         });
       });
     } else {
