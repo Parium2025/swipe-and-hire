@@ -161,6 +161,7 @@ export function ResilientImage({
 
   return (
     <img
+      ref={attachRef}
       decoding="async"
       {...rest}
       src={finalSrc}
