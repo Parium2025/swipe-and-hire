@@ -52,6 +52,7 @@ export interface MyCandidateData {
   job_title: string | null;
   profile_image_url: string | null;
   video_url: string | null;
+  cover_image_url: string | null;
   is_profile_video: boolean | null;
   applied_at: string | null;
   viewed_at: string | null;
@@ -148,7 +149,7 @@ async function fetchSearchPage(
 
 // 🔥 localStorage cache for instant-load
 // v2 bryter gamla cacher som kunde sakna profilmedia/viewed_at och gav FA + ny-prick efter hard refresh.
-const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_v2_';
+const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_v3_';
 // Stale-while-revalidate: listan hämtas ändå om vid varje mount (staleTime: 0),
 // så cachen finns bara till för att första painten ska vara instant. En 5-min
 // TTL innebar att varje besök efter en kafferast började med tom tavla och att
@@ -202,7 +203,9 @@ function deduplicateByApplicant(items: MyCandidateData[]): MyCandidateData[] {
   const seen = new Map<string, MyCandidateData>();
   for (const c of items) {
     const existing = seen.get(c.applicant_id);
-    if (!existing || c.updated_at > existing.updated_at) {
+    const candidateAppliedAt = c.applied_at || c.latest_application_at || c.created_at;
+    const existingAppliedAt = existing?.applied_at || existing?.latest_application_at || existing?.created_at;
+    if (!existing || candidateAppliedAt > existingAppliedAt) {
       seen.set(c.applicant_id, c);
     }
   }

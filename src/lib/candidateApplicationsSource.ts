@@ -16,7 +16,7 @@ import type { ApplicationData } from '@/hooks/useApplicationsData';
  * gjorde att en kollegas annonser saknades i "X jobb"-väljaren.
  */
 
-const CACHE_PREFIX = 'candidate_apps_cache_v3_';
+const CACHE_PREFIX = 'candidate_apps_cache_v4_';
 /** Hur länge cachen räknas som *färsk* (ingen ny hämtning behövs). */
 const CACHE_TTL_MS = 60 * 1000;
 /**
@@ -31,7 +31,7 @@ const CACHE_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 if (typeof window !== 'undefined') {
   try {
     for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('candidate_apps_cache_v1_') || key.startsWith('candidate_apps_cache_v2_')) {
+      if (key.startsWith('candidate_apps_cache_v1_') || key.startsWith('candidate_apps_cache_v2_') || key.startsWith('candidate_apps_cache_v3_')) {
         localStorage.removeItem(key);
       }
     }
@@ -42,7 +42,7 @@ const APPLICATION_COLUMNS = `
   id, job_id, applicant_id, first_name, last_name, email, phone,
   location, bio, cv_url, age, employment_status, work_schedule,
   availability, custom_answers, questions_snapshot, status, applied_at, updated_at,
-  profile_image_snapshot_url, video_snapshot_url, candidate_profile_label
+  profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url, candidate_profile_label
 `;
 
 interface CachedEnvelope {
