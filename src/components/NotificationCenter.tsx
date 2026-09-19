@@ -2,7 +2,7 @@ import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
-import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp, Clock3 } from 'lucide-react';
+import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
 import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { useNotificationPreferences, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -33,7 +33,6 @@ const typeIcons: Record<string, typeof Bell> = {
   saved_search_match: Bell,
   candidate_deleted: UserX,
   message_reaction: ThumbsUp,
-  application_decision_reminder: Clock3,
 };
 
 
@@ -48,7 +47,6 @@ const typeColors: Record<string, string> = {
   saved_search_match: 'text-white',
   candidate_deleted: 'text-white',
   message_reaction: 'text-white',
-  application_decision_reminder: 'text-white',
 };
 
 
@@ -105,7 +103,6 @@ function resolveRoute(type: string, metadata?: Record<string, unknown> | null): 
     case 'new_message':
       return '/messages';
     case 'new_application':
-    case 'application_decision_reminder':
       if (applicationId) return `/candidates?application=${applicationId}`;
       return jobId ? `/job-details/${jobId}` : '/candidates';
     case 'application_status':
@@ -374,7 +371,6 @@ const PREF_BY_NOTIFICATION_TYPE: Record<string, NotificationType> = {
   job_closed: 'job_closed',
   saved_search_match: 'saved_search_match',
   saved_job_expiring: 'saved_job_expiring',
-  application_decision_reminder: 'application_decision_reminder',
 };
 
 function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' } = {}) {

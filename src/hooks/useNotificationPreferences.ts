@@ -12,8 +12,7 @@ export type NotificationType =
   | 'saved_search_match'
   | 'job_closed'
   | 'saved_job_expiring'
-  | 'application_status'
-  | 'application_decision_reminder';
+  | 'application_status';
 
 export type NotificationChannel = 'push' | 'email' | 'in_app';
 
