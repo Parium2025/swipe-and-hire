@@ -716,13 +716,13 @@ export const CandidateProfileDialog = ({
           {/* Candidate navigation bar */}
           {candidateTotal != null && candidateTotal >= 1 && (
             <div className="flex items-center justify-center gap-3 py-1">
-              <button onClick={onNavigatePrev} disabled={!onNavigatePrev} className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent" aria-label="Föregående kandidat">
+              <button onClick={onNavigatePrev} disabled={!onNavigatePrev} className="flex items-center justify-center h-7 w-7 rounded-full text-white [@media(hover:hover)]:hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent" aria-label="Föregående kandidat">
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <span className="text-xs text-white font-medium tabular-nums">
                 {(candidateIndex ?? 0) + 1} av {candidateTotal}
               </span>
-              <button onClick={onNavigateNext} disabled={!onNavigateNext} className="flex items-center justify-center h-7 w-7 rounded-full text-white hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent" aria-label="Nästa kandidat">
+              <button onClick={onNavigateNext} disabled={!onNavigateNext} className="flex items-center justify-center h-7 w-7 rounded-full text-white [@media(hover:hover)]:hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-default disabled:hover:bg-transparent" aria-label="Nästa kandidat">
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -786,7 +786,7 @@ export const CandidateProfileDialog = ({
                         <button
                           type="button"
                           onClick={() => hasMultipleApplications && setJobDropdownOpen(prev => !prev)}
-                          className="w-full min-w-0 flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white hover:bg-white/20 transition-colors"
+                          className="w-full min-w-0 flex items-center justify-between gap-2 rounded-lg bg-white/10 border border-white/20 px-4 py-2.5 text-sm text-white [@media(hover:hover)]:hover:bg-white/20 transition-colors"
                         >
                           <span ref={jobTitleRef} className="truncate flex-1 min-w-0 text-left">{displayApp.job_title || application?.job_title || 'Okänt jobb'}</span>
                           <div className="flex items-center gap-1.5 shrink-0">
@@ -904,7 +904,7 @@ export const CandidateProfileDialog = ({
               <button
                 onClick={() => setSidebarTab('activity')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
-                  sidebarTab === 'activity' ? 'text-white' : 'text-white/50 hover:text-white/70'
+                  sidebarTab === 'activity' ? 'text-white' : 'text-white/50 [@media(hover:hover)]:hover:text-white/70'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5">
@@ -915,7 +915,7 @@ export const CandidateProfileDialog = ({
               <button
                 onClick={() => setSidebarTab('comments')}
                 className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors ${
-                  sidebarTab === 'comments' ? 'text-white' : 'text-white/50 hover:text-white/70'
+                  sidebarTab === 'comments' ? 'text-white' : 'text-white/50 [@media(hover:hover)]:hover:text-white/70'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5">
