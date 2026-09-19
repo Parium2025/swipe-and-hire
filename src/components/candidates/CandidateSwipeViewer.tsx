@@ -70,10 +70,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     apply();
     const ro = el ? new ResizeObserver(apply) : null;
     if (el && ro) ro.observe(el);
-    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
     return () => {
       ro?.disconnect();
-      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
     };
   }, [open]);
 
@@ -192,21 +192,23 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className={`fixed inset-0 bg-card-parium ${behind ? 'z-[40] pointer-events-none' : 'z-[100]'}`}
+        className={`fixed inset-0 bg-parium-gradient ${behind ? 'z-[40] pointer-events-none' : 'z-[100]'}`}
         aria-hidden={behind || undefined}
       >
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
+        <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
               {applications.length === 0 ? '0 / 0' : `${Math.min(currentIndex + 1, applications.length)} / ${applications.length}`}
             </span>
           </div>
-          <button onClick={onClose} className="flex h-11 w-11 items-center justify-center touch-manipulation" aria-label="Stäng">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+          <div className="py-3">
+          <button onClick={onClose} className="flex h-12 w-12 items-center justify-center touch-manipulation" aria-label="Stäng">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors">
               <X className="h-5 w-5 text-white" />
             </div>
           </button>
+          </div>
         </div>
 
         {activeQuestionFilters.length > 0 && (
@@ -255,7 +257,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         {/* Helskärmssvep — en kandidat per skärm, med snapp */}
         <div
           ref={scrollRef}
-          className="h-full w-full overflow-y-auto overscroll-contain"
+          className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain"
           style={{
             WebkitOverflowScrolling: 'touch',
             willChange: 'scroll-position',
@@ -280,7 +282,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 rating={getDisplayRating(app)}
                 onOpenFullProfile={() => onOpenFullProfile(app)}
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
-                isLast={item.index === applications.length - 1}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 showActions
                 saved={savedApplicantIds ? savedApplicantIds.has(app.applicant_id) : false}

@@ -53,6 +53,8 @@
 - [x] Lås frågefiltrets bredd och interna rullning på dator utan att ändra mobilvyn
 - [x] Ge datorns frågefilter en verklig mushjulsrullning och separera den fasta nederdelen från frågelistan
 - [x]Verifiera frågefiltrets centrering i förhandsvisningen och ge panelen 12 px andningsmarginal mot skärmens underkant
+- [ ] Matcha arbetsgivarens Swipe Mode mot jobbsökarens kortstruktur utan påverkan på jobbsökarsidan
+- [ ] Verifiera arbetsgivarens helkortsmedia, hörn, fingergest och stabila toppremsa på 393 × 580
 
 ## Utskickssystem
 - [x] Samla de sex redigerbara händelserna i automatiska flöden samt mallar, regler och logg

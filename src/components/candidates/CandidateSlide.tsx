@@ -1,5 +1,4 @@
 import { memo, useCallback, useEffect, useRef, type TouchEvent } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
@@ -14,7 +13,6 @@ interface CandidateSlideProps {
   rating: number;
   onOpenFullProfile: () => void;
   onRemoveFromList?: () => void;
-  isLast: boolean;
   isVisible: boolean;
   /** Åtgärdsraden visas bara när svepvyn kan hantera åtgärderna. */
   showActions?: boolean;
@@ -28,7 +26,6 @@ interface CandidateSlideProps {
 export const CandidateSlide = memo(function CandidateSlide({
   application,
   onOpenFullProfile,
-  isLast,
   isVisible,
   showActions = false,
   saved = false,
@@ -38,11 +35,13 @@ export const CandidateSlide = memo(function CandidateSlide({
 }: CandidateSlideProps) {
 
   const x = useMotionValue(0);
+  const exitOpacity = useMotionValue(1);
   const rotate = useTransform(x, [-220, 0, 220], [-6, 0, 6]);
-  const scale = useTransform(x, [-220, 0, 220], [0.985, 1, 0.985]);
+  const scale = useTransform(x, [-220, 0, 220], [0.98, 1, 0.98]);
   const touchRef = useRef<{
     startX: number;
     startY: number;
+    startTime: number;
     horizontal: boolean;
     cancelled: boolean;
   } | null>(null);
@@ -64,13 +63,15 @@ export const CandidateSlide = memo(function CandidateSlide({
       damping: 26,
       mass: 0.85,
     });
+    animate(exitOpacity, 0, { duration: 0.38, ease: [0.22, 1, 0.36, 1] });
     exitTimerRef.current = window.setTimeout(() => {
       exitTimerRef.current = null;
       onSkip?.();
       x.set(0);
+      exitOpacity.set(1);
       window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
     }, 240);
-  }, [onSkip, x]);
+  }, [exitOpacity, onSkip, x]);
 
   useEffect(() => () => {
     if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
@@ -78,7 +79,7 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const isInteractiveTarget = (target: EventTarget | null) =>
     target instanceof Element && Boolean(
-      target.closest('button, a, input, [role="slider"], [data-swipe-action-button]'),
+      target.closest('button, a, input, textarea, select, [role="slider"], [data-candidate-video-control], [data-swipe-action-button]'),
     );
 
   const handleTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
@@ -87,6 +88,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     touchRef.current = {
       startX: touch.clientX,
       startY: touch.clientY,
+      startTime: Date.now(),
       horizontal: false,
       cancelled: false,
     };
@@ -113,7 +115,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     if (event.cancelable) event.preventDefault();
     // Högerdrag har motstånd eftersom endast vänsterdrag går vidare.
     x.set(deltaX > 0 ? deltaX * 0.28 : deltaX);
-    if (!thresholdHapticRef.current && deltaX <= -90) {
+    if (!thresholdHapticRef.current && deltaX <= -100) {
       thresholdHapticRef.current = true;
       hapticLight();
     }
@@ -125,7 +127,9 @@ export const CandidateSlide = memo(function CandidateSlide({
     if (!gesture || gesture.cancelled || !gesture.horizontal) return;
     const touch = event.changedTouches[0];
     const deltaX = touch.clientX - gesture.startX;
-    if (deltaX <= -90) {
+    const elapsed = Math.max(1, Date.now() - gesture.startTime);
+    const velocityX = (deltaX / elapsed) * 1000;
+    if (deltaX <= -100 || velocityX <= -400) {
       commitSkip();
       return;
     }
@@ -169,12 +173,12 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [isVisible, fetchNotes]);
 
   return (
-    <div className="flex h-full w-full flex-col items-center px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] pt-[calc(env(safe-area-inset-top,0px)+3.25rem)]">
-      <div className="flex min-h-0 w-full flex-1 flex-col items-center gap-3">
+    <div className="flex h-full w-full flex-col px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]">
+      <div className="relative min-h-0 flex-1">
         <motion.div
           data-candidate-swipe-card
-          className="relative flex min-h-0 w-full flex-1 flex-col items-center overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform [-webkit-tap-highlight-color:transparent]"
-          style={{ x, rotate, scale, touchAction: 'pan-y' }}
+          className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent]"
+          style={{ x, opacity: exitOpacity, rotate, scale, touchAction: 'pan-y' }}
           onTouchStartCapture={handleTouchStart}
           onTouchMoveCapture={handleTouchMove}
           onTouchEndCapture={handleTouchEnd}
@@ -196,9 +200,14 @@ export const CandidateSlide = memo(function CandidateSlide({
             onOpen={handleOpen}
 
           />
+        </motion.div>
 
-          {showActions && (
-            <div className="absolute inset-x-0 bottom-4 z-20 flex justify-center">
+        {showActions && (
+          <div
+            className="pointer-events-none absolute inset-x-0 z-20 px-5"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
+          >
+            <div className="pointer-events-auto flex justify-center">
               <CandidateSlideActions
                 saved={saved}
                 onSave={() => onSave?.()}
@@ -206,13 +215,6 @@ export const CandidateSlide = memo(function CandidateSlide({
                 onOpenInfo={onOpenFullProfile}
               />
             </div>
-          )}
-        </motion.div>
-
-        {!isLast && (
-          <div className="flex shrink-0 flex-col items-center gap-0.5">
-            <ChevronDown className="h-4 w-4 animate-bounce fill-white text-white" />
-            <span className="text-[10px] font-medium text-white">Nästa kandidat</span>
           </div>
         )}
       </div>
