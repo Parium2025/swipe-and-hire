@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef, memo } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ChevronDown, Sparkles } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobStageIconByName } from '@/hooks/useJobStageSettings';
 import { SortableApplicationCard } from './ApplicationCard';
@@ -19,7 +19,6 @@ export interface StatusColumnProps {
   onOpenProfile: (app: JobApplication) => void;
   onMarkAsViewed: (id: string) => void;
   onPrefetch?: (app: JobApplication) => void;
-  onOpenCriteriaDialog?: () => void;
   stageConfig: {
     label: string;
     color: string;
@@ -48,7 +47,6 @@ export const StatusColumn = memo(({
   onOpenProfile, 
   onMarkAsViewed, 
   onPrefetch,
-  onOpenCriteriaDialog,
   stageConfig,
   totalStageCount,
   criteriaCount = 0,
@@ -186,15 +184,6 @@ export const StatusColumn = memo(({
             {displayCount}
           </span>
 
-          {onOpenCriteriaDialog && (
-            <button
-              onClick={onOpenCriteriaDialog}
-              className="p-1 rounded hover:bg-white/20 transition-colors text-white/80 hover:text-white"
-              title="Urvalskriterier"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-            </button>
-          )}
           {/* Stegen i en jobbannons är låsta standardsteg – de kan inte byggas
               om, döpas om eller raderas här. Vill man ha egna steg används
               "Mina kandidater". */}
