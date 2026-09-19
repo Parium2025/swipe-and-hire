@@ -2561,6 +2561,24 @@ export type Database = {
           },
         ]
       }
+      notification_digest_state: {
+        Row: {
+          digest_type: string
+          last_sent_at: string
+          user_id: string
+        }
+        Insert: {
+          digest_type: string
+          last_sent_at?: string
+          user_id: string
+        }
+        Update: {
+          digest_type?: string
+          last_sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           created_at: string

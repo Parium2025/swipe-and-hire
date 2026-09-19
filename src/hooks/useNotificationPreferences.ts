@@ -107,11 +107,19 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
   in_app: 'in_app_enabled',
 };
 
+  // Kanaler som kräver ett aktivt val. Mejlsammanfattningar för chatt och nya
+  // ansökningar kan bli mycket stora volymer — de skickas bara om användaren
+  // uttryckligen slagit på dem.
+  const DEFAULT_OFF = new Set(['new_message:email', 'new_application:email']);
+  const defaultFor = (type: NotificationType, channel: NotificationChannel) =>
+    !DEFAULT_OFF.has(`${type}:${channel}`);
+
   const isEnabled = (type: NotificationType, channel: NotificationChannel = 'push'): boolean => {
+    const fallback = defaultFor(type, channel);
     const pref = preferences.find(p => p.notification_type === type);
-    if (!pref) return true; // default enabled
+    if (!pref) return fallback;
     const value = pref[FIELD_BY_CHANNEL[channel]];
-    return value ?? true;
+    return value ?? fallback;
   };
 
 
@@ -152,9 +160,9 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
           }
           return [...old, { 
             notification_type: type, 
-            is_enabled: channel === 'push' ? enabled : true,
-            email_enabled: channel === 'email' ? enabled : true,
-            in_app_enabled: channel === 'in_app' ? enabled : true,
+            is_enabled: channel === 'push' ? enabled : defaultFor(type, 'push'),
+            email_enabled: channel === 'email' ? enabled : defaultFor(type, 'email'),
+            in_app_enabled: channel === 'in_app' ? enabled : defaultFor(type, 'in_app'),
           }];
         }
       );

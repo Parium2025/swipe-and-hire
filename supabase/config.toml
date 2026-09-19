@@ -101,3 +101,5 @@ project_id = "jrjaegapuujushsiofoi"
     verify_jwt = false
   [functions.app-exception-watchdog]
     verify_jwt = false
+  [functions.activity-digest-emails]
+    verify_jwt = false
