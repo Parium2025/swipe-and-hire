@@ -254,18 +254,6 @@ function NotificationItem({
               Rapportera
             </button>
           )}
-          {reminderStateId && (
-            <Button
-              type="button"
-              variant="glass"
-              size="sm"
-              disabled={snoozing}
-              onClick={snooze}
-              className="ml-auto h-7 rounded-full px-3 text-[11px]"
-            >
-              {snoozing ? 'Sparar…' : 'Påminn om 3 dagar'}
-            </Button>
-          )}
         </div>
       </div>
 
