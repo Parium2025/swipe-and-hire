@@ -145,15 +145,22 @@ export function useEmployerMediaWarmup() {
       });
     };
 
-    // Initial scan av befintlig data
-    const applicationsData = queryClient.getQueryData<InfinitePageData>(
-      ['applications', userId, '', '[]', null, 'applied_at'],
-    );
-    const myCandidatesData = queryClient.getQueryData<InfinitePageData>(
-      ['my-candidates', userId, '', getActiveCandidateListId(userId), ''],
-    );
-    collectAndWarm(applicationsData);
-    collectAndWarm(myCandidatesData);
+    // Initial scan av ALLA befintliga kandidatvarianter för användaren.
+    // Filter, sortering och valda steg ingår i query-nyckeln; hårdkodade
+    // defaultnycklar missade därför redan cachade filtrerade vyer vid återbesök.
+    const candidateQueries = queryClient.getQueryCache().findAll({
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) &&
+          (key[0] === 'applications' || key[0] === 'my-candidates') &&
+          key[1] === userId
+        );
+      },
+    });
+    for (const query of candidateQueries) {
+      collectAndWarm(query.state.data as InfinitePageData | undefined);
+    }
 
     // 🖼️ JOB AD IMAGES — speglar jobbsökarens warmup-mönster.
     // Warmar `job_image_url` + `company_logo_url` direkt in i `imageCache`
