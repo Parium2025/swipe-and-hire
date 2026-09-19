@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { openCvFile } from '@/utils/cvUtils';
-import ProfileVideo from '@/components/ProfileVideo';
+import ProfileVideoCircle from '@/components/ProfileVideoCircle';
 import { useVideoPoster } from '@/hooks/useVideoPoster';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
@@ -471,29 +471,22 @@ export default function ProfilePreview() {
   const DesktopListView = () => {
     const { toast } = useToast();
 
-    // Helper: Desktop video with countdown rendered outside the circular clip
+    // Helper: Desktop video med spolningslist under den runda videon
     const DesktopVideoWithCountdown = () => {
-      const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-      const [countdown, setCountdown] = useState<number | null>(null);
-
       return (
         <div 
-          className="relative h-[140px] w-[140px]"
+          className="relative"
           onClick={(e) => e.stopPropagation()}
         >
-          <ProfileVideo
+          <ProfileVideoCircle
             videoUrl={effectiveVideoUrl}
             coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
             posterUrl={videoPosterUrl}
             userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
             alt="Profilbild"
-            className="w-full h-full rounded-full ring-2 ring-white/20 shadow-xl"
-            countdownVariant="circle"
-            showCountdown={true}
-            disablePlayback={false}
+            circleClassName="h-[140px] w-[140px] rounded-full ring-2 ring-white/20 shadow-xl overflow-hidden"
+            barClassName="w-[140px]"
             forceTouchMode={true}
-            onPlayingChange={setIsVideoPlaying}
-            onRemainingChange={setCountdown}
           />
         </div>
       );

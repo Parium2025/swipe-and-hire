@@ -16,6 +16,8 @@ interface ProfileVideoCircleProps {
   barClassName?: string;
   showCountdown?: boolean;
   disablePlayback?: boolean;
+  /** Tvinga touch-kontroller även på musenheter (används i förhandsvisningar). */
+  forceTouchMode?: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export function ProfileVideoCircle({
   barClassName = '',
   showCountdown = true,
   disablePlayback = false,
+  forceTouchMode = false,
 }: ProfileVideoCircleProps) {
   const [time, setTime] = useState({ current: 0, duration: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
@@ -61,6 +64,7 @@ export function ProfileVideoCircle({
           showCountdown={false}
           showProgressBar={false}
           disablePlayback={disablePlayback}
+          forceTouchMode={forceTouchMode}
           onPlayingChange={setIsPlaying}
           onTimeChange={handleTimeChange}
           seekRef={seekRef}
