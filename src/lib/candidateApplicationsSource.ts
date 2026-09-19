@@ -280,6 +280,7 @@ export async function fetchApplicationsForApplicant(
       jobTitle: scope.titleById.get(app.job_id),
       fallbackProfileImageUrl: fallback?.profile_image_url,
       fallbackVideoUrl: fallback?.video_url,
+      fallbackCoverImageUrl: (fallback as any)?.cover_image_url,
       fallbackIsProfileVideo: fallback?.is_profile_video,
     }),
   );
