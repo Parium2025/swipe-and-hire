@@ -172,6 +172,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     <div className="flex h-full w-full flex-col items-center px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] pt-[calc(env(safe-area-inset-top,0px)+3.25rem)]">
       <div className="flex min-h-0 w-full flex-1 flex-col items-center gap-3">
         <motion.div
+          data-candidate-swipe-card
           className="relative flex min-h-0 w-full flex-1 flex-col items-center overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform [-webkit-tap-highlight-color:transparent]"
           style={{ x, rotate, scale, touchAction: 'pan-y' }}
           onTouchStartCapture={handleTouchStart}
