@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
-import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { imageCache } from '@/lib/imageCache';
 import { AVATAR_TRANSFORM, CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
