@@ -10,12 +10,14 @@ vi.mock('@/hooks/useCandidateNotes', () => ({
 }));
 vi.mock('@/lib/haptics', () => ({ hapticLight: vi.fn(), hapticMedium: vi.fn() }));
 vi.mock('../CandidateCardFace', () => ({
-  CandidateCardFace: ({ fullBleed, profileImageUrl, coverImageUrl }: { fullBleed?: boolean; profileImageUrl?: string | null; coverImageUrl?: string | null }) => (
+  CandidateCardFace: ({ fullBleed, profileImageUrl, coverImageUrl, videoUrl, hasVideo }: { fullBleed?: boolean; profileImageUrl?: string | null; coverImageUrl?: string | null; videoUrl?: string | null; hasVideo?: boolean }) => (
     <div
       data-testid="candidate-media"
       data-full-bleed={String(Boolean(fullBleed))}
       data-profile-image={profileImageUrl || ''}
       data-cover-image={coverImageUrl || ''}
+      data-video={videoUrl || ''}
+      data-has-video={String(Boolean(hasVideo))}
     >Kandidatmedia</div>
   ),
 }));
@@ -99,7 +101,7 @@ describe('CandidateSlide employer swipe', () => {
     expect(getByTestId('candidate-media').getAttribute('data-full-bleed')).toBe('true');
   });
 
-  it('skickar samma ansökningsbild och videoomslag till helkortet', () => {
+  it('skickar ansökans anpassade videoomslag till helkortet', () => {
     const { getByTestId } = render(
       <CandidateSlide
         application={{
@@ -117,6 +119,8 @@ describe('CandidateSlide employer swipe', () => {
 
     expect(getByTestId('candidate-media').getAttribute('data-profile-image')).toBe('https://example.com/profile.jpg');
     expect(getByTestId('candidate-media').getAttribute('data-cover-image')).toBe('snapshot-cover.jpg');
+    expect(getByTestId('candidate-media').getAttribute('data-video')).toBe('snapshot-video.mp4');
+    expect(getByTestId('candidate-media').getAttribute('data-has-video')).toBe('true');
   });
 
   it('låter ett vertikalt drag fortsätta utan att byta kandidat', () => {
