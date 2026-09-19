@@ -72,10 +72,11 @@ const EmployerLayoutInner = memo(({ children, overlay }: EmployerLayoutProps) =>
   
   const isCandidateRoute = location.pathname === '/candidates' || location.pathname === '/my-candidates';
 
-  // Kandidatpreload och dess realtime-kanal behövs endast i kandidatverktygen.
-  // Hookarna är alltid anropade men gör inget på övriga arbetsgivarsidor.
+  // Betygen behövs bara inne i kandidatverktygen. Själva kandidatdatan måste
+  // däremot börja synkas direkt efter arbetsgivarinloggningen: då hinner både
+  // första sidan och dess media bli varma innan Kandidater/Swipe-läge öppnas.
   useEagerRatingsPreload(isCandidateRoute);
-  useCandidateBackgroundSync(isCandidateRoute);
+  useCandidateBackgroundSync(true);
 
   // Keyboard shortcut: Cmd+N / Ctrl+N to open "Create New Job" dialog
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
