@@ -142,6 +142,8 @@ function KeepAliveCached({
   // Force a re-render when we mount a new key
   const [, setTick] = React.useState(0);
   const [displayedKey, setDisplayedKey] = React.useState(activeKey);
+  const [exitingKey, setExitingKey] = React.useState<string | null>(null);
+  const [exitStarted, setExitStarted] = React.useState(false);
   const [isEntered, setIsEntered] = React.useState(true);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const isFirstActivationRef = React.useRef(true);
@@ -468,6 +470,10 @@ function KeepAliveCached({
     // Bytet sker fortfarande före paint (ingen blixt), men vyn börjar
     // osynlig och tonar in kort så att återbesök inte hoppar fram hårt.
     revisitAnimRef.current = activeKey;
+    if (mobileSlideNavigation) {
+      setExitingKey(displayedKey);
+      setExitStarted(false);
+    }
     setDisplayedKey(activeKey);
     setIsFastEnter(true);
     setIsEntered(false);
@@ -480,12 +486,17 @@ function KeepAliveCached({
     let raf1 = 0;
     let raf2 = 0;
     raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => setIsEntered(true));
+      raf2 = requestAnimationFrame(() => {
+        setIsEntered(true);
+        setExitStarted(true);
+      });
     });
     const safety = window.setTimeout(() => {
       setIsEntered(true);
       setIsAnimating(false);
       revisitAnimRef.current = null;
+      setExitingKey(null);
+      setExitStarted(false);
     }, 600);
     return () => {
       cancelAnimationFrame(raf1);
@@ -528,6 +539,10 @@ function KeepAliveCached({
     const delayTimer = window.setTimeout(() => {
       // 1) Byt synlig nod och sätt start-state (osynlig)
       freshKeysRef.current.delete(activeKey);
+      if (mobileSlideNavigation) {
+        setExitingKey(displayedKey);
+        setExitStarted(false);
+      }
       setDisplayedKey(activeKey);
 
       setIsEntered(false);
@@ -539,6 +554,7 @@ function KeepAliveCached({
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
           setIsEntered(true);
+          setExitStarted(true);
         });
       });
 
@@ -548,6 +564,8 @@ function KeepAliveCached({
       safetyTimer = window.setTimeout(() => {
         setIsEntered(true);
         setIsAnimating(false);
+        setExitingKey(null);
+        setExitStarted(false);
       }, 800);
     }, enterDelayMs);
 
@@ -557,7 +575,7 @@ function KeepAliveCached({
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
-  }, [activeKey, displayedKey, enterDelayMs]);
+  }, [activeKey, displayedKey, enterDelayMs, mobileSlideNavigation]);
 
   // Mount the active key on demand if it isn't cached yet
   useEffect(() => {
@@ -599,13 +617,14 @@ function KeepAliveCached({
   }, [activeKey, displayedKey, keepKeys]);
 
   return (
-    <div ref={rootRef} className="relative w-full h-full flex flex-col min-h-0">
+    <div ref={rootRef} className="relative w-full h-full flex flex-col min-h-0 overflow-x-hidden">
       {mountedKeysRef.current.map((key) => {
         const isDisplayed = key === displayedKey;
+        const isExiting = mobileSlideNavigation && key === exitingKey && key !== displayedKey;
         const enterClasses = isEntered
           ? 'opacity-100 translate-x-0 translate-y-0'
           : isFastEnter
-            ? `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-1' : 'translate-y-1'}`
+                ? `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-1' : 'translate-y-1'}`
             : `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-2' : 'translate-y-2'}`;
         const durationClass = mobileSlideNavigation
           ? isFastEnter
@@ -623,21 +642,27 @@ function KeepAliveCached({
             }}
             style={
               isDisplayed
-                ? { willChange: isAnimating ? 'opacity, transform' : 'auto' }
+                ? { willChange: isAnimating ? 'opacity, transform' : 'auto', zIndex: 2 }
+                : isExiting
+                  ? { position: 'absolute', inset: 0, width: '100%', zIndex: 1, willChange: 'transform' }
                 : { display: 'none' }
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none motion-reduce:transform-none ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none motion-reduce:transform-none ${enterClasses}`
+                : isExiting
+                  ? `flex min-h-0 flex-col pointer-events-none transform-gpu transition-transform duration-[320ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none motion-reduce:transform-none ${exitStarted ? 'max-lg:-translate-x-full' : 'translate-x-0'}`
                 : ''
             }
             aria-hidden={!isDisplayed}
             onTransitionEnd={(e) => {
               if (!isDisplayed) return;
-              if (e.propertyName !== 'opacity') return;
+              if (e.propertyName !== 'opacity' && e.propertyName !== 'transform') return;
               revisitAnimRef.current = null;
               setIsAnimating(false);
               setIsEntered(true);
+              setExitingKey(null);
+              setExitStarted(false);
             }}
           >
             {cacheRef.current.get(key)}

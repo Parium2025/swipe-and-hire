@@ -534,8 +534,9 @@ const Index = () => {
   const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const device = useDevice();
-  const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
+  // Mobilens sida börjar röra sig direkt bakom den stängande drawern. En
+  // sekventiell väntan gav den tomma/hårda mellanbild användaren upplevde.
+  const routeEnterDelayMs = 0;
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
   // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
@@ -811,6 +812,7 @@ const Index = () => {
           render={(key) => renderSidebarContent(key)}
           keepKeys={JOB_SEEKER_KEEP_KEYS}
           enterDelayMs={routeEnterDelayMs}
+          mobileSlideNavigation
         />
         {showTourOverlay ? (
           <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} initialStep={introTourStep} />

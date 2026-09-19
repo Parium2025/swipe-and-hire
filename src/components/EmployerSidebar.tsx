@@ -1,6 +1,5 @@
-import React, { useEffect, useState, memo, useMemo, useRef, startTransition } from "react";
+import React, { useEffect, useState, memo, useMemo, startTransition } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
@@ -140,8 +139,6 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
-  const navTimerRef = useRef<(() => void) | null>(null);
-  useEffect(() => () => { navTimerRef.current?.(); }, []);
 
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
@@ -285,16 +282,13 @@ export function EmployerSidebar() {
   const handleNavigation = (href: string) => {
     if (!checkBeforeNavigation(href)) return;
 
-    // Mobil: stäng sidobaren FÖRST och byt route först när slide-out-animationen
-    // är helt klar — annars byts innehållet bakom drawern halvvägs in i
-    // rörelsen, vilket syns som en "blixt".
+    // Mobil: starta sidbyte och drawer-stängning i samma händelse. KeepAlive
+    // låter den gamla sidan ligga kvar tills den nya börjar glida in, vilket
+    // ger samma sammanhängande rörelse som listan → konversation i chatten.
     if (isMobile) {
       setOpenMobile(false);
-      navTimerRef.current?.();
-      navTimerRef.current = navigateAfterSidebarClose(() => {
-        startTransition(() => {
-          navigate(href);
-        });
+      startTransition(() => {
+        navigate(href);
       });
     } else {
       navigate(href);
