@@ -31,4 +31,6 @@ export function useJobSeekerWarmupOrchestrator() {
   useNotificationsPreload();
   // 4. Kallstart för Sparade jobb / Mina ansökningar — samma nycklar som sidorna.
   useJobSeekerPagePrewarm();
+  // 5. Kallstart för Swipe Mode: första söksidan förvärms i idle efter login.
+  useDefaultJobSearchPrewarm();
 }
