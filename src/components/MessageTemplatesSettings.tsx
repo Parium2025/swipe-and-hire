@@ -1333,12 +1333,6 @@ export function MessageTemplatesSettings() {
       .filter((automation) => automation.is_enabled)
       .map((automation) => `${automation.trigger}::${automation.channel}`),
   );
-  // En egen aktiv mall ersätter Parium-standarden för exakt samma händelse + kanal.
-  const coveredEventChannels = new Set(
-    customTemplates
-      .filter((template) => template.is_active && template.trigger)
-      .map((template) => `${template.trigger}::${template.channel}`),
-  );
   const STANDARD_CHANNEL_ORDER: OutreachChannel[] = ['email', 'push', 'chat'];
 
   // Parium-standardmallarna kommer alltid från koden, aldrig från databasen. Då kan de
@@ -1348,7 +1342,6 @@ export function MessageTemplatesSettings() {
     STANDARD_CHANNEL_ORDER.flatMap((channel) => {
       const config = event.templates[channel as 'email' | 'push' | 'chat'];
       if (!config) return [];
-      if (coveredEventChannels.has(`${event.trigger}::${channel}`)) return [];
       return [{
         id: `standard:${event.trigger}:${channel}`,
         name: config.name,
@@ -1535,7 +1528,7 @@ export function MessageTemplatesSettings() {
 
       <div className="mb-3 grid gap-1.5 md:grid-cols-3">
           {[
-          { label: 'Mallar', value: templates.length, icon: Bot },
+          { label: 'Mallar', value: standardAutoTemplates.length + customTemplates.length, icon: Bot },
            { label: 'Aktiva regler', value: automationGroups.filter((group) => group.automations.some((item) => item.is_enabled)).length, icon: RefreshCw },
           { label: 'Väntar på att skickas', value: logs.filter((item) => item.status === 'pending' || item.status === 'retrying').length, icon: ScrollText },
         ].map(({ label, value, icon: Icon }) => (

@@ -160,6 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
           .from("job_applications")
           .select("id, applicant_id")
           .eq("job_id", job.id)
+          .is("rejected_at", null)
           .not("status", "in", '("hired","rejected")')
           .gt("id", job.auto_close_cursor ?? "00000000-0000-0000-0000-000000000000")
           .order("id", { ascending: true })

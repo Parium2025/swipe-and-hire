@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { MessageSquare, CalendarPlus, Users, Trash2, ListPlus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MessageSquare, CalendarPlus, Users, Trash2, ListPlus, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import { noFocusRingProps } from '@/lib/noFocusRing';
 
@@ -12,6 +12,8 @@ interface ProfileActionsProps {
   onRemove?: () => void;
   /** Visas i stället för borttagning när kandidaten ännu inte ligger i en lista. */
   onAddToList?: () => void;
+  onReject?: () => void;
+  isRejected?: boolean;
   currentStage?: string;
   stageOrder?: string[];
   stageConfig?: Record<string, StageSettings>;
@@ -26,6 +28,8 @@ export const ProfileActions = ({
   onShare,
   onRemove,
   onAddToList,
+  onReject,
+  isRejected = false,
   currentStage,
   stageOrder,
   stageConfig,
@@ -65,6 +69,15 @@ export const ProfileActions = ({
             </Button>
           )}
         </div>
+
+        {onReject && !isRejected && (
+          <div className="flex justify-center">
+            <Button {...noFocusRingProps} onClick={onReject} variant="glassRed" className="h-8 px-4 text-[11px] md:h-9 md:text-sm">
+              <XCircle className="h-3 w-3 md:h-4 md:w-4 shrink-0" />
+              <span>Ge avslag för detta jobb</span>
+            </Button>
+          </div>
+        )}
 
 
         {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {
@@ -127,6 +140,12 @@ export const ProfileActions = ({
           <Button {...noFocusRingProps} onClick={onAddToList} variant="glassGreen" size="default">
             <ListPlus className="h-4 w-4 mr-1.5" />
             Lägg till i lista
+          </Button>
+        )}
+        {onReject && !isRejected && (
+          <Button {...noFocusRingProps} onClick={onReject} variant="glassRed" size="default">
+            <XCircle className="h-4 w-4 mr-1.5" />
+            Ge avslag för detta jobb
           </Button>
         )}
       </div>
