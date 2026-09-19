@@ -13,6 +13,7 @@ import { template as passwordReset } from './password-reset.tsx'
 import { template as outreachMessage } from './outreach-message.tsx'
 import { template as accountInactivityWarning } from './account-inactivity-warning.tsx'
 import { template as teamInvitation } from './team-invitation.tsx'
+import { template as activityDigest } from './activity-digest.tsx'
 
 export interface TemplateEntry {
   component: (props: any) => React.ReactElement
