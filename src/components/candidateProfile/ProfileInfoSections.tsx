@@ -131,7 +131,7 @@ export const ProfileInfoSections = ({
         <div className="bg-white/10 border border-white/20 rounded-lg overflow-hidden">
           <button
             onClick={onToggleQuestions}
-            className="w-full px-3 py-2 flex items-center justify-between hover:bg-white/5 transition-colors"
+            className="w-full px-3 py-2 flex items-center justify-between pointer-fine:hover:bg-white/5 pointer-fine:transition-colors [-webkit-tap-highlight-color:transparent]"
           >
             <h3 className="text-[10px] font-semibold text-white uppercase tracking-wider">
               Frågor ({customAnswerKeys.length})

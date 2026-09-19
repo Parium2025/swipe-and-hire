@@ -16,6 +16,8 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
   const elementRef = useRef<T | null>(null);
   const [node, setNode] = useState<T | null>(null);
   const state = useRef({ isDown: false, isDragging: false, startX: 0, scrollLeft: 0 });
+  const frameRef = useRef<number | null>(null);
+  const pendingScrollLeftRef = useRef<number | null>(null);
   const DRAG_THRESHOLD = 0;
   const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, [role="button"], [draggable="true"], [data-dnd-draggable="true"]';
 
@@ -75,7 +77,16 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
 
     e.preventDefault();
     const walk = (x - state.current.startX) * 1.5;
-    el.scrollLeft = state.current.scrollLeft - walk;
+    pendingScrollLeftRef.current = state.current.scrollLeft - walk;
+    if (frameRef.current === null) {
+      frameRef.current = window.requestAnimationFrame(() => {
+        frameRef.current = null;
+        const nextScrollLeft = pendingScrollLeftRef.current;
+        if (nextScrollLeft !== null && elementRef.current) {
+          elementRef.current.scrollLeft = nextScrollLeft;
+        }
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -93,6 +104,11 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>() {
     window.addEventListener('blur', onMouseUp);
 
     return () => {
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      pendingScrollLeftRef.current = null;
       el.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);

@@ -387,23 +387,38 @@ export const useApplicationsData = (
 
 
 
+       // Hämta all kompletterande siddata parallellt. Tidigare låg fyra anrop i
+       // kö efter huvudsökningen, vilket höll uppdateringssignalen synlig onödigt länge.
+       const ids = baseData.map((item: any) => item.id);
+       const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
+       const [snapshotResult, mediaResult, activityResult, ratingsResult] = await Promise.all([
+         ids.length > 0
+           ? supabase
+               .from('job_applications')
+               .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url, rejected_at')
+               .in('id', ids)
+           : Promise.resolve({ data: [] as any[], error: null }),
+         supabase.rpc('get_applicant_profile_media_batch', {
+           p_applicant_ids: applicantIds,
+           p_employer_id: user.id,
+         }),
+         supabase.rpc('get_applicant_latest_activity', {
+           p_applicant_ids: applicantIds,
+           p_employer_id: user.id,
+         }),
+         supabase
+           .from('candidate_ratings')
+           .select('applicant_id, rating')
+           .eq('recruiter_id', user.id)
+           .in('applicant_id', applicantIds),
+       ]);
+
        // Ansökans snapshot (den kandidatprofil som faktiskt användes vid ansökan).
-       // RPC:n returnerar inte dessa kolumner, så vi hämtar dem för sidans rader.
        const snapshotById = new Map<string, any>();
-       {
-         const ids = baseData.map((item: any) => item.id);
-         if (ids.length > 0) {
-           const { data: snapRows } = await supabase
-             .from('job_applications')
-              .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url, rejected_at')
-             .in('id', ids);
-           (snapRows || []).forEach((row: any) => snapshotById.set(row.id, row));
-         }
-       }
+       (snapshotResult.data || []).forEach((row: any) => snapshotById.set(row.id, row));
 
        // Fetch profile media (image, video, is_profile_video, last_active_at) via secure BATCH RPC function
        // This is a single call instead of N calls - critical for scalability with 10M+ users
-       const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
        const profileMediaMap: Record<
          string,
          {
@@ -414,11 +429,7 @@ export const useApplicationsData = (
          }
        > = {};
 
-       // Single batch RPC call for all applicants (scales to millions)
-       const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
-         p_applicant_ids: applicantIds,
-         p_employer_id: user.id,
-       });
+       const batchMediaData = mediaResult.data;
 
        if (batchMediaData && Array.isArray(batchMediaData)) {
          batchMediaData.forEach((row: any) => {
@@ -445,10 +456,7 @@ export const useApplicationsData = (
 
        // Fetch latest activity (SAME source as "Mina kandidater") in one batch
        const activityMap: Record<string, { last_active_at: string | null }> = {};
-       const { data: activityData } = await supabase.rpc('get_applicant_latest_activity', {
-         p_applicant_ids: applicantIds,
-         p_employer_id: user.id,
-       });
+       const activityData = activityResult.data;
 
        if (activityData) {
          activityData.forEach((row: any) => {
@@ -460,11 +468,8 @@ export const useApplicationsData = (
        const cachedRatings = readCachedRatings(user.id);
        const ratingsMap: Record<string, number> = { ...cachedRatings };
 
-       const { data: ratingsData, error: ratingsError } = await supabase
-         .from('candidate_ratings')
-         .select('applicant_id, rating')
-         .eq('recruiter_id', user.id)
-         .in('applicant_id', applicantIds);
+       const ratingsData = ratingsResult.data;
+       const ratingsError = ratingsResult.error;
 
        if (!ratingsError && ratingsData) {
          // Databasen är sanningen: rensa cachade betyg för de kandidater vi
@@ -729,6 +734,7 @@ export const useApplicationsData = (
   const jobIdsForRealtime = useMemo(() => {
     return [...new Set(applications.map(a => a.job_id))].filter(Boolean).sort();
   }, [applications]);
+  const applicationsInvalidateTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -750,24 +756,34 @@ export const useApplicationsData = (
     }
     // else: no filter — listen to all job_applications changes (RLS still protects data)
 
-    const channel = createRealtimeChannel(channelName)
-      .on('postgres_changes', filterConfig, () => {
+    const scheduleApplicationsInvalidate = () => {
+      if (applicationsInvalidateTimerRef.current) {
+        window.clearTimeout(applicationsInvalidateTimerRef.current);
+      }
+      applicationsInvalidateTimerRef.current = window.setTimeout(() => {
+        applicationsInvalidateTimerRef.current = null;
         queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-      })
+      }, 400);
+    };
+
+    const channel = createRealtimeChannel(channelName)
+      .on('postgres_changes', filterConfig, scheduleApplicationsInvalidate)
       // DELETE-payloads innehåller endast id (REPLICA IDENTITY DEFAULT) av
       // integritetsskäl, därför matchar de inte job_id-filtret ovan. Vi lyssnar
       // därför ofiltrerat på DELETE och invaliderar bara cachen (ingen PII läses).
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'job_applications' },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['applications', user.id] });
-        }
+        scheduleApplicationsInvalidate
       )
       .subscribe();
 
 
     return () => {
+      if (applicationsInvalidateTimerRef.current) {
+        window.clearTimeout(applicationsInvalidateTimerRef.current);
+        applicationsInvalidateTimerRef.current = null;
+      }
       supabase.removeChannel(channel);
     };
   }, [user, queryClient, jobIdsForRealtime]);

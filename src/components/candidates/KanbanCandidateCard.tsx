@@ -89,11 +89,10 @@ export const CandidateCardContent = memo(function CandidateCardContent({
             ? 'ring-1 ring-white/30 bg-white/[0.08]'
             : isDragging
             ? 'ring-2 ring-inset ring-primary/50 bg-white/10 scale-[1.02] shadow-lg shadow-primary/20'
-            : 'ring-white/10 hover:ring-white/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+            : 'ring-white/10 pointer-fine:hover:ring-white/30 pointer-fine:hover:bg-white/[0.08] pointer-fine:hover:-translate-y-0.5 pointer-fine:hover:shadow-md pointer-fine:hover:shadow-black/20'
         }`}
       onClick={handleClick}
       onMouseEnter={onPrefetch}
-      onTouchStart={onPrefetch}
     >
       {/* Selection checkbox */}
       {isSelectionMode && (
@@ -121,7 +120,7 @@ export const CandidateCardContent = memo(function CandidateCardContent({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-fuchsia-400 font-medium text-xs truncate group-hover:text-fuchsia-300 transition-colors cursor-default">
+                <p className="text-fuchsia-400 font-medium text-xs truncate pointer-fine:group-hover:text-fuchsia-300 pointer-fine:transition-colors cursor-default">
                   {candidate.first_name} {candidate.last_name}
                 </p>
               </TooltipTrigger>
@@ -178,11 +177,11 @@ export const CandidateCardContent = memo(function CandidateCardContent({
             onRemove();
           }}
           aria-label="Ta bort kandidat"
-          className={`absolute right-0.5 top-0.5 flex h-9 w-9 items-center justify-center text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full
+           className={`absolute right-0.5 top-0.5 flex h-9 w-9 items-center justify-center text-white/60 pointer-fine:hover:text-red-400 pointer-fine:hover:bg-red-500/10 rounded-full
             transition-all duration-300 ${
               isTouchDevice
                 ? 'opacity-100 scale-100'
-                : 'opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'
+                 : 'opacity-0 pointer-fine:group-hover:opacity-100 scale-90 pointer-fine:group-hover:scale-100'
             }`}
         >
           <Trash2 className="h-3 w-3" />
