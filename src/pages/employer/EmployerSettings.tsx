@@ -208,7 +208,7 @@ const EmployerSettings = () => {
     },
     {
       value: 'manuella-besked',
-      label: 'Manuella besked & mallar',
+      label: 'Mallar, regler & utskick',
       content: <MessageTemplatesSettings />,
     },
     {
@@ -216,16 +216,25 @@ const EmployerSettings = () => {
       label: 'Systemutskick',
       content: (
         <div className="space-y-3">
-          <p className="text-sm text-white">Dessa meddelanden är låsta och hanteras av Parium. De kan inte redigeras eller stängas av här.</p>
+          <p className="text-sm text-white">Tekniska meddelanden som Parium sköter utanför de sex redigerbara händelserna.</p>
           <ul className="space-y-2">
-            {[
-              'Intervjukallelse med svarsknappar och kalenderlänk.',
-              'Påminnelse till dig efter 14 dagar om en kandidat väntar på besked.',
-              'Påminnelser om sparade jobb och jobb som snart går ut.',
-              'Konto-, säkerhets- och supportmeddelanden.',
-            ].map((message) => (
-              <li key={message} className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">{message}</li>
-            ))}
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">Intervjukallelse med svarsknappar och kalenderlänk.</li>
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium text-white">Påminnelse efter 14 dagar</p>
+                  <p className="text-xs text-white">En intern notis per kandidat som fortfarande väntar på besked. Kandidaten får inget automatiskt avslag.</p>
+                </div>
+                <Switch
+                  checked={isEnabled('application_decision_reminder', 'in_app')}
+                  onCheckedChange={(checked) => toggle('application_decision_reminder', checked, 'in_app')}
+                  disabled={prefsLoading}
+                  aria-label="Påminnelse efter 14 dagar"
+                />
+              </div>
+            </li>
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">Påminnelser om sparade jobb och jobb som snart går ut.</li>
+            <li className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">Konto-, säkerhets- och supportmeddelanden.</li>
           </ul>
         </div>
       ),
@@ -273,7 +282,7 @@ const EmployerSettings = () => {
             ref={section.value === 'notifications' ? notificationSettingsRef : undefined}
             className="border-0 scroll-mt-6"
           >
-            <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors data-[state=open]:rounded-b-none">
+            <AccordionTrigger className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm px-6 md:px-4 py-4 text-sm font-medium text-white no-underline hover:no-underline hover:bg-white/10 transition-colors">
               {section.label}
             </AccordionTrigger>
             <AccordionContent className="pb-0 pt-4">

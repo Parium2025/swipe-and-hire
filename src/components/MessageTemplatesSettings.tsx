@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   AlertDialog,
@@ -57,7 +57,6 @@ import {
 import { notifyOutreachStudioUpdated, OUTREACH_STUDIO_UPDATED_EVENT, readCachedOutreachStudio, writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { AUTO_RULE_EVENTS } from '@/lib/outreachAutoRules';
-import { MANUAL_OUTREACH_ACTIONS } from '@/lib/outreachManualActions';
 
 // Namn+kanal för samtliga Parium-original (bibliotek + automatiska utskick).
 const STANDARD_TEMPLATE_KEYS = new Set<string>([
@@ -69,16 +68,7 @@ const STANDARD_TEMPLATE_KEYS = new Set<string>([
   ),
 ]);
 
-const isManualStandardTemplate = (template: OutreachTemplate) => {
-  const normalizedName = template.name.trim().toLocaleLowerCase('sv-SE');
-  return !template.trigger && Object.values(MANUAL_OUTREACH_ACTIONS).some((action) =>
-    action.keywords.some((keyword) => normalizedName.includes(keyword)),
-  );
-};
-
-// Alla Parium-original: biblioteksmallarna, de som Automatiska utskick skapar och de
-// manuella originalen (Gå vidare/Avslag) som styrs från kandidatprofilen. Dessa är låsta
-// och räknas aldrig som "egna mallar" – bara det du själv skapar hamnar i Egna mallar.
+// Alla Parium-original är låsta och räknas aldrig som egna mallar.
 function isStandardTemplate(template: { name: string; channel: string; is_default?: boolean | null }) {
   return template.is_default === true || STANDARD_TEMPLATE_KEYS.has(`${template.name}::${template.channel}`);
 }
@@ -1372,18 +1362,13 @@ export function MessageTemplatesSettings() {
     }),
   );
 
-  // De sex manuella originalen ligger i databasen utan händelse och används
-  // uttryckligen från kandidatprofilens Gå vidare/Ge avslag-flöden.
-  const standardManualTemplates = templates.filter(isManualStandardTemplate);
-
-  const standardTemplates = [...standardAutoTemplates, ...standardManualTemplates];
+  const standardTemplates = standardAutoTemplates;
   const groupByChannel = (items: OutreachTemplate[]) =>
     STANDARD_CHANNEL_ORDER.map((channel) => ({
       channel,
       items: items.filter((template) => template.channel === channel),
     })).filter((group) => group.items.length > 0);
   const standardAutoByChannel = groupByChannel(standardAutoTemplates);
-  const standardManualByChannel = groupByChannel(standardManualTemplates);
   const standardByChannel = standardAutoByChannel;
 
 
@@ -1879,19 +1864,6 @@ export function MessageTemplatesSettings() {
                         </>
                       )}
 
-                      {standardManualByChannel.length > 0 && (
-                        <>
-                          <div className="px-1 pb-1 pt-10">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-                              Manuella standardmallar ({standardManualTemplates.length})
-                            </p>
-                            <p className="mt-2 text-[11px] text-white md:text-xs">
-                              Skickas bara när du själv trycker på Gå vidare eller Avslag i kandidatprofilen. De ligger alltid kvar och påverkas inte av reglagen ovan.
-                            </p>
-                          </div>
-                          {standardManualByChannel.map((group) => renderChannelGroup(group, 'manual'))}
-                        </>
-                      )}
                     </>
                   );
                 })()}
@@ -1908,7 +1880,7 @@ export function MessageTemplatesSettings() {
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-semibold text-white md:text-base">Steg 1 · Skapa mall</h4>
-                  <InfoHint text="Här bygger du grunden för automatiska eller manuella utskick. Börja med namn, välj kanaler och skriv sedan innehåll per kanal." />
+                  <InfoHint text="Här anpassar du innehållet för en av de sex automatiska händelserna. Börja med namn, välj händelse och kanaler och skriv sedan innehållet." />
                 </div>
                 <p className="text-xs text-white md:text-sm">Här skriver du bara texten — när den ska skickas väljer du i steg 2. Variablerna fylls i automatiskt per kandidat. Ditt utkast sparas automatiskt, även om du laddar om sidan.</p>
               </div>
@@ -1937,10 +1909,11 @@ export function MessageTemplatesSettings() {
                   <SelectValue placeholder="Välj händelse" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AUTO_RULE_EVENTS.map((event) => (
-                    <SelectItem key={event.trigger} value={event.trigger}>
-                      {event.title}
-                    </SelectItem>
+                  {AUTO_RULE_EVENTS.map((event, index) => (
+                    <div key={event.trigger}>
+                      {index > 0 && <SelectSeparator className="bg-white/20" />}
+                      <SelectItem value={event.trigger}>{event.title}</SelectItem>
+                    </div>
                   ))}
                 </SelectContent>
               </Select>

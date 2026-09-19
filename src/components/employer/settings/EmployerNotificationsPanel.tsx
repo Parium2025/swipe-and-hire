@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import SettingsPanel from './SettingsPanel';
 
-type NotificationPreferenceType = 'new_application' | 'new_message' | 'interview_scheduled';
+type NotificationPreferenceType = 'new_application' | 'new_message' | 'interview_scheduled' | 'application_decision_reminder';
 type Channel = 'push' | 'email' | 'in_app';
 
 interface EmployerNotificationsPanelProps {

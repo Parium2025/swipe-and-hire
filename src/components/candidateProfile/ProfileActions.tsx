@@ -1,16 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { MessageSquare, CalendarPlus, Users, Trash2, ListPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StageSettings } from '@/hooks/useStageSettings';
-import type { ManualOutreachActionKey } from '@/lib/outreachManualActions';
-import type { ButtonProps } from '@/components/ui/button';
 import { noFocusRingProps } from '@/lib/noFocusRing';
-
-interface QuickAction {
-  key: ManualOutreachActionKey;
-  label: string;
-  variant: ButtonProps['variant'];
-  onClick: () => void;
-}
 
 interface ProfileActionsProps {
   variant: 'all-candidates' | 'my-candidates';
@@ -25,7 +16,6 @@ interface ProfileActionsProps {
   stageOrder?: string[];
   stageConfig?: Record<string, StageSettings>;
   onStageChange?: (newStage: string) => void;
-  quickActions?: QuickAction[];
 }
 
 export const ProfileActions = ({
@@ -40,7 +30,6 @@ export const ProfileActions = ({
   stageOrder,
   stageConfig,
   onStageChange,
-  quickActions = [],
 }: ProfileActionsProps) => {
   if (variant === 'my-candidates') {
     return (
@@ -77,21 +66,6 @@ export const ProfileActions = ({
           )}
         </div>
 
-        {quickActions.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
-            {quickActions.map((action) => (
-              <Button
-                key={action.key}
-                {...noFocusRingProps}
-                onClick={action.onClick}
-                variant={action.variant}
-                className="h-9 min-w-0 rounded-full px-3 text-xs md:text-sm"
-              >
-                <span className="truncate">{action.label}</span>
-              </Button>
-            ))}
-          </div>
-        )}
 
         {currentStage && stageOrder && stageConfig && onStageChange && stageOrder.length > 1 && (() => {
           const currentIndex = stageOrder.indexOf(currentStage);
@@ -156,15 +130,6 @@ export const ProfileActions = ({
           </Button>
         )}
       </div>
-      {quickActions.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-2">
-          {quickActions.map((action) => (
-            <Button key={action.key} {...noFocusRingProps} onClick={action.onClick} variant={action.variant} size="default">
-              {action.label}
-            </Button>
-          ))}
-        </div>
-      )}
     </div>
   );
 };
