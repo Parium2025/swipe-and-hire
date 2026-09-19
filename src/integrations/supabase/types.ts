@@ -4668,6 +4668,7 @@ export type Database = {
         Args: { p_applicant_id: string; p_employer_id: string }
         Returns: boolean
       }
+      has_applied_to_job: { Args: { p_job_id: string }; Returns: boolean }
       has_premium: { Args: { p_user_id: string }; Returns: boolean }
       heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
       increment_app_exception_count: {
