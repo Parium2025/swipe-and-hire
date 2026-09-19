@@ -634,7 +634,7 @@ function KeepAliveCached({
             aria-hidden={!isDisplayed}
             onTransitionEnd={(e) => {
               if (!isDisplayed) return;
-              if (e.propertyName !== 'opacity') return;
+              if (e.propertyName !== (useMobileSlide ? 'transform' : 'opacity')) return;
               revisitAnimRef.current = null;
               setIsAnimating(false);
               setIsEntered(true);
