@@ -10,7 +10,9 @@ vi.mock('@/hooks/useCandidateNotes', () => ({
 }));
 vi.mock('@/lib/haptics', () => ({ hapticLight: vi.fn(), hapticMedium: vi.fn() }));
 vi.mock('../CandidateCardFace', () => ({
-  CandidateCardFace: () => <div data-testid="candidate-media">Kandidatmedia</div>,
+  CandidateCardFace: ({ fullBleed }: { fullBleed?: boolean }) => (
+    <div data-testid="candidate-media" data-full-bleed={String(Boolean(fullBleed))}>Kandidatmedia</div>
+  ),
 }));
 
 const application: ApplicationData = {
@@ -68,6 +70,21 @@ describe('CandidateSlide employer swipe', () => {
     act(() => vi.advanceTimersByTime(250));
 
     expect(onSkip).toHaveBeenCalledTimes(1);
+  });
+
+  it('använder alltid helkortsläget och aldrig den runda profilvarianten', () => {
+    const { getByTestId } = render(
+      <CandidateSlide
+        application={application}
+        rating={0}
+        isVisible
+        isActive
+        onOpenFullProfile={vi.fn()}
+        onSkip={vi.fn()}
+      />,
+    );
+
+    expect(getByTestId('candidate-media').getAttribute('data-full-bleed')).toBe('true');
   });
 
   it('låter ett vertikalt drag fortsätta utan att byta kandidat', () => {
