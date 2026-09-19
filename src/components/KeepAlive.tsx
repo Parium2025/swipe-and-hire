@@ -608,7 +608,9 @@ function KeepAliveCached({
             ? `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-1' : 'translate-y-1'}`
             : `opacity-0 pointer-events-none ${mobileSlideNavigation ? 'max-lg:translate-x-full max-lg:translate-y-0 lg:translate-y-2' : 'translate-y-2'}`;
         const durationClass = mobileSlideNavigation
-          ? 'duration-[320ms] lg:duration-[280ms]'
+          ? isFastEnter
+            ? 'duration-[320ms] lg:duration-[280ms]'
+            : 'duration-[320ms] lg:duration-500'
           : isFastEnter
             ? 'duration-[280ms]'
             : 'duration-500';
