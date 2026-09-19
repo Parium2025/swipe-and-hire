@@ -75,6 +75,17 @@ export function useEmployerPagePrewarm() {
       // efter att kortet redan syns.
       void prefetchUnviewedApplicationCounts(queryClient, userId);
 
+      // Intervjukortet på startsidan: samma nyckel och hämtare som kortet
+      // använder, så första besökets skelett försvinner.
+      void queryClient
+        .prefetchQuery({
+          queryKey: ['interviews', userId],
+          queryFn: () => fetchEmployerInterviewsForUser(userId),
+        })
+        .catch(() => {
+          // Kortet hämtar själv om förvärmningen inte går igenom.
+        });
+
       // "Mina kandidater" bygger på en kedja: listor → aktiv lista → steg →
       // kandidater. Vid kallstart väntade varje led på föregående, vilket är
       // den långa laddningen användaren märker. Här värms de två första leden
