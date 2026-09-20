@@ -1091,6 +1091,7 @@ export function CandidatesTable({
           applicationId={selectedApplicationForTeam.id}
           applicantId={selectedApplicationForTeam.applicant_id}
           jobId={selectedApplicationForTeam.job_id}
+          elevated
           candidateName={`${selectedApplicationForTeam.first_name || ''} ${selectedApplicationForTeam.last_name || ''}`.trim() || 'Kandidat'}
           canRemoveFromOwnList={isApplicantAdded(selectedApplicationForTeam.applicant_id)}
           onAdded={onUpdate}
