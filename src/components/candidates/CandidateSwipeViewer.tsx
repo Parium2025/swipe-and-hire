@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, X } from 'lucide-react';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
@@ -78,6 +77,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const endSectionRef = useRef<HTMLDivElement | null>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
   const transitionTargetIndexRef = useRef<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -110,18 +111,20 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open]);
 
   const hasEndSection = applications.length > 0;
-  const virtualizer = useVirtualizer({
-    count: applications.length + (hasEndSection ? 1 : 0),
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => slideHeight,
-    overscan: 2,
-    getItemKey: (index) => applications[index]?.id || 'candidate-swipe-complete',
-  });
 
-  // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
-  useEffect(() => {
-    virtualizer.measure();
-  }, [slideHeight, virtualizer]);
+  // Håll ref-listan i takt med kandidatlistan, annars kan gamla element
+  // ligga kvar och ge fel snap-position efter att någon tagits bort.
+  slideRefs.current.length = applications.length;
+
+  /** Positionen för ett kort — läses direkt från DOM, precis som jobbsökarens svep. */
+  const getSlideTop = useCallback((idx: number) => {
+    const container = scrollRef.current;
+    const el = idx === applications.length ? endSectionRef.current : slideRefs.current[idx];
+    if (!container || !el) return null;
+    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+    return Math.min(Math.max(el.offsetTop, 0), maxScrollTop);
+  }, [applications.length]);
+
 
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
@@ -143,8 +146,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (!applications[initialIndex]) return;
     didInitialScrollRef.current = true;
     setCurrentIndex(initialIndex);
-    requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
-  }, [open, behind, initialIndex, applications, virtualizer]);
+    requestAnimationFrame(() => {
+      const top = getSlideTop(initialIndex);
+      if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
+    });
+  }, [open, behind, initialIndex, applications, getSlideTop]);
 
 
   // Track current candidate via scroll position. Under ett programmerat byte
@@ -154,21 +160,31 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const container = scrollRef.current;
     if (!container) return;
 
+    const scrollTop = container.scrollTop;
     let bestIdx = currentIndexRef.current;
     let bestDistance = Infinity;
 
-    virtualizer.getVirtualItems().forEach((item) => {
-      const dist = Math.abs(item.start - container.scrollTop);
+    slideRefs.current.forEach((el, idx) => {
+      if (!el) return;
+      const dist = Math.abs(el.offsetTop - scrollTop);
       if (dist < bestDistance) {
         bestDistance = dist;
-        bestIdx = item.index;
+        bestIdx = idx;
       }
     });
+    const endEl = endSectionRef.current;
+    if (endEl) {
+      const dist = Math.abs(endEl.offsetTop - scrollTop);
+      if (dist < bestDistance) {
+        bestDistance = dist;
+        bestIdx = applications.length;
+      }
+    }
 
     const targetIndex = transitionTargetIndexRef.current;
     if (targetIndex !== null) {
-      const target = virtualizer.getVirtualItems().find((item) => item.index === targetIndex);
-      if (target && Math.abs(target.start - container.scrollTop) <= 2) {
+      const targetTop = getSlideTop(targetIndex);
+      if (targetTop !== null && Math.abs(targetTop - scrollTop) <= 2) {
         transitionTargetIndexRef.current = null;
         setCurrentIndex(targetIndex);
       }
@@ -179,7 +195,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
       onLoadMore?.();
     }
-  }, [applications.length, hasMore, isLoadingMore, onLoadMore, virtualizer]);
+  }, [applications.length, getSlideTop, hasMore, isLoadingMore, onLoadMore]);
 
   // iOS skickar scroll-events tätare än 60 Hz under momentum. Utan rAF-koalescering
   // körs index-beräkning + setState flera gånger per frame, vilket syns som hack
@@ -214,13 +230,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     // ersätts av nästa riktiga kort i samma frame. En rAF-kedja här gav först
     // en tom/halv frame och därefter ett synligt vertikalt hopp på iOS.
     const container = scrollRef.current;
-    if (container) {
-      container.scrollTo({ top: idx * slideHeight, behavior: 'auto' });
-    } else {
-      virtualizer.scrollToIndex(idx, { align: 'start' });
-    }
+    const top = getSlideTop(idx) ?? idx * slideHeight;
+    container?.scrollTo({ top, behavior: 'auto' });
     transitionTargetIndexRef.current = null;
-  }, [applications.length, hasEndSection, slideHeight, virtualizer]);
+  }, [applications.length, getSlideTop, hasEndSection, slideHeight]);
 
   const handleSkip = useCallback(() => {
     const current = applications[currentIndex];
@@ -382,84 +395,76 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             touchAction: 'pan-y',
           }}
         >
-          <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-          {virtualizer.getVirtualItems().map((item) => {
-            const app = applications[item.index];
-            if (!app && item.index === applications.length && hasEndSection) {
-              return (
-                <div
-                  key="candidate-swipe-complete"
-                  data-index={item.index}
-                  className="absolute left-0 top-0 w-full"
-                  style={{
-                    transform: `translateY(${item.start}px)`,
-                    height: `${slideHeight}px`,
-                    scrollSnapAlign: 'start',
-                    scrollSnapStop: 'always',
-                  }}
-                >
-                  <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
-                    {hasMore ? (
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                        animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
-                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
-                      >
-                        <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
-                        <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
-                      </motion.div>
-                    )}
-
-                    {canUndo && !hasMore && (
-                      <button
-                        type="button"
-                        onClick={handleUndo}
-                        data-swipe-action-button
-                        className="mt-5 flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg transition-transform active:scale-[0.93] touch-manipulation"
-                      >
-                        <Undo2 className="h-4.5 w-4.5 text-white" />
-                        <span className="text-sm font-medium text-white">Ångra</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-            if (!app) return null;
+          {applications.map((app, idx) => {
+            // Exakt samma modell som jobbsökarens svep: korten ligger i normalt
+            // flöde med fast höjd och snap-start. Endast ±2 kort monteras.
+            const withinWindow = Math.abs(idx - currentIndex) <= 2;
             return (
-            <div
-              key={app.id}
-              data-index={item.index}
-              className="absolute left-0 top-0 w-full"
-              style={{
-                transform: `translateY(${item.start}px)`,
-                height: `${slideHeight}px`,
-                scrollSnapAlign: 'start',
-                scrollSnapStop: 'always',
-              }}
-            >
-              <div className="h-full w-full">
-              <CandidateSlide
-                application={app}
-                rating={getDisplayRating(app)}
-                onOpenFullProfile={() => onOpenFullProfile(app)}
-                onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
-                isVisible={Math.abs(item.index - currentIndex) <= 1}
-                isActive={item.index === currentIndex}
-                nextApplication={applications[item.index + 1]}
-                isUndoEntry={app.id === undoEntryApplicationId}
-                onSkip={handleSkip}
-                onRegisterSkip={registerActiveSkip}
-
-              />
+              <div
+                key={app.id}
+                ref={(el) => { slideRefs.current[idx] = el; }}
+                data-index={idx}
+                className="w-full shrink-0 snap-start snap-always"
+                style={{
+                  minHeight: `${slideHeight}px`,
+                  height: `${slideHeight}px`,
+                  contain: 'layout style paint',
+                }}
+              >
+                {withinWindow ? (
+                  <CandidateSlide
+                    application={app}
+                    rating={getDisplayRating(app)}
+                    onOpenFullProfile={() => onOpenFullProfile(app)}
+                    onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
+                    isVisible={Math.abs(idx - currentIndex) <= 1}
+                    isActive={idx === currentIndex}
+                    nextApplication={applications[idx + 1]}
+                    isUndoEntry={app.id === undoEntryApplicationId}
+                    onSkip={handleSkip}
+                    onRegisterSkip={registerActiveSkip}
+                  />
+                ) : null}
               </div>
-            </div>
             );
           })}
-          </div>
+
+          {hasEndSection && (
+            <div
+              ref={endSectionRef}
+              data-index={applications.length}
+              className="w-full shrink-0 snap-start snap-always"
+              style={{ minHeight: `${slideHeight}px`, height: `${slideHeight}px` }}
+            >
+              <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
+                {hasMore ? (
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                    animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
+                  >
+                    <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
+                    <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
+                  </motion.div>
+                )}
+
+                {canUndo && !hasMore && (
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    data-swipe-action-button
+                    className="mt-5 flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg transition-transform active:scale-[0.93] touch-manipulation"
+                  >
+                    <Undo2 className="h-4.5 w-4.5 text-white" />
+                    <span className="text-sm font-medium text-white">Ångra</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {currentApplication && (
