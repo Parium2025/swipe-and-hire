@@ -4,6 +4,7 @@ import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { fetchMyApplicationViews } from '@/lib/applicationViews';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { chunk } from '@/lib/fetchAllPages';
@@ -280,10 +281,11 @@ async function hydrateApplications(
   evaluationsResult.forEach((e) => evaluationByApplicant.set(e.applicant_id, e.id));
 
   const evaluationIds = evaluationsResult.map((e) => e.id);
-  const [resultsByEvaluation] = await Promise.all([
+  const [resultsByEvaluation, myViews] = await Promise.all([
     evaluationIds.length > 0
       ? fetchCriterionResults(evaluationIds, criteriaMap)
       : Promise.resolve(new Map<string, CriterionResult[]>()),
+    myViewsPromise,
     mediaAndActivityPromise,
   ]);
 
@@ -306,6 +308,7 @@ async function hydrateApplications(
       criterionResults,
       last_active_at: activity?.last_active_at || null,
       city: liveMedia.city || null,
+      viewed_at: myViews.get(app.id) ?? null,
     } as JobApplication;
   });
 }
