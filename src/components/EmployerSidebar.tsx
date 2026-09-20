@@ -1,6 +1,5 @@
-import React, { useEffect, useState, memo, useMemo, useRef, startTransition } from "react";
+import React, { useEffect, useState, memo, useMemo } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
@@ -140,8 +139,6 @@ const LOGO_CACHE_KEY = 'parium_company_logo_url';
 
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
-  const navTimerRef = useRef<(() => void) | null>(null);
-  useEffect(() => () => { navTimerRef.current?.(); }, []);
 
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
@@ -290,12 +287,7 @@ export function EmployerSidebar() {
     // rörelsen, vilket syns som en "blixt".
     if (isMobile) {
       setOpenMobile(false);
-      navTimerRef.current?.();
-      navTimerRef.current = navigateAfterSidebarClose(() => {
-        startTransition(() => {
-          navigate(href);
-        });
-      });
+      navigate(href);
     } else {
       navigate(href);
     }
