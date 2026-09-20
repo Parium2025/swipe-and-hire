@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef, startTransition } from 'react';
 import { MyCandidateData, useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useMyCandidateStageCounts } from '@/hooks/useMyCandidateStageCounts';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
