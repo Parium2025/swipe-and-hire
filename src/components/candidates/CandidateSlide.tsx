@@ -171,9 +171,16 @@ export const CandidateSlide = memo(function CandidateSlide({
     triggerSwipe('left');
   }, [triggerSwipe]);
 
-  useEffect(() => {
-    if (!isActive) dragStartRef.current = null;
-  }, [isActive]);
+  // Kortinstanserna återanvänds (virtualisering). Ett kort som blir aktivt
+  // igen — via Ångra eller genom att användaren skrollar tillbaka — måste
+  // alltid vara fullt interaktivt, aldrig låst av en tidigare commit.
+  useLayoutEffect(() => {
+    dragStartRef.current = null;
+    if (isActive) {
+      resetGesture();
+      suppressOpenRef.current = false;
+    }
+  }, [isActive, resetGesture]);
 
   useEffect(() => {
     if (!onRegisterSkip || !isActive) return;
