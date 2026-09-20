@@ -112,6 +112,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   const hasEndSection = applications.length > 0;
 
+  // Håll ref-listan i takt med kandidatlistan, annars kan gamla element
+  // ligga kvar och ge fel snap-position efter att någon tagits bort.
+  slideRefs.current.length = applications.length;
+
   /** Positionen för ett kort — läses direkt från DOM, precis som jobbsökarens svep. */
   const getSlideTop = useCallback((idx: number) => {
     const container = scrollRef.current;
