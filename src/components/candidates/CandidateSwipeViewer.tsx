@@ -179,12 +179,27 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     }
   }, [applications.length, currentIndex, hasMore, isLoadingMore, onLoadMore, virtualizer]);
 
+  // iOS skickar scroll-events tätare än 60 Hz under momentum. Utan rAF-koalescering
+  // körs index-beräkning + setState flera gånger per frame, vilket syns som hack
+  // mitt i svepet. En avläsning per frame räcker och gör övergången jämn.
   useEffect(() => {
     const container = scrollRef.current;
     if (!open || !container) return;
 
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    let frame: number | null = null;
+    const onScroll = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        handleScroll();
+      });
+    };
+
+    container.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', onScroll);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
   }, [open, handleScroll]);
 
   const snapToIndex = useCallback((idx: number) => {
