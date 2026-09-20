@@ -55,6 +55,8 @@
 - [x]Verifiera frågefiltrets centrering i förhandsvisningen och ge panelen 12 px andningsmarginal mot skärmens underkant
 - [x] Matcha arbetsgivarens Swipe Mode mot jobbsökarens kortstruktur utan påverkan på jobbsökarsidan
 - [ ] Verifiera arbetsgivarens helkortsmedia, hörn, fingergest och stabila toppremsa på 393 × 580
+- [ ] Ge arbetsgivarens Swipe Mode exakt samma kortstack, prickar och svepgester som jobbsökarens
+- [ ] Verifiera att vänsterneka är sessionslokalt och att höger öppnar kandidatinformation
 
 ## Utskickssystem
 - [x] Samla de sex redigerbara händelserna i automatiska flöden samt mallar, regler och logg

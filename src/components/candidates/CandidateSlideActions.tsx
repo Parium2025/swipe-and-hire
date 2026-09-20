@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Bookmark, Info, X } from 'lucide-react';
+import { Bookmark, Info, Undo2, X } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
 
 interface CandidateSlideActionsProps {
@@ -7,6 +7,9 @@ interface CandidateSlideActionsProps {
   onSave: () => void;
   onSkip: () => void;
   onOpenInfo: () => void;
+  canUndo?: boolean;
+  onUndo?: () => void;
+  visible?: boolean;
 }
 
 /**
@@ -21,9 +24,17 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
   onSave,
   onSkip,
   onOpenInfo,
+  canUndo,
+  onUndo,
+  visible = true,
 }: CandidateSlideActionsProps) {
+  const undoActive = Boolean(canUndo && onUndo);
   return (
-    <div className="flex items-center justify-center gap-4">
+    <div
+      className="flex items-center justify-center gap-4 transition-opacity duration-200"
+      style={{ opacity: visible ? 1 : 0 }}
+      aria-hidden={!visible}
+    >
       <button
         type="button"
         aria-label="Hoppa över kandidaten"
@@ -73,6 +84,24 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         className="w-[52px] h-[52px] rounded-full bg-success flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
       >
         <Info className="w-6 h-6 text-white" strokeWidth={2.25} />
+      </button>
+
+      <button
+        type="button"
+        aria-label="Ångra senaste nekandet"
+        aria-disabled={!undoActive}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          if (undoActive) onUndo?.();
+        }}
+        onClick={(e) => e.preventDefault()}
+        data-swipe-action-button
+        className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation"
+      >
+        <Undo2
+          className={`w-6 h-6 text-white transition-opacity duration-200 ${undoActive ? 'opacity-100' : 'opacity-40'}`}
+          strokeWidth={2.25}
+        />
       </button>
 
     </div>
