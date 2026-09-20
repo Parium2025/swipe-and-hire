@@ -1,7 +1,6 @@
 import { memo, useEffect } from 'react';
 import { Info, X } from 'lucide-react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { useInputCapability } from '@/hooks/useInputCapability';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
@@ -53,8 +52,6 @@ export const CandidateSlide = memo(function CandidateSlide({
   onRegisterSwipeApi,
   criteria,
 }: CandidateSlideProps) {
-  const inputCapability = useInputCapability();
-  const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
   const entryScale = useMotionValue(1);
@@ -90,13 +87,12 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const {
     triggerSwipe,
-    handleDragEnd,
     handleTouchStartCapture,
     handleTouchMoveCapture,
     handleTouchEndCapture,
     handleTouchCancelCapture,
   } = useSwipeCardGesture({
-    useTouchTunnel,
+    useTouchTunnel: true,
     overlayOpen,
     showTapHint: false,
     x,
@@ -163,13 +159,8 @@ export const CandidateSlide = memo(function CandidateSlide({
             opacity: exitOpacity,
             rotate: cardRotate,
             scale: combinedScale,
-            touchAction: useTouchTunnel ? 'pan-y' : 'auto',
+            touchAction: 'pan-y',
           }}
-          drag={useTouchTunnel ? false : 'x'}
-          dragDirectionLock={!useTouchTunnel}
-          dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
-          dragElastic={useTouchTunnel ? undefined : 0.18}
-          onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
           onTouchStartCapture={handleTouchStartCapture}
           onTouchMoveCapture={handleTouchMoveCapture}
           onTouchEndCapture={handleTouchEndCapture}
