@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, type TouchEvent as ReactTouchEvent } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, type TouchEvent as ReactTouchEvent } from 'react';
 import { animate, motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
 import { Info, X } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -88,6 +88,25 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
 
+  // Virtualiseringen behåller kortinstansen när användaren ångrar. Ett kort
+  // som nyss nekats har då fortfarande sin commit-spärr och sina exitvärden.
+  // Återställ allt synkront före paint när kortet blir aktivt igen, så Ångra
+  // ger ett fullt interaktivt kort utan en låst eller halvtransparent frame.
+  useLayoutEffect(() => {
+    if (!isUndoEntry) return;
+    if (exitTimerRef.current !== null) {
+      window.clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+    }
+    touchRef.current = null;
+    gestureCommittedRef.current = false;
+    suppressOpenRef.current = false;
+    thresholdHapticFiredRef.current = false;
+    underlayY.set(UNDERLAY_INITIAL_Y);
+    underlayScale.set(UNDERLAY_INITIAL_SCALE);
+    underlayOpacity.set(UNDERLAY_INITIAL_OPACITY);
+  }, [isUndoEntry, underlayOpacity, underlayScale, underlayY]);
+
 
   const commitSkip = useCallback(() => {
     if (gestureCommittedRef.current || exitTimerRef.current !== null) return;
@@ -129,6 +148,10 @@ export const CandidateSlide = memo(function CandidateSlide({
       dragging: false,
       cancelled: false,
     };
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive) touchRef.current = null;
   }, [isActive]);
 
   const handleTouchMove = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {

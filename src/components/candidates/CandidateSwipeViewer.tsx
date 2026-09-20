@@ -79,6 +79,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
+  const transitionTargetIndexRef = useRef<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const skippedStackRef = useRef<string[]>(readCandidateUndoStack());
   const [canUndo, setCanUndo] = useState(() => skippedStackRef.current.length > 0);
@@ -143,7 +144,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open, behind, initialIndex, applications, virtualizer]);
 
 
-  // Track current candidate via scroll position — simple & reliable
+  // Track current candidate via scroll position. Under ett programmerat byte
+  // får mellanframes inte skriva tillbaka det gamla indexet; det gav både
+  // videons dubbelhopp och fel aktivt kort direkt efter Ångra.
   const handleScroll = useCallback(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -159,6 +162,16 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       }
     });
 
+    const targetIndex = transitionTargetIndexRef.current;
+    if (targetIndex !== null) {
+      const target = virtualizer.getVirtualItems().find((item) => item.index === targetIndex);
+      if (target && Math.abs(target.start - container.scrollTop) <= 2) {
+        transitionTargetIndexRef.current = null;
+        setCurrentIndex(targetIndex);
+      }
+      return;
+    }
+
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
     if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
       onLoadMore?.();
@@ -173,11 +186,18 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [open, handleScroll]);
 
-  // Hoppa över = nästa kandidat.
-  const goToIndex = useCallback((idx: number) => {
+  const snapToIndex = useCallback((idx: number) => {
     if (idx < 0 || idx >= applications.length) return;
+    transitionTargetIndexRef.current = idx;
     setCurrentIndex(idx);
-    virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+    // Kandidatkortets egen exit + underlay är hela övergången. Ytterligare
+    // smooth-scroll ovanpå den gav en andra synlig rörelse och hack på iOS.
+    requestAnimationFrame(() => {
+      virtualizer.scrollToIndex(idx, { align: 'start' });
+      requestAnimationFrame(() => {
+        transitionTargetIndexRef.current = null;
+      });
+    });
   }, [applications.length, virtualizer]);
 
   const handleSkip = useCallback(() => {
@@ -188,8 +208,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       persistCandidateUndoStack(skippedStackRef.current);
       setCanUndo(true);
     }
-    goToIndex(currentIndex + 1);
-  }, [applications, currentIndex, goToIndex]);
+    snapToIndex(currentIndex + 1);
+  }, [applications, currentIndex, snapToIndex]);
 
   const handleUndo = useCallback(() => {
     const stack = skippedStackRef.current;
@@ -202,15 +222,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (restoredIndex >= 0) {
       setUndoEntryApplicationId(applicationId);
       hapticSuccess();
-      setCurrentIndex(restoredIndex);
-      virtualizer.scrollToIndex(restoredIndex, { align: 'start' });
+      snapToIndex(restoredIndex);
       if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
       undoEntryTimerRef.current = window.setTimeout(() => {
         undoEntryTimerRef.current = null;
         setUndoEntryApplicationId(null);
       }, 700);
     }
-  }, [applications, virtualizer]);
+  }, [applications, snapToIndex]);
 
   useEffect(() => () => {
     if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
