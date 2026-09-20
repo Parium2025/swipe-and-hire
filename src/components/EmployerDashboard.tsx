@@ -874,7 +874,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''}`}>
+                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''} ${enteringIds.has(job.id) ? 'job-card-entering' : ''}`}>
                     <MobileJobCard
                       job={job}
                       onOpen={handleOpenJob}
@@ -974,7 +974,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''}`}>
+                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''} ${enteringIds.has(job.id) ? 'job-card-entering' : ''}`}>
                     <MobileJobCard
                       job={job}
                       onOpen={handleOpenJob}
@@ -1038,7 +1038,11 @@ const EmployerDashboard = memo(() => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToDelete.title}"`} className="font-semibold text-white break-words" />? Denna åtgärd går inte att ångra.
+                  <span className="block">Är du säker på att du vill ta bort annonsen</span>
+                  <span className="mt-1 block font-semibold text-white break-words">
+                    {`”${jobToDelete.title}”?`}
+                  </span>
+                  <span className="mt-2 block">Denna åtgärd går inte att ångra.</span>
                 </>
               )}
             </AlertDialogDescription>
