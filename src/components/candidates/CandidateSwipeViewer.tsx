@@ -80,7 +80,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const endSectionRef = useRef<HTMLDivElement | null>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
-  const transitionTargetIndexRef = useRef<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const currentIndexRef = useRef(initialIndex);
   currentIndexRef.current = currentIndex;
@@ -173,7 +172,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const restoredIndex = visibleApplications.findIndex((application) => application.id === applicationId);
     if (restoredIndex < 0) return;
     pendingUndoApplicationIdRef.current = null;
-    transitionTargetIndexRef.current = null;
     currentIndexRef.current = restoredIndex;
     setCurrentIndex(restoredIndex);
     const top = getSlideTop(restoredIndex);
@@ -209,16 +207,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       }
     }
 
-    const targetIndex = transitionTargetIndexRef.current;
-    if (targetIndex !== null) {
-      const targetTop = getSlideTop(targetIndex);
-      if (targetTop !== null && Math.abs(targetTop - scrollTop) <= 2) {
-        transitionTargetIndexRef.current = null;
-        setCurrentIndex(targetIndex);
-      }
-      return;
-    }
-
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
     if (hasMore && !isLoadingMore && bestIdx >= visibleApplications.length - 8) {
       onLoadMore?.();
@@ -247,21 +235,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       if (frame !== null) cancelAnimationFrame(frame);
     };
   }, [open, handleScroll]);
-
-  const snapToIndex = useCallback((idx: number) => {
-    const maximumIndex = visibleApplications.length - 1 + (hasEndSection ? 1 : 0);
-    if (idx < 0 || idx > maximumIndex) return;
-    transitionTargetIndexRef.current = idx;
-    currentIndexRef.current = idx;
-    setCurrentIndex(idx);
-    // Samma handoff som i jobbsökarens swipe-läge: det färdiga underlaget
-    // ersätts av nästa riktiga kort i samma frame. En rAF-kedja här gav först
-    // en tom/halv frame och därefter ett synligt vertikalt hopp på iOS.
-    const container = scrollRef.current;
-    const top = getSlideTop(idx) ?? idx * slideHeight;
-    container?.scrollTo({ top, behavior: 'auto' });
-    transitionTargetIndexRef.current = null;
-  }, [getSlideTop, hasEndSection, slideHeight, visibleApplications.length]);
 
   const handleSkip = useCallback(() => {
     const current = visibleApplications[currentIndex];
