@@ -18,9 +18,10 @@ const JOBSEEKER_ROWS: NotificationRow[] = [
   {
     type: 'interview_scheduled',
     label: 'Intervjuer',
-    description: 'Kallelse, ombokning, avbokning och påminnelsen strax före intervjun.',
+    description:
+      'Kallelse, ombokning, avbokning och påminnelsen strax före intervjun. Du väljer själv om de även ska komma som push och mejl — i appen ligger de alltid kvar.',
     channels: ['in_app', 'push', 'email'],
-    locked: ['in_app', 'push', 'email'],
+    locked: ['in_app'],
   },
   {
     type: 'new_message',
