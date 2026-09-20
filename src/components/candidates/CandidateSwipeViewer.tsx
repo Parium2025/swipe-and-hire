@@ -368,23 +368,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </div>
         </div>
 
-        {currentApplication && (
-          <div
-            className="pointer-events-none absolute inset-x-0 z-30 px-5"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
-          >
-            <div className="pointer-events-auto flex justify-center">
-              <CandidateSlideActions
-                saved={savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
-                onSave={() => onSaveCandidate?.(currentApplication)}
-                onSkip={handleActionReject}
-                onOpenInfo={handleActionInfo}
-                canUndo={rejectedStackSize > 0}
-                onUndo={handleUndo}
-              />
-            </div>
+        <div
+          className="pointer-events-none absolute inset-x-0 z-30 px-5"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
+        >
+          <div className="pointer-events-auto flex justify-center">
+            <CandidateSlideActions
+              saved={currentApplication && savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
+              onSave={() => currentApplication && onSaveCandidate?.(currentApplication)}
+              onSkip={handleActionReject}
+              onOpenInfo={handleActionInfo}
+              canUndo={rejectedStackSize > 0}
+              onUndo={handleUndo}
+              visible={Boolean(currentApplication)}
+            />
           </div>
-        )}
+        </div>
 
       </div>,
     document.body
