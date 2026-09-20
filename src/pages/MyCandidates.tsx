@@ -230,6 +230,7 @@ const MyCandidates = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
+  const [swipeSaveCandidate, setSwipeSaveCandidate] = useState<ApplicationData | null>(null);
 
   // Swipe viewer state — continuous scroll navigation
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
