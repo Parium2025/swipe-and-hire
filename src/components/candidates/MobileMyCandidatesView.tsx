@@ -644,6 +644,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
         {/* Candidate list — swipe here switches stages step by step */}
         <div
+          ref={listScrollRef}
           className="flex-1 min-h-[40vh]"
           onTouchStart={stageSwipeHandlers.onTouchStart}
           onTouchMove={stageSwipeHandlers.onTouchMove}
