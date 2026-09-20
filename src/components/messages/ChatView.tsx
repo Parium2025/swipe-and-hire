@@ -1256,7 +1256,7 @@ export function ChatView({
             }}
             placeholder={editingMessageId ? "Redigera meddelandet..." : "Skriv ett meddelande..."}
             className={cn(
-              "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-base md:text-sm text-pure-white placeholder:text-pure-white rounded-xl",
+              "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-[16px] md:text-sm text-pure-white placeholder:text-pure-white rounded-xl",
               editingMessageId && "border-blue-500/30"
             )}
             onFocus={pinMessagesToBottom}
