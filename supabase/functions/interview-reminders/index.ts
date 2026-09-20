@@ -416,27 +416,29 @@ Deno.serve(async (req) => {
             delivered = true;
           }
 
-          try {
-            await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${supabaseServiceKey}`,
-              },
-              body: JSON.stringify({
-                recipient_id: userId,
-                title,
-                body,
-                data: {
-                  type: "interview_reminder",
-                  interview_id: interview.id,
-                  route,
+          if (!options?.skipPush) {
+            try {
+              await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseServiceKey}`,
                 },
-              }),
-            });
-          } catch (err) {
-            // Push är ett komplement – saknad mobilapp får inte fälla påminnelsen.
-            console.error(`Push failed for ${userId}:`, err);
+                body: JSON.stringify({
+                  recipient_id: userId,
+                  title,
+                  body,
+                  data: {
+                    type: "interview_reminder",
+                    interview_id: interview.id,
+                    route,
+                  },
+                }),
+              });
+            } catch (err) {
+              // Push är ett komplement – saknad mobilapp får inte fälla påminnelsen.
+              console.error(`Push failed for ${userId}:`, err);
+            }
           }
 
           if (delivered) {
