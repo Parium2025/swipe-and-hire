@@ -107,9 +107,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     };
   }, [open]);
 
-  const hasCompletedSection = applications.length > 0 && !hasMore;
+  const hasEndSection = applications.length > 0;
   const virtualizer = useVirtualizer({
-    count: applications.length + (hasCompletedSection ? 1 : 0),
+    count: applications.length + (hasEndSection ? 1 : 0),
     getScrollElement: () => scrollRef.current,
     estimateSize: () => slideHeight,
     overscan: 2,
@@ -188,7 +188,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open, handleScroll]);
 
   const snapToIndex = useCallback((idx: number) => {
-    const maximumIndex = applications.length - 1 + (hasCompletedSection ? 1 : 0);
+    const maximumIndex = applications.length - 1 + (hasEndSection ? 1 : 0);
     if (idx < 0 || idx > maximumIndex) return;
     transitionTargetIndexRef.current = idx;
     setCurrentIndex(idx);
@@ -200,7 +200,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         transitionTargetIndexRef.current = null;
       });
     });
-  }, [applications.length, hasCompletedSection, virtualizer]);
+  }, [applications.length, hasEndSection, virtualizer]);
 
   const handleSkip = useCallback(() => {
     const current = applications[currentIndex];
@@ -210,16 +210,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     persistCandidateUndoStack(skippedStackRef.current);
     setCanUndo(true);
 
-    if (currentIndex < applications.length - 1 || hasCompletedSection) {
-      snapToIndex(currentIndex + 1);
-      return;
-    }
-
-    // Om nästa sida ännu inte har kommit ska kortet ligga kvar och fungera.
-    // Förladdningen ovan anropar normalt detta tidigare, men sista trycket är
-    // en säkerhetsventil vid långsamma anslutningar.
-    onLoadMore?.();
-  }, [applications, currentIndex, hasCompletedSection, onLoadMore, snapToIndex]);
+    if (currentIndex === applications.length - 1 && hasMore) onLoadMore?.();
+    snapToIndex(currentIndex + 1);
+  }, [applications, currentIndex, hasMore, onLoadMore, snapToIndex]);
 
   const handleUndo = useCallback(() => {
     const stack = skippedStackRef.current;
@@ -254,7 +247,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, []);
 
   const currentApplication = applications[currentIndex];
-  const isComplete = hasCompletedSection && currentIndex === applications.length;
+  const isEndSection = hasEndSection && currentIndex === applications.length;
+  const isComplete = isEndSection && !hasMore;
 
 
   // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
@@ -336,7 +330,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         )}
 
         {/* Compact position indicator — never creates thousands of DOM nodes. */}
-        <div className={`absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5 transition-opacity duration-200 ${isComplete ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5 transition-opacity duration-200 ${isEndSection ? 'opacity-0' : 'opacity-100'}`}>
           {Array.from({ length: Math.min(applications.length, 7) }, (_, offset) => {
             const start = Math.max(0, Math.min(currentIndex - 3, applications.length - 7));
             const idx = start + offset;
@@ -371,7 +365,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((item) => {
             const app = applications[item.index];
-            if (!app && item.index === applications.length && hasCompletedSection) {
+            if (!app && item.index === applications.length && hasEndSection) {
               return (
                 <div
                   key="candidate-swipe-complete"
@@ -385,17 +379,21 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                   }}
                 >
                   <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                      animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
-                      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                      className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
-                    >
-                      <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
-                      <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
-                    </motion.div>
+                    {hasMore ? (
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                        animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                        className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
+                      >
+                        <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
+                        <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
+                      </motion.div>
+                    )}
 
-                    {canUndo && (
+                    {canUndo && !hasMore && (
                       <button
                         type="button"
                         onClick={handleUndo}
