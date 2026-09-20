@@ -831,7 +831,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className="relative">
+                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''}`}>
                     <MobileJobCard
                       job={job}
                       onOpen={handleOpenJob}
