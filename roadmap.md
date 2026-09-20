@@ -1,1 +1,1 @@
-- [x] Match employer Swipe Mode exactly to job-seeker animations, feedback, and structure
+- [ ] Make employer candidate info truly full-screen and keep undo available at the end of Swipe Mode
