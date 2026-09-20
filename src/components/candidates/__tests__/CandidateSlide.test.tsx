@@ -80,9 +80,20 @@ describe('CandidateSlide employer swipe', () => {
     expect(onSkip).toHaveBeenCalledTimes(1);
     expect(onOpenFullProfile).not.toHaveBeenCalled();
 
-    fireEvent.touchStart(card as Element, { touches: [touch(120, 220)] });
-    fireEvent.touchMove(card as Element, { touches: [touch(320, 224)] });
-    fireEvent.touchEnd(card as Element, { changedTouches: [touch(320, 224)] });
+    const secondRender = render(
+      <CandidateSlide
+        application={{ ...application, id: 'application-2' }}
+        rating={0}
+        isVisible
+        isActive
+        onOpenFullProfile={onOpenFullProfile}
+        onSkip={onSkip}
+      />,
+    );
+    const secondCard = secondRender.container.querySelector('[data-candidate-swipe-card]');
+    fireEvent.touchStart(secondCard as Element, { touches: [touch(120, 220)] });
+    fireEvent.touchMove(secondCard as Element, { touches: [touch(320, 224)] });
+    fireEvent.touchEnd(secondCard as Element, { changedTouches: [touch(320, 224)] });
     act(() => vi.advanceTimersByTime(250));
 
     expect(onSkip).toHaveBeenCalledTimes(1);
