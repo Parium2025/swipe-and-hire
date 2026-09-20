@@ -19,8 +19,10 @@ export const CandidateNextCardUnderlay = memo(function CandidateNextCardUnderlay
   opacity,
 }: CandidateNextCardUnderlayProps) {
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
-  const videoUrl = useMediaUrl(application.video_url, 'profile-video');
   const coverImageUrl = useMediaUrl(application.cover_image_url, 'profile-image');
+  const displayImageUrl = application.is_profile_video
+    ? (coverImageUrl || profileImageUrl)
+    : (profileImageUrl || coverImageUrl);
 
   return (
     <motion.div
@@ -34,10 +36,9 @@ export const CandidateNextCardUnderlay = memo(function CandidateNextCardUnderlay
         lastName={application.last_name}
         age={application.age}
         residence={application.location}
-        profileImageUrl={profileImageUrl}
-        coverImageUrl={coverImageUrl}
-        videoUrl={videoUrl}
-        hasVideo={Boolean(application.is_profile_video)}
+        profileImageUrl={displayImageUrl}
+        coverImageUrl={displayImageUrl}
+        hasVideo={false}
         contentBottomClassName="pb-24"
       />
     </motion.div>

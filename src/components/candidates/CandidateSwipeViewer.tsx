@@ -45,7 +45,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   onClose,
   onOpenFullProfile,
   getDisplayRating,
-  onRemoveCandidate,
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,

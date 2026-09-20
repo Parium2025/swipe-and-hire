@@ -26,8 +26,10 @@ interface CandidateSlideProps {
   isVisible: boolean;
   isActive: boolean;
   overlayOpen?: boolean;
-  onSwipeLeft: () => void;
-  onSwipeRight: () => void;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  /** Bakåtkompatibel alias för vänstersvep. */
+  onSkip?: () => void;
   onRegisterSwipeApi?: (api: CandidateSlideSwipeApi | null) => void;
   /** Urvalskriterier med AI-resultat för kandidaten. */
   criteria?: { criterion_id: string; title: string; result: 'match' | 'no_match' | 'no_data' }[];
@@ -41,6 +43,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   overlayOpen,
   onSwipeLeft,
   onSwipeRight,
+  onSkip,
   onRegisterSwipeApi,
   criteria,
 }: CandidateSlideProps) {
@@ -76,8 +79,8 @@ export const CandidateSlide = memo(function CandidateSlide({
     underlayY,
     underlayScale,
     underlayOpacity,
-    onSwipeLeft,
-    onSwipeRight,
+    onSwipeLeft: onSwipeLeft ?? onSkip ?? (() => undefined),
+    onSwipeRight: onSwipeRight ?? onOpenFullProfile,
     onTapTitle: () => undefined,
     onTapCompany: () => undefined,
     clearTapHint: () => undefined,
