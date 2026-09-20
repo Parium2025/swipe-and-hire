@@ -66,11 +66,36 @@ export const CandidateSlide = memo(function CandidateSlide({
     if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
   }, []);
 
-  // Kortet får medvetet INTE dras i sidled. Endast vertikal scroll/swipe
-  // mellan kandidater är tillåtet; hoppa över sker via knappen.
   const handleOpen = useCallback(() => {
     if (!suppressOpenRef.current) onOpenFullProfile();
   }, [onOpenFullProfile]);
+
+  // Svep vänster = hoppa över, svep höger = visa all info. Vertikal scroll
+  // mellan kandidater påverkas inte (riktningslås + pan-y).
+  const handleDragEnd = useCallback((
+    _event: unknown,
+    info: { offset: { x: number }; velocity: { x: number } },
+  ) => {
+    const { offset, velocity } = info;
+    const goLeft = offset.x < -110 || velocity.x < -650;
+    const goRight = offset.x > 110 || velocity.x > 650;
+
+    if (goLeft) {
+      commitSkip();
+      return;
+    }
+
+    if (goRight) {
+      suppressOpenRef.current = true;
+      hapticMedium();
+      animate(x, 0, { type: 'spring', stiffness: 320, damping: 30 });
+      onOpenFullProfile();
+      window.setTimeout(() => { suppressOpenRef.current = false; }, 250);
+      return;
+    }
+
+    animate(x, 0, { type: 'spring', stiffness: 320, damping: 30 });
+  }, [commitSkip, onOpenFullProfile, x]);
 
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
   const videoUrl = useMediaUrl(application.video_url, 'profile-video');
