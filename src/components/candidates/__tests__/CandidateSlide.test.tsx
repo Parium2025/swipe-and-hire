@@ -3,8 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CandidateSlide } from '../CandidateSlide';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
-// Svep-gesterna använder touch-tunneln, precis som på en riktig telefon.
-vi.mock('@/hooks/useInputCapability', () => ({ useInputCapability: () => 'touch' }));
 vi.mock('@/hooks/useMediaUrl', () => ({ useMediaUrl: (url: string | null) => url }));
 vi.mock('@/hooks/useCandidateSummary', () => ({ useCandidateSummary: vi.fn() }));
 vi.mock('@/hooks/useCandidateNotes', () => ({
@@ -57,17 +55,16 @@ describe('CandidateSlide employer swipe', () => {
     vi.useRealTimers();
   });
 
-  it('hoppar över åt vänster och öppnar information åt höger', () => {
+  it('byter aldrig kandidat av ett drag i sidled', () => {
     vi.useFakeTimers();
     const onSkip = vi.fn();
-    const onOpenFullProfile = vi.fn();
     const { container } = render(
       <CandidateSlide
         application={application}
         rating={0}
         isVisible
         isActive
-        onOpenFullProfile={onOpenFullProfile}
+        onOpenFullProfile={vi.fn()}
         onSkip={onSkip}
       />,
     );
@@ -79,44 +76,14 @@ describe('CandidateSlide employer swipe', () => {
     fireEvent.touchEnd(card as Element, { changedTouches: [touch(190, 224)] });
     act(() => vi.advanceTimersByTime(250));
 
-    expect(onSkip).toHaveBeenCalledTimes(1);
-    expect(onOpenFullProfile).not.toHaveBeenCalled();
+    expect(onSkip).not.toHaveBeenCalled();
 
-    const secondRender = render(
-      <CandidateSlide
-        application={{ ...application, id: 'application-2' }}
-        rating={0}
-        isVisible
-        isActive
-        onOpenFullProfile={onOpenFullProfile}
-        onSkip={onSkip}
-      />,
-    );
-    const secondCard = secondRender.container.querySelector('[data-candidate-swipe-card]');
-    fireEvent.touchStart(secondCard as Element, { touches: [touch(120, 220)] });
-    fireEvent.touchMove(secondCard as Element, { touches: [touch(320, 224)] });
-    fireEvent.touchEnd(secondCard as Element, { changedTouches: [touch(320, 224)] });
+    fireEvent.touchStart(card as Element, { touches: [touch(120, 220)] });
+    fireEvent.touchMove(card as Element, { touches: [touch(320, 224)] });
+    fireEvent.touchEnd(card as Element, { changedTouches: [touch(320, 224)] });
     act(() => vi.advanceTimersByTime(250));
 
-    expect(onSkip).toHaveBeenCalledTimes(1);
-    expect(onOpenFullProfile).toHaveBeenCalledTimes(1);
-  });
-
-  it('visar samma röda och gröna dragfeedback som jobbsökarens swipe-läge', () => {
-    const { container, getByText } = render(
-      <CandidateSlide
-        application={application}
-        rating={0}
-        isVisible
-        isActive
-        onOpenFullProfile={vi.fn()}
-        onSkip={vi.fn()}
-      />,
-    );
-
-    expect(getByText('Visa info')).toBeTruthy();
-    expect(getByText('Hoppa över')).toBeTruthy();
-    expect(container.querySelector('[data-candidate-swipe-card]')).not.toBeNull();
+    expect(onSkip).not.toHaveBeenCalled();
   });
 
   it('använder alltid helkortsläget och aldrig den runda profilvarianten', () => {
@@ -200,46 +167,5 @@ describe('CandidateSlide employer swipe', () => {
 
     expect(contextMenu.defaultPrevented).toBe(true);
     expect(dragStart.defaultPrevented).toBe(true);
-  });
-
-  it('är fullt interaktivt igen efter ångra-animationen', () => {
-    vi.useFakeTimers();
-    const onSkip = vi.fn();
-    const onOpenFullProfile = vi.fn();
-    const { container, rerender } = render(
-      <CandidateSlide
-        application={application}
-        rating={0}
-        isVisible
-        isActive
-        onOpenFullProfile={onOpenFullProfile}
-        onSkip={onSkip}
-      />,
-    );
-    const card = container.querySelector('[data-candidate-swipe-card]');
-
-    fireEvent.touchStart(card as Element, { touches: [touch(340, 220)] });
-    fireEvent.touchMove(card as Element, { touches: [touch(190, 224)] });
-    fireEvent.touchEnd(card as Element, { changedTouches: [touch(190, 224)] });
-    act(() => vi.advanceTimersByTime(250));
-    expect(onSkip).toHaveBeenCalledTimes(1);
-
-    rerender(
-      <CandidateSlide
-        application={application}
-        rating={0}
-        isVisible
-        isActive
-        isUndoEntry
-        onOpenFullProfile={onOpenFullProfile}
-        onSkip={onSkip}
-      />,
-    );
-
-    fireEvent.touchStart(card as Element, { touches: [touch(120, 220)] });
-    fireEvent.touchMove(card as Element, { touches: [touch(320, 224)] });
-    fireEvent.touchEnd(card as Element, { changedTouches: [touch(320, 224)] });
-
-    expect(onOpenFullProfile).toHaveBeenCalledTimes(1);
   });
 });

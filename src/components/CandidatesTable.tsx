@@ -1051,8 +1051,6 @@ export function CandidatesTable({
           const idx = sortedApplications.findIndex(a => a.id === app.id);
           if (idx >= 0) setSwipeIndex(idx);
           setReturnToSwipe(true);
-          // Samma direkta överlämning som jobbsökarens swipe-detalj. Extra
-          // schemaläggning här kändes som input-lagg efter fingersläpp.
           handleRowClick(app);
         }}
         getDisplayRating={getDisplayRating}

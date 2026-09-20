@@ -1,14 +1,12 @@
 import { memo } from 'react';
-import { Bookmark, Info, Undo2, X } from 'lucide-react';
+import { Bookmark, Info, X } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
 
 interface CandidateSlideActionsProps {
   saved: boolean;
-  canUndo: boolean;
   onSave: () => void;
   onSkip: () => void;
   onOpenInfo: () => void;
-  onUndo: () => void;
 }
 
 /**
@@ -20,14 +18,12 @@ interface CandidateSlideActionsProps {
  */
 export const CandidateSlideActions = memo(function CandidateSlideActions({
   saved,
-  canUndo,
   onSave,
   onSkip,
   onOpenInfo,
-  onUndo,
 }: CandidateSlideActionsProps) {
   return (
-    <div className="flex items-center justify-center gap-4 pointer-events-auto">
+    <div className="flex items-center justify-center gap-4">
       <button
         type="button"
         aria-label="Hoppa över kandidaten"
@@ -55,7 +51,9 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         }}
         onClick={(e) => e.preventDefault()}
         data-swipe-action-button
-        className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
+        className={`w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 transition-transform touch-manipulation ${
+          saved ? 'opacity-60' : 'active:scale-[0.93]'
+        }`}
       >
         <Bookmark
           className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`}
@@ -75,25 +73,6 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         className="w-[52px] h-[52px] rounded-full bg-success flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
       >
         <Info className="w-6 h-6 text-white" strokeWidth={2.25} />
-      </button>
-
-      <button
-        type="button"
-        aria-label="Ångra senaste överhoppade kandidat"
-        aria-disabled={!canUndo}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          if (!canUndo) return;
-          onUndo();
-        }}
-        onClick={(e) => e.preventDefault()}
-        data-swipe-action-button
-        className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation opacity-100"
-      >
-        <Undo2
-          className={`w-6 h-6 text-white transition-opacity duration-200 ${canUndo ? 'opacity-100' : 'opacity-40'}`}
-          strokeWidth={2.25}
-        />
       </button>
 
     </div>

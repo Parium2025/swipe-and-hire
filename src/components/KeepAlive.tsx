@@ -453,18 +453,43 @@ function KeepAliveCached({
   }, [displayedKey, resetScrollOnNavigation]);
 
 
-  // Växla alltid synlig vy före paint. En ny route får aldrig vänta bakom den
-  // gamla sidan eller vara pointer-blockerad medan en animation startas.
+  // 🚀 Synkron växling för redan besökta vyer (t.ex. krysset i en annonsvy →
+  // tillbaka till annonslistan). Tidigare kördes bytet i en `useEffect`, alltså
+  // EFTER att webbläsaren målat en bildruta där routen redan var listan men
+  // annonsvyn fortfarande syntes — det var blixten användaren såg. Nu sker
+  // bytet före paint, så övergången är en enda ren bildruta.
   useLayoutEffect(() => {
     if (isFirstActivationRef.current) return;
     if (activeKey === displayedKey) return;
-    freshKeysRef.current.delete(activeKey);
+    if (freshKeysRef.current.has(activeKey)) return; // ny vy → tona in nedan
+    // Bytet sker fortfarande före paint (ingen blixt), men vyn börjar
+    // osynlig och tonar in kort så att återbesök inte hoppar fram hårt.
+    revisitAnimRef.current = activeKey;
     setDisplayedKey(activeKey);
-    setIsFastEnter(false);
-    setIsEntered(true);
-    setIsAnimating(false);
-    revisitAnimRef.current = null;
+    setIsFastEnter(true);
+    setIsEntered(false);
+    setIsAnimating(true);
   }, [activeKey, displayedKey]);
+
+  // Flippar återbesöket till slut-state efter att start-framen committats.
+  useEffect(() => {
+    if (revisitAnimRef.current !== displayedKey) return;
+    let raf1 = 0;
+    let raf2 = 0;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setIsEntered(true));
+    });
+    const safety = window.setTimeout(() => {
+      setIsEntered(true);
+      setIsAnimating(false);
+      revisitAnimRef.current = null;
+    }, 600);
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      window.clearTimeout(safety);
+    };
+  }, [displayedKey]);
 
   useEffect(() => {
     if (isFirstActivationRef.current) {
@@ -485,7 +510,50 @@ function KeepAliveCached({
       return;
     }
 
-    // Själva bytet sker synkront i layout-effekten ovan.
+    // Redan besökta vyer hanteras synkront i layout-effekten ovan.
+    if (!freshKeysRef.current.has(activeKey)) {
+      return;
+    }
+
+    setIsFastEnter(false);
+    revisitAnimRef.current = null;
+
+
+    let raf1 = 0;
+    let raf2 = 0;
+    let safetyTimer = 0;
+    const delayTimer = window.setTimeout(() => {
+      // 1) Byt synlig nod och sätt start-state (osynlig)
+      freshKeysRef.current.delete(activeKey);
+      setDisplayedKey(activeKey);
+
+      setIsEntered(false);
+      setIsAnimating(true);
+
+      // 2) Dubbel rAF garanterar att browsern committar start-framen
+      //    innan vi flippar till slut-state. Utan detta kan transitionen
+      //    "hoppas över" under hög last → fade missas.
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          setIsEntered(true);
+        });
+      });
+
+      // 3) Safety-net: oavsett om transitionend fyrar eller ej, tvinga
+      //    fully entered efter max (delay + 800ms) så att vi aldrig
+      //    fastnar i halvtransparent läge.
+      safetyTimer = window.setTimeout(() => {
+        setIsEntered(true);
+        setIsAnimating(false);
+      }, 800);
+    }, enterDelayMs);
+
+    return () => {
+      window.clearTimeout(delayTimer);
+      window.clearTimeout(safetyTimer);
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
   }, [activeKey, displayedKey, enterDelayMs]);
 
   // Mount the active key on demand if it isn't cached yet

@@ -1,6 +1,7 @@
-import React, { useEffect, useState, memo, useMemo, useCallback } from "react";
+import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
 import { useNavigate, useLocation } from "react-router-dom";
+import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
@@ -55,6 +56,8 @@ const businessItems = [
 
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
+  const navTimerRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => { navTimerRef.current?.(); }, []);
   const collapsed = state === 'collapsed';
 
   const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications } = useAuth();
@@ -149,10 +152,16 @@ export function AppSidebar() {
     if (!checkBeforeNavigation(href)) return;
 
     if (isMobile) {
-      // Byt route direkt i samma tryck. Menyn ligger kvar ovanpå under sin
-      // stängningsanimation, så det nya innehållet hinner bli klart bakom den.
+      // Stäng drawern först — och byt route FÖRST när slide-out-animationen
+      // är helt klar. Annars byts innehållet bakom drawern halvvägs in i
+      // rörelsen, vilket syns som en "blixt".
       setOpenMobile(false);
-      navigate(href);
+      navTimerRef.current?.();
+      navTimerRef.current = navigateAfterSidebarClose(() => {
+        startTransition(() => {
+          navigate(href);
+        });
+      });
     } else {
       navigate(href);
     }

@@ -1,35 +1,13 @@
-import { useState, useRef, useEffect, useLayoutEffect, memo, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Undo2, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
-import { hapticSuccess } from '@/lib/haptics';
-
-const CANDIDATE_UNDO_STORAGE_KEY = 'parium-candidate-swipe-undo-stack';
-
-function readCandidateUndoStack(): string[] {
-  try {
-    const parsed = JSON.parse(sessionStorage.getItem(CANDIDATE_UNDO_STORAGE_KEY) || '[]');
-    return Array.isArray(parsed)
-      ? parsed.filter((id): id is string => typeof id === 'string' && id.length > 0)
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-function persistCandidateUndoStack(stack: string[]) {
-  try {
-    if (stack.length === 0) sessionStorage.removeItem(CANDIDATE_UNDO_STORAGE_KEY);
-    else sessionStorage.setItem(CANDIDATE_UNDO_STORAGE_KEY, JSON.stringify(stack));
-  } catch {
-    // Privat läge/full lagring: ångra fortsätter fungera i minnet.
-  }
-}
 
 export interface CandidateSwipeFilter {
   question: string;
@@ -77,26 +55,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const endSectionRef = useRef<HTMLDivElement | null>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const currentIndexRef = useRef(initialIndex);
-  currentIndexRef.current = currentIndex;
-  const skippedStackRef = useRef<string[]>(readCandidateUndoStack());
-  const [canUndo, setCanUndo] = useState(() => skippedStackRef.current.length > 0);
-  // Ett överhoppat kort tas bara ur den lokala svepstacken. Kandidatens
-  // pipeline/status påverkas inte. Det är samma handoff-modell som på
-  // jobbsökarsidan: nästa kort flyttas in på exakt samma plats i DOM i stället
-  // för att hela containern samtidigt scrollas en viewport nedåt.
-  const [dismissedApplicationIds, setDismissedApplicationIds] = useState<Set<string>>(() => new Set());
-  const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
-  const [profileHandoffApplication, setProfileHandoffApplication] = useState<ApplicationData | null>(null);
-  const undoEntryTimerRef = useRef<number | null>(null);
-  const profileHandoffFallbackTimerRef = useRef<number | null>(null);
-  const profileHandoffOpeningRef = useRef(false);
-  const pendingUndoApplicationIdRef = useRef<string | null>(null);
-  const pendingStackIndexRef = useRef<number | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -119,29 +79,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     };
   }, [open]);
 
-  const visibleApplications = useMemo(
-    () => applications.filter((application) => !dismissedApplicationIds.has(application.id)),
-    [applications, dismissedApplicationIds],
-  );
-  const hasEndSection = applications.length > 0;
+  const virtualizer = useVirtualizer({
+    count: applications.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => slideHeight,
+    overscan: 2,
+    getItemKey: (index) => applications[index]?.id || index,
+  });
 
-  // Håll ref-listan i takt med kandidatlistan, annars kan gamla element
-  // ligga kvar och ge fel snap-position efter att någon tagits bort.
-  slideRefs.current.length = visibleApplications.length;
-
-  /** Positionen för ett kort — läses direkt från DOM, precis som jobbsökarens svep. */
-  const getSlideTop = useCallback((idx: number) => {
-    const container = scrollRef.current;
-    const el = idx === visibleApplications.length ? endSectionRef.current : slideRefs.current[idx];
-    if (!container || !el) return null;
-    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-    return Math.min(Math.max(el.offsetTop, 0), maxScrollTop);
-  }, [visibleApplications.length]);
-
+  // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
+  useEffect(() => {
+    virtualizer.measure();
+  }, [slideHeight, virtualizer]);
 
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
-  useCandidateMediaPreloader(visibleApplications, currentIndex, open, 10, 2, 25);
+  useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
 
 
 
@@ -152,187 +105,56 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   useEffect(() => {
     if (!open) {
       didInitialScrollRef.current = false;
-      setDismissedApplicationIds(new Set());
-      setUndoEntryApplicationId(null);
-      setProfileHandoffApplication(null);
-      profileHandoffOpeningRef.current = false;
-      pendingUndoApplicationIdRef.current = null;
-      pendingStackIndexRef.current = null;
       return;
     }
     if (behind || didInitialScrollRef.current) return;
-    if (!visibleApplications[initialIndex]) return;
+    if (!applications[initialIndex]) return;
     didInitialScrollRef.current = true;
     setCurrentIndex(initialIndex);
-    requestAnimationFrame(() => {
-      const top = getSlideTop(initialIndex);
-      if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
-    });
-  }, [open, behind, initialIndex, visibleApplications, getSlideTop]);
-
-  // Ångra återför kortet i den lokala stacken och placerar det synkront före
-  // paint. Därmed syns aldrig mellanläget där listans höjd ändrats men den
-  // gamla scrollpositionen fortfarande gäller.
-  useLayoutEffect(() => {
-    const applicationId = pendingUndoApplicationIdRef.current;
-    const stackIndex = pendingStackIndexRef.current;
-    let targetIndex: number | null = stackIndex;
-
-    if (applicationId) {
-      const restoredIndex = visibleApplications.findIndex((application) => application.id === applicationId);
-      if (restoredIndex < 0) return;
-      targetIndex = restoredIndex;
-    }
-    if (targetIndex === null) return;
-
-    pendingUndoApplicationIdRef.current = null;
-    pendingStackIndexRef.current = null;
-    const safeIndex = Math.min(targetIndex, visibleApplications.length);
-    currentIndexRef.current = safeIndex;
-    setCurrentIndex(safeIndex);
-    const top = getSlideTop(safeIndex);
-    if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
-  }, [getSlideTop, visibleApplications]);
+    requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
+  }, [open, behind, initialIndex, applications, virtualizer]);
 
 
-  // Track current candidate via scroll position. Under ett programmerat byte
-  // får mellanframes inte skriva tillbaka det gamla indexet; det gav både
-  // videons dubbelhopp och fel aktivt kort direkt efter Ångra.
+  // Track current candidate via scroll position — simple & reliable
   const handleScroll = useCallback(() => {
     const container = scrollRef.current;
     if (!container) return;
 
-    const scrollTop = container.scrollTop;
-    let bestIdx = currentIndexRef.current;
+    let bestIdx = currentIndex;
     let bestDistance = Infinity;
 
-    slideRefs.current.forEach((el, idx) => {
-      if (!el) return;
-      const dist = Math.abs(el.offsetTop - scrollTop);
+    virtualizer.getVirtualItems().forEach((item) => {
+      const dist = Math.abs(item.start - container.scrollTop);
       if (dist < bestDistance) {
         bestDistance = dist;
-        bestIdx = idx;
+        bestIdx = item.index;
       }
     });
-    const endEl = endSectionRef.current;
-    if (endEl) {
-      const dist = Math.abs(endEl.offsetTop - scrollTop);
-      if (dist < bestDistance) {
-        bestDistance = dist;
-        bestIdx = visibleApplications.length;
-      }
-    }
 
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
-    if (hasMore && !isLoadingMore && bestIdx >= visibleApplications.length - 8) {
+    if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
       onLoadMore?.();
     }
-  }, [getSlideTop, hasMore, isLoadingMore, onLoadMore, visibleApplications.length]);
+  }, [applications.length, currentIndex, hasMore, isLoadingMore, onLoadMore, virtualizer]);
 
-  // iOS skickar scroll-events tätare än 60 Hz under momentum. Utan rAF-koalescering
-  // körs index-beräkning + setState flera gånger per frame, vilket syns som hack
-  // mitt i svepet. En avläsning per frame räcker och gör övergången jämn.
   useEffect(() => {
     const container = scrollRef.current;
     if (!open || !container) return;
 
-    let frame: number | null = null;
-    const onScroll = () => {
-      if (frame !== null) return;
-      frame = requestAnimationFrame(() => {
-        frame = null;
-        handleScroll();
-      });
-    };
-
-    container.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      container.removeEventListener('scroll', onScroll);
-      if (frame !== null) cancelAnimationFrame(frame);
-    };
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
   }, [open, handleScroll]);
 
+  // Hoppa över = nästa kandidat.
+  const goToIndex = useCallback((idx: number) => {
+    if (idx < 0 || idx >= applications.length) return;
+    setCurrentIndex(idx);
+    virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+  }, [applications.length, virtualizer]);
+
   const handleSkip = useCallback(() => {
-    const current = visibleApplications[currentIndex];
-    if (!current) return;
-
-    skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);
-    persistCandidateUndoStack(skippedStackRef.current);
-    setCanUndo(true);
-
-    if (currentIndex === visibleApplications.length - 1 && hasMore) onLoadMore?.();
-    pendingStackIndexRef.current = currentIndex;
-    setDismissedApplicationIds((previous) => {
-      const next = new Set(previous);
-      next.add(current.id);
-      return next;
-    });
-  }, [currentIndex, hasMore, onLoadMore, visibleApplications]);
-
-  const handleUndo = useCallback(() => {
-    const stack = skippedStackRef.current;
-    const applicationId = stack[stack.length - 1];
-    if (!applicationId) return;
-    const canRestore = applications.some((application) => application.id === applicationId);
-    skippedStackRef.current = stack.slice(0, -1);
-    persistCandidateUndoStack(skippedStackRef.current);
-    setCanUndo(skippedStackRef.current.length > 0);
-    if (canRestore) {
-      pendingUndoApplicationIdRef.current = applicationId;
-      setUndoEntryApplicationId(applicationId);
-      setDismissedApplicationIds((previous) => {
-        const next = new Set(previous);
-        next.delete(applicationId);
-        return next;
-      });
-      hapticSuccess();
-      if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
-      undoEntryTimerRef.current = window.setTimeout(() => {
-        undoEntryTimerRef.current = null;
-        setUndoEntryApplicationId(null);
-      }, 700);
-    }
-  }, [applications]);
-
-  useEffect(() => () => {
-    if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
-    if (profileHandoffFallbackTimerRef.current !== null) window.clearTimeout(profileHandoffFallbackTimerRef.current);
-  }, []);
-
-  const openProfileWithHandoff = useCallback((application: ApplicationData) => {
-    if (profileHandoffOpeningRef.current) return;
-    profileHandoffOpeningRef.current = true;
-    setProfileHandoffApplication(application);
-  }, []);
-
-  const completeProfileHandoff = useCallback(() => {
-    const application = profileHandoffApplication;
-    if (!application || !profileHandoffOpeningRef.current) return;
-
-    profileHandoffOpeningRef.current = false;
-    onOpenFullProfile(application);
-
-    // Säkerhetsstädning om en caller saknar kandidaten och därför inte öppnar
-    // dialogen. Lagret är alltid pointer-events:none och kan aldrig låsa appen.
-    if (profileHandoffFallbackTimerRef.current !== null) {
-      window.clearTimeout(profileHandoffFallbackTimerRef.current);
-    }
-    profileHandoffFallbackTimerRef.current = window.setTimeout(() => {
-      profileHandoffFallbackTimerRef.current = null;
-      setProfileHandoffApplication(null);
-    }, 500);
-  }, [onOpenFullProfile, profileHandoffApplication]);
-
-  // Profilen är nu monterad ovanför Swipe Mode. Ta bort överlämningsytan före
-  // nästa paint; ingen extra timer, portal eller blockerande helskärmsyta blir kvar.
-  useLayoutEffect(() => {
-    if (!behind || !profileHandoffApplication) return;
-    if (profileHandoffFallbackTimerRef.current !== null) {
-      window.clearTimeout(profileHandoffFallbackTimerRef.current);
-      profileHandoffFallbackTimerRef.current = null;
-    }
-    setProfileHandoffApplication(null);
-  }, [behind, profileHandoffApplication]);
+    goToIndex(currentIndex + 1);
+  }, [currentIndex, goToIndex]);
 
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
@@ -342,9 +164,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     activeSkipRef.current?.();
   }, []);
 
-  const currentApplication = visibleApplications[currentIndex];
-  const isEndSection = hasEndSection && currentIndex === visibleApplications.length;
-  const isComplete = isEndSection && !hasMore;
+  const currentApplication = applications[currentIndex];
 
 
   // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
@@ -391,7 +211,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
-              {applications.length === 0 ? '0 / 0' : `${Math.min(dismissedApplicationIds.size + currentIndex + 1, applications.length)} / ${applications.length}`}
+              {applications.length === 0 ? '0 / 0' : `${Math.min(currentIndex + 1, applications.length)} / ${applications.length}`}
             </span>
           </div>
           <div className="py-3">
@@ -426,9 +246,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         )}
 
         {/* Compact position indicator — never creates thousands of DOM nodes. */}
-        <div className={`absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5 transition-opacity duration-200 ${isEndSection ? 'opacity-0' : 'opacity-100'}`}>
-          {Array.from({ length: Math.min(visibleApplications.length, 7) }, (_, offset) => {
-            const start = Math.max(0, Math.min(currentIndex - 3, visibleApplications.length - 7));
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
+          {Array.from({ length: Math.min(applications.length, 7) }, (_, offset) => {
+            const start = Math.max(0, Math.min(currentIndex - 3, applications.length - 7));
             const idx = start + offset;
             return (
             <div
@@ -453,82 +273,44 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           style={{
             WebkitOverflowScrolling: 'touch',
             willChange: 'scroll-position',
-            overflowAnchor: 'none',
-            contain: 'layout style paint',
+            contain: 'layout style',
             scrollSnapType: 'y mandatory',
             touchAction: 'pan-y',
           }}
         >
-          {visibleApplications.map((app, idx) => {
-            // Exakt samma modell som jobbsökarens svep: korten ligger i normalt
-            // flöde med fast höjd och snap-start. Endast ±2 kort monteras.
-            const withinWindow = Math.abs(idx - currentIndex) <= 2;
+          <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+          {virtualizer.getVirtualItems().map((item) => {
+            const app = applications[item.index];
+            if (!app) return null;
             return (
-              <div
-                key={app.id}
-                ref={(el) => { slideRefs.current[idx] = el; }}
-                data-index={idx}
-                className="w-full shrink-0 snap-start snap-always"
-                style={{
-                  minHeight: `${slideHeight}px`,
-                  height: `${slideHeight}px`,
-                  contain: 'layout style paint',
-                }}
-              >
-                {withinWindow ? (
-                  <CandidateSlide
-                    application={app}
-                    rating={getDisplayRating(app)}
-                    onOpenFullProfile={() => openProfileWithHandoff(app)}
-                    onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
-                    isVisible={Math.abs(idx - currentIndex) <= 1}
-                    isActive={idx === currentIndex}
-                    nextApplication={visibleApplications[idx + 1]}
-                    isUndoEntry={app.id === undoEntryApplicationId}
-                    onSkip={handleSkip}
-                    onRegisterSkip={registerActiveSkip}
-                  />
-                ) : null}
-              </div>
-            );
-          })}
-
-          {hasEndSection && (
             <div
-              ref={endSectionRef}
-              data-index={visibleApplications.length}
-              className="w-full shrink-0 snap-start snap-always"
-              style={{ minHeight: `${slideHeight}px`, height: `${slideHeight}px` }}
+              key={app.id}
+              data-index={item.index}
+              className="absolute left-0 top-0 w-full"
+              style={{
+                transform: `translateY(${item.start}px)`,
+                height: `${slideHeight}px`,
+                scrollSnapAlign: 'start',
+                scrollSnapStop: 'always',
+              }}
             >
-              <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
-                {hasMore ? (
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                    animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
-                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
-                  >
-                    <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
-                    <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
-                  </motion.div>
-                )}
+              <div className="h-full w-full">
+              <CandidateSlide
+                application={app}
+                rating={getDisplayRating(app)}
+                onOpenFullProfile={() => onOpenFullProfile(app)}
+                onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
+                isVisible={Math.abs(item.index - currentIndex) <= 1}
+                isActive={item.index === currentIndex}
+                onSkip={handleSkip}
+                onRegisterSkip={registerActiveSkip}
 
-                {canUndo && !hasMore && (
-                  <button
-                    type="button"
-                    onClick={handleUndo}
-                    data-swipe-action-button
-                    className="mt-5 flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg transition-transform active:scale-[0.93] touch-manipulation"
-                  >
-                    <Undo2 className="h-4.5 w-4.5 text-white" />
-                    <span className="text-sm font-medium text-white">Ångra</span>
-                  </button>
-                )}
+              />
               </div>
             </div>
-          )}
+            );
+          })}
+          </div>
         </div>
 
         {currentApplication && (
@@ -539,37 +321,15 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             <div className="pointer-events-auto flex justify-center">
               <CandidateSlideActions
                 saved={savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
-                canUndo={canUndo}
                 onSave={() => onSaveCandidate?.(currentApplication)}
                 onSkip={handleActionSkip}
-                onOpenInfo={() => openProfileWithHandoff(currentApplication)}
-                onUndo={handleUndo}
+                onOpenInfo={() => onOpenFullProfile(currentApplication)}
               />
             </div>
           </div>
         )}
 
-        <AnimatePresence>
-          {profileHandoffApplication && !behind && (
-            <motion.div
-              key={`candidate-profile-handoff-${profileHandoffApplication.id}`}
-              className="pointer-events-none absolute inset-0 z-40 overflow-hidden bg-card-parium transform-gpu [backface-visibility:hidden]"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
-              onAnimationComplete={completeProfileHandoff}
-              aria-hidden
-            >
-              <div className="flex justify-center pb-2 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
-                <div className="h-1.5 w-10 rounded-full bg-white/30" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
       </motion.div>
-
     </AnimatePresence>,
     document.body
   );
