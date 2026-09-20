@@ -57,6 +57,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
   const rejectedStackRef = useRef<Array<{ id: string; index: number }>>([]);
+  const pendingUndoIndexRef = useRef<number | null>(null);
   const [rejectedStackSize, setRejectedStackSize] = useState(0);
   const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => new Set());
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -179,8 +180,18 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       next.delete(previous.id);
       return next;
     });
-    requestAnimationFrame(() => goToIndex(previous.index));
-  }, [goToIndex]);
+    pendingUndoIndexRef.current = previous.index;
+  }, []);
+
+  // Vänta tills den återställda kandidaten finns i virtualizerns underlag innan
+  // vi flyttar tillbaka. Det gör även ångra av listans sista kandidat stabilt.
+  useEffect(() => {
+    const pendingIndex = pendingUndoIndexRef.current;
+    if (pendingIndex === null || pendingIndex >= visibleApplications.length) return;
+    pendingUndoIndexRef.current = null;
+    setCurrentIndex(pendingIndex);
+    requestAnimationFrame(() => virtualizer.scrollToIndex(pendingIndex, { align: 'start', behavior: 'smooth' }));
+  }, [visibleApplications.length, virtualizer]);
 
   const handleActionReject = useCallback(() => {
     activeCardSwipeRef.current?.('left');
@@ -224,6 +235,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   useEffect(() => {
     if (open) return;
     rejectedStackRef.current = [];
+    pendingUndoIndexRef.current = null;
     setRejectedStackSize(0);
     setRejectedIds(new Set());
   }, [open]);
