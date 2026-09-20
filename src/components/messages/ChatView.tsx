@@ -1027,7 +1027,7 @@ export function ChatView({
       <ScrollArea
         ref={scrollAreaRef}
         className={cn(
-          "flex-1 px-4 pt-4 pb-1 no-chrome-pad",
+          "flex-1 p-4 no-chrome-pad",
           messages.length > 0 && !isInitialScrollReady && "opacity-0"
         )}
         onScrollCapture={handleScroll}
@@ -1147,7 +1147,7 @@ export function ChatView({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="px-4 py-1 border-t border-white/5"
+            className="px-4 py-2 border-t border-white/5"
             role="status"
             aria-label="Den andra personen skriver"
           >
@@ -1215,7 +1215,7 @@ export function ChatView({
       )}
 
       {/* Input */}
-      <div className="px-4 pt-2 pb-3 border-t border-white/10 flex-shrink-0">
+      <div className="p-4 border-t border-white/10 flex-shrink-0">
         <div className="flex items-end gap-2">
           {/* File attach button - hidden during edit */}
           {!editingMessageId && (

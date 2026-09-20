@@ -152,31 +152,9 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
   }, [applications.length, virtualizer]);
 
-  // Ångra-stack: index vi svepte bort ifrån. Knappen ligger alltid kvar.
-  const undoStackRef = useRef<number[]>([]);
-  const [canUndo, setCanUndo] = useState(false);
-
   const handleSkip = useCallback(() => {
-    undoStackRef.current = [...undoStackRef.current, currentIndex].slice(-50);
-    setCanUndo(true);
     goToIndex(currentIndex + 1);
   }, [currentIndex, goToIndex]);
-
-  const handleUndo = useCallback(() => {
-    const stack = undoStackRef.current;
-    if (stack.length === 0) return;
-    const target = stack[stack.length - 1];
-    undoStackRef.current = stack.slice(0, -1);
-    setCanUndo(undoStackRef.current.length > 0);
-    goToIndex(target);
-  }, [goToIndex]);
-
-  useEffect(() => {
-    if (!open) {
-      undoStackRef.current = [];
-      setCanUndo(false);
-    }
-  }, [open]);
 
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
@@ -346,8 +324,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onSave={() => onSaveCandidate?.(currentApplication)}
                 onSkip={handleActionSkip}
                 onOpenInfo={() => onOpenFullProfile(currentApplication)}
-                canUndo={canUndo}
-                onUndo={handleUndo}
               />
             </div>
           </div>

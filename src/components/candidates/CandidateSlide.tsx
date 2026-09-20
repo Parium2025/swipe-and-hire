@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useRef } from 'react';
-import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
+import { animate, motion, useMotionValue } from 'framer-motion';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
@@ -31,7 +31,6 @@ export const CandidateSlide = memo(function CandidateSlide({
 }: CandidateSlideProps) {
 
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-320, 0, 320], [-7, 0, 7]);
   const exitOpacity = useMotionValue(1);
   const suppressOpenRef = useRef(false);
   const exitTimerRef = useRef<number | null>(null);
@@ -67,37 +66,11 @@ export const CandidateSlide = memo(function CandidateSlide({
     if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
   }, []);
 
+  // Kortet får medvetet INTE dras i sidled. Endast vertikal scroll/swipe
+  // mellan kandidater är tillåtet; hoppa över sker via knappen.
   const handleOpen = useCallback(() => {
     if (!suppressOpenRef.current) onOpenFullProfile();
   }, [onOpenFullProfile]);
-
-  // Svep vänster = hoppa över, svep höger = visa all info. Vertikal scroll
-  // mellan kandidater påverkas inte (riktningslås + pan-y).
-  const handleDragEnd = useCallback((
-    _event: unknown,
-    info: { offset: { x: number }; velocity: { x: number } },
-  ) => {
-    const { offset, velocity } = info;
-    const goLeft = offset.x < -110 || velocity.x < -650;
-    const goRight = offset.x > 110 || velocity.x > 650;
-
-    if (goLeft) {
-      commitSkip();
-      return;
-    }
-
-    if (goRight) {
-      suppressOpenRef.current = true;
-      hapticMedium();
-      animate(x, 0, { type: 'spring', stiffness: 320, damping: 30 });
-      onOpenFullProfile();
-      window.setTimeout(() => { suppressOpenRef.current = false; }, 250);
-      return;
-    }
-
-    animate(x, 0, { type: 'spring', stiffness: 320, damping: 30 });
-    window.setTimeout(() => { suppressOpenRef.current = false; }, 80);
-  }, [commitSkip, onOpenFullProfile, x]);
 
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
   const videoUrl = useMediaUrl(application.video_url, 'profile-video');
@@ -130,14 +103,7 @@ export const CandidateSlide = memo(function CandidateSlide({
         <motion.div
           data-candidate-swipe-card
           className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
-          style={{ x, rotate, opacity: exitOpacity, touchAction: 'pan-y' }}
-          drag="x"
-          dragDirectionLock
-          dragMomentum={false}
-          dragElastic={0.85}
-          dragConstraints={{ left: 0, right: 0 }}
-          onDragStart={() => { suppressOpenRef.current = true; }}
-          onDragEnd={handleDragEnd}
+          style={{ x, opacity: exitOpacity, touchAction: 'pan-y' }}
           onContextMenuCapture={(event) => event.preventDefault()}
           onDragStartCapture={(event) => event.preventDefault()}
         >

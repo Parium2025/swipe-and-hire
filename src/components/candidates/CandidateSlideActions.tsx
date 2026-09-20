@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Bookmark, Info, RotateCcw, X } from 'lucide-react';
+import { Bookmark, Info, X } from 'lucide-react';
 import { hapticLight } from '@/lib/haptics';
 
 interface CandidateSlideActionsProps {
@@ -7,26 +7,20 @@ interface CandidateSlideActionsProps {
   onSave: () => void;
   onSkip: () => void;
   onOpenInfo: () => void;
-  canUndo: boolean;
-  onUndo: () => void;
 }
 
 /**
  * Åtgärdsrad i arbetsgivarens swipe-läge — samma form, storlek och känsla som
- * jobbsökarens [✕] [🔖] [ℹ] [↺], men med kandidatens åtgärder:
- * hoppa över, spara i lista, visa all info och ångra senaste svep.
+ * jobbsökarens [✕] [🔖] [❤] [↺], men med kandidatens åtgärder:
+ * hoppa över, spara i lista och visa all info.
  *
- * Knapparna är alltid monterade så raden aldrig hoppar. Spara går alltid att
- * trycka på — även för en redan sparad kandidat — så listväljaren kan öppnas
- * igen och kandidaten flyttas eller läggas i fler listor.
+ * Knapparna är alltid monterade så raden aldrig hoppar.
  */
 export const CandidateSlideActions = memo(function CandidateSlideActions({
   saved,
   onSave,
   onSkip,
   onOpenInfo,
-  canUndo,
-  onUndo,
 }: CandidateSlideActionsProps) {
   return (
     <div className="flex items-center justify-center gap-4">
@@ -46,16 +40,20 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
 
       <button
         type="button"
-        aria-label={saved ? 'Kandidaten är sparad — hantera listor' : 'Spara kandidaten i en lista'}
+        aria-label={saved ? 'Kandidaten finns redan i en lista' : 'Spara kandidaten i en lista'}
         aria-pressed={saved}
+        aria-disabled={saved}
         onPointerDown={(e) => {
           e.stopPropagation();
+          if (saved) return;
           hapticLight();
           onSave();
         }}
         onClick={(e) => e.preventDefault()}
         data-swipe-action-button
-        className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 transition-transform touch-manipulation active:scale-[0.93]"
+        className={`w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 transition-transform touch-manipulation ${
+          saved ? 'opacity-60' : 'active:scale-[0.93]'
+        }`}
       >
         <Bookmark
           className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`}
@@ -77,24 +75,6 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         <Info className="w-6 h-6 text-white" strokeWidth={2.25} />
       </button>
 
-      <button
-        type="button"
-        aria-label="Ångra senaste svep"
-        aria-disabled={!canUndo}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          if (!canUndo) return;
-          hapticLight();
-          onUndo();
-        }}
-        onClick={(e) => e.preventDefault()}
-        data-swipe-action-button
-        className={`w-[52px] h-[52px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-transform touch-manipulation ${
-          canUndo ? 'active:scale-[0.93]' : 'opacity-40'
-        }`}
-      >
-        <RotateCcw className="w-6 h-6 text-white" strokeWidth={2.25} />
-      </button>
     </div>
   );
 });
