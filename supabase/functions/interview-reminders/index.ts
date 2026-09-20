@@ -390,26 +390,38 @@ Deno.serve(async (req) => {
           }
         };
 
-        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på.
+        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på –
+        // och inte heller då om kandidatens eget Google-larm redan ligger på
+        // exakt 10 minuter (dubbelping samma minut).
         const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id);
-        if (candidateReminderAllowed) {
+        const candidateGoogleCollides = candidateReminderAllowed
+          ? await collidesWithGoogleReminder(interview.applicant_id, 10)
+          : false;
+        if (candidateReminderAllowed && !candidateGoogleCollides) {
           await notifyBoth(
             interview.applicant_id,
             "Intervju om 10 minuter ⏰",
             `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
             "/my-applications",
           );
+        } else if (candidateGoogleCollides) {
+          console.log(`Candidate reminder skipped – Google påminner redan 10 min före (kandidat ${interview.applicant_id})`);
         } else {
           console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
         }
 
-        // Arbetsgivaren påminns alltid om sin egen bokning.
-        await notifyBoth(
-          interview.employer_id,
-          "Intervju om 10 minuter ⏰",
-          `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
-          "/employer",
-        );
+        // Arbetsgivaren påminns alltid om sin egen bokning – med samma
+        // undantag: hennes eget Google-larm på exakt 10 minuter räcker.
+        if (await collidesWithGoogleReminder(interview.employer_id, 10)) {
+          console.log(`Employer reminder skipped – Google påminner redan 10 min före (arbetsgivare ${interview.employer_id})`);
+        } else {
+          await notifyBoth(
+            interview.employer_id,
+            "Intervju om 10 minuter ⏰",
+            `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+            "/employer",
+          );
+        }
 
       }
     } else {
