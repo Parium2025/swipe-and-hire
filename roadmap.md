@@ -1,1 +1,1 @@
-- [ ] Fix employer Swipe Mode final-card interactions, undo, and completed state
+- [x] Fix employer Swipe Mode final-card interactions, undo, and completed state
