@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
 import { sendInterviewRescheduleEmail } from "../_shared/interviewRescheduleEmail.ts";
+import { googleDefaultReminderCollides } from "../_shared/calendarSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,6 +91,23 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // Symbios med Google Kalender: om mottagarens eget Google-larm ligger på
+    // exakt samma antal minuter före intervjun som Pariums utskick hoppar vi
+    // över vårt – annars pinglas personen två gånger samma minut. Kollen är
+    // live (en ändring i Google slår igenom direkt) och fail-open: kan vi inte
+    // läsa Googles inställning skickar Parium alltid som vanligt.
+    // Resultatet cachas per körning så samma användare inte slås upp flera
+    // gånger i samma minutsvep.
+    const collisionCache = new Map<string, boolean>();
+    const collidesWithGoogleReminder = async (userId: string, leadMinutes: number): Promise<boolean> => {
+      const key = `${userId}:${leadMinutes}`;
+      const cached = collisionCache.get(key);
+      if (cached !== undefined) return cached;
+      const collides = await googleDefaultReminderCollides(userId, leadMinutes);
+      collisionCache.set(key, collides);
+      return collides;
+    };
+
     const queueInterviewTimelineDispatches = async (trigger: "interview_before" | "interview_after") => {
       const { data: automations, error: automationsError } = await supabase
         .from("outreach_automations")
@@ -165,6 +183,18 @@ Deno.serve(async (req) => {
           });
 
           if (alreadyQueued) continue;
+
+          // Före-intervju: kandidatens eget Google-larm på samma minutantal
+          // ersätter vårt utskick den här gången.
+          if (
+            trigger === "interview_before" &&
+            await collidesWithGoogleReminder(interview.applicant_id, Math.max(automation.delay_minutes ?? 0, 0))
+          ) {
+            console.log(
+              `interview_before skipped – Google påminner redan ${automation.delay_minutes} min före (kandidat ${interview.applicant_id})`,
+            );
+            continue;
+          }
 
           const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
             owner_user_id: automation.owner_user_id,
@@ -360,26 +390,38 @@ Deno.serve(async (req) => {
           }
         };
 
-        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på.
+        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på –
+        // och inte heller då om kandidatens eget Google-larm redan ligger på
+        // exakt 10 minuter (dubbelping samma minut).
         const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id);
-        if (candidateReminderAllowed) {
+        const candidateGoogleCollides = candidateReminderAllowed
+          ? await collidesWithGoogleReminder(interview.applicant_id, 10)
+          : false;
+        if (candidateReminderAllowed && !candidateGoogleCollides) {
           await notifyBoth(
             interview.applicant_id,
             "Intervju om 10 minuter ⏰",
             `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
             "/my-applications",
           );
+        } else if (candidateGoogleCollides) {
+          console.log(`Candidate reminder skipped – Google påminner redan 10 min före (kandidat ${interview.applicant_id})`);
         } else {
           console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
         }
 
-        // Arbetsgivaren påminns alltid om sin egen bokning.
-        await notifyBoth(
-          interview.employer_id,
-          "Intervju om 10 minuter ⏰",
-          `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
-          "/employer",
-        );
+        // Arbetsgivaren påminns alltid om sin egen bokning – med samma
+        // undantag: hennes eget Google-larm på exakt 10 minuter räcker.
+        if (await collidesWithGoogleReminder(interview.employer_id, 10)) {
+          console.log(`Employer reminder skipped – Google påminner redan 10 min före (arbetsgivare ${interview.employer_id})`);
+        } else {
+          await notifyBoth(
+            interview.employer_id,
+            "Intervju om 10 minuter ⏰",
+            `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+            "/employer",
+          );
+        }
 
       }
     } else {
