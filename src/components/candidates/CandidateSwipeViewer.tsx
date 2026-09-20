@@ -109,18 +109,16 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open]);
 
   const hasEndSection = applications.length > 0;
-  const virtualizer = useVirtualizer({
-    count: applications.length + (hasEndSection ? 1 : 0),
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => slideHeight,
-    overscan: 2,
-    getItemKey: (index) => applications[index]?.id || 'candidate-swipe-complete',
-  });
 
-  // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
-  useEffect(() => {
-    virtualizer.measure();
-  }, [slideHeight, virtualizer]);
+  /** Positionen för ett kort — läses direkt från DOM, precis som jobbsökarens svep. */
+  const getSlideTop = useCallback((idx: number) => {
+    const container = scrollRef.current;
+    const el = idx === applications.length ? endSectionRef.current : slideRefs.current[idx];
+    if (!container || !el) return null;
+    const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+    return Math.min(Math.max(el.offsetTop, 0), maxScrollTop);
+  }, [applications.length]);
+
 
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
