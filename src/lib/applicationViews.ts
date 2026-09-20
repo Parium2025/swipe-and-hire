@@ -45,3 +45,19 @@ export async function fetchMyApplicationViews(
   }
   return result;
 }
+
+/**
+ * Väljer rätt läst-källa för en ansökan: personlig markering på egna
+ * annonser, delad `viewed_at` på kollegors annonser.
+ */
+export function resolveApplicationViewedAt(
+  app: { viewed_at?: string | null; job_postings?: { employer_id?: string | null } | null } | null | undefined,
+  myViews: Map<string, string>,
+  userId: string,
+  applicationId: string,
+): string | null {
+  if (app?.job_postings?.employer_id === userId) {
+    return myViews.get(applicationId) ?? null;
+  }
+  return app?.viewed_at ?? null;
+}
