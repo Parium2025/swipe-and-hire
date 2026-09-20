@@ -2,7 +2,7 @@ import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransitio
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -55,6 +55,23 @@ type JobStatusTab = 'active' | 'expired' | 'draft';
 // `__searchJobsHasMountedOnce` på job-seeker-sidan exakt.
 let __employerDashboardHasMountedOnce = false;
 
+/**
+ * Räknar kandidater som automatiskt får besked när en annons avslutas.
+ * Spegling av `enqueue_outreach_dispatch` — anställda och redan avslagna
+ * räknas aldrig med. Körs via React Query så svaret kan förhämtas.
+ */
+const AUTO_NOTIFY_KEY = 'job-auto-notify-count';
+const fetchAutoNotifyCount = async (jobId: string): Promise<number | null> => {
+  const { count, error } = await supabase
+    .from('job_applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('job_id', jobId)
+    .is('rejected_at', null)
+    .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
+  if (error) return null;
+  return count ?? 0;
+};
+
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,10 +100,20 @@ const EmployerDashboard = memo(() => {
   const [deletingJob, setDeletingJob] = useState(false);
   // Kortet som just nu tonar ut — listan uppdateras först när animationen är klar.
   const [removingJobId, setRemovingJobId] = useState<string | null>(null);
+  // Kortet som just fyllts på i listan efter en borttagning — tonar in.
+  const [enteringIds, setEnteringIds] = useState<Set<string>>(() => new Set());
+  const prevPageIdsRef = useRef<string[]>([]);
+  const expectEnterRef = useRef(false);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
-  // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
-  // samma regel som databasens utskickstrigger använder.
-  const [autoNotifyCount, setAutoNotifyCount] = useState<number | null>(null);
+  // Förhämtas för sidans annonser, så rutan är ifylld direkt vid klick.
+  const { data: autoNotifyData } = useQuery({
+    queryKey: [AUTO_NOTIFY_KEY, jobToDelete?.id],
+    queryFn: () => fetchAutoNotifyCount(jobToDelete!.id),
+    enabled: !!jobToDelete?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+  const autoNotifyCount = autoNotifyData ?? null;
 
 
   const [editRepublishMode, setEditRepublishMode] = useState(false);
