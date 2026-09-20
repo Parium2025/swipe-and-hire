@@ -213,6 +213,10 @@ const AnimatedRoutes = () => {
     <>
       <ScrollRestoration />
       <Suspense fallback={<LazyFallback />}>
+        {/* Subtil fade-in vid sidbyte (endast mobil, se index.css .route-fade).
+            key={pathname} startar om animationen vid varje navigering — samma
+            mönster som iOS, där nästa vy bleker in efter att menyn glidit undan. */}
+        <div key={location.pathname} className="route-fade">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/jobbsokare" element={<AudienceLanding key="job_seeker" audience="job_seeker" />} />
@@ -282,6 +286,7 @@ const AnimatedRoutes = () => {
           
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </div>
       </Suspense>
     </>
   );
