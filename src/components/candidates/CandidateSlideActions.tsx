@@ -51,20 +51,16 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
 
       <button
         type="button"
-        aria-label={saved ? 'Kandidaten finns redan i en lista' : 'Spara kandidaten i en lista'}
+        aria-label={saved ? 'Hantera kandidatens listor' : 'Spara kandidaten i en lista'}
         aria-pressed={saved}
-        aria-disabled={saved}
         onPointerDown={(e) => {
           e.stopPropagation();
-          if (saved) return;
           hapticLight();
           onSave();
         }}
         onClick={(e) => e.preventDefault()}
         data-swipe-action-button
-        className={`w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 transition-transform touch-manipulation ${
-          saved ? 'opacity-60' : 'active:scale-[0.93]'
-        }`}
+        className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 transition-transform touch-manipulation active:scale-[0.93]"
       >
         <Bookmark
           className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`}

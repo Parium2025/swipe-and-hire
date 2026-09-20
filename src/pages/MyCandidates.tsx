@@ -34,6 +34,7 @@ import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
 import { useCandidateLists, useActiveCandidateList, useTeamCandidateLists } from '@/hooks/useCandidateLists';
 import { CandidateListsDialog } from '@/pages/myCandidates/CandidateListsDialog';
+import { AddToColleagueListDialog } from '@/components/AddToColleagueListDialog';
 import { 
   UserCheck,
   Plus,
@@ -229,6 +230,7 @@ const MyCandidates = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [candidateToRemove, setCandidateToRemove] = useState<MyCandidateData | null>(null);
+  const [swipeSaveCandidate, setSwipeSaveCandidate] = useState<ApplicationData | null>(null);
 
   // Swipe viewer state — continuous scroll navigation
   const [swipeViewerOpen, setSwipeViewerOpen] = useState(false);
@@ -820,7 +822,7 @@ const MyCandidates = () => {
     return allCandidatesAsAppData;
   }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData, swipeCriteriaEnabled, swipeCriteriaFilter]);
 
-  // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och låst.
+  // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och öppnar hanteringen.
   const swipeSavedApplicantIds = useMemo(
     () => new Set(swipeApplicationsData.map(a => a.applicant_id)),
     [swipeApplicationsData],
@@ -1100,6 +1102,21 @@ const MyCandidates = () => {
             handleRemoveCandidate(original);
           }
         }}
+        onSaveCandidate={isViewingColleague ? undefined : (app) => setSwipeSaveCandidate(app)}
+      />
+
+      {/* Hantera kandidatens listor från svepläget */}
+      <AddToColleagueListDialog
+        open={!!swipeSaveCandidate}
+        onOpenChange={(o) => { if (!o) setSwipeSaveCandidate(null); }}
+        teamMembers={teamMembers}
+        applicationId={swipeSaveCandidate?.id}
+        applicantId={swipeSaveCandidate?.applicant_id}
+        jobId={swipeSaveCandidate?.job_id ?? undefined}
+        elevated
+        canRemoveFromOwnList={Boolean(swipeSaveCandidate && swipeSavedApplicantIds.has(swipeSaveCandidate.applicant_id))}
+        candidateName={`${swipeSaveCandidate?.first_name || ''} ${swipeSaveCandidate?.last_name || ''}`.trim() || 'Kandidat'}
+        onAdded={() => setSwipeSaveCandidate(null)}
       />
 
       {/* Candidate Profile Dialog */}

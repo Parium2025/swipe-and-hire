@@ -869,7 +869,7 @@ const JobDetails = () => {
           fromSwipe={returnToSwipe}
           enableJobRejection
           onAddToList={
-            selectedApplication && !savedApplicantIds.has(selectedApplication.applicant_id)
+            selectedApplication
               ? () => setSwipeSaveCandidate(mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb'))
               : undefined
           }
@@ -904,6 +904,7 @@ const JobDetails = () => {
           applicantId={swipeSaveCandidate?.applicant_id}
           jobId={jobId}
           elevated
+          canRemoveFromOwnList={Boolean(swipeSaveCandidate && savedApplicantIds.has(swipeSaveCandidate.applicant_id))}
           candidateName={`${swipeSaveCandidate?.first_name || ''} ${swipeSaveCandidate?.last_name || ''}`.trim()}
           onAdded={() => {
             setSwipeSaveCandidate(null);
