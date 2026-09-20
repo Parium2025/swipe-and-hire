@@ -229,18 +229,21 @@ Deno.serve(async (req) => {
           );
 
           // Före-intervju: kandidatens eget Google-larm på samma minutantal
-          // ersätter vårt utskick den här gången.
-          if (
-            trigger === "interview_before" &&
-            await collidesWithGoogleReminder(interview.applicant_id, Math.max(automation.delay_minutes ?? 0, 0))
-          ) {
-            console.log(
-              `interview_before skipped – Google påminner redan ${automation.delay_minutes} min före (kandidat ${interview.applicant_id})`,
+          // ersätter vårt LARM (push) – men chatt/mejl finns kvar, annars
+          // försvinner själva meddelandet ur tråden.
+          const googleCollides = trigger === "interview_before"
+            && await collidesWithGoogleReminder(
+              interview.applicant_id,
+              Math.max(automation.delay_minutes ?? 0, 0),
             );
-            continue;
+          if (googleCollides) {
+            console.log(
+              `interview_before push skipped – Google påminner redan ${automation.delay_minutes} min före (kandidat ${interview.applicant_id})`,
+            );
           }
 
-          const channels = await candidateChannels(interview.applicant_id);
+          const channels = (await candidateChannels(interview.applicant_id))
+            .filter((channel) => !(googleCollides && channel === "push"));
 
           for (const channel of channels) {
             if (alreadyQueuedChannels.has(channel)) continue;
