@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { removeApplicantMembershipCacheEntry } from '@/lib/applicantMembershipCache';
+import { addApplicantMembershipCacheEntry, removeApplicantMembershipCacheEntry } from '@/lib/applicantMembershipCache';
 
 export interface CandidateToAdd {
   applicationId: string;
