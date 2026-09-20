@@ -1,1 +1,1 @@
-- [ ] Make employer candidate info truly full-screen and keep undo available at the end of Swipe Mode
+- [x] Make employer candidate info truly full-screen and keep undo available at the end of Swipe Mode
