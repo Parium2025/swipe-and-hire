@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide, type CandidateSlideSwipeApi } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
@@ -58,8 +57,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
   const rejectedStackRef = useRef<Array<{ id: string; index: number }>>([]);
   const pendingUndoIndexRef = useRef<number | null>(null);
+  const undoEntryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [rejectedStackSize, setRejectedStackSize] = useState(0);
   const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => new Set());
+  const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const visibleApplications = useMemo(
     () => applications.filter((application) => !rejectedIds.has(application.id)),
@@ -181,6 +182,12 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       return next;
     });
     pendingUndoIndexRef.current = previous.index;
+    setUndoEntryApplicationId(previous.id);
+    if (undoEntryTimerRef.current) clearTimeout(undoEntryTimerRef.current);
+    undoEntryTimerRef.current = setTimeout(() => {
+      setUndoEntryApplicationId(null);
+      undoEntryTimerRef.current = null;
+    }, 700);
   }, []);
 
   // Vänta tills den återställda kandidaten finns i virtualizerns underlag innan
@@ -232,6 +239,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     }
   }, [open]);
 
+  useEffect(() => () => {
+    if (undoEntryTimerRef.current) clearTimeout(undoEntryTimerRef.current);
+  }, []);
+
   useEffect(() => {
     if (open) return;
     rejectedStackRef.current = [];
@@ -243,12 +254,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   if (!open) return null;
 
   return createPortal(
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+      <div
         className={`fixed inset-0 bg-parium-gradient ${behind ? 'z-[40] pointer-events-none' : 'z-[100]'}`}
         aria-hidden={behind || undefined}
       >
@@ -334,6 +340,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 isActive={item.index === currentIndex}
                 overlayOpen={behind}
+                isUndoEntry={app.id === undoEntryApplicationId}
                 onSwipeLeft={() => handleReject(item.index, app.id)}
                 onSwipeRight={() => onOpenFullProfile(app)}
                 onRegisterSwipeApi={registerActiveSwipeApi}
@@ -364,8 +371,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </div>
         )}
 
-      </motion.div>
-    </AnimatePresence>,
+      </div>,
     document.body
   );
 });

@@ -1,3 +1,16 @@
+@keyframes candidate-swipe-sheet-in {
+  0% { transform: translate3d(0, 100%, 0); }
+  45% { transform: translate3d(0, 6%, 0); }
+  72% { transform: translate3d(0, -1.2%, 0); }
+  88% { transform: translate3d(0, 0.35%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="candidate-swipe-sheet-in"] {
+    animation: none !important;
+  }
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

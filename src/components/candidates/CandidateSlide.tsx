@@ -1,5 +1,7 @@
 import { memo, useEffect } from 'react';
+import { Info, X } from 'lucide-react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { useInputCapability } from '@/hooks/useInputCapability';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
@@ -11,6 +13,7 @@ import {
   UNDERLAY_INITIAL_SCALE,
   UNDERLAY_INITIAL_Y,
 } from '@/components/swipe/jobSlide/constants';
+import { useUndoEntryAnimation } from '@/components/swipe/jobSlide/useUndoEntryAnimation';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
 export interface CandidateSlideSwipeApi {
@@ -26,6 +29,7 @@ interface CandidateSlideProps {
   isVisible: boolean;
   isActive: boolean;
   overlayOpen?: boolean;
+  isUndoEntry?: boolean;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
   /** Bakåtkompatibel alias för vänstersvep. */
@@ -42,17 +46,36 @@ export const CandidateSlide = memo(function CandidateSlide({
   isVisible,
   isActive,
   overlayOpen,
+  isUndoEntry,
   onSwipeLeft,
   onSwipeRight,
   onSkip,
   onRegisterSwipeApi,
   criteria,
 }: CandidateSlideProps) {
-
+  const inputCapability = useInputCapability();
+  const useTouchTunnel = inputCapability !== 'mouse';
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
+  const entryScale = useMotionValue(1);
+  const infoDragOpacity = useTransform(x, [0, 20, 90], [0, 0.65, 1]);
+  const rejectDragOpacity = useTransform(x, [-90, -20, 0], [1, 0.65, 0]);
+  const infoOpacity = useTransform(
+    [infoDragOpacity, exitOpacity],
+    ([opacity, exit]) => (opacity as number) * (exit as number) * (exit as number),
+  );
+  const rejectOpacity = useTransform(
+    [rejectDragOpacity, exitOpacity],
+    ([opacity, exit]) => (opacity as number) * (exit as number) * (exit as number),
+  );
+  const infoScale = useTransform(x, [0, 90], [0.86, 1]);
+  const rejectScale = useTransform(x, [-90, 0], [1, 0.86]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.98, 1, 0.98]);
+  const combinedScale = useTransform(
+    [cardScale, entryScale],
+    ([dragScale, undoScale]) => (dragScale as number) * (undoScale as number),
+  );
   const underlayY = useMotionValue(UNDERLAY_INITIAL_Y);
   const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
   const underlayOpacity = useMotionValue(UNDERLAY_INITIAL_OPACITY);
@@ -72,7 +95,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     handleTouchEndCapture,
     handleTouchCancelCapture,
   } = useSwipeCardGesture({
-    useTouchTunnel: true,
+    useTouchTunnel,
     overlayOpen,
     showTapHint: false,
     x,
@@ -86,6 +109,8 @@ export const CandidateSlide = memo(function CandidateSlide({
     onTapCompany: () => undefined,
     clearTapHint: () => undefined,
   });
+
+  useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
 
   useEffect(() => {
     if (!onRegisterSwipeApi || !isActive) return;
@@ -132,7 +157,18 @@ export const CandidateSlide = memo(function CandidateSlide({
         <motion.div
           data-candidate-swipe-card
           className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
-          style={{ x, opacity: exitOpacity, rotate: cardRotate, scale: cardScale, touchAction: 'pan-y' }}
+          style={{
+            x,
+            opacity: exitOpacity,
+            rotate: cardRotate,
+            scale: combinedScale,
+            touchAction: useTouchTunnel ? 'pan-y' : 'auto',
+          }}
+          drag={useTouchTunnel ? false : 'x'}
+          dragDirectionLock={!useTouchTunnel}
+          dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
+          dragElastic={useTouchTunnel ? undefined : 0.18}
+          onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
           onTouchStartCapture={handleTouchStartCapture}
           onTouchMoveCapture={handleTouchMoveCapture}
           onTouchEndCapture={handleTouchEndCapture}
@@ -155,6 +191,52 @@ export const CandidateSlide = memo(function CandidateSlide({
             criteria={criteria}
           />
         </motion.div>
+
+        {isActive && !overlayOpen && (
+          <>
+            <motion.div
+              className="absolute inset-0 z-40 pointer-events-none flex items-center justify-start will-change-[opacity]"
+              style={{ opacity: infoOpacity }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/40 via-emerald-400/12 to-transparent rounded-2xl" />
+              <motion.div
+                style={{ scale: infoScale }}
+                className="relative flex flex-col items-center gap-3 pl-3 w-[46%] will-change-transform"
+              >
+                <div className="grid place-items-center h-20 w-20 rounded-full bg-emerald-500 ring-4 ring-white/30 shadow-[0_10px_28px_rgba(16,185,129,0.45)]">
+                  <Info className="h-9 w-9 text-white" strokeWidth={2.75} />
+                </div>
+                <div className="rounded-full border border-white/25 bg-black/70 px-4 py-1.5">
+                  <span className="text-white text-[13px] font-semibold tracking-[0.1em] uppercase">
+                    Visa profil
+                  </span>
+                </div>
+                <span className="text-white text-xs font-medium text-center">Släpp för kandidatinfo</span>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              className="absolute inset-0 z-40 pointer-events-none flex items-center justify-end will-change-[opacity]"
+              style={{ opacity: rejectOpacity }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-l from-red-500/40 via-red-500/12 to-transparent rounded-2xl" />
+              <motion.div
+                style={{ scale: rejectScale }}
+                className="relative flex flex-col items-center gap-3 pr-3 w-[46%] will-change-transform"
+              >
+                <div className="grid place-items-center h-20 w-20 rounded-full bg-red-500 ring-4 ring-white/30 shadow-[0_10px_28px_rgba(239,68,68,0.45)]">
+                  <X className="h-9 w-9 text-white" strokeWidth={2.75} />
+                </div>
+                <div className="rounded-full border border-white/25 bg-black/70 px-4 py-1.5">
+                  <span className="text-white text-[13px] font-semibold tracking-[0.1em] uppercase">
+                    Neka
+                  </span>
+                </div>
+                <span className="text-white text-xs font-medium text-center">Släpp för nästa kandidat</span>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
 
       </div>
     </div>
