@@ -57,6 +57,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const skippedStackRef = useRef<string[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -105,6 +107,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   useEffect(() => {
     if (!open) {
       didInitialScrollRef.current = false;
+      skippedStackRef.current = [];
+      setCanUndo(false);
       return;
     }
     if (behind || didInitialScrollRef.current) return;
@@ -153,8 +157,24 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [applications.length, virtualizer]);
 
   const handleSkip = useCallback(() => {
+    if (currentIndex >= applications.length - 1) return;
+    const current = applications[currentIndex];
+    if (current) {
+      skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);
+      setCanUndo(true);
+    }
     goToIndex(currentIndex + 1);
-  }, [currentIndex, goToIndex]);
+  }, [applications, currentIndex, goToIndex]);
+
+  const handleUndo = useCallback(() => {
+    const stack = skippedStackRef.current;
+    const applicationId = stack[stack.length - 1];
+    if (!applicationId) return;
+    const restoredIndex = applications.findIndex((application) => application.id === applicationId);
+    skippedStackRef.current = stack.slice(0, -1);
+    setCanUndo(skippedStackRef.current.length > 0);
+    if (restoredIndex >= 0) goToIndex(restoredIndex);
+  }, [applications, goToIndex]);
 
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
@@ -321,9 +341,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             <div className="pointer-events-auto flex justify-center">
               <CandidateSlideActions
                 saved={savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
+                canUndo={canUndo}
                 onSave={() => onSaveCandidate?.(currentApplication)}
                 onSkip={handleActionSkip}
                 onOpenInfo={() => onOpenFullProfile(currentApplication)}
+                onUndo={handleUndo}
               />
             </div>
           </div>
