@@ -81,6 +81,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
   const underlayOpacity = useMotionValue(UNDERLAY_INITIAL_OPACITY);
   const suppressOpenRef = useRef(false);
+  const gestureCommittedRef = useRef(false);
   const exitTimerRef = useRef<number | null>(null);
   const thresholdHapticFiredRef = useRef(false);
   const touchRef = useRef<{ startX: number; startY: number; startTime: number; dragging: boolean; cancelled: boolean } | null>(null);
@@ -89,7 +90,8 @@ export const CandidateSlide = memo(function CandidateSlide({
 
 
   const commitSkip = useCallback(() => {
-    if (exitTimerRef.current !== null) return;
+    if (gestureCommittedRef.current || exitTimerRef.current !== null) return;
+    gestureCommittedRef.current = true;
     suppressOpenRef.current = true;
     hapticMedium();
     animate(x, -EXIT_X, EXIT_SPRING);
@@ -104,15 +106,20 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [exitOpacity, onSkip, underlayOpacity, underlayScale, underlayY, x]);
 
   const openFromSwipe = useCallback(() => {
+    if (gestureCommittedRef.current) return;
+    gestureCommittedRef.current = true;
     suppressOpenRef.current = true;
     hapticMedium();
     animate(x, 0, SNAP_SPRING);
     onOpenFullProfile();
-    window.setTimeout(() => { suppressOpenRef.current = false; }, 160);
+    window.setTimeout(() => {
+      suppressOpenRef.current = false;
+      gestureCommittedRef.current = false;
+    }, 160);
   }, [onOpenFullProfile, x]);
 
   const handleTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!isActive || event.touches.length !== 1) return;
+    if (!isActive || gestureCommittedRef.current || event.touches.length !== 1) return;
     if (event.target instanceof Element && event.target.closest('button, a, input, textarea, select, [role="button"], [data-swipe-action-button]')) return;
     const touch = event.touches[0];
     touchRef.current = {
@@ -165,13 +172,19 @@ export const CandidateSlide = memo(function CandidateSlide({
       return;
     }
     animate(x, 0, SNAP_SPRING);
-    window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
+    window.setTimeout(() => {
+      suppressOpenRef.current = false;
+      gestureCommittedRef.current = false;
+    }, 120);
   }, [commitSkip, openFromSwipe, x]);
 
   const handleTouchCancel = useCallback(() => {
     touchRef.current = null;
     animate(x, 0, SNAP_SPRING);
-    window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
+    window.setTimeout(() => {
+      suppressOpenRef.current = false;
+      gestureCommittedRef.current = false;
+    }, 120);
   }, [x]);
 
   const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
