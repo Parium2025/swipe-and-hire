@@ -40,7 +40,7 @@ export async function hydrateMyCandidateRows(
   const applicantIds = [...new Set(rows.map(r => r.applicant_id))];
 
   // Ansökningarna (fryst ögonblicksbild) + media + aktivitet hämtas parallellt.
-  const [appsRes, mediaRes, activityRes, ratingsRes] = await Promise.all([
+  const [appsRes, mediaRes, activityRes, ratingsRes, myViews] = await Promise.all([
     supabase.from('job_applications').select(APPLICATION_FIELDS).in('id', applicationIds),
     supabase.rpc('get_applicant_profile_media_batch', {
       p_applicant_ids: applicantIds,
