@@ -157,7 +157,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       applied_at,
       updated_at,
       viewed_at,
-      job_postings!inner(title, occupation)
+      job_postings!inner(title, occupation, employer_id)
     `)
     .order('applied_at', { ascending: false })
     .range(0, PAGE_SIZE - 1);
