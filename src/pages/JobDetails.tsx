@@ -317,11 +317,7 @@ const JobDetails = () => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
     
     try {
-      await supabase
-        .from('job_applications')
-        .update({ viewed_at: new Date().toISOString() })
-        .eq('id', applicationId)
-        .is('viewed_at', null);
+      await markApplicationViewedForMe(applicationId);
     } catch (error) {
       console.error('Error marking as viewed:', error);
     }

@@ -1193,13 +1193,7 @@ export function useMyCandidatesData(
       // Session shadow — instant + survives any later refetch race
       markViewedInSession(applicationId);
 
-      const { error } = await supabase
-        .from('job_applications')
-        .update({ viewed_at: new Date().toISOString() })
-        .eq('id', applicationId)
-        .is('viewed_at', null);
-
-      if (error) throw error;
+      await markApplicationViewedForMe(applicationId);
     },
     onMutate: async (applicationId) => {
       // Optimistic update (paginated structure)
