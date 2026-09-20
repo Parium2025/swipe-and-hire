@@ -120,6 +120,13 @@
       "when": 1789906297195,
       "tag": "0016_own_jobs_per_viewer_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789906455690,
+      "tag": "0017_application_views_realtime",
+      "breakpoints": true
     }
   ]
 }
