@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef, startTransition } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ApplicationData } from '@/hooks/useApplicationsData';
@@ -1051,7 +1051,11 @@ export function CandidatesTable({
           const idx = sortedApplications.findIndex(a => a.id === app.id);
           if (idx >= 0) setSwipeIndex(idx);
           setReturnToSwipe(true);
-          handleRowClick(app);
+          // Vänta en bildruta och montera den tunga profilen som låg
+          // prioritet, så svepets animation aldrig tappar ramar.
+          requestAnimationFrame(() => {
+            startTransition(() => handleRowClick(app));
+          });
         }}
         getDisplayRating={getDisplayRating}
         savedApplicantIds={swipeSavedApplicantIds}
