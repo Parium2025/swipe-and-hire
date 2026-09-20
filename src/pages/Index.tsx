@@ -251,7 +251,7 @@ const CandidatesContent = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="relative space-y-2">
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 <QuestionFilter 
                   value={questionFilters}
@@ -281,7 +281,7 @@ const CandidatesContent = () => {
 
               {/* Swipe-läge på egen rad så knappen alltid är exakt centrerad */}
               {canSwipe && safeApplications.length > 0 && (
-                <div className="flex justify-center">
+                <div className="flex justify-center pt-4">
                   <button
                     disabled={isBusy}
                     onClick={() => setSwipeOpen(true)}
@@ -304,7 +304,8 @@ const CandidatesContent = () => {
                   />
                 </div>
               )}
-              <div className="flex h-5 items-center justify-center" aria-live="polite">
+              {/* Absolut positionerad så indikatorn aldrig påverkar avstånden runt Swipe-läge-knappen */}
+              <div className="pointer-events-none absolute inset-x-0 top-full mt-2 flex h-5 items-center justify-center" aria-live="polite">
                 {showSearchBusy && (
                   <div className="flex items-center gap-2 text-xs text-white">
                     <span aria-hidden="true" className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
