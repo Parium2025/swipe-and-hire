@@ -96,6 +96,7 @@ export const CandidateSlide = memo(function CandidateSlide({
     }
 
     animate(x, 0, { type: 'spring', stiffness: 320, damping: 30 });
+    window.setTimeout(() => { suppressOpenRef.current = false; }, 80);
   }, [commitSkip, onOpenFullProfile, x]);
 
   const profileImageUrl = useMediaUrl(application.profile_image_url, 'profile-image');
