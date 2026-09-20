@@ -142,8 +142,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (!applications[initialIndex]) return;
     didInitialScrollRef.current = true;
     setCurrentIndex(initialIndex);
-    requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
-  }, [open, behind, initialIndex, applications, virtualizer]);
+    requestAnimationFrame(() => {
+      const top = getSlideTop(initialIndex);
+      if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
+    });
+  }, [open, behind, initialIndex, applications, getSlideTop]);
 
 
   // Track current candidate via scroll position. Under ett programmerat byte
@@ -153,21 +156,31 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const container = scrollRef.current;
     if (!container) return;
 
+    const scrollTop = container.scrollTop;
     let bestIdx = currentIndexRef.current;
     let bestDistance = Infinity;
 
-    virtualizer.getVirtualItems().forEach((item) => {
-      const dist = Math.abs(item.start - container.scrollTop);
+    slideRefs.current.forEach((el, idx) => {
+      if (!el) return;
+      const dist = Math.abs(el.offsetTop - scrollTop);
       if (dist < bestDistance) {
         bestDistance = dist;
-        bestIdx = item.index;
+        bestIdx = idx;
       }
     });
+    const endEl = endSectionRef.current;
+    if (endEl) {
+      const dist = Math.abs(endEl.offsetTop - scrollTop);
+      if (dist < bestDistance) {
+        bestDistance = dist;
+        bestIdx = applications.length;
+      }
+    }
 
     const targetIndex = transitionTargetIndexRef.current;
     if (targetIndex !== null) {
-      const target = virtualizer.getVirtualItems().find((item) => item.index === targetIndex);
-      if (target && Math.abs(target.start - container.scrollTop) <= 2) {
+      const targetTop = getSlideTop(targetIndex);
+      if (targetTop !== null && Math.abs(targetTop - scrollTop) <= 2) {
         transitionTargetIndexRef.current = null;
         setCurrentIndex(targetIndex);
       }
@@ -178,7 +191,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
       onLoadMore?.();
     }
-  }, [applications.length, hasMore, isLoadingMore, onLoadMore, virtualizer]);
+  }, [applications.length, getSlideTop, hasMore, isLoadingMore, onLoadMore]);
 
   // iOS skickar scroll-events tätare än 60 Hz under momentum. Utan rAF-koalescering
   // körs index-beräkning + setState flera gånger per frame, vilket syns som hack
