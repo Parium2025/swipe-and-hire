@@ -29,6 +29,17 @@ import { readCachedOutreachTemplates, writeCachedOutreachTemplates } from '@/lib
 
 type ManualChannel = 'chat' | 'email' | 'push';
 
+/** Visar den faktiska orsaken i stället för ett tyst generiskt fel. */
+function describeSendError(error: unknown): string | undefined {
+  if (!error) return undefined;
+  if (typeof error === 'string') return error;
+  const err = error as { message?: string; details?: string; hint?: string; code?: string };
+  const parts = [err.message, err.details, err.hint].filter(Boolean) as string[];
+  if (parts.length === 0) return undefined;
+  const text = parts.join(' – ');
+  return err.code ? `${text} (${err.code})` : text;
+}
+
 const MANUAL_CHANNELS: Array<{ value: ManualChannel; label: string; icon: typeof MessageSquare }> = [
   { value: 'chat', label: 'Chat', icon: MessageSquare },
   { value: 'email', label: 'E-post', icon: Mail },
@@ -205,7 +216,9 @@ export function SendMessageDialog({
         }
       } catch (error) {
         console.error('Error sending message:', error);
-        toast.error('Kunde inte skicka meddelande');
+        toast.error('Kunde inte skicka meddelande', {
+          description: describeSendError(error),
+        } as Parameters<typeof toast.error>[1]);
       } finally {
         setSending(false);
       }
@@ -272,7 +285,9 @@ export function SendMessageDialog({
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Kunde inte skicka meddelande');
+      toast.error('Kunde inte skicka meddelande', {
+        description: describeSendError(error),
+      } as Parameters<typeof toast.error>[1]);
     } finally {
       setSending(false);
     }
