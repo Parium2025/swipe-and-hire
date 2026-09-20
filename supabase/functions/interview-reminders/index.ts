@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
 import { sendInterviewRescheduleEmail } from "../_shared/interviewRescheduleEmail.ts";
+import { googleDefaultReminderCollides } from "../_shared/calendarSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
