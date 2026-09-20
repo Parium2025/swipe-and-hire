@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, X } from 'lucide-react';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
