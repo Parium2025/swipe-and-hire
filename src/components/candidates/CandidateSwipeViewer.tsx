@@ -77,6 +77,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const endSectionRef = useRef<HTMLDivElement | null>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
   const transitionTargetIndexRef = useRef<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
