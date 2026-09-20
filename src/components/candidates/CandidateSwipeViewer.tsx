@@ -59,6 +59,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const skippedStackRef = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
+  const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
+  const undoEntryTimerRef = useRef<number | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -109,6 +111,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       didInitialScrollRef.current = false;
       skippedStackRef.current = [];
       setCanUndo(false);
+      setUndoEntryApplicationId(null);
       return;
     }
     if (behind || didInitialScrollRef.current) return;
@@ -173,8 +176,21 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const restoredIndex = applications.findIndex((application) => application.id === applicationId);
     skippedStackRef.current = stack.slice(0, -1);
     setCanUndo(skippedStackRef.current.length > 0);
-    if (restoredIndex >= 0) goToIndex(restoredIndex);
-  }, [applications, goToIndex]);
+    if (restoredIndex >= 0) {
+      setUndoEntryApplicationId(applicationId);
+      setCurrentIndex(restoredIndex);
+      virtualizer.scrollToIndex(restoredIndex, { align: 'start' });
+      if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
+      undoEntryTimerRef.current = window.setTimeout(() => {
+        undoEntryTimerRef.current = null;
+        setUndoEntryApplicationId(null);
+      }, 700);
+    }
+  }, [applications, virtualizer]);
+
+  useEffect(() => () => {
+    if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
+  }, []);
 
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
@@ -322,6 +338,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 isActive={item.index === currentIndex}
+                nextApplication={applications[item.index + 1]}
+                isUndoEntry={app.id === undoEntryApplicationId}
                 onSkip={handleSkip}
                 onRegisterSkip={registerActiveSkip}
 

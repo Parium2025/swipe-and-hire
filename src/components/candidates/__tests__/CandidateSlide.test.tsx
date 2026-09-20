@@ -89,6 +89,23 @@ describe('CandidateSlide employer swipe', () => {
     expect(onOpenFullProfile).toHaveBeenCalledTimes(1);
   });
 
+  it('visar samma röda och gröna dragfeedback som jobbsökarens swipe-läge', () => {
+    const { container, getByText } = render(
+      <CandidateSlide
+        application={application}
+        rating={0}
+        isVisible
+        isActive
+        onOpenFullProfile={vi.fn()}
+        onSkip={vi.fn()}
+      />,
+    );
+
+    expect(getByText('Visa info')).toBeTruthy();
+    expect(getByText('Hoppa över')).toBeTruthy();
+    expect(container.querySelector('[data-candidate-swipe-card]')).not.toBeNull();
+  });
+
   it('använder alltid helkortsläget och aldrig den runda profilvarianten', () => {
     const { getByTestId } = render(
       <CandidateSlide
