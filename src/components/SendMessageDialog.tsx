@@ -205,7 +205,9 @@ export function SendMessageDialog({
         }
       } catch (error) {
         console.error('Error sending message:', error);
-        toast.error('Kunde inte skicka meddelande');
+        toast.error('Kunde inte skicka meddelande', {
+          description: describeSendError(error),
+        } as Parameters<typeof toast.error>[1]);
       } finally {
         setSending(false);
       }
@@ -272,7 +274,9 @@ export function SendMessageDialog({
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Kunde inte skicka meddelande');
+      toast.error('Kunde inte skicka meddelande', {
+        description: describeSendError(error),
+      } as Parameters<typeof toast.error>[1]);
     } finally {
       setSending(false);
     }
