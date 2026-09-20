@@ -300,6 +300,8 @@ export function ChatView({
     const viewport = getViewportEl();
     if (!viewport) return;
 
+    messagesCountRef.current = messages.length;
+
     if (messages.length === 0 && !isLoading && viewport.clientHeight > 0) {
       setIsInitialScrollReady(true);
       return;
