@@ -184,6 +184,18 @@ Deno.serve(async (req) => {
 
           if (alreadyQueued) continue;
 
+          // Före-intervju: kandidatens eget Google-larm på samma minutantal
+          // ersätter vårt utskick den här gången.
+          if (
+            trigger === "interview_before" &&
+            await collidesWithGoogleReminder(interview.applicant_id, Math.max(automation.delay_minutes ?? 0, 0))
+          ) {
+            console.log(
+              `interview_before skipped – Google påminner redan ${automation.delay_minutes} min före (kandidat ${interview.applicant_id})`,
+            );
+            continue;
+          }
+
           const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
             owner_user_id: automation.owner_user_id,
             organization_id: automation.organization_id,
