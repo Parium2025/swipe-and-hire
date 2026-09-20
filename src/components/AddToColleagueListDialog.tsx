@@ -227,6 +227,7 @@ export function AddToColleagueListDialog({
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] }),
         queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] }),
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] }),
+        queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] }),
       ]);
       toast.success('Kandidat borttagen från din lista');
       setRemoveConfirmOpen(false);
