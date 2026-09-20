@@ -313,7 +313,6 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 nextApplication={item.index === currentIndex ? applications[item.index + 1] : undefined}
                 rating={getDisplayRating(app)}
                 onOpenFullProfile={() => onOpenFullProfile(app)}
-                onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 isActive={item.index === currentIndex}
                 overlayOpen={behind}

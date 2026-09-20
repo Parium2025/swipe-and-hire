@@ -58,13 +58,14 @@ describe('CandidateSlide employer swipe', () => {
   it('nekar kandidaten med vänstersvep och öppnar information med högersvep', () => {
     vi.useFakeTimers();
     const onSkip = vi.fn();
+    const onOpenFullProfile = vi.fn();
     const { container } = render(
       <CandidateSlide
         application={application}
         rating={0}
         isVisible
         isActive
-        onOpenFullProfile={vi.fn()}
+        onOpenFullProfile={onOpenFullProfile}
         onSkip={onSkip}
       />,
     );

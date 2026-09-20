@@ -38,6 +38,7 @@ interface CandidateSlideProps {
 export const CandidateSlide = memo(function CandidateSlide({
   application,
   nextApplication,
+  onOpenFullProfile,
   isVisible,
   isActive,
   overlayOpen,
