@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
+import { fetchMyApplicationViews } from '@/lib/applicationViews';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
@@ -215,6 +216,11 @@ export function useColleagueCandidates(
       // Create a map for quick lookup
       const appMap = new Map(applications?.map(app => [app.id, app]) || []);
 
+      // Läst-markeringen är personlig, inte delad med kollegorna.
+      const myViews = await fetchMyApplicationViews(applicationIds).catch(
+        () => new Map<string, string>(),
+      );
+
       // Fetch profile media for all applicants in ONE batch call (scales to millions)
       const applicantIds = [...new Set(myCandidates.map(mc => mc.applicant_id))];
       const profileMediaMap: Record<string, { profile_image_url: string | null; video_url: string | null; cover_image_url: string | null; is_profile_video: boolean | null }> = {};
@@ -313,7 +319,7 @@ export function useColleagueCandidates(
           cover_image_url: media.cover_image_url,
           is_profile_video: media.is_profile_video,
           applied_at: app?.applied_at || null,
-          viewed_at: app?.viewed_at || null,
+          viewed_at: myViews.get(mc.application_id) ?? null,
           latest_application_at: activity.latest_application_at,
           last_active_at: activity.last_active_at,
         };

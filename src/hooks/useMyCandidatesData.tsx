@@ -10,6 +10,7 @@ import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/u
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { markApplicationViewedForMe } from '@/lib/applicationViews';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
@@ -1193,13 +1194,7 @@ export function useMyCandidatesData(
       // Session shadow — instant + survives any later refetch race
       markViewedInSession(applicationId);
 
-      const { error } = await supabase
-        .from('job_applications')
-        .update({ viewed_at: new Date().toISOString() })
-        .eq('id', applicationId)
-        .is('viewed_at', null);
-
-      if (error) throw error;
+      await markApplicationViewedForMe(applicationId);
     },
     onMutate: async (applicationId) => {
       // Optimistic update (paginated structure)

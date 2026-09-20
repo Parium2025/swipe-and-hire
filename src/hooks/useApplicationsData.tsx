@@ -8,6 +8,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { fetchMyApplicationViews, markApplicationViewedForMe } from '@/lib/applicationViews';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export interface ApplicationData {
@@ -391,7 +392,7 @@ export const useApplicationsData = (
        // kö efter huvudsökningen, vilket höll uppdateringssignalen synlig onödigt länge.
        const ids = baseData.map((item: any) => item.id);
        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-       const [snapshotResult, mediaResult, activityResult, ratingsResult] = await Promise.all([
+       const [snapshotResult, mediaResult, activityResult, ratingsResult, myViews] = await Promise.all([
          ids.length > 0
            ? supabase
                .from('job_applications')
@@ -410,8 +411,11 @@ export const useApplicationsData = (
            .from('candidate_ratings')
            .select('applicant_id, rating')
            .eq('recruiter_id', user.id)
-           .in('applicant_id', applicantIds),
-       ]);
+            .in('applicant_id', applicantIds),
+          // Läst-markeringen är personlig: en kollega som öppnat kandidaten
+          // får inte nolla pricken för övriga i teamet.
+          fetchMyApplicationViews(ids).catch(() => new Map<string, string>()),
+        ]);
 
        // Ansökans snapshot (den kandidatprofil som faktiskt användes vid ansökan).
        const snapshotById = new Map<string, any>();
@@ -510,7 +514,7 @@ export const useApplicationsData = (
            is_profile_video: media.is_profile_video,
            // Prefer activity RPC to stay 1:1 med "Mina kandidater"
            last_active_at: activityLastActive ?? liveMedia.last_active_at,
-           viewed_at: item.viewed_at,
+           viewed_at: myViews.get(item.id) ?? null,
            rating,
            total_count: undefined,
          };
@@ -901,13 +905,7 @@ export const useApplicationsData = (
       // Session shadow — instant + survives any later refetch race
       markViewedInSession(applicationId);
 
-      const { error } = await supabase
-        .from('job_applications')
-        .update({ viewed_at: new Date().toISOString() })
-        .eq('id', applicationId)
-        .is('viewed_at', null);
-
-      if (error) throw error;
+      await markApplicationViewedForMe(applicationId);
     },
     onMutate: async (applicationId) => {
       // Optimistic update

@@ -53,6 +53,7 @@ import {
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
+import { markApplicationViewedForMe } from '@/lib/applicationViews';
 
 // Extracted sub-components
 import {
@@ -317,11 +318,7 @@ const JobDetails = () => {
     updateApplicationLocally(applicationId, { viewed_at: new Date().toISOString() });
     
     try {
-      await supabase
-        .from('job_applications')
-        .update({ viewed_at: new Date().toISOString() })
-        .eq('id', applicationId)
-        .is('viewed_at', null);
+      await markApplicationViewedForMe(applicationId);
     } catch (error) {
       console.error('Error marking as viewed:', error);
     }

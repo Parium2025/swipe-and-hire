@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
+import { fetchMyApplicationViews } from '@/lib/applicationViews';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 
 /**
@@ -40,7 +41,7 @@ export async function hydrateMyCandidateRows(
   const applicantIds = [...new Set(rows.map(r => r.applicant_id))];
 
   // Ansökningarna (fryst ögonblicksbild) + media + aktivitet hämtas parallellt.
-  const [appsRes, mediaRes, activityRes, ratingsRes] = await Promise.all([
+  const [appsRes, mediaRes, activityRes, ratingsRes, myViews] = await Promise.all([
     supabase.from('job_applications').select(APPLICATION_FIELDS).in('id', applicationIds),
     supabase.rpc('get_applicant_profile_media_batch', {
       p_applicant_ids: applicantIds,
@@ -58,6 +59,8 @@ export async function hydrateMyCandidateRows(
       .select('applicant_id, rating')
       .eq('recruiter_id', userId)
       .in('applicant_id', applicantIds),
+    // Läst-markering är per person, inte per team.
+    fetchMyApplicationViews(applicationIds).catch(() => new Map<string, string>()),
   ]);
 
   if (appsRes.error) throw appsRes.error;
@@ -144,7 +147,7 @@ export async function hydrateMyCandidateRows(
       cover_image_url: media.cover_image_url,
       is_profile_video: media.is_profile_video,
       applied_at: app?.applied_at || null,
-      viewed_at: app?.viewed_at || null,
+      viewed_at: myViews.get(row.application_id) ?? null,
       latest_application_at: activity.latest_application_at,
       last_active_at: activity.last_active_at ?? liveMedia.last_active_at,
     } satisfies MyCandidateData;
