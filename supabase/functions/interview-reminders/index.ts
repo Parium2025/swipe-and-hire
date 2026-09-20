@@ -189,7 +189,12 @@ Deno.serve(async (req) => {
         const rangeStart = new Date(targetTime.getTime() - WINDOW_PADDING_MS).toISOString();
         const rangeEnd = new Date(targetTime.getTime() + WINDOW_PADDING_MS).toISOString();
 
-        const interviewStatuses = trigger === "interview_before" ? ["pending", "confirmed"] : ["pending", "confirmed", "completed"];
+        // Före intervjun räcker pending/confirmed. Efteråt krävs ett faktiskt
+        // svar: tack-mejlet ska aldrig gå till en intervju kandidaten tackat
+        // nej till (declined), som avbokats, eller som hen aldrig svarat på
+        // (pending). Vi kan inte veta om någon dök upp, men ett bekräftat
+        // möte är den bästa proxy:n.
+        const interviewStatuses = trigger === "interview_before" ? ["pending", "confirmed"] : ["confirmed", "completed"];
 
         const { data: interviews, error: interviewsError } = await supabase
           .from("interviews")
