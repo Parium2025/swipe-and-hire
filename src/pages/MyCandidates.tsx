@@ -901,21 +901,23 @@ const MyCandidates = () => {
         <>
         <div className="flex flex-wrap justify-center gap-2 pb-3">
           {canSwipe && (
-            <button
-              type="button"
-              disabled={swipeCriteriaEnabled && swipeCriteriaLoading}
-              onClick={() => { setSwipeFilteredApps(null); setSwipeStageCandidates([]); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
-              className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary text-white text-sm font-medium shadow-lg shadow-secondary/30 transition-colors pointer-fine:hover:bg-secondary/90 active:scale-[0.97] touch-manipulation disabled:opacity-60"
-            >
-              <Layers className="h-4 w-4" />
-              <span>
-                {swipeCriteriaEnabled && swipeCriteriaLoading
-                  ? 'Räknar ut matchningar…'
-                  : swipeCriteriaEnabled && swipeCriteriaFilter
-                    ? `Swipe-läge · ${swipeApplicationsData.length}`
-                    : 'Swipe-läge'}
-              </span>
-            </button>
+            <div className="w-full flex justify-center">
+              <button
+                type="button"
+                disabled={swipeCriteriaEnabled && swipeCriteriaLoading}
+                onClick={() => { setSwipeFilteredApps(null); setSwipeStageCandidates([]); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
+                className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary text-white text-sm font-medium shadow-lg shadow-secondary/30 transition-colors pointer-fine:hover:bg-secondary/90 active:scale-[0.97] touch-manipulation disabled:opacity-60"
+              >
+                <Layers className="h-4 w-4" />
+                <span>
+                  {swipeCriteriaEnabled && swipeCriteriaLoading
+                    ? 'Räknar ut matchningar…'
+                    : swipeCriteriaEnabled && swipeCriteriaFilter
+                      ? `Swipe-läge · ${swipeApplicationsData.length}`
+                      : 'Swipe-läge'}
+                </span>
+              </button>
+            </div>
           )}
           {singleSwipeJobId && (
             <button
