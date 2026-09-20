@@ -1,1 +1,1 @@
-- [ ] Match employer Swipe Mode exactly to job-seeker animations, feedback, and structure
+- [x] Match employer Swipe Mode exactly to job-seeker animations, feedback, and structure
