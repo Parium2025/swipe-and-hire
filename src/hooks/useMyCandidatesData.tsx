@@ -10,6 +10,7 @@ import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/u
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { markApplicationViewedForMe } from '@/lib/applicationViews';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';

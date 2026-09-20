@@ -53,6 +53,7 @@ import {
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { columnXCollisionDetection } from '@/lib/dnd/columnCollisionDetection';
+import { markApplicationViewedForMe } from '@/lib/applicationViews';
 
 // Extracted sub-components
 import {
