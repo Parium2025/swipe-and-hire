@@ -91,7 +91,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   // för att hela containern samtidigt scrollas en viewport nedåt.
   const [dismissedApplicationIds, setDismissedApplicationIds] = useState<Set<string>>(() => new Set());
   const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
+  const [profileHandoffApplication, setProfileHandoffApplication] = useState<ApplicationData | null>(null);
   const undoEntryTimerRef = useRef<number | null>(null);
+  const profileHandoffFallbackTimerRef = useRef<number | null>(null);
+  const profileHandoffOpeningRef = useRef(false);
   const pendingUndoApplicationIdRef = useRef<string | null>(null);
   const pendingStackIndexRef = useRef<number | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
@@ -151,6 +154,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       didInitialScrollRef.current = false;
       setDismissedApplicationIds(new Set());
       setUndoEntryApplicationId(null);
+      setProfileHandoffApplication(null);
+      profileHandoffOpeningRef.current = false;
       pendingUndoApplicationIdRef.current = null;
       pendingStackIndexRef.current = null;
       return;
@@ -291,7 +296,43 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   useEffect(() => () => {
     if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
+    if (profileHandoffFallbackTimerRef.current !== null) window.clearTimeout(profileHandoffFallbackTimerRef.current);
   }, []);
+
+  const openProfileWithHandoff = useCallback((application: ApplicationData) => {
+    if (profileHandoffOpeningRef.current) return;
+    profileHandoffOpeningRef.current = true;
+    setProfileHandoffApplication(application);
+  }, []);
+
+  const completeProfileHandoff = useCallback(() => {
+    const application = profileHandoffApplication;
+    if (!application || !profileHandoffOpeningRef.current) return;
+
+    profileHandoffOpeningRef.current = false;
+    onOpenFullProfile(application);
+
+    // Säkerhetsstädning om en caller saknar kandidaten och därför inte öppnar
+    // dialogen. Lagret är alltid pointer-events:none och kan aldrig låsa appen.
+    if (profileHandoffFallbackTimerRef.current !== null) {
+      window.clearTimeout(profileHandoffFallbackTimerRef.current);
+    }
+    profileHandoffFallbackTimerRef.current = window.setTimeout(() => {
+      profileHandoffFallbackTimerRef.current = null;
+      setProfileHandoffApplication(null);
+    }, 500);
+  }, [onOpenFullProfile, profileHandoffApplication]);
+
+  // Profilen är nu monterad ovanför Swipe Mode. Ta bort överlämningsytan före
+  // nästa paint; ingen extra timer, portal eller blockerande helskärmsyta blir kvar.
+  useLayoutEffect(() => {
+    if (!behind || !profileHandoffApplication) return;
+    if (profileHandoffFallbackTimerRef.current !== null) {
+      window.clearTimeout(profileHandoffFallbackTimerRef.current);
+      profileHandoffFallbackTimerRef.current = null;
+    }
+    setProfileHandoffApplication(null);
+  }, [behind, profileHandoffApplication]);
 
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
@@ -438,7 +479,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                   <CandidateSlide
                     application={app}
                     rating={getDisplayRating(app)}
-                    onOpenFullProfile={() => onOpenFullProfile(app)}
+                    onOpenFullProfile={() => openProfileWithHandoff(app)}
                     onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                     isVisible={Math.abs(idx - currentIndex) <= 1}
                     isActive={idx === currentIndex}
@@ -501,12 +542,31 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 canUndo={canUndo}
                 onSave={() => onSaveCandidate?.(currentApplication)}
                 onSkip={handleActionSkip}
-                onOpenInfo={() => onOpenFullProfile(currentApplication)}
+                onOpenInfo={() => openProfileWithHandoff(currentApplication)}
                 onUndo={handleUndo}
               />
             </div>
           </div>
         )}
+
+        <AnimatePresence>
+          {profileHandoffApplication && !behind && (
+            <motion.div
+              key={`candidate-profile-handoff-${profileHandoffApplication.id}`}
+              className="pointer-events-none absolute inset-0 z-40 overflow-hidden bg-card-parium transform-gpu [backface-visibility:hidden]"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'spring', damping: 32, stiffness: 340, mass: 0.8 }}
+              onAnimationComplete={completeProfileHandoff}
+              aria-hidden
+            >
+              <div className="flex justify-center pb-2 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
+                <div className="h-1.5 w-10 rounded-full bg-white/30" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </motion.div>
 
