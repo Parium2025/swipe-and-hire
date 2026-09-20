@@ -19,29 +19,23 @@ export function useVisualViewportBounds() {
     if (!vv) return;
 
     const root = document.documentElement;
-    let frame = 0;
-
     const apply = () => {
-      frame = 0;
       root.style.setProperty('--app-viewport-height', `${Math.round(vv.height)}px`);
       root.style.setProperty('--app-viewport-offset', `${Math.max(0, Math.round(vv.offsetTop))}px`);
     };
 
-    const schedule = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(apply);
-    };
-
     apply();
-    vv.addEventListener('resize', schedule);
-    vv.addEventListener('scroll', schedule);
-    window.addEventListener('orientationchange', schedule);
+    // Uppdatera innan nästa paint. En requestAnimationFrame här lämnade exakt
+    // en synlig bildruta där Safari redan hade flyttat layout-viewporten vid
+    // tangentbordsfokus men appskalet fortfarande använde de gamla måtten.
+    vv.addEventListener('resize', apply);
+    vv.addEventListener('scroll', apply);
+    window.addEventListener('orientationchange', apply);
 
     return () => {
-      if (frame) cancelAnimationFrame(frame);
-      vv.removeEventListener('resize', schedule);
-      vv.removeEventListener('scroll', schedule);
-      window.removeEventListener('orientationchange', schedule);
+      vv.removeEventListener('resize', apply);
+      vv.removeEventListener('scroll', apply);
+      window.removeEventListener('orientationchange', apply);
       root.style.removeProperty('--app-viewport-height');
       root.style.removeProperty('--app-viewport-offset');
     };

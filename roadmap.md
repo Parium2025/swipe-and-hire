@@ -76,3 +76,4 @@
 - [x] Flytta korta konversationer närmare kompositörens vita skiljelinje
 - [x] Verifiera mobilflödet visuellt samt med tester och typkontroll
 - [x] Ersätt konkurrerande iOS-scrollregler med ett enda visualViewport-styrt mobilskal och 16 px skrivfält
+- [x] Stoppa Safaris auto-scroll och svarta mellanbild när chattens skrivfält fokuseras
