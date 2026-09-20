@@ -1773,6 +1773,32 @@ export type Database = {
           },
         ]
       }
+      job_application_views: {
+        Row: {
+          application_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          application_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          application_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_application_views_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           age: number | null
@@ -4743,6 +4769,10 @@ export type Database = {
           confirmation_id: string
           user_id: string
         }[]
+      }
+      mark_application_viewed: {
+        Args: { p_application_id: string }
+        Returns: undefined
       }
       match_criterion_prompt: {
         Args: {
