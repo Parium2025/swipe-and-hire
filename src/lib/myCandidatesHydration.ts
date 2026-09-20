@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
+import { fetchMyApplicationViews } from '@/lib/applicationViews';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 
 /**
@@ -58,6 +59,8 @@ export async function hydrateMyCandidateRows(
       .select('applicant_id, rating')
       .eq('recruiter_id', userId)
       .in('applicant_id', applicantIds),
+    // Läst-markering är per person, inte per team.
+    fetchMyApplicationViews(applicationIds).catch(() => new Map<string, string>()),
   ]);
 
   if (appsRes.error) throw appsRes.error;
