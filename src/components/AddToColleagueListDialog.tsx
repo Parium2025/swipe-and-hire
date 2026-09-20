@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
-import { removeApplicantMembershipCacheEntry } from '@/lib/applicantMembershipCache';
+import { addApplicantMembershipCacheEntry, removeApplicantMembershipCacheEntry } from '@/lib/applicantMembershipCache';
 
 export interface CandidateToAdd {
   applicationId: string;
@@ -161,9 +161,20 @@ export function AddToColleagueListDialog({
         added += 1;
       }
 
+      // Håll "sparad"-markeringen i synk direkt: egen lista = medlem, kollegas lista = inte längre min
+      if (user) {
+        for (const id of applicantIds) {
+          if (recruiterId === user.id) addApplicantMembershipCacheEntry(user.id, id);
+          else removeApplicantMembershipCacheEntry(user.id, id);
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership'] });
+      queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] });
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
 
       const target = isOwnList ? 'din lista' : 'kollegans lista';
 
@@ -216,6 +227,7 @@ export function AddToColleagueListDialog({
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] }),
         queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] }),
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] }),
+        queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] }),
       ]);
       toast.success('Kandidat borttagen från din lista');
       setRemoveConfirmOpen(false);
