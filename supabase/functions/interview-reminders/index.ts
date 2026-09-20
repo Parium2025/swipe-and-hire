@@ -399,6 +399,7 @@ Deno.serve(async (req) => {
           title: string,
           body: string,
           route: string,
+          options?: { skipPush?: boolean },
         ) => {
           let delivered = false;
           const { error: notifError } = await supabase.from("notifications").insert({
