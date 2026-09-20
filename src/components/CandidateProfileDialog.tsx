@@ -54,6 +54,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+const MotionDialogContentNoFocus = motion.create(DialogContentNoFocus);
+
 function useProfileImageUrl(path: string | null | undefined) {
   // Ingen transform: porträttet renderas stort (192px CSS, upp till 3x på retina)
   // och ska alltid ha originalkvalitet. Komprimering här syntes tydligt.
@@ -197,6 +199,7 @@ export const CandidateProfileDialog = ({
   const pullFrameRef = useRef<number | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
   const dismissTimerRef = useRef<number | null>(null);
+  const shouldUseSwipeSheetMotion = fromSwipe && typeof window !== 'undefined' && window.innerWidth < 768;
 
   const writePull = useCallback((y: number, transition: string | null) => {
     const el = dialogContentRef.current;
@@ -673,11 +676,14 @@ export const CandidateProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContentNoFocus
+      <MotionDialogContentNoFocus
         ref={dialogContentRef}
         hideClose
         overlayClassName="bg-transparent md:bg-black/70"
-        className="max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 translate-x-0 translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0"
+        className={`max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !left-0 !right-0 !bottom-0 translate-x-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0 ${fromSwipe ? '!top-auto h-[88dvh] rounded-t-3xl' : '!top-0 h-[100dvh] rounded-none translate-y-0'}`}
+        initial={shouldUseSwipeSheetMotion ? { y: '100%' } : false}
+        animate={shouldUseSwipeSheetMotion ? { y: 0 } : undefined}
+        transition={shouldUseSwipeSheetMotion ? { type: 'spring', damping: 32, stiffness: 340, mass: 0.8 } : undefined}
         // Dragrörelsen skrivs direkt på elementet (se writePull) — inga
         // React-renderingar per touchmove, vilket håller draget mjukt.
 
@@ -961,7 +967,7 @@ export const CandidateProfileDialog = ({
             </div>
           )}
         </div>
-      </DialogContentNoFocus>
+      </MotionDialogContentNoFocus>
     </Dialog>
 
     {/* CV Dialog */}
