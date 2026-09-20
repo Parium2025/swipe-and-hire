@@ -24,6 +24,7 @@ import { useFieldDraft } from '@/hooks/useFormDraft';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateRowProfileWarmup } from '@/hooks/useCandidateRowProfileWarmup';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { formatTimeAgo } from '@/lib/date';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -143,6 +144,7 @@ export const CandidateProfileDialog = ({
 
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { hasTeam } = useTeamMembers();
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
@@ -892,8 +894,9 @@ export const CandidateProfileDialog = ({
           />
           </div>
 
-          {/* Activity Sidebar - desktop only */}
-          <div className="hidden md:flex w-80 border-l border-white/20 bg-white/5 flex-col overflow-hidden relative">
+          {/* Aktivitetssidan monteras bara på dator. CSS-hidden räcker inte:
+              dess frågor och prenumerationer kördes annars även på mobilen. */}
+          {!isMobile && <div className="hidden md:flex w-80 border-l border-white/20 bg-white/5 flex-col overflow-hidden relative">
             <div className="relative flex border-b border-white/20 pr-10">
               <motion.div
                 className="absolute bottom-0 h-0.5 bg-white"
@@ -945,7 +948,7 @@ export const CandidateProfileDialog = ({
                 )}
               </SectionErrorBoundary>
             </div>
-          </div>
+          </div>}
 
           {/* Mobile Activity/Comments tab content */}
           {mobileTab === 'activity' && (
