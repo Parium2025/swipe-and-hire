@@ -185,7 +185,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
               height: 'var(--app-viewport-height, 100dvh)',
               // Mjuk övergång när iOS-tangentbordet öppnas/stängs ("Klar") —
               // utan denna ändras höjden tvärt och innehållet hoppar.
-              transition: 'top 0.3s cubic-bezier(0.32, 0.72, 0, 1), height 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+              transition: 'top 0.18s cubic-bezier(0.32, 0.72, 0, 1), height 0.18s cubic-bezier(0.32, 0.72, 0, 1)',
             }
           : { WebkitOverflowScrolling: 'touch' }}
       >
