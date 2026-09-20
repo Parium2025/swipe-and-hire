@@ -473,31 +473,45 @@ const EmployerDashboard = memo(() => {
   };
 
   /**
-   * 📣 Informationsruta vid borttagning: räknar hur många kandidater som
-   * automatiskt får besked om att tjänsten är avslutad. Spegling av
-   * `enqueue_outreach_dispatch` — anställda och redan avslagna hoppas över.
-   * Rent informativt; arbetsgivaren behöver aldrig välja något.
+   * 📣 Informationsrutan vid borttagning förhämtas för sidans annonser när
+   * webbläsaren är ledig, så antalet kandidater redan ligger i cachen när
+   * arbetsgivaren trycker på papperskorgen. Inget laddningshopp i dialogen.
    */
   useEffect(() => {
-    const jobId = jobToDelete?.id;
-    if (!deleteDialogOpen || !jobId) {
-      setAutoNotifyCount(null);
-      return;
-    }
+    if (!pageJobs.length) return;
     let cancelled = false;
-    setAutoNotifyCount(null);
-    (async () => {
-      const { count, error } = await supabase
-        .from('job_applications')
-        .select('id', { count: 'exact', head: true })
-        .eq('job_id', jobId)
-        .is('rejected_at', null)
-        .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
-      if (cancelled) return;
-      setAutoNotifyCount(error ? null : (count ?? 0));
-    })();
-    return () => { cancelled = true; };
-  }, [deleteDialogOpen, jobToDelete?.id]);
+    const ids = pageJobs.map(j => j.id);
+    const run = async () => {
+      for (const id of ids) {
+        if (cancelled) return;
+        await queryClient.prefetchQuery({
+          queryKey: [AUTO_NOTIFY_KEY, id],
+          queryFn: () => fetchAutoNotifyCount(id),
+          staleTime: 5 * 60 * 1000,
+        });
+      }
+    };
+    const timer = window.setTimeout(run, 400);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [pageJobs, queryClient]);
+
+  /**
+   * ✨ Kortet som fylls på i listan efter en borttagning tonar in mjukt
+   * i stället för att blinka fram.
+   */
+  useEffect(() => {
+    const ids = pageJobs.map(j => j.id);
+    const prev = prevPageIdsRef.current;
+    prevPageIdsRef.current = ids;
+    if (!expectEnterRef.current) return;
+    const prevSet = new Set(prev);
+    const fresh = ids.filter(id => !prevSet.has(id));
+    expectEnterRef.current = false;
+    if (!fresh.length) return;
+    setEnteringIds(new Set(fresh));
+    const timer = window.setTimeout(() => setEnteringIds(new Set()), 420);
+    return () => window.clearTimeout(timer);
+  }, [pageJobs]);
 
 
   const handleRepublishClick = (job: JobPosting) => {
