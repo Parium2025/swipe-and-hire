@@ -43,7 +43,7 @@ import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCoun
 import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
-import TruncatedText from '@/components/TruncatedText';
+import { TruncatedText } from '@/components/TruncatedText';
 import { RepublishJobDialog } from '@/components/RepublishJobDialog';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
