@@ -226,13 +226,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     // ersätts av nästa riktiga kort i samma frame. En rAF-kedja här gav först
     // en tom/halv frame och därefter ett synligt vertikalt hopp på iOS.
     const container = scrollRef.current;
-    if (container) {
-      container.scrollTo({ top: idx * slideHeight, behavior: 'auto' });
-    } else {
-      virtualizer.scrollToIndex(idx, { align: 'start' });
-    }
+    const top = getSlideTop(idx) ?? idx * slideHeight;
+    container?.scrollTo({ top, behavior: 'auto' });
     transitionTargetIndexRef.current = null;
-  }, [applications.length, hasEndSection, slideHeight, virtualizer]);
+  }, [applications.length, getSlideTop, hasEndSection, slideHeight]);
 
   const handleSkip = useCallback(() => {
     const current = applications[currentIndex];
