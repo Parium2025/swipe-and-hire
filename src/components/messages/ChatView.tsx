@@ -151,13 +151,24 @@ export function ChatView({
     return scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLDivElement | null;
   }, []);
 
+  // Korta trådar ska alltid ligga toppankrade (som iMessage) så att
+  // datumdividern "Idag" aldrig scrollas ut ovanför kanten. För långa
+  // trådar, eller när tangentbordet är uppe och innehållet verkligen
+  // överflödar, behåller vi bottenankaret så att senaste meddelandet syns.
+  const messagesCountRef = useRef(0);
+  const pinViewportSmart = useCallback((viewport: HTMLDivElement) => {
+    const overflow = viewport.scrollHeight - viewport.clientHeight;
+    const isShortThread = messagesCountRef.current <= 4;
+    viewport.scrollTop = isShortThread && overflow < 320 ? 0 : viewport.scrollHeight;
+  }, []);
+
   const pinMessagesToBottom = useCallback(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
     isNearBottomRef.current = true;
-    viewport.scrollTop = viewport.scrollHeight;
+    pinViewportSmart(viewport);
     prevScrollHeightRef.current = viewport.scrollHeight;
-  }, [getViewportEl]);
+  }, [getViewportEl, pinViewportSmart]);
 
   // iOS Safari försöker annars först scrolla den fixerade sidan så textarea:n
   // hamnar ovanför tangentbordet. Mobilskalet anpassas redan efter
