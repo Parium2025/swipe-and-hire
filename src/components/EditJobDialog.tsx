@@ -2812,8 +2812,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             >
                               <AlertDialogHeader className="space-y-4 text-center">
                                 <div className="flex items-center justify-center gap-2.5">
-                                  <div className="rounded-full bg-destructive/20 p-2">
-                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  <div className="rounded-full bg-red-500/80 p-2">
+                                    <Trash2 className="h-4 w-4 text-white" />
                                   </div>
                                   <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">
                                     Ta bort fråga

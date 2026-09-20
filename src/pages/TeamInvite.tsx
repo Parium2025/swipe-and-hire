@@ -119,7 +119,7 @@ const TeamInvite = () => {
         {status === "error" && (
           <>
             <div className="mb-3 flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-destructive/40 bg-destructive/15">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-red-500/80">
                 <AlertTriangle className="h-[18px] w-[18px] text-white" />
               </span>
               <h1 className="min-w-0 text-2xl font-semibold text-white">Inbjudan kunde inte användas</h1>

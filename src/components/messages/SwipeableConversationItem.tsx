@@ -402,7 +402,7 @@ export function SwipeableConversationItem({
             style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
           >
             <button
-              className="rounded-full flex items-center gap-1 px-3 py-2 bg-destructive/20 border border-destructive/40 text-white font-medium text-xs"
+              className="rounded-full flex items-center gap-1 px-3 py-2 bg-red-500/80 border-0 text-white font-medium text-xs"
               onClick={(e) => {
                 e.stopPropagation();
                 animateBack();
