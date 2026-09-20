@@ -32,10 +32,28 @@ export function useVisualViewportBounds() {
     vv.addEventListener('scroll', apply);
     window.addEventListener('orientationchange', apply);
 
+    // iOS Safari skickar visualViewport-resize först när tangentbordets
+    // nedåtanimation redan har kört en stund — upp till flera hundra
+    // millisekunder efter trycket på "Klar". Reagera därför direkt på blur:
+    // när ett fält tappar fokus (utan att ett annat tar över) återställer vi
+    // måtten mot hela layout-viewporten omedelbart, så shellen glider ner
+    // i samma ögonblick som tangentbordet börjar stängas. Den riktiga
+    // resize-händelsen korrigerar sedan om måtten skulle skilja något.
+    const handleFocusOut = () => {
+      requestAnimationFrame(() => {
+        const active = document.activeElement;
+        if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
+        root.style.setProperty('--app-viewport-height', `${Math.round(window.innerHeight)}px`);
+        root.style.setProperty('--app-viewport-offset', '0px');
+      });
+    };
+    window.addEventListener('focusout', handleFocusOut);
+
     return () => {
       vv.removeEventListener('resize', apply);
       vv.removeEventListener('scroll', apply);
       window.removeEventListener('orientationchange', apply);
+      window.removeEventListener('focusout', handleFocusOut);
       root.style.removeProperty('--app-viewport-height');
       root.style.removeProperty('--app-viewport-offset');
     };
