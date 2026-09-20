@@ -1033,7 +1033,7 @@ const EmployerDashboard = memo(() => {
               </AlertDialogTitle>
             </div>
           </AlertDialogHeader>
-          <div className="overflow-y-auto flex-1 my-4">
+          <div className="overflow-y-auto min-h-0 mt-3 mb-4">
             <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
