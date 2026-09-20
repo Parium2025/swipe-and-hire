@@ -381,84 +381,76 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             touchAction: 'pan-y',
           }}
         >
-          <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-          {virtualizer.getVirtualItems().map((item) => {
-            const app = applications[item.index];
-            if (!app && item.index === applications.length && hasEndSection) {
-              return (
-                <div
-                  key="candidate-swipe-complete"
-                  data-index={item.index}
-                  className="absolute left-0 top-0 w-full"
-                  style={{
-                    transform: `translateY(${item.start}px)`,
-                    height: `${slideHeight}px`,
-                    scrollSnapAlign: 'start',
-                    scrollSnapStop: 'always',
-                  }}
-                >
-                  <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
-                    {hasMore ? (
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                        animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
-                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
-                      >
-                        <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
-                        <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
-                      </motion.div>
-                    )}
-
-                    {canUndo && !hasMore && (
-                      <button
-                        type="button"
-                        onClick={handleUndo}
-                        data-swipe-action-button
-                        className="mt-5 flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg transition-transform active:scale-[0.93] touch-manipulation"
-                      >
-                        <Undo2 className="h-4.5 w-4.5 text-white" />
-                        <span className="text-sm font-medium text-white">Ångra</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-            if (!app) return null;
+          {applications.map((app, idx) => {
+            // Exakt samma modell som jobbsökarens svep: korten ligger i normalt
+            // flöde med fast höjd och snap-start. Endast ±2 kort monteras.
+            const withinWindow = Math.abs(idx - currentIndex) <= 2;
             return (
-            <div
-              key={app.id}
-              data-index={item.index}
-              className="absolute left-0 top-0 w-full"
-              style={{
-                transform: `translateY(${item.start}px)`,
-                height: `${slideHeight}px`,
-                scrollSnapAlign: 'start',
-                scrollSnapStop: 'always',
-              }}
-            >
-              <div className="h-full w-full">
-              <CandidateSlide
-                application={app}
-                rating={getDisplayRating(app)}
-                onOpenFullProfile={() => onOpenFullProfile(app)}
-                onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
-                isVisible={Math.abs(item.index - currentIndex) <= 1}
-                isActive={item.index === currentIndex}
-                nextApplication={applications[item.index + 1]}
-                isUndoEntry={app.id === undoEntryApplicationId}
-                onSkip={handleSkip}
-                onRegisterSkip={registerActiveSkip}
-
-              />
+              <div
+                key={app.id}
+                ref={(el) => { slideRefs.current[idx] = el; }}
+                data-index={idx}
+                className="w-full shrink-0 snap-start snap-always"
+                style={{
+                  minHeight: `${slideHeight}px`,
+                  height: `${slideHeight}px`,
+                  contain: 'layout style paint',
+                }}
+              >
+                {withinWindow ? (
+                  <CandidateSlide
+                    application={app}
+                    rating={getDisplayRating(app)}
+                    onOpenFullProfile={() => onOpenFullProfile(app)}
+                    onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
+                    isVisible={Math.abs(idx - currentIndex) <= 1}
+                    isActive={idx === currentIndex}
+                    nextApplication={applications[idx + 1]}
+                    isUndoEntry={app.id === undoEntryApplicationId}
+                    onSkip={handleSkip}
+                    onRegisterSkip={registerActiveSkip}
+                  />
+                ) : null}
               </div>
-            </div>
             );
           })}
-          </div>
+
+          {hasEndSection && (
+            <div
+              ref={endSectionRef}
+              data-index={applications.length}
+              className="w-full shrink-0 snap-start snap-always"
+              style={{ minHeight: `${slideHeight}px`, height: `${slideHeight}px` }}
+            >
+              <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
+                {hasMore ? (
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                    animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
+                  >
+                    <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
+                    <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
+                  </motion.div>
+                )}
+
+                {canUndo && !hasMore && (
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    data-swipe-action-button
+                    className="mt-5 flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg transition-transform active:scale-[0.93] touch-manipulation"
+                  >
+                    <Undo2 className="h-4.5 w-4.5 text-white" />
+                    <span className="text-sm font-medium text-white">Ångra</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {currentApplication && (
