@@ -27,7 +27,7 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
   onUndo,
 }: CandidateSlideActionsProps) {
   return (
-    <div className="flex items-center justify-center gap-4">
+    <div className="flex items-center justify-center gap-4 pointer-events-auto">
       <button
         type="button"
         aria-label="Hoppa över kandidaten"
@@ -55,9 +55,7 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         }}
         onClick={(e) => e.preventDefault()}
         data-swipe-action-button
-        className={`w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 transition-transform touch-manipulation ${
-          saved ? 'opacity-60' : 'active:scale-[0.93]'
-        }`}
+        className="w-[52px] h-[52px] rounded-full bg-secondary border border-white/25 flex items-center justify-center shadow-lg shadow-secondary/30 active:scale-[0.93] transition-transform touch-manipulation"
       >
         <Bookmark
           className={`w-6 h-6 ${saved ? 'text-white fill-white' : 'text-white'}`}
@@ -86,12 +84,11 @@ export const CandidateSlideActions = memo(function CandidateSlideActions({
         onPointerDown={(e) => {
           e.stopPropagation();
           if (!canUndo) return;
-          hapticLight();
           onUndo();
         }}
         onClick={(e) => e.preventDefault()}
         data-swipe-action-button
-        className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-transform touch-manipulation"
+        className="w-[52px] h-[52px] rounded-full bg-white/15 border border-white/25 flex items-center justify-center shadow-lg active:scale-[0.93] transition-all touch-manipulation opacity-100"
       >
         <Undo2
           className={`w-6 h-6 text-white transition-opacity duration-200 ${canUndo ? 'opacity-100' : 'opacity-40'}`}

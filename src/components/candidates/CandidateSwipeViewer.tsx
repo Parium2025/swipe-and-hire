@@ -8,6 +8,29 @@ import { CandidateSlideActions } from './CandidateSlideActions';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { hapticSuccess } from '@/lib/haptics';
+
+const CANDIDATE_UNDO_STORAGE_KEY = 'parium-candidate-swipe-undo-stack';
+
+function readCandidateUndoStack(): string[] {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(CANDIDATE_UNDO_STORAGE_KEY) || '[]');
+    return Array.isArray(parsed)
+      ? parsed.filter((id): id is string => typeof id === 'string' && id.length > 0)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistCandidateUndoStack(stack: string[]) {
+  try {
+    if (stack.length === 0) sessionStorage.removeItem(CANDIDATE_UNDO_STORAGE_KEY);
+    else sessionStorage.setItem(CANDIDATE_UNDO_STORAGE_KEY, JSON.stringify(stack));
+  } catch {
+    // Privat läge/full lagring: ångra fortsätter fungera i minnet.
+  }
+}
 
 export interface CandidateSwipeFilter {
   question: string;
@@ -57,8 +80,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeSkipRef = useRef<(() => void) | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const skippedStackRef = useRef<string[]>([]);
-  const [canUndo, setCanUndo] = useState(false);
+  const skippedStackRef = useRef<string[]>(readCandidateUndoStack());
+  const [canUndo, setCanUndo] = useState(() => skippedStackRef.current.length > 0);
+  const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
+  const undoEntryTimerRef = useRef<number | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -107,8 +132,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   useEffect(() => {
     if (!open) {
       didInitialScrollRef.current = false;
-      skippedStackRef.current = [];
-      setCanUndo(false);
+      setUndoEntryApplicationId(null);
       return;
     }
     if (behind || didInitialScrollRef.current) return;
@@ -161,6 +185,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const current = applications[currentIndex];
     if (current) {
       skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);
+      persistCandidateUndoStack(skippedStackRef.current);
       setCanUndo(true);
     }
     goToIndex(currentIndex + 1);
@@ -172,9 +197,24 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (!applicationId) return;
     const restoredIndex = applications.findIndex((application) => application.id === applicationId);
     skippedStackRef.current = stack.slice(0, -1);
+    persistCandidateUndoStack(skippedStackRef.current);
     setCanUndo(skippedStackRef.current.length > 0);
-    if (restoredIndex >= 0) goToIndex(restoredIndex);
-  }, [applications, goToIndex]);
+    if (restoredIndex >= 0) {
+      setUndoEntryApplicationId(applicationId);
+      hapticSuccess();
+      setCurrentIndex(restoredIndex);
+      virtualizer.scrollToIndex(restoredIndex, { align: 'start' });
+      if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
+      undoEntryTimerRef.current = window.setTimeout(() => {
+        undoEntryTimerRef.current = null;
+        setUndoEntryApplicationId(null);
+      }, 700);
+    }
+  }, [applications, virtualizer]);
+
+  useEffect(() => () => {
+    if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
+  }, []);
 
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
@@ -322,6 +362,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 isActive={item.index === currentIndex}
+                nextApplication={applications[item.index + 1]}
+                isUndoEntry={app.id === undoEntryApplicationId}
                 onSkip={handleSkip}
                 onRegisterSkip={registerActiveSkip}
 
