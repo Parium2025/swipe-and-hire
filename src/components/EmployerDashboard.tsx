@@ -532,7 +532,7 @@ const EmployerDashboard = memo(() => {
     setDeleteDialogOpen(false);
     setJobToDelete(null);
     setRemovingJobId(job.id);
-    const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 240));
+    const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 420));
 
     try {
       // Soft delete in DB — is_active måste nollas också, annars ligger raden
@@ -557,7 +557,9 @@ const EmployerDashboard = memo(() => {
         return;
       }
 
-      // Ta bort ur cacherna först när kortet redan tonat bort.
+      // Ta bort ur cacherna först när kortet redan tonat bort. Nästa kort som
+      // fylls på i listan ska tona in, inte blinka fram.
+      expectEnterRef.current = true;
       queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
         if (!Array.isArray(old)) return old;
         return old.filter((j: any) => j.id !== job.id);
