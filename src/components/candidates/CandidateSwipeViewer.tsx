@@ -157,6 +157,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [applications.length, virtualizer]);
 
   const handleSkip = useCallback(() => {
+    if (currentIndex >= applications.length - 1) return;
     const current = applications[currentIndex];
     if (current) {
       skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);

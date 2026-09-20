@@ -137,8 +137,8 @@ export const CandidateSlide = memo(function CandidateSlide({
     if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
   }, []);
 
-  // Kortet får medvetet INTE dras i sidled. Endast vertikal scroll/swipe
-  // mellan kandidater är tillåtet; hoppa över sker via knappen.
+  // Ett vanligt tryck öppnar profilen. Horisontella drag hanteras separat:
+  // vänster hoppar över och höger öppnar kandidatens fullständiga information.
   const handleOpen = useCallback(() => {
     if (!suppressOpenRef.current) onOpenFullProfile();
   }, [onOpenFullProfile]);
