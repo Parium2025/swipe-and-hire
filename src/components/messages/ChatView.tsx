@@ -373,7 +373,7 @@ export function ChatView({
         }
       };
     }
-  }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading]);
+  }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading, pinViewportSmart]);
 
   // Skyddsnät: konversationen får aldrig se tom ut. Skulle mätningen av någon
   // anledning inte bli klar avslöjas innehållet ändå strax efteråt.
@@ -400,7 +400,7 @@ export function ChatView({
     observer.observe(content);
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [conversation.id, getViewportEl]);
+  }, [conversation.id, getViewportEl, pinViewportSmart]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
