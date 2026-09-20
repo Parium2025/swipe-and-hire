@@ -147,7 +147,7 @@ export async function hydrateMyCandidateRows(
       cover_image_url: media.cover_image_url,
       is_profile_video: media.is_profile_video,
       applied_at: app?.applied_at || null,
-      viewed_at: app?.viewed_at || null,
+      viewed_at: myViews.get(row.application_id) ?? null,
       latest_application_at: activity.latest_application_at,
       last_active_at: activity.last_active_at ?? liveMedia.last_active_at,
     } satisfies MyCandidateData;
