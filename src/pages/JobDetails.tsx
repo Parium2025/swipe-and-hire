@@ -716,7 +716,7 @@ const JobDetails = () => {
               <button
                 type="button"
                 onClick={() => { setSwipeFilteredApps(null); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
-                className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 text-white text-sm font-medium shadow-lg shadow-black/20 transition-all hover:bg-white/15 active:scale-[0.97] touch-manipulation"
+                className="h-11 px-6 inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary text-white text-sm font-medium shadow-lg shadow-secondary/30 transition-colors pointer-fine:hover:bg-secondary/90 active:scale-[0.97] touch-manipulation"
               >
                 <Layers className="h-4 w-4" />
                 <span>Swipe-läge</span>

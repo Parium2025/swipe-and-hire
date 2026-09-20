@@ -282,7 +282,7 @@ const CandidatesContent = () => {
                     disabled={isBusy}
                     onClick={() => setSwipeOpen(true)}
                     onMouseDown={(e) => e.preventDefault()}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none bg-secondary border-secondary/40 text-white shadow-lg shadow-secondary/30 hover:bg-secondary/90 disabled:opacity-60 disabled:pointer-events-none"
+                    className="h-11 px-6 inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium transition-colors border whitespace-nowrap min-w-0 flex-shrink-0 active:scale-[0.97] touch-manipulation outline-none focus:outline-none bg-secondary border-secondary/40 text-white shadow-lg shadow-secondary/30 pointer-fine:hover:bg-secondary/90 disabled:opacity-60 disabled:pointer-events-none"
                   >
                     <Layers className="h-4 w-4" />
                     <span>Swipe-läge</span>
