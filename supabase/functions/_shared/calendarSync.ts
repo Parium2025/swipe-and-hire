@@ -87,6 +87,41 @@ async function findGoogleEventIds(connectionAPIKey: string, interviewId: string,
   return (data?.items ?? []).flatMap((item) => item.id ? [item.id] : []);
 }
 
+// Läser användarens egna standardpåminnelser i Google Kalender (live, så en
+// ändring hos Google slår igenom direkt). Returnerar null vid fel eller om
+// kontot inte kan läsas – då ska Pariums egna utskick alltid gå iväg.
+export async function fetchGoogleDefaultReminderMinutes(connectionAPIKey: string): Promise<number[] | null> {
+  const res = await googleRequest(connectionAPIKey, '/calendar/v3/users/me/calendarList/primary', {
+    method: 'GET',
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null) as
+    | { defaultReminders?: Array<{ method?: string; minutes?: number }> }
+    | null;
+  if (!data?.defaultReminders) return null;
+  return data.defaultReminders
+    .map((r) => (typeof r.minutes === 'number' ? r.minutes : null))
+    .filter((m): m is number => m !== null);
+}
+
+// Kollision = användarens Google-larm ligger på exakt samma antal minuter före
+// intervjun som Pariums egna utskick. Då räcker Googles larm – Parium ska inte
+// skicka ett dubbelt larm samma minut. Osäkert svar (fel, ingen koppling) ger
+// alltid "skicka" – Parium är den garanterade kanalen.
+export async function googleDefaultReminderCollides(userId: string, leadMinutes: number): Promise<boolean> {
+  try {
+    const connection = await getConnectionForUser(userId, 'google_calendar');
+    if (!connection) return false;
+    const minutes = await fetchGoogleDefaultReminderMinutes(connection.connectionAPIKey);
+    if (!minutes || minutes.length === 0) return false;
+    return minutes.some((m) => Math.abs(m - leadMinutes) < 1);
+  } catch (error) {
+    console.error('Kunde inte läsa Google-standardpåminnelse', error);
+    return false;
+  }
+}
+
 function googleEventBody(input: InterviewEventInput, role: CalendarRole) {
   return {
     summary: eventSummary(input, role),
