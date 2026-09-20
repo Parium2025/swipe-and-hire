@@ -127,6 +127,13 @@
       "when": 1789906455690,
       "tag": "0017_application_views_realtime",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789930874168,
+      "tag": "0018_fix_job_closed_dispatch_conflict",
+      "breakpoints": true
     }
   ]
 }

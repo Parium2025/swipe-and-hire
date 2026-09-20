@@ -2485,3 +2485,22 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   100% { transform: translateX(160%) scaleX(0.35); }
 }
 
+
+/* Mjuk borttagning av annonskort — kortet tonar och sjunker ihop innan
+   listan uppdateras, så raderingen aldrig känns ryckig. */
+@keyframes job-card-remove {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.94); }
+}
+
+.job-card-removing {
+  animation: job-card-remove 240ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-card-removing {
+    animation-duration: 1ms;
+  }
+}
