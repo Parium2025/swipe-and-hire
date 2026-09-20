@@ -493,6 +493,8 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     [stageCandidates, renderLimit],
   );
 
+  const listScrollRef = useRef<HTMLDivElement | null>(null);
+
   const handleListScroll = useCallback(
     (e: React.UIEvent<HTMLElement>) => {
       const el = e.target as HTMLElement;
@@ -506,6 +508,24 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     },
     [stageCandidates.length, renderLimit, hasMoreInStage, activeTab, onLoadMore],
   );
+
+  // Höga skärmar kan rymma hela förstafönstret utan att listan går att scrolla.
+  // Då kommer inget scroll-event och resten av steget blir oåtkomligt. Växer
+  // fönstret tyst efter målning tills listan faktiskt kan scrollas.
+  useEffect(() => {
+    const host = listScrollRef.current;
+    if (!host) return;
+    const viewport = host.querySelector<HTMLElement>('[data-radix-scroll-area-viewport]') ?? host;
+    const frame = requestAnimationFrame(() => {
+      if (viewport.scrollHeight > viewport.clientHeight + 8) return;
+      if (renderLimit < stageCandidates.length) {
+        setRenderLimit(prev => Math.min(prev + RENDER_STEP, stageCandidates.length));
+      } else if (hasMoreInStage?.(activeTab)) {
+        onLoadMore?.(activeTab);
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [renderLimit, stageCandidates.length, hasMoreInStage, activeTab, onLoadMore]);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -624,6 +644,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
         {/* Candidate list — swipe here switches stages step by step */}
         <div
+          ref={listScrollRef}
           className="flex-1 min-h-[40vh]"
           onTouchStart={stageSwipeHandlers.onTouchStart}
           onTouchMove={stageSwipeHandlers.onTouchMove}
