@@ -151,13 +151,24 @@ export function ChatView({
     return scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLDivElement | null;
   }, []);
 
+  // Korta trådar ska alltid ligga toppankrade (som iMessage) så att
+  // datumdividern "Idag" aldrig scrollas ut ovanför kanten. För långa
+  // trådar, eller när tangentbordet är uppe och innehållet verkligen
+  // överflödar, behåller vi bottenankaret så att senaste meddelandet syns.
+  const messagesCountRef = useRef(0);
+  const pinViewportSmart = useCallback((viewport: HTMLDivElement) => {
+    const overflow = viewport.scrollHeight - viewport.clientHeight;
+    const isShortThread = messagesCountRef.current <= 4;
+    viewport.scrollTop = isShortThread && overflow < 320 ? 0 : viewport.scrollHeight;
+  }, []);
+
   const pinMessagesToBottom = useCallback(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
     isNearBottomRef.current = true;
-    viewport.scrollTop = viewport.scrollHeight;
+    pinViewportSmart(viewport);
     prevScrollHeightRef.current = viewport.scrollHeight;
-  }, [getViewportEl]);
+  }, [getViewportEl, pinViewportSmart]);
 
   // iOS Safari försöker annars först scrolla den fixerade sidan så textarea:n
   // hamnar ovanför tangentbordet. Mobilskalet anpassas redan efter
@@ -289,6 +300,8 @@ export function ChatView({
     const viewport = getViewportEl();
     if (!viewport) return;
 
+    messagesCountRef.current = messages.length;
+
     if (messages.length === 0 && !isLoading && viewport.clientHeight > 0) {
       setIsInitialScrollReady(true);
       return;
@@ -311,7 +324,7 @@ export function ChatView({
       if (!isInitialLoad && (isOwnNewMessage || isNearBottomRef.current)) {
         // En direkt positionering undviker att iOS målar ett mellanläge medan
         // tangentbordet samtidigt ändrar den synliga viewportens höjd.
-        viewport.scrollTop = viewport.scrollHeight;
+        pinViewportSmart(viewport);
       }
     }
 
@@ -336,7 +349,7 @@ export function ChatView({
         attempts += 1;
 
 
-        currentViewport.scrollTop = currentViewport.scrollHeight;
+        pinViewportSmart(currentViewport);
         const currentHeight = currentViewport.scrollHeight;
         stableFrames = currentHeight === previousHeight ? stableFrames + 1 : 0;
         previousHeight = currentHeight;
@@ -360,7 +373,7 @@ export function ChatView({
         }
       };
     }
-  }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading]);
+  }, [messages, currentUserId, getViewportEl, isInitialScrollReady, isLoading, pinViewportSmart]);
 
   // Skyddsnät: konversationen får aldrig se tom ut. Skulle mätningen av någon
   // anledning inte bli klar avslöjas innehållet ändå strax efteråt.
@@ -381,22 +394,22 @@ export function ChatView({
 
     const observer = new ResizeObserver(() => {
       if (!isNearBottomRef.current) return;
-      viewport.scrollTop = viewport.scrollHeight;
+      pinViewportSmart(viewport);
       prevScrollHeightRef.current = viewport.scrollHeight;
     });
     observer.observe(content);
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [conversation.id, getViewportEl]);
+  }, [conversation.id, getViewportEl, pinViewportSmart]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
     const viewport = getViewportEl();
     if (!viewport) return;
     if (typingUsers.length > 0 && isNearBottomRef.current) {
-      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      pinViewportSmart(viewport);
     }
-  }, [typingUsers, getViewportEl]);
+  }, [typingUsers, getViewportEl, pinViewportSmart]);
 
   // Debounce search query (300ms)
   useEffect(() => {
