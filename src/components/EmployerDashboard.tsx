@@ -482,30 +482,31 @@ const EmployerDashboard = memo(() => {
     // Dubbelklickspärr: dialogen stängs först efter svaret, så utan den här
     // spärren kunde två raderingar skickas och två toasts visas.
     if (!jobToDelete || deletingJobRef.current) return;
+    const job = jobToDelete;
     deletingJobRef.current = true;
     setDeletingJob(true);
 
+    // Premiumkänsla: stäng dialogen direkt och låt kortet tona ut medan
+    // servern arbetar. Listan hoppar aldrig till innan animationen är klar.
+    setDeleteDialogOpen(false);
+    setJobToDelete(null);
+    setRemovingJobId(job.id);
+    const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 240));
+
     try {
-      // Optimistic: remove from react-query cache immediately
-      queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
-        if (!Array.isArray(old)) return old;
-        return old.filter((j: any) => j.id !== jobToDelete.id);
-      });
-
-      // Rensa localStorage-cachen direkt så annonsen inte blinkar tillbaka
-      if (user?.id) removeJobFromJobsCache(user.id, jobToDelete.id);
-
       // Soft delete in DB — is_active måste nollas också, annars ligger raden
       // kvar som "aktiv" i alla vyer/räknare som bara tittar på is_active.
       const { data, error } = await supabase
         .from('job_postings')
         .update({ deleted_at: new Date().toISOString(), is_active: false })
-        .eq('id', jobToDelete.id)
+        .eq('id', job.id)
         .select('id')
         .maybeSingle();
 
+      await fadeDone;
+
       if (error || !data) {
-        // Rollback on error
+        setRemovingJobId(null);
         invalidateJobs();
         toast({
           title: "Fel vid borttagning",
@@ -515,16 +516,23 @@ const EmployerDashboard = memo(() => {
         return;
       }
 
+      // Ta bort ur cacherna först när kortet redan tonat bort.
+      queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((j: any) => j.id !== job.id);
+      });
+      if (user?.id) removeJobFromJobsCache(user.id, job.id);
+      setRemovingJobId(null);
+
       toast({
         title: "Annons borttagen",
         description: "Jobbannonsen har tagits bort."
       });
 
-      setDeleteDialogOpen(false);
-      setJobToDelete(null);
       // Background refetch to sync with server
       invalidateJobs();
     } catch (error) {
+      setRemovingJobId(null);
       invalidateJobs();
       toast({
         title: "Ett fel uppstod",
