@@ -286,6 +286,7 @@ const AnimatedRoutes = () => {
           
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </div>
       </Suspense>
     </>
   );
