@@ -134,6 +134,13 @@
       "when": 1789930874168,
       "tag": "0018_fix_job_closed_dispatch_conflict",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789931772798,
+      "tag": "0019_job_search_vector_shifts",
+      "breakpoints": true
     }
   ]
 }
