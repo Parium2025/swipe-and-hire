@@ -95,7 +95,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const [profileHandoffRevealing, setProfileHandoffRevealing] = useState(false);
   const undoEntryTimerRef = useRef<number | null>(null);
   const profileHandoffStartedAtRef = useRef(0);
-  const profileHandoffOpenFrameRef = useRef<number | null>(null);
+  const profileHandoffOpenTimerRef = useRef<number | null>(null);
   const profileHandoffRevealFrameRef = useRef<number | null>(null);
   const profileHandoffRevealTimerRef = useRef<number | null>(null);
   const profileHandoffFallbackTimerRef = useRef<number | null>(null);
@@ -301,11 +301,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, []);
 
   const clearProfileHandoffScheduling = useCallback(() => {
-    if (profileHandoffOpenFrameRef.current !== null) cancelAnimationFrame(profileHandoffOpenFrameRef.current);
+    if (profileHandoffOpenTimerRef.current !== null) window.clearTimeout(profileHandoffOpenTimerRef.current);
     if (profileHandoffRevealFrameRef.current !== null) cancelAnimationFrame(profileHandoffRevealFrameRef.current);
     if (profileHandoffRevealTimerRef.current !== null) window.clearTimeout(profileHandoffRevealTimerRef.current);
     if (profileHandoffFallbackTimerRef.current !== null) window.clearTimeout(profileHandoffFallbackTimerRef.current);
-    profileHandoffOpenFrameRef.current = null;
+    profileHandoffOpenTimerRef.current = null;
     profileHandoffRevealFrameRef.current = null;
     profileHandoffRevealTimerRef.current = null;
     profileHandoffFallbackTimerRef.current = null;
@@ -318,19 +318,20 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     setProfileHandoffRevealing(false);
     setProfileHandoffApplication(application);
 
-    // Måla först ett mycket lätt, GPU-kompositerat lager. Kandidatprofilen är
-    // stor och får inte blockera den första animationsframen när fingret släpps.
-    profileHandoffOpenFrameRef.current = requestAnimationFrame(() => {
-      profileHandoffOpenFrameRef.current = null;
+    // Låt det lätta GPU-lagret slutföra hela förflyttningen innan den stora
+    // profilträdet monteras. Om profilen monteras redan nästa frame kan dess
+    // layout/portal/queries fortfarande frysa animationen mitt i rörelsen.
+    profileHandoffOpenTimerRef.current = window.setTimeout(() => {
+      profileHandoffOpenTimerRef.current = null;
       onOpenFullProfile(application);
-    });
+    }, 340);
 
     // Om en caller av någon anledning inte öppnar profilen får lagret aldrig
     // bli kvar över Swipe Mode.
     profileHandoffFallbackTimerRef.current = window.setTimeout(() => {
       profileHandoffFallbackTimerRef.current = null;
       setProfileHandoffRevealing(true);
-    }, 900);
+    }, 1200);
   }, [clearProfileHandoffScheduling, onOpenFullProfile, profileHandoffApplication]);
 
   useEffect(() => {
