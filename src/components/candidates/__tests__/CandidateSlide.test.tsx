@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CandidateSlide } from '../CandidateSlide';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
+// Svep-gesterna använder touch-tunneln, precis som på en riktig telefon.
+vi.mock('@/hooks/useInputCapability', () => ({ useInputCapability: () => 'touch' }));
 vi.mock('@/hooks/useMediaUrl', () => ({ useMediaUrl: (url: string | null) => url }));
 vi.mock('@/hooks/useCandidateSummary', () => ({ useCandidateSummary: vi.fn() }));
 vi.mock('@/hooks/useCandidateNotes', () => ({
