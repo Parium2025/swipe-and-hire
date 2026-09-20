@@ -407,9 +407,9 @@ export function ChatView({
     const viewport = getViewportEl();
     if (!viewport) return;
     if (typingUsers.length > 0 && isNearBottomRef.current) {
-      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      pinViewportSmart(viewport);
     }
-  }, [typingUsers, getViewportEl]);
+  }, [typingUsers, getViewportEl, pinViewportSmart]);
 
   // Debounce search query (300ms)
   useEffect(() => {
