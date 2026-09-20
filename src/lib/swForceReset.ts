@@ -9,7 +9,7 @@
  * publicerade domäner och:
  *   1. Av-registrerar alla service workers
  *   2. Tömmer alla Cache Storage-buckets
- *   3. Tvingar en silent reload så bundle hämtas direkt utan SW
+ *   3. Markerar rensningen klar utan att avbryta den synliga sessionen
  *
  * Bumpa RESET_VERSION om vi behöver göra det igen i framtiden.
  */
@@ -17,7 +17,6 @@
 const RESET_VERSION = 'sw-reset-2026-04-27-v10-hard-domain-no-sw-no-cache';
 const RESET_KEY = 'parium_sw_force_reset';
 const RESET_ATTEMPT_KEY = 'parium_sw_force_reset_attempt';
-const RESET_QUERY_PARAM = '_sw_reset';
 const ATTEMPT_TTL_MS = 30_000;
 
 export const getServiceWorkerResetVersion = (): string => RESET_VERSION;
@@ -34,17 +33,7 @@ export function forceServiceWorkerReset(): void {
       host === 'parium-ab.lovable.app';
     if (!isProdDomain) return;
 
-    const url = new URL(window.location.href);
-    const resetMarkerInUrl = url.searchParams.get(RESET_QUERY_PARAM);
     const stored = localStorage.getItem(RESET_KEY);
-
-    if (resetMarkerInUrl === RESET_VERSION) {
-      localStorage.setItem(RESET_KEY, RESET_VERSION);
-      sessionStorage.removeItem(RESET_ATTEMPT_KEY);
-      url.searchParams.delete(RESET_QUERY_PARAM);
-      window.history.replaceState({}, document.title, url.toString());
-      return;
-    }
 
     const hasServiceWorkerApi = 'serviceWorker' in navigator && !!navigator.serviceWorker.getRegistrations;
 
@@ -110,16 +99,11 @@ export function forceServiceWorkerReset(): void {
 
     runReset()
       .then(() => {
-        console.log('[swForceReset] Removed service worker + caches, reloading…');
-        setTimeout(() => {
-          try {
-            const nextUrl = new URL(window.location.href);
-            nextUrl.searchParams.set(RESET_QUERY_PARAM, RESET_VERSION);
-            window.location.replace(nextUrl.toString());
-          } catch {
-            /* ignore */
-          }
-        }, 50);
+        // Den redan laddade appen fortsätter säkert utan den borttagna cachen.
+        // Nästa naturliga sidstart hämtar en färsk version. En tvingad reload
+        // här kunde annars blinka bort hela chatten mitt under skrivning.
+        localStorage.setItem(RESET_KEY, RESET_VERSION);
+        sessionStorage.removeItem(RESET_ATTEMPT_KEY);
       })
       .catch(() => {
         sessionStorage.removeItem(RESET_ATTEMPT_KEY);

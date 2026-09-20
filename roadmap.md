@@ -69,3 +69,9 @@
 - [x] 14-dagarspåminnelsen borttagen helt (notis, reglage, snooze, daglig körning)
 
 - [x] Standardisera kandidatmedia och förvärmning i alla arbetsgivar- och jobbsökarvyer; eliminera personberoende kallstartsblink och verifiera
+
+## Mobilchatt – stabil kompositör och bottenankring
+- [x] Ta bort blinkningen när meddelandefältet fokuseras på mobil
+- [x] Behåll senaste meddelandet synligt efter skickning och tangentbordsstängning
+- [x] Flytta korta konversationer närmare kompositörens vita skiljelinje
+- [x] Verifiera mobilflödet visuellt samt med tester och typkontroll
