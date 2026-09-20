@@ -8,6 +8,7 @@ import { SwipeDots } from '@/components/swipe/SwipeDots';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { Undo2 } from 'lucide-react';
 
 export interface CandidateSwipeFilter {
   question: string;
@@ -297,9 +298,23 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         />
 
         {visibleApplications.length === 0 && (
-          <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-8 text-center">
-            <p className="text-white font-semibold">Inga kandidater att svepa igenom</p>
-            <p className="mt-2 text-sm text-white">Lägg till kandidater i din lista eller ändra dina urvalskriterier.</p>
+          <div className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-5 px-6 text-center">
+            <div className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl animate-scale-in">
+              <p className="text-[15px] font-medium text-white sm:text-base">Inga fler kandidater just nu</p>
+              <p className="mt-2 text-[13px] text-white sm:text-sm">Du kan ångra den senaste kandidaten eller stänga Swipe Mode.</p>
+            </div>
+            {rejectedStackSize > 0 && (
+              <button
+                type="button"
+                onClick={handleUndo}
+                data-swipe-action-button
+                className="flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg backdrop-blur-sm transition-transform active:scale-[0.93] touch-manipulation"
+                aria-label="Ångra senaste nekandet"
+              >
+                <Undo2 className="h-4.5 w-4.5 text-white" />
+                <span className="text-sm font-medium text-white">Ångra</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -353,23 +368,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </div>
         </div>
 
-        {currentApplication && (
-          <div
-            className="pointer-events-none absolute inset-x-0 z-30 px-5"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
-          >
-            <div className="pointer-events-auto flex justify-center">
-              <CandidateSlideActions
-                saved={savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
-                onSave={() => onSaveCandidate?.(currentApplication)}
-                onSkip={handleActionReject}
-                onOpenInfo={handleActionInfo}
-                canUndo={rejectedStackSize > 0}
-                onUndo={handleUndo}
-              />
-            </div>
+        <div
+          className="pointer-events-none absolute inset-x-0 z-30 px-5"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 2.25rem)' }}
+        >
+          <div className="pointer-events-auto flex justify-center">
+            <CandidateSlideActions
+              saved={currentApplication && savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
+              onSave={() => currentApplication && onSaveCandidate?.(currentApplication)}
+              onSkip={handleActionReject}
+              onOpenInfo={handleActionInfo}
+              canUndo={rejectedStackSize > 0}
+              onUndo={handleUndo}
+              visible={Boolean(currentApplication)}
+            />
           </div>
-        )}
+        </div>
 
       </div>,
     document.body
