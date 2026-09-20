@@ -93,6 +93,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
   const undoEntryTimerRef = useRef<number | null>(null);
   const pendingUndoApplicationIdRef = useRef<string | null>(null);
+  const pendingStackIndexRef = useRef<number | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -151,6 +152,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       setDismissedApplicationIds(new Set());
       setUndoEntryApplicationId(null);
       pendingUndoApplicationIdRef.current = null;
+      pendingStackIndexRef.current = null;
       return;
     }
     if (behind || didInitialScrollRef.current) return;
@@ -168,13 +170,22 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   // gamla scrollpositionen fortfarande gäller.
   useLayoutEffect(() => {
     const applicationId = pendingUndoApplicationIdRef.current;
-    if (!applicationId) return;
-    const restoredIndex = visibleApplications.findIndex((application) => application.id === applicationId);
-    if (restoredIndex < 0) return;
+    const stackIndex = pendingStackIndexRef.current;
+    let targetIndex: number | null = stackIndex;
+
+    if (applicationId) {
+      const restoredIndex = visibleApplications.findIndex((application) => application.id === applicationId);
+      if (restoredIndex < 0) return;
+      targetIndex = restoredIndex;
+    }
+    if (targetIndex === null) return;
+
     pendingUndoApplicationIdRef.current = null;
-    currentIndexRef.current = restoredIndex;
-    setCurrentIndex(restoredIndex);
-    const top = getSlideTop(restoredIndex);
+    pendingStackIndexRef.current = null;
+    const safeIndex = Math.min(targetIndex, visibleApplications.length);
+    currentIndexRef.current = safeIndex;
+    setCurrentIndex(safeIndex);
+    const top = getSlideTop(safeIndex);
     if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
   }, [getSlideTop, visibleApplications]);
 
@@ -245,6 +256,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     setCanUndo(true);
 
     if (currentIndex === visibleApplications.length - 1 && hasMore) onLoadMore?.();
+    pendingStackIndexRef.current = currentIndex;
     setDismissedApplicationIds((previous) => {
       const next = new Set(previous);
       next.add(current.id);
@@ -400,6 +412,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           style={{
             WebkitOverflowScrolling: 'touch',
             willChange: 'scroll-position',
+            overflowAnchor: 'none',
             contain: 'layout style paint',
             scrollSnapType: 'y mandatory',
             touchAction: 'pan-y',
