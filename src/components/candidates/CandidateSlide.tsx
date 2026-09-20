@@ -90,6 +90,7 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const {
     triggerSwipe,
+    handleDragEnd,
     handleTouchStartCapture,
     handleTouchMoveCapture,
     handleTouchEndCapture,
