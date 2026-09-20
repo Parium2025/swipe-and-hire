@@ -869,7 +869,7 @@ const JobDetails = () => {
           fromSwipe={returnToSwipe}
           enableJobRejection
           onAddToList={
-            selectedApplication && !savedApplicantIds.has(selectedApplication.applicant_id)
+            selectedApplication
               ? () => setSwipeSaveCandidate(mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb'))
               : undefined
           }
