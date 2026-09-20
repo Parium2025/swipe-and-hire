@@ -81,6 +81,8 @@ const EmployerDashboard = memo(() => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const deletingJobRef = useRef(false);
   const [deletingJob, setDeletingJob] = useState(false);
+  // Kortet som just nu tonar ut — listan uppdateras först när animationen är klar.
+  const [removingJobId, setRemovingJobId] = useState<string | null>(null);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
   // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
   // samma regel som databasens utskickstrigger använder.
