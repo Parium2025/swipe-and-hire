@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, X } from 'lucide-react';
@@ -86,8 +86,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   currentIndexRef.current = currentIndex;
   const skippedStackRef = useRef<string[]>(readCandidateUndoStack());
   const [canUndo, setCanUndo] = useState(() => skippedStackRef.current.length > 0);
+  // Ett överhoppat kort tas bara ur den lokala svepstacken. Kandidatens
+  // pipeline/status påverkas inte. Det är samma handoff-modell som på
+  // jobbsökarsidan: nästa kort flyttas in på exakt samma plats i DOM i stället
+  // för att hela containern samtidigt scrollas en viewport nedåt.
+  const [dismissedApplicationIds, setDismissedApplicationIds] = useState<Set<string>>(() => new Set());
   const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
   const undoEntryTimerRef = useRef<number | null>(null);
+  const pendingUndoApplicationIdRef = useRef<string | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -110,25 +116,29 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     };
   }, [open]);
 
+  const visibleApplications = useMemo(
+    () => applications.filter((application) => !dismissedApplicationIds.has(application.id)),
+    [applications, dismissedApplicationIds],
+  );
   const hasEndSection = applications.length > 0;
 
   // Håll ref-listan i takt med kandidatlistan, annars kan gamla element
   // ligga kvar och ge fel snap-position efter att någon tagits bort.
-  slideRefs.current.length = applications.length;
+  slideRefs.current.length = visibleApplications.length;
 
   /** Positionen för ett kort — läses direkt från DOM, precis som jobbsökarens svep. */
   const getSlideTop = useCallback((idx: number) => {
     const container = scrollRef.current;
-    const el = idx === applications.length ? endSectionRef.current : slideRefs.current[idx];
+    const el = idx === visibleApplications.length ? endSectionRef.current : slideRefs.current[idx];
     if (!container || !el) return null;
     const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
     return Math.min(Math.max(el.offsetTop, 0), maxScrollTop);
-  }, [applications.length]);
+  }, [visibleApplications.length]);
 
 
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
-  useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
+  useCandidateMediaPreloader(visibleApplications, currentIndex, open, 10, 2, 25);
 
 
 
@@ -139,18 +149,36 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   useEffect(() => {
     if (!open) {
       didInitialScrollRef.current = false;
+      setDismissedApplicationIds(new Set());
       setUndoEntryApplicationId(null);
+      pendingUndoApplicationIdRef.current = null;
       return;
     }
     if (behind || didInitialScrollRef.current) return;
-    if (!applications[initialIndex]) return;
+    if (!visibleApplications[initialIndex]) return;
     didInitialScrollRef.current = true;
     setCurrentIndex(initialIndex);
     requestAnimationFrame(() => {
       const top = getSlideTop(initialIndex);
       if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
     });
-  }, [open, behind, initialIndex, applications, getSlideTop]);
+  }, [open, behind, initialIndex, visibleApplications, getSlideTop]);
+
+  // Ångra återför kortet i den lokala stacken och placerar det synkront före
+  // paint. Därmed syns aldrig mellanläget där listans höjd ändrats men den
+  // gamla scrollpositionen fortfarande gäller.
+  useLayoutEffect(() => {
+    const applicationId = pendingUndoApplicationIdRef.current;
+    if (!applicationId) return;
+    const restoredIndex = visibleApplications.findIndex((application) => application.id === applicationId);
+    if (restoredIndex < 0) return;
+    pendingUndoApplicationIdRef.current = null;
+    transitionTargetIndexRef.current = null;
+    currentIndexRef.current = restoredIndex;
+    setCurrentIndex(restoredIndex);
+    const top = getSlideTop(restoredIndex);
+    if (top !== null) scrollRef.current?.scrollTo({ top, behavior: 'auto' });
+  }, [getSlideTop, visibleApplications]);
 
 
   // Track current candidate via scroll position. Under ett programmerat byte
@@ -177,7 +205,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       const dist = Math.abs(endEl.offsetTop - scrollTop);
       if (dist < bestDistance) {
         bestDistance = dist;
-        bestIdx = applications.length;
+        bestIdx = visibleApplications.length;
       }
     }
 
@@ -192,10 +220,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     }
 
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
-    if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
+    if (hasMore && !isLoadingMore && bestIdx >= visibleApplications.length - 8) {
       onLoadMore?.();
     }
-  }, [applications.length, getSlideTop, hasMore, isLoadingMore, onLoadMore]);
+  }, [getSlideTop, hasMore, isLoadingMore, onLoadMore, visibleApplications.length]);
 
   // iOS skickar scroll-events tätare än 60 Hz under momentum. Utan rAF-koalescering
   // körs index-beräkning + setState flera gånger per frame, vilket syns som hack
@@ -221,7 +249,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open, handleScroll]);
 
   const snapToIndex = useCallback((idx: number) => {
-    const maximumIndex = applications.length - 1 + (hasEndSection ? 1 : 0);
+    const maximumIndex = visibleApplications.length - 1 + (hasEndSection ? 1 : 0);
     if (idx < 0 || idx > maximumIndex) return;
     transitionTargetIndexRef.current = idx;
     currentIndexRef.current = idx;
@@ -233,39 +261,48 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const top = getSlideTop(idx) ?? idx * slideHeight;
     container?.scrollTo({ top, behavior: 'auto' });
     transitionTargetIndexRef.current = null;
-  }, [applications.length, getSlideTop, hasEndSection, slideHeight]);
+  }, [getSlideTop, hasEndSection, slideHeight, visibleApplications.length]);
 
   const handleSkip = useCallback(() => {
-    const current = applications[currentIndex];
+    const current = visibleApplications[currentIndex];
     if (!current) return;
 
     skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);
     persistCandidateUndoStack(skippedStackRef.current);
     setCanUndo(true);
 
-    if (currentIndex === applications.length - 1 && hasMore) onLoadMore?.();
-    snapToIndex(currentIndex + 1);
-  }, [applications, currentIndex, hasMore, onLoadMore, snapToIndex]);
+    if (currentIndex === visibleApplications.length - 1 && hasMore) onLoadMore?.();
+    setDismissedApplicationIds((previous) => {
+      const next = new Set(previous);
+      next.add(current.id);
+      return next;
+    });
+  }, [currentIndex, hasMore, onLoadMore, visibleApplications]);
 
   const handleUndo = useCallback(() => {
     const stack = skippedStackRef.current;
     const applicationId = stack[stack.length - 1];
     if (!applicationId) return;
-    const restoredIndex = applications.findIndex((application) => application.id === applicationId);
+    const canRestore = applications.some((application) => application.id === applicationId);
     skippedStackRef.current = stack.slice(0, -1);
     persistCandidateUndoStack(skippedStackRef.current);
     setCanUndo(skippedStackRef.current.length > 0);
-    if (restoredIndex >= 0) {
+    if (canRestore) {
+      pendingUndoApplicationIdRef.current = applicationId;
       setUndoEntryApplicationId(applicationId);
+      setDismissedApplicationIds((previous) => {
+        const next = new Set(previous);
+        next.delete(applicationId);
+        return next;
+      });
       hapticSuccess();
-      snapToIndex(restoredIndex);
       if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
       undoEntryTimerRef.current = window.setTimeout(() => {
         undoEntryTimerRef.current = null;
         setUndoEntryApplicationId(null);
       }, 700);
     }
-  }, [applications, snapToIndex]);
+  }, [applications]);
 
   useEffect(() => () => {
     if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
@@ -279,8 +316,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     activeSkipRef.current?.();
   }, []);
 
-  const currentApplication = applications[currentIndex];
-  const isEndSection = hasEndSection && currentIndex === applications.length;
+  const currentApplication = visibleApplications[currentIndex];
+  const isEndSection = hasEndSection && currentIndex === visibleApplications.length;
   const isComplete = isEndSection && !hasMore;
 
 
@@ -328,7 +365,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
           <div className="py-3">
             <span className="text-xs text-white font-medium tabular-nums">
-              {applications.length === 0 ? '0 / 0' : `${Math.min(currentIndex + 1, applications.length)} / ${applications.length}`}
+              {applications.length === 0 ? '0 / 0' : `${Math.min(dismissedApplicationIds.size + currentIndex + 1, applications.length)} / ${applications.length}`}
             </span>
           </div>
           <div className="py-3">
@@ -364,8 +401,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
         {/* Compact position indicator — never creates thousands of DOM nodes. */}
         <div className={`absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5 transition-opacity duration-200 ${isEndSection ? 'opacity-0' : 'opacity-100'}`}>
-          {Array.from({ length: Math.min(applications.length, 7) }, (_, offset) => {
-            const start = Math.max(0, Math.min(currentIndex - 3, applications.length - 7));
+          {Array.from({ length: Math.min(visibleApplications.length, 7) }, (_, offset) => {
+            const start = Math.max(0, Math.min(currentIndex - 3, visibleApplications.length - 7));
             const idx = start + offset;
             return (
             <div
@@ -395,7 +432,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             touchAction: 'pan-y',
           }}
         >
-          {applications.map((app, idx) => {
+          {visibleApplications.map((app, idx) => {
             // Exakt samma modell som jobbsökarens svep: korten ligger i normalt
             // flöde med fast höjd och snap-start. Endast ±2 kort monteras.
             const withinWindow = Math.abs(idx - currentIndex) <= 2;
@@ -419,7 +456,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                     onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                     isVisible={Math.abs(idx - currentIndex) <= 1}
                     isActive={idx === currentIndex}
-                    nextApplication={applications[idx + 1]}
+                    nextApplication={visibleApplications[idx + 1]}
                     isUndoEntry={app.id === undoEntryApplicationId}
                     onSkip={handleSkip}
                     onRegisterSkip={registerActiveSkip}
@@ -432,7 +469,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           {hasEndSection && (
             <div
               ref={endSectionRef}
-              data-index={applications.length}
+              data-index={visibleApplications.length}
               className="w-full shrink-0 snap-start snap-always"
               style={{ minHeight: `${slideHeight}px`, height: `${slideHeight}px` }}
             >
