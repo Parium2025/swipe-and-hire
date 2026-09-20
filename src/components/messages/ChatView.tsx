@@ -771,7 +771,10 @@ export function ChatView({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // På pekenheter ska returtangenten alltid ge en ny rad (som i iMessage),
+    // aldrig skicka. På desktop skickar Enter, Shift+Enter ger ny rad.
+    const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+    if (e.key === 'Enter' && !e.shiftKey && !isTouch) {
       e.preventDefault();
       handleSend();
     }
@@ -1283,6 +1286,7 @@ export function ChatView({
             )}
             onPointerDown={handleComposerPointerDown}
             onFocus={pinMessagesToBottom}
+            enterKeyHint="enter"
             rows={1}
           />
           <Button
