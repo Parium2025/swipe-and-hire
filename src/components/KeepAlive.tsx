@@ -144,8 +144,9 @@ function KeepAliveCached({
   // Nycklar som monterats i den här renderingen och alltså aldrig visats förut.
   // Endast de ska tona in; redan besökta vyer byts synkront utan animation.
   const freshKeysRef = useRef<Set<string>>(new Set());
-  // Återbesök tonar in kort och lågt (280ms) medan aldrig sedda vyer får den
-  // längre intoningen (500ms). Utan detta blev återbesök ett hårt hopp.
+  // Återbesök får en mycket diskret rörelse medan aldrig sedda vyer får en
+  // något tydligare entré. Startopaciteten hålls hög så appens bakgrund aldrig
+  // exponeras som en tom/blek bildruta under kalla laddningar.
   const [isFastEnter, setIsFastEnter] = React.useState(false);
   const revisitAnimRef = useRef<string | null>(null);
 
@@ -601,9 +602,11 @@ function KeepAliveCached({
         const enterClasses = isEntered
           ? 'opacity-100 translate-y-0'
           : isFastEnter
-            ? 'opacity-0 translate-y-1 pointer-events-none'
-            : 'opacity-0 translate-y-2 pointer-events-none';
-        const durationClass = isFastEnter ? 'duration-[280ms]' : 'duration-500';
+            ? 'opacity-90 translate-y-0.5 md:opacity-0 md:translate-y-1 pointer-events-none'
+            : 'opacity-80 translate-y-1.5 md:opacity-0 md:translate-y-2 pointer-events-none';
+        const durationClass = isFastEnter
+          ? 'duration-[220ms] md:duration-[280ms]'
+          : 'duration-[340ms] md:duration-500';
         return (
           <div
             key={key}
@@ -618,7 +621,7 @@ function KeepAliveCached({
             }
             className={
               isDisplayed
-                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
+                ? `flex-1 min-h-0 flex flex-col transform-gpu transition-[opacity,transform] motion-reduce:transition-none ${durationClass} [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${enterClasses}`
                 : ''
             }
             aria-hidden={!isDisplayed}

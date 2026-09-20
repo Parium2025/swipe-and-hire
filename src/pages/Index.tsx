@@ -539,8 +539,6 @@ const Index = () => {
   const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const device = useDevice();
-  const routeEnterDelayMs = device === 'desktop' ? 0 : 140;
 
   // JobView overlay-stöd: när användaren navigerar till /job-view/:id ska
   // den underliggande KeepAlive-vyn (SearchJobs/SavedJobs/etc) stå kvar
@@ -815,7 +813,6 @@ const Index = () => {
           activeKey={activeKeepKey}
           render={(key) => renderSidebarContent(key)}
           keepKeys={JOB_SEEKER_KEEP_KEYS}
-          enterDelayMs={routeEnterDelayMs}
         />
         {showTourOverlay ? (
           <AppOnboardingTour onComplete={finishIntroTour} firstName={(profile as any)?.first_name} initialStep={introTourStep} />
@@ -904,7 +901,6 @@ const Index = () => {
           activeKey={employerKeepKey}
           render={(key) => renderEmployerContent(key)}
           keepKeys={EMPLOYER_KEEP_KEYS}
-          enterDelayMs={routeEnterDelayMs}
           resetScrollOnNavigation
         />
         {showEmployerTourOverlay ? (
