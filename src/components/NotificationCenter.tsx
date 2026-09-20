@@ -109,9 +109,12 @@ function resolveRoute(type: string, metadata?: Record<string, unknown> | null): 
     case 'application_status':
       return applicationId ? `/my-applications?application=${applicationId}` : '/my-applications';
     case 'interview_scheduled':
-    case 'interview_reminder':
       if (interviewId) return `/my-candidates?interview=${interviewId}`;
       return candidateId ? `/my-candidates?candidate=${candidateId}` : '/my-candidates';
+    // Intervjupåminnelser ("Intervju om 10 minuter") saknar ett meningsfullt mål
+    // och ska inte gå att trycka på – de är bara information.
+    case 'interview_reminder':
+      return undefined;
     case 'job_expired':
     case 'job_closed':
       return jobId ? `/job-details/${jobId}` : '/my-jobs';
@@ -191,31 +194,30 @@ function NotificationItem({
 
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
 
+  // Utan rutt är notisen ren information: inget tryck, ingen hover, ingen pil.
+  const clickable = Boolean(route);
+
   return (
     <motion.div
-      role="button"
-      tabIndex={0}
+      {...(clickable ? { role: 'button', tabIndex: 0 } : {})}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.15 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => {
+      onClick={clickable ? () => {
         if (!notification.is_read) onRead(notification.id);
-        if (route) onNavigate(route);
-      }}
-      onKeyDown={(e) => {
+        onNavigate(route!);
+      } : undefined}
+      onKeyDown={clickable ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           if (!notification.is_read) onRead(notification.id);
-          if (route) onNavigate(route);
+          onNavigate(route!);
         }
-      }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
-        notification.is_read 
-          ? 'opacity-60 hover:bg-white/5' 
-          : 'hover:bg-white/5'
-      }`}
+      } : undefined}
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors ${
+        clickable ? 'pointer-fine:hover:bg-white/5 cursor-pointer' : ''
+      } ${notification.is_read ? 'opacity-60' : ''}`}
     >
       <div className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
         <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
@@ -287,22 +289,22 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
     if (route) onNavigate(route);
   };
 
+  const clickable = Boolean(route);
+
   return (
     <motion.div
-      role="button"
-      tabIndex={0}
+      {...(clickable ? { role: 'button', tabIndex: 0 } : {})}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.15 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={activate}
-      onKeyDown={(e) => {
+      onClick={clickable ? activate : undefined}
+      onKeyDown={clickable ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
-      }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer ${
-        item.is_read ? 'opacity-60 hover:bg-white/5' : 'hover:bg-white/5'
-      }`}
+      } : undefined}
+      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors ${
+        clickable ? 'pointer-fine:hover:bg-white/5 cursor-pointer' : ''
+      } ${item.is_read ? 'opacity-60' : ''}`}
     >
       <span className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
         <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
