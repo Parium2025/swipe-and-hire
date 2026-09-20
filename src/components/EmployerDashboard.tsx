@@ -43,6 +43,7 @@ import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCoun
 import { getManagedScrollContainer, readPositions, writePositions, saveScrollNow } from '@/lib/scrollRestoration';
 import { EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { TruncatedText } from '@/components/TruncatedText';
 import { RepublishJobDialog } from '@/components/RepublishJobDialog';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
@@ -1021,9 +1022,9 @@ const EmployerDashboard = memo(() => {
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0 max-h-[90dvh] flex flex-col"
+          className="h-auto max-h-[90dvh] w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] overflow-y-auto border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:w-[28rem] sm:max-w-md sm:p-6"
         >
-          <AlertDialogHeader className="space-y-4 text-center flex-shrink-0">
+          <AlertDialogHeader className="text-center">
             <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
                 <AlertTriangle className="h-4 w-4 text-white" />
@@ -1033,14 +1034,16 @@ const EmployerDashboard = memo(() => {
               </AlertDialogTitle>
             </div>
           </AlertDialogHeader>
-          <div className="overflow-y-auto min-h-0 mt-3 mb-4">
+          <div className="min-h-0">
             <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
                   <span className="block">Är du säker på att du vill ta bort annonsen</span>
-                  <span className="mt-1 block font-semibold text-white break-words">
-                    {`”${jobToDelete.title}”?`}
-                  </span>
+                  <TruncatedText
+                    text={`”${jobToDelete.title}”?`}
+                    className="mx-auto mt-1 line-clamp-2 max-w-full text-center font-semibold leading-relaxed text-white break-words [overflow-wrap:anywhere]"
+                    tooltipSide="top"
+                  />
                   <span className="mt-2 block">Denna åtgärd går inte att ångra.</span>
                 </>
               )}
@@ -1055,7 +1058,7 @@ const EmployerDashboard = memo(() => {
             )}
           </div>
 
-          <AlertDialogFooter className="flex-row gap-2 sm:justify-center flex-shrink-0">
+          <AlertDialogFooter className="flex-row gap-2 sm:justify-center">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
