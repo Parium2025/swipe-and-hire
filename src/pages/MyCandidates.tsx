@@ -34,6 +34,7 @@ import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { useBulkCandidateOps } from '@/hooks/useBulkCandidateOps';
 import { useCandidateLists, useActiveCandidateList, useTeamCandidateLists } from '@/hooks/useCandidateLists';
 import { CandidateListsDialog } from '@/pages/myCandidates/CandidateListsDialog';
+import { AddToColleagueListDialog } from '@/components/AddToColleagueListDialog';
 import { 
   UserCheck,
   Plus,
