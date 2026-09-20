@@ -59,7 +59,7 @@ describe('CandidateSlide employer swipe', () => {
     vi.useFakeTimers();
     const onSkip = vi.fn();
     const onOpenFullProfile = vi.fn();
-    const { container } = render(
+    const { container, unmount } = render(
       <CandidateSlide
         application={application}
         rating={0}
@@ -79,9 +79,21 @@ describe('CandidateSlide employer swipe', () => {
 
     expect(onSkip).toHaveBeenCalledTimes(1);
 
-    fireEvent.touchStart(card as Element, { touches: [touch(120, 220)] });
-    fireEvent.touchMove(card as Element, { touches: [touch(320, 224)] });
-    fireEvent.touchEnd(card as Element, { changedTouches: [touch(320, 224)] });
+    unmount();
+    const second = render(
+      <CandidateSlide
+        application={application}
+        rating={0}
+        isVisible
+        isActive
+        onOpenFullProfile={onOpenFullProfile}
+        onSkip={onSkip}
+      />,
+    );
+    const nextCard = second.container.querySelector('[data-candidate-swipe-card]');
+    fireEvent.touchStart(nextCard as Element, { touches: [touch(120, 220)] });
+    fireEvent.touchMove(nextCard as Element, { touches: [touch(320, 224)] });
+    fireEvent.touchEnd(nextCard as Element, { changedTouches: [touch(320, 224)] });
     act(() => vi.advanceTimersByTime(250));
 
     expect(onSkip).toHaveBeenCalledTimes(1);

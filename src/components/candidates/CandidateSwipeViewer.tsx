@@ -56,10 +56,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
-  const rejectedStackRef = useRef<number[]>([]);
+  const rejectedStackRef = useRef<Array<{ id: string; index: number }>>([]);
   const [rejectedStackSize, setRejectedStackSize] = useState(0);
-  const [cardVersions, setCardVersions] = useState<Record<string, number>>({});
+  const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => new Set());
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const visibleApplications = useMemo(
+    () => applications.filter((application) => !rejectedIds.has(application.id)),
+    [applications, rejectedIds],
+  );
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
     typeof window === 'undefined' ? 800 : window.innerHeight
@@ -83,11 +87,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open]);
 
   const virtualizer = useVirtualizer({
-    count: applications.length,
+    count: visibleApplications.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => slideHeight,
     overscan: 2,
-    getItemKey: (index) => applications[index]?.id || index,
+    getItemKey: (index) => visibleApplications[index]?.id || index,
   });
 
   // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
@@ -97,7 +101,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 
 
   /* ── Premium media preloading: bulk-25 on open, rolling 10 ahead / 2 back ── */
-  useCandidateMediaPreloader(applications, currentIndex, open, 10, 2, 25);
+  useCandidateMediaPreloader(visibleApplications, currentIndex, open, 10, 2, 25);
 
 
 
@@ -111,11 +115,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       return;
     }
     if (behind || didInitialScrollRef.current) return;
-    if (!applications[initialIndex]) return;
+    if (!visibleApplications[initialIndex]) return;
     didInitialScrollRef.current = true;
     setCurrentIndex(initialIndex);
     requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
-  }, [open, behind, initialIndex, applications, virtualizer]);
+  }, [open, behind, initialIndex, visibleApplications, virtualizer]);
 
 
   // Track current candidate via scroll position — simple & reliable
@@ -135,10 +139,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     });
 
     setCurrentIndex(prev => prev !== bestIdx ? bestIdx : prev);
-    if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
+    if (hasMore && !isLoadingMore && bestIdx >= visibleApplications.length - 8) {
       onLoadMore?.();
     }
-  }, [applications.length, currentIndex, hasMore, isLoadingMore, onLoadMore, virtualizer]);
+  }, [visibleApplications.length, currentIndex, hasMore, isLoadingMore, onLoadMore, virtualizer]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -149,31 +153,33 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open, handleScroll]);
 
   const goToIndex = useCallback((idx: number) => {
-    if (idx < 0 || idx >= applications.length) return;
+    if (idx < 0 || idx >= visibleApplications.length) return;
     setCurrentIndex(idx);
     virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
-  }, [applications.length, virtualizer]);
+  }, [visibleApplications.length, virtualizer]);
 
   const registerActiveSwipeApi = useCallback((api: CandidateSlideSwipeApi | null) => {
     activeCardSwipeRef.current = api?.swipe ?? null;
   }, []);
 
   const handleReject = useCallback((index: number, applicationId: string) => {
-    rejectedStackRef.current = [...rejectedStackRef.current, index];
+    rejectedStackRef.current = [...rejectedStackRef.current, { id: applicationId, index }];
     setRejectedStackSize(rejectedStackRef.current.length);
-    setCardVersions((previous) => ({
-      ...previous,
-      [applicationId]: (previous[applicationId] ?? 0) + 1,
-    }));
-    goToIndex(Math.min(index + 1, applications.length - 1));
-  }, [applications.length, goToIndex]);
+    setRejectedIds((previous) => new Set(previous).add(applicationId));
+    setCurrentIndex(Math.min(index, Math.max(0, visibleApplications.length - 2)));
+  }, [visibleApplications.length]);
 
   const handleUndo = useCallback(() => {
-    const previousIndex = rejectedStackRef.current.at(-1);
-    if (previousIndex === undefined) return;
+    const previous = rejectedStackRef.current.at(-1);
+    if (!previous) return;
     rejectedStackRef.current = rejectedStackRef.current.slice(0, -1);
     setRejectedStackSize(rejectedStackRef.current.length);
-    goToIndex(previousIndex);
+    setRejectedIds((current) => {
+      const next = new Set(current);
+      next.delete(previous.id);
+      return next;
+    });
+    requestAnimationFrame(() => goToIndex(previous.index));
   }, [goToIndex]);
 
   const handleActionReject = useCallback(() => {
@@ -184,7 +190,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     activeCardSwipeRef.current?.('right');
   }, []);
 
-  const currentApplication = applications[currentIndex];
+  const currentApplication = visibleApplications[currentIndex];
 
 
   // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
@@ -219,7 +225,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (open) return;
     rejectedStackRef.current = [];
     setRejectedStackSize(0);
-    setCardVersions({});
+    setRejectedIds(new Set());
   }, [open]);
 
   if (!open) return null;
@@ -235,8 +241,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         aria-hidden={behind || undefined}
       >
         <SwipeHeader
-          displayIndex={applications.length === 0 ? 0 : Math.min(currentIndex + 1, applications.length)}
-          totalCount={applications.length}
+          displayIndex={visibleApplications.length === 0 ? 0 : Math.min(currentIndex + 1, visibleApplications.length)}
+          totalCount={visibleApplications.length}
           hasFilter={false}
           activeFilterCount={0}
           onFilterOpen={() => undefined}
@@ -266,13 +272,13 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         )}
 
         <SwipeDots
-          count={applications.length}
+          count={visibleApplications.length}
           currentIndex={currentIndex}
           isEndStateActive={false}
           onScrubTo={goToIndex}
         />
 
-        {applications.length === 0 && (
+        {visibleApplications.length === 0 && (
           <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-8 text-center">
             <p className="text-white font-semibold">Inga kandidater att svepa igenom</p>
             <p className="mt-2 text-sm text-white">Lägg till kandidater i din lista eller ändra dina urvalskriterier.</p>
@@ -293,11 +299,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         >
           <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((item) => {
-            const app = applications[item.index];
+            const app = visibleApplications[item.index];
             if (!app) return null;
             return (
             <div
-               key={`${app.id}:${cardVersions[app.id] ?? 0}`}
+               key={app.id}
               data-index={item.index}
               className="absolute left-0 top-0 w-full"
               style={{
@@ -310,7 +316,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
               <div className="h-full w-full">
               <CandidateSlide
                 application={app}
-                nextApplication={item.index === currentIndex ? applications[item.index + 1] : undefined}
+                nextApplication={item.index === currentIndex ? visibleApplications[item.index + 1] : undefined}
                 rating={getDisplayRating(app)}
                 onOpenFullProfile={() => onOpenFullProfile(app)}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
