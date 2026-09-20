@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef, startTransition } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { MyCandidateData, useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useMyCandidateStageCounts } from '@/hooks/useMyCandidateStageCounts';
 import { useKanbanLayout } from '@/hooks/useKanbanLayout';
@@ -836,15 +836,10 @@ const MyCandidates = () => {
     setReturnToSwipe(true);
     const original = displayedCandidates.find(c => c.application_id === application.id);
     if (!original) return;
-    // Kandidatprofilen är en tung vy. Monteras den i samma bildruta som
-    // svepets släpp tappar animationen ramar. Vi väntar en bildruta och
-    // monterar sedan som låg prioritet, så gesten alltid känns len.
-    requestAnimationFrame(() => {
-      startTransition(() => {
-        setSelectedCandidate(original);
-        setDialogOpen(true);
-      });
-    });
+    // Öppna i samma commit som jobbsökarens swipe-detalj. Den tidigare
+    // rAF + lågprioritetsköningen skapade en märkbar paus efter fingersläpp.
+    setSelectedCandidate(original);
+    setDialogOpen(true);
   }, [displayedCandidates, swipeApplicationsData]);
 
   const getDisplayRating = useCallback((app: ApplicationData) => app.rating || 0, []);
