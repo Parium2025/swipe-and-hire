@@ -6,6 +6,7 @@ import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { hydrateMyCandidateRows } from '@/lib/myCandidatesHydration';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 
