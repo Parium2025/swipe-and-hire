@@ -2,7 +2,7 @@ import { useState, memo, useMemo, useRef, useEffect, useCallback, startTransitio
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +13,6 @@ import { useJobsData, removeJobFromJobsCache, removeJobsFromJobsCache, type JobP
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 
-import { TruncatedText } from '@/components/TruncatedText';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { formatDateShortSv } from '@/lib/date';
 import { getEmployerJobStatus, isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
@@ -55,6 +54,23 @@ type JobStatusTab = 'active' | 'expired' | 'draft';
 // `__searchJobsHasMountedOnce` på job-seeker-sidan exakt.
 let __employerDashboardHasMountedOnce = false;
 
+/**
+ * Räknar kandidater som automatiskt får besked när en annons avslutas.
+ * Spegling av `enqueue_outreach_dispatch` — anställda och redan avslagna
+ * räknas aldrig med. Körs via React Query så svaret kan förhämtas.
+ */
+const AUTO_NOTIFY_KEY = 'job-auto-notify-count';
+const fetchAutoNotifyCount = async (jobId: string): Promise<number | null> => {
+  const { count, error } = await supabase
+    .from('job_applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('job_id', jobId)
+    .is('rejected_at', null)
+    .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
+  if (error) return null;
+  return count ?? 0;
+};
+
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,10 +99,20 @@ const EmployerDashboard = memo(() => {
   const [deletingJob, setDeletingJob] = useState(false);
   // Kortet som just nu tonar ut — listan uppdateras först när animationen är klar.
   const [removingJobId, setRemovingJobId] = useState<string | null>(null);
+  // Kortet som just fyllts på i listan efter en borttagning — tonar in.
+  const [enteringIds, setEnteringIds] = useState<Set<string>>(() => new Set());
+  const prevPageIdsRef = useRef<string[]>([]);
+  const expectEnterRef = useRef(false);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
-  // null = ännu inte hämtat. Anställda och redan avslagna räknas aldrig med —
-  // samma regel som databasens utskickstrigger använder.
-  const [autoNotifyCount, setAutoNotifyCount] = useState<number | null>(null);
+  // Förhämtas för sidans annonser, så rutan är ifylld direkt vid klick.
+  const { data: autoNotifyData } = useQuery({
+    queryKey: [AUTO_NOTIFY_KEY, jobToDelete?.id],
+    queryFn: () => fetchAutoNotifyCount(jobToDelete!.id),
+    enabled: !!jobToDelete?.id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+  const autoNotifyCount = autoNotifyData ?? null;
 
 
   const [editRepublishMode, setEditRepublishMode] = useState(false);
@@ -446,31 +472,45 @@ const EmployerDashboard = memo(() => {
   };
 
   /**
-   * 📣 Informationsruta vid borttagning: räknar hur många kandidater som
-   * automatiskt får besked om att tjänsten är avslutad. Spegling av
-   * `enqueue_outreach_dispatch` — anställda och redan avslagna hoppas över.
-   * Rent informativt; arbetsgivaren behöver aldrig välja något.
+   * 📣 Informationsrutan vid borttagning förhämtas för sidans annonser när
+   * webbläsaren är ledig, så antalet kandidater redan ligger i cachen när
+   * arbetsgivaren trycker på papperskorgen. Inget laddningshopp i dialogen.
    */
   useEffect(() => {
-    const jobId = jobToDelete?.id;
-    if (!deleteDialogOpen || !jobId) {
-      setAutoNotifyCount(null);
-      return;
-    }
+    if (!pageJobs.length) return;
     let cancelled = false;
-    setAutoNotifyCount(null);
-    (async () => {
-      const { count, error } = await supabase
-        .from('job_applications')
-        .select('id', { count: 'exact', head: true })
-        .eq('job_id', jobId)
-        .is('rejected_at', null)
-        .or('status.is.null,and(status.neq.hired,status.neq.rejected)');
-      if (cancelled) return;
-      setAutoNotifyCount(error ? null : (count ?? 0));
-    })();
-    return () => { cancelled = true; };
-  }, [deleteDialogOpen, jobToDelete?.id]);
+    const ids = pageJobs.map(j => j.id);
+    const run = async () => {
+      for (const id of ids) {
+        if (cancelled) return;
+        await queryClient.prefetchQuery({
+          queryKey: [AUTO_NOTIFY_KEY, id],
+          queryFn: () => fetchAutoNotifyCount(id),
+          staleTime: 5 * 60 * 1000,
+        });
+      }
+    };
+    const timer = window.setTimeout(run, 400);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [pageJobs, queryClient]);
+
+  /**
+   * ✨ Kortet som fylls på i listan efter en borttagning tonar in mjukt
+   * i stället för att blinka fram.
+   */
+  useEffect(() => {
+    const ids = pageJobs.map(j => j.id);
+    const prev = prevPageIdsRef.current;
+    prevPageIdsRef.current = ids;
+    if (!expectEnterRef.current) return;
+    const prevSet = new Set(prev);
+    const fresh = ids.filter(id => !prevSet.has(id));
+    expectEnterRef.current = false;
+    if (!fresh.length) return;
+    setEnteringIds(new Set(fresh));
+    const timer = window.setTimeout(() => setEnteringIds(new Set()), 420);
+    return () => window.clearTimeout(timer);
+  }, [pageJobs]);
 
 
   const handleRepublishClick = (job: JobPosting) => {
@@ -491,7 +531,7 @@ const EmployerDashboard = memo(() => {
     setDeleteDialogOpen(false);
     setJobToDelete(null);
     setRemovingJobId(job.id);
-    const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 240));
+    const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 420));
 
     try {
       // Soft delete in DB — is_active måste nollas också, annars ligger raden
@@ -516,7 +556,9 @@ const EmployerDashboard = memo(() => {
         return;
       }
 
-      // Ta bort ur cacherna först när kortet redan tonat bort.
+      // Ta bort ur cacherna först när kortet redan tonat bort. Nästa kort som
+      // fylls på i listan ska tona in, inte blinka fram.
+      expectEnterRef.current = true;
       queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
         if (!Array.isArray(old)) return old;
         return old.filter((j: any) => j.id !== job.id);
@@ -831,7 +873,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''}`}>
+                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''} ${enteringIds.has(job.id) ? 'job-card-entering' : ''}`}>
                     <MobileJobCard
                       job={job}
                       onOpen={handleOpenJob}
@@ -931,7 +973,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''}`}>
+                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''} ${enteringIds.has(job.id) ? 'job-card-entering' : ''}`}>
                     <MobileJobCard
                       job={job}
                       onOpen={handleOpenJob}
@@ -995,7 +1037,11 @@ const EmployerDashboard = memo(() => {
             <AlertDialogDescription className="text-white text-sm leading-relaxed text-center">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <TruncatedText text={`"${jobToDelete.title}"`} className="font-semibold text-white break-words" />? Denna åtgärd går inte att ångra.
+                  <span className="block">Är du säker på att du vill ta bort annonsen</span>
+                  <span className="mt-1 block font-semibold text-white break-words">
+                    {`”${jobToDelete.title}”?`}
+                  </span>
+                  <span className="mt-2 block">Denna åtgärd går inte att ångra.</span>
                 </>
               )}
             </AlertDialogDescription>
