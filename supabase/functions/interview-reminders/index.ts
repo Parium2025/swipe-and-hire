@@ -137,9 +137,50 @@ Deno.serve(async (req) => {
         for (const t of templates || []) activeTemplateIds.add((t as { id: string }).id);
       }
 
+      // Arbetsgivaren äger OM och NÄR påminnelsen går ut (regel + mall).
+      // Kandidaten äger PÅ VILKEN KANAL den landar. Därför slår vi ihop
+      // arbetsgivarens regler per tidpunkt och skickar sedan på de kanaler
+      // kandidaten själv valt (chatt ligger alltid kvar i inkorgen).
+      type Group = {
+        rep: InterviewTimelineAutomation;
+        byChannel: Map<string, InterviewTimelineAutomation>;
+      };
+      const groups = new Map<string, Group>();
       for (const automation of (automations || []) as InterviewTimelineAutomation[]) {
         const tplId = (automation as { template_id?: string | null }).template_id;
         if (tplId && !activeTemplateIds.has(tplId)) continue;
+        const delay = Math.max(automation.delay_minutes ?? 0, 0);
+        const key = `${automation.owner_user_id}:${delay}`;
+        const group = groups.get(key);
+        if (!group) {
+          groups.set(key, { rep: automation, byChannel: new Map([[automation.channel, automation]]) });
+          continue;
+        }
+        if (!group.byChannel.has(automation.channel)) group.byChannel.set(automation.channel, automation);
+        // Chattregelns mall är den rikaste – låt den vara reserv för övriga kanaler.
+        if (group.rep.channel !== "chat" && automation.channel === "chat") group.rep = automation;
+      }
+
+      const candidateChannelCache = new Map<string, string[]>();
+      const candidateChannels = async (userId: string): Promise<string[]> => {
+        const cached = candidateChannelCache.get(userId);
+        if (cached) return cached;
+        const { data } = await supabase
+          .from("notification_preferences")
+          .select("is_enabled, email_enabled")
+          .eq("user_id", userId)
+          .eq("notification_type", "interview_scheduled")
+          .maybeSingle();
+        // Chatten kan inte stängas av – kallelsen ska alltid finnas i tråden.
+        const channels = ["chat"];
+        if (!data || data.is_enabled !== false) channels.push("push");
+        if (!data || data.email_enabled !== false) channels.push("email");
+        candidateChannelCache.set(userId, channels);
+        return channels;
+      };
+
+      for (const { rep, byChannel } of groups.values()) {
+        const automation = rep;
         const delayMs = Math.max(automation.delay_minutes ?? 0, 0) * 60 * 1000;
         const targetTime = trigger === "interview_before"
           ? new Date(now.getTime() + delayMs)
@@ -170,19 +211,22 @@ Deno.serve(async (req) => {
 
           const { data: existingLogs } = await supabase
             .from("outreach_dispatch_logs")
-            .select("id, payload")
-            .eq("automation_id", automation.id)
+            .select("id, channel, payload")
             .eq("interview_id", interview.id)
             .eq("recipient_user_id", interview.applicant_id)
             .eq("trigger", trigger);
 
-          const alreadyQueued = (existingLogs || []).some((log) => {
-            const payload = (log as { payload?: Record<string, unknown> | null }).payload;
-            const loggedRevision = Number(payload?.revision ?? 0);
-            return loggedRevision === revision;
-          });
-
-          if (alreadyQueued) continue;
+          const alreadyQueuedChannels = new Set(
+            (existingLogs || [])
+              .filter((log) => {
+                const payload = (log as { payload?: Record<string, unknown> | null }).payload;
+                const loggedRevision = Number(payload?.revision ?? 0);
+                const loggedDelay = Number(payload?.delay_minutes ?? -1);
+                return loggedRevision === revision
+                  && loggedDelay === Math.max(automation.delay_minutes ?? 0, 0);
+              })
+              .map((log) => (log as { channel: string }).channel),
+          );
 
           // Före-intervju: kandidatens eget Google-larm på samma minutantal
           // ersätter vårt utskick den här gången.
@@ -196,30 +240,37 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
-            owner_user_id: automation.owner_user_id,
-            organization_id: automation.organization_id,
-            automation_id: automation.id,
-            template_id: automation.template_id,
-            trigger,
-            channel: automation.channel,
-            recipient_user_id: interview.applicant_id,
-            interview_id: interview.id,
-            job_id: interview.job_id,
-            payload: {
-              source: "interview-reminders",
-              queued_at: now.toISOString(),
-              revision,
-              delay_minutes: automation.delay_minutes,
-              filters: automation.filters,
-              location_type: interview.location_type,
-              location_details: interview.location_details,
-            },
-            status: "pending",
-          });
+          const channels = await candidateChannels(interview.applicant_id);
 
+          for (const channel of channels) {
+            if (alreadyQueuedChannels.has(channel)) continue;
+            const source = byChannel.get(channel) ?? automation;
 
-          if (!insertError) queued += 1;
+            const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
+              owner_user_id: automation.owner_user_id,
+              organization_id: automation.organization_id,
+              automation_id: source.id,
+              template_id: source.template_id,
+              trigger,
+              channel,
+              recipient_user_id: interview.applicant_id,
+              interview_id: interview.id,
+              job_id: interview.job_id,
+              payload: {
+                source: "interview-reminders",
+                queued_at: now.toISOString(),
+                revision,
+                delay_minutes: automation.delay_minutes,
+                filters: automation.filters,
+                location_type: interview.location_type,
+                location_details: interview.location_details,
+                channel_chosen_by: "recipient",
+              },
+              status: "pending",
+            });
+
+            if (!insertError) queued += 1;
+          }
         }
       }
 
