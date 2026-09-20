@@ -1,31 +1,21 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, type TouchEvent as ReactTouchEvent } from 'react';
-import { animate, motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Info, X } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useInputCapability } from '@/hooks/useInputCapability';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
-import { hapticLight, hapticMedium } from '@/lib/haptics';
 import { CandidateCardFace } from './CandidateCardFace';
 import { CandidateNextCardUnderlay } from './CandidateNextCardUnderlay';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import {
-  EXIT_HANDOFF_MS,
-  EXIT_OPACITY_DURATION,
-  EXIT_SPRING,
-  EXIT_X,
-  PREMIUM_EASE,
-  SNAP_SPRING,
-  SWIPE_THRESHOLD,
   TOUCH_DRAG_INTENT_THRESHOLD,
   UNDERLAY_INITIAL_OPACITY,
   UNDERLAY_INITIAL_SCALE,
   UNDERLAY_INITIAL_Y,
-  UNDERLAY_OPACITY_DURATION,
-  UNDERLAY_RISE_SPRING,
-  VELOCITY_THRESHOLD,
 } from '@/components/swipe/jobSlide/constants';
 import { useUndoEntryAnimation } from '@/components/swipe/jobSlide/useUndoEntryAnimation';
+import { useSwipeCardGesture } from '@/components/swipe/jobSlide/useSwipeCardGesture';
 
 interface CandidateSlideProps {
   application: ApplicationData;
@@ -246,10 +236,10 @@ export const CandidateSlide = memo(function CandidateSlide({
           dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
           dragElastic={useTouchTunnel ? undefined : 0.18}
           onDragEnd={useTouchTunnel ? undefined : handleDragEnd}
-          onTouchStartCapture={handleTouchStart}
-          onTouchMoveCapture={handleTouchMove}
-          onTouchEndCapture={handleTouchEnd}
-          onTouchCancelCapture={handleTouchCancel}
+          onTouchStartCapture={onTouchStart}
+          onTouchMoveCapture={onTouchMove}
+          onTouchEndCapture={onTouchEnd}
+          onTouchCancelCapture={onTouchCancel}
           onContextMenuCapture={(event) => event.preventDefault()}
           onDragStartCapture={(event) => event.preventDefault()}
         >
