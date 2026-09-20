@@ -229,18 +229,21 @@ Deno.serve(async (req) => {
           );
 
           // Före-intervju: kandidatens eget Google-larm på samma minutantal
-          // ersätter vårt utskick den här gången.
-          if (
-            trigger === "interview_before" &&
-            await collidesWithGoogleReminder(interview.applicant_id, Math.max(automation.delay_minutes ?? 0, 0))
-          ) {
-            console.log(
-              `interview_before skipped – Google påminner redan ${automation.delay_minutes} min före (kandidat ${interview.applicant_id})`,
+          // ersätter vårt LARM (push) – men chatt/mejl finns kvar, annars
+          // försvinner själva meddelandet ur tråden.
+          const googleCollides = trigger === "interview_before"
+            && await collidesWithGoogleReminder(
+              interview.applicant_id,
+              Math.max(automation.delay_minutes ?? 0, 0),
             );
-            continue;
+          if (googleCollides) {
+            console.log(
+              `interview_before push skipped – Google påminner redan ${automation.delay_minutes} min före (kandidat ${interview.applicant_id})`,
+            );
           }
 
-          const channels = await candidateChannels(interview.applicant_id);
+          const channels = (await candidateChannels(interview.applicant_id))
+            .filter((channel) => !(googleCollides && channel === "push"));
 
           for (const channel of channels) {
             if (alreadyQueuedChannels.has(channel)) continue;
@@ -396,6 +399,7 @@ Deno.serve(async (req) => {
           title: string,
           body: string,
           route: string,
+          options?: { skipPush?: boolean },
         ) => {
           let delivered = false;
           const { error: notifError } = await supabase.from("notifications").insert({
@@ -412,27 +416,29 @@ Deno.serve(async (req) => {
             delivered = true;
           }
 
-          try {
-            await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${supabaseServiceKey}`,
-              },
-              body: JSON.stringify({
-                recipient_id: userId,
-                title,
-                body,
-                data: {
-                  type: "interview_reminder",
-                  interview_id: interview.id,
-                  route,
+          if (!options?.skipPush) {
+            try {
+              await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseServiceKey}`,
                 },
-              }),
-            });
-          } catch (err) {
-            // Push är ett komplement – saknad mobilapp får inte fälla påminnelsen.
-            console.error(`Push failed for ${userId}:`, err);
+                body: JSON.stringify({
+                  recipient_id: userId,
+                  title,
+                  body,
+                  data: {
+                    type: "interview_reminder",
+                    interview_id: interview.id,
+                    route,
+                  },
+                }),
+              });
+            } catch (err) {
+              // Push är ett komplement – saknad mobilapp får inte fälla påminnelsen.
+              console.error(`Push failed for ${userId}:`, err);
+            }
           }
 
           if (delivered) {
@@ -441,38 +447,41 @@ Deno.serve(async (req) => {
           }
         };
 
-        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på –
-        // och inte heller då om kandidatens eget Google-larm redan ligger på
-        // exakt 10 minuter (dubbelping samma minut).
+        // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på.
+        // Ligger kandidatens eget Google-larm på exakt 10 minuter hoppar vi
+        // över vårt LARM (push) men behåller notisen i appen.
         const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id);
         const candidateGoogleCollides = candidateReminderAllowed
           ? await collidesWithGoogleReminder(interview.applicant_id, 10)
           : false;
-        if (candidateReminderAllowed && !candidateGoogleCollides) {
+        if (candidateReminderAllowed) {
+          if (candidateGoogleCollides) {
+            console.log(`Candidate push skipped – Google påminner redan 10 min före (kandidat ${interview.applicant_id})`);
+          }
           await notifyBoth(
             interview.applicant_id,
             "Intervju om 10 minuter ⏰",
             `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
             "/my-applications",
+            { skipPush: candidateGoogleCollides },
           );
-        } else if (candidateGoogleCollides) {
-          console.log(`Candidate reminder skipped – Google påminner redan 10 min före (kandidat ${interview.applicant_id})`);
         } else {
           console.log(`Candidate reminder skipped – employer ${interview.employer_id} has interview_before off`);
         }
 
         // Arbetsgivaren påminns alltid om sin egen bokning – med samma
-        // undantag: hennes eget Google-larm på exakt 10 minuter räcker.
-        if (await collidesWithGoogleReminder(interview.employer_id, 10)) {
-          console.log(`Employer reminder skipped – Google påminner redan 10 min före (arbetsgivare ${interview.employer_id})`);
-        } else {
-          await notifyBoth(
-            interview.employer_id,
-            "Intervju om 10 minuter ⏰",
-            `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
-            "/employer",
-          );
+        // undantag: hennes eget Google-larm på exakt 10 minuter ersätter pushen.
+        const employerGoogleCollides = await collidesWithGoogleReminder(interview.employer_id, 10);
+        if (employerGoogleCollides) {
+          console.log(`Employer push skipped – Google påminner redan 10 min före (arbetsgivare ${interview.employer_id})`);
         }
+        await notifyBoth(
+          interview.employer_id,
+          "Intervju om 10 minuter ⏰",
+          `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
+          "/employer",
+          { skipPush: employerGoogleCollides },
+        );
 
       }
     } else {
