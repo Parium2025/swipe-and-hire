@@ -1102,7 +1102,7 @@ export function ChatView({
             <p className="text-pure-white text-xs">Skriv ett meddelande för att starta konversationen.</p>
           </div>
         ) : (
-          <div className="min-h-full flex flex-col justify-end gap-4">
+          <div className="min-h-full flex flex-col justify-start gap-4">
             {/* Äldre meddelanden laddas automatiskt vid uppscroll */}
             {hasMore && !isLoading && messages.length >= MESSAGES_PAGE_SIZE && (
               <div className="flex justify-center py-2 min-h-[28px]">
