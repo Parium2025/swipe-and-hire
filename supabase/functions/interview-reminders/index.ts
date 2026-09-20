@@ -91,6 +91,23 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // Symbios med Google Kalender: om mottagarens eget Google-larm ligger på
+    // exakt samma antal minuter före intervjun som Pariums utskick hoppar vi
+    // över vårt – annars pinglas personen två gånger samma minut. Kollen är
+    // live (en ändring i Google slår igenom direkt) och fail-open: kan vi inte
+    // läsa Googles inställning skickar Parium alltid som vanligt.
+    // Resultatet cachas per körning så samma användare inte slås upp flera
+    // gånger i samma minutsvep.
+    const collisionCache = new Map<string, boolean>();
+    const collidesWithGoogleReminder = async (userId: string, leadMinutes: number): Promise<boolean> => {
+      const key = `${userId}:${leadMinutes}`;
+      const cached = collisionCache.get(key);
+      if (cached !== undefined) return cached;
+      const collides = await googleDefaultReminderCollides(userId, leadMinutes);
+      collisionCache.set(key, collides);
+      return collides;
+    };
+
     const queueInterviewTimelineDispatches = async (trigger: "interview_before" | "interview_after") => {
       const { data: automations, error: automationsError } = await supabase
         .from("outreach_automations")
