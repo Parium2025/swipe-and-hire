@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { CandidateSlide } from './CandidateSlide';
+import { CandidateSlide, type CandidateSlideSwipeApi } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
+import { SwipeHeader } from '@/components/swipe/SwipeHeader';
+import { SwipeDots } from '@/components/swipe/SwipeDots';
 import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
@@ -55,7 +56,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
 }: CandidateSwipeViewerProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const activeSkipRef = useRef<(() => void) | null>(null);
+  const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
+  const rejectedStackRef = useRef<number[]>([]);
+  const [rejectedStackSize, setRejectedStackSize] = useState(0);
+  const [cardVersions, setCardVersions] = useState<Record<string, number>>({});
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
   const [slideHeight, setSlideHeight] = useState(() =>
@@ -145,23 +149,40 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [open, handleScroll]);
 
-  // Hoppa över = nästa kandidat.
   const goToIndex = useCallback((idx: number) => {
     if (idx < 0 || idx >= applications.length) return;
     setCurrentIndex(idx);
     virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
   }, [applications.length, virtualizer]);
 
-  const handleSkip = useCallback(() => {
-    goToIndex(currentIndex + 1);
-  }, [currentIndex, goToIndex]);
-
-  const registerActiveSkip = useCallback((skip: (() => void) | null) => {
-    activeSkipRef.current = skip;
+  const registerActiveSwipeApi = useCallback((api: CandidateSlideSwipeApi | null) => {
+    activeCardSwipeRef.current = api?.swipe ?? null;
   }, []);
 
-  const handleActionSkip = useCallback(() => {
-    activeSkipRef.current?.();
+  const handleReject = useCallback((index: number, applicationId: string) => {
+    rejectedStackRef.current = [...rejectedStackRef.current, index];
+    setRejectedStackSize(rejectedStackRef.current.length);
+    setCardVersions((previous) => ({
+      ...previous,
+      [applicationId]: (previous[applicationId] ?? 0) + 1,
+    }));
+    goToIndex(Math.min(index + 1, applications.length - 1));
+  }, [applications.length, goToIndex]);
+
+  const handleUndo = useCallback(() => {
+    const previousIndex = rejectedStackRef.current.at(-1);
+    if (previousIndex === undefined) return;
+    rejectedStackRef.current = rejectedStackRef.current.slice(0, -1);
+    setRejectedStackSize(rejectedStackRef.current.length);
+    goToIndex(previousIndex);
+  }, [goToIndex]);
+
+  const handleActionReject = useCallback(() => {
+    activeCardSwipeRef.current?.('left');
+  }, []);
+
+  const handleActionInfo = useCallback(() => {
+    activeCardSwipeRef.current?.('right');
   }, []);
 
   const currentApplication = applications[currentIndex];
@@ -195,6 +216,13 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (open) return;
+    rejectedStackRef.current = [];
+    setRejectedStackSize(0);
+    setCardVersions({});
+  }, [open]);
+
   if (!open) return null;
 
   return createPortal(
@@ -207,21 +235,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         className={`fixed inset-0 bg-parium-gradient ${behind ? 'z-[40] pointer-events-none' : 'z-[100]'}`}
         aria-hidden={behind || undefined}
       >
-        {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)]">
-          <div className="py-3">
-            <span className="text-xs text-white font-medium tabular-nums">
-              {applications.length === 0 ? '0 / 0' : `${Math.min(currentIndex + 1, applications.length)} / ${applications.length}`}
-            </span>
-          </div>
-          <div className="py-3">
-          <button onClick={onClose} className="flex h-12 w-12 items-center justify-center touch-manipulation" aria-label="Stäng">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors">
-              <X className="h-5 w-5 text-white" />
-            </div>
-          </button>
-          </div>
-        </div>
+        <SwipeHeader
+          displayIndex={applications.length === 0 ? 0 : Math.min(currentIndex + 1, applications.length)}
+          totalCount={applications.length}
+          hasFilter={false}
+          activeFilterCount={0}
+          onFilterOpen={() => undefined}
+          onClose={onClose}
+        />
 
         {activeQuestionFilters.length > 0 && (
           <div className="pointer-events-none absolute left-4 right-16 top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20">
@@ -245,19 +266,12 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           </div>
         )}
 
-        {/* Compact position indicator — never creates thousands of DOM nodes. */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
-          {Array.from({ length: Math.min(applications.length, 7) }, (_, offset) => {
-            const start = Math.max(0, Math.min(currentIndex - 3, applications.length - 7));
-            const idx = start + offset;
-            return (
-            <div
-              key={idx}
-              className={`rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/30'}`}
-            />
-            );
-          })}
-        </div>
+        <SwipeDots
+          count={applications.length}
+          currentIndex={currentIndex}
+          isEndStateActive={false}
+          onScrubTo={goToIndex}
+        />
 
         {applications.length === 0 && (
           <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center px-8 text-center">
@@ -284,7 +298,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
             if (!app) return null;
             return (
             <div
-              key={app.id}
+               key={`${app.id}:${cardVersions[app.id] ?? 0}`}
               data-index={item.index}
               className="absolute left-0 top-0 w-full"
               style={{
@@ -297,13 +311,16 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
               <div className="h-full w-full">
               <CandidateSlide
                 application={app}
+                nextApplication={item.index === currentIndex ? applications[item.index + 1] : undefined}
                 rating={getDisplayRating(app)}
                 onOpenFullProfile={() => onOpenFullProfile(app)}
                 onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                 isVisible={Math.abs(item.index - currentIndex) <= 1}
                 isActive={item.index === currentIndex}
-                onSkip={handleSkip}
-                onRegisterSkip={registerActiveSkip}
+                overlayOpen={behind}
+                onSwipeLeft={() => handleReject(item.index, app.id)}
+                onSwipeRight={() => onOpenFullProfile(app)}
+                onRegisterSwipeApi={registerActiveSwipeApi}
 
               />
               </div>
@@ -322,8 +339,10 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
               <CandidateSlideActions
                 saved={savedApplicantIds ? savedApplicantIds.has(currentApplication.applicant_id) : false}
                 onSave={() => onSaveCandidate?.(currentApplication)}
-                onSkip={handleActionSkip}
-                onOpenInfo={() => onOpenFullProfile(currentApplication)}
+                onSkip={handleActionReject}
+                onOpenInfo={handleActionInfo}
+                canUndo={rejectedStackSize > 0}
+                onUndo={handleUndo}
               />
             </div>
           </div>
