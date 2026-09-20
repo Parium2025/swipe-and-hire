@@ -586,7 +586,6 @@ export function useJobDetailsData(jobId: string | undefined) {
                 return {
                   ...app,
                   status: row.status ?? app.status,
-                  viewed_at: row.viewed_at ?? app.viewed_at,
                   custom_answers: row.custom_answers ?? app.custom_answers,
                 };
               });
