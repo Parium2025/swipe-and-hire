@@ -679,7 +679,6 @@ export const CandidateProfileDialog = ({
         overlayClassName="bg-transparent md:bg-black/70"
         className={cn(
           "max-w-[950px] md:max-h-[85vh] overflow-hidden bg-card-parium backdrop-blur-md border-white/20 text-white p-0 !top-0 !left-0 !right-0 !bottom-0 translate-x-0 translate-y-0 md:!right-auto md:!bottom-auto md:!left-[50%] md:!top-[50%] md:!translate-x-[-50%] md:!translate-y-[-50%] w-screen h-[100dvh] md:w-[min(950px,calc(100vw-3rem))] md:h-auto md:rounded-lg rounded-none border-0 md:border flex flex-col data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 data-[state=closed]:!slide-out-to-left-0 data-[state=closed]:!slide-out-to-top-0 data-[state=open]:!fade-in-0 data-[state=open]:!zoom-in-100 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-100 !duration-0",
-          fromSwipe && "candidate-profile-swipe-enter",
         )}
         // Dragrörelsen skrivs direkt på elementet (se writePull) — inga
         // React-renderingar per touchmove, vilket håller draget mjukt.
