@@ -393,9 +393,9 @@ const getDelayFieldLabel = (trigger: OutreachTrigger | '') => {
 const getDelayFieldHint = (trigger: OutreachTrigger | '') => {
   switch (trigger) {
     case 'interview_before':
-      return 'Exempel: 60 = skicka 1 timme innan intervjun.';
+      return 'Exempel: 60 = skicka 1 timme innan intervjun. Du styr tid och innehåll — kandidaten väljer själv om det kommer som push eller mejl.';
     case 'interview_after':
-      return 'Exempel: 180 = skicka 3 timmar efter intervjun.';
+      return 'Exempel: 180 = skicka 3 timmar efter intervjun. Du styr tid och innehåll — kandidaten väljer själv om det kommer som push eller mejl.';
     case 'application_received':
       return '0 betyder direkt när ansökan kommer in.';
     default:
