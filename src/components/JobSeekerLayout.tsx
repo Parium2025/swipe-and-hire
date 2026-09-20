@@ -20,6 +20,7 @@ import { useJobSeekerWarmupOrchestrator } from '@/hooks/useJobSeekerWarmupOrches
 import { useSecondaryPagesPrewarm } from '@/hooks/useSecondaryPagesPrewarm';
 import { useDevice } from '@/hooks/use-device';
 import { useMessagesChrome } from '@/hooks/useMessagesChrome';
+import { useVisualViewportBounds } from '@/hooks/useVisualViewportBounds';
 
 
 interface JobSeekerLayoutProps {
@@ -104,6 +105,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
   const device = useDevice();
   // Chattens fullhöjdsläge släpps först när vybytet är klart (annars klipps chatten).
   const isMessagesChrome = useMessagesChrome();
+  useVisualViewportBounds();
   
   // Desktop uses top nav, mobile/tablet uses sidebar
   const isDesktop = device === 'desktop';
@@ -174,7 +176,16 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
         }}
       />
       
-      <div className="h-[100dvh] flex w-full overflow-hidden relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div
+        className={isMessagesChrome ? "fixed left-0 right-0 flex w-full overflow-hidden" : "h-[100dvh] flex w-full overflow-hidden relative"}
+        style={isMessagesChrome
+          ? {
+              WebkitOverflowScrolling: 'touch',
+              top: 'var(--app-viewport-offset, 0px)',
+              height: 'var(--app-viewport-height, 100dvh)',
+            }
+          : { WebkitOverflowScrolling: 'touch' }}
+      >
         <AnimatedBackground showBubbles={false} />
         <AppSidebar />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10 [padding-top:var(--top-chrome-content-offset,0px)]">
@@ -238,7 +249,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
           
           <main
             data-main-scroll-container="true"
-            className={`flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-3 flex flex-col ${isMessagesChrome ? 'no-chrome-pad' : 'pb-8'}`}
+            className={`flex-1 min-h-0 overflow-x-hidden p-3 flex flex-col ${isMessagesChrome ? 'no-chrome-pad overflow-y-hidden' : 'overflow-y-auto pb-8'}`}
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',

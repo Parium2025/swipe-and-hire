@@ -134,7 +134,6 @@ export function ChatView({
   const prevFirstMessageIdRef = useRef<string | null>(null);
   const prevScrollHeightRef = useRef(0);
   const initialScrollFrameRef = useRef<number | null>(null);
-  const keyboardTransitionUntilRef = useRef(0);
 
   // Search state
   const [showSearch, setShowSearch] = useState(false);
@@ -294,10 +293,9 @@ export function ChatView({
       const isOwnNewMessage = isNewMessage && lastMessage?.sender_id === currentUserId;
 
       if (!isInitialLoad && (isOwnNewMessage || isNearBottomRef.current)) {
-        viewport.scrollTo({
-          top: viewport.scrollHeight,
-          behavior: 'smooth',
-        });
+        // En direkt positionering undviker att iOS målar ett mellanläge medan
+        // tangentbordet samtidigt ändrar den synliga viewportens höjd.
+        viewport.scrollTop = viewport.scrollHeight;
       }
     }
 
@@ -374,43 +372,6 @@ export function ChatView({
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [conversation.id, getViewportEl]);
-
-  // iOS ändrar den synliga viewporten i flera steg när tangentbordet öppnas
-  // och stängs. Håll senaste meddelandet förankrat under hela övergången så
-  // att varken en tom mellanbild eller ett stort glapp hinner målas.
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    const visualViewport = window.visualViewport;
-    if (!textarea || !visualViewport) return;
-
-    let frame: number | null = null;
-    const schedulePin = () => {
-      if (
-        document.activeElement !== textarea &&
-        performance.now() > keyboardTransitionUntilRef.current
-      ) return;
-      if (frame !== null) cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        frame = null;
-        pinMessagesToBottom();
-      });
-    };
-    const beginKeyboardTransition = () => {
-      keyboardTransitionUntilRef.current = performance.now() + 900;
-      schedulePin();
-    };
-
-    textarea.addEventListener('focus', beginKeyboardTransition);
-    textarea.addEventListener('blur', beginKeyboardTransition);
-    visualViewport.addEventListener('resize', schedulePin);
-
-    return () => {
-      if (frame !== null) cancelAnimationFrame(frame);
-      textarea.removeEventListener('focus', beginKeyboardTransition);
-      textarea.removeEventListener('blur', beginKeyboardTransition);
-      visualViewport.removeEventListener('resize', schedulePin);
-    };
-  }, [pinMessagesToBottom]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
@@ -738,7 +699,6 @@ export function ChatView({
     setPendingFile(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     textareaRef.current?.focus();
-    keyboardTransitionUntilRef.current = performance.now() + 900;
     requestAnimationFrame(pinMessagesToBottom);
     setSending(true);
 
@@ -833,7 +793,7 @@ export function ChatView({
   const currentSearchMatchId = searchMatchIds[searchIndex] || null;
 
   return (
-    <div ref={rootRef} className="flex-1 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
+    <div ref={rootRef} className="flex-1 min-h-0 flex flex-col rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm overflow-hidden">
 
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/20 flex-shrink-0">
@@ -1075,7 +1035,7 @@ export function ChatView({
       <ScrollArea
         ref={scrollAreaRef}
         className={cn(
-          "flex-1 p-4 no-chrome-pad",
+          "flex-1 min-h-0 no-chrome-pad [&_[data-radix-scroll-area-viewport]]:p-4 [&_[data-radix-scroll-area-viewport]>div]:!min-h-full",
           messages.length > 0 && !isInitialScrollReady && "opacity-0"
         )}
         onScrollCapture={handleScroll}
@@ -1296,9 +1256,10 @@ export function ChatView({
             }}
             placeholder={editingMessageId ? "Redigera meddelandet..." : "Skriv ett meddelande..."}
             className={cn(
-              "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-pure-white placeholder:text-pure-white rounded-xl",
+              "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-[16px] md:text-sm text-pure-white placeholder:text-pure-white rounded-xl",
               editingMessageId && "border-blue-500/30"
             )}
+            onFocus={pinMessagesToBottom}
             rows={1}
           />
           <Button

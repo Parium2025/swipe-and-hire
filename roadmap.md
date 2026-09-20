@@ -75,3 +75,4 @@
 - [x] Behåll senaste meddelandet synligt efter skickning och tangentbordsstängning
 - [x] Flytta korta konversationer närmare kompositörens vita skiljelinje
 - [x] Verifiera mobilflödet visuellt samt med tester och typkontroll
+- [x] Ersätt konkurrerande iOS-scrollregler med ett enda visualViewport-styrt mobilskal och 16 px skrivfält
