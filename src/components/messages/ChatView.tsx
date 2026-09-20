@@ -159,6 +159,22 @@ export function ChatView({
     prevScrollHeightRef.current = viewport.scrollHeight;
   }, [getViewportEl]);
 
+  // iOS Safari försöker annars först scrolla den fixerade sidan så textarea:n
+  // hamnar ovanför tangentbordet. Mobilskalet anpassas redan efter
+  // visualViewport, så Safaris extra auto-scroll ger ett svart mellanläge där
+  // hela chatten ligger utanför skärmen. Fokusera därför i samma touch-händelse
+  // med preventScroll; efterföljande tryck i ett redan fokuserat fält lämnas
+  // orörda så markören fortfarande kan placeras normalt.
+  const handleComposerPointerDown = useCallback((event: React.PointerEvent<HTMLTextAreaElement>) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    const textarea = textareaRef.current;
+    if (!textarea || document.activeElement === textarea) return;
+
+    event.preventDefault();
+    textarea.focus({ preventScroll: true });
+    pinMessagesToBottom();
+  }, [pinMessagesToBottom]);
+
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const { displayMember, isSelf: isSelfConversation } = resolveDisplayMember(conversation.members, currentUserId);
 
@@ -698,7 +714,7 @@ export function ChatView({
     setNewMessage('');
     setPendingFile(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    textareaRef.current?.focus();
+    textareaRef.current?.focus({ preventScroll: true });
     requestAnimationFrame(pinMessagesToBottom);
     setSending(true);
 
@@ -1259,6 +1275,7 @@ export function ChatView({
               "min-h-[44px] max-h-32 resize-none bg-white/5 border-white/10 text-[16px] md:text-sm text-pure-white placeholder:text-pure-white rounded-xl",
               editingMessageId && "border-blue-500/30"
             )}
+            onPointerDown={handleComposerPointerDown}
             onFocus={pinMessagesToBottom}
             rows={1}
           />
