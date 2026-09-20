@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useRef } from 'react';
-import { animate, motion, useMotionValue } from 'framer-motion';
+import { memo, useCallback, useEffect, useRef, type TouchEvent as ReactTouchEvent } from 'react';
+import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidateSummary } from '@/hooks/useCandidateSummary';
 import { useCandidateNotes } from '@/hooks/useCandidateNotes';
@@ -32,8 +32,13 @@ export const CandidateSlide = memo(function CandidateSlide({
 
   const x = useMotionValue(0);
   const exitOpacity = useMotionValue(1);
+  const cardRotate = useTransform(x, [-200, 0, 200], [-6, 0, 6]);
+  const cardScale = useTransform(x, [-200, 0, 200], [0.98, 1, 0.98]);
   const suppressOpenRef = useRef(false);
   const exitTimerRef = useRef<number | null>(null);
+  const touchRef = useRef<{ startX: number; startY: number; startTime: number; dragging: boolean; cancelled: boolean } | null>(null);
+  const SWIPE_THRESHOLD = 76;
+  const VELOCITY_THRESHOLD = 650;
 
 
   const commitSkip = useCallback(() => {
@@ -55,6 +60,72 @@ export const CandidateSlide = memo(function CandidateSlide({
       window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
     }, 240);
   }, [exitOpacity, onSkip, x]);
+
+  const openFromSwipe = useCallback(() => {
+    suppressOpenRef.current = true;
+    hapticMedium();
+    animate(x, 0, { type: 'spring', stiffness: 360, damping: 32 });
+    onOpenFullProfile();
+    window.setTimeout(() => { suppressOpenRef.current = false; }, 160);
+  }, [onOpenFullProfile, x]);
+
+  const handleTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    if (!isActive || event.touches.length !== 1) return;
+    if (event.target instanceof Element && event.target.closest('button, a, input, textarea, select, [role="button"], [data-swipe-action-button]')) return;
+    const touch = event.touches[0];
+    touchRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startTime: Date.now(),
+      dragging: false,
+      cancelled: false,
+    };
+  }, [isActive]);
+
+  const handleTouchMove = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    const gesture = touchRef.current;
+    if (!gesture || gesture.cancelled || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    const dx = touch.clientX - gesture.startX;
+    const dy = touch.clientY - gesture.startY;
+    if (!gesture.dragging) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        gesture.cancelled = true;
+        return;
+      }
+      gesture.dragging = true;
+      suppressOpenRef.current = true;
+    }
+    if (event.cancelable) event.preventDefault();
+    x.set(dx);
+  }, [x]);
+
+  const handleTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    const gesture = touchRef.current;
+    touchRef.current = null;
+    if (!gesture || gesture.cancelled || !gesture.dragging) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - gesture.startX;
+    const elapsed = Math.max(Date.now() - gesture.startTime, 1);
+    const velocityX = (dx / elapsed) * 1000;
+    if (dx <= -SWIPE_THRESHOLD || velocityX <= -VELOCITY_THRESHOLD) {
+      commitSkip();
+      return;
+    }
+    if (dx >= SWIPE_THRESHOLD || velocityX >= VELOCITY_THRESHOLD) {
+      openFromSwipe();
+      return;
+    }
+    animate(x, 0, { type: 'spring', stiffness: 360, damping: 32 });
+    window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
+  }, [commitSkip, openFromSwipe, x]);
+
+  const handleTouchCancel = useCallback(() => {
+    touchRef.current = null;
+    animate(x, 0, { type: 'spring', stiffness: 360, damping: 32 });
+    window.setTimeout(() => { suppressOpenRef.current = false; }, 120);
+  }, [x]);
 
   useEffect(() => {
     if (!onRegisterSkip || !isActive) return;
@@ -103,7 +174,11 @@ export const CandidateSlide = memo(function CandidateSlide({
         <motion.div
           data-candidate-swipe-card
           className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
-          style={{ x, opacity: exitOpacity, touchAction: 'pan-y' }}
+          style={{ x, opacity: exitOpacity, rotate: cardRotate, scale: cardScale, touchAction: 'pan-y' }}
+          onTouchStartCapture={handleTouchStart}
+          onTouchMoveCapture={handleTouchMove}
+          onTouchEndCapture={handleTouchEnd}
+          onTouchCancelCapture={handleTouchCancel}
           onContextMenuCapture={(event) => event.preventDefault()}
           onDragStartCapture={(event) => event.preventDefault()}
         >
