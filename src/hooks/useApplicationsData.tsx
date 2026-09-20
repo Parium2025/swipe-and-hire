@@ -8,6 +8,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { fetchMyApplicationViews, markApplicationViewedForMe } from '@/lib/applicationViews';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export interface ApplicationData {
@@ -513,7 +514,7 @@ export const useApplicationsData = (
            is_profile_video: media.is_profile_video,
            // Prefer activity RPC to stay 1:1 med "Mina kandidater"
            last_active_at: activityLastActive ?? liveMedia.last_active_at,
-           viewed_at: item.viewed_at,
+           viewed_at: myViews.get(item.id) ?? null,
            rating,
            total_count: undefined,
          };
