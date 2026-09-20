@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
-import { fetchMyApplicationViews } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
@@ -207,7 +207,7 @@ export function useColleagueCandidates(
           status,
           applied_at,
           viewed_at,
-          job_postings!inner(title)
+          job_postings!inner(title, employer_id)
         `)
         .in('id', applicationIds);
 
@@ -216,7 +216,7 @@ export function useColleagueCandidates(
       // Create a map for quick lookup
       const appMap = new Map(applications?.map(app => [app.id, app]) || []);
 
-      // Läst-markeringen är personlig, inte delad med kollegorna.
+      // Läst-markering följer ägarregeln (personlig på egna annonser, delad på kollegors).
       const myViews = await fetchMyApplicationViews(applicationIds).catch(
         () => new Map<string, string>(),
       );
@@ -319,7 +319,7 @@ export function useColleagueCandidates(
           cover_image_url: media.cover_image_url,
           is_profile_video: media.is_profile_video,
           applied_at: app?.applied_at || null,
-          viewed_at: myViews.get(mc.application_id) ?? null,
+          viewed_at: resolveApplicationViewedAt(app, myViews, user.id, mc.application_id),
           latest_application_at: activity.latest_application_at,
           last_active_at: activity.last_active_at,
         };

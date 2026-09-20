@@ -1,15 +1,17 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Per-person läsmarkering för ansökningar.
+ * Läsmarkering för ansökningar — ägarregeln.
  *
- * Tidigare fanns en enda `viewed_at` per ansökan: den kollega som öppnade
- * kandidaten först nollade prickarna för hela teamet. Nu skrivs en rad per
- * (ansökan, person) i `job_application_views`, så varje teammedlem har sin
- * egen olästa-markering — precis som i en delad inkorg.
+ * - EGNA annonser: varje teammedlem har sin egen olästa-markering. Att en
+ *   kollega öppnar kandidaten nollar inte din prick (delad inkorg-känsla).
+ * - KOLLEGORS annonser: delad status. När någon i teamet öppnat ansökan
+ *   räknas den som sedd för alla — man jobbar i den tillsammans.
  *
- * `job_applications.viewed_at` finns kvar som "någon i teamet har sett" och
- * används av mejlsammanfattningar.
+ * Tekniskt skrivs en rad per (ansökan, person) i `job_application_views`, och
+ * `job_applications.viewed_at` sätts alltid när någon i teamet sett ansökan
+ * (används även av mejlsammanfattningar). `resolveApplicationViewedAt` väljer
+ * vilken källa som gäller utifrån vem som äger annonsen.
  */
 
 /** Markerar ansökan som läst för den inloggade personen (idempotent). */
@@ -42,4 +44,20 @@ export async function fetchMyApplicationViews(
     }
   }
   return result;
+}
+
+/**
+ * Väljer rätt läst-källa för en ansökan: personlig markering på egna
+ * annonser, delad `viewed_at` på kollegors annonser.
+ */
+export function resolveApplicationViewedAt(
+  app: { viewed_at?: string | null; job_postings?: { employer_id?: string | null } | null } | null | undefined,
+  myViews: Map<string, string>,
+  userId: string,
+  applicationId: string,
+): string | null {
+  if (app?.job_postings?.employer_id === userId) {
+    return myViews.get(applicationId) ?? null;
+  }
+  return app?.viewed_at ?? null;
 }

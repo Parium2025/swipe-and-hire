@@ -6,6 +6,7 @@ import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { hydrateMyCandidateRows } from '@/lib/myCandidatesHydration';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { useAuth } from '@/hooks/useAuth';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 
@@ -157,7 +158,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       applied_at,
       updated_at,
       viewed_at,
-      job_postings!inner(title, occupation)
+      job_postings!inner(title, occupation, employer_id)
     `)
     .order('applied_at', { ascending: false })
     .range(0, PAGE_SIZE - 1);
@@ -189,7 +190,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
   const activityMap: Record<string, any> = {};
   const ratingsMap: Record<string, number> = {};
   
-  const [activityResult, ratingsResult] = await Promise.all([
+  const [activityResult, ratingsResult, myViews] = await Promise.all([
     supabase.rpc('get_applicant_latest_activity', {
       p_applicant_ids: applicantIds,
       p_employer_id: userId,
@@ -198,7 +199,9 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
       .from('candidate_ratings')
       .select('applicant_id, rating')
       .eq('recruiter_id', userId)
-      .in('applicant_id', applicantIds)
+      .in('applicant_id', applicantIds),
+    // Läst-markering följer ägarregeln (personlig på egna annonser, delad på kollegors).
+    fetchMyApplicationViews(baseData.map((item: any) => item.id)).catch(() => new Map<string, string>()),
   ]);
 
   if (activityResult.data) {
@@ -225,6 +228,7 @@ async function syncApplicationsData(userId: string, queryClient: ReturnType<type
 
     return {
       ...item,
+      viewed_at: resolveApplicationViewedAt(item, myViews, userId, item.id),
       job_title: item.job_postings?.title || 'Okänt jobb',
       job_occupation: item.job_postings?.occupation || null,
       profile_image_url: media.profile_image_url,

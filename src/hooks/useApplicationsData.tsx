@@ -8,7 +8,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
-import { fetchMyApplicationViews, markApplicationViewedForMe } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, markApplicationViewedForMe, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export interface ApplicationData {
@@ -396,7 +396,7 @@ export const useApplicationsData = (
          ids.length > 0
            ? supabase
                .from('job_applications')
-               .select('id, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url, rejected_at')
+               .select('id, viewed_at, candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url, rejected_at, job_postings!inner(employer_id)')
                .in('id', ids)
            : Promise.resolve({ data: [] as any[], error: null }),
          supabase.rpc('get_applicant_profile_media_batch', {
@@ -412,8 +412,8 @@ export const useApplicationsData = (
            .select('applicant_id, rating')
            .eq('recruiter_id', user.id)
             .in('applicant_id', applicantIds),
-          // Läst-markeringen är personlig: en kollega som öppnat kandidaten
-          // får inte nolla pricken för övriga i teamet.
+          // Läst-markering följer ägarregeln: personlig på egna annonser,
+          // delad på kollegors (resolveApplicationViewedAt väljer källa).
           fetchMyApplicationViews(ids).catch(() => new Map<string, string>()),
         ]);
 
@@ -514,7 +514,7 @@ export const useApplicationsData = (
            is_profile_video: media.is_profile_video,
            // Prefer activity RPC to stay 1:1 med "Mina kandidater"
            last_active_at: activityLastActive ?? liveMedia.last_active_at,
-           viewed_at: myViews.get(item.id) ?? null,
+           viewed_at: resolveApplicationViewedAt(snap, myViews, user.id, item.id),
            rating,
            total_count: undefined,
          };
@@ -927,6 +927,9 @@ export const useApplicationsData = (
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
+      // Dashboard-räknarna ("Nya ansökningar") ska sjunka direkt.
+      queryClient.invalidateQueries({ queryKey: ['employer-unviewed-applications'] });
+      queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
     },
   });
 

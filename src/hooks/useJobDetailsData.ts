@@ -4,7 +4,7 @@ import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
-import { fetchMyApplicationViews } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { chunk } from '@/lib/fetchAllPages';
@@ -250,8 +250,8 @@ async function hydrateApplications(
     }),
   );
 
-  // Läst-markeringen är personlig — en kollega som öppnat kandidaten får inte
-  // nolla den olästa pricken för övriga i teamet.
+  // Läst-markering följer ägarregeln: personlig på egna annonser, delad på
+  // kollegors (resolveApplicationViewedAt väljer källa per ansökan).
   const myViewsPromise = fetchMyApplicationViews(applicationsData.map((a) => a.id)).catch(
     () => new Map<string, string>(),
   );
@@ -300,6 +300,8 @@ async function hydrateApplications(
 
     return {
       ...app,
+      // job_postings användes bara för ägarregeln i läsmarkeringen.
+      job_postings: undefined,
       profile_image_url: media.profile_image_url,
       video_url: media.video_url,
       cover_image_url: media.cover_image_url,
@@ -308,7 +310,7 @@ async function hydrateApplications(
       criterionResults,
       last_active_at: activity?.last_active_at || null,
       city: liveMedia.city || null,
-      viewed_at: myViews.get(app.id) ?? null,
+      viewed_at: resolveApplicationViewedAt(app, myViews, userId, app.id),
     } as JobApplication;
   });
 }
@@ -322,7 +324,7 @@ async function fetchApplicationsPage(
 ): Promise<{ rows: JobApplication[]; hasMore: boolean }> {
   const { data, error } = await supabase
     .from('job_applications')
-    .select('*')
+    .select('*, job_postings!inner(employer_id)')
     .eq('job_id', jobId)
     .order('applied_at', { ascending: false })
     .order('id', { ascending: false })

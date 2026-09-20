@@ -8,9 +8,10 @@ import { safeSetItem, safeReadArrayCache } from '@/lib/safeStorage';
 /**
  * Antal ansökningar arbetsgivaren INTE har öppnat ännu, per annons.
  *
- * Servern är sanning (`viewed_at IS NULL`) så siffran är identisk i mobil och
- * desktop, och den nollas automatiskt när kandidaten öppnas – då sätts
- * `viewed_at` och realtime-eventet invaliderar den här frågan.
+ * Ägarregeln (servern är sanning, identiskt i mobil och desktop):
+ * - Egna annonser: personlig markering per teammedlem (job_application_views).
+ * - Kollegors annonser: delad markering (job_applications.viewed_at).
+ * Realtime på båda tabellerna invaliderar frågan när något ändras.
  */
 export const UNVIEWED_APPLICATIONS_QUERY_KEY = 'employer-unviewed-applications';
 
@@ -88,6 +89,13 @@ export function useUnviewedApplicationCounts() {
     };
     const channel = createRealtimeChannel(`employer-unviewed-apps-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, invalidate)
+      // Egna annonser: min egen markering skrivs i job_application_views och
+      // uppdaterar inte alltid job_applications — lyssna där också.
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'job_application_views', filter: `viewer_id=eq.${user.id}` },
+        invalidate,
+      )
       .subscribe();
     const onVisible = () => { if (document.visibilityState === 'visible') invalidate(); };
     document.addEventListener('visibilitychange', onVisible);

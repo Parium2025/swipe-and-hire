@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
-import { fetchMyApplicationViews } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import type { MyCandidateData } from '@/hooks/useMyCandidatesData';
 
 /**
@@ -28,7 +28,7 @@ const APPLICATION_FIELDS = `
   id, applicant_id, first_name, last_name, email, phone, location, bio,
   cv_url, age, employment_status, work_schedule, availability, custom_answers, questions_snapshot,
   candidate_profile_label, profile_image_snapshot_url, video_snapshot_url, cover_image_snapshot_url,
-  status, applied_at, viewed_at, job_postings!inner(title)
+  status, applied_at, viewed_at, job_postings!inner(title, employer_id)
 `;
 
 export async function hydrateMyCandidateRows(
@@ -147,7 +147,7 @@ export async function hydrateMyCandidateRows(
       cover_image_url: media.cover_image_url,
       is_profile_video: media.is_profile_video,
       applied_at: app?.applied_at || null,
-      viewed_at: myViews.get(row.application_id) ?? null,
+      viewed_at: resolveApplicationViewedAt(app, myViews, userId, row.application_id),
       latest_application_at: activity.latest_application_at,
       last_active_at: activity.last_active_at ?? liveMedia.last_active_at,
     } satisfies MyCandidateData;
