@@ -1102,6 +1102,21 @@ const MyCandidates = () => {
             handleRemoveCandidate(original);
           }
         }}
+        onSaveCandidate={isViewingColleague ? undefined : (app) => setSwipeSaveCandidate(app)}
+      />
+
+      {/* Hantera kandidatens listor från svepläget */}
+      <AddToColleagueListDialog
+        open={!!swipeSaveCandidate}
+        onOpenChange={(o) => { if (!o) setSwipeSaveCandidate(null); }}
+        teamMembers={teamMembers}
+        applicationId={swipeSaveCandidate?.id}
+        applicantId={swipeSaveCandidate?.applicant_id}
+        jobId={swipeSaveCandidate?.job_id ?? undefined}
+        elevated
+        canRemoveFromOwnList={Boolean(swipeSaveCandidate && swipeSavedApplicantIds.has(swipeSaveCandidate.applicant_id))}
+        candidateName={`${swipeSaveCandidate?.first_name || ''} ${swipeSaveCandidate?.last_name || ''}`.trim() || 'Kandidat'}
+        onAdded={() => setSwipeSaveCandidate(null)}
       />
 
       {/* Candidate Profile Dialog */}
