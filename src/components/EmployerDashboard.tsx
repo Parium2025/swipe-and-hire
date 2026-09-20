@@ -1022,7 +1022,7 @@ const EmployerDashboard = memo(() => {
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContentNoFocus 
-          className="h-auto max-h-[90dvh] w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] overflow-y-auto border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:w-[28rem] sm:max-w-md sm:p-6"
+          className="no-chrome-pad h-auto max-h-[90dvh] w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] overflow-y-auto border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:w-[28rem] sm:max-w-md sm:p-6"
         >
           <AlertDialogHeader className="text-center">
             <div className="flex items-center justify-center gap-2.5">
