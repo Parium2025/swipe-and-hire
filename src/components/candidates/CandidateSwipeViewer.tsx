@@ -91,7 +91,14 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   // för att hela containern samtidigt scrollas en viewport nedåt.
   const [dismissedApplicationIds, setDismissedApplicationIds] = useState<Set<string>>(() => new Set());
   const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
+  const [profileHandoffApplication, setProfileHandoffApplication] = useState<ApplicationData | null>(null);
+  const [profileHandoffRevealing, setProfileHandoffRevealing] = useState(false);
   const undoEntryTimerRef = useRef<number | null>(null);
+  const profileHandoffStartedAtRef = useRef(0);
+  const profileHandoffOpenTimerRef = useRef<number | null>(null);
+  const profileHandoffRevealFrameRef = useRef<number | null>(null);
+  const profileHandoffRevealTimerRef = useRef<number | null>(null);
+  const profileHandoffFallbackTimerRef = useRef<number | null>(null);
   const pendingUndoApplicationIdRef = useRef<string | null>(null);
   const pendingStackIndexRef = useRef<number | null>(null);
   // Helskärmssvep: varje kandidat är exakt en viewport hög.
@@ -293,6 +300,60 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (undoEntryTimerRef.current !== null) window.clearTimeout(undoEntryTimerRef.current);
   }, []);
 
+  const clearProfileHandoffScheduling = useCallback(() => {
+    if (profileHandoffOpenTimerRef.current !== null) window.clearTimeout(profileHandoffOpenTimerRef.current);
+    if (profileHandoffRevealFrameRef.current !== null) cancelAnimationFrame(profileHandoffRevealFrameRef.current);
+    if (profileHandoffRevealTimerRef.current !== null) window.clearTimeout(profileHandoffRevealTimerRef.current);
+    if (profileHandoffFallbackTimerRef.current !== null) window.clearTimeout(profileHandoffFallbackTimerRef.current);
+    profileHandoffOpenTimerRef.current = null;
+    profileHandoffRevealFrameRef.current = null;
+    profileHandoffRevealTimerRef.current = null;
+    profileHandoffFallbackTimerRef.current = null;
+  }, []);
+
+  const openProfileWithHandoff = useCallback((application: ApplicationData) => {
+    if (profileHandoffApplication) return;
+    clearProfileHandoffScheduling();
+    profileHandoffStartedAtRef.current = performance.now();
+    setProfileHandoffRevealing(false);
+    setProfileHandoffApplication(application);
+
+    // Låt det lätta GPU-lagret slutföra hela förflyttningen innan den stora
+    // profilträdet monteras. Om profilen monteras redan nästa frame kan dess
+    // layout/portal/queries fortfarande frysa animationen mitt i rörelsen.
+    profileHandoffOpenTimerRef.current = window.setTimeout(() => {
+      profileHandoffOpenTimerRef.current = null;
+      onOpenFullProfile(application);
+    }, 340);
+
+    // Om en caller av någon anledning inte öppnar profilen får lagret aldrig
+    // bli kvar över Swipe Mode.
+    profileHandoffFallbackTimerRef.current = window.setTimeout(() => {
+      profileHandoffFallbackTimerRef.current = null;
+      setProfileHandoffRevealing(true);
+    }, 1200);
+  }, [clearProfileHandoffScheduling, onOpenFullProfile, profileHandoffApplication]);
+
+  useEffect(() => {
+    if (!behind || !profileHandoffApplication) return;
+
+    // Vänta tills den riktiga profilen både är monterad och har fått en egen
+    // paint. Handoff-lagret döljer därmed all tung första layout/rasterisering.
+    profileHandoffRevealFrameRef.current = requestAnimationFrame(() => {
+      profileHandoffRevealFrameRef.current = requestAnimationFrame(() => {
+        profileHandoffRevealFrameRef.current = null;
+        const elapsed = performance.now() - profileHandoffStartedAtRef.current;
+        const remaining = Math.max(0, 340 - elapsed);
+        profileHandoffRevealTimerRef.current = window.setTimeout(() => {
+          profileHandoffRevealTimerRef.current = null;
+          setProfileHandoffRevealing(true);
+        }, remaining);
+      });
+    });
+  }, [behind, profileHandoffApplication]);
+
+  useEffect(() => () => clearProfileHandoffScheduling(), [clearProfileHandoffScheduling]);
+
   const registerActiveSkip = useCallback((skip: (() => void) | null) => {
     activeSkipRef.current = skip;
   }, []);
@@ -438,7 +499,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                   <CandidateSlide
                     application={app}
                     rating={getDisplayRating(app)}
-                    onOpenFullProfile={() => onOpenFullProfile(app)}
+                    onOpenFullProfile={() => openProfileWithHandoff(app)}
                     onRemoveFromList={onRemoveCandidate ? () => onRemoveCandidate(app) : undefined}
                     isVisible={Math.abs(idx - currentIndex) <= 1}
                     isActive={idx === currentIndex}
@@ -501,7 +562,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 canUndo={canUndo}
                 onSave={() => onSaveCandidate?.(currentApplication)}
                 onSkip={handleActionSkip}
-                onOpenInfo={() => onOpenFullProfile(currentApplication)}
+                onOpenInfo={() => openProfileWithHandoff(currentApplication)}
                 onUndo={handleUndo}
               />
             </div>
@@ -509,6 +570,31 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         )}
 
       </motion.div>
+
+      <AnimatePresence>
+        {profileHandoffApplication && (
+          <motion.div
+            key={`candidate-profile-handoff-${profileHandoffApplication.id}`}
+            className="fixed inset-0 z-[120] overflow-hidden bg-card-parium pointer-events-none"
+            initial={{ y: '100%', opacity: 1 }}
+            animate={profileHandoffRevealing ? { y: 0, opacity: 0 } : { y: 0, opacity: 1 }}
+            transition={profileHandoffRevealing
+              ? { opacity: { duration: 0.14, ease: 'easeOut' }, y: { duration: 0 } }
+              : { y: { duration: 0.34, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0 } }}
+            onAnimationComplete={() => {
+              if (!profileHandoffRevealing) return;
+              clearProfileHandoffScheduling();
+              setProfileHandoffApplication(null);
+              setProfileHandoffRevealing(false);
+            }}
+            aria-hidden
+          >
+            <div className="flex h-12 items-end border-b border-white/10 px-4 pb-2 pt-[env(safe-area-inset-top,0px)]">
+              <div className="mx-auto h-1 w-10 rounded-full bg-white/25" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AnimatePresence>,
     document.body
   );
