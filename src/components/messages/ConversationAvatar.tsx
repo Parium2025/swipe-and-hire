@@ -38,6 +38,29 @@ export function ConversationAvatar({
     ? getCompanyInitials(profile.company_name || `${profile.first_name || ''} ${profile.last_name || ''}`)
     : `${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`.toUpperCase() || '?';
 
+  // Hooks must run for both individual and group avatars. A conversation can
+  // change shape after realtime data arrives; returning before these hooks made
+  // React see a different hook count and crash with error 310.
+  const hasImageUrl = !isGroup && !!resolvedUrl;
+  const isReady = hasImageUrl && (loadedAvatarUrls.has(resolvedUrl) || resolvedUrl.startsWith('blob:'));
+  const [loaded, setLoaded] = useState(isReady);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const expectsImage = !isGroup && !!(
+    profile?.profile_image_url ||
+    (profile?.role === 'employer' && profile.company_logo_url)
+  );
+
+  useEffect(() => {
+    setLoaded(hasImageUrl && !!resolvedUrl && (loadedAvatarUrls.has(resolvedUrl) || resolvedUrl.startsWith('blob:')));
+    setLoadFailed(false);
+  }, [resolvedUrl, hasImageUrl]);
+
+  const attachImage = useCallback((node: HTMLImageElement | null) => {
+    if (!node || !resolvedUrl || !node.complete || node.naturalWidth <= 0) return;
+    loadedAvatarUrls.add(resolvedUrl);
+    setLoaded(true);
+  }, [resolvedUrl]);
+
   const sizeClasses = {
     sm: 'h-8 w-8',
     md: 'h-10 w-10',
@@ -64,26 +87,6 @@ export function ConversationAvatar({
   // Permanenta lager: initialer och bildyta ligger alltid kvar. Radix
   // AvatarImage monterade om bilden vid varje besök och visade initialer
   // först — det upplevdes som att loggan "laddades om" varje gång.
-  const hasImageUrl = !!resolvedUrl;
-  const isReady = hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:'));
-  const [loaded, setLoaded] = useState(isReady);
-  const [loadFailed, setLoadFailed] = useState(false);
-  const expectsImage = !!(
-    profile?.profile_image_url ||
-    (profile?.role === 'employer' && profile.company_logo_url)
-  );
-
-  useEffect(() => {
-    setLoaded(hasImageUrl && (loadedAvatarUrls.has(resolvedUrl!) || resolvedUrl!.startsWith('blob:')));
-    setLoadFailed(false);
-  }, [resolvedUrl, hasImageUrl]);
-
-  const attachImage = useCallback((node: HTMLImageElement | null) => {
-    if (!node || !resolvedUrl || !node.complete || node.naturalWidth <= 0) return;
-    loadedAvatarUrls.add(resolvedUrl);
-    setLoaded(true);
-  }, [resolvedUrl]);
-
   return (
     <div
       className={cn(

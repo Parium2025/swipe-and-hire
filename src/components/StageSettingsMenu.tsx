@@ -173,8 +173,6 @@ export function StageSettingsMenu({
     }
   };
 
-  if (!currentConfig) return null;
-
   const isMenuOpen = open ?? internalMenuOpen;
 
   const updateMenuAlignment = () => {
@@ -212,6 +210,9 @@ export function StageSettingsMenu({
       window.visualViewport?.removeEventListener('scroll', handleViewportChange);
     };
   }, [isMenuOpen, centerOnStageCard]);
+
+  // Stage settings arrive asynchronously. Keep hook order stable while waiting.
+  if (!currentConfig) return null;
 
   const handleMenuOpenChange = (nextOpen: boolean) => {
     if (nextOpen) updateMenuAlignment();
