@@ -81,10 +81,56 @@ export const CandidateSlide = memo(function CandidateSlide({
   const underlayScale = useMotionValue(UNDERLAY_INITIAL_SCALE);
   const underlayOpacity = useMotionValue(UNDERLAY_INITIAL_OPACITY);
   const suppressOpenRef = useRef(false);
-  const gestureCommittedRef = useRef(false);
-  const exitTimerRef = useRef<number | null>(null);
-  const thresholdHapticFiredRef = useRef(false);
-  const touchRef = useRef<{ startX: number; startY: number; startTime: number; dragging: boolean; cancelled: boolean } | null>(null);
+  const suppressTimerRef = useRef<number | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const suppressOpenFor = useCallback((ms: number) => {
+    suppressOpenRef.current = true;
+    if (suppressTimerRef.current !== null) window.clearTimeout(suppressTimerRef.current);
+    suppressTimerRef.current = window.setTimeout(() => {
+      suppressTimerRef.current = null;
+      suppressOpenRef.current = false;
+    }, ms);
+  }, []);
+
+  const handleSwipeLeft = useCallback(() => {
+    onSkip?.();
+  }, [onSkip]);
+
+  const handleSwipeRight = useCallback(() => {
+    suppressOpenFor(240);
+    onOpenFullProfile();
+  }, [onOpenFullProfile, suppressOpenFor]);
+
+  const noop = useCallback(() => {}, []);
+
+  // EXAKT samma gestmotor som jobbsökarens swipe-läge. Tidigare fanns en
+  // egen kopia här, med risk för att de två glider isär.
+  const {
+    triggerSwipe,
+    resetGesture,
+    handleDragEnd,
+    handleTouchStartCapture,
+    handleTouchMoveCapture,
+    handleTouchEndCapture,
+    handleTouchCancelCapture,
+  } = useSwipeCardGesture({
+    useTouchTunnel,
+    // Inaktiva kort ska inte ta emot gester. Hooken låser dessutom input en
+    // kort stund när kortet blir aktivt igen, vilket tar bort tap-through.
+    overlayOpen: !isActive,
+    showTapHint: false,
+    x,
+    exitOpacity,
+    underlayY,
+    underlayScale,
+    underlayOpacity,
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+    onTapTitle: noop,
+    onTapCompany: noop,
+    clearTapHint: noop,
+  });
 
   useUndoEntryAnimation({ isUndoEntry, x, exitOpacity, entryScale });
 
@@ -94,133 +140,50 @@ export const CandidateSlide = memo(function CandidateSlide({
   // ger ett fullt interaktivt kort utan en låst eller halvtransparent frame.
   useLayoutEffect(() => {
     if (!isUndoEntry) return;
-    if (exitTimerRef.current !== null) {
-      window.clearTimeout(exitTimerRef.current);
-      exitTimerRef.current = null;
-    }
-    touchRef.current = null;
-    gestureCommittedRef.current = false;
+    resetGesture();
     suppressOpenRef.current = false;
-    thresholdHapticFiredRef.current = false;
+    dragStartRef.current = null;
     underlayY.set(UNDERLAY_INITIAL_Y);
     underlayScale.set(UNDERLAY_INITIAL_SCALE);
     underlayOpacity.set(UNDERLAY_INITIAL_OPACITY);
-  }, [isUndoEntry, underlayOpacity, underlayScale, underlayY]);
+  }, [isUndoEntry, resetGesture, underlayOpacity, underlayScale, underlayY]);
 
-
-  const commitSkip = useCallback(() => {
-    if (gestureCommittedRef.current || exitTimerRef.current !== null) return;
-    gestureCommittedRef.current = true;
-    suppressOpenRef.current = true;
-    hapticMedium();
-    animate(x, -EXIT_X, EXIT_SPRING);
-    animate(exitOpacity, 0, { duration: EXIT_OPACITY_DURATION, ease: PREMIUM_EASE });
-    animate(underlayY, 0, UNDERLAY_RISE_SPRING);
-    animate(underlayScale, 1, UNDERLAY_RISE_SPRING);
-    animate(underlayOpacity, 1, { duration: UNDERLAY_OPACITY_DURATION, ease: PREMIUM_EASE });
-    exitTimerRef.current = window.setTimeout(() => {
-      exitTimerRef.current = null;
-      onSkip?.();
-    }, EXIT_HANDOFF_MS);
-  }, [exitOpacity, onSkip, underlayOpacity, underlayScale, underlayY, x]);
-
-  const openFromSwipe = useCallback(() => {
-    if (gestureCommittedRef.current) return;
-    gestureCommittedRef.current = true;
-    suppressOpenRef.current = true;
-    hapticMedium();
-    animate(x, 0, SNAP_SPRING);
-    onOpenFullProfile();
-    window.setTimeout(() => {
-      suppressOpenRef.current = false;
-      gestureCommittedRef.current = false;
-    }, 160);
-  }, [onOpenFullProfile, x]);
-
-  const handleTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    if (!isActive || gestureCommittedRef.current || event.touches.length !== 1) return;
-    if (event.target instanceof Element && event.target.closest('button, a, input, textarea, select, [role="button"], [data-swipe-action-button]')) return;
+  // Klick-suppression: ett horisontellt drag får aldrig sluta med att
+  // kandidatprofilen öppnas av det efterföljande click-eventet.
+  const onTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
-    touchRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      startTime: Date.now(),
-      dragging: false,
-      cancelled: false,
-    };
-  }, [isActive]);
+    dragStartRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+    handleTouchStartCapture(event);
+  }, [handleTouchStartCapture]);
 
-  useEffect(() => {
-    if (!isActive) touchRef.current = null;
-  }, [isActive]);
-
-  const handleTouchMove = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    const gesture = touchRef.current;
-    if (!gesture || gesture.cancelled || event.touches.length !== 1) return;
+  const onTouchMove = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
     const touch = event.touches[0];
-    const dx = touch.clientX - gesture.startX;
-    const dy = touch.clientY - gesture.startY;
-    if (!gesture.dragging) {
-      if (Math.abs(dx) < TOUCH_DRAG_INTENT_THRESHOLD && Math.abs(dy) < TOUCH_DRAG_INTENT_THRESHOLD) return;
-      if (Math.abs(dy) > Math.abs(dx)) {
-        gesture.cancelled = true;
-        return;
-      }
-      gesture.dragging = true;
-      thresholdHapticFiredRef.current = false;
+    if (start && touch && Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > TOUCH_DRAG_INTENT_THRESHOLD) {
       suppressOpenRef.current = true;
     }
-    if (event.cancelable) event.preventDefault();
-    x.set(dx);
-    if (!thresholdHapticFiredRef.current && Math.abs(dx) >= SWIPE_THRESHOLD) {
-      thresholdHapticFiredRef.current = true;
-      hapticLight();
-    }
-  }, [x]);
+    handleTouchMoveCapture(event);
+  }, [handleTouchMoveCapture]);
 
-  const handleTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
-    const gesture = touchRef.current;
-    touchRef.current = null;
-    if (!gesture || gesture.cancelled || !gesture.dragging) return;
-    const touch = event.changedTouches[0];
-    const dx = touch.clientX - gesture.startX;
-    const elapsed = Math.max(Date.now() - gesture.startTime, 1);
-    const velocityX = (dx / elapsed) * 1000;
-    if (dx <= -SWIPE_THRESHOLD || velocityX <= -VELOCITY_THRESHOLD) {
-      commitSkip();
-      return;
-    }
-    if (dx >= SWIPE_THRESHOLD || velocityX >= VELOCITY_THRESHOLD) {
-      openFromSwipe();
-      return;
-    }
-    animate(x, 0, SNAP_SPRING);
-    window.setTimeout(() => {
-      suppressOpenRef.current = false;
-      gestureCommittedRef.current = false;
-    }, 120);
-  }, [commitSkip, openFromSwipe, x]);
+  const onTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    handleTouchEndCapture(event);
+    dragStartRef.current = null;
+    if (suppressOpenRef.current) suppressOpenFor(200);
+  }, [handleTouchEndCapture, suppressOpenFor]);
 
-  const handleTouchCancel = useCallback(() => {
-    touchRef.current = null;
-    animate(x, 0, SNAP_SPRING);
-    window.setTimeout(() => {
-      suppressOpenRef.current = false;
-      gestureCommittedRef.current = false;
-    }, 120);
-  }, [x]);
+  const onTouchCancel = useCallback(() => {
+    handleTouchCancelCapture();
+    dragStartRef.current = null;
+    suppressOpenFor(120);
+  }, [handleTouchCancelCapture, suppressOpenFor]);
 
-  const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
-    if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -VELOCITY_THRESHOLD) {
-      commitSkip();
-      return;
-    }
-    if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > VELOCITY_THRESHOLD) {
-      openFromSwipe();
-      return;
-    }
-    animate(x, 0, SNAP_SPRING);
-  }, [commitSkip, openFromSwipe, x]);
+  const commitSkip = useCallback(() => {
+    triggerSwipe('left');
+  }, [triggerSwipe]);
+
+  useEffect(() => {
+    if (!isActive) dragStartRef.current = null;
+  }, [isActive]);
 
   useEffect(() => {
     if (!onRegisterSkip || !isActive) return;
@@ -229,7 +192,7 @@ export const CandidateSlide = memo(function CandidateSlide({
   }, [commitSkip, isActive, onRegisterSkip]);
 
   useEffect(() => () => {
-    if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
+    if (suppressTimerRef.current !== null) window.clearTimeout(suppressTimerRef.current);
   }, []);
 
   // Ett vanligt tryck öppnar profilen. Horisontella drag hanteras separat:
