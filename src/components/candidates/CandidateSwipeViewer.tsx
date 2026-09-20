@@ -81,6 +81,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const activeSkipRef = useRef<(() => void) | null>(null);
   const transitionTargetIndexRef = useRef<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const currentIndexRef = useRef(initialIndex);
+  currentIndexRef.current = currentIndex;
   const skippedStackRef = useRef<string[]>(readCandidateUndoStack());
   const [canUndo, setCanUndo] = useState(() => skippedStackRef.current.length > 0);
   const [undoEntryApplicationId, setUndoEntryApplicationId] = useState<string | null>(null);
@@ -152,7 +154,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const container = scrollRef.current;
     if (!container) return;
 
-    let bestIdx = currentIndex;
+    let bestIdx = currentIndexRef.current;
     let bestDistance = Infinity;
 
     virtualizer.getVirtualItems().forEach((item) => {
@@ -177,7 +179,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (hasMore && !isLoadingMore && bestIdx >= applications.length - 8) {
       onLoadMore?.();
     }
-  }, [applications.length, currentIndex, hasMore, isLoadingMore, onLoadMore, virtualizer]);
+  }, [applications.length, hasMore, isLoadingMore, onLoadMore, virtualizer]);
 
   // iOS skickar scroll-events tätare än 60 Hz under momentum. Utan rAF-koalescering
   // körs index-beräkning + setState flera gånger per frame, vilket syns som hack
@@ -206,16 +208,19 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     const maximumIndex = applications.length - 1 + (hasEndSection ? 1 : 0);
     if (idx < 0 || idx > maximumIndex) return;
     transitionTargetIndexRef.current = idx;
+    currentIndexRef.current = idx;
     setCurrentIndex(idx);
-    // Kandidatkortets egen exit + underlay är hela övergången. Ytterligare
-    // smooth-scroll ovanpå den gav en andra synlig rörelse och hack på iOS.
-    requestAnimationFrame(() => {
+    // Samma handoff som i jobbsökarens swipe-läge: det färdiga underlaget
+    // ersätts av nästa riktiga kort i samma frame. En rAF-kedja här gav först
+    // en tom/halv frame och därefter ett synligt vertikalt hopp på iOS.
+    const container = scrollRef.current;
+    if (container) {
+      container.scrollTo({ top: idx * slideHeight, behavior: 'auto' });
+    } else {
       virtualizer.scrollToIndex(idx, { align: 'start' });
-      requestAnimationFrame(() => {
-        transitionTargetIndexRef.current = null;
-      });
-    });
-  }, [applications.length, hasEndSection, virtualizer]);
+    }
+    transitionTargetIndexRef.current = null;
+  }, [applications.length, hasEndSection, slideHeight, virtualizer]);
 
   const handleSkip = useCallback(() => {
     const current = applications[currentIndex];
@@ -372,7 +377,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           style={{
             WebkitOverflowScrolling: 'touch',
             willChange: 'scroll-position',
-            contain: 'layout style',
+            contain: 'layout style paint',
             scrollSnapType: 'y mandatory',
             touchAction: 'pan-y',
           }}

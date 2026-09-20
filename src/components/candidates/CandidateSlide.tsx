@@ -3,8 +3,6 @@ import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Info, X } from 'lucide-react';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useInputCapability } from '@/hooks/useInputCapability';
-import { useCandidateSummary } from '@/hooks/useCandidateSummary';
-import { useCandidateNotes } from '@/hooks/useCandidateNotes';
 import { CandidateCardFace } from './CandidateCardFace';
 import { CandidateNextCardUnderlay } from './CandidateNextCardUnderlay';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
@@ -35,7 +33,6 @@ interface CandidateSlideProps {
 export const CandidateSlide = memo(function CandidateSlide({
   application,
   onOpenFullProfile,
-  isVisible,
   isActive,
   nextApplication,
   isUndoEntry,
@@ -203,26 +200,6 @@ export const CandidateSlide = memo(function CandidateSlide({
   const coverImageUrl = useMediaUrl(application.cover_image_url, 'profile-image');
   const isProfileVideo = application.is_profile_video;
 
-  // Behåll samma förvärmning som tidigare medan kandidaten är i eller nära
-  // viewporten. Den vanliga kandidatprofilen kan då öppnas med färdig data.
-  useCandidateSummary({
-    applicantId: application.applicant_id,
-    jobId: application.job_id,
-    applicationId: application.id,
-    cvUrl: application.cv_url,
-    open: isVisible,
-  });
-
-  const { fetchNotes } = useCandidateNotes({
-    applicantId: application.applicant_id,
-    jobId: application.job_id,
-    enabled: isVisible,
-  });
-
-  useEffect(() => {
-    if (isVisible) fetchNotes();
-  }, [isVisible, fetchNotes]);
-
   return (
     <div className="flex h-full w-full flex-col px-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]">
       <div className="relative min-h-0 flex-1">
@@ -236,7 +213,7 @@ export const CandidateSlide = memo(function CandidateSlide({
         )}
         <motion.div
           data-candidate-swipe-card
-          className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
+          className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [backface-visibility:hidden] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
           style={{ x, opacity: exitOpacity, rotate: cardRotate, scale: combinedScale, touchAction: useTouchTunnel ? 'pan-y' : 'auto' }}
           drag={useTouchTunnel ? false : 'x'}
           dragDirectionLock={!useTouchTunnel}
