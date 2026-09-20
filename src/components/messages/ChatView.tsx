@@ -324,7 +324,7 @@ export function ChatView({
       if (!isInitialLoad && (isOwnNewMessage || isNearBottomRef.current)) {
         // En direkt positionering undviker att iOS målar ett mellanläge medan
         // tangentbordet samtidigt ändrar den synliga viewportens höjd.
-        viewport.scrollTop = viewport.scrollHeight;
+        pinViewportSmart(viewport);
       }
     }
 
@@ -349,7 +349,7 @@ export function ChatView({
         attempts += 1;
 
 
-        currentViewport.scrollTop = currentViewport.scrollHeight;
+        pinViewportSmart(currentViewport);
         const currentHeight = currentViewport.scrollHeight;
         stableFrames = currentHeight === previousHeight ? stableFrames + 1 : 0;
         previousHeight = currentHeight;
@@ -394,7 +394,7 @@ export function ChatView({
 
     const observer = new ResizeObserver(() => {
       if (!isNearBottomRef.current) return;
-      viewport.scrollTop = viewport.scrollHeight;
+      pinViewportSmart(viewport);
       prevScrollHeightRef.current = viewport.scrollHeight;
     });
     observer.observe(content);
