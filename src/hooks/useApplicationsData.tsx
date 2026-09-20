@@ -391,7 +391,7 @@ export const useApplicationsData = (
        // kö efter huvudsökningen, vilket höll uppdateringssignalen synlig onödigt länge.
        const ids = baseData.map((item: any) => item.id);
        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-       const [snapshotResult, mediaResult, activityResult, ratingsResult] = await Promise.all([
+       const [snapshotResult, mediaResult, activityResult, ratingsResult, myViews] = await Promise.all([
          ids.length > 0
            ? supabase
                .from('job_applications')
@@ -410,8 +410,11 @@ export const useApplicationsData = (
            .from('candidate_ratings')
            .select('applicant_id, rating')
            .eq('recruiter_id', user.id)
-           .in('applicant_id', applicantIds),
-       ]);
+            .in('applicant_id', applicantIds),
+          // Läst-markeringen är personlig: en kollega som öppnat kandidaten
+          // får inte nolla pricken för övriga i teamet.
+          fetchMyApplicationViews(ids).catch(() => new Map<string, string>()),
+        ]);
 
        // Ansökans snapshot (den kandidatprofil som faktiskt användes vid ansökan).
        const snapshotById = new Map<string, any>();
