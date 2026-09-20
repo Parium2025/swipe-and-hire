@@ -248,10 +248,10 @@ export function EmployerSidebar() {
     // if undefined, keep previous URL while profile is re-fetching
   }, [profileCompanyLogoUrl, preloadedCompanyLogoUrl, companyLogoUrl]);
 
-  // Listen for unsaved changes cancel event to close sidebar
+  // Stäng drawern efter båda valen i dialogen för osparade ändringar,
+  // identiskt med jobbsökarens sidebar.
   useEffect(() => {
-    const handleUnsavedCancel = () => {
-      console.log('Unsaved cancel event received - closing sidebar');
+    const closeSidebarIfMobile = () => {
       // Endast stäng sidebaren på mobil/tablet (skärmar under 768px)
       if (isMobile || window.innerWidth < 768) {
         if (isMobile) {
@@ -263,8 +263,12 @@ export function EmployerSidebar() {
       // På desktop (768px+) låt sidebaren vara öppen
     };
 
-    window.addEventListener('unsaved-cancel', handleUnsavedCancel);
-    return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
+    window.addEventListener('unsaved-cancel', closeSidebarIfMobile);
+    window.addEventListener('unsaved-confirm', closeSidebarIfMobile);
+    return () => {
+      window.removeEventListener('unsaved-cancel', closeSidebarIfMobile);
+      window.removeEventListener('unsaved-confirm', closeSidebarIfMobile);
+    };
   }, [isMobile, setOpenMobile, setOpen]);
 
   // Förladda företagslogo via Service Worker — identiskt med jobbsökarens
