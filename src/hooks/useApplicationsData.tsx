@@ -927,6 +927,9 @@ export const useApplicationsData = (
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
+      // Dashboard-räknarna ("Nya ansökningar") ska sjunka direkt.
+      queryClient.invalidateQueries({ queryKey: ['employer-unviewed-applications'] });
+      queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
     },
   });
 

@@ -319,10 +319,13 @@ const JobDetails = () => {
     
     try {
       await markApplicationViewedForMe(applicationId);
+      // Dashboard-räknarna ("Nya ansökningar") ska sjunka direkt.
+      queryClient.invalidateQueries({ queryKey: ['employer-unviewed-applications'] });
+      queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
     } catch (error) {
       console.error('Error marking as viewed:', error);
     }
-  }, [updateApplicationLocally]);
+  }, [updateApplicationLocally, queryClient]);
 
   const applicationsByStatus = useMemo(() => {
     const result: Record<string, JobApplication[]> = {};
