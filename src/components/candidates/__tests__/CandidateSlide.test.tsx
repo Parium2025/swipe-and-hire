@@ -199,4 +199,45 @@ describe('CandidateSlide employer swipe', () => {
     expect(contextMenu.defaultPrevented).toBe(true);
     expect(dragStart.defaultPrevented).toBe(true);
   });
+
+  it('är fullt interaktivt igen efter ångra-animationen', () => {
+    vi.useFakeTimers();
+    const onSkip = vi.fn();
+    const onOpenFullProfile = vi.fn();
+    const { container, rerender } = render(
+      <CandidateSlide
+        application={application}
+        rating={0}
+        isVisible
+        isActive
+        onOpenFullProfile={onOpenFullProfile}
+        onSkip={onSkip}
+      />,
+    );
+    const card = container.querySelector('[data-candidate-swipe-card]');
+
+    fireEvent.touchStart(card as Element, { touches: [touch(340, 220)] });
+    fireEvent.touchMove(card as Element, { touches: [touch(190, 224)] });
+    fireEvent.touchEnd(card as Element, { changedTouches: [touch(190, 224)] });
+    act(() => vi.advanceTimersByTime(250));
+    expect(onSkip).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <CandidateSlide
+        application={application}
+        rating={0}
+        isVisible
+        isActive
+        isUndoEntry
+        onOpenFullProfile={onOpenFullProfile}
+        onSkip={onSkip}
+      />,
+    );
+
+    fireEvent.touchStart(card as Element, { touches: [touch(120, 220)] });
+    fireEvent.touchMove(card as Element, { touches: [touch(320, 224)] });
+    fireEvent.touchEnd(card as Element, { changedTouches: [touch(320, 224)] });
+
+    expect(onOpenFullProfile).toHaveBeenCalledTimes(1);
+  });
 });

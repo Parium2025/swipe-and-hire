@@ -55,6 +55,7 @@
 - [x]Verifiera frågefiltrets centrering i förhandsvisningen och ge panelen 12 px andningsmarginal mot skärmens underkant
 - [x] Matcha arbetsgivarens Swipe Mode mot jobbsökarens kortstruktur utan påverkan på jobbsökarsidan
 - [ ] Verifiera arbetsgivarens helkortsmedia, hörn, fingergest och stabila toppremsa på 393 × 580
+- [x] Återställ arbetsgivarens kandidatkort fullt efter Ångra och eliminera dubbelrörelsen vid nekad kandidat
 
 ## Utskickssystem
 - [x] Samla de sex redigerbara händelserna i automatiska flöden samt mallar, regler och logg
