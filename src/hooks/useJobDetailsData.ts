@@ -4,7 +4,7 @@ import { measurePerformance } from '@/lib/realtimePerformance';
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
-import { fetchMyApplicationViews } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { chunk } from '@/lib/fetchAllPages';

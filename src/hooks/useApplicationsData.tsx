@@ -8,7 +8,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { smartSearchCandidates } from '@/lib/smartSearch';
 import { markViewedInSession } from '@/lib/viewedApplicationsSession';
-import { fetchMyApplicationViews, markApplicationViewedForMe } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, markApplicationViewedForMe, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export interface ApplicationData {

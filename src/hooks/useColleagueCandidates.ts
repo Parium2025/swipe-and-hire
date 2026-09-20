@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
-import { fetchMyApplicationViews } from '@/lib/applicationViews';
+import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 
 // Page size for scalable pagination
 const PAGE_SIZE = 50;
