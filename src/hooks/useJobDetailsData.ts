@@ -249,6 +249,12 @@ async function hydrateApplications(
     }),
   );
 
+  // Läst-markeringen är personlig — en kollega som öppnat kandidaten får inte
+  // nolla den olästa pricken för övriga i teamet.
+  const myViewsPromise = fetchMyApplicationViews(applicationsData.map((a) => a.id)).catch(
+    () => new Map<string, string>(),
+  );
+
   const [ratingsByApplicant, criteriaResult, evaluationsResult] = await Promise.all([
     fetchRatings(userId, applicantIds),
     supabase.from('job_criteria').select('id, title').eq('job_id', jobId),
