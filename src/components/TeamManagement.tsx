@@ -424,7 +424,7 @@ const TeamManagement = () => {
                 aria-label="Återkalla inbjudan"
                 onClick={() => handleRevokeInvitation(invitation.id)}
                 disabled={busyInvitationId === invitation.id}
-                className="h-8 w-8 shrink-0 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white disabled:opacity-50"
+                className="h-8 w-8 shrink-0 border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
               >
                 {busyInvitationId === invitation.id ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -502,7 +502,7 @@ const TeamManagement = () => {
                       aria-label="Ta bort medlem"
                       onClick={() => handleRemoveMember(member.user_id)}
                       disabled={busyMemberId === member.user_id}
-                      className="h-8 w-8 border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white disabled:opacity-50"
+                      className="h-8 w-8 border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
                     >
                       {busyMemberId === member.user_id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

@@ -149,7 +149,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
                     e.stopPropagation();
                     onRemoveLinkClick(index);
                   }}
-                  className="border-destructive/40 bg-destructive/20 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white flex-shrink-0"
+                  className="border-0 bg-red-500/80 text-white transition-all duration-300 md:hover:!bg-red-500 md:hover:!text-white flex-shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

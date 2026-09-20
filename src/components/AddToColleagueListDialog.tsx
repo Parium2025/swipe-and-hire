@@ -343,7 +343,7 @@ export function AddToColleagueListDialog({
           {canRemoveFromOwnList && rows.length === 1 && (
             <Button
               variant="outline"
-              className="mobile-touch-removal-action w-full justify-start gap-3 h-auto py-3 bg-destructive/20 border-destructive/40 text-white hover:bg-destructive/30 hover:text-white"
+              className="mobile-touch-removal-action w-full justify-start gap-3 h-auto py-3 bg-red-500/80 border-0 text-white hover:bg-red-500 hover:text-white"
               onClick={() => setRemoveConfirmOpen(true)}
               disabled={isAdding !== null || isRemoving}
             >
@@ -358,7 +358,7 @@ export function AddToColleagueListDialog({
       <AlertDialogContentNoFocus elevated className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
         <AlertDialogHeader className="space-y-4 text-center">
           <div className="flex items-center justify-center gap-2.5">
-            <div className="bg-destructive/20 p-2 rounded-full">
+            <div className="bg-red-500/80 p-2 rounded-full">
               <AlertTriangle className="h-4 w-4 text-white" />
             </div>
             <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">Ta bort från listan</AlertDialogTitle>

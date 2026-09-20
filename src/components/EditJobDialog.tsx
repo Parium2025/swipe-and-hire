@@ -2789,7 +2789,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                   }}
                                                   onMouseDown={(e) => e.currentTarget.blur()}
                                                   onMouseUp={(e) => e.currentTarget.blur()}
-                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
+                                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-0 bg-red-500/80 text-white text-xs transition-all duration-300 active:scale-[0.97] focus:outline-none focus:ring-0"
                                                 >
                                                   <Trash2 className="h-3.5 w-3.5" />
                                                   <span>Ta bort</span>
@@ -2812,8 +2812,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             >
                               <AlertDialogHeader className="space-y-4 text-center">
                                 <div className="flex items-center justify-center gap-2.5">
-                                  <div className="rounded-full bg-destructive/20 p-2">
-                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  <div className="rounded-full bg-red-500/80 p-2">
+                                    <Trash2 className="h-4 w-4 text-white" />
                                   </div>
                                   <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">
                                     Ta bort fråga
@@ -3012,7 +3012,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         onClick={() => removeOption(index)}
                                         onMouseDown={(e) => e.currentTarget.blur()}
                                         onMouseUp={(e) => e.currentTarget.blur()}
-                                        className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors duration-150 flex-shrink-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white focus:outline-none focus:ring-0"
+                                        className="rounded-full border border-0 bg-red-500/80 p-2 text-white transition-colors duration-150 flex-shrink-0 md:hover:!bg-red-500 md:hover:!text-white focus:outline-none focus:ring-0"
                                       >
                                         <Trash2 className="h-4 w-4" />
                                       </button>
@@ -4320,7 +4320,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                       imageClearedRef.current = true;
                                       setManualFocus(null);
                                     }}
-                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-0 bg-red-500/80 text-white transition-all duration-200 md:hover:!bg-red-500 md:hover:!text-white"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     <span>Ta bort bild</span>
@@ -4424,7 +4424,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                       setJobImageDesktopDisplayUrl(null);
                                       desktopImageClearedRef.current = true;
                                     }}
-                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-destructive/40 bg-destructive/20 text-white transition-all duration-200 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                    className="premium-edit-pill-action inline-flex items-center gap-1.5 border border-0 bg-red-500/80 text-white transition-all duration-200 md:hover:!bg-red-500 md:hover:!text-white"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     <span>Ta bort bild</span>

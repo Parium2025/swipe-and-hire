@@ -769,7 +769,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                                     setTemplateToDelete(template);
                                   }}
                                   onPointerDown={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 border-destructive/40 bg-destructive/20 backdrop-blur-[2px] text-white text-xs transition-colors duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-full border h-9 px-3 border-0 bg-red-500/80 backdrop-blur-[2px] text-white text-xs transition-colors duration-300 md:hover:!bg-red-500 md:hover:!text-white active:scale-95 focus:outline-none focus:ring-0"
                                   aria-label={`Ta bort mall ${template.name}`}
                                 >
                                   <Trash2 size={13} />

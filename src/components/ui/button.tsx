@@ -13,7 +13,7 @@ const buttonVariants = cva(
         destructive:
           "rounded-md bg-destructive text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg md:hover:scale-[1.02] active:scale-[0.97] active:bg-destructive/90",
         destructiveSoft:
-          "rounded-full border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-[0.97] active:bg-destructive/40",
+          "rounded-full border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white active:scale-[0.97] active:bg-red-500",
         outline:
           "rounded-md border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground active:scale-[0.97] active:bg-accent/80",
         // Neutral outline without accent hover for precise per-button control
@@ -32,9 +32,9 @@ const buttonVariants = cva(
         // Glass variant with green accent (for success/confirm actions)
         glassGreen:
           "rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-green-500/40",
-        // Glass variant with red accent (for destructive actions)
+        // Solid red variant (for destructive actions)
         glassRed:
-          "rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-red-500/40",
+          "rounded-full bg-red-500/80 border-0 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-red-500 md:hover:!bg-red-500 md:hover:!text-white",
         // Glass variant with blue accent (for info/primary actions)
         glassBlue:
           "rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40 text-white focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none focus-visible:outline-none active:scale-[0.97] active:bg-blue-500/40",

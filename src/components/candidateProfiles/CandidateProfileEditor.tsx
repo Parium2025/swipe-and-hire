@@ -330,7 +330,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         setCoverUrl(null);
                       }}
                       aria-label="Ta bort media"
-                      className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-destructive/30"
+                      className="absolute -top-3 -right-3 rounded-full border border-0 bg-red-500/80 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-red-500"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -488,7 +488,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                       setCvFilename(null);
                     }}
                     aria-label="Ta bort CV"
-                    className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!bg-destructive/30"
+                    className="rounded-full border border-0 bg-red-500/80 p-2 text-white transition-colors md:hover:!bg-red-500"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
