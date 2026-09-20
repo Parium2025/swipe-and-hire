@@ -134,6 +134,7 @@ export function ChatView({
   const prevFirstMessageIdRef = useRef<string | null>(null);
   const prevScrollHeightRef = useRef(0);
   const initialScrollFrameRef = useRef<number | null>(null);
+  const keyboardTransitionUntilRef = useRef(0);
 
   // Search state
   const [showSearch, setShowSearch] = useState(false);
@@ -150,6 +151,14 @@ export function ChatView({
     if (!scrollAreaRef.current) return null;
     return scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLDivElement | null;
   }, []);
+
+  const pinMessagesToBottom = useCallback(() => {
+    const viewport = getViewportEl();
+    if (!viewport) return;
+    isNearBottomRef.current = true;
+    viewport.scrollTop = viewport.scrollHeight;
+    prevScrollHeightRef.current = viewport.scrollHeight;
+  }, [getViewportEl]);
 
   const otherMembers = (conversation.members || []).filter(m => m.user_id !== currentUserId);
   const { displayMember, isSelf: isSelfConversation } = resolveDisplayMember(conversation.members, currentUserId);
@@ -365,6 +374,43 @@ export function ChatView({
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [conversation.id, getViewportEl]);
+
+  // iOS ändrar den synliga viewporten i flera steg när tangentbordet öppnas
+  // och stängs. Håll senaste meddelandet förankrat under hela övergången så
+  // att varken en tom mellanbild eller ett stort glapp hinner målas.
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    const visualViewport = window.visualViewport;
+    if (!textarea || !visualViewport) return;
+
+    let frame: number | null = null;
+    const schedulePin = () => {
+      if (
+        document.activeElement !== textarea &&
+        performance.now() > keyboardTransitionUntilRef.current
+      ) return;
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        pinMessagesToBottom();
+      });
+    };
+    const beginKeyboardTransition = () => {
+      keyboardTransitionUntilRef.current = performance.now() + 900;
+      schedulePin();
+    };
+
+    textarea.addEventListener('focus', beginKeyboardTransition);
+    textarea.addEventListener('blur', beginKeyboardTransition);
+    visualViewport.addEventListener('resize', schedulePin);
+
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      textarea.removeEventListener('focus', beginKeyboardTransition);
+      textarea.removeEventListener('blur', beginKeyboardTransition);
+      visualViewport.removeEventListener('resize', schedulePin);
+    };
+  }, [pinMessagesToBottom]);
 
   // Scroll to bottom when typing indicator appears
   useEffect(() => {
@@ -692,6 +738,8 @@ export function ChatView({
     setPendingFile(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     textareaRef.current?.focus();
+    keyboardTransitionUntilRef.current = performance.now() + 900;
+    requestAnimationFrame(pinMessagesToBottom);
     setSending(true);
 
     const restoreComposer = () => {
@@ -1069,7 +1117,7 @@ export function ChatView({
             <p className="text-pure-white text-xs">Skriv ett meddelande för att starta konversationen.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="min-h-full flex flex-col justify-end gap-4">
             {/* Äldre meddelanden laddas automatiskt vid uppscroll */}
             {hasMore && !isLoading && messages.length >= MESSAGES_PAGE_SIZE && (
               <div className="flex justify-center py-2 min-h-[28px]">
