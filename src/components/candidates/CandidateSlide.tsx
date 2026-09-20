@@ -33,7 +33,6 @@ interface CandidateSlideProps {
 export const CandidateSlide = memo(function CandidateSlide({
   application,
   onOpenFullProfile,
-  isVisible,
   isActive,
   nextApplication,
   isUndoEntry,
@@ -215,7 +214,7 @@ export const CandidateSlide = memo(function CandidateSlide({
         <motion.div
           data-candidate-swipe-card
           className="relative h-full w-full overflow-hidden rounded-2xl bg-card-parium shadow-[0_18px_45px_-10px_rgba(0,0,0,0.4)] will-change-transform select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [backface-visibility:hidden] [&_img]:[-webkit-user-drag:none] [&_video]:[-webkit-user-drag:none]"
-          style={{ x, opacity: exitOpacity, rotate: cardRotate, scale: combinedScale, touchAction: useTouchTunnel ? 'pan-y' : 'auto', transform: 'translateZ(0)' }}
+          style={{ x, opacity: exitOpacity, rotate: cardRotate, scale: combinedScale, touchAction: useTouchTunnel ? 'pan-y' : 'auto' }}
           drag={useTouchTunnel ? false : 'x'}
           dragDirectionLock={!useTouchTunnel}
           dragConstraints={useTouchTunnel ? undefined : { left: 0, right: 0 }}
