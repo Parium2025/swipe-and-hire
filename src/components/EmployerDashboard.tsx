@@ -13,7 +13,6 @@ import { useJobsData, removeJobFromJobsCache, removeJobsFromJobsCache, type JobP
 import { MobileJobCard } from '@/components/MobileJobCard';
 
 
-import { TruncatedText } from '@/components/TruncatedText';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
 import { formatDateShortSv } from '@/lib/date';
 import { getEmployerJobStatus, isEmployerJobActive, isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
