@@ -901,7 +901,7 @@ const MyCandidates = () => {
         <>
         <div className="flex flex-wrap justify-center gap-2 pb-3">
           {canSwipe && (
-            <div className="w-full flex justify-center">
+            <div className="w-full flex justify-center pb-3">
               <button
                 type="button"
                 disabled={swipeCriteriaEnabled && swipeCriteriaLoading}

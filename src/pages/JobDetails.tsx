@@ -713,7 +713,7 @@ const JobDetails = () => {
         {useMobileView && applications.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2 pb-3">
             {canSwipe && (
-              <div className="w-full flex justify-center">
+              <div className="w-full flex justify-center py-2">
                 <button
                   type="button"
                   onClick={() => { setSwipeFilteredApps(null); setSwipeInitialIndex(0); setSwipeViewerOpen(true); }}
