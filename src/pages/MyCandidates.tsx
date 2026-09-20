@@ -822,7 +822,7 @@ const MyCandidates = () => {
     return allCandidatesAsAppData;
   }, [swipeFilteredApps, swipeStageCandidates, mapCandidateToAppData, allCandidatesAsAppData, swipeCriteriaEnabled, swipeCriteriaFilter]);
 
-  // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och låst.
+  // Alla kandidater här ligger redan i en lista — spara-knappen visas ifylld och öppnar hanteringen.
   const swipeSavedApplicantIds = useMemo(
     () => new Set(swipeApplicationsData.map(a => a.applicant_id)),
     [swipeApplicationsData],
