@@ -277,7 +277,11 @@ const CandidatesContent = () => {
                     <span>Välj kandidater</span>
                   )}
                 </button>
-                {canSwipe && safeApplications.length > 0 && (
+              </div>
+
+              {/* Swipe-läge på egen rad så knappen alltid är exakt centrerad */}
+              {canSwipe && safeApplications.length > 0 && (
+                <div className="flex justify-center">
                   <button
                     disabled={isBusy}
                     onClick={() => setSwipeOpen(true)}
@@ -287,8 +291,8 @@ const CandidatesContent = () => {
                     <Layers className="h-4 w-4" />
                     <span>Swipe-läge</span>
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Filter chips below */}
               {questionFilters.length > 0 && (
