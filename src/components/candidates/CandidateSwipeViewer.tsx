@@ -346,6 +346,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
                 onSave={() => onSaveCandidate?.(currentApplication)}
                 onSkip={handleActionSkip}
                 onOpenInfo={() => onOpenFullProfile(currentApplication)}
+                canUndo={canUndo}
+                onUndo={handleUndo}
               />
             </div>
           </div>
