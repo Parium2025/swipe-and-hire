@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Undo2, X } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
@@ -107,12 +107,13 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     };
   }, [open]);
 
+  const hasEndSection = applications.length > 0;
   const virtualizer = useVirtualizer({
-    count: applications.length,
+    count: applications.length + (hasEndSection ? 1 : 0),
     getScrollElement: () => scrollRef.current,
     estimateSize: () => slideHeight,
     overscan: 2,
-    getItemKey: (index) => applications[index]?.id || index,
+    getItemKey: (index) => applications[index]?.id || 'candidate-swipe-complete',
   });
 
   // Räkna om positionerna när viewporthöjden ändras (rotation, Safari-fält).
@@ -187,7 +188,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, [open, handleScroll]);
 
   const snapToIndex = useCallback((idx: number) => {
-    if (idx < 0 || idx >= applications.length) return;
+    const maximumIndex = applications.length - 1 + (hasEndSection ? 1 : 0);
+    if (idx < 0 || idx > maximumIndex) return;
     transitionTargetIndexRef.current = idx;
     setCurrentIndex(idx);
     // Kandidatkortets egen exit + underlay är hela övergången. Ytterligare
@@ -198,18 +200,19 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         transitionTargetIndexRef.current = null;
       });
     });
-  }, [applications.length, virtualizer]);
+  }, [applications.length, hasEndSection, virtualizer]);
 
   const handleSkip = useCallback(() => {
-    if (currentIndex >= applications.length - 1) return;
     const current = applications[currentIndex];
-    if (current) {
-      skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);
-      persistCandidateUndoStack(skippedStackRef.current);
-      setCanUndo(true);
-    }
+    if (!current) return;
+
+    skippedStackRef.current = [...skippedStackRef.current, current.id].slice(-50);
+    persistCandidateUndoStack(skippedStackRef.current);
+    setCanUndo(true);
+
+    if (currentIndex === applications.length - 1 && hasMore) onLoadMore?.();
     snapToIndex(currentIndex + 1);
-  }, [applications, currentIndex, snapToIndex]);
+  }, [applications, currentIndex, hasMore, onLoadMore, snapToIndex]);
 
   const handleUndo = useCallback(() => {
     const stack = skippedStackRef.current;
@@ -244,6 +247,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, []);
 
   const currentApplication = applications[currentIndex];
+  const isEndSection = hasEndSection && currentIndex === applications.length;
+  const isComplete = isEndSection && !hasMore;
 
 
   // Lätt haptik vid kandidatbyte — endast i svepvyn, aldrig vid första renderingen.
@@ -325,7 +330,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
         )}
 
         {/* Compact position indicator — never creates thousands of DOM nodes. */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5">
+        <div className={`absolute right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1.5 transition-opacity duration-200 ${isEndSection ? 'opacity-0' : 'opacity-100'}`}>
           {Array.from({ length: Math.min(applications.length, 7) }, (_, offset) => {
             const start = Math.max(0, Math.min(currentIndex - 3, applications.length - 7));
             const idx = start + offset;
@@ -360,6 +365,49 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
           <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((item) => {
             const app = applications[item.index];
+            if (!app && item.index === applications.length && hasEndSection) {
+              return (
+                <div
+                  key="candidate-swipe-complete"
+                  data-index={item.index}
+                  className="absolute left-0 top-0 w-full"
+                  style={{
+                    transform: `translateY(${item.start}px)`,
+                    height: `${slideHeight}px`,
+                    scrollSnapAlign: 'start',
+                    scrollSnapStop: 'always',
+                  }}
+                >
+                  <div className="flex h-full w-full flex-col items-center justify-center px-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.5rem)] text-center">
+                    {hasMore ? (
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-label="Laddar fler kandidater" />
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                        animate={isComplete ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                        className="w-full max-w-[27rem] rounded-[1.75rem] border border-white/25 bg-primary/30 px-8 py-6 shadow-2xl"
+                      >
+                        <p className="text-[15px] font-semibold text-white sm:text-base">Det här är alla kandidater</p>
+                        <p className="mt-2 text-[13px] text-white sm:text-sm">Du har gått igenom hela listan.</p>
+                      </motion.div>
+                    )}
+
+                    {canUndo && !hasMore && (
+                      <button
+                        type="button"
+                        onClick={handleUndo}
+                        data-swipe-action-button
+                        className="mt-5 flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 shadow-lg transition-transform active:scale-[0.93] touch-manipulation"
+                      >
+                        <Undo2 className="h-4.5 w-4.5 text-white" />
+                        <span className="text-sm font-medium text-white">Ångra</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            }
             if (!app) return null;
             return (
             <div
