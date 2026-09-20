@@ -1051,7 +1051,11 @@ export function CandidatesTable({
           const idx = sortedApplications.findIndex(a => a.id === app.id);
           if (idx >= 0) setSwipeIndex(idx);
           setReturnToSwipe(true);
-          handleRowClick(app);
+          // Vänta en bildruta och montera den tunga profilen som låg
+          // prioritet, så svepets animation aldrig tappar ramar.
+          requestAnimationFrame(() => {
+            startTransition(() => handleRowClick(app));
+          });
         }}
         getDisplayRating={getDisplayRating}
         savedApplicantIds={swipeSavedApplicantIds}
