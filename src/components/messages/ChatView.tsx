@@ -1286,6 +1286,7 @@ export function ChatView({
             )}
             onPointerDown={handleComposerPointerDown}
             onFocus={pinMessagesToBottom}
+            enterKeyHint="enter"
             rows={1}
           />
           <Button
