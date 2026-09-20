@@ -111,7 +111,7 @@ export const MyCandidatesDesktopActionBar = ({
           onClick={onBulkDeleteClick}
           onMouseDown={(e) => e.preventDefault()}
           className={`flex h-8 flex-shrink-0 items-center rounded-md px-2 text-xs whitespace-nowrap outline-none focus:outline-none transition-all duration-200 ${
-            selectedCount === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
+            selectedCount === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white'
           }`}
         >
           <Trash2 className="h-3.5 w-3.5 mr-1" />

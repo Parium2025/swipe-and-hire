@@ -241,7 +241,7 @@ export const MyCandidatesMobileActionBar = ({
                 onClick={onBulkDeleteClick}
                 onMouseDown={(e) => e.preventDefault()}
                 className={`flex h-9 w-9 items-center justify-center rounded-full outline-none focus:outline-none transition-all duration-200 active:scale-[0.97] touch-manipulation ${
-                  selectedCount === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
+                  selectedCount === 0 ? 'cursor-not-allowed border border-destructive/20 bg-destructive/10 text-white/30' : 'border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white'
                 }`}
               >
                 <Trash2 className="h-4 w-4" />

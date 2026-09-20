@@ -157,7 +157,7 @@ const SortableListRow = ({
             className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors focus:outline-none focus:ring-0 focus-visible:ring-0 ${
               list.is_default
                 ? 'border-white/5 text-white/30 bg-white/5 cursor-not-allowed'
-                : 'border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white'
+                : 'border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white'
             }`}
           >
             <Trash2 className="h-4 w-4" />

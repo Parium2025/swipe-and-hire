@@ -534,7 +534,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 active:bg-destructive/30"
+            className="flex items-center justify-center rounded-full border border-0 bg-red-500/80 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 active:bg-destructive/30"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -661,7 +661,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
             onClick={() => requestDelete(activeId)}
             title="Ta bort profil"
             aria-label="Ta bort profil"
-            className="flex items-center justify-center rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+            className="flex items-center justify-center rounded-full border border-0 bg-red-500/80 p-2 text-white outline-none transition-colors touch-manipulation [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-red-500 md:hover:!text-white"
           >
             <Trash2 className="h-4 w-4" />
           </button>

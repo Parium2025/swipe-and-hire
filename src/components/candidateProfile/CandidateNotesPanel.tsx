@@ -177,7 +177,7 @@ export const CandidateNotesPanel = ({
                                 </button>
                                 <button
                                   onClick={() => onConfirmDelete(note.id)}
-                                  className="rounded-full border border-destructive/40 bg-destructive/20 p-1.5 text-white transition-all duration-300 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                                  className="rounded-full border border-0 bg-red-500/80 p-1.5 text-white transition-all duration-300 md:hover:!bg-red-500 md:hover:!text-white"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -193,7 +193,7 @@ export const CandidateNotesPanel = ({
                                 </button>
                                 <button
                                   onClick={() => onConfirmDelete(note.id)}
-                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-destructive/40 bg-destructive/20 text-white text-xs transition-all duration-300 active:scale-[0.97]"
+                                  className="flex items-center gap-1.5 px-3 h-9 min-h-[2.25rem] rounded-full border border-0 bg-red-500/80 text-white text-xs transition-all duration-300 active:scale-[0.97]"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                   <span>Ta bort</span>

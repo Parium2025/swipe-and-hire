@@ -1645,7 +1645,7 @@ export function MessageTemplatesSettings() {
                       </label>
                       {selectedTemplateIds.length > 0 && (
                         <PillButton
-                          className="h-8 border-destructive/40 bg-destructive/20 px-3 hover:bg-destructive/30 hover:border-destructive/60"
+                          className="h-8 border-0 bg-red-500/80 px-3 hover:bg-red-500"
                           onClick={openBulkDeleteDialog}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -1786,7 +1786,7 @@ export function MessageTemplatesSettings() {
 
                             <PillButton
                               shape="icon"
-                              className="h-8 w-8 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
+                              className="h-8 w-8 border-0 bg-red-500/80 hover:bg-red-500"
                               onClick={() => openDeleteTemplateDialog(template)}
                             >
                               <Trash2 className="h-3 w-3" />
@@ -2258,7 +2258,7 @@ export function MessageTemplatesSettings() {
                   </PillButton>
                   {selectedAutomationGroup && (
                     <PillButton
-                      className="px-4 border-destructive/40 bg-destructive/20 hover:bg-destructive/30 hover:border-destructive/60"
+                      className="px-4 border-0 bg-red-500/80 hover:bg-red-500"
                       onClick={() => openDeleteAutomationDialog(selectedAutomationGroup, selectedTemplateFamily)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -2308,7 +2308,7 @@ export function MessageTemplatesSettings() {
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedLogIds.length > 0 && (
                     <PillButton
-                      className="h-8 border-destructive/60 bg-destructive/30 px-3 text-white hover:bg-destructive/45 hover:border-destructive/80"
+                      className="h-8 border-0 bg-red-500/80 px-3 text-white hover:bg-red-500"
                       onClick={() => openLogDeleteDialog(selectedLogIds, selectedLogIds.length === logs.length)}
                     >
                       <Trash2 className="h-3 w-3" />

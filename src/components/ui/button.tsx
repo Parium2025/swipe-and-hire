@@ -13,7 +13,7 @@ const buttonVariants = cva(
         destructive:
           "rounded-md bg-destructive text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg md:hover:scale-[1.02] active:scale-[0.97] active:bg-destructive/90",
         destructiveSoft:
-          "rounded-full border border-destructive/40 bg-destructive/20 text-white md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white active:scale-[0.97] active:bg-destructive/40",
+          "rounded-full border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white active:scale-[0.97] active:bg-destructive/40",
         outline:
           "rounded-md border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground active:scale-[0.97] active:bg-accent/80",
         // Neutral outline without accent hover for precise per-button control

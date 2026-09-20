@@ -2282,7 +2282,7 @@ const Profile = () => {
                     e.stopPropagation();
                     deleteProfileMedia();
                   }}
-                  className="absolute -top-3 -right-3 rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                  className="absolute -top-3 -right-3 rounded-full border border-0 bg-red-500/80 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-red-500 md:hover:!text-white"
                   aria-label="Ta bort profilmedia"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -2826,7 +2826,7 @@ const Profile = () => {
                         <button
                           type="button"
                           onClick={handleDeleteCv}
-                          className="rounded-full border border-destructive/40 bg-destructive/20 p-2 text-white transition-colors md:hover:!border-destructive/50 md:hover:!bg-destructive/30 md:hover:!text-white"
+                          className="rounded-full border border-0 bg-red-500/80 p-2 text-white transition-colors md:hover:!bg-red-500 md:hover:!text-white"
                           title="Ta bort CV"
                         >
                           <Trash2 className="h-4 w-4" />
