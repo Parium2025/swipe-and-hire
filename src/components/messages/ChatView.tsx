@@ -714,7 +714,13 @@ export function ChatView({
     setNewMessage('');
     setPendingFile(null);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    textareaRef.current?.focus({ preventScroll: true });
+    // Touch: stäng tangentbordet direkt efter skickning. Desktop: behåll
+    // fokus så nästa meddelande kan skrivas utan extra klick.
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
+      textareaRef.current?.blur();
+    } else {
+      textareaRef.current?.focus({ preventScroll: true });
+    }
     requestAnimationFrame(pinMessagesToBottom);
     setSending(true);
 
