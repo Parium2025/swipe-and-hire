@@ -372,8 +372,26 @@ export function useSwipeCardGesture({
     }
   }, [clearTapHint, x]);
 
+  /**
+   * Nollställer gest-state synkront. Jobbsökarens kort unmountas efter ett
+   * svep och behöver aldrig detta, men arbetsgivarens svepvy återanvänder
+   * kortinstansen vid Ångra — utan reset ligger commit-spärren kvar och
+   * kortet blir låst.
+   */
+  const resetGesture = useCallback(() => {
+    if (exitHandoffTimerRef.current !== null) {
+      window.clearTimeout(exitHandoffTimerRef.current);
+      exitHandoffTimerRef.current = null;
+    }
+    swipedRef.current = false;
+    touchGestureRef.current = null;
+    thresholdHapticFiredRef.current = false;
+    lastTapTimestampRef.current = 0;
+  }, []);
+
   return {
     triggerSwipe,
+    resetGesture,
     handleDragEnd,
     handleTouchStartCapture,
     handleTouchMoveCapture,
