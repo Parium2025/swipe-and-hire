@@ -4715,6 +4715,10 @@ export type Database = {
         Args: { p_conversation_id: string }
         Returns: boolean
       }
+      is_conversation_creator: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
       is_conversation_member: {
         Args: { p_conversation_id: string }
         Returns: boolean
