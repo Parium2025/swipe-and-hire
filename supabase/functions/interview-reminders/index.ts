@@ -586,9 +586,11 @@ Deno.serve(async (req) => {
       .gte("scheduled_at", fourDaysAgo.toISOString())
       .lte("scheduled_at", threeDaysAgo.toISOString())
       .is("followup_reminder_sent_at", null)
-      // Samma skäl som ovan – resten tas i nästa körning.
+      // Samma sidindelning som ovan – arbetarna delar upp uppföljningarna.
       .order("scheduled_at", { ascending: true })
-      .limit(2000);
+      .order("id", { ascending: true })
+      .range(workerPage * PAGE_SIZE, workerPage * PAGE_SIZE + PAGE_SIZE - 1);
+
 
     if (pastError) {
       console.error("Error fetching past interviews for follow-up:", pastError);
