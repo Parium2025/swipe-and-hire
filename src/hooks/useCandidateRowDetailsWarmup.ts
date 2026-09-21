@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { CandidateActivity, ActivityType } from '@/hooks/useCandidateActivities';
 import { primeCandidateNotesCache } from '@/hooks/useCandidateNotes';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
+import { prewarmExistingInterviews } from '@/lib/existingInterviewQuery';
 
 interface RowLike {
   applicant_id?: string | null;
