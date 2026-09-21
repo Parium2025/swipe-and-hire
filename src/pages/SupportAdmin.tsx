@@ -61,7 +61,10 @@ const SupportAdmin = () => {
       const { data: ticketsData, error } = await supabase
         .from('support_tickets')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        // Tak: annars hämtas varje ärende som någonsin skapats när supporten
+        // växer. De 300 senaste täcker arbetsflödet och sidan öppnas direkt.
+        .limit(300);
 
       if (error) throw error;
       

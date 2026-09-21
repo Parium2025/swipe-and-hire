@@ -161,11 +161,14 @@ async function runUnreadMessages() {
     finalIds.map((id) => recipientProfiles.get(id)?.email).filter((e): e is string => !!e),
   )
 
+  // SKALA: mejlen skickades ett i taget. Med tusentals mottagare hann jobbet
+  // inte klart inom körningens tidsfönster. Fem i taget är samma resultat,
+  // men bråkdelen av tiden – och håller sig inom mejlleverantörens takt.
   let sent = 0
-  for (const userId of finalIds) {
+  const sendOne = async (userId: string) => {
     const profile = recipientProfiles.get(userId)
     const email = profile?.email
-    if (!email || blocked.has(email.toLowerCase())) continue
+    if (!email || blocked.has(email.toLowerCase())) return
 
     const conversations = perUser.get(userId)!
     const total = [...conversations.values()].reduce((a, b) => a + b, 0)
@@ -191,6 +194,10 @@ async function runUnreadMessages() {
       settings_note: 'Du kan stänga av påminnelser om olästa meddelanden under Aviseringar i appen.',
     }, email)
     if (ok) sent++
+  }
+  const EMAIL_CONCURRENCY = 5
+  for (let i = 0; i < finalIds.length; i += EMAIL_CONCURRENCY) {
+    await Promise.all(finalIds.slice(i, i + EMAIL_CONCURRENCY).map(sendOne))
   }
   return sent
 }
@@ -238,11 +245,12 @@ async function runNewApplications() {
     finalIds.map((id) => profiles.get(id)?.email).filter((e): e is string => !!e),
   )
 
+  // Samma skäl som ovan: fem mejl i taget i stället för ett.
   let sent = 0
-  for (const employerId of finalIds) {
+  const sendOne = async (employerId: string) => {
     const profile = profiles.get(employerId)
     const email = profile?.email
-    if (!email || blocked.has(email.toLowerCase())) continue
+    if (!email || blocked.has(email.toLowerCase())) return
 
     const byJob = perEmployer.get(employerId)!
     const total = [...byJob.values()].reduce((a, b) => a + b, 0)
@@ -263,6 +271,10 @@ async function runNewApplications() {
       settings_note: 'Du kan stänga av sammanfattningar om nya ansökningar under Aviseringar i appen.',
     }, email)
     if (ok) sent++
+  }
+  const EMAIL_CONCURRENCY = 5
+  for (let i = 0; i < finalIds.length; i += EMAIL_CONCURRENCY) {
+    await Promise.all(finalIds.slice(i, i + EMAIL_CONCURRENCY).map(sendOne))
   }
   return sent
 }

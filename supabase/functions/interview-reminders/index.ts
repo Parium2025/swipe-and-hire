@@ -371,7 +371,11 @@ Deno.serve(async (req) => {
     if (upcomingInterviews && upcomingInterviews.length > 0) {
       console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
 
-      for (const interview of upcomingInterviews as unknown as Interview[]) {
+      // SKALA: varje intervju kräver ~6 anrop i följd. Med 200 möten i samma
+      // minutsvep hann körningen inte klart innan cron startade nästa. Nu körs
+      // åtta möten samtidigt – samma claim-skydd, samma ordning per möte, men
+      // hela svepet blir klart i tid även vid hög belastning.
+      const processInterview = async (interview: Interview) => {
         // Claim direkt: en samtidig körning får aldrig skicka samma påminnelse.
         const { data: claimed } = await supabase
           .from("interviews")
@@ -380,7 +384,7 @@ Deno.serve(async (req) => {
           .is("reminder_sent_at", null)
           .select("id")
           .maybeSingle();
-        if (!claimed) continue;
+        if (!claimed) return;
 
         const jobTitle = interview.job_postings?.title || "intervju";
         const scheduledTime = new Date(interview.scheduled_at);
@@ -488,6 +492,11 @@ Deno.serve(async (req) => {
           { skipPush: employerGoogleCollides },
         );
 
+      };
+      const REMINDER_CONCURRENCY = 8;
+      const interviewList = upcomingInterviews as unknown as Interview[];
+      for (let i = 0; i < interviewList.length; i += REMINDER_CONCURRENCY) {
+        await Promise.all(interviewList.slice(i, i + REMINDER_CONCURRENCY).map(processInterview));
       }
     } else {
       console.log("No upcoming interviews found in the 10-minute window");
@@ -529,7 +538,9 @@ Deno.serve(async (req) => {
     } else if (pastInterviews && pastInterviews.length > 0) {
       console.log(`Found ${pastInterviews.length} interviews needing follow-up reminders`);
 
-      for (const interview of pastInterviews) {
+      // Samma skäl som 10-minutersvepet: åtta uppföljningar i taget i stället
+      // för en i taget, så 200 möten hinner klart inom körningens tidsfönster.
+      const processFollowup = async (interview: any) => {
         const jobTitle = (interview.job_postings as any)?.title || "tjänsten";
 
         // Claim först: samtidiga körningar får aldrig skicka dubbla påminnelser.
@@ -540,7 +551,7 @@ Deno.serve(async (req) => {
           .is("followup_reminder_sent_at", null)
           .select("id")
           .maybeSingle();
-        if (!claimedFollowup) continue;
+        if (!claimedFollowup) return;
 
         // Check if the recruiter has already taken action on this candidate
         // (changed status from pending/reviewed, or added to my_candidates with stage change)
@@ -618,8 +629,11 @@ Deno.serve(async (req) => {
             console.error(`Push failed for follow-up ${interview.id}:`, err);
           }
         }
+      };
+      const FOLLOWUP_CONCURRENCY = 8;
+      for (let i = 0; i < pastInterviews.length; i += FOLLOWUP_CONCURRENCY) {
+        await Promise.all(pastInterviews.slice(i, i + FOLLOWUP_CONCURRENCY).map(processFollowup));
       }
-
     }
 
     const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
