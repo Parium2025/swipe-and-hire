@@ -538,7 +538,9 @@ Deno.serve(async (req) => {
     } else if (pastInterviews && pastInterviews.length > 0) {
       console.log(`Found ${pastInterviews.length} interviews needing follow-up reminders`);
 
-      for (const interview of pastInterviews) {
+      // Samma skäl som 10-minutersvepet: åtta uppföljningar i taget i stället
+      // för en i taget, så 200 möten hinner klart inom körningens tidsfönster.
+      const processFollowup = async (interview: any) => {
         const jobTitle = (interview.job_postings as any)?.title || "tjänsten";
 
         // Claim först: samtidiga körningar får aldrig skicka dubbla påminnelser.
@@ -549,7 +551,7 @@ Deno.serve(async (req) => {
           .is("followup_reminder_sent_at", null)
           .select("id")
           .maybeSingle();
-        if (!claimedFollowup) continue;
+        if (!claimedFollowup) return;
 
         // Check if the recruiter has already taken action on this candidate
         // (changed status from pending/reviewed, or added to my_candidates with stage change)
@@ -627,8 +629,11 @@ Deno.serve(async (req) => {
             console.error(`Push failed for follow-up ${interview.id}:`, err);
           }
         }
+      };
+      const FOLLOWUP_CONCURRENCY = 8;
+      for (let i = 0; i < pastInterviews.length; i += FOLLOWUP_CONCURRENCY) {
+        await Promise.all(pastInterviews.slice(i, i + FOLLOWUP_CONCURRENCY).map(processFollowup));
       }
-
     }
 
     const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
