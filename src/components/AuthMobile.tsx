@@ -133,6 +133,7 @@ const AuthMobile = ({
   const resetSectionRef = useRef<HTMLDivElement>(null);
   // Independent scroll positions per tab
   const signupScrollRef = useRef(0);
+  const loginFormRef = useRef<HTMLFormElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -145,6 +146,31 @@ const AuthMobile = ({
       }, 0);
     }
   }, [showResetPassword, resetPasswordSent]);
+
+  // Enter ska alltid logga in när inloggningsfliken är aktiv — även när fokus
+  // ligger utanför formuläret (t.ex. efter autofyll, efter klick i bakgrunden
+  // eller direkt efter att sidan laddats).
+  useEffect(() => {
+    if (!isLogin) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.isComposing || e.defaultPrevented) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (loading) return;
+      const form = loginFormRef.current;
+      if (!form) return;
+      const el = document.activeElement as HTMLElement | null;
+      // Låt formulärets egna fält och knappar/länkar hantera Enter själva.
+      if (el && form.contains(el)) return;
+      const tag = el?.tagName;
+      if (tag === 'BUTTON' || tag === 'A' || tag === 'TEXTAREA' || el?.isContentEditable) return;
+      e.preventDefault();
+      form.requestSubmit();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isLogin, loading]);
+
+
 
   // Utility: force top without smooth; works reliably on iOS Safari
   const hardScrollTo = (top: number) => {
@@ -752,7 +778,7 @@ const AuthMobile = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { const tag = (e.target as HTMLElement)?.tagName; if (e.key === 'Enter' && !e.nativeEvent.isComposing && tag !== 'BUTTON' && tag !== 'A' && tag !== 'TEXTAREA' && !loading) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} className="space-y-3 md:space-y-4">
+                    <form key="login-form" ref={loginFormRef} onSubmit={handleSubmit} onKeyDown={(e) => { const tag = (e.target as HTMLElement)?.tagName; if (e.key === 'Enter' && !e.nativeEvent.isComposing && tag !== 'BUTTON' && tag !== 'A' && tag !== 'TEXTAREA' && !loading) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
                         <Label htmlFor="login-email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
