@@ -102,6 +102,9 @@ const EmployerDashboard = memo(() => {
   // Kortet som just nu tonar ut — ersättaren ligger redan färdigmålad bakom.
   const [removingJobId, setRemovingJobId] = useState<string | null>(null);
   const [deleteUnderlayJob, setDeleteUnderlayJob] = useState<JobPosting | null>(null);
+  // Först när kopian bakom verkligen är målad döljer vi originalplatsen längre
+  // ned. Annars kan listan visa en tom ruta i en frame.
+  const [underlayPainted, setUnderlayPainted] = useState(false);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
   // Förhämtas för sidans annonser, så rutan är ifylld direkt vid klick.
   const { data: autoNotifyData } = useQuery({
