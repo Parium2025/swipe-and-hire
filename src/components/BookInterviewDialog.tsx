@@ -962,9 +962,9 @@ export const BookInterviewDialog = ({
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isSubmitting || !date || lockedByColleague || isUnchangedFromExisting}
-                className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && date && !lockedByColleague && !isUnchangedFromExisting ? 'border border-white/30' : ''
-                }`}
+                // Ramen ligger kvar hela tiden (bara färgen byts) så knappen
+                // aldrig hoppar eller blinkar när man byter plats eller tid.
+                className="flex-1 min-h-[44px] rounded-full border border-white/30 transition-none active:scale-95 focus:outline-none focus:ring-0 disabled:border-white/10"
               >
                 {isSubmitting ? (
                   <>
