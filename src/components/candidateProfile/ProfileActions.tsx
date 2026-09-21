@@ -63,9 +63,15 @@ export const ProfileActions = ({
             </Button>
           )}
           {onRemove && (
-            <Button {...noFocusRingProps} onClick={onRemove} variant="glassRed" className="min-w-0 flex-1 h-8 px-2 text-[11px] md:h-9 md:px-3 md:text-sm">
-              <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-1 shrink-0" />
-              <span className="truncate">Ta bort från listan</span>
+            <Button
+              {...noFocusRingProps}
+              onClick={onRemove}
+              variant="glassRed"
+              aria-label="Ta bort från listan"
+              className="min-w-0 shrink-0 h-8 w-9 px-0 text-[11px] md:h-9 md:w-auto md:flex-1 md:px-3 md:text-sm"
+            >
+              <Trash2 className="h-3 w-3 md:h-4 md:w-4 md:mr-1 shrink-0" />
+              <span className="hidden truncate md:inline">Ta bort från listan</span>
             </Button>
           )}
         </div>
