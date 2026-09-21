@@ -169,6 +169,13 @@
       "when": 1789933069430,
       "tag": "0023_remove_conversation_members_policy_recursion",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789999299508,
+      "tag": "0024_interview_token_dead_after_start",
+      "breakpoints": true
     }
   ]
 }
