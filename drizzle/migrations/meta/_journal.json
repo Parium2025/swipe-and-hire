@@ -225,6 +225,13 @@
       "when": 1790021510407,
       "tag": "0031_support_tickets_status_index",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790024142212,
+      "tag": "0032_push_notification_queue",
+      "breakpoints": true
     }
   ]
 }
