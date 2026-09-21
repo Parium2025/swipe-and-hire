@@ -41,6 +41,25 @@ export function useSecondaryPagesPrewarm() {
     const run = async () => {
       prewarmSupportTickets(userId);
 
+      // ── Aviseringsinställningar ──
+      // Samma nyckel som notiscentret och inställningssidan läser. Utan detta
+      // var reglagen tomma vid allra första öppningen på en ny enhet.
+      if (!queryClient.getQueryData(['notification-preferences', userId])) {
+        void queryClient.prefetchQuery({
+          queryKey: ['notification-preferences', userId],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('notification_preferences')
+              .select('notification_type, is_enabled, email_enabled, in_app_enabled')
+              .eq('user_id', userId);
+            if (error) throw error;
+            return data ?? [];
+          },
+          staleTime: 5 * 60 * 1000,
+        }).catch(() => { /* sidan hämtar själv */ });
+      }
+
+
       // ── Ekonomi (Abonnemang + Betalningar) ──
       // Samma query-nycklar som sidorna använder, så vyerna målas direkt
       // vid kallstart i stället för att fejda/hoppa in när datan landar.
