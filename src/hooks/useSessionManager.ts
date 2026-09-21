@@ -299,6 +299,9 @@ export function useSessionManager(
   const sendHeartbeat = useCallback(async () => {
     const token = sessionTokenRef.current;
     if (!token || !userId || signOutInProgress) return;
+    // Dold flik behöver inget hjärtslag: vid retur kör visibilitychange en
+    // omregistrering direkt, så sessionen återupprättas utan bakgrundstrafik.
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
 
     // Skip while no valid auth token exists — an anon RPC call is rejected by the DB
     const heartbeatTokenOk = await ensureFreshToken();
@@ -384,6 +387,9 @@ export function useSessionManager(
     const token = sessionTokenRef.current;
     if (!token || !userId || !registeredRef.current || alreadyKickedRef.current) return;
     if (signOutInProgress) return;
+    // Skalning: pollning i dold flik ger ingen nytta — realtidskanalen fångar
+    // återkallanden direkt, och visibilitychange kör en färsk koll vid retur.
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
 
     // Grace period: skip validity check right after registration (mobile wake-up scenario)
     const timeSinceRegistration = Date.now() - lastRegisteredAtRef.current;

@@ -232,8 +232,9 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
         supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('job_applications').select('id', { count: 'exact', head: true })
           .gte('created_at', oneWeekAgo.toISOString()),
-        // Get total job views for bandwidth estimation
-        supabase.from('job_postings').select('views_count'),
+        // Get total job views for bandwidth estimation — summeras i databasen
+        // i stället för att ladda ned en rad per annons.
+        supabase.rpc('get_total_job_views'),
         // Interviews scheduled this week and upcoming
         supabase.from('interviews').select('id', { count: 'exact', head: true })
           .in('status', ['pending', 'confirmed'])
@@ -260,7 +261,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       const openSupportTickets = supportTicketsRes.count || 0;
       const cvAnalysisQueueSize = cvQueueRes.count || 0;
       // Sum all job views (estimate monthly views as total / months active, assume ~1 month for now)
-      const totalJobViews = (totalJobViewsRes.data || []).reduce((sum, job) => sum + (job.views_count || 0), 0);
+      const totalJobViews = Number(totalJobViewsRes.data ?? 0) || 0;
       const jobViewsThisMonth = Math.max(totalJobViews, applicationsThisWeek * 5); // At least 5 views per application
 
       // Parse news health data

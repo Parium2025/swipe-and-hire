@@ -821,6 +821,9 @@ export const useEagerRatingsPreload = (enabled = true) => {
 
     // Starta periodisk refresh
     periodicRefreshRef.current = setInterval(() => {
+      // Skalning: en dold flik ska inte dra en full förvärmning var 5:e minut.
+      // Datan hämtas ändå om när fliken blir synlig igen.
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       preloadAllData(true); // Force refresh
     }, PERIODIC_REFRESH_INTERVAL);
 
