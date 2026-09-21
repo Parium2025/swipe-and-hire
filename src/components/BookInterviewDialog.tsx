@@ -525,11 +525,13 @@ export const BookInterviewDialog = ({
       queryClient.invalidateQueries({ queryKey: ['candidate-interviews'] });
       queryClient.invalidateQueries({ queryKey: ['existing-interview', applicationId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
-      onOpenChange(false);
       onSuccess?.();
     } catch (error) {
       console.error('Error creating interview:', error);
-      toast.error(isReschedule ? 'Kunde inte boka om intervjun' : 'Kunde inte boka intervjun');
+      const reason = error instanceof Error ? error.message : undefined;
+      toast.error(isReschedule ? 'Kunde inte boka om intervjun' : 'Kunde inte boka intervjun', {
+        description: reason,
+      });
     } finally {
       setIsSubmitting(false);
     }
