@@ -30,6 +30,7 @@ import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useQueryClient } from '@tanstack/react-query';
+import { useBatchPrefetchCompanyProfiles, prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { Helmet } from 'react-helmet-async';
