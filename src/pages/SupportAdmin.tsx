@@ -294,11 +294,17 @@ const SupportAdmin = () => {
         {/* Ärendelista */}
         <div className="lg:col-span-1">
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader>
+            <CardHeader className="space-y-3">
               <CardTitle className="text-white flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-                Supportärenden ({tickets.length})
+                Supportärenden ({totalCount})
               </CardTitle>
+              <Tabs value={filter} onValueChange={(v) => setFilter(v as TicketFilter)}>
+                <TabsList className="grid w-full grid-cols-2 bg-white/10">
+                  <TabsTrigger value="active" className="text-white text-sm">Aktiva</TabsTrigger>
+                  <TabsTrigger value="archived" className="text-white text-sm">Arkiv</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
@@ -328,6 +334,23 @@ const SupportAdmin = () => {
                     </p>
                   </div>
                 ))}
+                {tickets.length === 0 && (
+                  <p className="p-4 text-sm text-white">
+                    {filter === 'archived' ? 'Inga arkiverade ärenden än.' : 'Inga aktiva ärenden just nu.'}
+                  </p>
+                )}
+                {tickets.length < totalCount && (
+                  <div className="p-4">
+                    <Button
+                      variant="outline"
+                      className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? 'Hämtar…' : `Visa fler (${totalCount - tickets.length} kvar)`}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
