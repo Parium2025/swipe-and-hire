@@ -271,6 +271,46 @@ export const BookInterviewDialog = ({
     }
   }, [locationType, editableAddress, officeInstructions, editableVideoLink]);
 
+  const selectedScheduledAt = React.useMemo(() => {
+    if (!date) return null;
+    const [h, m] = time.split(':').map(Number);
+    const value = new Date(date);
+    value.setHours(h, m, 0, 0);
+    return value;
+  }, [date, time]);
+
+  // Redan skickad tid med oförändrat innehåll = inget att skicka om.
+  const isUnchangedFromExisting = React.useMemo(() => {
+    if (!isReschedule || !existingInterview || !selectedScheduledAt) return false;
+    if (new Date(existingInterview.scheduled_at).getTime() !== selectedScheduledAt.getTime()) return false;
+    if ((existingInterview.duration_minutes || 30) !== parseInt(duration)) return false;
+    const existingType = existingInterview.location_type === 'office' ? 'office' : 'video';
+    if (existingType !== locationType) return false;
+    const nextDetails =
+      locationType === 'video'
+        ? normalizeMeetingLink(editableVideoLink || locationDetails || '')
+        : locationDetails || '';
+    const prevDetails =
+      existingType === 'video'
+        ? normalizeMeetingLink(existingInterview.location_details || '')
+        : existingInterview.location_details || '';
+    if ((nextDetails || '') !== (prevDetails || '')) return false;
+    if ((subject || '') !== (existingInterview.subject || '')) return false;
+    if ((message || '') !== (existingInterview.message || '')) return false;
+    return true;
+  }, [
+    isReschedule,
+    existingInterview,
+    selectedScheduledAt,
+    duration,
+    locationType,
+    editableVideoLink,
+    locationDetails,
+    subject,
+    message,
+  ]);
+
+
   const handleSubmit = async () => {
     if (!user || !date) {
       toast.error('Välj ett datum för intervjun');
