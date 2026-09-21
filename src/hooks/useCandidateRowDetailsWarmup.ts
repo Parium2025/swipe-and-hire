@@ -59,20 +59,34 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
     const run = async () => {
       // 1) Anteckningar — en query för hela sidan
       try {
+        // Samma urval, join och sortering som useCandidateNotes använder —
+        // annars stämmer inte den förvärmda listan med den dialogen visar.
         const { data } = await supabase
           .from('candidate_notes')
-          .select('*')
+          .select(`
+            id, note, created_at, updated_at, employer_id, applicant_id,
+            profiles!candidate_notes_employer_id_fkey(first_name, last_name)
+          `)
           .in('applicant_id', pending)
-          .is('job_id', null);
+          .order('updated_at', { ascending: false });
         if (cancelled) return;
 
-        const byApplicant = new Map<string, any[]>();
+        const byApplicant = new Map<string, CandidateNote[]>();
         for (const id of pending) byApplicant.set(id, []);
-        for (const note of data || []) {
-          byApplicant.get(note.applicant_id)?.push(note);
+        for (const note of (data || []) as any[]) {
+          byApplicant.get(note.applicant_id)?.push({
+            id: note.id,
+            note: note.note,
+            created_at: note.created_at,
+            updated_at: note.updated_at || note.created_at,
+            employer_id: note.employer_id,
+            author_name: note.profiles
+              ? `${note.profiles.first_name || ''} ${note.profiles.last_name || ''}`.trim() || 'Okänd'
+              : 'Okänd',
+          });
         }
         for (const [id, notes] of byApplicant) {
-          queryClient.setQueryData(['candidate-notes', id], notes);
+          primeCandidateNotesCache(id, notes);
         }
       } catch { /* cache-warmup får aldrig störa UI */ }
 
