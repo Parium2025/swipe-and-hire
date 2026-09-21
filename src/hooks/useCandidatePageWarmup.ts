@@ -71,7 +71,15 @@ export function useCandidatePageWarmup(
     };
   }, [enabled, hasRows, pageKey]);
 
-  // Steg 1 — text
+  // Steg 1 — text (ansöknings-id följer med så bokade möten kan batchförvärmas)
+  const detailRows = useMemo(
+    () =>
+      (rows || []).map((r) => ({
+        applicant_id: r.applicant_id ?? null,
+        id: ((r as { application_id?: string | null }).application_id || r.id || null) as string | null,
+      })),
+    [rows],
+  );
   useCandidateRowDetailsWarmup(detailRows, enabled && stage >= 1);
 
   // Steg 1 — profildata som annars visar spinner: frågor, AI-sammanfattning, CV-länk
