@@ -873,7 +873,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
+                  <div className="relative">
                     {removingJobId === job.id && deleteUnderlayJob && (
                       <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
                         <MobileJobCard
@@ -993,7 +993,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
+                  <div className="relative">
                     {removingJobId === job.id && deleteUnderlayJob && (
                       <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
                         <MobileJobCard
