@@ -263,10 +263,22 @@ const handler = async (req: Request): Promise<Response> => {
       locationDetails: normalizedLocationDetails || null,
       message: message || null,
     };
-    for (const connector of SUPPORTED_CONNECTORS) {
-      await addInterviewToCalendar(applicantId, connector, calendarInput, 'job_seeker');
-      await addInterviewToCalendar(interviewEmployerId, connector, calendarInput, 'employer');
-    }
+
+    // Kalendersynk körs i bakgrunden och parallellt så att kallelsen går iväg
+    // direkt. Fel här får aldrig påverka utskicket.
+    const syncCalendars = async () => {
+      const tasks: Promise<unknown>[] = [];
+      for (const connector of SUPPORTED_CONNECTORS) {
+        tasks.push(addInterviewToCalendar(applicantId, connector, calendarInput, 'job_seeker'));
+        tasks.push(addInterviewToCalendar(interviewEmployerId, connector, calendarInput, 'employer'));
+      }
+      const results = await Promise.allSettled(tasks);
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          console.error('Calendar sync failed:', result.reason);
+        }
+      }
+    };
 
     // Candidate email — respect notification preference
     let candidateResult: any = { skipped: false };
@@ -305,6 +317,15 @@ const handler = async (req: Request): Promise<Response> => {
       } catch (empErr) {
         console.error("Error enqueueing employer confirmation:", empErr);
       }
+    }
+
+    // Starta kalendersynken efter svaret — den fortsätter i bakgrunden.
+    const backgroundSync = syncCalendars();
+    const runtime = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+    if (runtime?.waitUntil) {
+      runtime.waitUntil(backgroundSync);
+    } else {
+      backgroundSync.catch((err) => console.error('Calendar sync failed:', err));
     }
 
     return new Response(
