@@ -384,7 +384,7 @@ Deno.serve(async (req) => {
           .is("reminder_sent_at", null)
           .select("id")
           .maybeSingle();
-        if (!claimed) continue;
+        if (!claimed) return;
 
         const jobTitle = interview.job_postings?.title || "intervju";
         const scheduledTime = new Date(interview.scheduled_at);
