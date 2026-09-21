@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://www.parium.se/annons/ff6e470e-a7a7-4910-8057-5cf8987fe4a0</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.parium.se/annons/746cca28-8a81-4a4f-a6aa-de6b5c370ed1</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.parium.se/annons/28ed471a-57d4-415b-895b-8556b1523a47</loc>
     <lastmod>2026-09-20</lastmod>
     <changefreq>daily</changefreq>
@@ -38,12 +50,6 @@
   </url>
   <url>
     <loc>https://www.parium.se/annons/7908a22d-21ed-4e32-87a9-d6410dde6186</loc>
-    <lastmod>2026-09-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.parium.se/annons/e5b8f666-1db2-4c0d-b655-d9da79f0fa1f</loc>
     <lastmod>2026-09-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>

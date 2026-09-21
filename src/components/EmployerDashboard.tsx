@@ -47,6 +47,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { RepublishJobDialog } from '@/components/RepublishJobDialog';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
+import { imageCache } from '@/lib/imageCache';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -375,6 +376,17 @@ const EmployerDashboard = memo(() => {
       buildCardImageUrl(job.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
     ];
   }, []);
+
+  const prepareVisibleJobsAfterDelete = useCallback(async (deletedJobId: string) => {
+    const start = (page - 1) * pageSize;
+    const nextVisibleJobs = tabFilteredJobs
+      .filter((job) => job.id !== deletedJobId)
+      .slice(start, start + pageSize);
+    const urls = [...new Set(nextVisibleJobs.flatMap(getPageImageUrls).filter((url): url is string => Boolean(url)))];
+    if (urls.length === 0) return;
+    await imageCache.preloadImages(urls, true);
+  }, [getPageImageUrls, page, pageSize, tabFilteredJobs]);
+
   const preparePageImages = usePageImagePreparation(tabFilteredJobs, page, pageSize, getPageImageUrls);
   const handlePageChange = useAnimatedPageChange(page, setPage, preparePageImages);
 
@@ -537,12 +549,17 @@ const EmployerDashboard = memo(() => {
     try {
       // Soft delete in DB — is_active måste nollas också, annars ligger raden
       // kvar som "aktiv" i alla vyer/räknare som bara tittar på is_active.
-      const { data, error } = await supabase
-        .from('job_postings')
-        .update({ deleted_at: new Date().toISOString(), is_active: false })
-        .eq('id', job.id)
-        .select('id')
-        .maybeSingle();
+      const [{ data, error }] = await Promise.all([
+        supabase
+          .from('job_postings')
+          .update({ deleted_at: new Date().toISOString(), is_active: false })
+          .eq('id', job.id)
+          .select('id')
+          .maybeSingle(),
+        // Kortet som fyller den lediga platsen måste vara hämtat och avkodat
+        // innan listan ändras. Annars hinner Safari visa initiallagret i en frame.
+        prepareVisibleJobsAfterDelete(job.id),
+      ]);
 
       await fadeDone;
 
