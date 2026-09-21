@@ -21,11 +21,7 @@ import { normalizeMeetingLink, isSupportedMeetingLink } from '@/lib/meetingLink'
 import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { formatSwedishTime, isSwedishTimeZone, getLocalTimeZoneCity } from '@/lib/localTime';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  existingInterviewQueryKey,
-  fetchExistingInterview,
-  type ExistingInterviewRow,
-} from '@/lib/existingInterviewQuery';
+import { existingInterviewQueryKey, fetchExistingInterview } from '@/lib/existingInterviewQuery';
 
 interface BookInterviewDialogProps {
   open: boolean;
