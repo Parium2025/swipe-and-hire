@@ -150,6 +150,18 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
           queryClient.setQueryData(['candidate-activities', id], list);
         }
       } catch { /* ignore */ }
+
+      if (cancelled) return;
+
+      // 3) Bokade möten — ETT anrop för hela sidan, så "Boka om intervju"
+      // öppnas färdigifyllt även när dialogen öppnas direkt via touch.
+      try {
+        const appIds = applicationIdsRef.current.filter((id) => !warmedInterviewsRef.current.has(id));
+        if (appIds.length > 0) {
+          appIds.forEach((id) => warmedInterviewsRef.current.add(id));
+          await prewarmExistingInterviews(queryClient, appIds);
+        }
+      } catch { /* ignore */ }
     };
 
     let idleId: number | undefined;
