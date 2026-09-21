@@ -212,8 +212,9 @@ export const BookInterviewDialog = ({
     if (open && !wasOpenRef.current) {
       setSubject(`Intervju för ${jobTitle}`);
       setDate(new Date());
-      setLocationType('video');
-      setMessage(videoDefaultMessage);
+      const remembered = readRememberedLocationType(applicationId);
+      setLocationType(remembered);
+      setMessage(remembered === 'office' ? officeDefaultMessage : videoDefaultMessage);
       // Sync editable fields from latest profile values
       setEditableAddress(savedOfficeAddress);
       setEditableVideoLink(savedVideoLink);
@@ -246,6 +247,7 @@ export const BookInterviewDialog = ({
     setDuration(String(existingInterview.duration_minutes || 30));
     const type = existingInterview.location_type === 'office' ? 'office' : 'video';
     setLocationType(type);
+    rememberLocationType(applicationId, type);
     if (type === 'video') {
       const link = normalizeMeetingLink(existingInterview.location_details || '');
       if (link) setEditableVideoLink(link);
