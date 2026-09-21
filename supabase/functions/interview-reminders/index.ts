@@ -232,7 +232,7 @@ Deno.serve(async (req) => {
         // med hundratals möten samtidigt är det skillnaden mellan sekunder
         // och minuter.
         const interviewIds = (interviews || []).map((i) => (i as { id: string }).id);
-        const logsByInterview = new Map<string, Array<{ channel: string; payload: Record<string, unknown> | null }>>();
+        const logsByInterview = new Map<string, Array<{ channel: string; payload: Record<string, unknown> | null; recipient: string }>>();
         if (interviewIds.length > 0) {
           const CHUNK = 200;
           for (let i = 0; i < interviewIds.length; i += CHUNK) {
@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
             for (const log of logs || []) {
               const row = log as { interview_id: string; channel: string; payload: Record<string, unknown> | null; recipient_user_id: string };
               const list = logsByInterview.get(row.interview_id) ?? [];
-              list.push({ channel: row.channel, payload: row.payload });
+              list.push({ channel: row.channel, payload: row.payload, recipient: row.recipient_user_id });
               logsByInterview.set(row.interview_id, list);
             }
           }
@@ -260,6 +260,7 @@ Deno.serve(async (req) => {
           const alreadyQueuedChannels = new Set(
             existingLogs
               .filter((log) => {
+                if (log.recipient !== interview.applicant_id) return false;
                 const payload = log.payload;
                 const loggedRevision = Number(payload?.revision ?? 0);
                 const loggedDelay = Number(payload?.delay_minutes ?? -1);
