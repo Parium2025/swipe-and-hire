@@ -91,6 +91,15 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // Hur många möten som behandlas samtidigt. Arbetet är nästan bara väntan på
+    // nätverk, så bredden – inte processorn – avgör hur många som hinner med.
+    const REMINDER_CONCURRENCY = 40;
+    const FOLLOWUP_CONCURRENCY = 40;
+    // Tidsbudget: körningen avslutas snyggt efter 50 sekunder så att nästa
+    // minutkörning tar vid, i stället för att avbrytas mitt i av plattformen.
+    const RUN_DEADLINE = Date.now() + 50_000;
+    const outOfTime = () => Date.now() > RUN_DEADLINE;
+
     // Symbios med Google Kalender: om mottagarens eget Google-larm ligger på
     // exakt samma antal minuter före intervjun som Pariums utskick hoppar vi
     // över vårt – annars pinglas personen två gånger samma minut. Kollen är
