@@ -138,9 +138,13 @@ export function useMyApplicationsCache() {
       return fetchMyApplicationsForUser(user.id);
     },
     enabled: !!user,
-    staleTime: 0,
+    // 30s färskhet — matchar förvärmningen i sidomenyn, så en lista som nyss
+    // hämtades inte hämtas om direkt vid varje navigering. Realtime och
+    // invalidateQueries markerar ändå cachen som inaktuell omedelbart.
+    staleTime: 30 * 1000,
     gcTime: 30 * 60 * 1000, // Behåll cachen längre — färre kallstarter
-    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnMount: true,
+
     // structuralSharing (default true): oförändrade rader behåller samma
     // objektidentitet, så bakgrundsuppdateringen efter mount inte ritar om
     // varje kort (det var det som blixtrade till vid kallstart).

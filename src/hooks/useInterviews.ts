@@ -121,7 +121,10 @@ export const useInterviews = () => {
       return fetchEmployerInterviewsForUser(user.id);
     },
     enabled: !!user?.id,
-    staleTime: 0, // Always consider stale so invalidateQueries triggers refetch
+    // 30s färskhet — invalidateQueries/realtime markerar ändå direkt som
+    // inaktuell, men en nyss förvärmd lista hämtas inte om i onödan.
+    staleTime: 30 * 1000,
+
     gcTime: Infinity,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
@@ -306,7 +309,10 @@ export const useCandidateInterviews = () => {
 
     enabled: !!user?.id,
     retry: 0,
-    staleTime: 0, // Always consider stale so invalidateQueries triggers refetch
+    // 30s färskhet — matchar förvärmningen; invalidateQueries/realtime
+    // markerar ändå direkt som inaktuell vid riktiga ändringar.
+    staleTime: 30 * 1000,
+
     gcTime: Infinity,
     placeholderData: getInitialData, // Show cached data while fetching
     refetchOnMount: true,
