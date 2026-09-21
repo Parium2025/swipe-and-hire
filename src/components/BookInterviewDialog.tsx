@@ -346,9 +346,6 @@ export const BookInterviewDialog = ({
 
     setIsSubmitting(true);
 
-    // Rekryteraren ska inte behöva vänta – dialogen stängs direkt och
-    // bokningen görs klart i bakgrunden. Fel visas som notis.
-    handleOpenChange(false);
 
     try {
       // Combine date and time
