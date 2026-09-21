@@ -29,6 +29,7 @@ import { hasPendingVerification, markPendingVerification, clearPendingVerificati
 import { AuthFieldNotice } from '@/components/auth/AuthFieldNotice';
 import { loadAuthDraft, saveAuthDraft, clearAuthDraft, mergeDraft } from '@/lib/authFormDraft';
 import { AuthLogoInline } from '@/assets/authLogoInline';
+import { useLoginEnterSubmit } from '@/hooks/useLoginEnterSubmit';
 
 interface AuthTabletProps {
   isPasswordReset: boolean;
@@ -126,10 +127,17 @@ const AuthTablet = ({
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
+  const loginFormRef = useRef<HTMLFormElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useLoginEnterSubmit({
+    active: isLogin && !showResetPassword && !resetPasswordSent,
+    loading,
+    formRef: loginFormRef,
+  });
 
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
@@ -674,7 +682,7 @@ const AuthTablet = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form key="login-form" onSubmit={handleSubmit} onKeyDown={(e) => { const tag = (e.target as HTMLElement)?.tagName; if (e.key === 'Enter' && !e.nativeEvent.isComposing && tag !== 'BUTTON' && tag !== 'A' && tag !== 'TEXTAREA' && !loading) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} className="space-y-4">
+                    <form key="login-form" ref={loginFormRef} onSubmit={handleSubmit} className="space-y-4">
                       <div className="relative">
                         <Label htmlFor="login-email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
