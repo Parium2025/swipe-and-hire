@@ -60,6 +60,17 @@ export function prefetchCandidateNotes(applicantId: string | null | undefined): 
     .catch(() => { /* cache stays cold — the dialog fetches on open */ });
 }
 
+/**
+ * Batch-förvärmning: skriv färdighämtade anteckningar till EXAKT den cache
+ * hooken läser. Utan detta hamnade listans batch-hämtning i React Query, där
+ * ingen läste den — anteckningarna laddades ändå om när dialogen öppnades.
+ */
+export function primeCandidateNotesCache(applicantId: string, notes: CandidateNote[]): void {
+  if (!applicantId) return;
+  notesCache.set(applicantId, notes);
+  setPersistedNotes(applicantId, notes);
+}
+
 interface UseCandidateNotesOptions {
   applicantId: string | null;
   jobId: string | null;
