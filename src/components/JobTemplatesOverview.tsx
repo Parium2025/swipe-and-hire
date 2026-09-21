@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff, AlertTriangle } from 'lucide-react';
 import { SKELETON_COUNT_KEYS, readCachedCount, writeCachedCount } from '@/lib/skeletonCounts';
+import { readCachedJobTemplates, writeCachedJobTemplates } from '@/lib/jobTemplatesPrewarm';
 import {
   AlertDialog,
   AlertDialogAction,
