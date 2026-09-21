@@ -601,6 +601,7 @@ export const BookInterviewDialog = ({
   // Fritt tidsfält: rekryteraren kan skriva vilken minut som helst (t.ex.
   // 20:07). Snabblistan med kvartartider finns kvar som genväg.
   const [timePopoverOpen, setTimePopoverOpen] = useState(false);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [timeDraft, setTimeDraft] = useState(time);
 
   const openTimePopover = (nextOpen: boolean) => {
@@ -794,7 +795,10 @@ export const BookInterviewDialog = ({
                   initialFocus
                   className="pointer-events-auto touch-manipulation"
                   classNames={{
-                    day_today: "" // Remove today highlight
+                    day_today: "", // Remove today highlight
+                    caption_label: "text-sm font-medium text-white",
+                    day_outside: "day-outside text-white/40 opacity-100",
+                    day_disabled: "text-white/30 opacity-100",
                   }}
                 />
               </PopoverContent>
