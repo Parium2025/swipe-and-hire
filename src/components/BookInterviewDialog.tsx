@@ -143,7 +143,8 @@ export const BookInterviewDialog = ({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Reset to defaults immediately when closing
-      setLocationType('video');
+      const remembered = readRememberedLocationType(applicationId);
+      setLocationType(remembered);
       setDate(undefined);
       setTime('10:00');
       setDuration('30');
@@ -152,7 +153,7 @@ export const BookInterviewDialog = ({
       setEditableVideoLink(savedVideoLink);
       setVideoLinkEditing(false);
       setSaveVideoLinkAsDefault(false);
-      setMessage(videoDefaultMessage);
+      setMessage(remembered === 'office' ? officeDefaultMessage : videoDefaultMessage);
       setSubject('');
     }
     onOpenChange(newOpen);
