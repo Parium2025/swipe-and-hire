@@ -1302,23 +1302,57 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     });
   }, [rawJobs, reviewsData, selectedLocations]);
 
-  // Delad, debounce:ad invalidering. Både den id-filtrerade kanalen (redigerad
+  // Delad, coalesce:ad invalidering. Både den id-filtrerade kanalen (redigerad
   // annons som redan visas) och den breda kanalen (ny/återpublicerad annons)
   // använder samma timer, så flera händelser i följd ger EN refetch.
+  //
+  // SKALA: en ren debounce som nollställs vid varje händelse skulle kunna svälta
+  // helt när tusentals annonser ändras per minut (timern hinner aldrig löpa ut),
+  // och samtidigt trigga en refetch-storm hos varje besökare. Därför:
+  //  • första händelsen schemalägger en refetch om ~400 ms (samma känsla som förut)
+  //  • fler händelser under tiden slås ihop i samma refetch
+  //  • som mest en refetch var 5:e sekund
+  //  • i dold flik väntar vi till användaren är tillbaka
   const invalidateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scheduleSearchInvalidate = useCallback(() => {
-    if (invalidateTimerRef.current) clearTimeout(invalidateTimerRef.current);
-    invalidateTimerRef.current = setTimeout(() => {
-      // Viktigt: den korta hot-cachen måste tömmas först, annars läser
-      // refetchen tillbaka exakt samma gamla resultat och listan står still.
-      clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
-      queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
-    }, 400);
+  const lastInvalidateAtRef = useRef(0);
+  const pendingWhileHiddenRef = useRef(false);
+  const MIN_INVALIDATE_INTERVAL_MS = 5000;
+
+  const runSearchInvalidate = useCallback(() => {
+    invalidateTimerRef.current = null;
+    lastInvalidateAtRef.current = Date.now();
+    // Viktigt: den korta hot-cachen måste tömmas först, annars läser
+    // refetchen tillbaka exakt samma gamla resultat och listan står still.
+    clearPersistentCacheByPrefix(HOT_SEARCH_CACHE_PREFIX);
+    queryClient.invalidateQueries({ queryKey: ['optimized-job-search'] });
   }, [queryClient]);
+
+  const scheduleSearchInvalidate = useCallback(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      pendingWhileHiddenRef.current = true;
+      return;
+    }
+    if (invalidateTimerRef.current) return;
+    const sinceLast = Date.now() - lastInvalidateAtRef.current;
+    const wait = Math.max(400, MIN_INVALIDATE_INTERVAL_MS - sinceLast);
+    invalidateTimerRef.current = setTimeout(runSearchInvalidate, wait);
+  }, [runSearchInvalidate]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!pendingWhileHiddenRef.current) return;
+      pendingWhileHiddenRef.current = false;
+      scheduleSearchInvalidate();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [scheduleSearchInvalidate]);
 
   useEffect(() => () => {
     if (invalidateTimerRef.current) clearTimeout(invalidateTimerRef.current);
   }, []);
+
 
   // 🔥 SCALE: Realtime-listenern är scope:ad till de jobb som faktiskt visas.
   // PostgREST in.()-filter cap:as på 200 ids; vi prenumererar på max 200 av
