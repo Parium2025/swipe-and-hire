@@ -178,7 +178,7 @@ async function checkConnectivity(): Promise<boolean> {
  */
 function singleFlightCheck(): Promise<boolean> {
   if (_inflightCheck) return _inflightCheck;
-  _inflightCheck = checkConnectivityQuorum().finally(() => {
+  _inflightCheck = checkConnectivity().finally(() => {
     _inflightCheck = null;
   });
   return _inflightCheck;
