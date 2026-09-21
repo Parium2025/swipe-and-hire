@@ -69,38 +69,53 @@ const handler = async (req: Request): Promise<Response> => {
         (applications || []).map((a) => `${a.applicant_id}:${a.job_id}`)
       );
 
+      // SKALA: tidigare gjordes två extra databasfrågor PER sparat jobb. Vid
+      // tiotusentals sparade annonser blev det tiotusentals sekventiella anrop
+      // och körningen hann aldrig klart. Nu hämtas samma information i två
+      // samlade frågor och notiserna skrivs i klumpar.
+      const [prefsRes, existingRes] = await Promise.all([
+        supabase
+          .from("notification_preferences")
+          .select("user_id, is_enabled")
+          .eq("notification_type", "saved_job_expiring")
+          .in("user_id", userIds),
+        supabase
+          .from("notifications")
+          .select("user_id, metadata")
+          .eq("type", "saved_job_expiring")
+          .in("user_id", userIds)
+          .gte("created_at", new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()),
+      ]);
+
+      const disabledUsers = new Set(
+        (prefsRes.data || [])
+          .filter((p) => (p as { is_enabled: boolean | null }).is_enabled === false)
+          .map((p) => (p as { user_id: string }).user_id)
+      );
+      const alreadyNotified = new Set(
+        (existingRes.data || [])
+          .map((n) => {
+            const meta = (n as { metadata: Record<string, unknown> | null }).metadata;
+            const jobId = meta && typeof meta === "object" ? (meta as { job_id?: string }).job_id : undefined;
+            return jobId ? `${(n as { user_id: string }).user_id}:${jobId}` : null;
+          })
+          .filter((k): k is string => Boolean(k))
+      );
+
+      const rows: Array<Record<string, unknown>> = [];
+      const queuedKeys = new Set<string>();
+
       for (const saved of savedJobs) {
-        if (alreadyApplied.has(`${saved.user_id}:${saved.job_id}`)) {
-          continue;
-        }
+        const key = `${saved.user_id}:${saved.job_id}`;
+        if (alreadyApplied.has(key)) continue;
+        // Standard är påslaget – bara uttryckligt avstängt hoppas över.
+        if (disabledUsers.has(saved.user_id)) continue;
+        if (alreadyNotified.has(key)) continue;
+        if (queuedKeys.has(key)) continue;
+        queuedKeys.add(key);
+
         const job = saved.job_postings as any;
         const companyName = job.profiles?.company_name || "Företaget";
-
-        // Check if user has this notification type enabled
-        const { data: pref } = await supabase
-          .from("notification_preferences")
-          .select("is_enabled")
-          .eq("user_id", saved.user_id)
-          .eq("notification_type", "saved_job_expiring")
-          .maybeSingle();
-
-        // Default is enabled if no preference exists
-        if (pref && pref.is_enabled === false) {
-          continue;
-        }
-
-        // Check if we already sent this notification (avoid duplicates)
-        const { data: existing } = await supabase
-          .from("notifications")
-          .select("id")
-          .eq("user_id", saved.user_id)
-          .eq("type", "saved_job_expiring")
-          .contains("metadata", { job_id: saved.job_id })
-          .limit(1);
-
-        if (existing && existing.length > 0) {
-          continue;
-        }
 
         const expiresDate = new Date(job.expires_at);
         const hoursRemaining = Math.max(0, Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
@@ -110,22 +125,24 @@ const handler = async (req: Request): Promise<Response> => {
             ? `${hoursRemaining} timmar`
             : `${Math.ceil(hoursRemaining / 24)} dag(ar)`;
 
-        const { error: notifError } = await supabase
-          .from("notifications")
-          .insert({
-            user_id: saved.user_id,
-            type: "saved_job_expiring",
-            title: `"${job.title}" utgår snart!`,
-            body: `Din sparade annons hos ${companyName} utgår om ${timeText}. Sök nu innan det är för sent!`,
-            metadata: { job_id: saved.job_id },
-          });
+        rows.push({
+          user_id: saved.user_id,
+          type: "saved_job_expiring",
+          title: `"${job.title}" utgår snart!`,
+          body: `Din sparade annons hos ${companyName} utgår om ${timeText}. Sök nu innan det är för sent!`,
+          metadata: { job_id: saved.job_id },
+        });
+      }
 
+      const CHUNK = 500;
+      for (let i = 0; i < rows.length; i += CHUNK) {
+        const chunk = rows.slice(i, i + CHUNK);
+        const { error: notifError } = await supabase.from("notifications").insert(chunk);
         if (notifError) {
-          console.error(`Failed to create notification for user ${saved.user_id}:`, notifError);
+          console.error("Failed to create saved_job_expiring notifications chunk:", notifError);
           continue;
         }
-
-        notificationsSent++;
+        notificationsSent += chunk.length;
       }
     }
 
