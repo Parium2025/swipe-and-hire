@@ -2508,10 +2508,6 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   pointer-events: none;
 }
 
-.job-card-replacement-source {
-  visibility: hidden;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .job-card-removing {
     animation-duration: 1ms;
