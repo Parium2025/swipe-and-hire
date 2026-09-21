@@ -18,6 +18,8 @@ export interface InterviewEventInput {
   durationMinutes: number | null;
   locationDetails?: string | null;
   message?: string | null;
+  /** Visas först i kalenderrubriken, t.ex. "Nekad". */
+  statusLabel?: string | null;
 }
 
 export type CalendarSyncResult =
@@ -36,9 +38,10 @@ const transactionId = (interviewId: string, role: CalendarRole) =>
   `parium-interview-${interviewId}-${role}`;
 
 function eventSummary(input: InterviewEventInput, role: CalendarRole): string {
-  return role === 'job_seeker'
+  const prefix = input.statusLabel ? `${input.statusLabel} – ` : '';
+  return prefix + (role === 'job_seeker'
     ? `Intervju hos ${input.companyName} — ${input.jobTitle}`
-    : `Intervju: ${input.candidateName ?? 'Kandidat'} — ${input.jobTitle}`;
+    : `Intervju: ${input.candidateName ?? 'Kandidat'} — ${input.jobTitle}`);
 }
 
 function eventDescription(input: InterviewEventInput): string {
