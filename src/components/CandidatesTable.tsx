@@ -177,18 +177,10 @@ export function CandidatesTable({
 
     prefetchCandidateActivities(queryClient, application.applicant_id, user.id);
 
-    queryClient.prefetchQuery({
-      queryKey: ['candidate-notes', application.applicant_id],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('candidate_notes')
-          .select('*')
-          .eq('applicant_id', application.applicant_id)
-          .is('job_id', null);
-        return data || [];
-      },
-      staleTime: Infinity,
-    });
+    // Anteckningarna måste värmas via hookens egen cache — dialogen läser
+    // INTE React Query för dem, så en prefetchQuery här gav ett bortkastat
+    // anrop och dialogen laddade ändå om vid öppning.
+    prefetchCandidateNotes(application.applicant_id);
 
     // Dialogen visar porträttet UTAN transform (full storlek). Listan värmer bara
     // avatar-varianten, så utan detta hämtades och avkodades bilden först när
