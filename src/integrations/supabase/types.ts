@@ -4689,6 +4689,7 @@ export type Database = {
           occupation: string
         }[]
       }
+      get_total_job_views: { Args: never; Returns: number }
       get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
       has_active_plan: { Args: { _user_id: string }; Returns: boolean }
       has_applied_to_employer: {

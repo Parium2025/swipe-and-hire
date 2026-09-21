@@ -190,6 +190,13 @@
       "when": 1790001038950,
       "tag": "0026_interview_response_include_applicant",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1790019140236,
+      "tag": "0027_total_job_views_aggregate",
+      "breakpoints": true
     }
   ]
 }
