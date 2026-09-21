@@ -2,6 +2,84 @@
 // direkt från mejlet. GET visar en bekräftelsesida (så att mejlklienters
 // länkskanning aldrig svarar åt kandidaten), POST registrerar svaret.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
+import { addInterviewToCalendar } from '../_shared/calendarSync.ts'
+
+const SUPPORTED_CONNECTORS = ['google_calendar', 'microsoft_outlook'] as const
+
+const STOCKHOLM_DATE = new Intl.DateTimeFormat('sv-SE', {
+  weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Stockholm',
+})
+const STOCKHOLM_TIME = new Intl.DateTimeFormat('sv-SE', {
+  hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm',
+})
+
+/**
+ * Efterarbete när kandidaten svarat via mejllänken:
+ *  1. Arbetsgivaren får ett mejl (kan stängas av i aviseringar).
+ *  2. Vid nej ligger mötet kvar i kalendern, men rubriken märks "Nekad"
+ *     så att historik och statistik behålls.
+ * Fel här får aldrig påverka kandidatens svar.
+ */
+async function afterResponse(result: Record<string, unknown>, accept: boolean) {
+  const employerId = typeof result.employer_id === 'string' ? result.employer_id : null
+  const employerEmail = typeof result.employer_email === 'string' ? result.employer_email : null
+  const jobTitle = typeof result.job_title === 'string' ? result.job_title : 'tjänsten'
+  const candidateName = typeof result.candidate_name === 'string' ? result.candidate_name : 'Kandidaten'
+  const scheduledAt = typeof result.scheduled_at === 'string' ? result.scheduled_at : null
+  const interviewId = typeof result.interview_id === 'string' ? result.interview_id : null
+
+  if (!accept && interviewId && employerId && scheduledAt) {
+    const applicantId = typeof result.applicant_id === 'string' ? result.applicant_id : null
+    const input = {
+      interviewId,
+      jobTitle,
+      companyName: typeof result.company_name === 'string' ? result.company_name : 'Företaget',
+      candidateName,
+      scheduledAt,
+      durationMinutes: typeof result.duration_minutes === 'number' ? result.duration_minutes : null,
+      locationDetails: typeof result.location_details === 'string' ? result.location_details : null,
+      statusLabel: 'Nekad',
+    }
+    for (const connector of SUPPORTED_CONNECTORS) {
+      try {
+        await addInterviewToCalendar(employerId, connector, input, 'employer')
+        if (applicantId) await addInterviewToCalendar(applicantId, connector, input, 'job_seeker')
+      } catch (err) {
+        console.warn('Kalenderuppdatering vid nej misslyckades:', err)
+      }
+    }
+  }
+
+  if (!employerEmail || !employerId) return
+
+  try {
+    const { data: allowed } = await admin.rpc('is_email_notification_enabled', {
+      p_user_id: employerId,
+      p_type: 'interview_response',
+    })
+    if (allowed === false) return
+  } catch (err) {
+    console.warn('Kunde inte läsa mejlinställning, skickar ändå:', err)
+  }
+
+  const when = scheduledAt ? new Date(scheduledAt) : null
+  try {
+    await sendLoggedTemplateEmail('interview-response-employer', employerEmail, {
+      templateData: {
+        recipient_name: typeof result.employer_name === 'string' ? result.employer_name : 'där',
+        candidate_name: candidateName,
+        job_title: jobTitle,
+        date_str: when ? STOCKHOLM_DATE.format(when) : '',
+        time_str: when ? STOCKHOLM_TIME.format(when) : '',
+        accepted: accept,
+      },
+      idempotencyKey: `interview-response-${interviewId ?? 'unknown'}-${accept ? 'yes' : 'no'}`,
+    })
+  } catch (err) {
+    console.error('Kunde inte skicka svarsmejl till arbetsgivaren:', err)
+  }
+}
 
 const admin = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -119,6 +197,10 @@ Deno.serve(async (req) => {
 
   const result = (data ?? {}) as Record<string, unknown>
 
+  if (result.ok === true && result.already !== true) {
+    await afterResponse(result, accept)
+  }
+
   if (wantsJson) {
     return json({
       ok: result.ok === true,
@@ -133,9 +215,11 @@ Deno.serve(async (req) => {
     const reason = String(result.reason ?? '')
     const text = reason === 'expired'
       ? 'Länken har gått ut. Logga in i Parium för att svara på intervjun.'
-      : reason === 'closed'
-        ? 'Intervjun är inte längre öppen för svar. Logga in i Parium för att se vad som gäller.'
-        : 'Länken fungerar inte längre. Logga in i Parium för att svara på intervjun.'
+      : reason === 'started'
+        ? 'Intervjun har redan börjat, så länken går inte längre att använda. Kontakta arbetsgivaren i Parium om något har hänt.'
+        : reason === 'closed'
+          ? 'Intervjun är inte längre öppen för svar. Logga in i Parium för att se vad som gäller.'
+          : 'Länken fungerar inte längre. Logga in i Parium för att svara på intervjun.'
     return page('Svaret kunde inte registreras', `<p>${text}</p>`)
   }
 

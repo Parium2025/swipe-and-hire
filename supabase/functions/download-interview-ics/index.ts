@@ -65,8 +65,9 @@ serve(async (req) => {
     return new Response("Interview not found", { status: 404 });
   }
 
-  // Avbokad eller avböjd intervju får aldrig hamna i någons kalender.
-  if (interview.status === "cancelled" || interview.status === "declined") {
+  // Avbokad intervju får aldrig hamna i någons kalender. En nekad intervju
+  // ligger kvar – historik och statistik ska inte försvinna – men märks upp.
+  if (interview.status === "cancelled") {
     return new Response("Interview cancelled", { status: 410 });
   }
 
@@ -83,7 +84,8 @@ serve(async (req) => {
   const startDate = new Date(interview.scheduled_at);
   const endDate = new Date(startDate.getTime() + (interview.duration_minutes || 30) * 60 * 1000);
   const uid = `interview-${interview.id}@parium.se`;
-  const summary = escapeIcs(`Intervju – ${jobTitle}`);
+  const statusPrefix = interview.status === "declined" ? "Nekad – " : "";
+  const summary = escapeIcs(`${statusPrefix}Intervju – ${jobTitle}`);
   const locationLabel = interview.location_type === "video" ? "Videointervju" : "På plats";
   const locationDetails = interview.location_details || "";
   const location = locationDetails ? escapeIcs(locationDetails) : escapeIcs(locationLabel);

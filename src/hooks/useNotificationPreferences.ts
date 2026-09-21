@@ -9,6 +9,7 @@ export type NotificationType =
   | 'new_application' 
   | 'new_message' 
   | 'interview_scheduled' 
+  | 'interview_response'
   | 'saved_search_match'
   | 'job_closed'
   | 'saved_job_expiring'

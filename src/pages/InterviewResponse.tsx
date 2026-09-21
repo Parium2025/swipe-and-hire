@@ -47,9 +47,11 @@ const InterviewResponse = () => {
         setMessage(
           reason === 'expired'
             ? 'Länken har gått ut. Logga in i Parium för att svara på intervjun.'
-            : reason === 'closed'
-              ? 'Intervjun är inte längre öppen för svar. Logga in i Parium för att se vad som gäller.'
-              : 'Svaret kunde inte registreras just nu. Försök igen om en stund eller svara inne i Parium.',
+            : reason === 'started'
+              ? 'Intervjun har redan börjat, så länken går inte längre att använda. Kontakta arbetsgivaren i Parium om något har hänt.'
+              : reason === 'closed'
+                ? 'Intervjun är inte längre öppen för svar. Logga in i Parium för att se vad som gäller.'
+                : 'Svaret kunde inte registreras just nu. Försök igen om en stund eller svara inne i Parium.',
         );
         setPhase('error');
         return;

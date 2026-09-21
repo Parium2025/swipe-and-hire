@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Video, Building2, CheckCircle2, Clock3 } from 'lucide-react';
+import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
@@ -144,6 +144,24 @@ export const EmployerInterviewsCard = memo(() => {
                         <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                         <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                       </span>
+                      {/* Fungerar även utan kopplad kalender: filen läggs in i
+                          Google, Outlook eller Apple med samma id, så inget dubbleras. */}
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          window.open(
+                            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-interview-ics?id=${interview.id}`,
+                            '_blank',
+                            'noopener,noreferrer',
+                          );
+                        }}
+                        className="ml-auto flex items-center gap-1 rounded px-1 py-0.5 leading-none text-white hover:bg-white/15"
+                        aria-label="Lägg till i kalender"
+                      >
+                        <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                        <span className="leading-none">Kalender</span>
+                      </button>
                     </div>
                   </motion.div>
                 );
