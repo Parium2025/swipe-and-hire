@@ -6,6 +6,8 @@ import {
   connectCalendar,
   disconnectCalendar,
   fetchCalendarStatus,
+  getCachedCalendarStatus,
+
 } from '@/lib/calendarConnection';
 import { Button } from '@/components/ui/button';
 
@@ -16,17 +18,20 @@ import { Button } from '@/components/ui/button';
  * får alltid "Lägg till i kalender"-knappen i mejlet.
  */
 const CalendarConnectionCard = () => {
-  const [status, setStatus] = useState<CalendarStatusMap | null>(null);
+  const [status, setStatus] = useState<CalendarStatusMap | null>(() => getCachedCalendarStatus());
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       setStatus(await fetchCalendarStatus());
     } catch (error) {
-      setStatus({
-        google_calendar: { connected: false, email: null, available: false },
-        microsoft_outlook: { connected: false, email: null, available: false },
-      });
+      // Har vi redan en känd status behålls den — bättre än att tomma rutan.
+      if (!getCachedCalendarStatus()) {
+        setStatus({
+          google_calendar: { connected: false, email: null, available: false },
+          microsoft_outlook: { connected: false, email: null, available: false },
+        });
+      }
       toast({
         title: 'Kunde inte hämta kopplingsstatus',
         description: error instanceof Error ? error.message : 'Försök igen.',
@@ -34,6 +39,7 @@ const CalendarConnectionCard = () => {
       });
     }
   }, []);
+
 
   useEffect(() => {
     void load();

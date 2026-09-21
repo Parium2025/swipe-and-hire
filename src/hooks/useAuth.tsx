@@ -2501,6 +2501,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (reconnectionPollInterval) return; // Already polling
       
       reconnectionPollInterval = setInterval(() => {
+        // Ingen poll när fliken ligger i bakgrunden — annars tickade den
+        // vidare i timmar på en tappad anslutning och drog batteri i onödan.
+        if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
         // Check if realtime connection is restored
         if (supabase.realtime.isConnected()) {
           // Connection restored!
@@ -2517,7 +2520,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             reconnectionPollInterval = null;
           }
         }
-      }, 1000); // Check every second
+      }, 2000); // Kolla varannan sekund — återkopplingen känns fortfarande direkt
+
     };
 
     const handleChannelStatus = (channelName: string, status: string) => {

@@ -126,6 +126,8 @@ import { OnlineStatusProvider } from "@/components/OnlineStatusProvider";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
+import { pruneStaleCaches } from "@/lib/safeStorage";
+
 import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
@@ -141,7 +143,13 @@ import { CriteriaEvalProgress } from "@/components/CriteriaEvalProgress";
 // Run draft cleanup once on app load (removes drafts older than 1 day)
 // Defer to idle time to avoid blocking first paint
 if (typeof window !== 'undefined') {
-  const runCleanup = () => cleanupOldDrafts(24 * 60 * 60 * 1000);
+  const runCleanup = () => {
+    cleanupOldDrafts(24 * 60 * 60 * 1000);
+    // Gamla cacheposter städas bort i tid i stället för först när lagringen
+    // är full — annars blir varje sparning långsammare ju längre man använt appen.
+    pruneStaleCaches();
+  };
+
   if ('requestIdleCallback' in window) {
     (window as any).requestIdleCallback(runCleanup, { timeout: 3000 });
   } else {

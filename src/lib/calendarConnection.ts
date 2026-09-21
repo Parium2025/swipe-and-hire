@@ -19,6 +19,16 @@ export const CALENDAR_CONNECTORS: { id: CalendarConnector; name: string }[] = [
 export const isCalendarConnector = (value: unknown): value is CalendarConnector =>
   value === 'google_calendar' || value === 'microsoft_outlook';
 
+// Senast kända status för den här fliken. Kortet visar den direkt vid
+// öppning och hämtar färsk status tyst i bakgrunden, så rutan aldrig är tom.
+let cachedCalendarStatus: CalendarStatusMap | null = null;
+
+export const getCachedCalendarStatus = (): CalendarStatusMap | null => cachedCalendarStatus;
+
+export const clearCachedCalendarStatus = () => {
+  cachedCalendarStatus = null;
+};
+
 export async function fetchCalendarStatus(): Promise<CalendarStatusMap> {
   const { data, error } = await supabase.functions.invoke('app-user-connection-status');
   if (error) {
@@ -26,11 +36,14 @@ export async function fetchCalendarStatus(): Promise<CalendarStatusMap> {
     throw new Error(`Kunde inte hämta kopplingsstatus. ${details}`);
   }
   const connections = (data?.connections ?? {}) as Record<string, CalendarConnectionStatus>;
-  return {
+  const status: CalendarStatusMap = {
     google_calendar: connections.google_calendar ?? { connected: false, email: null, available: false },
     microsoft_outlook: connections.microsoft_outlook ?? { connected: false, email: null, available: false },
   };
+  cachedCalendarStatus = status;
+  return status;
 }
+
 
 function waitForOAuthCompletion(popup: Window, connectorId: CalendarConnector) {
   return new Promise<void>((resolve, reject) => {

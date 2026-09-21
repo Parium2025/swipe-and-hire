@@ -159,3 +159,66 @@ export function safeReadArrayCache<T>(
   return arr as T[];
 }
 
+/**
+ * Städar bort gamla cacheposter i stället för att vänta tills lagringen är
+ * full. Utan detta växte antalet nycklar obegränsat (en per kollega, lista,
+ * annons, ansökan …) och varje skrivning blev långsammare ju fler som låg kvar.
+ *
+ * Körs en gång per sessionsstart, när webbläsaren ändå är sysslolös.
+ */
+const STALE_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Nycklar utan tidsstämpel (rena värden) — här håller vi i stället ett tak.
+const COUNT_CAPPED_PREFIXES: { prefix: string; max: number }[] = [
+  { prefix: 'parium:interview-location-type:', max: 200 },
+];
+
+export function pruneStaleCaches(maxAgeMs: number = STALE_CACHE_MAX_AGE_MS): number {
+  let removed = 0;
+  try {
+    const now = Date.now();
+    const timestamped = [...EVICTION_KEYS_PREFIX, 'parium_colleague_candidates_v1_'];
+    const capped = new Map<string, string[]>();
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) keys.push(key);
+    }
+
+    for (const key of keys) {
+      const cappedRule = COUNT_CAPPED_PREFIXES.find((r) => key.startsWith(r.prefix));
+      if (cappedRule) {
+        const list = capped.get(cappedRule.prefix) ?? [];
+        list.push(key);
+        capped.set(cappedRule.prefix, list);
+        continue;
+      }
+      if (!timestamped.some((prefix) => key.startsWith(prefix))) continue;
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        const ts = parsed?.timestamp ?? parsed?.cachedAt;
+        if (typeof ts === 'number' && now - ts <= maxAgeMs) continue;
+        if (typeof ts !== 'number') continue; // okänt format lämnas åt kvot-städningen
+        localStorage.removeItem(key);
+        removed++;
+      } catch {
+        // Oläsbar post är bara skräp.
+        try { localStorage.removeItem(key); removed++; } catch { /* ignore */ }
+      }
+    }
+
+    for (const rule of COUNT_CAPPED_PREFIXES) {
+      const list = capped.get(rule.prefix);
+      if (!list || list.length <= rule.max) continue;
+      for (const key of list.slice(0, list.length - rule.max)) {
+        try { localStorage.removeItem(key); removed++; } catch { /* ignore */ }
+      }
+    }
+  } catch {
+    // Städningen är alltid frivillig.
+  }
+  return removed;
+}
+

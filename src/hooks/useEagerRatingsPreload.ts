@@ -1,4 +1,6 @@
 import { invalidateMyProfileCache } from '@/lib/myProfile';
+import { clearCachedCalendarStatus } from '@/lib/calendarConnection';
+
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -194,6 +196,11 @@ export const clearAllAppCaches = () => {
 
   // Kontobyte/utloggning: den delade profilhämtningen får aldrig återanvändas.
   try { invalidateMyProfileCache(); } catch { /* ignore */ }
+
+  // Kalenderkopplingen är personlig — nästa inloggning får aldrig se den förra
+  // användarens status.
+  try { clearCachedCalendarStatus(); } catch { /* ignore */ }
+
 
   // Weather cache is cleared SYNCHRONOUSLY on every call — it's a single
   // localStorage removal with zero perf impact, and it guarantees no stale
