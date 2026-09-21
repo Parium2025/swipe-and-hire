@@ -214,7 +214,9 @@ export const BookInterviewDialog = ({
     const scheduled = new Date(existingInterview.scheduled_at);
     if (!Number.isNaN(scheduled.getTime())) {
       setDate(scheduled);
-      setTime(`${String(scheduled.getHours()).padStart(2, '0')}:${String(Math.floor(scheduled.getMinutes() / 15) * 15).padStart(2, '0')}`);
+      // Exakt skickad tid – även icke-kvartartider som 20:07 – så att
+      // "samma tid"-skyddet och förifyllningen alltid motsvarar verkligheten.
+      setTime(`${String(scheduled.getHours()).padStart(2, '0')}:${String(scheduled.getMinutes()).padStart(2, '0')}`);
     }
     setDuration(String(existingInterview.duration_minutes || 30));
     const type = existingInterview.location_type === 'office' ? 'office' : 'video';
@@ -527,7 +529,7 @@ export const BookInterviewDialog = ({
 
         if (deliveryFailed) {
           toast.error('Tiden är sparad, men utskicket gick inte fram', {
-            description: 'Öppna intervjun och skicka tiden igen så får kandidaten kallelsen.',
+            description: 'Öppna intervjun igen och skicka om den – ändra t.ex. meddelandet så får kandidaten kallelsen.',
           });
         }
       })();
@@ -596,12 +598,70 @@ export const BookInterviewDialog = ({
     setTime('09:00');
   }, [date, timeOptions.length, minuteTick]);
 
-  // Reset time if current selection is no longer valid
-  React.useEffect(() => {
-    if (date && isToday(date) && timeOptions.length > 0 && !timeOptions.includes(time)) {
-      setTime(timeOptions[0]);
+  // Fritt tidsfält: rekryteraren kan skriva vilken minut som helst (t.ex.
+  // 20:07). Snabblistan med kvartartider finns kvar som genväg.
+  const [timePopoverOpen, setTimePopoverOpen] = useState(false);
+  const [timeDraft, setTimeDraft] = useState(time);
+
+  const openTimePopover = (nextOpen: boolean) => {
+    setTimePopoverOpen(nextOpen);
+    if (nextOpen) setTimeDraft(time);
+  };
+
+  const handleTimeDraftChange = (value: string) => {
+    let v = value.replace(/[^0-9:]/g, '').slice(0, 5);
+    const parts = v.split(':');
+    if (parts.length > 2) v = `${parts[0]}:${parts.slice(1).join('')}`;
+    setTimeDraft(v);
+  };
+
+  // Tolkar "20", "20:", "20:0", "930" och "2007" och normaliserar till HH:MM.
+  // Returnerar false vid en ogiltig tid – då står det gamla värdet kvar.
+  const commitTimeDraft = (raw: string): boolean => {
+    const cleaned = raw.replace(/[^0-9:]/g, '');
+    let hours: number;
+    let minutes = 0;
+    if (cleaned.includes(':')) {
+      const [h, m = ''] = cleaned.split(':');
+      if (!h) return false;
+      hours = parseInt(h, 10);
+      if (m) minutes = parseInt(m.padEnd(2, '0'), 10);
+    } else if (cleaned.length <= 2) {
+      if (!cleaned) return false;
+      hours = parseInt(cleaned, 10);
+    } else if (cleaned.length === 3) {
+      hours = parseInt(cleaned.slice(0, 1), 10);
+      minutes = parseInt(cleaned.slice(1), 10);
+    } else {
+      hours = parseInt(cleaned.slice(0, 2), 10);
+      minutes = parseInt(cleaned.slice(2), 10);
     }
-  }, [date, timeOptions, time]);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes) || hours > 23 || minutes > 59) return false;
+    const normalized = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    setTime(normalized);
+    setTimeDraft(normalized);
+    return true;
+  };
+
+  // Har den valda tiden passerat medan dialogen stått öppen hoppar vi fram
+  // till nästa lediga tid. Egen skrivna tider lämnas orörda så länge de
+  // ligger framåt i tiden.
+  React.useEffect(() => {
+    if (!date || !isToday(date)) return;
+    const [h, m] = time.split(':').map(Number);
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return;
+    const selected = new Date(date);
+    selected.setHours(h, m, 0, 0);
+    if (selected.getTime() > Date.now()) return;
+    if (timeOptions.length > 0) {
+      setTime(timeOptions[0]);
+    } else {
+      const tomorrow = startOfDay(new Date());
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      setDate(tomorrow);
+      setTime('09:00');
+    }
+  }, [date, time, minuteTick, timeOptions]);
 
   // Calculate end time based on start time and duration
   const getEndTime = (startTime: string, durationMinutes: string) => {
@@ -734,25 +794,64 @@ export const BookInterviewDialog = ({
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7.25rem] sm:grid-cols-[minmax(0,1fr)_8rem] gap-3 items-end">
             <div className="min-w-0 space-y-2">
               <Label className="text-white">Tid</Label>
-              <Select value={time} onValueChange={setTime}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white [&>svg]:text-white">
-                  <Clock className="mr-1.5 h-4 w-4 flex-shrink-0" />
-                  <span className="flex-1 text-left truncate text-sm">{time} →{endTime}</span>
-                </SelectTrigger>
-                <SelectContent 
-                  side="bottom" 
-                  align="start" 
-                  sideOffset={4} 
-                  avoidCollisions={false}
-                  className="max-h-[200px] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              <Popover open={timePopoverOpen} onOpenChange={openTimePopover}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full h-[var(--control-height)] flex items-center justify-start text-left text-sm font-normal bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white transition-colors hover:border-white/30"
+                  >
+                    <Clock className="mr-1.5 h-4 w-4 flex-shrink-0" />
+                    <span className="flex-1 truncate">{time} →{endTime}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[min(20rem,84vw)] p-3 pointer-events-auto z-[120]"
+                  align="start"
+                  side="bottom"
+                  sideOffset={4}
                 >
-                  {timeOptions.map((t) => (
-                    <SelectItem key={t} value={t} className="py-1.5 text-sm">
-                      {t}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Input
+                    value={timeDraft}
+                    onChange={(e) => handleTimeDraftChange(e.target.value)}
+                    onBlur={() => commitTimeDraft(timeDraft)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (commitTimeDraft(timeDraft)) setTimePopoverOpen(false);
+                      }
+                    }}
+                    inputMode="numeric"
+                    placeholder="Skriv en tid, t.ex. 20:07"
+                    className="h-11 bg-white/10 border-white/20 text-base text-white placeholder:text-white/50"
+                  />
+                  <p className="mt-1.5 text-xs leading-snug text-white/80">
+                    Skriv valfri tid eller välj en kvartartid nedan.
+                  </p>
+                  <div className="mt-2 max-h-[176px] overflow-y-auto overscroll-contain scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {timeOptions.map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => {
+                            setTime(t);
+                            setTimeDraft(t);
+                            setTimePopoverOpen(false);
+                          }}
+                          className={cn(
+                            'h-9 rounded-md border text-sm transition-colors focus:outline-none focus:ring-0',
+                            t === time
+                              ? 'bg-white/20 border-white/40 text-white'
+                              : 'bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30'
+                          )}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="min-w-0 space-y-2 w-full shrink-0">
               <Label className="text-white">Längd</Label>
@@ -812,6 +911,17 @@ export const BookInterviewDialog = ({
                 <span>På plats</span>
               </button>
             </div>
+          </div>
+
+          {/* Subject */}
+          <div className="min-w-0 space-y-2">
+            <Label className="text-white">Ämnesrad</Label>
+            <Input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Ämne för intervjukallelsen"
+              className="min-w-0 max-w-full bg-white/10 border-white/20 text-white placeholder:text-white/50"
+            />
           </div>
 
           {/* Video link input */}
@@ -926,17 +1036,6 @@ export const BookInterviewDialog = ({
               </div>
             </div>
           )}
-
-          {/* Subject */}
-          <div className="min-w-0 space-y-2">
-            <Label className="text-white">Ämnesrad</Label>
-            <Input
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Ämne för intervjukallelsen"
-              className="min-w-0 max-w-full bg-white/10 border-white/20 text-white placeholder:text-white/50"
-            />
-          </div>
 
           {/* Message */}
           <div className="min-w-0 space-y-2">
