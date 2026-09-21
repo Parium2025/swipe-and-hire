@@ -253,7 +253,7 @@ const SupportAdmin = () => {
       case 'open':
         return 'Öppen';
       case 'closed':
-        return 'Stängd';
+        return 'Arkiverad';
       case 'in_progress':
         return 'Pågår';
       default:
@@ -382,7 +382,7 @@ const SupportAdmin = () => {
                       <SelectContent className="glass-panel">
                         <SelectItem value="open">Öppen</SelectItem>
                         <SelectItem value="in_progress">Pågår</SelectItem>
-                        <SelectItem value="closed">Stängd</SelectItem>
+                        <SelectItem value="closed">Arkiverad</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
