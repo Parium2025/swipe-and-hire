@@ -546,8 +546,11 @@ const EmployerDashboard = memo(() => {
     // servern arbetar. Listan hoppar aldrig till innan animationen är klar.
     setDeleteDialogOpen(false);
     setJobToDelete(null);
-    const deletedIndex = pageJobs.findIndex((pageJob) => pageJob.id === job.id);
-    setDeleteUnderlayJob(deletedIndex >= 0 ? pageJobs[deletedIndex + 1] ?? null : null);
+    // Underlaget måste komma från exakt den lista som renderas i aktiv flik,
+    // annars kan fel kort målas bakom.
+    const renderedJobs = pagedBuckets[listActiveTab] ?? pageJobs;
+    const deletedIndex = renderedJobs.findIndex((pageJob) => pageJob.id === job.id);
+    setDeleteUnderlayJob(deletedIndex >= 0 ? renderedJobs[deletedIndex + 1] ?? null : null);
     setRemovingJobId(job.id);
     const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 420));
 
