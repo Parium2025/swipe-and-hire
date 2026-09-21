@@ -236,47 +236,61 @@ serve(async (req) => {
 
         if (matches) {
           totalMatches++;
+          matched.push({ id: search.id, user_id: search.user_id });
+        }
+      }
 
-          // Update match count
-          const { data: current } = await supabase
-            .from('saved_searches')
-            .select('new_matches_count')
-            .eq('id', search.id)
-            .single();
+      // SKALA: tidigare gjordes fyra sekventiella anrop PER träff (läs räknare,
+      // skriv räknare, kolla notisinställning, skicka push). Vid tiotusentals
+      // bevakade sökningar hann körningen aldrig klart. Nu räknas alla träffar
+      // upp i ETT databasanrop, inställningarna hämtas samlat och pusharna
+      // skickas några i taget. Samma träffar, samma notiser.
+      if (matched.length > 0) {
+        const ids = matched.map((m) => m.id);
+        const { error: incError } = await supabase.rpc('increment_saved_search_matches', {
+          p_ids: ids,
+        });
+        if (incError) {
+          console.error('[check-saved-searches] Failed to increment match counts:', incError);
+        }
 
-          await supabase
-            .from('saved_searches')
-            .update({
-              new_matches_count: (current?.new_matches_count || 0) + 1,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', search.id);
+        const userIds = [...new Set(matched.map((m) => m.user_id))];
+        const { data: prefs } = await supabase
+          .from('notification_preferences')
+          .select('user_id, is_enabled')
+          .eq('notification_type', 'saved_search_match')
+          .in('user_id', userIds);
+        // Standard är påslaget – bara uttryckligt avstängt hoppas över.
+        const disabled = new Set(
+          (prefs || [])
+            .filter((p) => (p as { is_enabled: boolean | null }).is_enabled === false)
+            .map((p) => (p as { user_id: string }).user_id)
+        );
 
-          // Send push notification (fire-and-forget)
-          try {
-            const notifEnabled = await supabase.rpc('is_notification_enabled', {
-              p_user_id: search.user_id,
-              p_type: 'saved_search_match',
-            });
-
-            if (notifEnabled.data) {
-              await supabase.functions.invoke('send-push-notification', {
-                body: {
-                  recipient_id: search.user_id,
-                  title: '🔔 Nytt jobb för din sökning!',
-                  body: `${title} - ${workplace_city || 'Okänd plats'}`,
-                  data: {
-                    type: 'saved_search_match',
-                    job_id,
-                    search_id: search.id,
-                    route: '/job-view/' + job_id,
+        const targets = matched.filter((m) => !disabled.has(m.user_id));
+        const PUSH_BATCH = 10;
+        for (let i = 0; i < targets.length; i += PUSH_BATCH) {
+          await Promise.all(
+            targets.slice(i, i + PUSH_BATCH).map(async (m) => {
+              try {
+                await supabase.functions.invoke('send-push-notification', {
+                  body: {
+                    recipient_id: m.user_id,
+                    title: '🔔 Nytt jobb för din sökning!',
+                    body: `${title} - ${workplace_city || 'Okänd plats'}`,
+                    data: {
+                      type: 'saved_search_match',
+                      job_id,
+                      search_id: m.id,
+                      route: '/job-view/' + job_id,
+                    },
                   },
-                },
-              });
-            }
-          } catch (pushErr) {
-            console.warn('[check-saved-searches] Push failed for user', search.user_id, pushErr);
-          }
+                });
+              } catch (pushErr) {
+                console.warn('[check-saved-searches] Push failed for user', m.user_id, pushErr);
+              }
+            })
+          );
         }
       }
 
