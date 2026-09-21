@@ -41,7 +41,10 @@ const InterviewInvitationEmail = ({
   decline_url,
 }: Props) => {
   const locationLabel = location_type === 'video' ? 'Videointervju' : 'På plats'
-  const isVideoLink = location_type === 'video' && location_details.startsWith('http')
+  const [locationAddress = '', ...instructionParts] = location_details.split(/\n\s*\n/)
+  const locationInstructions = instructionParts.join('\n\n').trim()
+  const visibleLocation = location_type === 'office' ? locationAddress.trim() : location_details
+  const isVideoLink = location_type === 'video' && visibleLocation.startsWith('http')
   const greeting = is_employer
     ? `Hej ${recipient_name}, du har bokat en intervju för ${job_title}.`
     : `Hej ${recipient_name}, du är kallad till intervju för ${job_title}.`
@@ -70,13 +73,19 @@ const InterviewInvitationEmail = ({
             <Text style={row}>
               <strong>{locationLabel}:</strong>{' '}
               {isVideoLink ? (
-                <Link href={location_details} style={link}>{location_details}</Link>
+                <Link href={visibleLocation} style={link}>{visibleLocation}</Link>
               ) : maps_url ? (
-                <Link href={maps_url} style={link}>{location_details}</Link>
+                <Link href={maps_url} style={link}>{visibleLocation}</Link>
               ) : (
-                location_details || 'Information meddelas'
+                visibleLocation || 'Information meddelas'
               )}
             </Text>
+            {location_type === 'office' && locationInstructions ? (
+              <Section style={instructionsSection}>
+                <Text style={smallLabel}>Instruktioner:</Text>
+                <Text style={{ ...text, whiteSpace: 'pre-line' as const }}>{locationInstructions}</Text>
+              </Section>
+            ) : null}
             {message ? (
               <Section style={messageSection}>
               <Text style={smallLabel}>{messageLabel}</Text>
@@ -96,7 +105,7 @@ const InterviewInvitationEmail = ({
 
           {isVideoLink ? (
             <Section style={{ textAlign: 'center' as const, margin: '28px 0 20px' }}>
-              <Button style={button} href={location_details}>Anslut till videomötet</Button>
+              <Button style={button} href={visibleLocation}>Anslut till videomötet</Button>
             </Section>
           ) : null}
 
@@ -153,6 +162,7 @@ const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0
 const smallLabel = { fontSize: '13px', color: '#6B7280', fontWeight: 600 as const, margin: '0 0 8px' }
 const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0' }
 const messageSection = { borderTop: '1px solid #e2e8f0', margin: '20px 0 0', padding: '20px 0 0' }
+const instructionsSection = { borderTop: '1px solid #e2e8f0', margin: '16px 0 0', padding: '16px 0 0' }
 const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const link = { color: '#001F3D', textDecoration: 'underline', wordBreak: 'break-all' as const }
 const calendarLink = { color: '#6B7280', textDecoration: 'underline', fontSize: '13px' }
