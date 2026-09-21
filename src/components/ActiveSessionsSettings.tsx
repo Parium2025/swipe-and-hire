@@ -52,10 +52,15 @@ function getDeviceIcon(label: string | null) {
   return <Laptop className="h-5 w-5" />;
 }
 
+// Senast hämtade sessioner för den här fliken. Gör att rutan visar listan
+// direkt när säkerhetsinställningarna öppnas igen i stället för en spinner.
+let sessionsCache: { userId: string; data: SessionData[] } | null = null;
+
 export function ActiveSessionsSettings() {
   const { user } = useAuth();
-  const [sessions, setSessions] = useState<SessionData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedForUser = user?.id && sessionsCache?.userId === user.id ? sessionsCache.data : null;
+  const [sessions, setSessions] = useState<SessionData[]>(cachedForUser ?? []);
+  const [loading, setLoading] = useState(!cachedForUser);
   const [kickingId, setKickingId] = useState<string | null>(null);
   // Ett hämtningsfel fick tidigare listan att se tom ut ("Inga aktiva
   // sessioner") — användaren kunde tro att ingen annan enhet var inloggad.
@@ -63,6 +68,8 @@ export function ActiveSessionsSettings() {
 
   // Sessioner från föregående konto får aldrig ligga kvar vid kontobyte.
   useEffect(() => {
+    if (user?.id && sessionsCache?.userId === user.id) return;
+    sessionsCache = null;
     setSessions([]);
     setHasError(false);
   }, [user?.id]);
@@ -70,6 +77,7 @@ export function ActiveSessionsSettings() {
   const fetchSessions = useCallback(async (silent = false) => {
     if (!user?.id) return;
     if (!silent) setLoading(true);
+
     try {
       const { data, error } = await supabase.rpc('get_active_sessions');
       if (error) {
