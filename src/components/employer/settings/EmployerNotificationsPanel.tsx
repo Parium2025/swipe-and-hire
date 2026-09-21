@@ -33,6 +33,13 @@ const EMPLOYER_ROWS: NotificationRow[] = [
     channels: ['in_app', 'push', 'email'],
     locked: ['in_app', 'push', 'email'],
   },
+  {
+    type: 'interview_response',
+    label: 'Mejl när kandidaten svarar',
+    description:
+      'Ett mejl till dig så fort kandidaten tackar ja eller nej. Notisen i appen kommer oavsett.',
+    channels: ['email'],
+  },
 ];
 
 const EmployerNotificationsPanel = ({
