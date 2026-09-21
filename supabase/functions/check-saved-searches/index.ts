@@ -247,11 +247,11 @@ serve(async (req) => {
         }
       }
 
-      // SKALA: tidigare gjordes fyra sekventiella anrop PER träff (läs räknare,
-      // skriv räknare, kolla notisinställning, skicka push). Vid tiotusentals
-      // bevakade sökningar hann körningen aldrig klart. Nu räknas alla träffar
-      // upp i ETT databasanrop, inställningarna hämtas samlat och pusharna
-      // skickas några i taget. Samma träffar, samma notiser.
+      // SKALA: tidigare skickades varje push direkt härifrån, några i taget.
+      // Vid tiotusentals träffar hann körningen aldrig klart – och alla
+      // notiser landade i samma sekund, så alla öppnade appen samtidigt.
+      // Nu läggs notiserna i kön och betas av i jämn takt, utspridda över
+      // tid. Samma träffar, samma notiser – bara utan stöttopp.
       if (matched.length > 0) {
         const ids = matched.map((m) => m.id);
         const { error: incError } = await supabase.rpc('increment_saved_search_matches', {
@@ -275,29 +275,36 @@ serve(async (req) => {
         );
 
         const targets = matched.filter((m) => !disabled.has(m.user_id));
-        const PUSH_BATCH = 10;
-        for (let i = 0; i < targets.length; i += PUSH_BATCH) {
-          await Promise.all(
-            targets.slice(i, i + PUSH_BATCH).map(async (m) => {
-              try {
-                await supabase.functions.invoke('send-push-notification', {
-                  body: {
-                    recipient_id: m.user_id,
-                    title: '🔔 Nytt jobb för din sökning!',
-                    body: `${title} - ${workplace_city || 'Okänd plats'}`,
-                    data: {
-                      type: 'saved_search_match',
-                      job_id,
-                      search_id: m.id,
-                      route: '/job-view/' + job_id,
-                    },
-                  },
-                });
-              } catch (pushErr) {
-                console.warn('[check-saved-searches] Push failed for user', m.user_id, pushErr);
-              }
-            })
+        const now = Date.now();
+        const rows = targets.map((m) => {
+          // Sprid ut utskicket: varje påbörjad sats om PUSH_PER_MINUTE skjuts
+          // en minut framåt, upp till MAX_SPREAD_MINUTES.
+          const delayMinutes = Math.min(
+            Math.floor(queuedSoFar++ / PUSH_PER_MINUTE),
+            MAX_SPREAD_MINUTES
           );
+          return {
+            recipient_id: m.user_id,
+            title: '🔔 Nytt jobb för din sökning!',
+            body: `${title} - ${workplace_city || 'Okänd plats'}`,
+            notification_type: 'saved_search_match',
+            // Samma annons + samma bevakning ska aldrig ge två notiser.
+            dedupe_key: `saved_search:${job_id}:${m.id}`,
+            scheduled_at: new Date(now + delayMinutes * 60_000).toISOString(),
+            data: {
+              type: 'saved_search_match',
+              job_id,
+              search_id: m.id,
+              route: '/job-view/' + job_id,
+            },
+          };
+        });
+
+        const { error: queueError } = await supabase.rpc('enqueue_push_notifications', {
+          p_rows: rows,
+        });
+        if (queueError) {
+          console.error('[check-saved-searches] Failed to queue push notifications:', queueError);
         }
       }
 
