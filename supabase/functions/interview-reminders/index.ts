@@ -228,29 +228,47 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // En enda logguppslagning för hela gruppen i stället för en per möte –
+        // med hundratals möten samtidigt är det skillnaden mellan sekunder
+        // och minuter.
+        const interviewIds = (interviews || []).map((i) => (i as { id: string }).id);
+        const logsByInterview = new Map<string, Array<{ channel: string; payload: Record<string, unknown> | null }>>();
+        if (interviewIds.length > 0) {
+          const CHUNK = 200;
+          for (let i = 0; i < interviewIds.length; i += CHUNK) {
+            const { data: logs } = await supabase
+              .from("outreach_dispatch_logs")
+              .select("interview_id, channel, payload, recipient_user_id")
+              .in("interview_id", interviewIds.slice(i, i + CHUNK))
+              .eq("trigger", trigger);
+            for (const log of logs || []) {
+              const row = log as { interview_id: string; channel: string; payload: Record<string, unknown> | null; recipient_user_id: string };
+              const list = logsByInterview.get(row.interview_id) ?? [];
+              list.push({ channel: row.channel, payload: row.payload });
+              logsByInterview.set(row.interview_id, list);
+            }
+          }
+        }
+
         for (const interview of interviews || []) {
           // Revisionen gör att en ombokad intervju får en ny påminnelse –
           // utan den blockerar den redan skickade loggen alltid nya tider.
           const revision = (interview as { revision?: number }).revision ?? 0;
 
-          const { data: existingLogs } = await supabase
-            .from("outreach_dispatch_logs")
-            .select("id, channel, payload")
-            .eq("interview_id", interview.id)
-            .eq("recipient_user_id", interview.applicant_id)
-            .eq("trigger", trigger);
+          const existingLogs = logsByInterview.get(interview.id) ?? [];
 
           const alreadyQueuedChannels = new Set(
-            (existingLogs || [])
+            existingLogs
               .filter((log) => {
-                const payload = (log as { payload?: Record<string, unknown> | null }).payload;
+                const payload = log.payload;
                 const loggedRevision = Number(payload?.revision ?? 0);
                 const loggedDelay = Number(payload?.delay_minutes ?? -1);
                 return loggedRevision === revision
                   && loggedDelay === Math.max(automation.delay_minutes ?? 0, 0);
               })
-              .map((log) => (log as { channel: string }).channel),
+              .map((log) => log.channel),
           );
+
 
           // Före-intervju: kandidatens eget Google-larm på samma minutantal
           // ersätter vårt LARM (push) – men chatt/mejl finns kvar, annars
