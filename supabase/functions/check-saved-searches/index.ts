@@ -9,6 +9,10 @@ const corsHeaders = {
 };
 
 const BATCH_SIZE = 500;
+/** Hur många pushnotiser som får schemaläggas per minut vid en ny annons. */
+const PUSH_PER_MINUTE = 2000;
+/** Längsta utspridning – ingen väntar mer än så här på sin notis. */
+const MAX_SPREAD_MINUTES = 15;
 
 // ─────────────────────────────────────────────────────────────
 // Synonym/typo-expansion (spegel av useOptimizedJobSearch).
