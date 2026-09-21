@@ -155,12 +155,12 @@ export const JobSeekerInterviewsCard = memo(() => {
                       </span>
                     </div>
                     
-                    <div className="flex items-center gap-2 mt-1 text-[10px] text-white">
-                      <span>{formatInterviewDate(interview.scheduled_at)}</span>
-                      <span>kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
-                      <span className="flex items-center gap-0.5">
-                        <LocationIcon className="h-2.5 w-2.5" />
-                        {getLocationLabel(interview.location_type)}
+                    <div className="flex items-center gap-2 mt-1 text-[10px] leading-none text-white whitespace-nowrap">
+                      <span className="leading-none">{formatInterviewDate(interview.scheduled_at)}</span>
+                      <span className="leading-none">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
+                      <span className="flex items-center gap-1 leading-none">
+                        <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                        <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                       </span>
                     </div>
                   </motion.div>
