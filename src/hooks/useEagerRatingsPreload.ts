@@ -127,6 +127,15 @@ const clearAllAppCachesSync = () => {
     'parium_toast_archive_v1',
     // Profilutkast (pass 16) — innehåller namn, telefon och bio.
     'parium_draft_profile',
+    // Jobbsökarens egna ansökningar (jobbtitel, bolag, status) låg kvar efter
+    // utloggning på delad enhet.
+    'job_seeker_applications_',
+    'parium_my_applications_cache',
+    // Påbörjade ansökningssvar är fritext från användaren.
+    'job-answers-draft-',
+    // Behörighetscache och annonsvy-layout är kontobundna.
+    'parium_is_org_admin_',
+    'parium:jobDetails:',
   ];
   
   const exactKeysToRemove = [
