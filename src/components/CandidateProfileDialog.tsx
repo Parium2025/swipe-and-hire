@@ -9,6 +9,8 @@ import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { prefetchExistingInterview } from '@/lib/existingInterviewQuery';
 import { toast } from 'sonner';
 import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
@@ -319,6 +321,16 @@ export const CandidateProfileDialog = ({
     cvUrl: activeApplication?.cv_url || null,
     open,
   });
+
+  // Förvärm "finns redan ett bokat möte?" så fort kandidaten visas. Då öppnas
+  // Boka möte direkt i rätt läge (ombokning, tid, plats, meddelande) i stället
+  // för att först visa nybokning och sedan hoppa när svaret kommer.
+  const interviewPrefetchClient = useQueryClient();
+  const prefetchApplicationId = activeApplication?.id || application?.id || null;
+  useEffect(() => {
+    if (!open || !prefetchApplicationId) return;
+    prefetchExistingInterview(interviewPrefetchClient, prefetchApplicationId);
+  }, [open, prefetchApplicationId, interviewPrefetchClient]);
 
   useEffect(() => {
     if (!application) return;

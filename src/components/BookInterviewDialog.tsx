@@ -21,6 +21,7 @@ import { normalizeMeetingLink, isSupportedMeetingLink } from '@/lib/meetingLink'
 import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { formatSwedishTime, isSwedishTimeZone, getLocalTimeZoneCity } from '@/lib/localTime';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { existingInterviewQueryKey, fetchExistingInterview } from '@/lib/existingInterviewQuery';
 
 interface BookInterviewDialogProps {
   open: boolean;
@@ -161,25 +162,13 @@ export const BookInterviewDialog = ({
 
   // Finns redan en aktiv intervju för ansökan? Då är detta en ombokning,
   // inte ett nytt möte – annars skulle kandidaten få dubbla kallelser.
+  // Hämtaren delas med förvärmningen (se existingInterviewQuery.ts) så att
+  // svaret redan ligger i cachen när dialogen öppnas.
   const { data: existingInterview } = useQuery({
-    queryKey: ['existing-interview', applicationId],
+    queryKey: existingInterviewQueryKey(applicationId),
     enabled: open && !!applicationId,
-    staleTime: 0,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('interviews')
-        .select('id, employer_id, scheduled_at, duration_minutes, location_type, location_details, subject, message')
-        .eq('application_id', applicationId)
-        .in('status', ['pending', 'confirmed'])
-        .order('scheduled_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) return null;
-      // Ett möte som redan är över ska inte bokas om – då är det ett nytt möte.
-      const end = new Date(data.scheduled_at).getTime() + (data.duration_minutes || 30) * 60_000;
-      return end > Date.now() ? data : null;
-    },
+    staleTime: 30_000,
+    queryFn: () => fetchExistingInterview(applicationId),
   });
 
   const isReschedule = !!existingInterview;
