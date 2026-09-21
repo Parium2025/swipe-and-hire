@@ -113,9 +113,6 @@ const InterviewRescheduledEmail = ({
             </Section>
           ) : null}
 
-          <Section style={{ textAlign: 'center' as const, margin: '4px 0 8px' }}>
-            <Link href={google_calendar_url} style={calendarLink}>Eller lägg till i Google Kalender</Link>
-          </Section>
 
           <Text style={footer}>Skickat av {company_name} via Parium</Text>
           <Text style={noReply}>
