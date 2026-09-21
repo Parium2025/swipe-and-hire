@@ -147,6 +147,31 @@ const AuthMobile = ({
     }
   }, [showResetPassword, resetPasswordSent]);
 
+  // Enter ska alltid logga in när inloggningsfliken är aktiv — även när fokus
+  // ligger utanför formuläret (t.ex. efter autofyll, efter klick i bakgrunden
+  // eller direkt efter att sidan laddats).
+  useEffect(() => {
+    if (!isLogin) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.isComposing || e.defaultPrevented) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (loading) return;
+      const form = loginFormRef.current;
+      if (!form) return;
+      const el = document.activeElement as HTMLElement | null;
+      // Låt formulärets egna fält och knappar/länkar hantera Enter själva.
+      if (el && form.contains(el)) return;
+      const tag = el?.tagName;
+      if (tag === 'BUTTON' || tag === 'A' || tag === 'TEXTAREA' || el?.isContentEditable) return;
+      e.preventDefault();
+      form.requestSubmit();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isLogin, loading]);
+
+
+
   // Utility: force top without smooth; works reliably on iOS Safari
   const hardScrollTo = (top: number) => {
     try {
