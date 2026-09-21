@@ -133,6 +133,7 @@ const AuthMobile = ({
   const resetSectionRef = useRef<HTMLDivElement>(null);
   // Independent scroll positions per tab
   const signupScrollRef = useRef(0);
+  const loginFormRef = useRef<HTMLFormElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
