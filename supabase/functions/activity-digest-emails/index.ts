@@ -222,6 +222,15 @@ async function runUnreadMessages() {
         'Parium'
       return { title: name, subtitle: count === 1 ? '1 oläst meddelande' : `${count} olästa meddelanden` }
     })
+    // Mejlet listar högst MAX_ITEMS rader för läsbarhet. Resten summeras så att
+    // ingenting göms bort, oavsett hur många konversationer det gäller.
+    const restConversations = conversations.size - items.length
+    if (restConversations > 0) {
+      items.push({
+        title: restConversations === 1 ? '+1 konversation till' : `+${restConversations} konversationer till`,
+        subtitle: 'Se alla i appen',
+      })
+    }
 
     const heading = total === 1 ? '1 oläst meddelande' : `${total} olästa meddelanden`
     await emailSlot()
@@ -314,6 +323,15 @@ async function runNewApplications() {
       title: (jobById.get(jobId)?.title as string) || 'Din annons',
       subtitle: count === 1 ? '1 ny ansökan' : `${count} nya ansökningar`,
     }))
+    // Samma princip här: högst MAX_ITEMS annonser listas, men resterande
+    // annonser summeras så att totalen alltid stämmer.
+    const restJobs = byJob.size - items.length
+    if (restJobs > 0) {
+      items.push({
+        title: restJobs === 1 ? '+1 annons till' : `+${restJobs} annonser till`,
+        subtitle: 'Se alla i appen',
+      })
+    }
 
     const heading = total === 1 ? '1 ny ansökan' : `${total} nya ansökningar`
     await emailSlot()
