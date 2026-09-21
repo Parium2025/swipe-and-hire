@@ -384,6 +384,9 @@ export function useSessionManager(
     const token = sessionTokenRef.current;
     if (!token || !userId || !registeredRef.current || alreadyKickedRef.current) return;
     if (signOutInProgress) return;
+    // Skalning: pollning i dold flik ger ingen nytta — realtidskanalen fångar
+    // återkallanden direkt, och visibilitychange kör en färsk koll vid retur.
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
 
     // Grace period: skip validity check right after registration (mobile wake-up scenario)
     const timeSinceRegistration = Date.now() - lastRegisteredAtRef.current;
