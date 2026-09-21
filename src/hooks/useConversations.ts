@@ -1503,11 +1503,15 @@ export function useCreateConversation() {
       // för att hitta befintlig tråd och för att skapa en ny.
       let organizationId: string | null = null;
       if (isInternal) {
+        // Måste matcha databasens get_user_organization_id() exakt (aktiv roll),
+        // annars nekar behörighetsregeln den interna chatten.
         const { data: roleRow } = await supabase
           .from('user_roles')
           .select('organization_id')
           .eq('user_id', user.id)
+          .eq('is_active', true)
           .not('organization_id', 'is', null)
+          .limit(1)
           .maybeSingle();
         organizationId = roleRow?.organization_id ?? null;
         if (!organizationId) {
