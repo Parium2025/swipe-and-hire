@@ -46,15 +46,16 @@ Deno.serve(async (req) => {
   // som en intervjutid ändras (i appen eller i arbetsgivarens kalender) och
   // kandidaten får då direkt ett "ny tid"-mejl med ja/nej-knappar.
   // Grenen rör inte den vanliga minutkörningen nedan.
+  let requestBody:
+    | { reschedule_interview_id?: string; old_scheduled_at?: string | null; worker_page?: number }
+    | null = null;
   try {
     const cloned = req.clone();
-    const body = await cloned.json().catch(() => null) as
-      | { reschedule_interview_id?: string; old_scheduled_at?: string | null }
-      | null;
-    if (body?.reschedule_interview_id) {
+    requestBody = await cloned.json().catch(() => null);
+    if (requestBody?.reschedule_interview_id) {
       const result = await sendInterviewRescheduleEmail(
-        body.reschedule_interview_id,
-        body.old_scheduled_at ?? null,
+        requestBody.reschedule_interview_id,
+        requestBody.old_scheduled_at ?? null,
       );
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -68,6 +69,14 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Sharding: minutkörningen (sida 0) är koordinator. Ligger fler möten i
+  // fönstret än en sida rymmer startar den parallella arbetare som tar sida
+  // 1, 2, 3 … samtidigt. Då begränsas kapaciteten inte av en enda körning.
+  const workerPage = Math.max(0, Math.min(Number(requestBody?.worker_page ?? 0) || 0, 15));
+  const PAGE_SIZE = 500;
+  const MAX_WORKERS = 16;
+
+
   console.log("Interview reminders cron job started");
 
   try {
@@ -75,15 +84,15 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Single-flight: om föregående minutkörning fortfarande pågår hoppar vi över
-    // helt. Det hindrar att långsamma körningar staplas på varandra och mättar
-    // databasen (som under nattens överbelastning).
+    // Single-flight per sida: samma sida får aldrig köras två gånger samtidigt,
+    // men olika sidor (arbetare) kör parallellt och delar upp arbetet.
+    const lockKey = workerPage === 0 ? 'interview-reminders' : `interview-reminders-w${workerPage}`;
     const { data: gotLock } = await supabase.rpc('try_claim_job_lock', {
-      _key: 'interview-reminders',
+      _key: lockKey,
       _ttl_seconds: 55,
     });
     if (gotLock !== true) {
-      console.log('Another interview-reminders run is in progress — skipping');
+      console.log(`Another interview-reminders run is in progress (${lockKey}) — skipping`);
       return new Response(JSON.stringify({ skipped: true, reason: 'run_in_progress' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -93,8 +102,9 @@ Deno.serve(async (req) => {
 
     // Hur många möten som behandlas samtidigt. Arbetet är nästan bara väntan på
     // nätverk, så bredden – inte processorn – avgör hur många som hinner med.
-    const REMINDER_CONCURRENCY = 40;
-    const FOLLOWUP_CONCURRENCY = 40;
+    const REMINDER_CONCURRENCY = 120;
+    const FOLLOWUP_CONCURRENCY = 120;
+
     // Tidsbudget: körningen avslutas snyggt efter 50 sekunder så att nästa
     // minutkörning tar vid, i stället för att avbrytas mitt i av plattformen.
     const RUN_DEADLINE = Date.now() + 50_000;
@@ -218,29 +228,48 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // En enda logguppslagning för hela gruppen i stället för en per möte –
+        // med hundratals möten samtidigt är det skillnaden mellan sekunder
+        // och minuter.
+        const interviewIds = (interviews || []).map((i) => (i as { id: string }).id);
+        const logsByInterview = new Map<string, Array<{ channel: string; payload: Record<string, unknown> | null; recipient: string }>>();
+        if (interviewIds.length > 0) {
+          const CHUNK = 200;
+          for (let i = 0; i < interviewIds.length; i += CHUNK) {
+            const { data: logs } = await supabase
+              .from("outreach_dispatch_logs")
+              .select("interview_id, channel, payload, recipient_user_id")
+              .in("interview_id", interviewIds.slice(i, i + CHUNK))
+              .eq("trigger", trigger);
+            for (const log of logs || []) {
+              const row = log as { interview_id: string; channel: string; payload: Record<string, unknown> | null; recipient_user_id: string };
+              const list = logsByInterview.get(row.interview_id) ?? [];
+              list.push({ channel: row.channel, payload: row.payload, recipient: row.recipient_user_id });
+              logsByInterview.set(row.interview_id, list);
+            }
+          }
+        }
+
         for (const interview of interviews || []) {
           // Revisionen gör att en ombokad intervju får en ny påminnelse –
           // utan den blockerar den redan skickade loggen alltid nya tider.
           const revision = (interview as { revision?: number }).revision ?? 0;
 
-          const { data: existingLogs } = await supabase
-            .from("outreach_dispatch_logs")
-            .select("id, channel, payload")
-            .eq("interview_id", interview.id)
-            .eq("recipient_user_id", interview.applicant_id)
-            .eq("trigger", trigger);
+          const existingLogs = logsByInterview.get(interview.id) ?? [];
 
           const alreadyQueuedChannels = new Set(
-            (existingLogs || [])
+            existingLogs
               .filter((log) => {
-                const payload = (log as { payload?: Record<string, unknown> | null }).payload;
+                if (log.recipient !== interview.applicant_id) return false;
+                const payload = log.payload;
                 const loggedRevision = Number(payload?.revision ?? 0);
                 const loggedDelay = Number(payload?.delay_minutes ?? -1);
                 return loggedRevision === revision
                   && loggedDelay === Math.max(automation.delay_minutes ?? 0, 0);
               })
-              .map((log) => (log as { channel: string }).channel),
+              .map((log) => log.channel),
           );
+
 
           // Före-intervju: kandidatens eget Google-larm på samma minutantal
           // ersätter vårt LARM (push) – men chatt/mejl finns kvar, annars
@@ -337,16 +366,45 @@ Deno.serve(async (req) => {
       // Fönstret är brett men cron kör varje minut – utan denna
       // markering skulle samma påminnelse skickas två gånger.
       .is("reminder_sent_at", null)
-      // Taket är högt satt (2000) eftersom körningen numera arbetar parallellt
-      // och dessutom stoppas av en tidsbudget nedan. Vid extrema toppar tas
-      // resten i nästa minutkörning i stället för att hela körningen dör.
+      // Stabil ordning + sidindelning: varje arbetare tar sin egen sida, så
+      // tiotusentals möten kan behandlas parallellt inom samma minut.
       .order("scheduled_at", { ascending: true })
-      .limit(2000);
+      .order("id", { ascending: true })
+      .range(workerPage * PAGE_SIZE, workerPage * PAGE_SIZE + PAGE_SIZE - 1);
 
     if (interviewsError) {
       console.error("Error fetching interviews:", interviewsError);
       throw interviewsError;
     }
+
+    // Full sida = det finns troligen mer. Koordinatorn startar då extra
+    // arbetare som tar nästa sidor samtidigt i stället för nästa minut.
+    if (workerPage === 0 && (upcomingInterviews?.length ?? 0) >= PAGE_SIZE) {
+      const { count } = await supabase
+        .from("interviews")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["pending", "confirmed"])
+        .gte("scheduled_at", now.toISOString())
+        .lte("scheduled_at", elevenMinutesFromNow.toISOString())
+        .is("reminder_sent_at", null);
+      const pagesNeeded = Math.min(Math.ceil((count ?? PAGE_SIZE) / PAGE_SIZE), MAX_WORKERS);
+      for (let page = 1; page < pagesNeeded; page++) {
+        const call = fetch(`${supabaseUrl}/functions/v1/interview-reminders`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({ worker_page: page }),
+        }).catch((err) => console.error(`worker ${page} failed to start`, err));
+        // Starta arbetaren utan att vänta – koordinatorn kör sin egen sida.
+        (globalThis as { EdgeRuntime?: { waitUntil: (p: Promise<unknown>) => void } })
+          .EdgeRuntime?.waitUntil(call);
+      }
+      console.log(`Fan-out: ${pagesNeeded} sidor (~${count} möten) behandlas parallellt`);
+    }
+
+
 
     let remindersSent = 0;
     const errors: string[] = [];
@@ -547,9 +605,11 @@ Deno.serve(async (req) => {
       .gte("scheduled_at", fourDaysAgo.toISOString())
       .lte("scheduled_at", threeDaysAgo.toISOString())
       .is("followup_reminder_sent_at", null)
-      // Samma skäl som ovan – resten tas i nästa körning.
+      // Samma sidindelning som ovan – arbetarna delar upp uppföljningarna.
       .order("scheduled_at", { ascending: true })
-      .limit(2000);
+      .order("id", { ascending: true })
+      .range(workerPage * PAGE_SIZE, workerPage * PAGE_SIZE + PAGE_SIZE - 1);
+
 
     if (pastError) {
       console.error("Error fetching past interviews for follow-up:", pastError);
@@ -657,12 +717,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
-    const afterInterviewQueued = await queueInterviewTimelineDispatches("interview_after");
+    // Arbetsgivarens egna regler köas bara av koordinatorn – arbetarna skulle
+    // annars göra exakt samma genomgång en gång till.
+    const beforeInterviewQueued = workerPage === 0
+      ? await queueInterviewTimelineDispatches("interview_before")
+      : 0;
+    const afterInterviewQueued = workerPage === 0
+      ? await queueInterviewTimelineDispatches("interview_after")
+      : 0;
 
-    console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
+    console.log(`Interview reminders completed (page ${workerPage}): ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
 
-    await supabase.rpc('release_job_lock', { _key: 'interview-reminders' });
+    await supabase.rpc('release_job_lock', { _key: lockKey });
+
     return new Response(
       JSON.stringify({
         success: true,
