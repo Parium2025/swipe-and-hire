@@ -1,100 +1,79 @@
-import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
-import { resolveCandidateMedia } from '@/lib/candidateMedia';
 
 /**
- * Shared hook for prefetching applications data.
- * Used by both EmployerLayout (on mount) and EmployerSidebar/TopNav (on hover).
+ * Förvärmning inför kandidatsidan (hover i sidomenyn/toppnavigeringen).
+ *
+ * Tidigare skrev den här hooken till nyckeln ['applications', userId, ''] med
+ * sidnumrering som tal. Den riktiga listan (useApplicationsData) använder en
+ * sexdelad nyckel och markörpaginering, så den förvärmda posten kunde aldrig
+ * läsas — ren bortkastad trafik. Nu värmer vi i stället det som faktiskt gör
+ * sidan snabb: samma databassökning som listan kör (svaret ligger varmt) och
+ * kandidatbildernas signerade URL:er med exakt samma cache-nyckel som
+ * avatarerna renderas med.
  */
+const PAGE_SIZE = 25;
+const THROTTLE_MS = 60_000;
+
 export const usePrefetchApplications = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const lastRunRef = useRef(0);
 
   const prefetchApplications = useCallback(() => {
     if (!user) return;
 
-    queryClient.prefetchInfiniteQuery({
-      queryKey: ['applications', user.id, ''],
-      initialPageParam: 0,
-      queryFn: async ({ pageParam = 0 }) => {
-        const from = (pageParam as number) * 25;
-        const to = from + 25 - 1;
+    const now = Date.now();
+    if (now - lastRunRef.current < THROTTLE_MS) return;
+    lastRunRef.current = now;
 
-        const { data: baseData, error: baseError } = await supabase
-          .from('job_applications')
-          .select(`
-            id, job_id, applicant_id, first_name, last_name, email, phone, location,
-            bio, cv_url, age, employment_status, work_schedule, availability,
-            custom_answers, status, applied_at, updated_at,
-            candidate_profile_label, profile_image_snapshot_url, video_snapshot_url,
-            job_postings!inner(title)
-          `)
-          .order('applied_at', { ascending: false })
-          .range(from, to);
+    const conn = (navigator as unknown as {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (conn?.saveData) return;
+    if (conn?.effectiveType && /(^|-)2g$/.test(conn.effectiveType)) return;
 
-        if (baseError) throw baseError;
-        if (!baseData) return { items: [], hasMore: false };
+    void (async () => {
+      try {
+        const { data, error } = await supabase.rpc('search_employer_candidates', {
+          p_search: null,
+          p_filters: [] as any,
+          p_status: null,
+          p_sort: 'applied_at',
+          p_limit: PAGE_SIZE,
+          p_offset: 0,
+          p_with_count: true,
+          p_cursor_applied_at: null,
+          p_cursor_id: null,
+          p_count_cap: 10000,
+        } as any);
+        if (error || !data) return;
 
-        const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
-        const profileMediaMap: Record<
-          string,
-          { profile_image_url: string | null; video_url: string | null; cover_image_url: string | null; is_profile_video: boolean | null }
-        > = {};
+        const rows = data as any[];
+        const applicantIds = [...new Set(rows.map((r) => r.applicant_id))].filter(Boolean);
+        if (applicantIds.length === 0) return;
 
-        const { data: batchMediaData } = await supabase.rpc('get_applicant_profile_media_batch', {
+        const { data: media } = await supabase.rpc('get_applicant_profile_media_batch', {
           p_applicant_ids: applicantIds,
           p_employer_id: user.id,
         });
 
-        if (batchMediaData && Array.isArray(batchMediaData)) {
-          batchMediaData.forEach((row: any) => {
-            profileMediaMap[row.applicant_id] = {
-              profile_image_url: row.profile_image_url,
-              video_url: row.video_url,
-              cover_image_url: row.cover_image_url ?? null,
-              is_profile_video: row.is_profile_video,
-            };
-          });
-        }
+        const paths = ((media as any[]) || [])
+          .map((row) => row?.profile_image_url)
+          .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
+          .slice(0, PAGE_SIZE);
 
-        applicantIds.forEach((id) => {
-          if (!profileMediaMap[id]) {
-            profileMediaMap[id] = { profile_image_url: null, video_url: null, cover_image_url: null, is_profile_video: null };
-          }
-        });
-
-        const items = baseData.map((item: any) => {
-          const media = resolveCandidateMedia(item, profileMediaMap[item.applicant_id]);
-          return {
-            ...item,
-            job_title: item.job_postings?.title || 'Okänt jobb',
-            profile_image_url: media.profile_image_url,
-            video_url: media.video_url,
-            is_profile_video: media.is_profile_video,
-            job_postings: undefined,
-          };
-        });
-
-        // Prefetch avatars in background — matcha CandidateAvatar (40px, 2x retina)
-        setTimeout(() => {
-          const paths = (items as any[])
-            .map((i) => i.profile_image_url)
-            .filter((p): p is string => typeof p === 'string' && p.trim() !== '')
-            .slice(0, 25);
-          if (paths.length > 0) {
-            Promise.all(paths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {}))).catch(() => {});
-          }
-        }, 0);
-
-        return { items, hasMore: items.length === 25 };
-      },
-      staleTime: Infinity,
-    });
-  }, [user, queryClient]);
+        if (paths.length === 0) return;
+        await Promise.all(
+          paths.map((p) => prefetchMediaUrl(p, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {})),
+        );
+      } catch {
+        // Förvärmning får aldrig störa UI.
+      }
+    })();
+  }, [user]);
 
   return prefetchApplications;
 };
