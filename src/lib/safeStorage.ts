@@ -171,6 +171,12 @@ const STALE_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 // Nycklar utan tidsstämpel (rena värden) — här håller vi i stället ett tak.
 const COUNT_CAPPED_PREFIXES: { prefix: string; max: number }[] = [
   { prefix: 'parium:interview-location-type:', max: 200 },
+  // En post per annons (kanban-layout/flik) — växte obegränsat utan tak.
+  { prefix: 'parium:jobDetails:', max: 200 },
+  // En post per räknare på startsidan.
+  { prefix: 'counter_', max: 50 },
+  // Påbörjade men aldrig skickade ansökningssvar.
+  { prefix: 'job-answers-draft-', max: 50 },
 ];
 
 export function pruneStaleCaches(maxAgeMs: number = STALE_CACHE_MAX_AGE_MS): number {
