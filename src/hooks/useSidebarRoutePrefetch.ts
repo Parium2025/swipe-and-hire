@@ -139,6 +139,8 @@ export function useSidebarRoutePrefetch() {
         prewarmJobTemplates(user.id);
         break;
       }
+      case '/company-profile':
+      case '/employer-profile':
       case '/reviews': {
         if (!queryClient.getQueryData(['company-profile', user.id])) {
           queryClient.prefetchQuery({
@@ -150,7 +152,8 @@ export function useSidebarRoutePrefetch() {
             staleTime: 5 * 60 * 1000,
           }).catch(() => { prefetchedRef.current.delete(key); });
         }
-        void prewarmCompanyReviews(queryClient, user.id);
+        // Omdömeslistan hämtas bara när man faktiskt är på väg till /reviews.
+        if (url === '/reviews') void prewarmCompanyReviews(queryClient, user.id);
         break;
       }
       // /my-candidates och /messages varmhålls redan via

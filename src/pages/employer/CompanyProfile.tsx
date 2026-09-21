@@ -599,6 +599,8 @@ const CompanyProfile = () => {
             : []),
           queryClient.invalidateQueries({ queryKey: ['profile'] }),
           queryClient.invalidateQueries({ queryKey: ['company-profile'] }),
+          // Publika profilformen (dialogen/förhandsgranskningen) har egen nyckel.
+          queryClient.invalidateQueries({ queryKey: ['company-public-profile'] }),
         ]);
       }
 

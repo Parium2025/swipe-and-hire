@@ -1776,6 +1776,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         queryClient.removeQueries({ queryKey: ['company-profile'] });
+        queryClient.removeQueries({ queryKey: ['company-public-profile'] });
 
         try {
           const cachePrefixes = [
