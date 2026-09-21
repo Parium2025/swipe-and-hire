@@ -282,6 +282,30 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     fetchJob();
   }, [jobId, authLoading, user?.id]);
 
+  // Förvärm företagsrutan: profil + första sidan omdömen hämtas i idle så
+  // fort annonsen visas, med samma nycklar som dialogen läser. Då öppnas
+  // "Om företaget" färdigmålad i stället för att visa laddning.
+  useEffect(() => {
+    const employerId = job?.employer_id;
+    if (!employerId) return;
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
+      void prefetchCompanyProfiles([employerId]).catch(() => { /* dialogen hämtar själv */ });
+      if (user) void prewarmCompanyReviews(queryClient, employerId);
+    };
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof w.requestIdleCallback === 'function') {
+      const id = w.requestIdleCallback(run, { timeout: 1500 });
+      return () => { cancelled = true; w.cancelIdleCallback?.(id); };
+    }
+    const id = window.setTimeout(run, 300);
+    return () => { cancelled = true; window.clearTimeout(id); };
+  }, [job?.employer_id, user, queryClient, prefetchCompanyProfiles]);
+
   // 🔴 LIVE: Prenumerera på ändringar i annonsen och dess frågor så att
   // förhandsgranskningen (och vanliga vyn) alltid speglar senaste versionen —
   // t.ex. när en kollega redigerar samma jobb i en annan flik.
