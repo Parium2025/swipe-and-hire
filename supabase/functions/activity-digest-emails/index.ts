@@ -2,7 +2,7 @@
 //
 // Volymskydd (viktigt): mejl skickas ALDRIG per händelse. Funktionen körs var
 // 15:e minut, tar bara med sådant som är minst 15 minuter gammalt och fortfarande
-// oläst/obehandlat, och skickar högst ett mejl per användare och typ per timme.
+// oläst/obehandlat, och skickar högst ett mejl per användare och typ per dygn.
 // Mejlen kräver dessutom ett aktivt val (email_enabled = true) i
 // notification_preferences — utan rad skickas ingenting.
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -16,7 +16,7 @@ const admin = createClient(
 )
 
 const QUIET_MINUTES = 15
-const MIN_INTERVAL_MINUTES = 60
+const MIN_INTERVAL_MINUTES = 1440
 const LOOKBACK_HOURS = 24
 const MAX_ITEMS = 8
 
@@ -107,7 +107,7 @@ async function sendDigest(
   try {
     await sendLoggedTemplateEmail('activity-digest', email, {
       templateData: payload,
-      idempotencyKey: `${digestType}-${userId}-${new Date().toISOString().slice(0, 13)}`,
+      idempotencyKey: `${digestType}-${userId}-${new Date().toISOString().slice(0, 10)}`,
     })
     await markSent(userId, digestType)
     return true
