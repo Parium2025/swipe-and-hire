@@ -1,3 +1,3 @@
 - [x] Make employer candidate info truly full-screen and keep undo available at the end of Swipe Mode
-- [ ] Separate office interview instructions from the clickable address in invitation emails
-- [ ] Keep interview response tokens on the public response page instead of password reset
+- [x] Separate office interview instructions from the clickable address in invitation emails
+- [x] Keep interview response tokens on the public response page instead of password reset
