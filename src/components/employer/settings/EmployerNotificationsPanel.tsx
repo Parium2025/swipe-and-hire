@@ -35,10 +35,10 @@ const EMPLOYER_ROWS: NotificationRow[] = [
   },
   {
     type: 'interview_response',
-    label: 'Mejl när kandidaten svarar',
+    label: 'Kandidatens svar',
     description:
-      'Ett mejl till dig så fort kandidaten tackar ja eller nej. Notisen i appen kommer oavsett.',
-    channels: ['email'],
+      'Kandidaten tackar ja eller nej till kallelsen. I appen betyder att svaret också landar som ett meddelande från kandidaten i chatten.',
+    channels: ['in_app', 'push', 'email'],
   },
 ];
 
