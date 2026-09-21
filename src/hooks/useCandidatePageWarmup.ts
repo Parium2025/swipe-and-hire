@@ -72,7 +72,7 @@ export function useCandidatePageWarmup(
   }, [enabled, hasRows, pageKey]);
 
   // Steg 1 — text
-  useCandidateRowDetailsWarmup(rows as { applicant_id?: string | null }[] | undefined, enabled && stage >= 1);
+  useCandidateRowDetailsWarmup(detailRows, enabled && stage >= 1);
 
   // Steg 1 — profildata som annars visar spinner: frågor, AI-sammanfattning, CV-länk
   useCandidateRowProfileWarmup(rows, enabled && stage >= 1);
