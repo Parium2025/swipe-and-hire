@@ -102,6 +102,9 @@ const EmployerDashboard = memo(() => {
   // Kortet som just nu tonar ut — ersättaren ligger redan färdigmålad bakom.
   const [removingJobId, setRemovingJobId] = useState<string | null>(null);
   const [deleteUnderlayJob, setDeleteUnderlayJob] = useState<JobPosting | null>(null);
+  // Först när kopian bakom verkligen är målad döljer vi originalplatsen längre
+  // ned. Annars kan listan visa en tom ruta i en frame.
+  const [underlayPainted, setUnderlayPainted] = useState(false);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
   // Förhämtas för sidans annonser, så rutan är ifylld direkt vid klick.
   const { data: autoNotifyData } = useQuery({
@@ -405,6 +408,28 @@ const EmployerDashboard = memo(() => {
     draft: sliceToPage(tabBuckets.draft),
   }), [sliceToPage, tabBuckets]);
 
+  // Kopian bakom det utfadande kortet får en hel frame på sig att målas innan
+  // originalet längre ned döljs — då kan ingen tom ruta uppstå.
+  useEffect(() => {
+    if (!removingJobId || !deleteUnderlayJob) {
+      setUnderlayPainted(false);
+      return;
+    }
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setUnderlayPainted(true));
+    });
+    return () => { cancelAnimationFrame(raf1); if (raf2) cancelAnimationFrame(raf2); };
+  }, [removingJobId, deleteUnderlayJob]);
+
+  // Byter man flik eller sida mitt i en borttagning ska inga spöklager ligga kvar.
+  useEffect(() => {
+    setRemovingJobId(null);
+    setDeleteUnderlayJob(null);
+  }, [activeTab, page]);
+
+
+
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);
@@ -521,8 +546,11 @@ const EmployerDashboard = memo(() => {
     // servern arbetar. Listan hoppar aldrig till innan animationen är klar.
     setDeleteDialogOpen(false);
     setJobToDelete(null);
-    const deletedIndex = pageJobs.findIndex((pageJob) => pageJob.id === job.id);
-    setDeleteUnderlayJob(deletedIndex >= 0 ? pageJobs[deletedIndex + 1] ?? null : null);
+    // Underlaget måste komma från exakt den lista som renderas i aktiv flik,
+    // annars kan fel kort målas bakom.
+    const renderedJobs = pagedBuckets[listActiveTab] ?? pageJobs;
+    const deletedIndex = renderedJobs.findIndex((pageJob) => pageJob.id === job.id);
+    setDeleteUnderlayJob(deletedIndex >= 0 ? renderedJobs[deletedIndex + 1] ?? null : null);
     setRemovingJobId(job.id);
     const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 420));
 
@@ -873,7 +901,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className="relative">
+                  <div className={`relative ${underlayPainted && deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
                     {removingJobId === job.id && deleteUnderlayJob && (
                       <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
                         <MobileJobCard
@@ -993,7 +1021,7 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className="relative">
+                  <div className={`relative ${underlayPainted && deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
                     {removingJobId === job.id && deleteUnderlayJob && (
                       <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
                         <MobileJobCard
