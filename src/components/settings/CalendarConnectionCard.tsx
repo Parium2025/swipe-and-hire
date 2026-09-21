@@ -6,6 +6,8 @@ import {
   connectCalendar,
   disconnectCalendar,
   fetchCalendarStatus,
+  getCachedCalendarStatus,
+
 } from '@/lib/calendarConnection';
 import { Button } from '@/components/ui/button';
 
