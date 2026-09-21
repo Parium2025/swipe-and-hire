@@ -593,22 +593,9 @@ const MyCandidates = () => {
     });
 
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
+    // prefetchCandidateNotes skriver till samma cache som dialogen läser;
+    // den tidigare extra React Query-prefetchen lästes aldrig och togs bort.
     prefetchCandidateNotes(candidate.applicant_id);
-    
-
-    
-    queryClient.prefetchQuery({
-      queryKey: ['candidate-notes', candidate.applicant_id],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('candidate_notes')
-          .select('*')
-          .eq('applicant_id', candidate.applicant_id)
-          .is('job_id', null);
-        return data || [];
-      },
-      staleTime: 30 * 1000,
-    });
   }, [user, queryClient]);
 
 
