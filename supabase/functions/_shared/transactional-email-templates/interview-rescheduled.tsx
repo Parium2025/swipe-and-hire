@@ -34,7 +34,6 @@ const InterviewRescheduledEmail = ({
   duration_minutes = 30,
   location_type = 'video',
   location_details = '',
-  google_calendar_url = '#',
   ics_url = '',
   maps_url = '',
   accept_url,
@@ -155,7 +154,6 @@ const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '
 const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const oldRow = { margin: '4px 0 12px', fontSize: '13px', color: '#6B7280', textDecoration: 'line-through' as const }
 const link = { color: '#001F3D', textDecoration: 'underline', wordBreak: 'break-all' as const }
-const calendarLink = { color: '#6B7280', textDecoration: 'underline', fontSize: '13px' }
 const answerSection = { margin: '24px 0 0', textAlign: 'center' as const }
 const answerLabel = { fontSize: '14px', fontWeight: 600 as const, color: '#001F3D', margin: '0 0 14px' }
 const acceptButton = { backgroundColor: '#1E4B8A', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
