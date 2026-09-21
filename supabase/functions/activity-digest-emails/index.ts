@@ -19,6 +19,9 @@ const QUIET_MINUTES = 15
 const MIN_INTERVAL_MINUTES = 1440
 const LOOKBACK_HOURS = 24
 const MAX_ITEMS = 8
+// Stabil sidhämtning: 1000 rader per sida, upp till 200 sidor (200 000 rader).
+const PAGE_SIZE = 1000
+const MAX_PAGES = 200
 
 // SKALA: mejlen skickades ett i taget, vilket inte räcker vid tusentals
 // mottagare. Nu körs 20 samtidigt, men aldrig snabbare än mejlleverantörens
@@ -121,15 +124,31 @@ async function runUnreadMessages() {
   const quietCutoff = new Date(Date.now() - QUIET_MINUTES * 60_000).toISOString()
   const lookback = new Date(Date.now() - LOOKBACK_HOURS * 3_600_000).toISOString()
 
-  const { data: messages } = await admin
-    .from('conversation_messages')
-    .select('id, conversation_id, sender_id, created_at, is_system_message')
-    .gte('created_at', lookback)
-    .lte('created_at', quietCutoff)
-    .order('created_at', { ascending: false })
-    .limit(3000)
+  // SKALA: hämta hela dygnets meddelanden i stabila sidor istället för en
+  // trunkerad topp-3000. Utan detta tappades mottagare tyst vid hög volym.
+  const messages: Array<Record<string, unknown>> = []
+  let msgCursor: { created_at: string; id: string } | null = null
+  for (let page = 0; page < MAX_PAGES; page++) {
+    let q = admin
+      .from('conversation_messages')
+      .select('id, conversation_id, sender_id, created_at, is_system_message')
+      .gte('created_at', lookback)
+      .lte('created_at', quietCutoff)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(PAGE_SIZE)
+    if (msgCursor) {
+      q = q.or(`created_at.gt.${msgCursor.created_at},and(created_at.eq.${msgCursor.created_at},id.gt.${msgCursor.id})`)
+    }
+    const { data } = await q
+    if (!data || data.length === 0) break
+    messages.push(...data)
+    const last = data[data.length - 1]
+    msgCursor = { created_at: last.created_at as string, id: last.id as string }
+    if (data.length < PAGE_SIZE) break
+  }
 
-  const real = (messages ?? []).filter((m) => !m.is_system_message)
+  const real = messages.filter((m) => !m.is_system_message)
   if (real.length === 0) return 0
 
   const conversationIds = [...new Set(real.map((m) => m.conversation_id as string))]
@@ -139,10 +158,19 @@ async function runUnreadMessages() {
     .in('conversation_id', conversationIds)
 
   // recipient -> conversation -> antal olästa
+  // SKALA: medlemmar indexeras per konversation. Tidigare loopades hela
+  // medlemslistan för varje meddelande (kvadratisk tid vid hög volym).
+  const membersByConversation = new Map<string, typeof members>()
+  for (const member of members ?? []) {
+    const key = member.conversation_id as string
+    const list = membersByConversation.get(key) ?? []
+    list!.push(member)
+    membersByConversation.set(key, list)
+  }
+
   const perUser = new Map<string, Map<string, number>>()
   for (const message of real) {
-    for (const member of members ?? []) {
-      if (member.conversation_id !== message.conversation_id) continue
+    for (const member of membersByConversation.get(message.conversation_id as string) ?? []) {
       if (member.user_id === message.sender_id) continue
       if (member.muted_at) continue
       const lastRead = member.last_read_at as string | null
@@ -219,15 +247,31 @@ async function runNewApplications() {
   const quietCutoff = new Date(Date.now() - QUIET_MINUTES * 60_000).toISOString()
   const lookback = new Date(Date.now() - LOOKBACK_HOURS * 3_600_000).toISOString()
 
-  const { data: applications } = await admin
-    .from('job_applications')
-    .select('id, job_id, created_at, viewed_at')
-    .gte('created_at', lookback)
-    .lte('created_at', quietCutoff)
-    .is('viewed_at', null)
-    .limit(5000)
+  // SKALA: stabil sidhämtning istället för en trunkerad gräns på 5000 rader.
+  const applications: Array<Record<string, unknown>> = []
+  let appCursor: { created_at: string; id: string } | null = null
+  for (let page = 0; page < MAX_PAGES; page++) {
+    let q = admin
+      .from('job_applications')
+      .select('id, job_id, created_at, viewed_at')
+      .gte('created_at', lookback)
+      .lte('created_at', quietCutoff)
+      .is('viewed_at', null)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(PAGE_SIZE)
+    if (appCursor) {
+      q = q.or(`created_at.gt.${appCursor.created_at},and(created_at.eq.${appCursor.created_at},id.gt.${appCursor.id})`)
+    }
+    const { data } = await q
+    if (!data || data.length === 0) break
+    applications.push(...data)
+    const last = data[data.length - 1]
+    appCursor = { created_at: last.created_at as string, id: last.id as string }
+    if (data.length < PAGE_SIZE) break
+  }
 
-  if (!applications || applications.length === 0) return 0
+  if (applications.length === 0) return 0
 
   const jobIds = [...new Set(applications.map((a) => a.job_id as string))]
   const { data: jobs } = await admin
