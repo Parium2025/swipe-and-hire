@@ -430,32 +430,44 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
     setHistory(getStoredHistory());
     fetchStats();
 
-    // Live updates every 30 seconds as backup
-    const interval = setInterval(fetchStats, 30000);
-    
+    // Realtime kan trigga tusentals händelser i minuten när plattformen växer.
+    // Varje händelse får inte bli en egen statistikhämtning — vi slår ihop dem
+    // till som mest en hämtning var 15:e sekund (trailing), vilket ger samma
+    // upplevda färskhet utan att belasta backend.
+    let coalesceTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastRunAt = Date.now();
+    const COALESCE_MS = 15000;
+
+    const runFetch = () => {
+      lastRunAt = Date.now();
+      coalesceTimer = null;
+      fetchStats();
+    };
+
+    const scheduleFetch = () => {
+      if (coalesceTimer) return;
+      const wait = Math.max(0, COALESCE_MS - (Date.now() - lastRunAt));
+      coalesceTimer = setTimeout(runFetch, wait);
+    };
+
+    // Live updates every 30 seconds as backup — pausas i dold flik.
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'hidden') return;
+      scheduleFetch();
+    }, 30000);
+
     // Subscribe to realtime changes for instant updates
     const channel = createRealtimeChannel('system-health-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, () => {
-        fetchStats();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, () => {
-        fetchStats();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-        fetchStats();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews' }, () => {
-        fetchStats();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => {
-        fetchStats();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cv_analysis_queue' }, () => {
-        fetchStats();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_applications' }, scheduleFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'job_postings' }, scheduleFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, scheduleFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'interviews' }, scheduleFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, scheduleFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cv_analysis_queue' }, scheduleFetch)
       .subscribe();
-    
+
     return () => {
+      if (coalesceTimer) clearTimeout(coalesceTimer);
       clearInterval(interval);
       supabase.removeChannel(channel);
     };
