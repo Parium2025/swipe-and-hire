@@ -934,6 +934,51 @@ export function useConversations() {
 
 const MESSAGES_PAGE_SIZE = 200;
 
+/** Delad hämtare — används av både chattvyn och förvärmningen. */
+async function fetchConversationMessagesPage(conversationId: string): Promise<ConversationMessage[]> {
+  const { data: messages, error } = await supabase
+    .from('conversation_messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: false })
+    .limit(MESSAGES_PAGE_SIZE);
+
+  if (error) throw error;
+  if (!messages || messages.length === 0) return [];
+
+  // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
+  messages.reverse();
+
+  const senderIds = [...new Set(messages.map((m) => m.sender_id))];
+  const profileMap = await fetchCachedProfiles(senderIds);
+
+  return messages.map((msg) => ({
+    ...msg,
+    sender_profile: profileMap.get(msg.sender_id),
+  })) as ConversationMessage[];
+}
+
+/**
+ * Förvärmer en chatts meddelanden innan den öppnas, så tråden målas direkt
+ * i stället för att visa laddning vid varje byte av konversation.
+ */
+export function prefetchConversationMessages(
+  queryClient: ReturnType<typeof useQueryClient>,
+  conversationId?: string | null,
+) {
+  if (!conversationId) return;
+  void queryClient
+    .prefetchQuery({
+      queryKey: ['conversation-messages', conversationId],
+      queryFn: () => fetchConversationMessagesPage(conversationId),
+      staleTime: 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    })
+    .catch(() => {
+      // Förvärmning får aldrig störa UI.
+    });
+}
+
 export function useConversationMessages(
   conversationId: string | null,
   options?: { isVisible?: () => boolean },
@@ -982,40 +1027,24 @@ export function useConversationMessages(
     queryFn: async () => {
       if (!conversationId) return [];
 
-      // Fetch latest messages with a reasonable limit to prevent memory issues
-      const { data: messages, error } = await supabase
-        .from('conversation_messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false })
-        .limit(MESSAGES_PAGE_SIZE);
-
-      if (error) throw error;
-      if (!messages || messages.length === 0) {
-        setHasMore(false);
-        return [];
-      }
-
+      const result = await fetchConversationMessagesPage(conversationId);
       // If we got fewer than the page size, there are no older messages
-      setHasMore(messages.length >= MESSAGES_PAGE_SIZE);
-
-      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
-      messages.reverse();
-
-      // Fetch sender profiles
-      const senderIds = [...new Set(messages.map(m => m.sender_id))];
-
-      const profileMap = await fetchCachedProfiles(senderIds);
-
-      return messages.map(msg => ({
-        ...msg,
-        sender_profile: profileMap.get(msg.sender_id),
-      })) as ConversationMessage[];
+      setHasMore(result.length >= MESSAGES_PAGE_SIZE);
+      return result;
     },
     enabled: !!conversationId,
     gcTime: 30 * 60 * 1000,
     staleTime: 60 * 1000,
   });
+
+  // När tråden kommer från förvärmd cache körs aldrig queryFn — då måste
+  // "finns äldre meddelanden" härledas från datan, annars går det inte att
+  // scrolla bakåt i en chatt som redan låg i cachen.
+  const messagesCount = messagesQuery.data?.length ?? 0;
+  useEffect(() => {
+    if (!conversationId) return;
+    if (messagesCount >= MESSAGES_PAGE_SIZE) setHasMore(true);
+  }, [conversationId, messagesCount]);
 
   // Load older messages (prepend to existing)
   const fetchOlderMessages = useCallback(async () => {

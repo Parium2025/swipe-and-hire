@@ -4,9 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import type { CandidateActivity, ActivityType } from '@/hooks/useCandidateActivities';
 import { primeCandidateNotesCache } from '@/hooks/useCandidateNotes';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
+import { prewarmExistingInterviews } from '@/lib/existingInterviewQuery';
 
 interface RowLike {
   applicant_id?: string | null;
+  /** Ansökans id — används för att förvärma "finns redan bokat möte?". */
+  id?: string | null;
 }
 
 /**
@@ -40,6 +43,23 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
   }, [rows]);
 
   const idsKey = useMemo(() => [...applicantIds].sort().join('|'), [applicantIds]);
+
+  // Ansöknings-id för samma rader — används till batchförvärmning av bokade möten.
+  const applicationIds = useMemo(() => {
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const row of rows || []) {
+      const id = row?.id?.trim();
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      ids.push(id);
+      if (ids.length >= MAX_ROWS) break;
+    }
+    return ids;
+  }, [rows]);
+  const applicationIdsRef = useRef<string[]>(applicationIds);
+  applicationIdsRef.current = applicationIds;
+  const warmedInterviewsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!enabled || applicantIds.length === 0) return;
@@ -129,6 +149,18 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
         }
         for (const [id, list] of byApplicant) {
           queryClient.setQueryData(['candidate-activities', id], list);
+        }
+      } catch { /* ignore */ }
+
+      if (cancelled) return;
+
+      // 3) Bokade möten — ETT anrop för hela sidan, så "Boka om intervju"
+      // öppnas färdigifyllt även när dialogen öppnas direkt via touch.
+      try {
+        const appIds = applicationIdsRef.current.filter((id) => !warmedInterviewsRef.current.has(id));
+        if (appIds.length > 0) {
+          appIds.forEach((id) => warmedInterviewsRef.current.add(id));
+          await prewarmExistingInterviews(queryClient, appIds);
         }
       } catch { /* ignore */ }
     };

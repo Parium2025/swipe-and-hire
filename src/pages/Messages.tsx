@@ -18,7 +18,8 @@ import { useDeleteConversation } from '@/hooks/useDeleteConversation';
 import { useMarkConversationUnread } from '@/hooks/useMarkConversationUnread';
 import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { prefetchConversationMessages } from '@/hooks/useConversations';
 import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
@@ -257,11 +258,36 @@ export default function Messages() {
   const showEmptyConversationList = filteredConversations.length === 0;
   const showEmptyChatState = !selectedConversation;
 
+  const queryClient = useQueryClient();
+
   const handleSelectConversation = (convId: string) => {
     clearAutoReadSuppression(convId);
     setSelectedConversationId(convId);
     setShowMobileChat(true);
   };
+
+  // Förvärm de översta trådarna när listan står stilla — då är chatten redan
+  // målad när man klickar, i stället för att ladda in vid varje byte.
+  const prewarmKey = filteredConversations.slice(0, 6).map((c) => c.id).join('|');
+  useEffect(() => {
+    if (!prewarmKey) return;
+    const ids = prewarmKey.split('|').filter(Boolean);
+    const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (conn?.saveData) return;
+    if (conn?.effectiveType && /(^|-)2g$/.test(conn.effectiveType)) return;
+
+    const ric = (globalThis as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    });
+    const run = () => ids.forEach((id) => prefetchConversationMessages(queryClient, id));
+    if (typeof ric.requestIdleCallback === 'function') {
+      const id = ric.requestIdleCallback(run, { timeout: 1200 });
+      return () => ric.cancelIdleCallback?.(id);
+    }
+    const t = window.setTimeout(run, 400);
+    return () => window.clearTimeout(t);
+  }, [prewarmKey, queryClient]);
 
   // Chatten glider ut åt höger på mobil. Konversationen får därför inte
   // nollställas direkt — då hade panelen varit tom under utglidningen.
@@ -453,7 +479,12 @@ export default function Messages() {
                     });
 
                     return (
-                      <div key={conv.id} className="w-full min-w-0 max-w-full overflow-hidden">
+                      <div
+                        key={conv.id}
+                        className="w-full min-w-0 max-w-full overflow-hidden"
+                        onPointerEnter={() => prefetchConversationMessages(queryClient, conv.id)}
+                        onPointerDown={() => prefetchConversationMessages(queryClient, conv.id)}
+                      >
                         <SwipeableConversationItem
                           canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
                           onMarkUnread={() => {
