@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { prewarmSupportTickets } from '@/lib/supportPrewarm';
 import { prewarmEmployerSettings } from '@/lib/settingsPrewarm';
+import { prewarmJobTemplates } from '@/lib/jobTemplatesPrewarm';
+import { prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
+import { fetchMyProfile } from '@/lib/myProfile';
 import {
   getEmployerAnalyticsCacheKey,
   readEmployerAnalyticsCacheEntry,
