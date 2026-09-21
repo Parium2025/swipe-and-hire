@@ -261,7 +261,7 @@ export const SystemHealthPanelContent = ({ isVisible, onClose }: { isVisible: bo
       const openSupportTickets = supportTicketsRes.count || 0;
       const cvAnalysisQueueSize = cvQueueRes.count || 0;
       // Sum all job views (estimate monthly views as total / months active, assume ~1 month for now)
-      const totalJobViews = (totalJobViewsRes.data || []).reduce((sum, job) => sum + (job.views_count || 0), 0);
+      const totalJobViews = Number(totalJobViewsRes.data ?? 0) || 0;
       const jobViewsThisMonth = Math.max(totalJobViews, applicationsThisWeek * 5); // At least 5 views per application
 
       // Parse news health data
