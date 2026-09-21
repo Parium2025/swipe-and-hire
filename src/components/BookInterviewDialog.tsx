@@ -453,14 +453,12 @@ export const BookInterviewDialog = ({
           },
         });
         if (dispatchError) throw dispatchError;
-        const processedCount = Number((dispatchData as { processedCount?: number } | null)?.processedCount ?? 0);
+        void dispatchData;
         description = isReschedule
           ? invitationSucceeded
             ? 'Kalenderbokningen är uppdaterad.'
             : description
-          : processedCount > 0
-            ? `Intervjukallelse skickad med kalenderinbjudan + ${processedCount} automation${processedCount > 1 ? 'er' : ''}.`
-            : 'Intervjukallelse med kalenderinbjudan skickad!';
+          : 'Intervjukallelse med kalenderinbjudan skickad!';
       } catch (dispatchErr) {
         console.error('Error invoking outreach-dispatch:', dispatchErr);
         if (!isReschedule) description = 'Intervjukallelse med kalenderinbjudan skickad!';
