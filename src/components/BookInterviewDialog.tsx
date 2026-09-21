@@ -41,6 +41,25 @@ Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.
 
 Vänliga hälsningar`;
 
+const LOCATION_TYPE_STORAGE_PREFIX = 'parium:interview-location-type:';
+
+function readRememberedLocationType(applicationId: string): 'video' | 'office' {
+  try {
+    const stored = localStorage.getItem(`${LOCATION_TYPE_STORAGE_PREFIX}${applicationId}`);
+    return stored === 'office' ? 'office' : 'video';
+  } catch {
+    return 'video';
+  }
+}
+
+function rememberLocationType(applicationId: string, type: 'video' | 'office') {
+  try {
+    localStorage.setItem(`${LOCATION_TYPE_STORAGE_PREFIX}${applicationId}`, type);
+  } catch {
+    /* privat läge – förvalet faller tillbaka på video */
+  }
+}
+
 function getVideoLinkLabel(url: string): string {
   const lower = url.toLowerCase();
   if (lower.includes('meet.google.com')) return 'Din Google Meet-länk';
@@ -91,7 +110,12 @@ export const BookInterviewDialog = ({
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('10:00');
   const [duration, setDuration] = useState('30');
-  const [locationType, setLocationType] = useState<'video' | 'office'>('video');
+  // Platstypen är förladdad från senaste kallelsen för just den här ansökan,
+  // så fliken står rätt direkt när dialogen öppnas i stället för att hoppa
+  // när den befintliga intervjun hämtas.
+  const [locationType, setLocationType] = useState<'video' | 'office'>(() =>
+    readRememberedLocationType(applicationId),
+  );
   const [locationDetails, setLocationDetails] = useState('');
   const [editableAddress, setEditableAddress] = useState(savedOfficeAddress);
   const [subject, setSubject] = useState('');
