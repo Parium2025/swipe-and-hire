@@ -157,6 +157,8 @@ serve(async (req) => {
     let offset = 0;
     let totalMatches = 0;
     let totalChecked = 0;
+    // Räknas upp över ALLA satser så utspridningen blir jämn för hela annonsen.
+    let queuedSoFar = 0;
 
     while (true) {
       // Utan uttrycklig sortering kan databasen ge tillbaka raderna i olika
