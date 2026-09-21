@@ -126,6 +126,8 @@ import { OnlineStatusProvider } from "@/components/OnlineStatusProvider";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
+import { pruneStaleCaches } from "@/lib/safeStorage";
+
 import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { CriticalAssetPreloads } from "@/components/CriticalAssetPreloads";
 import { AuthSplashScreen } from "@/components/AuthSplashScreen";
