@@ -1037,6 +1037,15 @@ export function useConversationMessages(
     staleTime: 60 * 1000,
   });
 
+  // När tråden kommer från förvärmd cache körs aldrig queryFn — då måste
+  // "finns äldre meddelanden" härledas från datan, annars går det inte att
+  // scrolla bakåt i en chatt som redan låg i cachen.
+  const messagesCount = messagesQuery.data?.length ?? 0;
+  useEffect(() => {
+    if (!conversationId) return;
+    if (messagesCount >= MESSAGES_PAGE_SIZE) setHasMore(true);
+  }, [conversationId, messagesCount]);
+
   // Load older messages (prepend to existing)
   const fetchOlderMessages = useCallback(async () => {
     if (!conversationId || loadingOlderRef.current || !hasMore) return;
