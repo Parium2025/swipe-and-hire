@@ -454,7 +454,7 @@ async function dispatchLog(log: OutreachLog) {
           // Svarssidan ligger på parium.se — funktionens egna HTML-svar visas
           // som rå kod i vissa mejlklienter, eftersom plattformen tvingar
           // text/plain på funktionssvar.
-          const base = `https://parium.se/intervjusvar?token=${encodeURIComponent(token)}`;
+          const base = `https://parium.se/intervjusvar?interview_token=${encodeURIComponent(token)}`;
           acceptUrl = `${base}&answer=yes`;
           declineUrl = `${base}&answer=no`;
         }

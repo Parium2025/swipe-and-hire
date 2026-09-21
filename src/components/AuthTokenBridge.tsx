@@ -10,6 +10,8 @@ import { useLocation } from 'react-router-dom';
 const OWN_TOKEN_ROUTES = new Set([
   '/unsubscribe',
   '/unsubscribe/',
+  '/intervjusvar',
+  '/intervjusvar/',
 ]);
 
 const isOwnCallbackRoute = (pathname: string) =>

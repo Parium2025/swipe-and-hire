@@ -109,7 +109,7 @@ export async function sendInterviewRescheduleEmail(
     .single();
   const token = created?.token as string | undefined;
   const responseBase = token
-    ? `https://parium.se/intervjusvar?token=${encodeURIComponent(token)}`
+    ? `https://parium.se/intervjusvar?interview_token=${encodeURIComponent(token)}`
     : null;
 
   const duration = interview.duration_minutes ?? 30;

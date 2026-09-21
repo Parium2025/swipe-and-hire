@@ -41,7 +41,13 @@ const InterviewRescheduledEmail = ({
   decline_url,
 }: Props) => {
   const locationLabel = location_type === 'video' ? 'Videointervju' : 'På plats'
-  const isVideoLink = location_type === 'video' && location_details.startsWith('http')
+  
+  // Split location_details into address and instructions (separated by \n\n)
+  const parts = (location_details || '').split('\n\n')
+  const address = parts[0] || ''
+  const instructions = parts.slice(1).join('\n\n').trim()
+  
+  const isVideoLink = location_type === 'video' && address.startsWith('http')
 
   return (
     <Html lang="sv" dir="ltr">
@@ -68,16 +74,26 @@ const InterviewRescheduledEmail = ({
             ) : null}
             <Text style={row}><strong>Ny dag:</strong> {date_str}</Text>
             <Text style={row}><strong>Ny tid:</strong> {time_str} · {duration_minutes} min</Text>
+            
+            {/* Address Row */}
             <Text style={row}>
               <strong>{locationLabel}:</strong>{' '}
               {isVideoLink ? (
-                <Link href={location_details} style={link}>{location_details}</Link>
+                <Link href={address} style={link}>{address}</Link>
               ) : maps_url ? (
-                <Link href={maps_url} style={link}>{location_details}</Link>
+                <Link href={maps_url} style={link}>{address}</Link>
               ) : (
-                location_details || 'Information meddelas'
+                address || 'Information meddelas'
               )}
             </Text>
+
+            {/* Separate Instructions Row */}
+            {location_type === 'office' && instructions ? (
+              <Text style={{ ...row, marginTop: '8px' }}>
+                <strong>Instruktioner:</strong>{' '}
+                <span style={{ whiteSpace: 'pre-line' }}>{instructions}</span>
+              </Text>
+            ) : null}
           </Section>
 
           {accept_url && decline_url ? (

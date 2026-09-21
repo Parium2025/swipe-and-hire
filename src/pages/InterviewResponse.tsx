@@ -15,7 +15,10 @@ type Phase = 'confirm' | 'sending' | 'done' | 'error';
 
 const InterviewResponse = () => {
   const [params] = useSearchParams();
-  const token = params.get('token') ?? '';
+  // Egna intervjutokens får ett tydligt namn så den globala auth-hanteringen
+  // aldrig kan misstolka dem som lösenordsåterställning. Behåll fallback för
+  // redan utskickade länkar.
+  const token = params.get('interview_token') ?? params.get('token') ?? '';
   const answer = params.get('answer') === 'no' ? 'no' : 'yes';
   const accept = answer === 'yes';
 

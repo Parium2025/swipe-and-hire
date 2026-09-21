@@ -41,7 +41,13 @@ const InterviewInvitationEmail = ({
   decline_url,
 }: Props) => {
   const locationLabel = location_type === 'video' ? 'Videointervju' : 'På plats'
-  const isVideoLink = location_type === 'video' && location_details.startsWith('http')
+  
+  // Split location_details into address and instructions (separated by \n\n)
+  const parts = (location_details || '').split('\n\n')
+  const address = parts[0] || ''
+  const instructions = parts.slice(1).join('\n\n').trim()
+  
+  const isVideoLink = location_type === 'video' && address.startsWith('http')
   const greeting = is_employer
     ? `Hej ${recipient_name}, du har bokat en intervju för ${job_title}.`
     : `Hej ${recipient_name}, du är kallad till intervju för ${job_title}.`
@@ -67,16 +73,27 @@ const InterviewInvitationEmail = ({
             <Text style={text}>{greeting}</Text>
             <Text style={row}><strong>Datum:</strong> {date_str}</Text>
             <Text style={row}><strong>Tid:</strong> {time_str} · {duration_minutes} min</Text>
+            
+            {/* Address Row */}
             <Text style={row}>
               <strong>{locationLabel}:</strong>{' '}
               {isVideoLink ? (
-                <Link href={location_details} style={link}>{location_details}</Link>
+                <Link href={address} style={link}>{address}</Link>
               ) : maps_url ? (
-                <Link href={maps_url} style={link}>{location_details}</Link>
+                <Link href={maps_url} style={link}>{address}</Link>
               ) : (
-                location_details || 'Information meddelas'
+                address || 'Information meddelas'
               )}
             </Text>
+
+            {/* Separate Instructions Row */}
+            {location_type === 'office' && instructions ? (
+              <Text style={{ ...row, marginTop: '8px' }}>
+                <strong>Instruktioner:</strong>{' '}
+                <span style={{ whiteSpace: 'pre-line' }}>{instructions}</span>
+              </Text>
+            ) : null}
+
             {message ? (
               <Section style={messageSection}>
               <Text style={smallLabel}>{messageLabel}</Text>
@@ -96,7 +113,7 @@ const InterviewInvitationEmail = ({
 
           {isVideoLink ? (
             <Section style={{ textAlign: 'center' as const, margin: '28px 0 20px' }}>
-              <Button style={button} href={location_details}>Anslut till videomötet</Button>
+              <Button style={button} href={address}>Anslut till videomötet</Button>
             </Section>
           ) : null}
 
