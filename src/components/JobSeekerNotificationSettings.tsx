@@ -27,7 +27,7 @@ const JOBSEEKER_ROWS: NotificationRow[] = [
     type: 'new_message',
     label: 'Meddelanden',
     description:
-      'Nya chattmeddelanden. Meddelandet hamnar alltid i inkorgen — mejl skickas bara som påminnelse om du inte läst det.',
+      'Nya chattmeddelanden. Meddelandet hamnar alltid i inkorgen — mejl skickas bara som en samlad påminnelse om olästa meddelanden, som mest ett mejl per dag.',
     channels: ['in_app', 'push', 'email'],
   },
   {
