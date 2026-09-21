@@ -33,7 +33,6 @@ const InterviewInvitationEmail = ({
   location_type = 'video',
   location_details = '',
   message = '',
-  google_calendar_url = '#',
   ics_url = '',
   maps_url = '',
   is_employer = false,
@@ -123,9 +122,6 @@ const InterviewInvitationEmail = ({
             </Section>
           ) : null}
 
-          <Section style={{ textAlign: 'center' as const, margin: '4px 0 8px' }}>
-            <Link href={google_calendar_url} style={calendarLink}>Eller lägg till i Google Kalender</Link>
-          </Section>
 
           <Text style={footer}>Skickat av {company_name} via Parium</Text>
           <Text style={noReply}>
@@ -172,7 +168,6 @@ const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '
 const messageSection = { borderTop: '1px solid #e2e8f0', margin: '20px 0 0', padding: '20px 0 0' }
 const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const link = { color: '#001F3D', textDecoration: 'underline', wordBreak: 'break-all' as const }
-const calendarLink = { color: '#6B7280', textDecoration: 'underline', fontSize: '13px' }
 const answerSection = { margin: '24px 0 0', textAlign: 'center' as const }
 const answerLabel = { fontSize: '14px', fontWeight: 600 as const, color: '#001F3D', margin: '0 0 14px' }
 const acceptButton = { backgroundColor: '#1E4B8A', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', display: 'inline-block', margin: '0 6px 10px' }
