@@ -481,6 +481,8 @@ export const BookInterviewDialog = ({
       // bekräftelsen visas – går något fel dessförinnan står rekryteraren kvar
       // i dialogen med sitt innehåll. Mejl och kalender körs sedan i bakgrunden.
       const interviewId = interviewRow?.id;
+      // Nästa gång dialogen öppnas för samma kandidat står rätt flik direkt.
+      rememberLocationType(applicationId, locationType);
       handleOpenChange(false);
       setIsSubmitting(false);
 
