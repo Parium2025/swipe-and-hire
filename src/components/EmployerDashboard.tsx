@@ -99,12 +99,9 @@ const EmployerDashboard = memo(() => {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const deletingJobRef = useRef(false);
   const [deletingJob, setDeletingJob] = useState(false);
-  // Kortet som just nu tonar ut — listan uppdateras först när animationen är klar.
+  // Kortet som just nu tonar ut — ersättaren ligger redan färdigmålad bakom.
   const [removingJobId, setRemovingJobId] = useState<string | null>(null);
-  // Kortet som just fyllts på i listan efter en borttagning — tonar in.
-  const [enteringIds, setEnteringIds] = useState<Set<string>>(() => new Set());
-  const prevPageIdsRef = useRef<string[]>([]);
-  const expectEnterRef = useRef(false);
+  const [deleteUnderlayJob, setDeleteUnderlayJob] = useState<JobPosting | null>(null);
   // Antal kandidater som automatiskt får besked när annonsen avslutas.
   // Förhämtas för sidans annonser, så rutan är ifylld direkt vid klick.
   const { data: autoNotifyData } = useQuery({
@@ -507,25 +504,6 @@ const EmployerDashboard = memo(() => {
     return () => { cancelled = true; window.clearTimeout(timer); };
   }, [pageJobs, queryClient]);
 
-  /**
-   * ✨ Kortet som fylls på i listan efter en borttagning tonar in mjukt
-   * i stället för att blinka fram.
-   */
-  useEffect(() => {
-    const ids = pageJobs.map(j => j.id);
-    const prev = prevPageIdsRef.current;
-    prevPageIdsRef.current = ids;
-    if (!expectEnterRef.current) return;
-    const prevSet = new Set(prev);
-    const fresh = ids.filter(id => !prevSet.has(id));
-    expectEnterRef.current = false;
-    if (!fresh.length) return;
-    setEnteringIds(new Set(fresh));
-    const timer = window.setTimeout(() => setEnteringIds(new Set()), 420);
-    return () => window.clearTimeout(timer);
-  }, [pageJobs]);
-
-
   const handleRepublishClick = (job: JobPosting) => {
     setRepublishJob(job);
     setRepublishDialogOpen(true);
@@ -543,6 +521,8 @@ const EmployerDashboard = memo(() => {
     // servern arbetar. Listan hoppar aldrig till innan animationen är klar.
     setDeleteDialogOpen(false);
     setJobToDelete(null);
+    const deletedIndex = pageJobs.findIndex((pageJob) => pageJob.id === job.id);
+    setDeleteUnderlayJob(deletedIndex >= 0 ? pageJobs[deletedIndex + 1] ?? null : null);
     setRemovingJobId(job.id);
     const fadeDone = new Promise<void>((resolve) => window.setTimeout(resolve, 420));
 
@@ -565,6 +545,7 @@ const EmployerDashboard = memo(() => {
 
       if (error || !data) {
         setRemovingJobId(null);
+        setDeleteUnderlayJob(null);
         invalidateJobs();
         toast({
           title: "Fel vid borttagning",
@@ -574,15 +555,15 @@ const EmployerDashboard = memo(() => {
         return;
       }
 
-      // Ta bort ur cacherna först när kortet redan tonat bort. Nästa kort som
-      // fylls på i listan ska tona in, inte blinka fram.
-      expectEnterRef.current = true;
+      // Ta bort ur cacherna först när ersättaren redan är helt synlig bakom.
+      // Det riktiga kortet landar då på exakt samma plats utan en andra rörelse.
       queryClient.setQueriesData({ queryKey: ['jobs'] }, (old: any) => {
         if (!Array.isArray(old)) return old;
         return old.filter((j: any) => j.id !== job.id);
       });
       if (user?.id) removeJobFromJobsCache(user.id, job.id);
       setRemovingJobId(null);
+      setDeleteUnderlayJob(null);
 
       toast({
         title: "Annons borttagen",
@@ -593,6 +574,7 @@ const EmployerDashboard = memo(() => {
       invalidateJobs();
     } catch (error) {
       setRemovingJobId(null);
+      setDeleteUnderlayJob(null);
       invalidateJobs();
       toast({
         title: "Ett fel uppstod",
@@ -891,21 +873,41 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''} ${enteringIds.has(job.id) ? 'job-card-entering' : ''}`}>
-                    <MobileJobCard
-                      job={job}
-                      onOpen={handleOpenJob}
-                      onEdit={handleEditJob}
-                      onDelete={handleDeleteClick}
-                      onEditDraft={handleEditDraft}
-                      onPrefetch={prefetchJob}
-                      onPrefetchNow={prefetchNow}
-                      onRepublish={handleRepublishClick}
-                      cardIndex={idx}
-                      collapsible
-                      expanded={expandAll}
-                      unviewedCount={unviewedByJob.get(job.id) ?? 0}
-                    />
+                  <div className={`relative ${deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
+                    {removingJobId === job.id && deleteUnderlayJob && (
+                      <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
+                        <MobileJobCard
+                          job={deleteUnderlayJob}
+                          onOpen={handleOpenJob}
+                          onEdit={handleEditJob}
+                          onDelete={handleDeleteClick}
+                          onEditDraft={handleEditDraft}
+                          onPrefetch={prefetchJob}
+                          onPrefetchNow={prefetchNow}
+                          onRepublish={handleRepublishClick}
+                          cardIndex={idx}
+                          collapsible
+                          expanded={expandAll}
+                          unviewedCount={unviewedByJob.get(deleteUnderlayJob.id) ?? 0}
+                        />
+                      </div>
+                    )}
+                    <div className={removingJobId === job.id ? 'job-card-removing' : ''}>
+                      <MobileJobCard
+                        job={job}
+                        onOpen={handleOpenJob}
+                        onEdit={handleEditJob}
+                        onDelete={handleDeleteClick}
+                        onEditDraft={handleEditDraft}
+                        onPrefetch={prefetchJob}
+                        onPrefetchNow={prefetchNow}
+                        onRepublish={handleRepublishClick}
+                        cardIndex={idx}
+                        collapsible
+                        expanded={expandAll}
+                        unviewedCount={unviewedByJob.get(job.id) ?? 0}
+                      />
+                    </div>
                     {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
                         type="button"
@@ -991,21 +993,41 @@ const EmployerDashboard = memo(() => {
               gridClassName="job-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               renderCard={(job, idx) => (
                 <CardErrorBoundary>
-                  <div className={`relative ${removingJobId === job.id ? 'job-card-removing' : ''} ${enteringIds.has(job.id) ? 'job-card-entering' : ''}`}>
-                    <MobileJobCard
-                      job={job}
-                      onOpen={handleOpenJob}
-                      onEdit={handlePremiumEditOpen}
-                      onDelete={handleDeleteClick}
-                      onEditDraft={handleEditDraft}
-                      onPrefetch={prefetchJob}
-                      onPrefetchNow={prefetchNow}
-                      onRepublish={handleRepublishClick}
-                      cardIndex={idx}
-                      collapsible
-                      expanded={expandAll}
-                      unviewedCount={unviewedByJob.get(job.id) ?? 0}
-                    />
+                  <div className={`relative ${deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
+                    {removingJobId === job.id && deleteUnderlayJob && (
+                      <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
+                        <MobileJobCard
+                          job={deleteUnderlayJob}
+                          onOpen={handleOpenJob}
+                          onEdit={handlePremiumEditOpen}
+                          onDelete={handleDeleteClick}
+                          onEditDraft={handleEditDraft}
+                          onPrefetch={prefetchJob}
+                          onPrefetchNow={prefetchNow}
+                          onRepublish={handleRepublishClick}
+                          cardIndex={idx}
+                          collapsible
+                          expanded={expandAll}
+                          unviewedCount={unviewedByJob.get(deleteUnderlayJob.id) ?? 0}
+                        />
+                      </div>
+                    )}
+                    <div className={removingJobId === job.id ? 'job-card-removing' : ''}>
+                      <MobileJobCard
+                        job={job}
+                        onOpen={handleOpenJob}
+                        onEdit={handlePremiumEditOpen}
+                        onDelete={handleDeleteClick}
+                        onEditDraft={handleEditDraft}
+                        onPrefetch={prefetchJob}
+                        onPrefetchNow={prefetchNow}
+                        onRepublish={handleRepublishClick}
+                        cardIndex={idx}
+                        collapsible
+                        expanded={expandAll}
+                        unviewedCount={unviewedByJob.get(job.id) ?? 0}
+                      />
+                    </div>
                     {selectionMode && bulkSelectable && isOwnJob(job) && (
                       <button
                         type="button"
