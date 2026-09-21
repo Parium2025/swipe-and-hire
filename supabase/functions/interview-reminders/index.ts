@@ -46,15 +46,16 @@ Deno.serve(async (req) => {
   // som en intervjutid ändras (i appen eller i arbetsgivarens kalender) och
   // kandidaten får då direkt ett "ny tid"-mejl med ja/nej-knappar.
   // Grenen rör inte den vanliga minutkörningen nedan.
+  let requestBody:
+    | { reschedule_interview_id?: string; old_scheduled_at?: string | null; worker_page?: number }
+    | null = null;
   try {
     const cloned = req.clone();
-    const body = await cloned.json().catch(() => null) as
-      | { reschedule_interview_id?: string; old_scheduled_at?: string | null }
-      | null;
-    if (body?.reschedule_interview_id) {
+    requestBody = await cloned.json().catch(() => null);
+    if (requestBody?.reschedule_interview_id) {
       const result = await sendInterviewRescheduleEmail(
-        body.reschedule_interview_id,
-        body.old_scheduled_at ?? null,
+        requestBody.reschedule_interview_id,
+        requestBody.old_scheduled_at ?? null,
       );
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -67,6 +68,14 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  // Sharding: minutkörningen (sida 0) är koordinator. Ligger fler möten i
+  // fönstret än en sida rymmer startar den parallella arbetare som tar sida
+  // 1, 2, 3 … samtidigt. Då begränsas kapaciteten inte av en enda körning.
+  const workerPage = Math.max(0, Math.min(Number(requestBody?.worker_page ?? 0) || 0, 15));
+  const PAGE_SIZE = 500;
+  const MAX_WORKERS = 16;
+
 
   console.log("Interview reminders cron job started");
 
