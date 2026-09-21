@@ -383,7 +383,7 @@ export function useBatchPrefetchCompanyProfiles() {
 
     // Only prefetch for companies not already cached
     const uncachedIds = companyIds.filter(id => {
-      const cached = queryClient.getQueryData(['company-profile', id]);
+      const cached = queryClient.getQueryData(['company-public-profile', id]);
       return !cached;
     });
 
@@ -398,7 +398,10 @@ export function useBatchPrefetchCompanyProfiles() {
 
     // Update query cache for each company
     profiles.forEach(profile => {
-      queryClient.setQueryData(['company-profile', profile.user_id], profile);
+      // OBS: egen nyckel för den PUBLIKA (trimmade) profilformen. Den fulla
+      // egna profilen ligger under ['company-profile', id] — samma nyckel för
+      // båda formerna gav fel data på /reviews efter egen förhandsgranskning.
+      queryClient.setQueryData(['company-public-profile', profile.user_id], profile);
     });
   }, [queryClient]);
 }

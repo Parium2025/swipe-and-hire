@@ -84,7 +84,9 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   // Use React Query for company profile with prefetched data
   const { data: company, isLoading: loading, isError: companyError, refetch: refetchCompany } = useQuery<CompanyProfile | null>({
-    queryKey: ['company-profile', companyId],
+    // Publik (trimmad) profilform — egen nyckel, får aldrig dela nyckel med
+    // den fulla egna profilen (['company-profile', id]).
+    queryKey: ['company-public-profile', companyId],
     queryFn: async () => {
       if (!companyId) return null;
       const { data, error } = await supabase
