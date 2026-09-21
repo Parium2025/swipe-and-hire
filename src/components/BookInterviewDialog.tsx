@@ -917,11 +917,13 @@ export const BookInterviewDialog = ({
           )}
 
           {locationType === 'office' && officeInstructions && (
-            <div className="min-w-0">
-              <p className="text-sm leading-5 text-white">
-                <span className="font-medium">Instruktioner till kandidaten:</span>{' '}
-                <span className="whitespace-pre-wrap">{officeInstructions}</span>
-              </p>
+            <div className="min-w-0 space-y-2">
+              <Label className="text-white">Instruktioner till kandidaten</Label>
+              <div className="min-w-0 max-w-full rounded-md border border-white/20 bg-white/10 px-3 py-2.5">
+                <p className="text-sm leading-5 text-white whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                  {officeInstructions}
+                </p>
+              </div>
             </div>
           )}
 
