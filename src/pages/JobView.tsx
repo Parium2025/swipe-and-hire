@@ -30,6 +30,7 @@ import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useQueryClient } from '@tanstack/react-query';
+import { useBatchPrefetchCompanyProfiles, prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
 import { clearMyApplicationsLocalCache } from '@/hooks/useMyApplicationsCache';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { Helmet } from 'react-helmet-async';
@@ -155,6 +156,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || isEmployerRole(userRole?.role));
   const { getPrefetchedJob } = useJobPrefetchCache();
   const queryClient = useQueryClient();
+  const prefetchCompanyProfiles = useBatchPrefetchCompanyProfiles();
   // Profilval för ansökan — samma källa och regler som swipe-flödet.
   const {
     profiles: candidateProfiles,
@@ -281,6 +283,30 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     if (authLoading) return;
     fetchJob();
   }, [jobId, authLoading, user?.id]);
+
+  // Förvärm företagsrutan: profil + första sidan omdömen hämtas i idle så
+  // fort annonsen visas, med samma nycklar som dialogen läser. Då öppnas
+  // "Om företaget" färdigmålad i stället för att visa laddning.
+  useEffect(() => {
+    const employerId = job?.employer_id;
+    if (!employerId) return;
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
+      void prefetchCompanyProfiles([employerId]).catch(() => { /* dialogen hämtar själv */ });
+      if (user) void prewarmCompanyReviews(queryClient, employerId);
+    };
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof w.requestIdleCallback === 'function') {
+      const id = w.requestIdleCallback(run, { timeout: 1500 });
+      return () => { cancelled = true; w.cancelIdleCallback?.(id); };
+    }
+    const id = window.setTimeout(run, 300);
+    return () => { cancelled = true; window.clearTimeout(id); };
+  }, [job?.employer_id, user, queryClient, prefetchCompanyProfiles]);
 
   // 🔴 LIVE: Prenumerera på ändringar i annonsen och dess frågor så att
   // förhandsgranskningen (och vanliga vyn) alltid speglar senaste versionen —

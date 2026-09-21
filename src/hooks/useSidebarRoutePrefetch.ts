@@ -6,6 +6,9 @@ import { fetchSavedJobsForUser } from '@/hooks/useSavedJobsCache';
 import { fetchMyApplicationsForUser } from '@/hooks/useMyApplicationsCache';
 import { fetchCandidateInterviewsForUser } from '@/hooks/useInterviews';
 import { prefetchEmployerJobsFirstPages } from '@/hooks/useJobsData';
+import { prewarmJobTemplates } from '@/lib/jobTemplatesPrewarm';
+import { prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
+import { fetchMyProfile } from '@/lib/myProfile';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
@@ -129,6 +132,25 @@ export function useSidebarRoutePrefetch() {
           },
           staleTime: 60_000,
         }).catch(() => { prefetchedRef.current.delete(key); });
+        break;
+      }
+      case '/templates': {
+        // Samma cache som sidan läser synkront vid montering.
+        prewarmJobTemplates(user.id);
+        break;
+      }
+      case '/reviews': {
+        if (!queryClient.getQueryData(['company-profile', user.id])) {
+          queryClient.prefetchQuery({
+            queryKey: ['company-profile', user.id],
+            queryFn: async () => {
+              const { data: rows } = await fetchMyProfile();
+              return Array.isArray(rows) ? rows[0] ?? null : null;
+            },
+            staleTime: 5 * 60 * 1000,
+          }).catch(() => { prefetchedRef.current.delete(key); });
+        }
+        void prewarmCompanyReviews(queryClient, user.id);
         break;
       }
       // /my-candidates och /messages varmhålls redan via

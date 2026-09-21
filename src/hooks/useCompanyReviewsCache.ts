@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
@@ -106,6 +106,37 @@ async function fetchReviewStats(companyId: string): Promise<{ total: number; avg
   const total = Number(row?.total_count ?? 0);
   const avg = row?.avg_rating != null ? Number(row.avg_rating) : undefined;
   return { total, avg };
+}
+
+/**
+ * Förvärmning av recensionssidan (/reviews).
+ *
+ * Skriver EXAKT samma format till samma localStorage-cache och query-nyckel
+ * som `useCompanyReviewsCache` läser, så vyn målas direkt vid första besöket
+ * i stället för att visa skelett. Felar tyst — sidan hämtar själv vid behov.
+ */
+export async function prewarmCompanyReviews(
+  queryClient: QueryClient,
+  companyId?: string | null,
+): Promise<void> {
+  if (!companyId) return;
+  if (queryClient.getQueryData(['company-reviews-cached', companyId])) return;
+
+  try {
+    const [reviews, stats] = await Promise.all([
+      fetchReviewsPage(companyId, 0, PAGE_SIZE - 1),
+      fetchReviewStats(companyId),
+    ]);
+    const result: CompanyReviewsData = {
+      reviews,
+      avgRating: stats.avg,
+      reviewCount: stats.total,
+    };
+    setLocalCache(companyId, result);
+    queryClient.setQueryData(['company-reviews-cached', companyId], result);
+  } catch {
+    // Tyst — förvärmning får aldrig störa UI.
+  }
 }
 
 /**

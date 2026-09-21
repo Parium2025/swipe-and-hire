@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { Plus, Edit, Trash2, Calendar, Loader2, Star, StarOff, AlertTriangle } from 'lucide-react';
 import { SKELETON_COUNT_KEYS, readCachedCount, writeCachedCount } from '@/lib/skeletonCounts';
+import { readCachedJobTemplates, writeCachedJobTemplates } from '@/lib/jobTemplatesPrewarm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,15 +41,20 @@ interface JobTemplate {
 }
 
 const JobTemplatesOverview = () => {
-  const [templates, setTemplates] = useState<JobTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<JobTemplate | null>(null);
-
   const { user } = useAuth();
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
+
+  // Förvärmd lista (skriven av useSecondaryPagesPrewarm) läses synkront vid
+  // montering, så sidan målas direkt i stället för att visa skelett vid
+  // kallstart. Färsk data hämtas ändå alltid i bakgrunden.
+  const [templates, setTemplates] = useState<JobTemplate[]>(
+    () => (readCachedJobTemplates(user?.id) as unknown as JobTemplate[] | null) ?? [],
+  );
+  const [loading, setLoading] = useState(() => readCachedJobTemplates(user?.id) === null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<JobTemplate | null>(null);
 
   const fetchTemplates = async () => {
     if (!user) return;
@@ -72,6 +78,8 @@ const JobTemplatesOverview = () => {
 
       setTemplates(data || []);
       writeCachedCount(SKELETON_COUNT_KEYS.jobTemplates, (data || []).length);
+      // Håll förvärmningscachen färsk så nästa besök målas direkt.
+      writeCachedJobTemplates(user.id, (data || []) as never);
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
