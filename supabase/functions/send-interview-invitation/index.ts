@@ -319,6 +319,15 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Starta kalendersynken efter svaret — den fortsätter i bakgrunden.
+    const backgroundSync = syncCalendars();
+    const runtime = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+    if (runtime?.waitUntil) {
+      runtime.waitUntil(backgroundSync);
+    } else {
+      backgroundSync.catch((err) => console.error('Calendar sync failed:', err));
+    }
+
     return new Response(
       JSON.stringify({ success: true, candidate: candidateResult, employer: employerResult }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
