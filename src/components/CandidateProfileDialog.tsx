@@ -322,6 +322,16 @@ export const CandidateProfileDialog = ({
     open,
   });
 
+  // Förvärm "finns redan ett bokat möte?" så fort kandidaten visas. Då öppnas
+  // Boka möte direkt i rätt läge (ombokning, tid, plats, meddelande) i stället
+  // för att först visa nybokning och sedan hoppa när svaret kommer.
+  const interviewPrefetchClient = useQueryClient();
+  const prefetchApplicationId = activeApplication?.id || application?.id || null;
+  useEffect(() => {
+    if (!open || !prefetchApplicationId) return;
+    prefetchExistingInterview(interviewPrefetchClient, prefetchApplicationId);
+  }, [open, prefetchApplicationId, interviewPrefetchClient]);
+
   useEffect(() => {
     if (!application) return;
     if (lastResetApplicationIdRef.current === application.id) return;
