@@ -479,7 +479,12 @@ export default function Messages() {
                     });
 
                     return (
-                      <div key={conv.id} className="w-full min-w-0 max-w-full overflow-hidden">
+                      <div
+                        key={conv.id}
+                        className="w-full min-w-0 max-w-full overflow-hidden"
+                        onPointerEnter={() => prefetchConversationMessages(queryClient, conv.id)}
+                        onPointerDown={() => prefetchConversationMessages(queryClient, conv.id)}
+                      >
                         <SwipeableConversationItem
                           canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
                           onMarkUnread={() => {
