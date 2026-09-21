@@ -875,7 +875,7 @@ const EmployerDashboard = memo(() => {
                 <CardErrorBoundary>
                   <div className={`relative ${deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
                     {removingJobId === job.id && deleteUnderlayJob && (
-                      <div className="job-card-delete-underlay" aria-hidden="true" inert="">
+                      <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
                         <MobileJobCard
                           job={deleteUnderlayJob}
                           onOpen={handleOpenJob}
@@ -995,7 +995,7 @@ const EmployerDashboard = memo(() => {
                 <CardErrorBoundary>
                   <div className={`relative ${deleteUnderlayJob?.id === job.id ? 'job-card-replacement-source' : ''}`}>
                     {removingJobId === job.id && deleteUnderlayJob && (
-                      <div className="job-card-delete-underlay" aria-hidden="true" inert="">
+                      <div className="job-card-delete-underlay" aria-hidden="true" {...({ inert: '' } as Record<string, string>)}>
                         <MobileJobCard
                           job={deleteUnderlayJob}
                           onOpen={handleOpenJob}
