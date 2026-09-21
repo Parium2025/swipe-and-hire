@@ -67,9 +67,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Found ${expiringJobs?.length || 0} jobs expiring within 8 hours`);
 
     // Send employer notification emails via Lovable Emails (hanterad e-postleverans)
+    // SKALA: utskicken kördes tidigare ett i taget. När många annonser går ut
+    // samma timme hann körningen inte klart. Nu skickas de i grupper om 5,
+    // vilket håller samma ordning och samma idempotensnyckel men blir snabbare.
     let emailsSent = 0;
     if (expiringJobs && expiringJobs.length > 0) {
-      for (const job of expiringJobs) {
+      const sendOne = async (job: (typeof expiringJobs)[number]) => {
         const profile = job.profiles as any;
         const firstName = profile?.first_name || "Arbetsgivare";
 
@@ -81,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (!email) {
           console.log('No email found for employer, skipping notification');
-          continue;
+          return;
         }
 
         const expiresDate = new Date(job.expires_at!);
@@ -106,6 +109,11 @@ const handler = async (req: Request): Promise<Response> => {
         } catch (emailError) {
           console.error('Failed to send job expiration email', { jobId: job.id, error: emailError });
         }
+      };
+
+      const BATCH = 5;
+      for (let i = 0; i < expiringJobs.length; i += BATCH) {
+        await Promise.all(expiringJobs.slice(i, i + BATCH).map(sendOne));
       }
     }
 
