@@ -7,6 +7,8 @@ import type { CandidateNote } from '@/components/candidateProfile/candidateProfi
 
 interface RowLike {
   applicant_id?: string | null;
+  /** Ansökans id — används för att förvärma "finns redan bokat möte?". */
+  id?: string | null;
 }
 
 /**
