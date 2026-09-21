@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { CandidateActivity, ActivityType } from '@/hooks/useCandidateActivities';
+import { primeCandidateNotesCache } from '@/hooks/useCandidateNotes';
+import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
 
 interface RowLike {
   applicant_id?: string | null;
