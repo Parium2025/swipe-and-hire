@@ -43,6 +43,23 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
 
   const idsKey = useMemo(() => [...applicantIds].sort().join('|'), [applicantIds]);
 
+  // Ansöknings-id för samma rader — används till batchförvärmning av bokade möten.
+  const applicationIds = useMemo(() => {
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const row of rows || []) {
+      const id = row?.id?.trim();
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      ids.push(id);
+      if (ids.length >= MAX_ROWS) break;
+    }
+    return ids;
+  }, [rows]);
+  const applicationIdsRef = useRef<string[]>(applicationIds);
+  applicationIdsRef.current = applicationIds;
+  const warmedInterviewsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (!enabled || applicantIds.length === 0) return;
 
