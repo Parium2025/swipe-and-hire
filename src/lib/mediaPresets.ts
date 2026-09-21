@@ -23,14 +23,13 @@ export const PROFILE_IMAGE_TRANSFORM: ImageTransformOptions = {
 };
 
 /**
- * Stora runda porträttet i kandidatprofilen (192px CSS → 2x = 384).
- * Egen konstant så prefetch och render delar cache-nyckel.
+ * OBS: Stora runda porträttet i kandidatprofilen hämtas medvetet UTAN
+ * transform — både renderingen (CandidateProfileDialog) och förvärmningen
+ * (useCandidateRowMediaWarmup) måste fortsätta göra det, annars blir
+ * cache-nyckeln olika och bilden hinner blinka till initialer.
  */
-export const PROFILE_DIALOG_TRANSFORM: ImageTransformOptions = {
-  width: 400,
-  height: 400,
-  resize: 'cover',
-};
+
+
 
 
 /** Standard-livslängd på signerade URL:er (24h). */
