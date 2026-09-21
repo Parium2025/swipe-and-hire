@@ -109,6 +109,37 @@ async function fetchReviewStats(companyId: string): Promise<{ total: number; avg
 }
 
 /**
+ * Förvärmning av recensionssidan (/reviews).
+ *
+ * Skriver EXAKT samma format till samma localStorage-cache och query-nyckel
+ * som `useCompanyReviewsCache` läser, så vyn målas direkt vid första besöket
+ * i stället för att visa skelett. Felar tyst — sidan hämtar själv vid behov.
+ */
+export async function prewarmCompanyReviews(
+  queryClient: QueryClient,
+  companyId?: string | null,
+): Promise<void> {
+  if (!companyId) return;
+  if (queryClient.getQueryData(['company-reviews-cached', companyId])) return;
+
+  try {
+    const [reviews, stats] = await Promise.all([
+      fetchReviewsPage(companyId, 0, PAGE_SIZE - 1),
+      fetchReviewStats(companyId),
+    ]);
+    const result: CompanyReviewsData = {
+      reviews,
+      avgRating: stats.avg,
+      reviewCount: stats.total,
+    };
+    setLocalCache(companyId, result);
+    queryClient.setQueryData(['company-reviews-cached', companyId], result);
+  } catch {
+    // Tyst — förvärmning får aldrig störa UI.
+  }
+}
+
+/**
  * Hook to get cached company reviews with instant load from localStorage
  * and background sync with the database.
  *
