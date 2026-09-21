@@ -84,15 +84,15 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Single-flight: om föregående minutkörning fortfarande pågår hoppar vi över
-    // helt. Det hindrar att långsamma körningar staplas på varandra och mättar
-    // databasen (som under nattens överbelastning).
+    // Single-flight per sida: samma sida får aldrig köras två gånger samtidigt,
+    // men olika sidor (arbetare) kör parallellt och delar upp arbetet.
+    const lockKey = workerPage === 0 ? 'interview-reminders' : `interview-reminders-w${workerPage}`;
     const { data: gotLock } = await supabase.rpc('try_claim_job_lock', {
-      _key: 'interview-reminders',
+      _key: lockKey,
       _ttl_seconds: 55,
     });
     if (gotLock !== true) {
-      console.log('Another interview-reminders run is in progress — skipping');
+      console.log(`Another interview-reminders run is in progress (${lockKey}) — skipping`);
       return new Response(JSON.stringify({ skipped: true, reason: 'run_in_progress' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -102,8 +102,9 @@ Deno.serve(async (req) => {
 
     // Hur många möten som behandlas samtidigt. Arbetet är nästan bara väntan på
     // nätverk, så bredden – inte processorn – avgör hur många som hinner med.
-    const REMINDER_CONCURRENCY = 40;
-    const FOLLOWUP_CONCURRENCY = 40;
+    const REMINDER_CONCURRENCY = 120;
+    const FOLLOWUP_CONCURRENCY = 120;
+
     // Tidsbudget: körningen avslutas snyggt efter 50 sekunder så att nästa
     // minutkörning tar vid, i stället för att avbrytas mitt i av plattformen.
     const RUN_DEADLINE = Date.now() + 50_000;
