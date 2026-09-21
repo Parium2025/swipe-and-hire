@@ -155,9 +155,14 @@ serve(async (req) => {
     let totalChecked = 0;
 
     while (true) {
+      // Utan uttrycklig sortering kan databasen ge tillbaka raderna i olika
+      // ordning mellan sidorna – då hoppas vissa bevakningar över och andra
+      // dubbleras. Sorterad sidindelning är förutsättningen för att alla
+      // bevakningar verkligen kontrolleras.
       const { data: batch, error: batchError } = await supabase
         .from('saved_searches')
         .select('id, user_id, name, search_query, city, county, employment_types, category, subcategories, salary_min, salary_max')
+        .order('id', { ascending: true })
         .range(offset, offset + BATCH_SIZE - 1);
 
       if (batchError) {
