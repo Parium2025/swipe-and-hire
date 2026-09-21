@@ -20,6 +20,22 @@ const MIN_INTERVAL_MINUTES = 60
 const LOOKBACK_HOURS = 24
 const MAX_ITEMS = 8
 
+// SKALA: mejlen skickades ett i taget, vilket inte räcker vid tusentals
+// mottagare. Nu körs 20 samtidigt, men aldrig snabbare än mejlleverantörens
+// takt (10 per sekund) – annars börjar leverantören neka utskick. Kombinationen
+// ger full fart utan att någon mottagare tappas.
+const EMAIL_CONCURRENCY = 20
+const EMAILS_PER_SECOND = 10
+let nextSlot = 0
+async function emailSlot() {
+  const spacing = 1000 / EMAILS_PER_SECOND
+  const now = Date.now()
+  const slot = Math.max(now, nextSlot)
+  nextSlot = slot + spacing
+  const wait = slot - now
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait))
+}
+
 type DigestType = 'unread_messages' | 'new_applications'
 
 interface DigestItem { title: string; subtitle?: string }
@@ -161,9 +177,6 @@ async function runUnreadMessages() {
     finalIds.map((id) => recipientProfiles.get(id)?.email).filter((e): e is string => !!e),
   )
 
-  // SKALA: mejlen skickades ett i taget. Med tusentals mottagare hann jobbet
-  // inte klart inom körningens tidsfönster. Fem i taget är samma resultat,
-  // men bråkdelen av tiden – och håller sig inom mejlleverantörens takt.
   let sent = 0
   const sendOne = async (userId: string) => {
     const profile = recipientProfiles.get(userId)
@@ -183,6 +196,7 @@ async function runUnreadMessages() {
     })
 
     const heading = total === 1 ? '1 oläst meddelande' : `${total} olästa meddelanden`
+    await emailSlot()
     const ok = await sendDigest(userId, 'unread_messages', {
       first_name: profile?.first_name || 'där',
       heading,
@@ -195,7 +209,6 @@ async function runUnreadMessages() {
     }, email)
     if (ok) sent++
   }
-  const EMAIL_CONCURRENCY = 5
   for (let i = 0; i < finalIds.length; i += EMAIL_CONCURRENCY) {
     await Promise.all(finalIds.slice(i, i + EMAIL_CONCURRENCY).map(sendOne))
   }
@@ -245,7 +258,6 @@ async function runNewApplications() {
     finalIds.map((id) => profiles.get(id)?.email).filter((e): e is string => !!e),
   )
 
-  // Samma skäl som ovan: fem mejl i taget i stället för ett.
   let sent = 0
   const sendOne = async (employerId: string) => {
     const profile = profiles.get(employerId)
@@ -260,6 +272,7 @@ async function runNewApplications() {
     }))
 
     const heading = total === 1 ? '1 ny ansökan' : `${total} nya ansökningar`
+    await emailSlot()
     const ok = await sendDigest(employerId, 'new_applications', {
       first_name: profile?.first_name || 'där',
       heading,
@@ -272,7 +285,6 @@ async function runNewApplications() {
     }, email)
     if (ok) sent++
   }
-  const EMAIL_CONCURRENCY = 5
   for (let i = 0; i < finalIds.length; i += EMAIL_CONCURRENCY) {
     await Promise.all(finalIds.slice(i, i + EMAIL_CONCURRENCY).map(sendOne))
   }

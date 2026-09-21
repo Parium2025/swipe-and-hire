@@ -91,6 +91,15 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // Hur många möten som behandlas samtidigt. Arbetet är nästan bara väntan på
+    // nätverk, så bredden – inte processorn – avgör hur många som hinner med.
+    const REMINDER_CONCURRENCY = 40;
+    const FOLLOWUP_CONCURRENCY = 40;
+    // Tidsbudget: körningen avslutas snyggt efter 50 sekunder så att nästa
+    // minutkörning tar vid, i stället för att avbrytas mitt i av plattformen.
+    const RUN_DEADLINE = Date.now() + 50_000;
+    const outOfTime = () => Date.now() > RUN_DEADLINE;
+
     // Symbios med Google Kalender: om mottagarens eget Google-larm ligger på
     // exakt samma antal minuter före intervjun som Pariums utskick hoppar vi
     // över vårt – annars pinglas personen två gånger samma minut. Kollen är
@@ -328,10 +337,11 @@ Deno.serve(async (req) => {
       // Fönstret är brett men cron kör varje minut – utan denna
       // markering skulle samma påminnelse skickas två gånger.
       .is("reminder_sent_at", null)
-      // Taket skyddar mot timeout: cron kör varje minut, så resterande
-      // påminnelser tas i nästa körning i stället för att hela körningen dör.
+      // Taket är högt satt (2000) eftersom körningen numera arbetar parallellt
+      // och dessutom stoppas av en tidsbudget nedan. Vid extrema toppar tas
+      // resten i nästa minutkörning i stället för att hela körningen dör.
       .order("scheduled_at", { ascending: true })
-      .limit(200);
+      .limit(2000);
 
     if (interviewsError) {
       console.error("Error fetching interviews:", interviewsError);
@@ -493,9 +503,17 @@ Deno.serve(async (req) => {
         );
 
       };
-      const REMINDER_CONCURRENCY = 8;
+      // 40 möten samtidigt: varje möte är mest väntan på nätverk, så bredden
+      // avgör hur många som hinner med per minut. 300 möten i samma minut tar
+      // nu sekunder i stället för minuter. Tidsbudgeten nedan ser till att
+      // körningen alltid avslutas snyggt – resten tas av nästa minutkörning,
+      // och eftersom golvet är "nu" tappas ingen påminnelse.
       const interviewList = upcomingInterviews as unknown as Interview[];
       for (let i = 0; i < interviewList.length; i += REMINDER_CONCURRENCY) {
+        if (outOfTime()) {
+          console.log(`Time budget reached – ${interviewList.length - i} reminders deferred to next run`);
+          break;
+        }
         await Promise.all(interviewList.slice(i, i + REMINDER_CONCURRENCY).map(processInterview));
       }
     } else {
@@ -531,7 +549,7 @@ Deno.serve(async (req) => {
       .is("followup_reminder_sent_at", null)
       // Samma skäl som ovan – resten tas i nästa körning.
       .order("scheduled_at", { ascending: true })
-      .limit(200);
+      .limit(2000);
 
     if (pastError) {
       console.error("Error fetching past interviews for follow-up:", pastError);
@@ -630,8 +648,11 @@ Deno.serve(async (req) => {
           }
         }
       };
-      const FOLLOWUP_CONCURRENCY = 8;
       for (let i = 0; i < pastInterviews.length; i += FOLLOWUP_CONCURRENCY) {
+        if (outOfTime()) {
+          console.log(`Time budget reached – ${pastInterviews.length - i} follow-ups deferred to next run`);
+          break;
+        }
         await Promise.all(pastInterviews.slice(i, i + FOLLOWUP_CONCURRENCY).map(processFollowup));
       }
     }

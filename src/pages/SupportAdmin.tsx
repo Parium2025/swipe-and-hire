@@ -37,8 +37,14 @@ interface SupportMessage {
   };
 }
 
+const PAGE_SIZE = 50;
+type TicketFilter = 'active' | 'archived';
+
 const SupportAdmin = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [filter, setFilter] = useState<TicketFilter>('active');
+  const [totalCount, setTotalCount] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [replyMessage, setReplyMessage] = useState('');
@@ -47,8 +53,11 @@ const SupportAdmin = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchTickets();
-  }, []);
+    setLoading(true);
+    setSelectedTicket(null);
+    fetchTickets(0, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   useEffect(() => {
     if (selectedTicket) {
@@ -56,17 +65,27 @@ const SupportAdmin = () => {
     }
   }, [selectedTicket]);
 
-  const fetchTickets = async () => {
+  // Ärenden hämtas sidvis. Även med 100 000 ärenden laddas bara 50 åt gången,
+  // och arkivet (stängda ärenden) ligger för sig så att listan bara visar det
+  // som faktiskt behöver hanteras.
+  const fetchTickets = async (offset: number, replace: boolean) => {
     try {
-      const { data: ticketsData, error } = await supabase
+      let query = supabase
         .from('support_tickets')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
-        // Tak: annars hämtas varje ärende som någonsin skapats när supporten
-        // växer. De 300 senaste täcker arbetsflödet och sidan öppnas direkt.
-        .limit(300);
+        // Tiebreak så att sidorna inte kan tappa eller dubblera ett ärende.
+        .order('id', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      query = filter === 'archived'
+        ? query.eq('status', 'closed')
+        : query.in('status', ['open', 'in_progress']);
+
+      const { data: ticketsData, error, count } = await query;
 
       if (error) throw error;
+      setTotalCount(count ?? 0);
       
       // Hämta användardata separat
       if (ticketsData && ticketsData.length > 0) {
@@ -81,15 +100,21 @@ const SupportAdmin = () => {
           profiles: profilesData?.find(p => p.user_id === ticket.user_id) || null
         }));
         
-        setTickets(ticketsWithProfiles);
-      } else {
-        setTickets(ticketsData || []);
+        setTickets(prev => (replace ? ticketsWithProfiles : [...prev, ...ticketsWithProfiles]));
+      } else if (replace) {
+        setTickets([]);
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    await fetchTickets(tickets.length, false);
   };
 
   const fetchMessages = async (ticketId: string) => {
@@ -143,7 +168,7 @@ const SupportAdmin = () => {
         description: `Ärendet har markerats som ${getStatusLabel(status).toLowerCase()}`
       });
 
-      fetchTickets();
+      fetchTickets(0, true);
       if (selectedTicket?.id === ticketId) {
         setSelectedTicket({ ...selectedTicket, status });
       }
@@ -228,7 +253,7 @@ const SupportAdmin = () => {
       case 'open':
         return 'Öppen';
       case 'closed':
-        return 'Stängd';
+        return 'Arkiverad';
       case 'in_progress':
         return 'Pågår';
       default:
@@ -269,11 +294,17 @@ const SupportAdmin = () => {
         {/* Ärendelista */}
         <div className="lg:col-span-1">
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader>
+            <CardHeader className="space-y-3">
               <CardTitle className="text-white flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-                Supportärenden ({tickets.length})
+                Supportärenden ({totalCount})
               </CardTitle>
+              <Tabs value={filter} onValueChange={(v) => setFilter(v as TicketFilter)}>
+                <TabsList className="grid w-full grid-cols-2 bg-white/10">
+                  <TabsTrigger value="active" className="text-white text-sm">Aktiva</TabsTrigger>
+                  <TabsTrigger value="archived" className="text-white text-sm">Arkiv</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
@@ -303,6 +334,23 @@ const SupportAdmin = () => {
                     </p>
                   </div>
                 ))}
+                {tickets.length === 0 && (
+                  <p className="p-4 text-sm text-white">
+                    {filter === 'archived' ? 'Inga arkiverade ärenden än.' : 'Inga aktiva ärenden just nu.'}
+                  </p>
+                )}
+                {tickets.length < totalCount && (
+                  <div className="p-4">
+                    <Button
+                      variant="outline"
+                      className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? 'Hämtar…' : `Visa fler (${totalCount - tickets.length} kvar)`}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -334,7 +382,7 @@ const SupportAdmin = () => {
                       <SelectContent className="glass-panel">
                         <SelectItem value="open">Öppen</SelectItem>
                         <SelectItem value="in_progress">Pågår</SelectItem>
-                        <SelectItem value="closed">Stängd</SelectItem>
+                        <SelectItem value="closed">Arkiverad</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
