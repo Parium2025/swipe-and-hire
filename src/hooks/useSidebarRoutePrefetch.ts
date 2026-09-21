@@ -6,6 +6,9 @@ import { fetchSavedJobsForUser } from '@/hooks/useSavedJobsCache';
 import { fetchMyApplicationsForUser } from '@/hooks/useMyApplicationsCache';
 import { fetchCandidateInterviewsForUser } from '@/hooks/useInterviews';
 import { prefetchEmployerJobsFirstPages } from '@/hooks/useJobsData';
+import { prewarmJobTemplates } from '@/lib/jobTemplatesPrewarm';
+import { prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
+import { fetchMyProfile } from '@/lib/myProfile';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
