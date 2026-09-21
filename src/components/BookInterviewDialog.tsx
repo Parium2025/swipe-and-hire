@@ -932,14 +932,19 @@ export const BookInterviewDialog = ({
             </div>
 
             {/* Actions */}
+            {isUnchangedFromExisting && !lockedByColleague && (
+              <p className="pt-3 text-sm text-white">
+                Den här tiden är redan skickad. Välj en ny tid för att skicka om intervjun.
+              </p>
+            )}
             <div className="flex gap-2 pt-4">
               <Button 
                 onClick={() => handleSubmit()} 
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isSubmitting || !date || lockedByColleague}
+                disabled={isSubmitting || !date || lockedByColleague || isUnchangedFromExisting}
                 className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && date && !lockedByColleague ? 'border border-white/30' : ''
+                  !isSubmitting && date && !lockedByColleague && !isUnchangedFromExisting ? 'border border-white/30' : ''
                 }`}
               >
                 {isSubmitting ? (
