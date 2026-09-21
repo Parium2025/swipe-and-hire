@@ -451,74 +451,21 @@ export const BookInterviewDialog = ({
         }
       }
 
-      let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
-      let invitationSucceeded = false;
-
-      // 1. Send the interview invitation email with .ics calendar attachment
-      try {
-        // Get candidate email from application
-        const { data: appData } = await supabase
-          .from('job_applications')
-          .select('email, first_name')
-          .eq('id', applicationId)
-          .single();
-
-        const candidateEmail = appData?.email;
-        if (candidateEmail && interviewRow?.id) {
-          const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
-            body: {
-              candidateEmail,
-              candidateName,
-              companyName: companyName || 'Företag',
-              jobTitle,
-              scheduledAt: scheduledAt.toISOString(),
-              durationMinutes: parseInt(duration),
-              locationType,
-              locationDetails: normalizedVideoLocationDetails || undefined,
-              message: message || undefined,
-              employerEmail: user?.email || undefined,
-              employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
-              interviewId: interviewRow.id,
-              // En ombokning uppdaterar kalendern och appnotisen, men skickar
-              // inte en ny kopia av kallelsemejlet.
-              sendEmail: !isReschedule,
-            },
-          });
-          if (invitationError) throw invitationError;
-          invitationSucceeded = true;
-        }
-
-      } catch (emailErr) {
-        console.error('Error sending interview email:', emailErr);
-        if (isReschedule) {
-          description = 'Intervjun är ombokad, men kalendern kunde inte uppdateras.';
-        }
-      }
-
-      // 2. Trigger outreach automations (chat, push, etc.)
-      try {
-        const { data: dispatchData, error: dispatchError } = await supabase.functions.invoke('outreach-dispatch', {
-          body: {
-            processPending: true,
-            trigger: 'interview_scheduled',
-            interviewId: interviewRow.id,
-          },
-        });
-        if (dispatchError) throw dispatchError;
-        void dispatchData;
-        description = isReschedule
-          ? invitationSucceeded
-            ? 'Kalenderbokningen är uppdaterad.'
-            : description
-          : 'Intervjukallelse med kalenderinbjudan skickad!';
-      } catch (dispatchErr) {
-        console.error('Error invoking outreach-dispatch:', dispatchErr);
-        if (!isReschedule) description = 'Intervjukallelse med kalenderinbjudan skickad!';
-      }
+      // Bokningen är nu säkrad i databasen. Först här stängs dialogen och
+      // bekräftelsen visas – går något fel dessförinnan står rekryteraren kvar
+      // i dialogen med sitt innehåll. Mejl och kalender körs sedan i bakgrunden.
+      const interviewId = interviewRow?.id;
+      handleOpenChange(false);
+      setIsSubmitting(false);
 
       toast.success(
         isReschedule ? `Intervju ombokad för ${candidateName}` : `Intervju bokad för ${candidateName}`,
-        { description, route: '/my-candidates' } as Parameters<typeof toast.success>[1],
+        {
+          description: isReschedule
+            ? 'Den nya tiden skickas till kandidaten.'
+            : 'Kallelsen med kalenderinbjudan skickas till kandidaten.',
+          route: '/my-candidates',
+        } as Parameters<typeof toast.success>[1],
       );
 
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
@@ -526,13 +473,73 @@ export const BookInterviewDialog = ({
       queryClient.invalidateQueries({ queryKey: ['existing-interview', applicationId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
       onSuccess?.();
+
+      void (async () => {
+        let deliveryFailed = false;
+
+        // 1. Send the interview invitation email with .ics calendar attachment
+        try {
+          const { data: appData } = await supabase
+            .from('job_applications')
+            .select('email, first_name')
+            .eq('id', applicationId)
+            .single();
+
+          const candidateEmail = appData?.email;
+          if (candidateEmail && interviewId) {
+            const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
+              body: {
+                candidateEmail,
+                candidateName,
+                companyName: companyName || 'Företag',
+                jobTitle,
+                scheduledAt: scheduledAt.toISOString(),
+                durationMinutes: parseInt(duration),
+                locationType,
+                locationDetails: normalizedVideoLocationDetails || undefined,
+                message: message || undefined,
+                employerEmail: user?.email || undefined,
+                employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
+                interviewId,
+                // En ombokning uppdaterar kalendern och appnotisen, men skickar
+                // inte en ny kopia av kallelsemejlet.
+                sendEmail: !isReschedule,
+              },
+            });
+            if (invitationError) throw invitationError;
+          }
+        } catch (emailErr) {
+          console.error('Error sending interview email:', emailErr);
+          deliveryFailed = true;
+        }
+
+        // 2. Trigger outreach automations (chat, push, etc.)
+        try {
+          const { error: dispatchError } = await supabase.functions.invoke('outreach-dispatch', {
+            body: {
+              processPending: true,
+              trigger: 'interview_scheduled',
+              interviewId,
+            },
+          });
+          if (dispatchError) throw dispatchError;
+        } catch (dispatchErr) {
+          console.error('Error invoking outreach-dispatch:', dispatchErr);
+          deliveryFailed = true;
+        }
+
+        if (deliveryFailed) {
+          toast.error('Tiden är sparad, men utskicket gick inte fram', {
+            description: 'Öppna intervjun och skicka tiden igen så får kandidaten kallelsen.',
+          });
+        }
+      })();
     } catch (error) {
       console.error('Error creating interview:', error);
       const reason = error instanceof Error ? error.message : undefined;
       toast.error(isReschedule ? 'Kunde inte boka om intervjun' : 'Kunde inte boka intervjun', {
         description: reason,
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
