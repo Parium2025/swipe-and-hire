@@ -296,7 +296,19 @@ export const BookInterviewDialog = ({
       return;
     }
 
+    // Samma tid och samma innehåll som redan är skickat ska inte kunna skickas igen.
+    if (isUnchangedFromExisting) {
+      toast.error('Tiden är redan skickad', {
+        description: 'Välj en ny tid innan du skickar om intervjun.',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
+
+    // Rekryteraren ska inte behöva vänta – dialogen stängs direkt och
+    // bokningen görs klart i bakgrunden. Fel visas som notis.
+    handleOpenChange(false);
 
     try {
       // Combine date and time
