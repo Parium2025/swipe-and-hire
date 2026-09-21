@@ -248,7 +248,7 @@ const handler = async (req: Request): Promise<Response> => {
       responseToken = createdToken?.token as string | undefined;
     }
     if (responseToken) {
-      const responseBase = `https://parium.se/intervjusvar?token=${encodeURIComponent(responseToken)}`;
+      const responseBase = `https://parium.se/intervjusvar?interview_token=${encodeURIComponent(responseToken)}`;
       acceptUrl = `${responseBase}&answer=yes`;
       declineUrl = `${responseBase}&answer=no`;
     }
