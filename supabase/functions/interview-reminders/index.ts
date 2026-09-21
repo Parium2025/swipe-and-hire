@@ -698,12 +698,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    const beforeInterviewQueued = await queueInterviewTimelineDispatches("interview_before");
-    const afterInterviewQueued = await queueInterviewTimelineDispatches("interview_after");
+    // Arbetsgivarens egna regler köas bara av koordinatorn – arbetarna skulle
+    // annars göra exakt samma genomgång en gång till.
+    const beforeInterviewQueued = workerPage === 0
+      ? await queueInterviewTimelineDispatches("interview_before")
+      : 0;
+    const afterInterviewQueued = workerPage === 0
+      ? await queueInterviewTimelineDispatches("interview_after")
+      : 0;
 
-    console.log(`Interview reminders completed: ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
+    console.log(`Interview reminders completed (page ${workerPage}): ${remindersSent} pre-reminders, ${followupRemindersSent} follow-up reminders, ${beforeInterviewQueued} queued before-interview messages, ${afterInterviewQueued} queued after-interview messages`);
 
-    await supabase.rpc('release_job_lock', { _key: 'interview-reminders' });
+    await supabase.rpc('release_job_lock', { _key: lockKey });
+
     return new Response(
       JSON.stringify({
         success: true,
