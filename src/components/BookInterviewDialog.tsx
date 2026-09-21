@@ -753,7 +753,7 @@ export const BookInterviewDialog = ({
           {/* Date picker */}
           <div className="space-y-2">
             <Label className="text-white">Datum</Label>
-            <Popover modal>
+            <Popover modal open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
               <PopoverTrigger asChild>
                   <button
                     className={cn(
@@ -768,11 +768,22 @@ export const BookInterviewDialog = ({
                   })() : 'Välj datum'}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 pointer-events-auto z-[120]" align="center" side="bottom" sideOffset={4} avoidCollisions={false}>
+              <PopoverContent
+                className="w-auto max-h-[min(24rem,60dvh)] overflow-y-auto overscroll-contain p-0 pointer-events-auto z-[120] text-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                align="center"
+                side="bottom"
+                sideOffset={4}
+                avoidCollisions={false}
+              >
                 <Calendar
                   mode="single"
                   selected={date}
-                  onSelect={setDate}
+                  onSelect={(day) => {
+                    if (!day) return;
+                    setDate(day);
+                    // Premiumkänsla: menyn stängs direkt när dagen är vald.
+                    setDatePopoverOpen(false);
+                  }}
                   disabled={(day) => {
                     // Inget bakåt i tiden, och som mest 12 månader fram –
                     // ett feltryck ska inte kunna boka ett möte år 2031.
