@@ -108,6 +108,22 @@ export function useEmployerPagePrewarm() {
           queryFn: () => fetchStageSettings(userId, activeId),
           staleTime: Infinity,
         });
+
+        // Övriga listor värms också — annars visade första bytet till en
+        // annan lista en tom tavla tills stegen hann hämtas.
+        if (cancelled) return;
+        for (const list of lists.slice(0, 8)) {
+          if (cancelled) return;
+          if (!list?.id || list.id === activeId) continue;
+          await queryClient
+            .prefetchQuery({
+              queryKey: ['stage-settings', userId, list.id],
+              queryFn: () => fetchStageSettings(userId, list.id),
+              staleTime: Infinity,
+            })
+            .catch(() => { /* listan hämtar själv */ });
+        }
+
       })().catch(() => {
         // Sidan hämtar själv om förvärmningen inte går igenom.
       });
