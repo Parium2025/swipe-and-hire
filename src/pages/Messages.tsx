@@ -18,7 +18,8 @@ import { useDeleteConversation } from '@/hooks/useDeleteConversation';
 import { useMarkConversationUnread } from '@/hooks/useMarkConversationUnread';
 import { useBlockConversation, useBlockedUsers } from '@/hooks/useBlockConversation';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { prefetchConversationMessages } from '@/hooks/useConversations';
 import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
