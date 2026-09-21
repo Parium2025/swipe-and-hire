@@ -41,6 +41,25 @@ Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.
 
 Vänliga hälsningar`;
 
+const LOCATION_TYPE_STORAGE_PREFIX = 'parium:interview-location-type:';
+
+function readRememberedLocationType(applicationId: string): 'video' | 'office' {
+  try {
+    const stored = localStorage.getItem(`${LOCATION_TYPE_STORAGE_PREFIX}${applicationId}`);
+    return stored === 'office' ? 'office' : 'video';
+  } catch {
+    return 'video';
+  }
+}
+
+function rememberLocationType(applicationId: string, type: 'video' | 'office') {
+  try {
+    localStorage.setItem(`${LOCATION_TYPE_STORAGE_PREFIX}${applicationId}`, type);
+  } catch {
+    /* privat läge – förvalet faller tillbaka på video */
+  }
+}
+
 function getVideoLinkLabel(url: string): string {
   const lower = url.toLowerCase();
   if (lower.includes('meet.google.com')) return 'Din Google Meet-länk';
@@ -91,7 +110,12 @@ export const BookInterviewDialog = ({
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('10:00');
   const [duration, setDuration] = useState('30');
-  const [locationType, setLocationType] = useState<'video' | 'office'>('video');
+  // Platstypen är förladdad från senaste kallelsen för just den här ansökan,
+  // så fliken står rätt direkt när dialogen öppnas i stället för att hoppa
+  // när den befintliga intervjun hämtas.
+  const [locationType, setLocationType] = useState<'video' | 'office'>(() =>
+    readRememberedLocationType(applicationId),
+  );
   const [locationDetails, setLocationDetails] = useState('');
   const [editableAddress, setEditableAddress] = useState(savedOfficeAddress);
   const [subject, setSubject] = useState('');
@@ -119,7 +143,8 @@ export const BookInterviewDialog = ({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Reset to defaults immediately when closing
-      setLocationType('video');
+      const remembered = readRememberedLocationType(applicationId);
+      setLocationType(remembered);
       setDate(undefined);
       setTime('10:00');
       setDuration('30');
@@ -128,7 +153,7 @@ export const BookInterviewDialog = ({
       setEditableVideoLink(savedVideoLink);
       setVideoLinkEditing(false);
       setSaveVideoLinkAsDefault(false);
-      setMessage(videoDefaultMessage);
+      setMessage(remembered === 'office' ? officeDefaultMessage : videoDefaultMessage);
       setSubject('');
     }
     onOpenChange(newOpen);
@@ -187,8 +212,9 @@ export const BookInterviewDialog = ({
     if (open && !wasOpenRef.current) {
       setSubject(`Intervju för ${jobTitle}`);
       setDate(new Date());
-      setLocationType('video');
-      setMessage(videoDefaultMessage);
+      const remembered = readRememberedLocationType(applicationId);
+      setLocationType(remembered);
+      setMessage(remembered === 'office' ? officeDefaultMessage : videoDefaultMessage);
       // Sync editable fields from latest profile values
       setEditableAddress(savedOfficeAddress);
       setEditableVideoLink(savedVideoLink);
@@ -221,6 +247,7 @@ export const BookInterviewDialog = ({
     setDuration(String(existingInterview.duration_minutes || 30));
     const type = existingInterview.location_type === 'office' ? 'office' : 'video';
     setLocationType(type);
+    rememberLocationType(applicationId, type);
     if (type === 'video') {
       const link = normalizeMeetingLink(existingInterview.location_details || '');
       if (link) setEditableVideoLink(link);
@@ -454,6 +481,8 @@ export const BookInterviewDialog = ({
       // bekräftelsen visas – går något fel dessförinnan står rekryteraren kvar
       // i dialogen med sitt innehåll. Mejl och kalender körs sedan i bakgrunden.
       const interviewId = interviewRow?.id;
+      // Nästa gång dialogen öppnas för samma kandidat står rätt flik direkt.
+      rememberLocationType(applicationId, locationType);
       handleOpenChange(false);
       setIsSubmitting(false);
 
@@ -601,6 +630,7 @@ export const BookInterviewDialog = ({
   // Fritt tidsfält: rekryteraren kan skriva vilken minut som helst (t.ex.
   // 20:07). Snabblistan med kvartartider finns kvar som genväg.
   const [timePopoverOpen, setTimePopoverOpen] = useState(false);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [timeDraft, setTimeDraft] = useState(time);
 
   const openTimePopover = (nextOpen: boolean) => {
@@ -753,7 +783,7 @@ export const BookInterviewDialog = ({
           {/* Date picker */}
           <div className="space-y-2">
             <Label className="text-white">Datum</Label>
-            <Popover modal>
+            <Popover modal open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
               <PopoverTrigger asChild>
                   <button
                     className={cn(
@@ -768,11 +798,22 @@ export const BookInterviewDialog = ({
                   })() : 'Välj datum'}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 pointer-events-auto z-[120]" align="center" side="bottom" sideOffset={4} avoidCollisions={false}>
+              <PopoverContent
+                className="w-auto max-h-[min(24rem,60dvh)] overflow-y-auto overscroll-contain p-0 pointer-events-auto z-[120] text-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                align="center"
+                side="bottom"
+                sideOffset={4}
+                avoidCollisions={false}
+              >
                 <Calendar
                   mode="single"
                   selected={date}
-                  onSelect={setDate}
+                  onSelect={(day) => {
+                    if (!day) return;
+                    setDate(day);
+                    // Premiumkänsla: menyn stängs direkt när dagen är vald.
+                    setDatePopoverOpen(false);
+                  }}
                   disabled={(day) => {
                     // Inget bakåt i tiden, och som mest 12 månader fram –
                     // ett feltryck ska inte kunna boka ett möte år 2031.
@@ -783,7 +824,10 @@ export const BookInterviewDialog = ({
                   initialFocus
                   className="pointer-events-auto touch-manipulation"
                   classNames={{
-                    day_today: "" // Remove today highlight
+                    day_today: "", // Remove today highlight
+                    caption_label: "text-sm font-medium text-white",
+                    day_outside: "day-outside text-white/40 opacity-100",
+                    day_disabled: "text-white/30 opacity-100",
                   }}
                 />
               </PopoverContent>
