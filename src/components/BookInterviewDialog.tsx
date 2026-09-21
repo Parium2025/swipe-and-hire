@@ -346,9 +346,6 @@ export const BookInterviewDialog = ({
 
     setIsSubmitting(true);
 
-    // Rekryteraren ska inte behöva vänta – dialogen stängs direkt och
-    // bokningen görs klart i bakgrunden. Fel visas som notis.
-    handleOpenChange(false);
 
     try {
       // Combine date and time
@@ -451,74 +448,21 @@ export const BookInterviewDialog = ({
         }
       }
 
-      let description = isReschedule ? 'Intervjun är ombokad.' : 'Intervjun är bokad.';
-      let invitationSucceeded = false;
-
-      // 1. Send the interview invitation email with .ics calendar attachment
-      try {
-        // Get candidate email from application
-        const { data: appData } = await supabase
-          .from('job_applications')
-          .select('email, first_name')
-          .eq('id', applicationId)
-          .single();
-
-        const candidateEmail = appData?.email;
-        if (candidateEmail && interviewRow?.id) {
-          const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
-            body: {
-              candidateEmail,
-              candidateName,
-              companyName: companyName || 'Företag',
-              jobTitle,
-              scheduledAt: scheduledAt.toISOString(),
-              durationMinutes: parseInt(duration),
-              locationType,
-              locationDetails: normalizedVideoLocationDetails || undefined,
-              message: message || undefined,
-              employerEmail: user?.email || undefined,
-              employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
-              interviewId: interviewRow.id,
-              // En ombokning uppdaterar kalendern och appnotisen, men skickar
-              // inte en ny kopia av kallelsemejlet.
-              sendEmail: !isReschedule,
-            },
-          });
-          if (invitationError) throw invitationError;
-          invitationSucceeded = true;
-        }
-
-      } catch (emailErr) {
-        console.error('Error sending interview email:', emailErr);
-        if (isReschedule) {
-          description = 'Intervjun är ombokad, men kalendern kunde inte uppdateras.';
-        }
-      }
-
-      // 2. Trigger outreach automations (chat, push, etc.)
-      try {
-        const { data: dispatchData, error: dispatchError } = await supabase.functions.invoke('outreach-dispatch', {
-          body: {
-            processPending: true,
-            trigger: 'interview_scheduled',
-            interviewId: interviewRow.id,
-          },
-        });
-        if (dispatchError) throw dispatchError;
-        void dispatchData;
-        description = isReschedule
-          ? invitationSucceeded
-            ? 'Kalenderbokningen är uppdaterad.'
-            : description
-          : 'Intervjukallelse med kalenderinbjudan skickad!';
-      } catch (dispatchErr) {
-        console.error('Error invoking outreach-dispatch:', dispatchErr);
-        if (!isReschedule) description = 'Intervjukallelse med kalenderinbjudan skickad!';
-      }
+      // Bokningen är nu säkrad i databasen. Först här stängs dialogen och
+      // bekräftelsen visas – går något fel dessförinnan står rekryteraren kvar
+      // i dialogen med sitt innehåll. Mejl och kalender körs sedan i bakgrunden.
+      const interviewId = interviewRow?.id;
+      handleOpenChange(false);
+      setIsSubmitting(false);
 
       toast.success(
         isReschedule ? `Intervju ombokad för ${candidateName}` : `Intervju bokad för ${candidateName}`,
-        { description, route: '/my-candidates' } as Parameters<typeof toast.success>[1],
+        {
+          description: isReschedule
+            ? 'Den nya tiden skickas till kandidaten.'
+            : 'Kallelsen med kalenderinbjudan skickas till kandidaten.',
+          route: '/my-candidates',
+        } as Parameters<typeof toast.success>[1],
       );
 
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
@@ -526,13 +470,73 @@ export const BookInterviewDialog = ({
       queryClient.invalidateQueries({ queryKey: ['existing-interview', applicationId] });
       queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
       onSuccess?.();
+
+      void (async () => {
+        let deliveryFailed = false;
+
+        // 1. Send the interview invitation email with .ics calendar attachment
+        try {
+          const { data: appData } = await supabase
+            .from('job_applications')
+            .select('email, first_name')
+            .eq('id', applicationId)
+            .single();
+
+          const candidateEmail = appData?.email;
+          if (candidateEmail && interviewId) {
+            const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
+              body: {
+                candidateEmail,
+                candidateName,
+                companyName: companyName || 'Företag',
+                jobTitle,
+                scheduledAt: scheduledAt.toISOString(),
+                durationMinutes: parseInt(duration),
+                locationType,
+                locationDetails: normalizedVideoLocationDetails || undefined,
+                message: message || undefined,
+                employerEmail: user?.email || undefined,
+                employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
+                interviewId,
+                // En ombokning uppdaterar kalendern och appnotisen, men skickar
+                // inte en ny kopia av kallelsemejlet.
+                sendEmail: !isReschedule,
+              },
+            });
+            if (invitationError) throw invitationError;
+          }
+        } catch (emailErr) {
+          console.error('Error sending interview email:', emailErr);
+          deliveryFailed = true;
+        }
+
+        // 2. Trigger outreach automations (chat, push, etc.)
+        try {
+          const { error: dispatchError } = await supabase.functions.invoke('outreach-dispatch', {
+            body: {
+              processPending: true,
+              trigger: 'interview_scheduled',
+              interviewId,
+            },
+          });
+          if (dispatchError) throw dispatchError;
+        } catch (dispatchErr) {
+          console.error('Error invoking outreach-dispatch:', dispatchErr);
+          deliveryFailed = true;
+        }
+
+        if (deliveryFailed) {
+          toast.error('Tiden är sparad, men utskicket gick inte fram', {
+            description: 'Öppna intervjun och skicka tiden igen så får kandidaten kallelsen.',
+          });
+        }
+      })();
     } catch (error) {
       console.error('Error creating interview:', error);
       const reason = error instanceof Error ? error.message : undefined;
       toast.error(isReschedule ? 'Kunde inte boka om intervjun' : 'Kunde inte boka intervjun', {
         description: reason,
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -557,17 +561,30 @@ export const BookInterviewDialog = ({
     return () => clearInterval(timer);
   }, [open]);
 
+  // Tiden som redan är skickad till kandidaten är förbrukad – den ska inte gå
+  // att välja igen på samma dag, annars skickar man om exakt samma kallelse.
+  const usedTimeOnSelectedDate = React.useMemo(() => {
+    if (!isReschedule || !existingInterview || !date) return null;
+    const sent = new Date(existingInterview.scheduled_at);
+    if (Number.isNaN(sent.getTime())) return null;
+    if (startOfDay(sent).getTime() !== startOfDay(date).getTime()) return null;
+    return `${String(sent.getHours()).padStart(2, '0')}:${String(Math.floor(sent.getMinutes() / 15) * 15).padStart(2, '0')}`;
+  }, [isReschedule, existingInterview, date]);
+
   // Filter times if today is selected - only show future times
   const timeOptions = React.useMemo(() => {
-    if (!date || !isToday(date)) return allTimeOptions;
+    const base = usedTimeOnSelectedDate
+      ? allTimeOptions.filter((t) => t !== usedTimeOnSelectedDate)
+      : allTimeOptions;
+    if (!date || !isToday(date)) return base;
     const now = new Date(minuteTick);
-    return allTimeOptions.filter(t => {
+    return base.filter(t => {
       const [hours, minutes] = t.split(':').map(Number);
       const timeDate = new Date(now);
       timeDate.setHours(hours, minutes, 0, 0);
       return timeDate > now;
     });
-  }, [allTimeOptions, date, minuteTick]);
+  }, [allTimeOptions, date, minuteTick, usedTimeOnSelectedDate]);
 
   // Nära midnatt finns ingen tid kvar i dag. Då hoppar vi automatiskt fram till
   // nästa dag i stället för att visa en tom, otryckbar lista.
@@ -900,11 +917,13 @@ export const BookInterviewDialog = ({
           )}
 
           {locationType === 'office' && officeInstructions && (
-            <div className="min-w-0">
-              <p className="text-sm leading-5 text-white">
-                <span className="font-medium">Instruktioner till kandidaten:</span>{' '}
-                <span className="whitespace-pre-wrap">{officeInstructions}</span>
-              </p>
+            <div className="min-w-0 space-y-2">
+              <Label className="text-white">Instruktioner till kandidaten</Label>
+              <div className="min-w-0 max-w-full rounded-md border border-white/20 bg-white/10 px-3 py-2.5">
+                <p className="text-sm leading-5 text-white whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                  {officeInstructions}
+                </p>
+              </div>
             </div>
           )}
 
@@ -943,9 +962,9 @@ export const BookInterviewDialog = ({
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isSubmitting || !date || lockedByColleague || isUnchangedFromExisting}
-                className={`flex-1 min-h-[44px] rounded-full transition-colors duration-150 active:scale-95 focus:outline-none focus:ring-0 ${
-                  !isSubmitting && date && !lockedByColleague && !isUnchangedFromExisting ? 'border border-white/30' : ''
-                }`}
+                // Ramen ligger kvar hela tiden (bara färgen byts) så knappen
+                // aldrig hoppar eller blinkar när man byter plats eller tid.
+                className="flex-1 min-h-[44px] rounded-full border border-white/30 transition-none active:scale-95 focus:outline-none focus:ring-0 disabled:border-white/10"
               >
                 {isSubmitting ? (
                   <>
