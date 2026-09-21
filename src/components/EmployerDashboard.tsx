@@ -408,6 +408,28 @@ const EmployerDashboard = memo(() => {
     draft: sliceToPage(tabBuckets.draft),
   }), [sliceToPage, tabBuckets]);
 
+  // Kopian bakom det utfadande kortet får en hel frame på sig att målas innan
+  // originalet längre ned döljs — då kan ingen tom ruta uppstå.
+  useEffect(() => {
+    if (!removingJobId || !deleteUnderlayJob) {
+      setUnderlayPainted(false);
+      return;
+    }
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setUnderlayPainted(true));
+    });
+    return () => { cancelAnimationFrame(raf1); if (raf2) cancelAnimationFrame(raf2); };
+  }, [removingJobId, deleteUnderlayJob]);
+
+  // Byter man flik eller sida mitt i en borttagning ska inga spöklager ligga kvar.
+  useEffect(() => {
+    setRemovingJobId(null);
+    setDeleteUnderlayJob(null);
+  }, [activeTab, page]);
+
+
+
   const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);
