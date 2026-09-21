@@ -139,6 +139,8 @@ export function useSidebarRoutePrefetch() {
         prewarmJobTemplates(user.id);
         break;
       }
+      case '/company-profile':
+      case '/employer-profile':
       case '/reviews': {
         if (!queryClient.getQueryData(['company-profile', user.id])) {
           queryClient.prefetchQuery({
