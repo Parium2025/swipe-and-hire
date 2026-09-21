@@ -174,6 +174,8 @@ serve(async (req) => {
       const countyValue = workplace_county || '';
 
       // Fetch subcategories column via select above (added below)
+      const matched: Array<{ id: string; user_id: string }> = [];
+
       for (const search of batch) {
         let matches = true;
 
