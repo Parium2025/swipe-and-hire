@@ -561,17 +561,30 @@ export const BookInterviewDialog = ({
     return () => clearInterval(timer);
   }, [open]);
 
+  // Tiden som redan är skickad till kandidaten är förbrukad – den ska inte gå
+  // att välja igen på samma dag, annars skickar man om exakt samma kallelse.
+  const usedTimeOnSelectedDate = React.useMemo(() => {
+    if (!isReschedule || !existingInterview || !date) return null;
+    const sent = new Date(existingInterview.scheduled_at);
+    if (Number.isNaN(sent.getTime())) return null;
+    if (startOfDay(sent).getTime() !== startOfDay(date).getTime()) return null;
+    return `${String(sent.getHours()).padStart(2, '0')}:${String(Math.floor(sent.getMinutes() / 15) * 15).padStart(2, '0')}`;
+  }, [isReschedule, existingInterview, date]);
+
   // Filter times if today is selected - only show future times
   const timeOptions = React.useMemo(() => {
-    if (!date || !isToday(date)) return allTimeOptions;
+    const base = usedTimeOnSelectedDate
+      ? allTimeOptions.filter((t) => t !== usedTimeOnSelectedDate)
+      : allTimeOptions;
+    if (!date || !isToday(date)) return base;
     const now = new Date(minuteTick);
-    return allTimeOptions.filter(t => {
+    return base.filter(t => {
       const [hours, minutes] = t.split(':').map(Number);
       const timeDate = new Date(now);
       timeDate.setHours(hours, minutes, 0, 0);
       return timeDate > now;
     });
-  }, [allTimeOptions, date, minuteTick]);
+  }, [allTimeOptions, date, minuteTick, usedTimeOnSelectedDate]);
 
   // Nära midnatt finns ingen tid kvar i dag. Då hoppar vi automatiskt fram till
   // nästa dag i stället för att visa en tom, otryckbar lista.
