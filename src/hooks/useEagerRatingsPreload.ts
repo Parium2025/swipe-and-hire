@@ -1,4 +1,6 @@
 import { invalidateMyProfileCache } from '@/lib/myProfile';
+import { clearCachedCalendarStatus } from '@/lib/calendarConnection';
+
 import { useEffect, useRef, useCallback } from 'react';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
