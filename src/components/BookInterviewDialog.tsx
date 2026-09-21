@@ -846,7 +846,7 @@ export const BookInterviewDialog = ({
               </div>
               {officeInstructions && (
                 <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                  <Label className="text-white/80 text-xs uppercase tracking-wide mb-1.5 block">Instruktioner till kandidaten</Label>
+                  <Label className="mb-1.5 block text-sm text-white">Instruktioner till kandidaten:</Label>
                   <p className="text-white text-sm whitespace-pre-wrap">{officeInstructions}</p>
                 </div>
               )}
