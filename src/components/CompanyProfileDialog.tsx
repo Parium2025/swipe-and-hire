@@ -138,7 +138,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         () => {
           // Hämta om via RPC:t i stället för att skriva in den råa profilraden
           // i cachen — bara de publika fälten får nå vyn.
-          queryClient.invalidateQueries({ queryKey: ['company-profile', companyId] });
+          queryClient.invalidateQueries({ queryKey: ['company-public-profile', companyId] });
         }
       )
       .subscribe();
