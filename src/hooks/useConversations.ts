@@ -1027,35 +1027,10 @@ export function useConversationMessages(
     queryFn: async () => {
       if (!conversationId) return [];
 
-      // Fetch latest messages with a reasonable limit to prevent memory issues
-      const { data: messages, error } = await supabase
-        .from('conversation_messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false })
-        .limit(MESSAGES_PAGE_SIZE);
-
-      if (error) throw error;
-      if (!messages || messages.length === 0) {
-        setHasMore(false);
-        return [];
-      }
-
+      const result = await fetchConversationMessagesPage(conversationId);
       // If we got fewer than the page size, there are no older messages
-      setHasMore(messages.length >= MESSAGES_PAGE_SIZE);
-
-      // Reverse to get chronological order (we fetched newest-first for the LIMIT to work correctly)
-      messages.reverse();
-
-      // Fetch sender profiles
-      const senderIds = [...new Set(messages.map(m => m.sender_id))];
-
-      const profileMap = await fetchCachedProfiles(senderIds);
-
-      return messages.map(msg => ({
-        ...msg,
-        sender_profile: profileMap.get(msg.sender_id),
-      })) as ConversationMessage[];
+      setHasMore(result.length >= MESSAGES_PAGE_SIZE);
+      return result;
     },
     enabled: !!conversationId,
     gcTime: 30 * 60 * 1000,
