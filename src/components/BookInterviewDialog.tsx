@@ -857,10 +857,16 @@ export const BookInterviewDialog = ({
                     placeholder="Skriv en tid, t.ex. 20:07"
                     className="h-11 bg-white/10 border-white/20 text-base text-white placeholder:text-white/50"
                   />
-                  <p className="mt-1.5 text-xs leading-snug text-white/80">
+                  <p className="mt-1.5 text-xs leading-snug text-white">
                     Skriv valfri tid eller välj en kvartartid nedan.
                   </p>
-                  <div className="mt-2 max-h-[176px] overflow-y-auto overscroll-contain scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <div
+                    onWheel={(e) => e.stopPropagation()}
+                    onTouchMove={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+                    className="mt-2 max-h-[min(44vh,220px)] overflow-y-auto overscroll-contain scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  >
                     <div className="grid grid-cols-4 gap-1.5">
                       {timeOptions.map((t) => (
                         <button
@@ -875,7 +881,7 @@ export const BookInterviewDialog = ({
                             'h-9 rounded-md border text-sm transition-colors focus:outline-none focus:ring-0',
                             t === time
                               ? 'bg-white/20 border-white/40 text-white'
-                              : 'bg-white/10 border-white/20 text-white/80 hover:text-white hover:border-white/30'
+                              : 'bg-white/10 border-white/20 text-white hover:border-white/30'
                           )}
                         >
                           {t}

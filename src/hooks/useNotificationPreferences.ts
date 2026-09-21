@@ -111,7 +111,12 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
   // Kanaler som kräver ett aktivt val. Mejlsammanfattningar för chatt och nya
   // ansökningar kan bli mycket stora volymer — de skickas bara om användaren
   // uttryckligen slagit på dem.
-  const DEFAULT_OFF = new Set(['new_message:email', 'new_application:email']);
+  const DEFAULT_OFF = new Set([
+    'new_message:email',
+    'new_application:email',
+    // Chattmeddelandet vid kandidatens svar slås på aktivt.
+    'interview_response:in_app',
+  ]);
   const defaultFor = (type: NotificationType, channel: NotificationChannel) =>
     !DEFAULT_OFF.has(`${type}:${channel}`);
 
