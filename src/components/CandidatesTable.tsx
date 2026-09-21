@@ -21,6 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
+import { prefetchCandidateNotes } from '@/hooks/useCandidateNotes';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
