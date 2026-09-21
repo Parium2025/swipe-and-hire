@@ -3413,6 +3413,57 @@ export type Database = {
           },
         ]
       }
+      push_notification_queue: {
+        Row: {
+          attempts: number
+          body: string
+          claimed_at: string | null
+          created_at: string
+          data: Json
+          dedupe_key: string | null
+          id: number
+          last_error: string | null
+          notification_type: string | null
+          recipient_id: string
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          claimed_at?: string | null
+          created_at?: string
+          data?: Json
+          dedupe_key?: string | null
+          id?: number
+          last_error?: string | null
+          notification_type?: string | null
+          recipient_id: string
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          claimed_at?: string | null
+          created_at?: string
+          data?: Json
+          dedupe_key?: string | null
+          id?: number
+          last_error?: string | null
+          notification_type?: string | null
+          recipient_id?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           bucket_key: string
@@ -4196,6 +4247,31 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_push_notifications: {
+        Args: { p_limit: number }
+        Returns: {
+          attempts: number
+          body: string
+          claimed_at: string | null
+          created_at: string
+          data: Json
+          dedupe_key: string | null
+          id: number
+          last_error: string | null
+          notification_type: string | null
+          recipient_id: string
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "push_notification_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       cleanup_expired_email_confirmation_capabilities: {
         Args: { _batch_size?: number }
         Returns: {
@@ -4207,6 +4283,7 @@ export type Database = {
         Args: { _batch_size?: number }
         Returns: number
       }
+      cleanup_push_notification_queue: { Args: never; Returns: number }
       cleanup_stale_sessions: { Args: never; Returns: number }
       complete_cv_analysis: {
         Args: {
@@ -4217,6 +4294,10 @@ export type Database = {
         Returns: undefined
       }
       complete_past_interviews: { Args: never; Returns: number }
+      complete_push_notifications: {
+        Args: { p_error?: string; p_failed_ids: number[]; p_sent_ids: number[] }
+        Returns: undefined
+      }
       compute_job_fingerprint: {
         Args: { j: Database["public"]["Tables"]["job_postings"]["Row"] }
         Returns: string
@@ -4309,6 +4390,7 @@ export type Database = {
         Args: { p_job_id: string }
         Returns: boolean
       }
+      enqueue_push_notifications: { Args: { p_rows: Json }; Returns: number }
       ensure_default_candidate_list: {
         Args: { p_owner_id: string }
         Returns: string
