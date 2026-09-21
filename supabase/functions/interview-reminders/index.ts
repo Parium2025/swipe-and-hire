@@ -347,16 +347,45 @@ Deno.serve(async (req) => {
       // Fönstret är brett men cron kör varje minut – utan denna
       // markering skulle samma påminnelse skickas två gånger.
       .is("reminder_sent_at", null)
-      // Taket är högt satt (2000) eftersom körningen numera arbetar parallellt
-      // och dessutom stoppas av en tidsbudget nedan. Vid extrema toppar tas
-      // resten i nästa minutkörning i stället för att hela körningen dör.
+      // Stabil ordning + sidindelning: varje arbetare tar sin egen sida, så
+      // tiotusentals möten kan behandlas parallellt inom samma minut.
       .order("scheduled_at", { ascending: true })
-      .limit(2000);
+      .order("id", { ascending: true })
+      .range(workerPage * PAGE_SIZE, workerPage * PAGE_SIZE + PAGE_SIZE - 1);
 
     if (interviewsError) {
       console.error("Error fetching interviews:", interviewsError);
       throw interviewsError;
     }
+
+    // Full sida = det finns troligen mer. Koordinatorn startar då extra
+    // arbetare som tar nästa sidor samtidigt i stället för nästa minut.
+    if (workerPage === 0 && (upcomingInterviews?.length ?? 0) >= PAGE_SIZE) {
+      const { count } = await supabase
+        .from("interviews")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["pending", "confirmed"])
+        .gte("scheduled_at", now.toISOString())
+        .lte("scheduled_at", elevenMinutesFromNow.toISOString())
+        .is("reminder_sent_at", null);
+      const pagesNeeded = Math.min(Math.ceil((count ?? PAGE_SIZE) / PAGE_SIZE), MAX_WORKERS);
+      for (let page = 1; page < pagesNeeded; page++) {
+        const call = fetch(`${supabaseUrl}/functions/v1/interview-reminders`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({ worker_page: page }),
+        }).catch((err) => console.error(`worker ${page} failed to start`, err));
+        // Starta arbetaren utan att vänta – koordinatorn kör sin egen sida.
+        (globalThis as { EdgeRuntime?: { waitUntil: (p: Promise<unknown>) => void } })
+          .EdgeRuntime?.waitUntil(call);
+      }
+      console.log(`Fan-out: ${pagesNeeded} sidor (~${count} möten) behandlas parallellt`);
+    }
+
+
 
     let remindersSent = 0;
     const errors: string[] = [];
