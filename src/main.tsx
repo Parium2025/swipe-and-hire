@@ -50,12 +50,14 @@ function redirectAuthTokensIfNeeded() {
   const { location } = window;
   const pathname = location.pathname;
 
-  // Sidor med EGNA ?token=-parametrar (avprenumerationslänkar i mejl) får
+  // Sidor med EGNA ?token=-parametrar (avprenumerations- och intervjulänkar) får
   // aldrig kapas hit — annars blir det en extra full sidladdning till /auth
   // med blank skärm och splash-blink direkt från inkorgen.
   if (
     pathname === '/unsubscribe' ||
     pathname === '/unsubscribe/' ||
+    pathname === '/intervjusvar' ||
+    pathname === '/intervjusvar/' ||
     /^\/oauth\/(google_calendar|microsoft_outlook)\/return\/?$/.test(pathname)
   ) return false;
 

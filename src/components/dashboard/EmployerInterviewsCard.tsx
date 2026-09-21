@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Video, Building2 } from 'lucide-react';
+import { Calendar, Video, Building2, CheckCircle2, Clock3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
@@ -120,12 +120,22 @@ export const EmployerInterviewsCard = memo(() => {
                         <TruncatedText text={interview.candidate_name} className="text-xs font-semibold text-white" insideInteractive />
                         <TruncatedText text={interview.job_title} className="text-[10px] text-white" insideInteractive />
                       </div>
-                      <span className={cn(
-                        "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap text-white",
-                        isUrgent && "bg-white/20"
-                      )}>
-                        {timeUntil}
-                      </span>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <span className={cn(
+                          "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap text-white",
+                          isUrgent && "bg-white/20"
+                        )}>
+                          {timeUntil}
+                        </span>
+                        <span className="flex items-center gap-1 whitespace-nowrap text-[9px] font-medium leading-none text-white">
+                          {interview.status === 'confirmed' ? (
+                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          ) : (
+                            <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          )}
+                          {interview.status === 'confirmed' ? 'Bekräftad' : 'Inväntar svar'}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 mt-1 text-[10px] leading-none text-white whitespace-nowrap">
                       <span className="leading-none">{formatInterviewDate(interview.scheduled_at)}</span>
