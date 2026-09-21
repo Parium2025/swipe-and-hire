@@ -371,7 +371,11 @@ Deno.serve(async (req) => {
     if (upcomingInterviews && upcomingInterviews.length > 0) {
       console.log(`Found ${upcomingInterviews.length} interviews to send reminders for`);
 
-      for (const interview of upcomingInterviews as unknown as Interview[]) {
+      // SKALA: varje intervju kräver ~6 anrop i följd. Med 200 möten i samma
+      // minutsvep hann körningen inte klart innan cron startade nästa. Nu körs
+      // åtta möten samtidigt – samma claim-skydd, samma ordning per möte, men
+      // hela svepet blir klart i tid även vid hög belastning.
+      const processInterview = async (interview: Interview) => {
         // Claim direkt: en samtidig körning får aldrig skicka samma påminnelse.
         const { data: claimed } = await supabase
           .from("interviews")
@@ -488,6 +492,11 @@ Deno.serve(async (req) => {
           { skipPush: employerGoogleCollides },
         );
 
+      };
+      const REMINDER_CONCURRENCY = 8;
+      const interviewList = upcomingInterviews as unknown as Interview[];
+      for (let i = 0; i < interviewList.length; i += REMINDER_CONCURRENCY) {
+        await Promise.all(interviewList.slice(i, i + REMINDER_CONCURRENCY).map(processInterview));
       }
     } else {
       console.log("No upcoming interviews found in the 10-minute window");
