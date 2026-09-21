@@ -40,15 +40,20 @@ interface JobTemplate {
 }
 
 const JobTemplatesOverview = () => {
-  const [templates, setTemplates] = useState<JobTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<JobTemplate | null>(null);
-
   const { user } = useAuth();
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
+
+  // Förvärmd lista (skriven av useSecondaryPagesPrewarm) läses synkront vid
+  // montering, så sidan målas direkt i stället för att visa skelett vid
+  // kallstart. Färsk data hämtas ändå alltid i bakgrunden.
+  const [templates, setTemplates] = useState<JobTemplate[]>(
+    () => (readCachedJobTemplates(user?.id) as unknown as JobTemplate[] | null) ?? [],
+  );
+  const [loading, setLoading] = useState(() => readCachedJobTemplates(user?.id) === null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<JobTemplate | null>(null);
 
   const fetchTemplates = async () => {
     if (!user) return;
