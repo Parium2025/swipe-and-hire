@@ -9,6 +9,8 @@ import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { prefetchExistingInterview } from '@/lib/existingInterviewQuery';
 import { toast } from 'sonner';
 import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
