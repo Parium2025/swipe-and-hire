@@ -74,6 +74,8 @@ async function fetchReviewsPage(companyId: string, from: number, to: number): Pr
     .select('*')
     .eq('company_id', companyId)
     .order('created_at', { ascending: false })
+    // Tiebreak så att sidorna inte kan tappa eller dubblera ett omdöme.
+    .order('id', { ascending: false })
     .range(from, to);
 
   if (error) throw error;

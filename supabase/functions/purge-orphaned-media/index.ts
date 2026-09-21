@@ -109,9 +109,13 @@ async function collectReferencedPaths(
   for (const { table, columns } of sources) {
     let from = 0
     while (true) {
+      // Utan sortering kan databasen ge sidorna i olika ordning, så rader
+      // hoppas över. Här vore det direkt farligt: en missad rad ser ut som en
+      // oanvänd fil och raderas. Sorterad sidindelning gör listan komplett.
       const { data, error } = await admin
         .from(table)
-        .select(columns.join(','))
+        .select(['id', ...columns].join(','))
+        .order('id', { ascending: true })
         .range(from, from + PAGE - 1)
 
       if (error) {

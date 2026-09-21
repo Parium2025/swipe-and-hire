@@ -156,11 +156,29 @@ async function checkConnectivityQuorum(): Promise<boolean> {
 }
 
 /**
+ * Skalning: när allt redan är friskt räcker EN liten förfrågan för att bekräfta
+ * att nätet finns. Först när den misslyckas görs den fullständiga quorum-kollan.
+ * Beteendet vid faktiskt nätbortfall är alltså identiskt, men i normalfallet
+ * skickas en tredjedel så många pings per användare.
+ */
+async function checkConnectivity(): Promise<boolean> {
+  const healthy = _isActuallyOnline && _consecutiveFailures === 0;
+  if (healthy) {
+    const ok = await pingFetch(
+      `${window.location.origin}/favicon-parium.png?_cb=${Date.now()}_f`,
+      getAdaptiveTimeout()
+    );
+    if (ok) return true;
+  }
+  return checkConnectivityQuorum();
+}
+
+/**
  * Single-flight wrapper — multiple concurrent callers share the same check.
  */
 function singleFlightCheck(): Promise<boolean> {
   if (_inflightCheck) return _inflightCheck;
-  _inflightCheck = checkConnectivityQuorum().finally(() => {
+  _inflightCheck = checkConnectivity().finally(() => {
     _inflightCheck = null;
   });
   return _inflightCheck;

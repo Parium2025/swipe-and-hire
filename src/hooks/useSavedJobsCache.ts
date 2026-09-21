@@ -250,6 +250,9 @@ export async function fetchSavedJobsForUser(userId: string): Promise<SavedJob[]>
       .select(SAVED_SELECT)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
+      // Tiebreak: två poster med exakt samma tidsstämpel kan annars byta plats
+      // mellan sidorna, så en annons hoppas över eller dyker upp två gånger.
+      .order('id', { ascending: false })
       .range(from, to),
   );
   const items = sanitizeSavedJobsList<SavedJob>(rows);
@@ -265,6 +268,7 @@ export async function fetchSkippedJobsForUser(userId: string): Promise<SkippedJo
       .eq('user_id', userId)
       .eq('action', 'skipped')
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .range(from, to),
   );
   const items = sanitizeSavedJobsList<SkippedJob>(rows);

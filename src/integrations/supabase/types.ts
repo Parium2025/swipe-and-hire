@@ -4707,6 +4707,10 @@ export type Database = {
         Args: { _counts: number[]; _job_ids: string[] }
         Returns: undefined
       }
+      increment_saved_search_matches: {
+        Args: { p_ids: string[] }
+        Returns: undefined
+      }
       is_allowed_attachment_path: {
         Args: { object_name: string }
         Returns: boolean

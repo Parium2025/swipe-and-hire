@@ -20,7 +20,11 @@ export const endSignOutTracking = () => { signOutInProgress = false; };
 
 const SESSION_TOKEN_COOKIE = 'parium_device_token';
 const HEARTBEAT_INTERVAL_MS = 90 * 1000; // 90s — well under DB cleanup threshold (5 min)
-const VALIDITY_CHECK_INTERVAL_MS = 30 * 1000; // 30 seconds — reduced frequency to avoid false kicks on mobile
+// Skalning: realtidskanalen på user_sessions fångar återkallanden direkt och
+// visibilitychange kör en färsk koll vid retur. Pollningen är bara ett skyddsnät
+// för tappade sockets, så 2 minuter räcker – det tredjedelar databaslasten per
+// inloggad användare utan att fördröja en verklig utloggning.
+const VALIDITY_CHECK_INTERVAL_MS = 120 * 1000;
 
 /**
  * Generate a unique session token per browser (persisted in localStorage).
