@@ -41,10 +41,13 @@ const InterviewRescheduledEmail = ({
   decline_url,
 }: Props) => {
   const locationLabel = location_type === 'video' ? 'Videointervju' : 'På plats'
-  const [locationAddress = '', ...instructionParts] = location_details.split(/\n\s*\n/)
-  const locationInstructions = instructionParts.join('\n\n').trim()
-  const visibleLocation = location_type === 'office' ? locationAddress.trim() : location_details
-  const isVideoLink = location_type === 'video' && visibleLocation.startsWith('http')
+  
+  // Split location_details into address and instructions (separated by \n\n)
+  const parts = (location_details || '').split('\n\n')
+  const address = parts[0] || ''
+  const instructions = parts.slice(1).join('\n\n').trim()
+  
+  const isVideoLink = location_type === 'video' && address.startsWith('http')
 
   return (
     <Html lang="sv" dir="ltr">
@@ -68,47 +71,28 @@ const InterviewRescheduledEmail = ({
               <Text style={oldRow}>
                 Tidigare tid: {old_date_str} {old_time_str}
               </Text>
-            {location_type === "office" && location_details.includes("\n\n") ? (
-              <>
-                <Text style={row}>
-                  <strong>{locationLabel}:</strong>{" "}
-                  {maps_url ? (
-                    <Link href={maps_url} style={link}>
-                      {location_details.split("\n\n")[0]}
-                    </Link>
-                  ) : (
-                    location_details.split("\n\n")[0]
-                  )}
-                </Text>
-                <Text style={{ ...row, whiteSpace: "pre-line" as const }}>
-                  <strong>Instruktioner:</strong>{" "}
-                  {location_details.split("\n\n").slice(1).join("\n\n")}
-                </Text>
-              </>
-            ) : (
-              <Text style={row}>
-                <strong>{locationLabel}:</strong>{" "}
-                {isVideoLink ? (
-                  <Link href={location_details} style={link}>
-                    {location_details}
-                  </Link>
-                ) : maps_url ? (
-                  <Link href={maps_url} style={link}>
-                    {location_details}
-                  </Link>
-                ) : (
-                  location_details || "Information meddelas"
-                )}
-              </Text>
-            )}
-                visibleLocation || 'Information meddelas'
+            ) : null}
+            <Text style={row}><strong>Ny dag:</strong> {date_str}</Text>
+            <Text style={row}><strong>Ny tid:</strong> {time_str} · {duration_minutes} min</Text>
+            
+            {/* Address Row */}
+            <Text style={row}>
+              <strong>{locationLabel}:</strong>{' '}
+              {isVideoLink ? (
+                <Link href={address} style={link}>{address}</Link>
+              ) : maps_url ? (
+                <Link href={maps_url} style={link}>{address}</Link>
+              ) : (
+                address || 'Information meddelas'
               )}
             </Text>
-            {location_type === 'office' && locationInstructions ? (
-              <Section style={instructionsSection}>
-                <Text style={smallLabel}>Instruktioner:</Text>
-                <Text style={{ ...text, whiteSpace: 'pre-line' as const }}>{locationInstructions}</Text>
-              </Section>
+
+            {/* Separate Instructions Row */}
+            {location_type === 'office' && instructions ? (
+              <Text style={{ ...row, marginTop: '8px' }}>
+                <strong>Instruktioner:</strong>{' '}
+                <span style={{ whiteSpace: 'pre-line' }}>{instructions}</span>
+              </Text>
             ) : null}
           </Section>
 
@@ -173,8 +157,6 @@ const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0
 const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0' }
 const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const oldRow = { margin: '4px 0 12px', fontSize: '13px', color: '#6B7280', textDecoration: 'line-through' as const }
-const smallLabel = { fontSize: '13px', color: '#6B7280', fontWeight: 600 as const, margin: '0 0 8px' }
-const instructionsSection = { borderTop: '1px solid #e2e8f0', margin: '16px 0 0', padding: '16px 0 0' }
 const link = { color: '#001F3D', textDecoration: 'underline', wordBreak: 'break-all' as const }
 const calendarLink = { color: '#6B7280', textDecoration: 'underline', fontSize: '13px' }
 const answerSection = { margin: '24px 0 0', textAlign: 'center' as const }
