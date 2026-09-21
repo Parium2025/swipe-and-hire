@@ -832,24 +832,25 @@ export const BookInterviewDialog = ({
           )}
 
 
-          {/* Location details - Address and Instructions */}
+          {/* Location details */}
           {locationType === 'office' && (
-            <div className="min-w-0 space-y-3">
-              <div className="min-w-0 space-y-2">
-                <Label className="text-white">Adress</Label>
-                <Input
-                  value={editableAddress}
-                  onChange={(e) => setEditableAddress(e.target.value)}
-                  placeholder="Ange adress för mötet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                />
-              </div>
-              {officeInstructions && (
-                <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-                  <Label className="mb-1.5 block text-sm text-white">Instruktioner till kandidaten:</Label>
-                  <p className="text-white text-sm whitespace-pre-wrap">{officeInstructions}</p>
-                </div>
-              )}
+            <div className="min-w-0 space-y-2">
+              <Label className="text-white">Adress</Label>
+              <Input
+                value={editableAddress}
+                onChange={(e) => setEditableAddress(e.target.value)}
+                placeholder="Ange adress för mötet"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              />
+            </div>
+          )}
+
+          {locationType === 'office' && officeInstructions && (
+            <div className="min-w-0">
+              <p className="text-sm leading-5 text-white">
+                <span className="font-medium">Instruktioner till kandidaten:</span>{' '}
+                <span className="whitespace-pre-wrap">{officeInstructions}</span>
+              </p>
             </div>
           )}
 
