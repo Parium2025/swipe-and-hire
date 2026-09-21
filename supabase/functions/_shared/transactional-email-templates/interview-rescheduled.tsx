@@ -68,16 +68,39 @@ const InterviewRescheduledEmail = ({
               <Text style={oldRow}>
                 Tidigare tid: {old_date_str} {old_time_str}
               </Text>
-            ) : null}
-            <Text style={row}><strong>Ny dag:</strong> {date_str}</Text>
-            <Text style={row}><strong>Ny tid:</strong> {time_str} · {duration_minutes} min</Text>
-            <Text style={row}>
-              <strong>{locationLabel}:</strong>{' '}
-              {isVideoLink ? (
-                <Link href={visibleLocation} style={link}>{visibleLocation}</Link>
-              ) : maps_url ? (
-                <Link href={maps_url} style={link}>{visibleLocation}</Link>
-              ) : (
+            {location_type === "office" && location_details.includes("\n\n") ? (
+              <>
+                <Text style={row}>
+                  <strong>{locationLabel}:</strong>{" "}
+                  {maps_url ? (
+                    <Link href={maps_url} style={link}>
+                      {location_details.split("\n\n")[0]}
+                    </Link>
+                  ) : (
+                    location_details.split("\n\n")[0]
+                  )}
+                </Text>
+                <Text style={{ ...row, whiteSpace: "pre-line" as const }}>
+                  <strong>Instruktioner:</strong>{" "}
+                  {location_details.split("\n\n").slice(1).join("\n\n")}
+                </Text>
+              </>
+            ) : (
+              <Text style={row}>
+                <strong>{locationLabel}:</strong>{" "}
+                {isVideoLink ? (
+                  <Link href={location_details} style={link}>
+                    {location_details}
+                  </Link>
+                ) : maps_url ? (
+                  <Link href={maps_url} style={link}>
+                    {location_details}
+                  </Link>
+                ) : (
+                  location_details || "Information meddelas"
+                )}
+              </Text>
+            )}
                 visibleLocation || 'Information meddelas'
               )}
             </Text>
