@@ -74,6 +74,26 @@ export function useSecondaryPagesPrewarm() {
 
       prewarmEmployerSettings(userId);
 
+      // ── Mallar (/templates) ──
+      // Listan låg tidigare helt utanför all förvärmning och gav skelett vid
+      // varje kallstart. Samma query som sidan använder, samma cacheformat.
+      prewarmJobTemplates(userId);
+
+      // ── Omdömen (/reviews) ──
+      // Sidan läser företagsprofilen (samma nyckel som dialogen) plus första
+      // sidan recensioner. Båda värms här så vyn målas direkt.
+      if (!queryClient.getQueryData(['company-profile', userId])) {
+        void queryClient.prefetchQuery({
+          queryKey: ['company-profile', userId],
+          queryFn: async () => {
+            const { data: rows } = await fetchMyProfile();
+            return Array.isArray(rows) ? rows[0] ?? null : null;
+          },
+          staleTime: 5 * 60 * 1000,
+        }).catch(() => { /* sidan hämtar själv */ });
+      }
+      await prewarmCompanyReviews(queryClient, userId);
+
       // ── Statistik: fyll cachen om den är tom/utgången ──
       // Sidan har tre datakällor (översikt, avancerat, team). Tidigare värmdes
       // bara översikten, så /reports visade fortfarande spinner i de två andra
