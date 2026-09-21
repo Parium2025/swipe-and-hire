@@ -68,10 +68,15 @@ export function useActiveCriteriaEvalRuns() {
   const query = useQuery({
     queryKey: ['criteria-eval-runs'],
     enabled: !!user,
+    // Under pågående körning pollas tätt så förloppet rör sig mjukt. När inget
+    // är igång är pollningen bara ett skyddsnät (starten invaliderar ändå
+    // direkt), så den går lugnt – vid många samtidiga arbetsgivare är det
+    // skillnaden mellan tre och en förfrågan per minut och användare.
     refetchInterval: (q) => {
       const rows = (q.state.data as CriteriaEvalRun[] | undefined) ?? [];
-      return rows.length > 0 ? 3000 : 20000;
+      return rows.length > 0 ? 3000 : 60000;
     },
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from('criteria_eval_runs')
