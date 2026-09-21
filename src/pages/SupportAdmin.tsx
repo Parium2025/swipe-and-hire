@@ -37,8 +37,14 @@ interface SupportMessage {
   };
 }
 
+const PAGE_SIZE = 50;
+type TicketFilter = 'active' | 'archived';
+
 const SupportAdmin = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [filter, setFilter] = useState<TicketFilter>('active');
+  const [totalCount, setTotalCount] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [replyMessage, setReplyMessage] = useState('');
@@ -47,8 +53,11 @@ const SupportAdmin = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchTickets();
-  }, []);
+    setLoading(true);
+    setSelectedTicket(null);
+    fetchTickets(0, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   useEffect(() => {
     if (selectedTicket) {
@@ -56,17 +65,27 @@ const SupportAdmin = () => {
     }
   }, [selectedTicket]);
 
-  const fetchTickets = async () => {
+  // Ärenden hämtas sidvis. Även med 100 000 ärenden laddas bara 50 åt gången,
+  // och arkivet (stängda ärenden) ligger för sig så att listan bara visar det
+  // som faktiskt behöver hanteras.
+  const fetchTickets = async (offset: number, replace: boolean) => {
     try {
-      const { data: ticketsData, error } = await supabase
+      let query = supabase
         .from('support_tickets')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
-        // Tak: annars hämtas varje ärende som någonsin skapats när supporten
-        // växer. De 300 senaste täcker arbetsflödet och sidan öppnas direkt.
-        .limit(300);
+        // Tiebreak så att sidorna inte kan tappa eller dubblera ett ärende.
+        .order('id', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      query = filter === 'archived'
+        ? query.eq('status', 'closed')
+        : query.in('status', ['open', 'in_progress']);
+
+      const { data: ticketsData, error, count } = await query;
 
       if (error) throw error;
+      setTotalCount(count ?? 0);
       
       // Hämta användardata separat
       if (ticketsData && ticketsData.length > 0) {
@@ -81,15 +100,21 @@ const SupportAdmin = () => {
           profiles: profilesData?.find(p => p.user_id === ticket.user_id) || null
         }));
         
-        setTickets(ticketsWithProfiles);
-      } else {
-        setTickets(ticketsData || []);
+        setTickets(prev => (replace ? ticketsWithProfiles : [...prev, ...ticketsWithProfiles]));
+      } else if (replace) {
+        setTickets([]);
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    await fetchTickets(tickets.length, false);
   };
 
   const fetchMessages = async (ticketId: string) => {
@@ -143,7 +168,7 @@ const SupportAdmin = () => {
         description: `Ärendet har markerats som ${getStatusLabel(status).toLowerCase()}`
       });
 
-      fetchTickets();
+      fetchTickets(0, true);
       if (selectedTicket?.id === ticketId) {
         setSelectedTicket({ ...selectedTicket, status });
       }
