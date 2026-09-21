@@ -94,6 +94,8 @@ export function ActiveSessionsSettings() {
 
       setHasError(false);
       setSessions(enriched);
+      if (user?.id) sessionsCache = { userId: user.id, data: enriched };
+
     } catch (err) {
       console.warn('Error fetching sessions:', err);
       setHasError(true);
