@@ -105,7 +105,9 @@ export function ActiveSessionsSettings() {
   }, [user?.id]);
 
   useEffect(() => {
-    fetchSessions();
+    // Finns en känd lista visas den direkt och uppdateras tyst i bakgrunden.
+    fetchSessions(!!(user?.id && sessionsCache?.userId === user.id));
+
 
     // Auto-uppdatera var 30:e sekund samt när fliken/fönstret blir aktivt igen
     const interval = window.setInterval(() => {
