@@ -264,7 +264,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error('export-my-data error:', err);
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
+    return new Response(JSON.stringify({ error: 'Kunde inte hämta dina uppgifter just nu. Försök igen om en stund.' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
