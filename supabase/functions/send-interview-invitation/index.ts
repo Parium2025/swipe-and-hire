@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 import { addInterviewToCalendar } from '../_shared/calendarSync.ts'
 import { SUPPORTED_CONNECTORS } from '../_shared/appUserScopes.ts'
+import { icsUrlFor } from '../_shared/icsLink.ts'
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,

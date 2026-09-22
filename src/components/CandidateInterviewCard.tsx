@@ -280,11 +280,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
         {(isPending || isConfirmed) && (
           <Button
             onClick={() => {
-              window.open(
-                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-interview-ics?id=${interview.id}`,
-                '_blank',
-                'noopener,noreferrer',
-              );
+              void downloadInterviewIcs(interview.id);
             }}
             variant="ghost"
             className="w-full text-white hover:bg-white/10 border border-white/10"

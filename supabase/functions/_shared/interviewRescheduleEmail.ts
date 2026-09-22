@@ -5,6 +5,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendLoggedTemplateEmail } from "./transactional-email-templates/send-logged-email.ts";
+import { icsUrlFor } from "./icsLink.ts";
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString("sv-SE", {
