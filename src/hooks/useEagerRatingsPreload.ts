@@ -10,6 +10,7 @@ import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
+import { fetchEmployerInterviewsForUser } from '@/hooks/useInterviews';
 import { notesCache, questionsCache, summaryCache } from '@/components/candidateProfile/candidateProfileCache';
 import { clearCandidateProfilesMemoryCache } from '@/hooks/useCandidateProfiles';
 
