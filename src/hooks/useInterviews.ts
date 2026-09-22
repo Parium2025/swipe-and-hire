@@ -29,6 +29,12 @@ export interface Interview {
 /** Möten som pågår just nu ska ligga kvar; längsta rimliga intervju. */
 const IN_PROGRESS_WINDOW_MS = 6 * 60 * 60 * 1000;
 
+/**
+ * Avslutade och avböjta möten ligger kvar ett dygn i arbetsgivarens kort så
+ * att ingen kandidat glöms bort — sedan städas de bort automatiskt.
+ */
+const KEEP_VISIBLE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 // 🔥 localStorage cache for employer interviews - instant-load
 const EMPLOYER_INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 
