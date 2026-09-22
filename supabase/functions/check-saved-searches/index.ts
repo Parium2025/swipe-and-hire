@@ -376,7 +376,12 @@ async function fullScan(supabase: any) {
         }
       }
       if (search.city) {
-        query = query.or(`workplace_city.ilike.%${search.city}%,workplace_municipality.ilike.%${search.city}%`);
+        // SÄKERHET: samma rensning som för sökfrågan — staden kommer från
+        // användarinmatning och får inte kunna ändra filteruttrycket.
+        const safeCity = String(search.city).replace(/[,()"*\\]/g, ' ').trim();
+        if (safeCity) {
+          query = query.or(`workplace_city.ilike.%${safeCity}%,workplace_municipality.ilike.%${safeCity}%`);
+        }
       }
       if (search.county) {
         query = query.eq('workplace_county', search.county);

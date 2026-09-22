@@ -137,10 +137,12 @@ const handler = async (req: Request): Promise<Response> => {
 
 
     const {
-      candidateEmail, candidateName, companyName, jobTitle,
+      candidateName, companyName, jobTitle,
       scheduledAt, durationMinutes, locationType, locationDetails, message,
       employerEmail, employerName, interviewId, sendEmail,
     } = parsed.data;
+    // SÄKERHET: kan skrivas över med mejlet från den ansökan intervjun gäller.
+    let candidateEmail = parsed.data.candidateEmail;
 
     // Revisionen håller bokningens identitet stabil och används om en ny
     // strukturerad kallelse uttryckligen behöver skickas för en senare version.
@@ -153,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
     {
       const { data: interview } = await supabaseAdmin
         .from('interviews')
-        .select('applicant_id, employer_id, job_id, revision')
+        .select('applicant_id, employer_id, job_id, revision, application_id')
         .eq('id', interviewId)
         .maybeSingle();
       if (!interview) {
@@ -189,6 +191,20 @@ const handler = async (req: Request): Promise<Response> => {
           JSON.stringify({ error: 'Forbidden' }),
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
+      }
+      // SÄKERHET: kandidatmejlet binds till ansökningen som intervjun gäller —
+      // aldrig till en adress som valts i request-bodyn. Faller vi tillbaka på
+      // request-adressen gäller det bara äldre intervjuer utan ansökningskoppling.
+      const boundApplicationId = (interview as { application_id?: string | null }).application_id;
+      if (boundApplicationId) {
+        const { data: boundApp } = await supabaseAdmin
+          .from('job_applications')
+          .select('email')
+          .eq('id', boundApplicationId)
+          .maybeSingle();
+        if (boundApp?.email) {
+          candidateEmail = boundApp.email;
+        }
       }
     }
 

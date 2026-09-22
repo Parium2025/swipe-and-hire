@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { memo, useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText, Maximize2 } from 'lucide-react';
@@ -59,7 +60,7 @@ export const EmployerNotesCard = memo(() => {
             {!notesEditor && content && (
               <div
                 className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white overflow-hidden pointer-events-none"
-                dangerouslySetInnerHTML={{ __html: content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
               />
             )}
             {!notesEditor && !content && (
