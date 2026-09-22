@@ -188,6 +188,16 @@ export const EmployerInterviewsCard = memo(() => {
                         <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                         <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                       </span>
+                      {canDismiss && (
+                        <span className="ml-auto flex items-center gap-1 rounded bg-white/10 px-1.5 py-0.5 leading-none text-white">
+                          {interview.status === 'confirmed' ? (
+                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          ) : (
+                            <Hourglass className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          )}
+                          <span className="leading-none">{responseLabel}</span>
+                        </span>
+                      )}
                       {!canDismiss && (
                         /* Fungerar även utan kopplad kalender: filen läggs in i
                            Google, Outlook eller Apple med samma id, så inget dubbleras. */
