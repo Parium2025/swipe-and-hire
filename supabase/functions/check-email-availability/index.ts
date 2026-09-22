@@ -58,7 +58,9 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     const row = Array.isArray(data) ? data[0] : null;
-    return json({ exists: !!row?.exists_flag, checked: true, role: row?.user_role ?? null });
+    // Rollen lämnas aldrig ut till en oinloggad anropare — bara om adressen
+    // är upptagen, vilket registreringsformuläret behöver.
+    return json({ exists: !!row?.exists_flag, checked: true });
   } catch (e) {
     console.error("check-email-availability error", e);
     return json({ exists: false, checked: false });
