@@ -554,6 +554,11 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     } catch (error) {
       queryClient.invalidateQueries({ queryKey: ['saved-jobs', user.id] });
       queryClient.invalidateQueries({ queryKey: ['skipped-jobs', user.id] });
+      // Serversidig gräns (DB-triggern) → visa samma premiumruta som klienten.
+      if (String((error as { message?: string })?.message ?? '').includes('saved_jobs_free_limit_reached')) {
+        emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
+        return;
+      }
       throw error;
     }
   }, [user?.id, queryClient, savedJobIds, isPremium, premiumUnknown, removeSkippedJobLocally]);
