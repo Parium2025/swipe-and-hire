@@ -53,37 +53,14 @@ export const useEmployerBackgroundSync = () => {
   // Endast för arbetsgivare
   const isEmployer = userRole?.role === 'employer';
 
-  // 📅 Preload arbetsgivarens intervjuer (alltid hämta färsk data - realtime synkar)
+  // 📅 Preload arbetsgivarens intervjuer — exakt samma hämtning som kortet
+  // använder, annars kan förvärmningen skriva över kortet med ett smalare urval.
   const preloadInterviews = useCallback(async (userId: string) => {
-    const cacheKey = INTERVIEWS_CACHE_KEY + userId;
-
-    const { data, error } = await supabase
-      .from('interviews')
-      .select(`
-        *,
-        job_postings(title),
-        job_applications(first_name, last_name)
-      `)
-      .eq('employer_id', userId)
-      .gte('scheduled_at', new Date().toISOString())
-      .in('status', ['pending', 'confirmed'])
-      .order('scheduled_at', { ascending: true });
-
-    if (!error && data) {
-      const result = data.map((interview: any) => ({
-        ...interview,
-        candidate_name: interview.job_applications 
-          ? `${interview.job_applications.first_name || ''} ${interview.job_applications.last_name || ''}`.trim() || 'Okänd'
-          : 'Okänd',
-        job_title: interview.job_postings?.title || 'Okänd tjänst',
-      }));
-
-      safeSetItem(cacheKey, JSON.stringify({
-        interviews: result,
-        timestamp: Date.now(),
-      }));
-      
+    try {
+      const result = await fetchEmployerInterviewsForUser(userId);
       queryClient.setQueryData(['interviews', userId], result);
+    } catch {
+      // Bakgrundssynk får aldrig störa användaren
     }
   }, [queryClient]);
 
