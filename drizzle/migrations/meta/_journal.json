@@ -239,6 +239,13 @@
       "when": 1790025008257,
       "tag": "0033_interview_response_channels",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790051645819,
+      "tag": "0034_job_closed_reason_in_outreach_payload",
+      "breakpoints": true
     }
   ]
 }

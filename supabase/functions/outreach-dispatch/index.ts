@@ -379,8 +379,22 @@ async function dispatchLog(log: OutreachLog) {
   // platshållare eller whitespace. Vald mall/manuellt utskick = bolaget.
   // Ren fritext utan mall = personen som skriver.
   const isPersonalManualChat = log.trigger === 'manual_send' && !template && Boolean(customBody);
-  const subject = renderTemplate(template?.subject ?? String(payload.custom_subject ?? ''), data);
-  const body = isPersonalManualChat ? customBody : (renderedTemplateBody || customBody);
+  let subject = renderTemplate(template?.subject ?? String(payload.custom_subject ?? ''), data);
+  let body = isPersonalManualChat ? customBody : (renderedTemplateBody || customBody);
+
+  // Tar arbetsgivaren bort annonsen i förtid (inte naturlig utgång) får
+  // kandidaten en universell text från Parium. Mallens "vi har valt att gå
+  // vidare med andra kandidater" skulle då vara felaktig — borttagningen kan
+  // ha vilken anledning som helst och ska aldrig låta som ett avslag.
+  if (log.trigger === 'job_closed' && payload.closed_reason === 'removed') {
+    if (log.channel === 'email') {
+      subject = `Annonsen ${data.job_title} har tagits bort`;
+      body = `Hej ${data.candidate_name},\n\nAnnonsen ${data.job_title} hos ${data.company_name} har tagits bort av arbetsgivaren och är inte längre tillgänglig. Din ansökan kan därför inte behandlas vidare i den här processen.\n\nDu är varmt välkommen att söka andra lediga tjänster på Parium.\n\nVänliga hälsningar,\n${data.company_name}`;
+    } else if (log.channel === 'push') {
+      subject = data.company_name;
+      body = `Annonsen ${data.job_title} har tagits bort av arbetsgivaren. Sök gärna andra lediga tjänster.`;
+    }
+  }
 
   if (!body.trim()) {
     // Utan innehåll finns inget att skicka — markera raden som hoppad så att den
