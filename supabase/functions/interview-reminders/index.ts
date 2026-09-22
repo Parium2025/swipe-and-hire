@@ -463,6 +463,15 @@ Deno.serve(async (req) => {
           timeZone: "Europe/Stockholm",
         })}`;
 
+        // Rubriken speglar den faktiska tiden kvar. Skickas kallelsen nio
+        // minuter före start ska notisen säga nio – inte tio.
+        const minutesLeft = Math.round(
+          (scheduledTime.getTime() - Date.now()) / 60000,
+        );
+        const reminderHeadline = minutesLeft <= 1
+          ? "Intervjun börjar nu ⏰"
+          : `Intervju om ${minutesLeft} minuter ⏰`;
+
         const locationInfo = interview.location_type === "video"
           ? "Videomöte"
           : interview.location_type === "office"
