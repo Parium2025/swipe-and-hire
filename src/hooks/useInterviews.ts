@@ -29,6 +29,12 @@ export interface Interview {
 /** Möten som pågår just nu ska ligga kvar; längsta rimliga intervju. */
 const IN_PROGRESS_WINDOW_MS = 6 * 60 * 60 * 1000;
 
+/**
+ * Avslutade och avböjta möten ligger kvar ett dygn i arbetsgivarens kort så
+ * att ingen kandidat glöms bort — sedan städas de bort automatiskt.
+ */
+const KEEP_VISIBLE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 // 🔥 localStorage cache for employer interviews - instant-load
 const EMPLOYER_INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 
@@ -81,10 +87,13 @@ export async function fetchEmployerInterviewsForUser(userId: string): Promise<In
       job_applications(first_name, last_name)
     `)
     .eq('employer_id', userId)
-    // Hämta även möten som just startat – ett pågående möte får inte
-    // försvinna från kortet mitt under intervjun. isInterviewOver städar bort.
-    .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
-    .in('status', ['pending', 'confirmed'])
+    // Hämta även möten som just startat eller nyss avslutats – ett pågående
+    // möte får inte försvinna mitt under intervjun, och ett avslutat eller
+    // avböjt möte ska ligga kvar ett dygn så inget glöms bort.
+    .gte('scheduled_at', new Date(Date.now() - KEEP_VISIBLE_WINDOW_MS).toISOString())
+    .in('status', ['pending', 'confirmed', 'declined'])
+    // Arbetsgivaren kan själv rensa bort ett avslutat eller avböjt möte.
+    .is('employer_dismissed_at', null)
     .order('scheduled_at', { ascending: true })
     // Tak: ett stort företag kan ha tusentals bokade möten framåt.
     // Kortet visar bara de närmaste – hämta aldrig hela historiken.
@@ -215,12 +224,55 @@ export const useInterviews = () => {
     },
   });
 
+  /**
+   * Tar bort mötet från arbetsgivarens översiktskort utan att röra statusen,
+   * kalendern eller kandidatens vy. Bara en visuell rensning.
+   */
+  const dismissInterview = useMutation({
+    mutationFn: async (interviewId: string) => {
+      if (!getIsOnline()) throw new Error('Du är offline');
+
+      const { data, error } = await supabase
+        .from('interviews')
+        .update({ employer_dismissed_at: new Date().toISOString() })
+        .eq('id', interviewId)
+        .select('id')
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error('Kunde inte ta bort intervjun');
+    },
+    onMutate: async (interviewId: string) => {
+      if (!user?.id) return { previous: undefined };
+      const key = ['interviews', user.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Interview[]>(key);
+      if (previous) {
+        const next = previous.filter((i) => i.id !== interviewId);
+        queryClient.setQueryData(key, next);
+        writeEmployerInterviewsCache(user.id, next);
+      }
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (!user?.id) return;
+      if (context?.previous) {
+        queryClient.setQueryData(['interviews', user.id], context.previous);
+        writeEmployerInterviewsCache(user.id, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviews'] });
+    },
+  });
+
   return {
     interviews,
     isLoading,
     error,
     updateStatus,
     cancelInterview,
+    dismissInterview,
   };
 };
 

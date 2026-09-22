@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, XCircle } from 'lucide-react';
+import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, XCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
@@ -35,18 +35,24 @@ const getLocationLabel = (type: Interview['location_type']) => {
 };
 
 export const EmployerInterviewsCard = memo(() => {
-  const { interviews, isLoading, error } = useInterviews();
+  const { interviews, isLoading, error, dismissInterview } = useInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
   // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
   const lastOpenRef = useRef(0);
 
-  // Filtrera bort intervjuer som redan är avslutade – annars ligger de kvar
-  // tills nästa refetch och visar "passerad".
-  const liveInterviews = useMemo(
-    () => interviews.filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
-    [interviews, now],
-  );
+  // Avslutade och avböjta möten ligger kvar (hämtningen släpper dem efter ett
+  // dygn) så att ingen kandidat glöms bort — men de sorteras efter de aktiva.
+  const liveInterviews = useMemo(() => {
+    const isDone = (i: Interview) =>
+      i.status === 'declined' || isInterviewOver(i.scheduled_at, i.duration_minutes, now);
+    return [...interviews].sort((a, b) => {
+      const aDone = isDone(a) ? 1 : 0;
+      const bDone = isDone(b) ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone;
+      return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
+    });
+  }, [interviews, now]);
   const upcomingInterviews = liveInterviews.slice(0, 5);
   const hasMore = liveInterviews.length > 5;
 
@@ -94,8 +100,16 @@ export const EmployerInterviewsCard = memo(() => {
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
               {upcomingInterviews.map((interview) => {
                 const LocationIcon = getLocationIcon(interview.location_type);
-                const timeUntil = getTimeUntil(interview.scheduled_at, now);
-                const isUrgent = isInterviewUrgent(interview.scheduled_at, now);
+                const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
+                const isDeclined = interview.status === 'declined';
+                // Avböjda och avslutade möten får rensas bort manuellt.
+                const canDismiss = isDeclined || isOver;
+                const timeUntil = isDeclined
+                  ? 'Avböjt'
+                  : isOver
+                    ? 'Avslutad'
+                    : getTimeUntil(interview.scheduled_at, now);
+                const isUrgent = !canDismiss && isInterviewUrgent(interview.scheduled_at, now);
                 const meetingUrl = getMeetingUrl(interview.location_details);
 
                 return (
@@ -103,12 +117,15 @@ export const EmployerInterviewsCard = memo(() => {
                     key={interview.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="bg-white/10 rounded-lg p-2 cursor-pointer hover:bg-white/15 transition-colors"
+                    className={cn(
+                      'rounded-lg p-2 cursor-pointer transition-colors',
+                      canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
+                    )}
                     onClick={() => {
                       const nowMs = Date.now();
                       if (nowMs - lastOpenRef.current < 800) return;
                       lastOpenRef.current = nowMs;
-                      if (interview.location_type === 'video' && meetingUrl) {
+                      if (!canDismiss && interview.location_type === 'video' && meetingUrl) {
                         window.open(meetingUrl, '_blank', 'noopener,noreferrer');
                       } else {
                         navigate('/my-candidates');
@@ -128,17 +145,17 @@ export const EmployerInterviewsCard = memo(() => {
                           {timeUntil}
                         </span>
                         <span className="flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 whitespace-nowrap text-[9px] font-medium leading-none text-white">
-                          {interview.status === 'confirmed' ? (
-                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          ) : interview.status === 'declined' ? (
+                          {isDeclined ? (
                             <XCircle className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          ) : interview.status === 'confirmed' ? (
+                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                           ) : (
                             <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                           )}
-                          {interview.status === 'confirmed'
-                            ? 'Bekräftad'
-                            : interview.status === 'declined'
-                              ? 'Nekad'
+                          {isDeclined
+                            ? 'Avböjt'
+                            : interview.status === 'confirmed'
+                              ? 'Bekräftad'
                               : 'Inväntar svar'}
                         </span>
                       </div>
@@ -150,24 +167,39 @@ export const EmployerInterviewsCard = memo(() => {
                         <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                         <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                       </span>
-                      {/* Fungerar även utan kopplad kalender: filen läggs in i
-                          Google, Outlook eller Apple med samma id, så inget dubbleras. */}
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          window.open(
-                            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-interview-ics?id=${interview.id}`,
-                            '_blank',
-                            'noopener,noreferrer',
-                          );
-                        }}
-                        className="ml-auto flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 leading-none text-white hover:bg-white/15"
-                        aria-label="Lägg till i kalender"
-                      >
-                        <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                        <span className="leading-none">Kalender</span>
-                      </button>
+                      {canDismiss ? (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            dismissInterview.mutate(interview.id);
+                          }}
+                          className="ml-auto flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 leading-none text-white hover:bg-white/15"
+                          aria-label="Ta bort från översikten"
+                        >
+                          <Trash2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          <span className="leading-none">Ta bort</span>
+                        </button>
+                      ) : (
+                        /* Fungerar även utan kopplad kalender: filen läggs in i
+                           Google, Outlook eller Apple med samma id, så inget dubbleras. */
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            window.open(
+                              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-interview-ics?id=${interview.id}`,
+                              '_blank',
+                              'noopener,noreferrer',
+                            );
+                          }}
+                          className="ml-auto flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 leading-none text-white hover:bg-white/15"
+                          aria-label="Lägg till i kalender"
+                        >
+                          <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          <span className="leading-none">Kalender</span>
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 );
