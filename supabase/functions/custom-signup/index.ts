@@ -304,7 +304,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in custom-signup:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Kunde inte skapa kontot just nu. Försök igen om en stund." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
