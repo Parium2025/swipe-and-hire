@@ -546,7 +546,7 @@ Deno.serve(async (req) => {
           }
           await notifyBoth(
             interview.applicant_id,
-            "Intervju om 10 minuter ⏰",
+            reminderHeadline,
             `Din intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
             "/my-applications",
             { skipPush: candidateGoogleCollides },
@@ -563,7 +563,7 @@ Deno.serve(async (req) => {
         }
         await notifyBoth(
           interview.employer_id,
-          "Intervju om 10 minuter ⏰",
+          reminderHeadline,
           `Intervju för "${jobTitle}" börjar kl ${timeString}. ${locationInfo}.`,
           "/employer",
           { skipPush: employerGoogleCollides },
