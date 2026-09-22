@@ -51,7 +51,10 @@ export const EmployerInterviewsCard = memo(() => {
       const aDone = isDone(a) ? 1 : 0;
       const bDone = isDone(b) ? 1 : 0;
       if (aDone !== bDone) return aDone - bDone;
-      return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
+      const aTime = new Date(a.scheduled_at).getTime();
+      const bTime = new Date(b.scheduled_at).getTime();
+      // Aktiva: närmast i tiden först. Avslutade/avböjda: senaste först.
+      return aDone ? bTime - aTime : aTime - bTime;
     });
   }, [interviews, now]);
   const upcomingInterviews = liveInterviews.slice(0, 5);
@@ -110,6 +113,12 @@ export const EmployerInterviewsCard = memo(() => {
                   : isOver
                     ? 'Avslutad'
                     : getTimeUntil(interview.scheduled_at, now);
+                // Kandidatens svar följer alltid med, även när mötet är avslutat.
+                const responseLabel = isDeclined
+                  ? 'Tackade nej'
+                  : interview.status === 'confirmed'
+                    ? 'Tackade ja'
+                    : 'Inget svar';
                 const isUrgent = !canDismiss && isInterviewUrgent(interview.scheduled_at, now);
                 const meetingUrl = getMeetingUrl(interview.location_details);
 
@@ -179,6 +188,16 @@ export const EmployerInterviewsCard = memo(() => {
                         <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                         <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                       </span>
+                      {canDismiss && (
+                        <span className="ml-auto flex items-center gap-1 rounded bg-white/10 px-1.5 py-0.5 leading-none text-white">
+                          {interview.status === 'confirmed' ? (
+                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          ) : (
+                            <Hourglass className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          )}
+                          <span className="leading-none">{responseLabel}</span>
+                        </span>
+                      )}
                       {!canDismiss && (
                         /* Fungerar även utan kopplad kalender: filen läggs in i
                            Google, Outlook eller Apple med samma id, så inget dubbleras. */
