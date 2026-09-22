@@ -274,6 +274,20 @@
       "when": 1790099025936,
       "tag": "0038_gate_employer_admin_on_email_confirmation",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790107563532,
+      "tag": "0039_restore_interview_response_details_and_cutoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790107625239,
+      "tag": "0040_add_stable_interview_reminder_shards",
+      "breakpoints": true
     }
   ]
 }
