@@ -629,7 +629,9 @@ export const BookInterviewDialog = ({
 
   // Endast siffror – max fyra – och kolon sätts automatiskt, exakt som brickorna (HH:MM).
   const handleTimeDraftChange = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 4);
+    let digits = value.replace(/\D/g, '').slice(0, 4);
+    // "930" ska bli 09:30 – en första siffra över 2 kan aldrig vara en timme.
+    if (digits.length >= 2 && Number(digits[0]) > 2) digits = `0${digits}`.slice(0, 4);
     setTimeDraft(digits.length <= 2 ? digits : `${digits.slice(0, 2)}:${digits.slice(2)}`);
   };
 
