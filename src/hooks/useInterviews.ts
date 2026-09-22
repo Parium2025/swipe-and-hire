@@ -81,10 +81,13 @@ export async function fetchEmployerInterviewsForUser(userId: string): Promise<In
       job_applications(first_name, last_name)
     `)
     .eq('employer_id', userId)
-    // Hämta även möten som just startat – ett pågående möte får inte
-    // försvinna från kortet mitt under intervjun. isInterviewOver städar bort.
-    .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
-    .in('status', ['pending', 'confirmed'])
+    // Hämta även möten som just startat eller nyss avslutats – ett pågående
+    // möte får inte försvinna mitt under intervjun, och ett avslutat eller
+    // avböjt möte ska ligga kvar ett dygn så inget glöms bort.
+    .gte('scheduled_at', new Date(Date.now() - KEEP_VISIBLE_WINDOW_MS).toISOString())
+    .in('status', ['pending', 'confirmed', 'declined'])
+    // Arbetsgivaren kan själv rensa bort ett avslutat eller avböjt möte.
+    .is('employer_dismissed_at', null)
     .order('scheduled_at', { ascending: true })
     // Tak: ett stort företag kan ha tusentals bokade möten framåt.
     // Kortet visar bara de närmaste – hämta aldrig hela historiken.
