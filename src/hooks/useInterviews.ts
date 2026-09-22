@@ -91,7 +91,7 @@ export async function fetchEmployerInterviewsForUser(userId: string): Promise<In
     // möte får inte försvinna mitt under intervjun, och ett avslutat eller
     // avböjt möte ska ligga kvar ett dygn så inget glöms bort.
     .gte('scheduled_at', new Date(Date.now() - KEEP_VISIBLE_WINDOW_MS).toISOString())
-    .in('status', ['pending', 'confirmed', 'declined'])
+    .in('status', ['pending', 'confirmed', 'declined', 'completed'])
     // Arbetsgivaren kan själv rensa bort ett avslutat eller avböjt möte.
     .is('employer_dismissed_at', null)
     .order('scheduled_at', { ascending: true })
