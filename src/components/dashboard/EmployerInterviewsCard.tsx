@@ -140,7 +140,7 @@ export const EmployerInterviewsCard = memo(() => {
                       <div className="flex w-[88px] shrink-0 flex-col items-center gap-1">
                         <span className={cn(
                           "flex w-full items-center justify-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap text-white",
-                          isUrgent && "bg-white/20"
+                          (isUrgent || canDismiss) && "bg-white/20"
                         )}>
                           {!canDismiss && <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />}
                           {timeUntil}
