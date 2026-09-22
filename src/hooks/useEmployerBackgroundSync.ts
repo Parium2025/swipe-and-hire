@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
+import { fetchEmployerInterviewsForUser } from './useInterviews';
 
 const INTERVIEWS_CACHE_KEY = 'parium_employer_interviews_';
 const MY_CANDIDATES_CACHE_KEY = 'parium_my_candidates_';
