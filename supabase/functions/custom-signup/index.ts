@@ -21,6 +21,23 @@ interface SignupRequest {
   data?: any;
 }
 
+// Endast dessa fält får följa med från registreringsformuläret till kontot.
+const ALLOWED_SIGNUP_FIELDS = [
+  'first_name',
+  'last_name',
+  'company_name',
+  'org_number',
+  'industry',
+  'address',
+  'website',
+  'company_description',
+  'employee_count',
+  'phone',
+  'terms_accepted_at',
+  'policy_version',
+  'dpa_version',
+] as const;
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -109,11 +126,22 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // 2. Skapa användare utan automatisk bekräftelse
+    // SÄKERHET: bara kända fält får sparas som metadata — annars kan en
+    // anropare smyga in godtyckliga värden i kontot.
+    const metadata: Record<string, unknown> = {};
+    for (const key of ALLOWED_SIGNUP_FIELDS) {
+      const value = (data as Record<string, unknown> | undefined)?.[key];
+      if (typeof value === 'string' && value.trim() !== '') {
+        metadata[key] = value.slice(0, 500);
+      }
+    }
+    metadata.role = data?.role === 'employer' ? 'employer' : 'job_seeker';
+
     const { data: user, error: signupError } = await supabase.auth.admin.createUser({
       email: normalizedEmail,
       password,
       email_confirm: false, // Användaren måste bekräfta via mejl
-      user_metadata: data || {}
+      user_metadata: metadata
     });
 
     console.log('Signup result:', { hasUser: !!user?.user?.id, error: signupError?.message });
