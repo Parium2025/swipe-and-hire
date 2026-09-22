@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, XCircle } from 'lucide-react';
+import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, XCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
