@@ -152,6 +152,8 @@ serve(async (req) => {
         const { data, error } = await supabase
           .from('job_applications')
           .select('*')
+          // SÄKERHET: ansökan måste tillhöra den sökande som analysen gäller.
+          .eq('applicant_id', applicant_id)
           .eq('id', application_id)
           .single();
         if (!error) application = data;

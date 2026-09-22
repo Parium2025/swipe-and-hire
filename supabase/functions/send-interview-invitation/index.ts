@@ -304,18 +304,29 @@ const handler = async (req: Request): Promise<Response> => {
       candidateResult = { skipped: 'email_disabled' };
     }
 
-    // Employer confirmation (if different address)
+    // Employer confirmation (if different address).
+    // SÄKERHET: adressen tas alltid från det inloggade kontot — aldrig från
+    // request-bodyn — så att ingen kan skicka bekräftelser till valfri adress.
     let employerResult: any = null;
-    if (sendEmail && employerEmail && employerEmail.toLowerCase() !== candidateEmail.toLowerCase()) {
+    if (sendEmail) {
+      let callerEmail: string | null = null;
       try {
-        employerResult = await enqueueInvitation(
-          employerEmail,
-          true,
-          { ...baseData, recipient_name: employerName || companyName },
-          `interview-employer-${idBase}`,
-        );
-      } catch (empErr) {
-        console.error("Error enqueueing employer confirmation:", empErr);
+        const { data: callerUser } = await supabaseAdmin.auth.admin.getUserById(callerId);
+        callerEmail = callerUser?.user?.email ?? null;
+      } catch (lookupErr) {
+        console.error("Could not resolve caller email:", lookupErr);
+      }
+      if (callerEmail && callerEmail.toLowerCase() !== candidateEmail.toLowerCase()) {
+        try {
+          employerResult = await enqueueInvitation(
+            callerEmail,
+            true,
+            { ...baseData, recipient_name: employerName || companyName },
+            `interview-employer-${idBase}`,
+          );
+        } catch (empErr) {
+          console.error("Error enqueueing employer confirmation:", empErr);
+        }
       }
     }
 
@@ -335,7 +346,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-interview-invitation:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Kunde inte skicka kallelsen just nu." }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
