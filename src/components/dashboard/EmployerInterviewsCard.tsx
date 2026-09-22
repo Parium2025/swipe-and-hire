@@ -139,8 +139,8 @@ export const EmployerInterviewsCard = memo(() => {
                       </div>
                       <div className="flex w-[88px] shrink-0 flex-col items-center gap-1">
                         <span className={cn(
-                          "flex w-full items-center justify-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap text-white",
-                          (isUrgent || canDismiss) && "bg-white/20"
+                          "flex h-5 w-full items-center justify-center gap-1 rounded px-1.5 text-[10px] font-medium leading-none whitespace-nowrap text-white",
+                          (isUrgent || canDismiss) && "bg-white/10"
                         )}>
                           {!canDismiss && <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />}
                           {timeUntil}
@@ -152,12 +152,13 @@ export const EmployerInterviewsCard = memo(() => {
                               event.stopPropagation();
                               dismissInterview.mutate(interview.id);
                             }}
-                            className="flex w-full items-center justify-center gap-1 rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white hover:bg-white/15"
+                            className="flex h-5 w-full items-center justify-center gap-1 rounded bg-white/10 px-1.5 text-[10px] font-medium leading-none text-white hover:bg-white/15"
                             aria-label="Ta bort från översikten"
                           >
                             <Trash2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                             <span className="leading-none">Ta bort</span>
                           </button>
+
                         ) : (
                           <span className="flex w-full items-center justify-center gap-1 rounded px-1 py-0.5 whitespace-nowrap text-[9px] font-medium leading-none text-white">
                             {interview.status === 'confirmed' ? (
