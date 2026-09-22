@@ -59,7 +59,7 @@ export const JobSeekerNotesCard = memo(() => {
             {!notesEditor && content && (
               <div
                 className="absolute inset-0 bg-white/10 rounded-lg p-2 pr-4 text-sm leading-relaxed text-pure-white overflow-hidden pointer-events-none"
-                dangerouslySetInnerHTML={{ __html: content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
               />
             )}
             {!notesEditor && !content && (

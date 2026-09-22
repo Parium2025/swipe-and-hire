@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { memo, useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText, Maximize2 } from 'lucide-react';
