@@ -484,6 +484,14 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const canUsePortal = typeof document !== 'undefined';
 
+  const handleOpenChange = () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+    // En påminnelse kan skapas precis efter att sidan laddats. Hämta därför
+    // alltid färskt när klockan öppnas även om realtidsanslutningen hunnit blinka.
+    if (nextOpen) void refetch();
+  };
+
   // Close on outside click
   useEffect(() => {
     if (!open) return;
@@ -512,7 +520,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     <div className="relative">
       <button
         ref={triggerRef}
-        onClick={() => setOpen(v => !v)}
+        onClick={handleOpenChange}
         className={triggerClass}
         aria-label="Notifikationer"
       >

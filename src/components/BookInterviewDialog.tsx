@@ -504,7 +504,7 @@ export const BookInterviewDialog = ({
 
           const candidateEmail = appData?.email;
           if (candidateEmail && interviewId) {
-            const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
+            const { data: invitationResult, error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
               body: {
                 candidateEmail,
                 candidateName,
@@ -524,6 +524,9 @@ export const BookInterviewDialog = ({
               },
             });
             if (invitationError) throw invitationError;
+            if (invitationResult?.candidate?.sent === false) {
+              throw new Error('candidate_email_not_sent');
+            }
           }
         } catch (emailErr) {
           console.error('Error sending interview email:', emailErr);
