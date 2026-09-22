@@ -292,8 +292,10 @@ export async function fetchCandidateInterviewsForUser(userId: string) {
       )
     `)
     .eq('applicant_id', userId)
-    .gte('scheduled_at', new Date(Date.now() - IN_PROGRESS_WINDOW_MS).toISOString())
-    .in('status', ['pending', 'confirmed'])
+    // Samma regel som arbetsgivarens kort: ett möte som pågår, nyss avslutats
+    // eller tackats nej till ligger kvar ett dygn — det får inte bara försvinna.
+    .gte('scheduled_at', new Date(Date.now() - KEEP_VISIBLE_WINDOW_MS).toISOString())
+    .in('status', ['pending', 'confirmed', 'declined', 'completed'])
     .order('scheduled_at', { ascending: true })
     .limit(200);
 
