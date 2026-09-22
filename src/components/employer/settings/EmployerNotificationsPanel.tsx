@@ -29,7 +29,7 @@ const EMPLOYER_ROWS: NotificationRow[] = [
     type: 'interview_scheduled',
     label: 'Intervjuer',
     description:
-      'Kandidatens svar på kallelsen, av- och ombokningar samt påminnelsen strax före intervjun.',
+      'Bokningar, av- och ombokningar samt påminnelsen strax före intervjun. Alltid på — det här är tider i din kalender.',
     channels: ['in_app', 'push', 'email'],
     locked: ['in_app', 'push', 'email'],
   },
