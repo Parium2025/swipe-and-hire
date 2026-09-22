@@ -8,6 +8,7 @@ import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
 import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
 import { fetchAllPages } from '@/lib/fetchAllPages';
+import { fetchCandidateInterviewsForUser } from './useInterviews';
 
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
@@ -253,31 +254,14 @@ export const useJobSeekerBackgroundSync = () => {
       }
     }
 
-    // STEG 2: Hämta färsk data från servern (i bakgrunden)
-    const { data, error } = await supabase
-      .from('interviews')
-      .select(`
-        *,
-        job_postings(
-          title,
-          employer_id,
-          workplace_name
-        )
-      `)
-      .eq('applicant_id', userId)
-      .gte('scheduled_at', new Date().toISOString())
-      .in('status', ['pending', 'confirmed'])
-      .order('scheduled_at', { ascending: true });
-
-    if (!error && data) {
-      // Spara till localStorage
-      safeSetItem(cacheKey, JSON.stringify({
-        items: data,
-        timestamp: Date.now(),
-      }));
-      
-      // Uppdatera React Query cache med färsk data
+    // STEG 2: Hämta färsk data från servern (i bakgrunden).
+    // Exakt samma hämtning som kortet använder — annars skulle förvärmningen
+    // kunna skriva över kortets data med ett smalare urval.
+    try {
+      const data = await fetchCandidateInterviewsForUser(userId);
       queryClient.setQueryData(['candidate-interviews', userId], data);
+    } catch {
+      // Bakgrundssynk får aldrig störa användaren
     }
   }, [queryClient]);
 

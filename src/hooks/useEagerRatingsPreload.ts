@@ -10,6 +10,7 @@ import { useAuth } from './useAuth';
 import { preloadWeatherLocation } from './useWeather';
 import { useQueryClient } from '@tanstack/react-query';
 import { warmTeamAvatars } from '@/lib/warmTeamAvatars';
+import { fetchEmployerInterviewsForUser } from '@/hooks/useInterviews';
 import { notesCache, questionsCache, summaryCache } from '@/components/candidateProfile/candidateProfileCache';
 import { clearCandidateProfilesMemoryCache } from '@/hooks/useCandidateProfiles';
 
@@ -671,51 +672,14 @@ export const useEagerRatingsPreload = (enabled = true) => {
     }
   }, []);
 
-  // 📅 Preload intervjuer (kommande bokade intervjuer)
+  // 📅 Preload intervjuer — exakt samma hämtning som arbetsgivarkortet använder,
+  // annars kan förvärmningen skriva över kortet med ett smalare urval.
   const preloadInterviews = useCallback(async (userId: string) => {
-    const cacheKey = INTERVIEWS_CACHE_KEY + userId;
-    const existingCache = localStorage.getItem(cacheKey);
-    
-    if (existingCache) {
-      try {
-        const parsed = JSON.parse(existingCache);
-        const age = Date.now() - parsed.timestamp;
-        if (age < WEATHER_CACHE_MAX_AGE && parsed.items?.length >= 0) {
-          return; // Cache är färsk
-        }
-      } catch {
-        // Korrupt cache - fortsätt
-      }
-    }
-
-    const { data, error } = await supabase
-      .from('interviews')
-      .select(`
-        *,
-        job_postings(title),
-        job_applications(first_name, last_name)
-      `)
-      .eq('employer_id', userId)
-      .gte('scheduled_at', new Date().toISOString())
-      .in('status', ['pending', 'confirmed'])
-      .order('scheduled_at', { ascending: true });
-
-    if (!error && data) {
-      const items = data.map((interview: any) => ({
-        ...interview,
-        candidate_name: interview.job_applications 
-          ? `${interview.job_applications.first_name || ''} ${interview.job_applications.last_name || ''}`.trim() || 'Okänd'
-          : 'Okänd',
-        job_title: interview.job_postings?.title || 'Okänd tjänst',
-      }));
-
-      safeSetItem(cacheKey, JSON.stringify({
-        items,
-        timestamp: Date.now(),
-      }));
-      
-      // Uppdatera React Query cache
+    try {
+      const items = await fetchEmployerInterviewsForUser(userId);
       queryClient.setQueryData(['interviews', userId], items);
+    } catch {
+      // Förvärmning får aldrig störa användaren
     }
   }, [queryClient]);
 
