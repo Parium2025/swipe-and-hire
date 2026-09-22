@@ -1,7 +1,14 @@
-// Public endpoint that generates an .ics calendar file on demand for an interview.
-// Interview UUIDs are unguessable (122 bits of entropy), so the ID acts as a capability token.
+// Genererar en .ics-fil för en intervju. Åtkomst kräver antingen en signerad
+// länk (mejlen) eller en inloggad deltagare i mötet — intervju-id ensamt
+// räcker inte.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { icsSignatureValid } from "../_shared/icsLink.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
