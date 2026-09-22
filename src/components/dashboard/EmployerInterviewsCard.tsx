@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, XCircle, Trash2 } from 'lucide-react';
+import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, Hourglass, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
@@ -137,27 +137,24 @@ export const EmployerInterviewsCard = memo(() => {
                         <TruncatedText text={interview.candidate_name} className="text-xs font-semibold text-white" insideInteractive />
                         <TruncatedText text={interview.job_title} className="text-[10px] text-white" insideInteractive />
                       </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
+                      <div className="flex w-[76px] shrink-0 flex-col items-center gap-1">
                         <span className={cn(
-                          "text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap text-white",
+                          "flex w-full items-center justify-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap text-white",
                           isUrgent && "bg-white/20"
                         )}>
+                          {!canDismiss && <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />}
                           {timeUntil}
                         </span>
-                        <span className="flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 whitespace-nowrap text-[9px] font-medium leading-none text-white">
-                          {isDeclined ? (
-                            <XCircle className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          ) : interview.status === 'confirmed' ? (
-                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          ) : (
-                            <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          )}
-                          {isDeclined
-                            ? 'Avböjt'
-                            : interview.status === 'confirmed'
-                              ? 'Bekräftad'
-                              : 'Inväntar svar'}
-                        </span>
+                        {!isDeclined && (
+                          <span className="flex w-full items-center justify-center gap-1 rounded px-1 py-0.5 whitespace-nowrap text-[9px] font-medium leading-none text-white">
+                            {interview.status === 'confirmed' ? (
+                              <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                            ) : (
+                              <Hourglass className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                            )}
+                            {interview.status === 'confirmed' ? 'Bekräftad' : 'Inväntar svar'}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-1 text-[10px] leading-none text-white whitespace-nowrap">

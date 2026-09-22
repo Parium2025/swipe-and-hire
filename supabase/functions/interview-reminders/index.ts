@@ -413,26 +413,34 @@ Deno.serve(async (req) => {
     // skickas ingenting till kandidaten – inte heller 10-minutersputten.
     // Ligger deras egen regel nära 10 minuter (5–20 min) hoppas 10-minuters-
     // putten också över, annars får kandidaten två påminnelser samtidigt.
-    const employerAllowsCandidateReminder = new Map<string, boolean>();
-    const candidateRemindersAllowed = async (employerId: string) => {
-      if (employerAllowsCandidateReminder.has(employerId)) {
-        return employerAllowsCandidateReminder.get(employerId)!;
+    const employerCandidateReminderRules = new Map<string, number[]>();
+    const candidateRemindersAllowed = async (employerId: string, minutesLeft: number) => {
+      let delays = employerCandidateReminderRules.get(employerId);
+      if (!delays) {
+        const { data } = await supabase
+          .from("outreach_automations")
+          .select("delay_minutes")
+          .eq("owner_user_id", employerId)
+          .eq("trigger", "interview_before")
+          .eq("recipient_type", "candidate")
+          .eq("is_enabled", true);
+        delays = ((data ?? []) as Array<{ delay_minutes: number | null }>)
+          .map((rule) => Math.max(rule.delay_minutes ?? 0, 0));
+        employerCandidateReminderRules.set(employerId, delays);
       }
-      const { data } = await supabase
-        .from("outreach_automations")
-        .select("id, delay_minutes")
-        .eq("owner_user_id", employerId)
-        .eq("trigger", "interview_before")
-        .eq("recipient_type", "candidate")
-        .eq("is_enabled", true);
-      const rules = (data ?? []) as Array<{ delay_minutes: number | null }>;
-      const collides = rules.some((rule) => {
-        const delay = rule.delay_minutes ?? 0;
-        return delay >= 5 && delay <= 20;
-      });
-      const allowed = rules.length > 0 && !collides;
-      employerAllowsCandidateReminder.set(employerId, allowed);
-      return allowed;
+
+      if (delays.length === 0) return false;
+
+      // En egen regel ersätter standardpåminnelsen bara när intervjun faktiskt
+      // ligger i regelns körfönster. Bokas mötet senare än så (t.ex. fyra
+      // minuter före start med en tiominutersregel) skickas standardpåminnelsen
+      // som reserv i stället för att båda systemen missar mötet.
+      const collidesNow = delays.some((delay) =>
+        delay >= 5
+        && delay <= 20
+        && Math.abs(delay - minutesLeft) <= WINDOW_PADDING_MS / 60_000
+      );
+      return !collidesNow;
     };
 
 
@@ -536,7 +544,7 @@ Deno.serve(async (req) => {
         // Kandidaten påminns bara om arbetsgivaren har "Före intervjun" på.
         // Ligger kandidatens eget Google-larm på exakt 10 minuter hoppar vi
         // över vårt LARM (push) men behåller notisen i appen.
-        const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id);
+        const candidateReminderAllowed = await candidateRemindersAllowed(interview.employer_id, minutesLeft);
         const candidateGoogleCollides = candidateReminderAllowed
           ? await collidesWithGoogleReminder(interview.applicant_id, 10)
           : false;

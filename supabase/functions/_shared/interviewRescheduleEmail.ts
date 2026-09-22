@@ -50,7 +50,12 @@ export async function sendInterviewRescheduleEmail(
   if (error) throw error;
   if (!interview) return { skipped: "interview_not_found" };
   if (!["pending", "confirmed"].includes(interview.status)) return { skipped: "status_not_active" };
-  if (new Date(interview.scheduled_at).getTime() <= Date.now()) return { skipped: "in_the_past" };
+  // Bakgrundsanropet kan vakna några sekunder efter en ombokning som börjar
+  // direkt. Tillåt en kort leveransmarginal så att en giltig ny tid inte blir
+  // utan mejl bara för att nätverket passerade startsekunden.
+  if (new Date(interview.scheduled_at).getTime() + 15 * 60_000 <= Date.now()) {
+    return { skipped: "in_the_past" };
+  }
 
   const [{ data: candidate }, { data: employer }, jobResult] = await Promise.all([
     supabase.from("profiles").select("email, first_name, last_name").eq("user_id", interview.applicant_id).maybeSingle(),

@@ -491,39 +491,41 @@ export const BookInterviewDialog = ({
       queryClient.invalidateQueries({ queryKey: ['candidate-activities'] });
       onSuccess?.();
 
+      // Starta det kritiska kandidatmejlet innan kontrollen lämnas tillbaka till
+      // webbläsaren. Då har nätverksanropet redan skickats även om användaren
+      // byter sida direkt efter att dialogen stängts.
+      let invitationPromise: Promise<{ data: any; error: any }> | null = null;
+      if (interviewId && !isReschedule) {
+        invitationPromise = supabase.functions.invoke('send-interview-invitation', {
+          body: {
+            candidateEmail: user?.email || 'bound-to-application@parium.invalid',
+            candidateName,
+            companyName: companyName || 'Företag',
+            jobTitle,
+            scheduledAt: scheduledAt.toISOString(),
+            durationMinutes: parseInt(duration),
+            locationType,
+            locationDetails: normalizedVideoLocationDetails || undefined,
+            message: message || undefined,
+            employerEmail: user?.email || undefined,
+            employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
+            interviewId,
+            sendEmail: true,
+          },
+        });
+      }
+
       void (async () => {
         let deliveryFailed = false;
 
         // 1. Send the interview invitation email with .ics calendar attachment
         try {
-          const { data: appData } = await supabase
-            .from('job_applications')
-            .select('email, first_name')
-            .eq('id', applicationId)
-            .single();
-
-          const candidateEmail = appData?.email;
-          if (candidateEmail && interviewId) {
-            const { error: invitationError } = await supabase.functions.invoke('send-interview-invitation', {
-              body: {
-                candidateEmail,
-                candidateName,
-                companyName: companyName || 'Företag',
-                jobTitle,
-                scheduledAt: scheduledAt.toISOString(),
-                durationMinutes: parseInt(duration),
-                locationType,
-                locationDetails: normalizedVideoLocationDetails || undefined,
-                message: message || undefined,
-                employerEmail: user?.email || undefined,
-                employerName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || undefined,
-                interviewId,
-                // En ombokning uppdaterar kalendern och appnotisen, men skickar
-                // inte en ny kopia av kallelsemejlet.
-                sendEmail: !isReschedule,
-              },
-            });
+          if (invitationPromise) {
+            const { data: invitationResult, error: invitationError } = await invitationPromise;
             if (invitationError) throw invitationError;
+            if (invitationResult?.candidate?.sent === false) {
+              throw new Error('candidate_email_not_sent');
+            }
           }
         } catch (emailErr) {
           console.error('Error sending interview email:', emailErr);
