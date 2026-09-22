@@ -30,6 +30,22 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, serviceKey);
 
+  // 🔒 Endast cron/service_role eller en arbetsgivare får knuffa kön —
+  // jobbsökarkonton har inget ärende i kandidatutvärderingen.
+  if (!caller.isServiceRole) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', caller.userId)
+      .maybeSingle();
+    if (profile?.role !== 'employer') {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
   let hop = 0;
   try {
     const body = await req.json().catch(() => ({}));
@@ -57,7 +73,7 @@ Deno.serve(async (req) => {
 
   if (claimError) {
     console.error('claim_criteria_eval_run failed:', claimError.message);
-    return json({ error: claimError.message }, 500);
+    return json({ error: 'Kunde inte starta utvärderingen just nu.' }, 500);
   }
 
   const run = Array.isArray(claimed) ? claimed[0] : claimed;

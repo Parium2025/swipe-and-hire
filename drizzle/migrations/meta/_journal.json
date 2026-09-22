@@ -253,6 +253,20 @@
       "when": 1790087273682,
       "tag": "0035_interview_employer_dismissed_at",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790095429378,
+      "tag": "0036_enforce_saved_jobs_free_limit",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790095544793,
+      "tag": "0037_hide_review_author_columns",
+      "breakpoints": true
     }
   ]
 }

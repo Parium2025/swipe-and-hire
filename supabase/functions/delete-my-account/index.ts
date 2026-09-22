@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error('❌ delete-my-account error:', err);
     return new Response(
-      JSON.stringify({ error: (err as Error).message }),
+      JSON.stringify({ error: 'Kunde inte ta bort kontot just nu. Försök igen om en stund.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }

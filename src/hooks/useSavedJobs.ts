@@ -266,6 +266,11 @@ export const useSavedJobs = () => {
         saveToCache(user.id, next);
         return next;
       });
+      // Serversidig gräns (DB-triggern) → visa samma premiumruta som klienten.
+      if (!isSaved && String((err as { message?: string })?.message ?? '').includes('saved_jobs_free_limit_reached')) {
+        emitSavedJobsLimit({ limit: SAVED_JOBS_FREE_LIMIT });
+        return;
+      }
       console.error('Error toggling saved job:', err);
       toast.error(isSaved ? 'Kunde inte ta bort jobbet' : 'Kunde inte spara jobbet');
     }
