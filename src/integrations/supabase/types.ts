@@ -1704,6 +1704,7 @@ export type Database = {
           application_id: string | null
           created_at: string
           duration_minutes: number
+          employer_dismissed_at: string | null
           employer_id: string
           followup_reminder_sent_at: string | null
           id: string
@@ -1723,6 +1724,7 @@ export type Database = {
           application_id?: string | null
           created_at?: string
           duration_minutes?: number
+          employer_dismissed_at?: string | null
           employer_id: string
           followup_reminder_sent_at?: string | null
           id?: string
@@ -1742,6 +1744,7 @@ export type Database = {
           application_id?: string | null
           created_at?: string
           duration_minutes?: number
+          employer_dismissed_at?: string | null
           employer_id?: string
           followup_reminder_sent_at?: string | null
           id?: string
