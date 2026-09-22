@@ -260,7 +260,10 @@ export function useNotifications() {
     // Topic "user:<uid>" + privat kanal: Realtime Authorization (RLS på
     // realtime.messages) släpper bara in ägaren — broadcast-synken mellan
     // användarens enheter kan därmed varken avlyssnas eller förfalskas.
-    const channel = createRealtimeChannel(`user:${user.id}`, { config: { private: true } })
+    // Den privata kanalens namn måste exakt matcha "user:<uid>" för att
+    // Realtime-behörigheten ska godkänna anslutningen. Den generella hjälparen
+    // lägger på ett unikt suffix och ska därför inte användas här.
+    const channel = supabase.channel(`user:${user.id}`, { config: { private: true } })
       .on(
         'postgres_changes',
         {
