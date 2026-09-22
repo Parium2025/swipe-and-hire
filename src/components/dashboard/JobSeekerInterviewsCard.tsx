@@ -41,10 +41,17 @@ export const JobSeekerInterviewsCard = memo(() => {
   const navigate = useNavigate();
   const now = useMinuteTick();
 
-  const liveInterviews = useMemo(
-    () => (interviews as any[]).filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
-    [interviews, now],
-  );
+  // Kommande möten först, sedan nyss avslutade/avböjda (de ligger kvar ett dygn).
+  const liveInterviews = useMemo(() => {
+    const list = interviews as any[];
+    const active = list.filter(
+      (i) => i.status !== 'declined' && !isInterviewOver(i.scheduled_at, i.duration_minutes, now),
+    );
+    const finished = list.filter(
+      (i) => i.status === 'declined' || isInterviewOver(i.scheduled_at, i.duration_minutes, now),
+    );
+    return [...active, ...finished];
+  }, [interviews, now]);
   const upcomingInterviews = liveInterviews.slice(0, 5);
   const hasMore = liveInterviews.length > 5;
 
