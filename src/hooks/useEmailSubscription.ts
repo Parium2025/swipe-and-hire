@@ -39,11 +39,16 @@ export function useEmailSubscription() {
         body: { action: subscribed ? 'resubscribe' : 'unsubscribe' },
       });
       if (error) throw error;
-      // Optimistiskt: visa direkt det läge användaren valde även om e-posttjänsten
-      // är fördröjt konsekvent, så att mejlreglagen slås på direkt vid aktivering.
+      // Använd e-posttjänstens svar som sanning; faller tillbaka på valt läge
+      // om svaret saknar fältet, så reglagen inte fastnar i fel läge.
+      const confirmed =
+        typeof data?.subscribed === 'boolean' ? (data.subscribed as boolean) : subscribed;
+      if (confirmed !== subscribed) {
+        throw new Error('E-posttjänsten bekräftade inte ändringen');
+      }
       queryClient.setQueryData(['email-subscription', userId], {
         recipient: data?.recipient ?? '',
-        subscribed,
+        subscribed: confirmed,
       } satisfies EmailSubscriptionState);
       // Synka om mot e-posttjänsten efter en stund för att bekräfta läget.
       setTimeout(() => {
