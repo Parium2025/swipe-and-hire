@@ -137,10 +137,12 @@ const handler = async (req: Request): Promise<Response> => {
 
 
     const {
-      candidateEmail, candidateName, companyName, jobTitle,
+      candidateName, companyName, jobTitle,
       scheduledAt, durationMinutes, locationType, locationDetails, message,
       employerEmail, employerName, interviewId, sendEmail,
     } = parsed.data;
+    // SÄKERHET: kan skrivas över med mejlet från den ansökan intervjun gäller.
+    let candidateEmail = parsed.data.candidateEmail;
 
     // Revisionen håller bokningens identitet stabil och används om en ny
     // strukturerad kallelse uttryckligen behöver skickas för en senare version.
@@ -201,7 +203,7 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('id', boundApplicationId)
           .maybeSingle();
         if (boundApp?.email) {
-          (parsed.data as { candidateEmail: string }).candidateEmail = boundApp.email;
+          candidateEmail = boundApp.email;
         }
       }
     }
