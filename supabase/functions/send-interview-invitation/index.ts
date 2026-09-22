@@ -224,9 +224,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     
-    const icsUrl = interviewId
-      ? `${supabaseUrl}/functions/v1/download-interview-ics?id=${interviewId}`
-      : '';
+    const icsUrl = interviewId ? await icsUrlFor(supabaseUrl, interviewId) : '';
 
     const baseData = {
       company_name: companyName,

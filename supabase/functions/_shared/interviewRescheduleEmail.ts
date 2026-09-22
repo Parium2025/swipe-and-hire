@@ -141,7 +141,7 @@ export async function sendInterviewRescheduleEmail(
       google_calendar_url: googleCalendarUrl(
         jobTitle, companyName, interview.scheduled_at, duration, locationType, locationDetails,
       ),
-      ics_url: `${supabaseUrl}/functions/v1/download-interview-ics?id=${interviewId}`,
+      ics_url: await icsUrlFor(supabaseUrl, interviewId),
       accept_url: responseBase ? `${responseBase}&answer=yes` : undefined,
       decline_url: responseBase ? `${responseBase}&answer=no` : undefined,
     },
