@@ -461,7 +461,7 @@ Deno.serve(async (req) => {
           hour: "2-digit",
           minute: "2-digit",
           timeZone: "Europe/Stockholm",
-        })} (svensk tid)`;
+        })}`;
 
         const locationInfo = interview.location_type === "video"
           ? "Videomöte"
