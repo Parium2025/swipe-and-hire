@@ -260,6 +260,13 @@
       "when": 1790095429378,
       "tag": "0036_enforce_saved_jobs_free_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790095544793,
+      "tag": "0037_hide_review_author_columns",
+      "breakpoints": true
     }
   ]
 }
