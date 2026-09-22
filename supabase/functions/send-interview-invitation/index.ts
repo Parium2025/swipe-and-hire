@@ -190,6 +190,20 @@ const handler = async (req: Request): Promise<Response> => {
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
+      // SÄKERHET: kandidatmejlet binds till ansökningen som intervjun gäller —
+      // aldrig till en adress som valts i request-bodyn. Faller vi tillbaka på
+      // request-adressen gäller det bara äldre intervjuer utan ansökningskoppling.
+      const boundApplicationId = (interview as { application_id?: string | null }).application_id;
+      if (boundApplicationId) {
+        const { data: boundApp } = await supabaseAdmin
+          .from('job_applications')
+          .select('email')
+          .eq('id', boundApplicationId)
+          .maybeSingle();
+        if (boundApp?.email) {
+          (parsed.data as { candidateEmail: string }).candidateEmail = boundApp.email;
+        }
+      }
     }
 
 
