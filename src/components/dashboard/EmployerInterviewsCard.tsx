@@ -41,12 +41,18 @@ export const EmployerInterviewsCard = memo(() => {
   // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
   const lastOpenRef = useRef(0);
 
-  // Filtrera bort intervjuer som redan är avslutade – annars ligger de kvar
-  // tills nästa refetch och visar "passerad".
-  const liveInterviews = useMemo(
-    () => interviews.filter((i) => !isInterviewOver(i.scheduled_at, i.duration_minutes, now)),
-    [interviews, now],
-  );
+  // Avslutade och avböjta möten ligger kvar (hämtningen släpper dem efter ett
+  // dygn) så att ingen kandidat glöms bort — men de sorteras efter de aktiva.
+  const liveInterviews = useMemo(() => {
+    const isDone = (i: Interview) =>
+      i.status === 'declined' || isInterviewOver(i.scheduled_at, i.duration_minutes, now);
+    return [...interviews].sort((a, b) => {
+      const aDone = isDone(a) ? 1 : 0;
+      const bDone = isDone(b) ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone;
+      return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
+    });
+  }, [interviews, now]);
   const upcomingInterviews = liveInterviews.slice(0, 5);
   const hasMore = liveInterviews.length > 5;
 
