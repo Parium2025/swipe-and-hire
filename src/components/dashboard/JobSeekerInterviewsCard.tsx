@@ -119,8 +119,10 @@ export const JobSeekerInterviewsCard = memo(() => {
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
               {upcomingInterviews.map((interview: any) => {
                 const LocationIcon = getLocationIcon(interview.location_type);
-                const timeUntil = getTimeUntil(interview.scheduled_at, now);
-                const isUrgent = isInterviewUrgent(interview.scheduled_at, now);
+                const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
+                const isDeclined = interview.status === 'declined';
+                const timeUntil = isDeclined ? 'Avböjt' : isOver ? 'Avslutad' : getTimeUntil(interview.scheduled_at, now);
+                const isUrgent = !isDeclined && !isOver && isInterviewUrgent(interview.scheduled_at, now);
                 const meetingUrl = getMeetingUrl(interview.location_details);
                 
                 const companyName = interview.job_postings?.workplace_name?.trim() || 'Okänt företag';
