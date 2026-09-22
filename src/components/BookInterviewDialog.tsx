@@ -855,7 +855,9 @@ export const BookInterviewDialog = ({
                       }
                     }}
                     inputMode="numeric"
-                    placeholder="Skriv en tid, t.ex. 20:07"
+                    pattern="[0-9]*"
+                    maxLength={5}
+                    placeholder="HH:MM"
                     className="h-11 bg-white/10 border-white/20 text-base text-white placeholder:text-white/50"
                   />
                   <p className="mt-1.5 text-xs leading-snug text-white">
