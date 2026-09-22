@@ -69,7 +69,6 @@ export default defineConfig(({ mode }) => ({
     ? { drop: ['console', 'debugger'] }
     : undefined,
   optimizeDeps: {
-    force: true,
     include: [
       'react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime',
       'react-dom/client',
