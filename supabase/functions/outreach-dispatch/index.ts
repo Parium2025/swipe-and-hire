@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
+import { computeTrackingToken } from '../_shared/track-token.ts'
 import { SUPPORTED_CONNECTORS } from '../_shared/appUserScopes.ts';
 import { addInterviewToCalendar, removeInterviewFromCalendar } from '../_shared/calendarSync.ts';
 // (service-role check now uses literal key match — no JWT payload trust)
@@ -438,7 +439,7 @@ async function dispatchLog(log: OutreachLog) {
       }
       if (!context.recipientEmail) throw new Error('Kandidaten saknar e-postadress');
 
-      const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}`;
+      const trackingUrl = `${supabaseUrl}/functions/v1/outreach-open-track?logId=${encodeURIComponent(log.id)}&k=${await computeTrackingToken(log.id)}`;
       const emailSubject = subject || `Meddelande från ${context.companyName}`;
 
       // Intervjuinbjudan får ja/nej-knappar. Svaret uppdaterar intervjun och

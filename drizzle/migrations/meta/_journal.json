@@ -267,6 +267,13 @@
       "when": 1790095544793,
       "tag": "0037_hide_review_author_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790099025936,
+      "tag": "0038_gate_employer_admin_on_email_confirmation",
+      "breakpoints": true
     }
   ]
 }

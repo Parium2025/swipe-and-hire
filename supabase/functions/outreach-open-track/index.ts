@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { computeTrackingToken } from '../_shared/track-token.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,8 +33,11 @@ Deno.serve(async (request) => {
   try {
     const url = new URL(request.url);
     const logId = url.searchParams.get('logId');
+    const token = url.searchParams.get('k');
 
-    if (logId) {
+    // Endast förfrågningar med giltig signatur (från egna utskick) får
+    // markera mejl som öppnade — ett läckt logg-ID räcker inte.
+    if (logId && token && (await computeTrackingToken(logId)) === token) {
       const { data: log } = await admin
         .from('outreach_dispatch_logs')
         .select('id, status, channel, payload')

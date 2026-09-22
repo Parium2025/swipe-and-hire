@@ -16,6 +16,49 @@ interface ConfirmRequest {
   token: string;
 }
 
+// Arbetsgivare: organisation + admin-roll skapas först när e-posten är
+// bekräftad — aldrig vid själva registreringen. Annars kunde vem som helst
+// registrera en obekräftad adress och direkt få arbetsgivarbehörighet.
+const provisionEmployerWorkspace = async (userId: string): Promise<void> => {
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, company_name')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (profile?.role !== 'employer') return;
+
+    const { data: existingRole } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (existingRole) return;
+
+    const orgName = (profile.company_name || '').trim() || 'Min organisation';
+    const { data: org, error: orgError } = await supabase
+      .from('organizations')
+      .insert({ name: orgName })
+      .select('id')
+      .single();
+    if (orgError || !org) {
+      console.error('Failed to create employer organization:', orgError);
+      return;
+    }
+
+    await supabase.from('user_roles').insert({
+      user_id: userId,
+      role: 'admin',
+      organization_id: org.id,
+      is_active: true,
+    });
+    await supabase.from('profiles').update({ organization_id: org.id }).eq('user_id', userId);
+  } catch (e) {
+    console.error('provisionEmployerWorkspace failed:', e);
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -57,6 +100,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 2. Kontrollera om redan bekräftad
     if (confirmation.confirmed_at) {
+      // Idempotent: ser till att en arbetsgivare alltid får sin organisation
+      // och admin-roll, även om ett tidigare försök avbröts.
+      await provisionEmployerWorkspace(confirmation.user_id);
       return new Response(JSON.stringify({ 
         success: true,
         alreadyConfirmed: true,
@@ -98,6 +144,9 @@ const handler = async (req: Request): Promise<Response> => {
       .from('email_confirmations')
       .update({ confirmed_at: new Date().toISOString() })
       .eq('id', confirmation.id);
+
+    // 6. Arbetsgivare: organisation + admin-roll skapas nu, inte tidigare
+    await provisionEmployerWorkspace(confirmation.user_id);
 
     return new Response(JSON.stringify({ 
       success: true, 
