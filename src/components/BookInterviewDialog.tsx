@@ -627,11 +627,12 @@ export const BookInterviewDialog = ({
     if (nextOpen) setTimeDraft(time);
   };
 
+  // Endast siffror – max fyra – och kolon sätts automatiskt, exakt som brickorna (HH:MM).
   const handleTimeDraftChange = (value: string) => {
-    let v = value.replace(/[^0-9:]/g, '').slice(0, 5);
-    const parts = v.split(':');
-    if (parts.length > 2) v = `${parts[0]}:${parts.slice(1).join('')}`;
-    setTimeDraft(v);
+    let digits = value.replace(/\D/g, '').slice(0, 4);
+    // "930" ska bli 09:30 – en första siffra över 2 kan aldrig vara en timme.
+    if (digits.length >= 2 && Number(digits[0]) > 2) digits = `0${digits}`.slice(0, 4);
+    setTimeDraft(digits.length <= 2 ? digits : `${digits.slice(0, 2)}:${digits.slice(2)}`);
   };
 
   // Tolkar "20", "20:", "20:0", "930" och "2007" och normaliserar till HH:MM.
@@ -854,7 +855,9 @@ export const BookInterviewDialog = ({
                       }
                     }}
                     inputMode="numeric"
-                    placeholder="Skriv en tid, t.ex. 20:07"
+                    pattern="[0-9]*"
+                    maxLength={5}
+                    placeholder="HH:MM"
                     className="h-11 bg-white/10 border-white/20 text-base text-white placeholder:text-white/50"
                   />
                   <p className="mt-1.5 text-xs leading-snug text-white">
