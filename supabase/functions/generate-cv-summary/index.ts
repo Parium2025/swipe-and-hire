@@ -631,25 +631,39 @@ VIKTIGT:
     }
 
     // Save to candidate_summaries if we have a job_id (job-specific analysis)
+    // SÄKERHET: job_id från anropet får bara användas om sökanden faktiskt har
+    // en ansökan till just det jobbet — annars kunde sammanfattningar skapas
+    // för godtyckliga annonser och dyka upp i arbetsgivarens kandidatlistor.
     const saveJobId = job_id || application?.job_id;
     if (saveJobId) {
-      const { error: saveError } = await supabase
-        .from('candidate_summaries')
-        .upsert({
-          job_id: saveJobId,
-          applicant_id,
-          application_id: application?.id || application_id,
-          summary_text: summaryText,
-          key_points: [docPoint, ...normalizedPoints],
-          raw_text: safeRawText,
-          generated_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'job_id,applicant_id',
-        });
+      const { data: ownApplication } = await supabase
+        .from('job_applications')
+        .select('id')
+        .eq('applicant_id', applicant_id)
+        .eq('job_id', saveJobId)
+        .maybeSingle();
 
-      if (saveError) {
-        console.error('Error saving job-specific summary:', saveError);
+      if (ownApplication) {
+        const { error: saveError } = await supabase
+          .from('candidate_summaries')
+          .upsert({
+            job_id: saveJobId,
+            applicant_id,
+            application_id: ownApplication.id,
+            summary_text: summaryText,
+            key_points: [docPoint, ...normalizedPoints],
+            raw_text: safeRawText,
+            generated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'job_id,applicant_id',
+          });
+
+        if (saveError) {
+          console.error('Error saving job-specific summary:', saveError);
+        }
+      } else {
+        console.warn('Skipping candidate_summaries upsert: no application for applicant/job pair', { applicant_id, job_id: saveJobId });
       }
     }
 
