@@ -528,7 +528,8 @@ VIKTIGT:
         summary = JSON.parse(content);
       }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
+      // Logga aldrig innehållet — det innehåller kandidatens CV-uppgifter.
+      console.error('Failed to parse AI response (length:', content?.length ?? 0, ')');
       summary = {
         is_valid_cv: false,
         document_type: 'okänt dokument',

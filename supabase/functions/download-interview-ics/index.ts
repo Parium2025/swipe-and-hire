@@ -1,7 +1,14 @@
-// Public endpoint that generates an .ics calendar file on demand for an interview.
-// Interview UUIDs are unguessable (122 bits of entropy), so the ID acts as a capability token.
+// Genererar en .ics-fil för en intervju. Åtkomst kräver antingen en signerad
+// länk (mejlen) eller en inloggad deltagare i mötet — intervju-id ensamt
+// räcker inte.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { icsSignatureValid } from "../_shared/icsLink.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -48,21 +55,44 @@ const foldIcsLine = (line: string): string => {
 
 
 serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
 
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) {
-    return new Response("Invalid interview id", { status: 400 });
+    return new Response("Invalid interview id", { status: 400, headers: corsHeaders });
   }
 
   const { data: interview, error } = await supabaseAdmin
     .from("interviews")
-    .select("id, scheduled_at, duration_minutes, location_type, location_details, message, subject, job_id, employer_id, status, revision")
+    .select("id, scheduled_at, duration_minutes, location_type, location_details, message, subject, job_id, employer_id, applicant_id, status, revision")
     .eq("id", id)
     .maybeSingle();
 
   if (error || !interview) {
-    return new Response("Interview not found", { status: 404 });
+    return new Response("Interview not found", { status: 404, headers: corsHeaders });
+  }
+
+  // === ÅTKOMST ===
+  // (a) signerad länk från våra egna mejl, eller
+  // (b) inloggad deltagare i mötet (kandidat eller arbetsgivare).
+  let allowed = await icsSignatureValid(id, url.searchParams.get("sig"));
+  if (!allowed) {
+    const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "").trim();
+    if (token) {
+      const authClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: `Bearer ${token}` } } },
+      );
+      const { data: claims } = await authClient.auth.getClaims(token);
+      const uid = claims?.claims?.sub as string | undefined;
+      allowed = !!uid && (uid === interview.employer_id || uid === interview.applicant_id);
+    }
+  }
+  if (!allowed) {
+    return new Response("Not authorized", { status: 403, headers: corsHeaders });
   }
 
   // Avbokad intervju får aldrig hamna i någons kalender. En nekad intervju

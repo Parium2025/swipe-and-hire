@@ -5,6 +5,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendLoggedTemplateEmail } from "./transactional-email-templates/send-logged-email.ts";
+import { icsUrlFor } from "./icsLink.ts";
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString("sv-SE", {
@@ -141,7 +142,7 @@ export async function sendInterviewRescheduleEmail(
       google_calendar_url: googleCalendarUrl(
         jobTitle, companyName, interview.scheduled_at, duration, locationType, locationDetails,
       ),
-      ics_url: `${supabaseUrl}/functions/v1/download-interview-ics?id=${interviewId}`,
+      ics_url: await icsUrlFor(supabaseUrl, interviewId),
       accept_url: responseBase ? `${responseBase}&answer=yes` : undefined,
       decline_url: responseBase ? `${responseBase}&answer=no` : undefined,
     },

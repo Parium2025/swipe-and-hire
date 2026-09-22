@@ -17,6 +17,7 @@ import {
   getMeetingUrl,
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
+import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
 
 const getLocationIcon = (type: Interview['location_type']) => {
   switch (type) {
@@ -185,11 +186,7 @@ export const EmployerInterviewsCard = memo(() => {
                           type="button"
                           onClick={(event) => {
                             event.stopPropagation();
-                            window.open(
-                              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-interview-ics?id=${interview.id}`,
-                              '_blank',
-                              'noopener,noreferrer',
-                            );
+                            void downloadInterviewIcs(interview.id);
                           }}
                           className="ml-auto flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 leading-none text-white hover:bg-white/15"
                           aria-label="Lägg till i kalender"
