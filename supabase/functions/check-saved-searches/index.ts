@@ -369,7 +369,11 @@ async function fullScan(supabase: any) {
         .gt('created_at', sinceDate);
 
       if (search.search_query) {
-        query = query.or(`title.ilike.%${search.search_query}%,workplace_city.ilike.%${search.search_query}%`);
+        // SÄKERHET: rensa tecken som annars kan ändra filteruttrycket.
+        const safeQuery = String(search.search_query).replace(/[,()"*\\]/g, ' ').trim();
+        if (safeQuery) {
+          query = query.or(`title.ilike.%${safeQuery}%,workplace_city.ilike.%${safeQuery}%`);
+        }
       }
       if (search.city) {
         query = query.or(`workplace_city.ilike.%${search.city}%,workplace_municipality.ilike.%${search.city}%`);
