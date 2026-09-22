@@ -224,12 +224,55 @@ export const useInterviews = () => {
     },
   });
 
+  /**
+   * Tar bort mötet från arbetsgivarens översiktskort utan att röra statusen,
+   * kalendern eller kandidatens vy. Bara en visuell rensning.
+   */
+  const dismissInterview = useMutation({
+    mutationFn: async (interviewId: string) => {
+      if (!getIsOnline()) throw new Error('Du är offline');
+
+      const { data, error } = await supabase
+        .from('interviews')
+        .update({ employer_dismissed_at: new Date().toISOString() })
+        .eq('id', interviewId)
+        .select('id')
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error('Kunde inte ta bort intervjun');
+    },
+    onMutate: async (interviewId: string) => {
+      if (!user?.id) return { previous: undefined };
+      const key = ['interviews', user.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Interview[]>(key);
+      if (previous) {
+        const next = previous.filter((i) => i.id !== interviewId);
+        queryClient.setQueryData(key, next);
+        writeEmployerInterviewsCache(user.id, next);
+      }
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (!user?.id) return;
+      if (context?.previous) {
+        queryClient.setQueryData(['interviews', user.id], context.previous);
+        writeEmployerInterviewsCache(user.id, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviews'] });
+    },
+  });
+
   return {
     interviews,
     isLoading,
     error,
     updateStatus,
     cancelInterview,
+    dismissInterview,
   };
 };
 
