@@ -62,7 +62,7 @@ const formatTime = (dateString: string): string => {
   const time = new Date(dateString).toLocaleTimeString('sv-SE', {
     hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm'
   });
-  return `${time} (svensk tid)`;
+  return `${time}`;
 };
 
 const generateGoogleCalendarUrl = (

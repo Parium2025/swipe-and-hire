@@ -88,7 +88,7 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     name: 'Intervju avbokad · professionellt mejl',
     channel: 'email',
     subject: 'Din intervju för {job_title} är avbokad',
-    body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} den {scheduled_date} kl. {scheduled_time} är tyvärr avbokad.\n\nVi återkommer om en ny tid.\n\nVänliga hälsningar,\n{company_name}',
+    body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} den {scheduled_date} kl. {scheduled_time} är tyvärr avbokad.\n\nVänliga hälsningar,\n{company_name}',
     is_active: true,
   },
   {
@@ -102,7 +102,7 @@ export const DEFAULT_OUTREACH_TEMPLATES: Array<{
     name: 'Intervju avbokad · chat',
     channel: 'chat',
     subject: null,
-    body: 'Hej {first_name}! Din intervju för {job_title} den {scheduled_date} kl. {scheduled_time} är avbokad. Vi återkommer om en ny tid.',
+    body: 'Hej {first_name}! Din intervju för {job_title} den {scheduled_date} kl. {scheduled_time} är avbokad.',
     is_active: true,
   },
 ];

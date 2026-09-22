@@ -154,7 +154,7 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
       email: {
         name: 'Intervju avbokad · professionellt mejl',
         subject: 'Din intervju för {job_title} är avbokad',
-        body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} den {scheduled_date} kl. {scheduled_time} är tyvärr avbokad.\n\nVi återkommer om en ny tid.\n\nVänliga hälsningar,\n{company_name}',
+        body: 'Hej {candidate_name},\n\nDin intervju för {job_title} hos {company_name} den {scheduled_date} kl. {scheduled_time} är tyvärr avbokad.\n\nVänliga hälsningar,\n{company_name}',
       },
       push: {
         name: 'Intervju avbokad · push',
@@ -164,7 +164,7 @@ export const AUTO_RULE_EVENTS: AutoRuleEvent[] = [
       chat: {
         name: 'Intervju avbokad · chat',
         subject: null,
-        body: 'Hej {first_name}! Din intervju för {job_title} den {scheduled_date} kl. {scheduled_time} är avbokad. Vi återkommer om en ny tid.',
+        body: 'Hej {first_name}! Din intervju för {job_title} den {scheduled_date} kl. {scheduled_time} är avbokad.',
       },
     },
   },

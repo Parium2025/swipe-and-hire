@@ -15,7 +15,7 @@ const formatDate = (value: string) =>
 const formatTime = (value: string) =>
   `${new Date(value).toLocaleTimeString("sv-SE", {
     hour: "2-digit", minute: "2-digit", timeZone: "Europe/Stockholm",
-  })} (svensk tid)`;
+  })}`;
 
 function googleCalendarUrl(
   jobTitle: string, companyName: string, scheduledAt: string,
