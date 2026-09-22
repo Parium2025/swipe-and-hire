@@ -47,6 +47,7 @@ const InterviewResponse = () => {
 
       if (!data?.ok) {
         const reason = data?.reason ?? '';
+        const isDead = reason === 'started' || reason === 'expired' || reason === 'closed';
         setMessage(
           reason === 'expired'
             ? 'Länken har gått ut. Logga in i Parium för att svara på intervjun.'
@@ -56,6 +57,7 @@ const InterviewResponse = () => {
                 ? 'Intervjun är inte längre öppen för svar. Logga in i Parium för att se vad som gäller.'
                 : 'Svaret kunde inte registreras just nu. Försök igen om en stund eller svara inne i Parium.',
         );
+        setDeadReason(isDead ? (reason as Exclude<DeadReason, null>) : null);
         setPhase('error');
         return;
       }
@@ -69,6 +71,7 @@ const InterviewResponse = () => {
       setPhase('done');
     } catch {
       setMessage('Svaret kunde inte registreras just nu. Kontrollera din uppkoppling och försök igen.');
+      setDeadReason(null);
       setPhase('error');
     }
   };
