@@ -1713,6 +1713,7 @@ export type Database = {
           location_type: string
           message: string | null
           reminder_sent_at: string | null
+          reminder_shard: number | null
           revision: number
           scheduled_at: string
           status: string
@@ -1733,6 +1734,7 @@ export type Database = {
           location_type?: string
           message?: string | null
           reminder_sent_at?: string | null
+          reminder_shard?: number | null
           revision?: number
           scheduled_at: string
           status?: string
@@ -1753,6 +1755,7 @@ export type Database = {
           location_type?: string
           message?: string | null
           reminder_sent_at?: string | null
+          reminder_shard?: number | null
           revision?: number
           scheduled_at?: string
           status?: string

@@ -69,9 +69,10 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Sharding: minutkörningen (sida 0) är koordinator. Ligger fler möten i
-  // fönstret än en sida rymmer startar den parallella arbetare som tar sida
-  // 1, 2, 3 … samtidigt. Då begränsas kapaciteten inte av en enda körning.
+  // Sharding: minutkörningen (sida 0) är koordinator. Vid stora toppar får
+  // varje arbetare en stabil shard. Offset får inte användas här eftersom
+  // reminder_sent_at ändras under körningen och då skulle senare sidor flytta
+  // sig och kunna hoppas över.
   const workerPage = Math.max(0, Math.min(Number(requestBody?.worker_page ?? 0) || 0, 15));
   const PAGE_SIZE = 500;
   const MAX_WORKERS = 16;
@@ -341,7 +342,21 @@ Deno.serve(async (req) => {
 
     console.log(`Looking for confirmed interviews between ${now.toISOString()} and ${elevenMinutesFromNow.toISOString()}`);
 
-    const { data: upcomingInterviews, error: interviewsError } = await supabase
+    const { count: dueInterviewCount, error: countError } = await supabase
+      .from("interviews")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["pending", "confirmed"])
+      .gte("scheduled_at", now.toISOString())
+      .lte("scheduled_at", elevenMinutesFromNow.toISOString())
+      .is("reminder_sent_at", null);
+
+    if (countError) {
+      console.error("Error counting interviews:", countError);
+      throw countError;
+    }
+
+    const useShards = (dueInterviewCount ?? 0) > PAGE_SIZE;
+    let upcomingQuery = supabase
       .from("interviews")
       .select(`
         id,
@@ -366,29 +381,30 @@ Deno.serve(async (req) => {
       // Fönstret är brett men cron kör varje minut – utan denna
       // markering skulle samma påminnelse skickas två gånger.
       .is("reminder_sent_at", null)
-      // Stabil ordning + sidindelning: varje arbetare tar sin egen sida, så
-      // tiotusentals möten kan behandlas parallellt inom samma minut.
+       // Stabil ordning inom varje shard.
       .order("scheduled_at", { ascending: true })
       .order("id", { ascending: true })
-      .range(workerPage * PAGE_SIZE, workerPage * PAGE_SIZE + PAGE_SIZE - 1);
+      .limit(PAGE_SIZE);
+
+    if (useShards) {
+      upcomingQuery = upcomingQuery.eq("reminder_shard", workerPage);
+    } else if (workerPage > 0) {
+      return new Response(JSON.stringify({ skipped: true, reason: "sharding_not_needed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: upcomingInterviews, error: interviewsError } = await upcomingQuery;
 
     if (interviewsError) {
       console.error("Error fetching interviews:", interviewsError);
       throw interviewsError;
     }
 
-    // Full sida = det finns troligen mer. Koordinatorn startar då extra
-    // arbetare som tar nästa sidor samtidigt i stället för nästa minut.
-    if (workerPage === 0 && (upcomingInterviews?.length ?? 0) >= PAGE_SIZE) {
-      const { count } = await supabase
-        .from("interviews")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["pending", "confirmed"])
-        .gte("scheduled_at", now.toISOString())
-        .lte("scheduled_at", elevenMinutesFromNow.toISOString())
-        .is("reminder_sent_at", null);
-      const pagesNeeded = Math.min(Math.ceil((count ?? PAGE_SIZE) / PAGE_SIZE), MAX_WORKERS);
-      for (let page = 1; page < pagesNeeded; page++) {
+    // Alla 16 stabila shards startas vid toppar. Varje intervju hör alltid till
+    // exakt en arbetare även när andra arbetare markerar sina rader som skickade.
+    if (workerPage === 0 && useShards) {
+      for (let page = 1; page < MAX_WORKERS; page++) {
         const call = fetch(`${supabaseUrl}/functions/v1/interview-reminders`, {
           method: "POST",
           headers: {
@@ -401,7 +417,7 @@ Deno.serve(async (req) => {
         (globalThis as { EdgeRuntime?: { waitUntil: (p: Promise<unknown>) => void } })
           .EdgeRuntime?.waitUntil(call);
       }
-      console.log(`Fan-out: ${pagesNeeded} sidor (~${count} möten) behandlas parallellt`);
+      console.log(`Fan-out: ${MAX_WORKERS} stabila shards (~${dueInterviewCount} möten) behandlas parallellt`);
     }
 
 
