@@ -35,7 +35,7 @@ const getLocationLabel = (type: Interview['location_type']) => {
 };
 
 export const EmployerInterviewsCard = memo(() => {
-  const { interviews, isLoading, error } = useInterviews();
+  const { interviews, isLoading, error, dismissInterview } = useInterviews();
   const navigate = useNavigate();
   const now = useMinuteTick();
   // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
