@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-response`;
 
 type Phase = 'confirm' | 'sending' | 'done' | 'error';
+// Permanenta spärrar: ett nytt tryck kan aldrig lyckas, så "Försök igen" döljs.
+type DeadReason = 'started' | 'expired' | 'closed' | null;
 
 const InterviewResponse = () => {
   const [params] = useSearchParams();
@@ -29,6 +31,7 @@ const InterviewResponse = () => {
 
   const [phase, setPhase] = useState<Phase>('confirm');
   const [message, setMessage] = useState('');
+  const [deadReason, setDeadReason] = useState<DeadReason>(null);
 
   const submit = async () => {
     setPhase('sending');
