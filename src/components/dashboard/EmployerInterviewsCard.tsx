@@ -51,7 +51,10 @@ export const EmployerInterviewsCard = memo(() => {
       const aDone = isDone(a) ? 1 : 0;
       const bDone = isDone(b) ? 1 : 0;
       if (aDone !== bDone) return aDone - bDone;
-      return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
+      const aTime = new Date(a.scheduled_at).getTime();
+      const bTime = new Date(b.scheduled_at).getTime();
+      // Aktiva: närmast i tiden först. Avslutade/avböjda: senaste först.
+      return aDone ? bTime - aTime : aTime - bTime;
     });
   }, [interviews, now]);
   const upcomingInterviews = liveInterviews.slice(0, 5);
