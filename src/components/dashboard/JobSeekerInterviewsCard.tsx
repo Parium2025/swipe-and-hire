@@ -50,6 +50,9 @@ export const JobSeekerInterviewsCard = memo(() => {
     const finished = list.filter(
       (i) => i.status === 'declined' || isInterviewOver(i.scheduled_at, i.duration_minutes, now),
     );
+    // Aktiva: närmast i tiden först. Avslutade: senaste först.
+    active.sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
+    finished.sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
     return [...active, ...finished];
   }, [interviews, now]);
   const upcomingInterviews = liveInterviews.slice(0, 5);
