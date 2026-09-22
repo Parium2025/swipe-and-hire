@@ -160,7 +160,7 @@ export const EmployerInterviewsCard = memo(() => {
                           </button>
 
                         ) : (
-                          <span className="flex w-full items-center justify-center gap-1 rounded px-1 py-0.5 whitespace-nowrap text-[9px] font-medium leading-none text-white">
+                          <span className="flex h-5 w-full items-center justify-center gap-1 rounded px-1 whitespace-nowrap text-[9px] font-medium leading-none text-white">
                             {interview.status === 'confirmed' ? (
                               <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                             ) : (
