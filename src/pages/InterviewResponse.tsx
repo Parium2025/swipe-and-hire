@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interview-response`;
 
 type Phase = 'confirm' | 'sending' | 'done' | 'error';
+// Permanenta spärrar: ett nytt tryck kan aldrig lyckas, så "Försök igen" döljs.
+type DeadReason = 'started' | 'expired' | 'closed' | null;
 
 const InterviewResponse = () => {
   const [params] = useSearchParams();
@@ -29,6 +31,7 @@ const InterviewResponse = () => {
 
   const [phase, setPhase] = useState<Phase>('confirm');
   const [message, setMessage] = useState('');
+  const [deadReason, setDeadReason] = useState<DeadReason>(null);
 
   const submit = async () => {
     setPhase('sending');
@@ -44,6 +47,7 @@ const InterviewResponse = () => {
 
       if (!data?.ok) {
         const reason = data?.reason ?? '';
+        const isDead = reason === 'started' || reason === 'expired' || reason === 'closed';
         setMessage(
           reason === 'expired'
             ? 'Länken har gått ut. Logga in i Parium för att svara på intervjun.'
@@ -53,6 +57,7 @@ const InterviewResponse = () => {
                 ? 'Intervjun är inte längre öppen för svar. Logga in i Parium för att se vad som gäller.'
                 : 'Svaret kunde inte registreras just nu. Försök igen om en stund eller svara inne i Parium.',
         );
+        setDeadReason(isDead ? (reason as Exclude<DeadReason, null>) : null);
         setPhase('error');
         return;
       }
@@ -66,6 +71,7 @@ const InterviewResponse = () => {
       setPhase('done');
     } catch {
       setMessage('Svaret kunde inte registreras just nu. Kontrollera din uppkoppling och försök igen.');
+      setDeadReason(null);
       setPhase('error');
     }
   };
@@ -74,7 +80,13 @@ const InterviewResponse = () => {
     ? 'Länken fungerar inte'
     : phase === 'done'
       ? accept ? 'Tack – du är anmäld' : 'Tack för ditt besked'
-      : accept ? 'Tacka ja till intervjun' : 'Tacka nej till intervjun';
+      : deadReason === 'started'
+        ? 'Intervjun har påbörjats'
+        : deadReason === 'expired'
+          ? 'Länken har gått ut'
+          : deadReason === 'closed'
+            ? 'Svaret är stängt'
+            : accept ? 'Tacka ja till intervjun' : 'Tacka nej till intervjun';
 
   return (
     <main className="min-h-screen bg-parium-gradient flex items-center justify-center px-4 py-8 text-primary-foreground">
@@ -97,7 +109,7 @@ const InterviewResponse = () => {
           <h1 className="text-2xl font-semibold text-white">{heading}</h1>
         </div>
 
-        <p className="mb-7 text-sm leading-6 text-white sm:text-base">
+        <p className={`mb-7 text-sm leading-6 sm:text-base ${deadReason ? 'text-destructive' : 'text-white'}`}>
           {!validLink
             ? 'Länken är ofullständig eller felaktig. Logga in i Parium för att svara på intervjun.'
             : phase === 'confirm' || phase === 'sending'
@@ -105,7 +117,7 @@ const InterviewResponse = () => {
               : message}
         </p>
 
-        {validLink && (phase === 'confirm' || phase === 'sending' || phase === 'error') && (
+        {validLink && !deadReason && (phase === 'confirm' || phase === 'sending' || phase === 'error') && (
           <Button
             type="button"
             variant="secondary"
