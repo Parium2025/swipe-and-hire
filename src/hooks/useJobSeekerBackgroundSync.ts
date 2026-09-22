@@ -8,6 +8,7 @@ import { updateLastSyncTime } from '@/lib/draftUtils';
 import { preloadWeatherLocation } from './useWeather';
 import { MY_APPLICATIONS_SELECT } from './myApplicationsShared';
 import { fetchAllPages } from '@/lib/fetchAllPages';
+import { fetchCandidateInterviewsForUser } from './useInterviews';
 
 
 const SAVED_JOBS_CACHE_KEY = 'job_seeker_saved_jobs_';
