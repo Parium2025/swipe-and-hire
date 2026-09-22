@@ -80,7 +80,13 @@ const InterviewResponse = () => {
     ? 'Länken fungerar inte'
     : phase === 'done'
       ? accept ? 'Tack – du är anmäld' : 'Tack för ditt besked'
-      : accept ? 'Tacka ja till intervjun' : 'Tacka nej till intervjun';
+      : deadReason === 'started'
+        ? 'Intervjun har påbörjats'
+        : deadReason === 'expired'
+          ? 'Länken har gått ut'
+          : deadReason === 'closed'
+            ? 'Svaret är stängt'
+            : accept ? 'Tacka ja till intervjun' : 'Tacka nej till intervjun';
 
   return (
     <main className="min-h-screen bg-parium-gradient flex items-center justify-center px-4 py-8 text-primary-foreground">
@@ -103,7 +109,7 @@ const InterviewResponse = () => {
           <h1 className="text-2xl font-semibold text-white">{heading}</h1>
         </div>
 
-        <p className="mb-7 text-sm leading-6 text-white sm:text-base">
+        <p className={`mb-7 text-sm leading-6 sm:text-base ${deadReason ? 'text-destructive' : 'text-white'}`}>
           {!validLink
             ? 'Länken är ofullständig eller felaktig. Logga in i Parium för att svara på intervjun.'
             : phase === 'confirm' || phase === 'sending'
@@ -111,7 +117,7 @@ const InterviewResponse = () => {
               : message}
         </p>
 
-        {validLink && (phase === 'confirm' || phase === 'sending' || phase === 'error') && (
+        {validLink && !deadReason && (phase === 'confirm' || phase === 'sending' || phase === 'error') && (
           <Button
             type="button"
             variant="secondary"
