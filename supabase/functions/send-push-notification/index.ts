@@ -236,25 +236,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // AUTHORIZATION: a non-service caller must be the recipient, or share a
-    // conversation with them. Blocks arbitrary user-to-user push spam.
-    if (!isServiceRole && callerSub && callerSub !== recipient_id) {
-      const { data: aRows } = await supabase
-        .from('conversation_members')
-        .select('conversation_id')
-        .eq('user_id', callerSub);
-      const { data: bRows } = await supabase
-        .from('conversation_members')
-        .select('conversation_id')
-        .eq('user_id', recipient_id);
-      const aSet = new Set((aRows ?? []).map((r) => r.conversation_id));
-      const shared = (bRows ?? []).some((r) => aSet.has(r.conversation_id));
-      if (!shared) {
-        return new Response(
-          JSON.stringify({ error: 'Forbidden — no relationship with recipient' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    // AUTHORIZATION: en inloggad användare får bara skicka notiser till sig
+    // själv. Alla notiser till någon annan skapas av servern (chatt, intervju,
+    // ansökan) — aldrig med text som en användare själv har valt.
+    if (!isServiceRole && callerSub !== recipient_id) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden — notifications to other users are sent by the server only' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // === TYST SPÄRR: mottagaren har blockerat avsändaren ===
