@@ -153,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
     {
       const { data: interview } = await supabaseAdmin
         .from('interviews')
-        .select('applicant_id, employer_id, job_id, revision')
+        .select('applicant_id, employer_id, job_id, revision, application_id')
         .eq('id', interviewId)
         .maybeSingle();
       if (!interview) {
