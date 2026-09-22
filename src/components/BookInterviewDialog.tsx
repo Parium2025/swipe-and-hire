@@ -627,11 +627,10 @@ export const BookInterviewDialog = ({
     if (nextOpen) setTimeDraft(time);
   };
 
+  // Endast siffror – max fyra – och kolon sätts automatiskt, exakt som brickorna (HH:MM).
   const handleTimeDraftChange = (value: string) => {
-    let v = value.replace(/[^0-9:]/g, '').slice(0, 5);
-    const parts = v.split(':');
-    if (parts.length > 2) v = `${parts[0]}:${parts.slice(1).join('')}`;
-    setTimeDraft(v);
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+    setTimeDraft(digits.length <= 2 ? digits : `${digits.slice(0, 2)}:${digits.slice(2)}`);
   };
 
   // Tolkar "20", "20:", "20:0", "930" och "2007" och normaliserar till HH:MM.
