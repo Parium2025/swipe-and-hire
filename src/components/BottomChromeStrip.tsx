@@ -27,11 +27,6 @@ const detectTabletLandscape = () => {
   ).matches;
 };
 
-const detectStandalone = () => {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(display-mode: standalone)').matches;
-};
-
 /** Färgankare som låter Safari måla rätt ruttfärg bakom bottenfältet. */
 const BottomChromeStrip = () => {
   const location = useLocation();
@@ -40,7 +35,6 @@ const BottomChromeStrip = () => {
   // the entire mobile shell look as though the top edge had jumped.
   const [isTouch, setIsTouch] = useState(detectTouch);
   const [isTabletLandscape, setIsTabletLandscape] = useState(detectTabletLandscape);
-  const [isStandalone, setIsStandalone] = useState(detectStandalone);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,15 +55,6 @@ const BottomChromeStrip = () => {
       mqTouch.removeEventListener?.('change', apply);
       mqTablet.removeEventListener?.('change', apply);
     };
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(display-mode: standalone)');
-    const apply = () => setIsStandalone(mq.matches);
-    apply();
-    mq.addEventListener?.('change', apply);
-    return () => mq.removeEventListener?.('change', apply);
   }, []);
 
   const color = isLandingVideoPath(location.pathname)

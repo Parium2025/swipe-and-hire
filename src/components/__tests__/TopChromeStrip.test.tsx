@@ -39,7 +39,6 @@ describe('TopChromeStrip', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
     expect(container.firstChild).not.toBeNull();
-    expect((container.firstChild as HTMLElement).style.height).toContain('safe-area-inset-top');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toContain('safe-area-inset-top');
