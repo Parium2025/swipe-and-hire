@@ -897,6 +897,28 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     desktopImageClearedRef.current = false;
   }, [job?.id, open]);
 
+  // Hämta sparade originalbilder så "Anpassa bild" alltid öppnar originalet,
+  // även om annonslistan inte innehåller originalfälten.
+  useEffect(() => {
+    if (!open || !job?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('job_postings')
+        .select('job_image_url, job_image_desktop_url, job_image_original_url, job_image_desktop_original_url')
+        .eq('id', job.id)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      if (data.job_image_original_url && !imageClearedRef.current) {
+        setOriginalImageUrl(prev => (!prev || prev === data.job_image_url) ? data.job_image_original_url : prev);
+      }
+      if (data.job_image_desktop_original_url && !desktopImageClearedRef.current) {
+        setOriginalDesktopImageUrl(prev => (!prev || prev === data.job_image_desktop_url) ? data.job_image_desktop_original_url : prev);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [job?.id, open]);
+
   // Load job image if exists - use public URL from job-images bucket (mobile)
   useEffect(() => {
     const loadJobImage = async () => {
