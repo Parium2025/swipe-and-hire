@@ -26,7 +26,7 @@ const detectStandalone = () => {
 };
 
 /**
- * Safe-area-fyllning längst upp för installerat app-läge.
+ * Färgankare för Safari längst upp och safe-area-fyllning i installerat läge.
  *
  * Med `viewport-fit=cover` sträcker sig sidan in bakom iOS statusrad.
  * iOS Safari samplar body's bakgrundsfärg EN gång vid sidladdning och
@@ -35,10 +35,11 @@ const detectStandalone = () => {
  * Samma problem som bottenremsan löser, samma lösning: en fixed remsa som
  * lyssnar på react-router location och alltid målar rätt ruttfärg.
  *
- * Vanlig iPhone-Safari har sitt innehåll under webbläsarens statusfält. En
- * fixed remsa där hamnar därför i webbsidan och blir en dubbel färgrad.
+ * Safari 26 hämtar inte längre webbläsarfärgen från theme-color utan från ett
+ * fixed/sticky element som möter viewportens kant. I vanlig Safari räcker en
+ * enda pixel: den triggar rätt färg men skapar ingen synlig extrarad.
  *
- * Synlig endast på touch-enheter i installerat app-läge.
+ * Installerat app-läge fyller fortfarande hela safe-area.
  */
 const TopChromeStrip = () => {
   const location = useLocation();
@@ -90,8 +91,11 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  const shouldShowStrip = isTouch && isStandalone;
-  const chromeOffset = 'calc(env(safe-area-inset-top, 0px) + 22px)';
+  const shouldShowStrip = isTouch;
+  const stripHeight = isStandalone
+    ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
+    : '1px';
+  const chromeOffset = isStandalone ? stripHeight : '0px';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
@@ -119,7 +123,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        height: chromeOffset,
+        height: stripHeight,
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',

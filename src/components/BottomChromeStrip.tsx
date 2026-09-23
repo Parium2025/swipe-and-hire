@@ -33,9 +33,9 @@ const detectStandalone = () => {
 };
 
 /**
- * Safe-area-fyllning längst ner för installerat app-läge.
+ * Färgankare för Safari längst ner och safe-area-fyllning i installerat läge.
  *
- * I vanlig Safari blir en fixed remsa en synlig extrarad ovanför verktygsfältet.
+ * En pixel vid kanten ger Safari rätt färg utan en synlig extrarad.
  */
 const BottomChromeStrip = () => {
   const location = useLocation();
@@ -124,7 +124,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isTabletLandscape, location.pathname]);
 
-  if (!isTouch || !isStandalone) return null;
+  if (!isTouch) return null;
 
   return (
     <div
@@ -139,7 +139,9 @@ const BottomChromeStrip = () => {
         bottom: 0,
         // Endast safe-area: remsan ska ligga helt bakom webbläsarens egen
         // bottenlist och aldrig synas som en mörk rad ovanför den.
-        height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
+        height: isStandalone
+          ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
+          : '1px',
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
