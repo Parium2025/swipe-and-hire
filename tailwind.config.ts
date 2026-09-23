@@ -2,6 +2,11 @@ import type { Config } from "tailwindcss";
 
 export default {
 	darkMode: ["class"],
+	future: {
+		/* Hover-effekter gäller bara på enheter med riktig hover (mus).
+		   Förhindrar att hover-stilar "fastnar" efter tap på touch. */
+		hoverOnlyWhenSupported: true,
+	},
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
