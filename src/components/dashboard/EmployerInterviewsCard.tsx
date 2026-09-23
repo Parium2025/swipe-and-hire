@@ -147,9 +147,9 @@ export const EmployerInterviewsCard = memo(() => {
   return (
     <Card
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
-      onTouchStart={useTouchCarousel ? swipeHandlers.onTouchStart : undefined}
-      onTouchMove={useTouchCarousel ? swipeHandlers.onTouchMove : undefined}
-      onTouchEnd={useTouchCarousel ? swipeHandlers.onTouchEnd : undefined}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
