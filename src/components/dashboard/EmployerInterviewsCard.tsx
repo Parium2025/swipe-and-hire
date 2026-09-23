@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,8 +41,10 @@ export const EmployerInterviewsCard = memo(() => {
   const now = useMinuteTick();
   // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
   const lastOpenRef = useRef(0);
+  // Mobil: en intervju per kortyta, prickar växlar mellan dem.
+  const [mobileIndex, setMobileIndex] = useState(0);
 
-  // Avslutade och avböjta möten ligger kvar (hämtningen släpper dem efter ett
+  // Avslutade och avböjda möten ligger kvar (hämtningen släpper dem efter ett
   // dygn) så att ingen kandidat glöms bort — men de sorteras efter de aktiva.
   const liveInterviews = useMemo(() => {
     const isDone = (i: Interview) =>
@@ -57,9 +59,13 @@ export const EmployerInterviewsCard = memo(() => {
       return aDone ? bTime - aTime : aTime - bTime;
     });
   }, [interviews, now]);
+
+  // Håll mobilindex giltigt när intervjuer tas bort eller läggs till.
+  const activeIndex = Math.min(mobileIndex, Math.max(0, liveInterviews.length - 1));
+
   if (isLoading) {
     return (
-      <Card className={`relative h-[320px] overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg sm:h-[200px] md:h-[220px] lg:h-[240px]`}>
+      <Card className={`relative h-[200px] overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg md:h-[220px] lg:h-[240px]`}>
         <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-4 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -73,7 +79,7 @@ export const EmployerInterviewsCard = memo(() => {
   }
 
   return (
-    <Card className={`relative h-[320px] overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg sm:h-[200px] md:h-[220px] lg:h-[240px]`}>
+    <Card className={`relative h-[200px] overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg md:h-[220px] lg:h-[240px]`}>
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
 
@@ -98,124 +104,153 @@ export const EmployerInterviewsCard = memo(() => {
               )}
             </div>
           ) : (
-            <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
-              {liveInterviews.map((interview) => {
-                const LocationIcon = getLocationIcon(interview.location_type);
-                const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
-                const isDeclined = interview.status === 'declined';
-                // Avböjda och avslutade möten får rensas bort manuellt.
-                const canDismiss = isDeclined || isOver;
-                const timeUntil = isDeclined
-                  ? 'Avböjt'
-                  : isOver
-                    ? 'Avslutad'
-                    : getTimeUntil(interview.scheduled_at, now);
-                // Kandidatens svar följer alltid med, även när mötet är avslutat.
-                const responseLabel = isDeclined
-                  ? 'Tackade nej'
-                  : interview.status === 'confirmed'
-                    ? 'Tackade ja'
-                    : 'Inget svar';
-                const isUrgent = !canDismiss && isInterviewUrgent(interview.scheduled_at, now);
-                const meetingUrl = getMeetingUrl(interview.location_details);
+            <>
+              <div className="flex-1 space-y-1.5 sm:overflow-y-auto h-full sm:pr-1 scrollbar-hide">
+                {liveInterviews.map((interview, index) => {
+                  const LocationIcon = getLocationIcon(interview.location_type);
+                  const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
+                  const isDeclined = interview.status === 'declined';
+                  // Avböjda och avslutade möten får rensas bort manuellt.
+                  const canDismiss = isDeclined || isOver;
+                  const timeUntil = isDeclined
+                    ? 'Avböjt'
+                    : isOver
+                      ? 'Avslutad'
+                      : getTimeUntil(interview.scheduled_at, now);
+                  // Kandidatens svar följer alltid med, även när mötet är avslutat.
+                  const responseLabel = isDeclined
+                    ? 'Tackade nej'
+                    : interview.status === 'confirmed'
+                      ? 'Tackade ja'
+                      : 'Inget svar';
+                  const isUrgent = !canDismiss && isInterviewUrgent(interview.scheduled_at, now);
+                  const meetingUrl = getMeetingUrl(interview.location_details);
 
-                return (
-                  <motion.div
-                    key={interview.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className={cn(
-                      'rounded-lg p-2 cursor-pointer transition-colors',
-                      canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
-                    )}
-                    onClick={() => {
-                      const nowMs = Date.now();
-                      if (nowMs - lastOpenRef.current < 800) return;
-                      lastOpenRef.current = nowMs;
-                      if (!canDismiss && interview.location_type === 'video' && meetingUrl) {
-                        window.open(meetingUrl, '_blank', 'noopener,noreferrer');
-                      } else {
-                        navigate('/my-candidates');
-                      }
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <TruncatedText text={interview.candidate_name} className="text-xs font-semibold text-white" insideInteractive />
-                        <TruncatedText text={interview.job_title} className="text-[10px] text-white" insideInteractive />
+                  return (
+                    <motion.div
+                      key={interview.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className={cn(
+                        'rounded-lg p-3 sm:p-2 cursor-pointer transition-colors',
+                        canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
+                        // Mobil: endast den valda intervjun syns — en per kortyta.
+                        index !== activeIndex && 'hidden sm:block',
+                      )}
+                      onClick={() => {
+                        const nowMs = Date.now();
+                        if (nowMs - lastOpenRef.current < 800) return;
+                        lastOpenRef.current = nowMs;
+                        if (!canDismiss && interview.location_type === 'video' && meetingUrl) {
+                          window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          navigate('/my-candidates');
+                        }
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <TruncatedText text={interview.candidate_name} className="text-sm sm:text-xs font-semibold text-white" insideInteractive />
+                          <TruncatedText text={interview.job_title} className="text-xs sm:text-[10px] text-white" insideInteractive />
+                        </div>
+                        <div className="flex w-[104px] sm:w-[88px] shrink-0 flex-col items-center gap-1.5 sm:gap-1">
+                          <span className={cn(
+                            "flex h-8 sm:h-5 w-full items-center justify-center gap-1 rounded px-2 sm:px-1.5 text-xs sm:text-[10px] font-medium leading-none whitespace-nowrap text-white",
+                            (isUrgent || canDismiss) && "bg-white/10"
+                          )}>
+                            {!canDismiss && <Clock3 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />}
+                            {timeUntil}
+                          </span>
+                          {canDismiss ? (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                dismissInterview.mutate(interview.id);
+                              }}
+                              className="flex h-8 sm:h-5 w-full items-center justify-center gap-1 rounded bg-white/10 px-2 sm:px-1.5 text-xs sm:text-[10px] font-medium leading-none text-white hover:bg-white/15"
+                              aria-label="Ta bort från översikten"
+                            >
+                              <Trash2 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                              <span className="leading-none">Ta bort</span>
+                            </button>
+
+                          ) : (
+                            <span className="flex h-8 sm:h-5 w-full items-center justify-center gap-1 rounded px-1 whitespace-nowrap text-xs sm:text-[9px] font-medium leading-none text-white">
+                              {interview.status === 'confirmed' ? (
+                                <CheckCircle2 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                              ) : (
+                                <Hourglass className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                              )}
+                              {interview.status === 'confirmed' ? 'Bekräftad' : 'Inväntar svar'}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex w-[88px] shrink-0 flex-col items-center gap-1">
-                        <span className={cn(
-                          "flex h-5 w-full items-center justify-center gap-1 rounded px-1.5 text-[10px] font-medium leading-none whitespace-nowrap text-white",
-                          (isUrgent || canDismiss) && "bg-white/10"
-                        )}>
-                          {!canDismiss && <Clock3 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />}
-                          {timeUntil}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 sm:gap-2 mt-2 sm:mt-1 text-xs sm:text-[10px] leading-none text-white">
+                        <span className="leading-none whitespace-nowrap">{formatInterviewDate(interview.scheduled_at)}</span>
+                        <span className="leading-none whitespace-nowrap">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
+                        <span className="flex items-center gap-1 leading-none whitespace-nowrap">
+                          <LocationIcon className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                          <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                         </span>
-                        {canDismiss ? (
+                        {canDismiss && (
+                          <span className="ml-auto flex h-7 sm:h-auto items-center gap-1 rounded bg-white/10 px-2 py-0.5 leading-none text-white whitespace-nowrap">
+                            {interview.status === 'confirmed' ? (
+                              <CheckCircle2 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                            ) : (
+                              <Hourglass className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                            )}
+                            <span className="leading-none">{responseLabel}</span>
+                          </span>
+                        )}
+                        {!canDismiss && (
+                          /* Fungerar även utan kopplad kalender: filen läggs in i
+                             Google, Outlook eller Apple med samma id, så inget dubbleras. */
                           <button
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              dismissInterview.mutate(interview.id);
+                              void downloadInterviewIcs(interview.id);
                             }}
-                            className="flex h-5 w-full items-center justify-center gap-1 rounded bg-white/10 px-1.5 text-[10px] font-medium leading-none text-white hover:bg-white/15"
-                            aria-label="Ta bort från översikten"
+                            className="ml-auto flex h-7 sm:h-5 sm:w-[76px] items-center justify-center sm:justify-start gap-1 rounded bg-white/10 sm:bg-transparent px-2 sm:px-1 py-0.5 leading-none text-white hover:bg-white/15"
+                            aria-label="Lägg till i kalender"
                           >
-                            <Trash2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                            <span className="leading-none">Ta bort</span>
+                            <CalendarPlus className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
+                            <span className="leading-none">Kalender</span>
                           </button>
-
-                        ) : (
-                          <span className="flex h-5 w-full items-center justify-center gap-1 rounded px-1 whitespace-nowrap text-[9px] font-medium leading-none text-white">
-                            {interview.status === 'confirmed' ? (
-                              <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                            ) : (
-                              <Hourglass className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                            )}
-                            {interview.status === 'confirmed' ? 'Bekräftad' : 'Inväntar svar'}
-                          </span>
                         )}
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 text-[10px] leading-none text-white whitespace-nowrap">
-                      <span className="leading-none">{formatInterviewDate(interview.scheduled_at)}</span>
-                      <span className="leading-none">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
-                      <span className="flex items-center gap-1 leading-none">
-                        <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                        <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
-                      </span>
-                      {canDismiss && (
-                        <span className="ml-auto flex items-center gap-1 rounded bg-white/10 px-1.5 py-0.5 leading-none text-white">
-                          {interview.status === 'confirmed' ? (
-                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          ) : (
-                            <Hourglass className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          )}
-                          <span className="leading-none">{responseLabel}</span>
-                        </span>
-                      )}
-                      {!canDismiss && (
-                        /* Fungerar även utan kopplad kalender: filen läggs in i
-                           Google, Outlook eller Apple med samma id, så inget dubbleras. */
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void downloadInterviewIcs(interview.id);
-                          }}
-                          className="ml-auto flex w-[76px] items-center justify-start gap-1 rounded px-1 py-0.5 leading-none text-white hover:bg-white/15"
-                          aria-label="Lägg till i kalender"
-                        >
-                          <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          <span className="leading-none">Kalender</span>
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Mobil: prickar för att växla mellan intervjuerna, en per yta. */}
+              {liveInterviews.length > 1 && (
+                <div className="mt-2 flex items-center justify-center gap-1.5 sm:hidden">
+                  {liveInterviews.map((interview, index) => (
+                    <button
+                      key={interview.id}
+                      type="button"
+                      aria-label={`Visa intervju ${index + 1}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setMobileIndex(index);
+                      }}
+                      className="flex h-5 w-5 items-center justify-center"
+                    >
+                      <span
+                        className={cn(
+                          'block h-1.5 w-1.5 rounded-full transition-colors',
+                          index === activeIndex ? 'bg-white' : 'bg-white/40',
+                        )}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
