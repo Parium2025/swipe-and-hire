@@ -190,6 +190,17 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     // Ingen border ritas in i bilden - kanter hanteras visuellt i UI
   }, [scale, position, imageLoaded, CANVAS_WIDTH, CANVAS_HEIGHT]);
 
+  const getCanvasPoint = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
+
   // Redraw when properties change
   useEffect(() => {
     drawCanvas();
@@ -199,11 +210,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isSaving) return;
     setIsDragging(true);
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) {
+    const point = getCanvasPoint(e.clientX, e.clientY);
+    if (point) {
       setDragStart({
-        x: e.clientX - rect.left - position.x,
-        y: e.clientY - rect.top - position.y
+        x: point.x - position.x,
+        y: point.y - position.y,
       });
     }
   };
@@ -211,9 +222,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !canvasRef.current || isSaving) return;
     
-    const rect = canvasRef.current.getBoundingClientRect();
-    const newX = e.clientX - rect.left - dragStart.x;
-    const newY = e.clientY - rect.top - dragStart.y;
+    const point = getCanvasPoint(e.clientX, e.clientY);
+    if (!point) return;
+    const newX = point.x - dragStart.x;
+    const newY = point.y - dragStart.y;
     
     setPosition(clampPosition({ x: newX, y: newY }, scale));
     setHasUserMadeChanges(true); // User made manual change
@@ -229,11 +241,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     e.preventDefault();
     const touch = e.touches[0];
     setIsDragging(true);
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) {
+    const point = getCanvasPoint(touch.clientX, touch.clientY);
+    if (point) {
       setDragStart({
-        x: touch.clientX - rect.left - position.x,
-        y: touch.clientY - rect.top - position.y
+        x: point.x - position.x,
+        y: point.y - position.y,
       });
     }
   };
@@ -244,9 +256,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     if (!isDragging || !canvasRef.current) return;
     
     const touch = e.touches[0];
-    const rect = canvasRef.current.getBoundingClientRect();
-    const newX = touch.clientX - rect.left - dragStart.x;
-    const newY = touch.clientY - rect.top - dragStart.y;
+    const point = getCanvasPoint(touch.clientX, touch.clientY);
+    if (!point) return;
+    const newX = point.x - dragStart.x;
+    const newY = point.y - dragStart.y;
     
     setPosition(clampPosition({ x: newX, y: newY }, scale));
     setHasUserMadeChanges(true); // User made manual change
@@ -267,7 +280,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setPosition(current => clampPosition(current, nextScale));
       return nextScale;
     });
-    setHasUserMadeChanges(isMobileJobCard);
+    setHasUserMadeChanges(true);
   };
 
   const zoomOut = () => {
@@ -277,7 +290,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setPosition(current => clampPosition(current, nextScale));
       return nextScale;
     });
-    setHasUserMadeChanges(true);
+    setHasUserMadeChanges(isMobileJobCard);
   };
 
   const resetPosition = () => {
