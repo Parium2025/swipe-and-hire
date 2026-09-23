@@ -870,6 +870,7 @@ const MobileJobWizard = ({
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const { addToLibrary } = useOrgImageLibrary();
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
   const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null); // Original storage path before editing
   const [originalDesktopStoragePath, setOriginalDesktopStoragePath] = useState<string | null>(null);
@@ -5135,7 +5136,7 @@ const MobileJobWizard = ({
                           const { getMediaUrl } = await import('@/lib/mediaManager');
                           const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
                           setOriginalImageUrl(signedUrl || storagePath);
-                        }}} />
+                        }} />
                       </>
                     )}
                     
@@ -5242,7 +5243,7 @@ const MobileJobWizard = ({
                           const { getMediaUrl } = await import('@/lib/mediaManager');
                           const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
                           setOriginalDesktopImageUrl(signedUrl || storagePath);
-                        }}} />
+                        }} />
                       </>
                     )}
                     

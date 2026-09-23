@@ -214,6 +214,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   const desktopImageClearedRef = useRef(false);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const { addToLibrary } = useOrgImageLibrary();
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
@@ -4341,7 +4342,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
                                 }
-                              }}} />
+                              }} />
                             </>
                           )}
                           
@@ -4465,7 +4466,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
                                   await preloadSingleFile(publicUrl);
                                 }
-                              }}} />
+                              }} />
                             </>
                           )}
                           
