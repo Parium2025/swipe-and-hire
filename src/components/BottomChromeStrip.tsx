@@ -32,7 +32,11 @@ const detectStandalone = () => {
   return window.matchMedia('(display-mode: standalone)').matches;
 };
 
-/** Safe-area-fyllning endast när Parium körs installerat från hemskärmen. */
+/**
+ * Färgankare för Safari längst ner på touch-enheter.
+ * Vanlig Safari får ett 14 px överlapp utan nytt layoututrymme; installerat
+ * läge fyller dessutom safe-area som tidigare.
+ */
 const BottomChromeStrip = () => {
   const location = useLocation();
   // Match the CSS reservation before first paint. Waiting for useEffect here
@@ -120,7 +124,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isTabletLandscape, location.pathname]);
 
-  if (!isTouch || !isStandalone) return null;
+  if (!isTouch) return null;
 
   return (
     <div
@@ -133,7 +137,9 @@ const BottomChromeStrip = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
+        height: isStandalone
+          ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
+          : '14px',
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',

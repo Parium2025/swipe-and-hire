@@ -35,10 +35,11 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar ingen synlig remsa i vanlig mobil-Safari', () => {
+  it('renderar färgankare utan innehållsförskjutning i vanlig mobil-Safari', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
-    expect(container.firstChild).toBeNull();
+    expect(container.firstChild).not.toBeNull();
+    expect((container.firstChild as HTMLElement).style.height).toBe('14px');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('0px');

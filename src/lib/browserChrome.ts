@@ -17,7 +17,19 @@ const removeLegacySentinels = () => {
   });
 };
 
+const nudgeColor = (color: string) => {
+  // Safari kan ignorera en SPA-uppdatering när samma meta-nod återanvänds.
+  // En osynligt liten färgskillnad följd av målfärgen nästa bildruta tvingar
+  // webbläsaren att läsa om theme-color utan timers eller omladdningar.
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return color;
+  const blue = Number.parseInt(hex.slice(4, 6), 16);
+  const nudgedBlue = (blue === 255 ? blue - 1 : blue + 1).toString(16).padStart(2, '0');
+  return `#${hex.slice(0, 4)}${nudgedBlue}`;
+};
+
 const THEME_META_ID = 'parium-theme-color';
+let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
   // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
@@ -42,6 +54,20 @@ const writeThemeColor = (color: string) => {
 };
 
 const setThemeColor = (color: string) => {
+  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(pendingThemeFrame);
+    pendingThemeFrame = null;
+  }
+
+  writeThemeColor(nudgeColor(color));
+  if (typeof requestAnimationFrame === 'function') {
+    pendingThemeFrame = requestAnimationFrame(() => {
+      pendingThemeFrame = null;
+      writeThemeColor(color);
+    });
+    return;
+  }
+
   writeThemeColor(color);
 };
 
