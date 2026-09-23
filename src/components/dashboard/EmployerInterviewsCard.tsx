@@ -216,7 +216,7 @@ export const EmployerInterviewsCard = memo(() => {
                       )}
                       onClick={() => {
                         const nowMs = Date.now();
-                        if (nowMs - lastSwipeRef.current < 500) return;
+                        if (isAccidentalTap()) return;
                         if (nowMs - lastOpenRef.current < 800) return;
                         lastOpenRef.current = nowMs;
                         if (!canDismiss && interview.location_type === 'video' && meetingUrl) {
