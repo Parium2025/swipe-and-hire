@@ -265,7 +265,7 @@ export const EmployerInterviewsCard = memo(() => {
                             </button>
 
                           ) : (
-                            <span className={cn('flex w-full items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white', useTouchCarousel ? 'h-7 px-2 text-xs' : 'h-5 px-1 text-[9px]')}>
+                            <span className={cn('flex w-full items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white', useTouchCarousel ? 'h-7 px-2 text-xs' : 'h-5 px-1.5 text-[10px]')}>
                               {interview.status === 'confirmed' ? (
                                 <CheckCircle2 className={cn('shrink-0', useTouchCarousel ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5')} aria-hidden="true" />
                               ) : (
@@ -308,7 +308,7 @@ export const EmployerInterviewsCard = memo(() => {
                             <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                           </span>
                           {canDismiss ? (
-                            <span className="ml-auto flex h-auto items-center gap-1 rounded bg-white/10 px-2 py-0.5 leading-none text-white whitespace-nowrap">
+                            <span className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white whitespace-nowrap">
                               {interview.status === 'confirmed' ? (
                                 <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                               ) : (
@@ -323,7 +323,7 @@ export const EmployerInterviewsCard = memo(() => {
                                 event.stopPropagation();
                                 void downloadInterviewIcs(interview.id);
                               }}
-                              className="ml-auto flex h-5 w-[76px] items-center justify-start gap-1 rounded bg-transparent px-1 py-0.5 leading-none text-white hover:bg-white/15"
+                              className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white hover:bg-white/15"
                               aria-label="Lägg till i kalender"
                             >
                               <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
