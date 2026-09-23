@@ -98,10 +98,6 @@ const TopChromeStrip = () => {
   // Samma 14 px överlapp som BottomChromeStrip. Safe-area kan rapporteras
   // som 0 i vanlig iPhone-Safari; överlappet ser då till att remsan ändå
   // målar ända in bakom den övre webbläsarkanten i stället för att bli 0 px.
-  // Vanlig Safari: remsan får ALDRIG sticka ut under statusraden. Nyare iOS
-  // (flytande verktygsfält) visar annars de extra pixlarna som en mörk rad
-  // mellan statusraden och toppmenyn. Endast installerat app-läge behåller
-  // sitt extra andrum.
   const stripInset = isStandalone ? '22px' : '14px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 

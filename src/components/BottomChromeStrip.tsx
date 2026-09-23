@@ -122,8 +122,6 @@ const BottomChromeStrip = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        // Endast safe-area: remsan ska ligga helt bakom webbläsarens egen
-        // bottenlist och aldrig synas som en mörk rad ovanför den.
         height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
         backgroundColor: displayColor,
         zIndex: 2147483647,

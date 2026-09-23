@@ -1,6 +1,5 @@
 import { memo, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useCloseOnRouteChange } from '@/hooks/useCloseOnRouteChange';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Chrome, Smartphone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,6 @@ interface BrowserInstructions {
 }
 
 const GpsHelpModal = memo(({ open, onClose }: GpsHelpModalProps) => {
-  useCloseOnRouteChange(open, onClose);
   const browser = getBrowser();
   const mobile = isMobile();
 
