@@ -4247,7 +4247,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             ))}
                           </div>
                         </div>
-                        {/* Mobile image section */}
+                        {/* Mobile image section — endast i mobilvyn */}
+{previewMode === 'mobile' && (
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                           <div className="flex items-center gap-2 mb-2">
                             <Smartphone className="h-4 w-4 text-white" />
@@ -4352,6 +4353,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             </>
                           )}
                         </div>
+)}
 
                         {/* Desktop image section */}
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
