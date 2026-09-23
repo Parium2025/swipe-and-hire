@@ -254,7 +254,8 @@ export const EmployerInterviewsCard = memo(() => {
                               type="button"
                               onClick={(event) => {
                                 event.stopPropagation();
-                                dismissInterview.mutate(interview.id);
+                                if (isAccidentalTap()) return;
+                                setPendingDismiss(interview);
                               }}
                               className={cn('flex w-full items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15', useTouchCarousel ? 'h-7 px-2 text-xs' : 'h-5 px-1.5 text-[10px]')}
                               aria-label="Ta bort från översikten"
