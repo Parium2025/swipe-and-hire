@@ -906,12 +906,6 @@ export const BookInterviewDialog = ({
             </div>
           </div>
 
-          {zoneNotice && (
-            <p className="-mt-1 text-xs text-white/80 break-words leading-snug">
-              {zoneNotice}
-            </p>
-          )}
-
           {/* Location type */}
           <div className="min-w-0 space-y-2">
             <Label className="text-white">Plats</Label>
