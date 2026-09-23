@@ -76,10 +76,9 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  // Vanlig Safari har redan ett eget statusfält. Ett extra 14 px-ankare blev
-  // den andra synliga remsan mellan systemfältet och sidan. Endast installerat
-  // helskärmsläge behöver en egen safe-area-yta.
-  const shouldShowStrip = isTouch && isStandalone;
+  // iPhone Safari behåller annars föregående rutts färg tills en full reload.
+  // Ankaret behövs därför även i vanlig Safari, inte bara installerat läge.
+  const shouldShowStrip = isTouch;
   const stripInset = isStandalone ? '22px' : '14px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
@@ -100,8 +99,7 @@ const TopChromeStrip = () => {
 
   return (
     <div
-      // Ny nod vid färgbyte: iOS Safari (flytande verktygsfält) samplar om
-      // statusrad/verktygsfält först när ett nytt fixed-element dyker upp.
+      data-browser-chrome-strip="top"
       key={displayColor}
       aria-hidden="true"
       style={{

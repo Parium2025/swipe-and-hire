@@ -102,7 +102,7 @@ const BottomChromeStrip = () => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    const shouldReserveChrome = isTouch && isStandalone && !isAuthPath(location.pathname);
+    const shouldReserveChrome = isTouch && !isAuthPath(location.pathname);
     if (shouldReserveChrome) {
       const basePx = isTabletLandscape ? 120 : 68;
       root.dataset.touchChrome = 'true';
@@ -120,14 +120,13 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isStandalone, isTabletLandscape, location.pathname]);
 
-  // I vanlig Safari är detta en extra remsa ovanför webbläsarens eget fält.
-  // Safe-area-ankaret behövs bara när appen körs installerad utan Safari-UI.
-  if (!isTouch || !isStandalone) return null;
+  // Safari samplar bottenfärgen från dokumentkanten och uppdaterar den inte
+  // säkert efter SPA-navigation. Ankaret håller färgen kopplad till rutten.
+  if (!isTouch) return null;
 
   return (
     <div
-      // Ny nod vid färgbyte: iOS Safari (flytande verktygsfält) samplar om
-      // statusrad/verktygsfält först när ett nytt fixed-element dyker upp.
+      data-browser-chrome-strip="bottom"
       key={displayColor}
       aria-hidden="true"
       style={{

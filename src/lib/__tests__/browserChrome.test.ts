@@ -14,14 +14,17 @@ describe('browserChrome', () => {
     document.body.className = '';
   });
 
-  it('behåller en stabil färgtagg när rutten byts så Safari läser den nya färgen', () => {
+  it('behåller en stabil färgtagg och tvingar Safari att läsa den nya färgen', () => {
+    vi.useFakeTimers();
     syncBrowserChrome('/');
+    vi.runOnlyPendingTimers();
 
     const landingTags = themeColorTags();
     expect(landingTags).toHaveLength(1);
     expect(landingTags[0]?.content).toBe('#2a2a2a');
 
     syncBrowserChrome('/auth');
+    vi.runOnlyPendingTimers();
 
     const authTags = themeColorTags();
     expect(authTags).toHaveLength(1);
@@ -30,7 +33,9 @@ describe('browserChrome', () => {
   });
 
   it('synkar målgruppssidornas toppfärg till blått', () => {
+    vi.useFakeTimers();
     syncBrowserChrome('/jobbsokare');
+    vi.runOnlyPendingTimers();
 
     expect(themeColorTags()).toHaveLength(1);
     expect(themeColorTags().every((tag) => tag.content === '#001F3D')).toBe(true);
@@ -40,9 +45,11 @@ describe('browserChrome', () => {
   });
 
   it('förbereder målruttens färg före SPA-navigation och stoppar gamla ruttskrivningar', () => {
+    vi.useFakeTimers();
     syncBrowserChrome('/');
 
     primeBrowserChrome('/auth');
+    vi.runOnlyPendingTimers();
 
     expect(themeColorTags()).toHaveLength(1);
     expect(themeColorTags().every((tag) => tag.content === '#062B5E')).toBe(true);
