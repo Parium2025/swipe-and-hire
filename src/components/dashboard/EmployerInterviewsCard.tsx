@@ -19,6 +19,16 @@ import {
 import { GRADIENTS } from './dashboardConstants';
 import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
 import { DashboardCarouselDots } from './DashboardCarouselDots';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -52,6 +62,10 @@ export const EmployerInterviewsCard = memo(() => {
   // Mobil: en intervju per kortyta, prickar växlar mellan dem.
   const [mobileIndex, setMobileIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(1);
+  // Bekräftelse innan ett möte plockas bort ur översikten.
+  const [pendingDismiss, setPendingDismiss] = useState<Interview | null>(null);
+  // Ett finger som rör sig (scroll/svep) får aldrig räknas som ett tryck.
+  const touchMovedRef = useRef(false);
 
   // Avslutade och avböjda möten ligger kvar (hämtningen släpper dem efter ett
   // dygn) så att ingen kandidat glöms bort — men de sorteras efter de aktiva.
@@ -84,6 +98,33 @@ export const EmployerInterviewsCard = memo(() => {
     setMobileIndex(current => (current - 1 + liveInterviews.length) % liveInterviews.length);
   }, [liveInterviews.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: showNext, onSwipeRight: showPrevious });
+  const touchStartPointRef = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    touchMovedRef.current = false;
+    const touch = event.touches[0];
+    touchStartPointRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+    if (useTouchCarousel) swipeHandlers.onTouchStart(event);
+  }, [swipeHandlers, useTouchCarousel]);
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    const start = touchStartPointRef.current;
+    const touch = event.touches[0];
+    if (start && touch) {
+      const moved = Math.abs(touch.clientX - start.x) > 8 || Math.abs(touch.clientY - start.y) > 8;
+      if (moved) touchMovedRef.current = true;
+    }
+    if (useTouchCarousel) swipeHandlers.onTouchMove(event);
+  }, [swipeHandlers, useTouchCarousel]);
+  const handleTouchEnd = useCallback(() => {
+    if (useTouchCarousel) swipeHandlers.onTouchEnd();
+  }, [swipeHandlers, useTouchCarousel]);
+  /** Ett tryck som följer på scroll eller svep ska ignoreras helt. */
+  const isAccidentalTap = useCallback(() => {
+    if (touchMovedRef.current) {
+      touchMovedRef.current = false;
+      return true;
+    }
+    return Date.now() - lastSwipeRef.current < 500;
+  }, []);
   const visibleInterviews = useTouchCarousel
     ? liveInterviews.slice(activeIndex, activeIndex + 1)
     : liveInterviews;
@@ -104,11 +145,12 @@ export const EmployerInterviewsCard = memo(() => {
   }
 
   return (
+    <>
     <Card
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
-      onTouchStart={useTouchCarousel ? swipeHandlers.onTouchStart : undefined}
-      onTouchMove={useTouchCarousel ? swipeHandlers.onTouchMove : undefined}
-      onTouchEnd={useTouchCarousel ? swipeHandlers.onTouchEnd : undefined}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
@@ -175,7 +217,7 @@ export const EmployerInterviewsCard = memo(() => {
                       )}
                       onClick={() => {
                         const nowMs = Date.now();
-                        if (nowMs - lastSwipeRef.current < 500) return;
+                        if (isAccidentalTap()) return;
                         if (nowMs - lastOpenRef.current < 800) return;
                         lastOpenRef.current = nowMs;
                         if (!canDismiss && interview.location_type === 'video' && meetingUrl) {
@@ -213,7 +255,8 @@ export const EmployerInterviewsCard = memo(() => {
                               type="button"
                               onClick={(event) => {
                                 event.stopPropagation();
-                                dismissInterview.mutate(interview.id);
+                                if (isAccidentalTap()) return;
+                                setPendingDismiss(interview);
                               }}
                               className={cn('flex w-full items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15', useTouchCarousel ? 'h-7 px-2 text-xs' : 'h-5 px-1.5 text-[10px]')}
                               aria-label="Ta bort från översikten"
@@ -315,6 +358,32 @@ export const EmployerInterviewsCard = memo(() => {
 
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!pendingDismiss} onOpenChange={(open) => { if (!open) setPendingDismiss(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Vill du ta bort den här intervjun</AlertDialogTitle>
+          <AlertDialogDescription>
+            {pendingDismiss
+              ? `Mötet med ${pendingDismiss.candidate_name} försvinner från översikten. Kalendern och kandidatens vy påverkas inte.`
+              : ''}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Avbryt</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => {
+              if (pendingDismiss) dismissInterview.mutate(pendingDismiss.id);
+              setPendingDismiss(null);
+            }}
+          >
+            Ta bort
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 });
 
