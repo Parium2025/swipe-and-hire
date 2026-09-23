@@ -32,12 +32,7 @@ const detectStandalone = () => {
   return window.matchMedia('(display-mode: standalone)').matches;
 };
 
-/**
- * Färgankare för Safari längst ner och safe-area-fyllning i installerat läge.
- *
- * WebKit testar fyra pixlar innanför kanten, därför används fem pixlar utan
- * reserverat layoututrymme i vanlig Safari.
- */
+/** Safe-area-fyllning endast när Parium körs installerat från hemskärmen. */
 const BottomChromeStrip = () => {
   const location = useLocation();
   // Match the CSS reservation before first paint. Waiting for useEffect here
@@ -125,7 +120,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isTabletLandscape, location.pathname]);
 
-  if (!isTouch) return null;
+  if (!isTouch || !isStandalone) return null;
 
   return (
     <div
@@ -138,11 +133,7 @@ const BottomChromeStrip = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        // Endast safe-area: remsan ska ligga helt bakom webbläsarens egen
-        // bottenlist och aldrig synas som en mörk rad ovanför den.
-        height: isStandalone
-          ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
-          : '5px',
+        height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',

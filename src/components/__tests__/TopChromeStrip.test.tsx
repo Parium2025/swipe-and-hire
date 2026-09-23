@@ -3,11 +3,7 @@ import { render, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import TopChromeStrip from '../TopChromeStrip';
 
-/**
- * Regressionsskydd: med viewport-fit=cover sträcker sig sidan in bakom iOS
- * statusrad i installerat app-läge. Safari 26 färgar sin browser-UI från ett
- * fixed element fyra pixlar innanför kanten, därför används ett 5 px ankare.
- */
+/** Regressionsskydd för vanlig Safari respektive installerat app-läge. */
 const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   vi.stubGlobal(
     'matchMedia',
@@ -39,13 +35,10 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar ett 5 px färgankare utan content-offset i vanlig mobil-Safari', () => {
+  it('renderar ingen synlig remsa i vanlig mobil-Safari', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
-    const strip = container.firstChild as HTMLElement;
-    expect(strip).not.toBeNull();
-    expect(strip.style.height).toBe('5px');
-    expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
+    expect(container.firstChild).toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('0px');
