@@ -64,20 +64,33 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
   }
 
   const when = scheduledAt ? new Date(scheduledAt) : null
+  const templateData = {
+    recipient_name: typeof result.employer_name === 'string' ? result.employer_name : 'där',
+    candidate_name: candidateName,
+    job_title: jobTitle,
+    date_str: when ? STOCKHOLM_DATE.format(when) : '',
+    time_str: when ? STOCKHOLM_TIME.format(when) : '',
+    accepted: accept,
+  }
+  // Basnyckeln hindrar dubbelutskick vid samma svar. Om ett utskick redan
+  // misslyckats hos e-posttjänsten blockeras nyckeln permanent (409), så ett
+  // nytt försök måste ha en ny nyckel — annars får arbetsgivaren aldrig svaret.
+  const baseKey = `interview-response-${interviewId ?? 'unknown'}-${accept ? 'yes' : 'no'}`
   try {
     await sendLoggedTemplateEmail('interview-response-employer', employerEmail, {
-      templateData: {
-        recipient_name: typeof result.employer_name === 'string' ? result.employer_name : 'där',
-        candidate_name: candidateName,
-        job_title: jobTitle,
-        date_str: when ? STOCKHOLM_DATE.format(when) : '',
-        time_str: when ? STOCKHOLM_TIME.format(when) : '',
-        accepted: accept,
-      },
-      idempotencyKey: `interview-response-${interviewId ?? 'unknown'}-${accept ? 'yes' : 'no'}`,
+      templateData,
+      idempotencyKey: baseKey,
     })
   } catch (err) {
     console.error('Kunde inte skicka svarsmejl till arbetsgivaren:', err)
+    try {
+      await sendLoggedTemplateEmail('interview-response-employer', employerEmail, {
+        templateData,
+        idempotencyKey: `${baseKey}-r${Date.now()}`,
+      })
+    } catch (retryErr) {
+      console.error('Nytt försök att skicka svarsmejl misslyckades:', retryErr)
+    }
   }
 }
 
