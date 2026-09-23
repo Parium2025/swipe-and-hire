@@ -17,7 +17,17 @@ const removeLegacySentinels = () => {
   });
 };
 
+const nudgeColor = (color: string) => {
+  // Minimal färgskillnad som tvingar Safari att läsa om theme-color.
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return color;
+  const blue = Number.parseInt(hex.slice(4, 6), 16);
+  const nudgedBlue = (blue === 255 ? blue - 1 : blue + 1).toString(16).padStart(2, '0');
+  return `#${hex.slice(0, 4)}${nudgedBlue}`;
+};
+
 const THEME_META_ID = 'parium-theme-color';
+let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
   // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
@@ -42,6 +52,20 @@ const writeThemeColor = (color: string) => {
 };
 
 const setThemeColor = (color: string) => {
+  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(pendingThemeFrame);
+    pendingThemeFrame = null;
+  }
+
+  writeThemeColor(nudgeColor(color));
+  if (typeof requestAnimationFrame === 'function') {
+    pendingThemeFrame = requestAnimationFrame(() => {
+      pendingThemeFrame = null;
+      writeThemeColor(color);
+    });
+    return;
+  }
+
   writeThemeColor(color);
 };
 
@@ -68,6 +92,8 @@ const setChromeCssColor = (color: string) => {
  * och body-färgen byts dock korrekt. Hard reloads tas bort eftersom de orsakade
  * vit/trasig sida i kombination med cache-killswitchen i index.html.
  */
+let pendingSyncTimers: number[] = [];
+
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const isAudienceLanding = isAudienceLandingPath(pathname);
@@ -97,6 +123,23 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   setThemeColor(color);
   notifyChromeStrips(pathname, color);
+
+  // Safari kan ignorera den första dynamiska uppdateringen. Den fungerande
+  // lösningen återapplicerar färgen medan nästa sida målas. Gamla timers
+  // avbryts och varje callback verifierar aktuell rutt, så en tidigare sida
+  // kan aldrig skriva tillbaka sin färg efter snabb navigering.
+  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
+  pendingSyncTimers = [];
+  [80, 260, 640, 1200, 2000].forEach((delay) => {
+    pendingSyncTimers.push(
+      window.setTimeout(() => {
+        if (window.location.pathname !== pathname) return;
+        setChromeCssColor(color);
+        setThemeColor(color);
+        notifyChromeStrips(pathname, color);
+      }, delay)
+    );
+  });
 
 };
 

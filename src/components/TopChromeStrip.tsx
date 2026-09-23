@@ -25,7 +25,7 @@ const detectStandalone = () => {
   return window.matchMedia('(display-mode: standalone)').matches;
 };
 
-/** Safe-area-fyllning endast när Parium körs installerat från hemskärmen. */
+/** Färgankare som låter Safari måla rätt ruttfärg bakom statusfältet. */
 const TopChromeStrip = () => {
   const location = useLocation();
   // Detect synchronously in the browser. Waiting for useEffect caused the
@@ -76,22 +76,22 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  const shouldShowStrip = isTouch && isStandalone;
-  const stripHeight = 'calc(env(safe-area-inset-top, 0px) + 22px)';
-  const chromeOffset = shouldShowStrip ? stripHeight : '0px';
+  const shouldShowStrip = isTouch;
+  const stripInset = isStandalone ? '22px' : '14px';
+  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (shouldShowStrip) {
+    if (isTouch) {
       root.style.setProperty('--top-chrome-content-offset', chromeOffset);
     } else {
-      root.style.setProperty('--top-chrome-content-offset', '0px');
+      root.style.removeProperty('--top-chrome-content-offset');
     }
     return () => {
       root.style.removeProperty('--top-chrome-content-offset');
     };
-  }, [shouldShowStrip, chromeOffset]);
+  }, [isTouch, isStandalone, chromeOffset]);
 
   if (!shouldShowStrip) return null;
 
@@ -106,7 +106,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        height: stripHeight,
+        height: chromeOffset,
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',
