@@ -3,6 +3,7 @@ const PARIUM_CHROME_COLOR = '#00193D';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 // Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.
 const AUTH_CHROME_COLOR = '#062B5E';
+const THEME_COLOR_MEDIA = ['', '(prefers-color-scheme: light)', '(prefers-color-scheme: dark)'];
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
 const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
@@ -26,29 +27,21 @@ const nudgeColor = (color: string) => {
   return `#${hex.slice(0, 4)}${nudgedBlue}`;
 };
 
-const THEME_META_ID = 'parium-theme-color';
 let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
-  // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
-  // gjorde tidigare) gör att iOS Safari tappar bort värdet under SPA-navigering
-  // och behåller den föregående ruttens färg — därför uppdaterar vi bara
-  // `content` på samma nod. Media-varianter tas bort: en omedia-tagg vinner
-  // konsekvent i Safari och slipper konflikt med light/dark-varianterna.
-  Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach((el) => {
-    if (el.id !== THEME_META_ID) el.remove();
-  });
+  // iOS Safari läser ofta inte om browser-chrome när bara `content` ändras på
+  // samma meta-nod efter en SPA-navigering. Skapa därför om den omedia-taggen
+  // och båda färgschema-taggarna, vilket är den tidigare beprövade lösningen.
+  Array.from(document.querySelectorAll('meta[name="theme-color"]')).forEach((el) => el.remove());
 
-  let meta = document.getElementById(THEME_META_ID) as HTMLMetaElement | null;
-  if (!meta) {
-    meta = document.createElement('meta');
-    meta.id = THEME_META_ID;
+  THEME_COLOR_MEDIA.forEach((media) => {
+    const meta = document.createElement('meta');
     meta.setAttribute('name', 'theme-color');
-    document.head.insertBefore(meta, document.head.firstChild);
-  }
-  if (meta.getAttribute('content') !== color) {
+    if (media) meta.setAttribute('media', media);
     meta.setAttribute('content', color);
-  }
+    document.head.insertBefore(meta, document.head.firstChild);
+  });
 };
 
 const setThemeColor = (color: string) => {
