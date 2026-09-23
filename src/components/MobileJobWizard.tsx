@@ -395,6 +395,28 @@ const MobileJobWizard = ({
           .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
 
         setFormData(restoredFormData);
+
+        // Återställ kopplingen till originalbilderna så "Anpassa bild" alltid
+        // öppnar originalet, även efter att annonsen sparats och öppnats igen.
+        {
+          const mobileOriginal = (existingJob as any).job_image_original_url || restoredFormData.job_image_url || null;
+          const desktopOriginal = (existingJob as any).job_image_desktop_original_url || restoredFormData.job_image_desktop_url || null;
+          setOriginalStoragePath(mobileOriginal);
+          setOriginalDesktopStoragePath(desktopOriginal);
+          setImageIsEdited(!!mobileOriginal && mobileOriginal !== restoredFormData.job_image_url);
+          setDesktopImageIsEdited(!!desktopOriginal && desktopOriginal !== restoredFormData.job_image_desktop_url);
+          (async () => {
+            const { getMediaUrl } = await import('@/lib/mediaManager');
+            if (mobileOriginal) {
+              const signed = mobileOriginal.startsWith('http') ? mobileOriginal : await getMediaUrl(mobileOriginal, 'job-image', 86400);
+              setOriginalImageUrl(signed || mobileOriginal);
+            } else setOriginalImageUrl(null);
+            if (desktopOriginal) {
+              const signed = desktopOriginal.startsWith('http') ? desktopOriginal : await getMediaUrl(desktopOriginal, 'job-image', 86400);
+              setOriginalDesktopImageUrl(signed || desktopOriginal);
+            } else setOriginalDesktopImageUrl(null);
+          })();
+        }
         if (bestStepSource) {
           setCurrentStep(bestStepSource.currentStep);
         }
@@ -2439,6 +2461,8 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_original_url: formData.job_image_url ? (originalStoragePath || formData.job_image_url) : null,
+        job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopStoragePath || formData.job_image_desktop_url) : null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         expires_at: null,
@@ -2629,6 +2653,8 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_original_url: formData.job_image_url ? (originalStoragePath || formData.job_image_url) : null,
+        job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopStoragePath || formData.job_image_desktop_url) : null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         // Databasen håller nya/återpublicerade annonser dolda tills både annons
