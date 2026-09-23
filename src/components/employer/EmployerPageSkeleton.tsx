@@ -575,7 +575,14 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
 /**
  * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
  */
-export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({ audience = 'employer' }: { audience?: 'employer' | 'job_seeker' }) {
+export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({
+  audience = 'employer',
+  hasTeam = false,
+}: {
+  audience?: 'employer' | 'job_seeker';
+  hasTeam?: boolean;
+}) {
+  const isDesktop = useDevice() === 'desktop';
   // Live-antal konversationer ur cachen → exakt lika många rader som listan
   // faktiskt renderar, clampat till vad som får plats i vyn.
   const messageCount = useLiveSkeletonCount({
@@ -595,48 +602,53 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({
         <SkeletonChrome audience={audience} />
         <div className="flex-1 min-h-0 overflow-hidden p-3">
           <div className="responsive-container-wide space-y-4 h-full flex flex-col">
-            {/* Header — mirrors Messages page icon/title group + optional new conversation action */}
+            {/* Header — exakt samma ikon/titelgrupp och rollstyrda åtgärd som Messages. */}
             <div className="flex items-center justify-center flex-shrink-0 relative">
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-full ${SHAPE}`} />
-                <div className="space-y-2">
-                  <div className={`h-7 w-24 rounded ${SHAPE}`} />
-                  <div className={`h-4 w-32 rounded ${SHAPE}`} />
-                </div>
+                <div className={`h-7 w-24 rounded ${SHAPE}`} />
               </div>
-              <div className={`absolute right-0 h-10 w-12 sm:w-40 rounded-lg ${SHAPE}`} />
+              {hasTeam && <div className={`absolute right-0 h-10 w-12 sm:w-40 rounded-lg ${SHAPE}`} />}
             </div>
-            <div className="flex-1 min-h-0 flex gap-4 overflow-hidden">
-              <div className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0">
-                {/* Tabs */}
-                <div className="flex justify-center gap-2 mb-3">
-                  <div className={`h-9 w-20 rounded-full ${SHAPE}`} />
-                  <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
-                  <div className={`h-9 w-24 rounded-full ${SHAPE}`} />
-                </div>
+            <div className={`flex-1 min-h-0 flex overflow-hidden ${isDesktop ? 'gap-4' : ''}`}>
+              <div
+                className={isDesktop
+                  ? 'w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0'
+                  : 'w-full flex-shrink-0 flex flex-col min-h-0'}
+              >
+                {/* Arbetsgivare med team har samma tvådelade Jobb/Kollegor-rad. */}
+                {hasTeam && (
+                  <div className="flex h-9 gap-0.5 rounded-lg border border-white/10 bg-white/5 p-1 mb-3">
+                    <div className={`h-full flex-1 rounded-md ${SHAPE}`} />
+                    <div className={`h-full flex-1 rounded-md ${SHAPE}`} />
+                  </div>
+                )}
                 {/* Search */}
-                <div className={`h-11 w-full rounded-xl mb-3 ${SHAPE}`} />
+                <div className={`h-10 w-full rounded-md mb-3 ${SHAPE}`} />
                 {/* Conversation rows */}
-                <div className="flex-1 space-y-2 rounded-xl border border-white/20 bg-white/5 p-2 overflow-hidden">
+                <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2 overflow-hidden">
                   {Array.from({ length: messageCount }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03]">
+                    <div key={i} className="flex min-h-[76px] items-start gap-3 p-3 rounded-lg border border-transparent">
                       <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
-                      <div className="flex-1 space-y-2 min-w-0">
-                        <div className={`h-4 w-1/2 rounded ${SHAPE}`} />
-                        <div className={`h-3 w-3/4 rounded ${SHAPE}`} />
+                      <div className="flex-1 space-y-1.5 min-w-0 pt-0.5">
+                        <div className={`h-4 w-2/5 rounded ${SHAPE}`} />
+                        <div className={`h-3 w-3/5 rounded ${SHAPE}`} />
+                        <div className={`h-3 w-4/5 rounded ${SHAPE}`} />
                       </div>
                       <div className={`h-3 w-10 rounded ${SHAPE}`} />
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="hidden md:flex flex-1 min-w-0 rounded-xl border border-white/20 bg-white/5 items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
-                  <div className={`h-5 w-48 rounded ${SHAPE}`} />
-                  <div className={`h-4 w-64 rounded ${SHAPE}`} />
+              {isDesktop && (
+                <div className="flex flex-1 min-w-0 rounded-xl border border-white/10 bg-white/5 items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
+                    <div className={`h-5 w-48 rounded ${SHAPE}`} />
+                    <div className={`h-4 w-64 rounded ${SHAPE}`} />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
