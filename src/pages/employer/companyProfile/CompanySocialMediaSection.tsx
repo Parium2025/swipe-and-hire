@@ -122,7 +122,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
           {links.map((link, index) => {
             const Icon = getPlatformIcon(link.platform);
             return (
-              <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
+              <div key={`${link.platform}|${link.url}|${links.findIndex((l) => l.platform === link.platform && l.url === link.url) === index ? 0 : index}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <Icon className="h-4 w-4 text-white flex-shrink-0" />
                   <div className="min-w-0 flex-1">
