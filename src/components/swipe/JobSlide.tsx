@@ -14,7 +14,6 @@ import {
   UNDERLAY_INITIAL_SCALE,
   UNDERLAY_INITIAL_Y,
 } from './jobSlide/constants';
-import { getImageObjectPosition } from './jobSlide/utils';
 import { JobSlideContent, OccupationBadge } from './jobSlide/JobSlideContent';
 import { NextCardUnderlay } from './jobSlide/NextCardUnderlay';
 import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
@@ -247,7 +246,7 @@ export const JobSlide = memo(function JobSlide({
                 src={imageUrl}
                 alt={job.title}
                 className="w-full h-full object-cover"
-                style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
+                style={{ objectPosition: 'center center' }}
                 loading={isVisible ? 'eager' : 'lazy'}
                 decoding="async"
                 {...fetchPriority(isVisible ? 'high' : 'auto')}

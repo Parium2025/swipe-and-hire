@@ -2,7 +2,6 @@ import { memo, useEffect, useMemo } from 'react';
 import { motion, type MotionValue } from 'framer-motion';
 import type { SwipeJob } from '../types';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
-import { getImageObjectPosition } from './utils';
 import { JobSlideContent, OccupationBadge } from './JobSlideContent';
 import { useCardImage } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
@@ -85,7 +84,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             src={imageUrl}
             alt=""
             className="h-full w-full object-cover"
-            style={{ objectPosition: getImageObjectPosition(job.image_focus_position) }}
+            style={{ objectPosition: 'center center' }}
             loading="eager"
             decoding="async"
             {...fetchPriority('high')}
