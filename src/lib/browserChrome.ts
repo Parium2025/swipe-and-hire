@@ -69,6 +69,7 @@ const nudgeColor = (color: string) => {
 
 let pendingThemeFrame: number | null = null;
 let pendingSyncTimers: number[] = [];
+let committedDocumentColor: string | null = null;
 
 const setThemeColor = (color: string) => {
   if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
@@ -141,6 +142,21 @@ const setChromeCssColor = (color: string) => {
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const color = getChromeColor(pathname);
+
+  // Fångar även browser-back, redirects efter inloggning och andra centrala
+  // routebyten som inte går genom navigateAcrossChromeColor(). När färgen
+  // ändras i vanlig iOS Safari krävs ett nytt dokument för att dess egna
+  // topp- och bottenfält ska sampla samma färg som våra remsor. useLayoutEffect
+  // anropar detta före paint, så den felaktiga tvåfärgsramen hinner inte visas.
+  if (
+    committedDocumentColor !== null &&
+    committedDocumentColor !== color &&
+    needsFullPageChromeNavigation()
+  ) {
+    window.location.reload();
+    return;
+  }
+  committedDocumentColor = color;
 
   removeLegacySentinels();
 
