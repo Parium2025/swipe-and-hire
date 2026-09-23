@@ -62,6 +62,10 @@ export const EmployerInterviewsCard = memo(() => {
   // Mobil: en intervju per kortyta, prickar växlar mellan dem.
   const [mobileIndex, setMobileIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(1);
+  // Bekräftelse innan ett möte plockas bort ur översikten.
+  const [pendingDismiss, setPendingDismiss] = useState<Interview | null>(null);
+  // Ett finger som rör sig (scroll/svep) får aldrig räknas som ett tryck.
+  const touchMovedRef = useRef(false);
 
   // Avslutade och avböjda möten ligger kvar (hämtningen släpper dem efter ett
   // dygn) så att ingen kandidat glöms bort — men de sorteras efter de aktiva.
