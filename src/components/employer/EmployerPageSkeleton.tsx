@@ -655,30 +655,32 @@ export const EmployerCompanyProfileSkeleton = memo(function EmployerCompanyProfi
       >
         <SkeletonChrome />
         <div className="flex-1 min-h-0 overflow-hidden p-3">
-          <div className="responsive-container-wide space-y-5">
-            <div className="flex justify-center items-center mb-2">
-              <div className={`h-7 w-48 rounded ${SHAPE}`} />
-            </div>
-            {/* Logo section */}
-            <div className="flex flex-col items-center gap-3 py-4">
+          <div className="responsive-container space-y-8">
+            {/* Logo section ligger först även på den färdiga sidan. */}
+            <div className="flex flex-col items-center gap-3 py-2">
               <div className={`h-24 w-24 rounded-full ${SHAPE}`} />
               <div className={`h-4 w-32 rounded ${SHAPE}`} />
             </div>
-            {/* Form fields */}
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="space-y-2">
-                  <div className={`h-3 w-24 rounded ${SHAPE}`} />
-                  <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
+            <div>
+              <div className="mb-6 flex flex-col items-center gap-2">
+                <div className={`h-7 w-48 rounded ${SHAPE}`} />
+                <div className={`h-4 w-80 max-w-full rounded ${SHAPE}`} />
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-6 md:p-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-3">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className={`h-3 w-24 rounded ${SHAPE}`} />
+                      <div className={`h-11 w-full rounded-md ${SHAPE}`} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-              <div className="space-y-2">
-                <div className={`h-3 w-32 rounded ${SHAPE}`} />
-                <div className={`h-28 w-full rounded-lg ${SHAPE}`} />
+                <div className="mt-4 space-y-1.5">
+                  <div className={`h-3 w-32 rounded ${SHAPE}`} />
+                  <div className={`h-28 w-full rounded-md ${SHAPE}`} />
+                </div>
               </div>
             </div>
-            {/* Save button */}
-            <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
           </div>
         </div>
       </motion.div>
