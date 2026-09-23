@@ -92,7 +92,7 @@ function JobSeekerTopNav() {
   // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
   // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const jobSeekerUnreadMessages = conversationsCtx
+  const jobSeekerUnreadMessages = conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
     : preloadedJobSeekerUnreadMessages;
   

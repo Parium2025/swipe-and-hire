@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
@@ -146,6 +147,13 @@ export function EmployerSidebar() {
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
+  // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt).
+  // När context är mountad (även med värde 0) ska live alltid vinna över det cachade
+  // värdet, annars står en gammal siffra kvar efter att olästa nollställts.
+  const conversationsCtx = useConversationsContext();
+  const unreadMessages = conversationsCtx && !conversationsCtx.isLoading
+    ? conversationsCtx.totalUnreadCount
+    : preloadedUnreadMessages;
   const { isPlatformAdmin } = useIsPlatformAdmin();
   const navigate = useNavigate();
   const location = useLocation();
@@ -427,9 +435,9 @@ export function EmployerSidebar() {
                           {item.url === '/my-candidates' && preloadedMyCandidates > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedMyCandidates})</span>
                           )}
-                          {item.url === '/messages' && preloadedUnreadMessages > 0 && (
+                          {item.url === '/messages' && unreadMessages > 0 && (
                             <span className="ml-1.5 inline-flex items-center justify-center align-middle h-5 min-w-[20px] px-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-semibold leading-none">
-                              {preloadedUnreadMessages}
+                              {unreadMessages}
                             </span>
                           )}
                         </span>
