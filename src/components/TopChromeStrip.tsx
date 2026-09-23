@@ -25,22 +25,7 @@ const detectStandalone = () => {
   return window.matchMedia('(display-mode: standalone)').matches;
 };
 
-/**
- * Färgankare för Safari längst upp och safe-area-fyllning i installerat läge.
- *
- * Med `viewport-fit=cover` sträcker sig sidan in bakom iOS statusrad.
- * iOS Safari samplar body's bakgrundsfärg EN gång vid sidladdning och
- * uppdaterar inte vid SPA-navigering — om man landade på startsidan
- * (grå #2a2a2a) och navigerar till /auth syns en mörk rand kvar högst upp.
- * Samma problem som bottenremsan löser, samma lösning: en fixed remsa som
- * lyssnar på react-router location och alltid målar rätt ruttfärg.
- *
- * Safari 26 hämtar inte längre webbläsarfärgen från theme-color utan från ett
- * fixed/sticky element som möter viewportens kant. WebKit testar fyra pixlar
- * innanför kanten, så färgankaret måste täcka den punkten.
- *
- * Installerat app-läge fyller fortfarande hela safe-area.
- */
+/** Safe-area-fyllning endast när Parium körs installerat från hemskärmen. */
 const TopChromeStrip = () => {
   const location = useLocation();
   // Detect synchronously in the browser. Waiting for useEffect caused the
@@ -91,11 +76,9 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  const shouldShowStrip = isTouch;
-  const stripHeight = isStandalone
-    ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
-    : '5px';
-  const chromeOffset = isStandalone ? stripHeight : '0px';
+  const shouldShowStrip = isTouch && isStandalone;
+  const stripHeight = 'calc(env(safe-area-inset-top, 0px) + 22px)';
+  const chromeOffset = shouldShowStrip ? stripHeight : '0px';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
