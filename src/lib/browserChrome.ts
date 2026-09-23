@@ -11,6 +11,28 @@ const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 const isAuthPath = (pathname: string) => pathname === '/auth';
 
+/**
+ * Vanlig iPhone/iPad-webbläsare låser topp- och bottenfältens samplade färg
+ * till dokumentet. Ett SPA-byte kan därför visa den gamla systemfärgen ovanpå
+ * vår nya remsa. Installerat läge har inte samma browser chrome.
+ */
+export const needsFullPageChromeNavigation = () => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  return isIos && !isStandalone;
+};
+
+export const navigateAcrossChromeColor = (target: string, spaNavigate: () => void) => {
+  cancelPendingRouteWrites();
+  if (needsFullPageChromeNavigation()) {
+    window.location.assign(target);
+    return;
+  }
+  spaNavigate();
+};
+
 const removeLegacySentinels = () => {
   ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
     const el = document.getElementById(id);

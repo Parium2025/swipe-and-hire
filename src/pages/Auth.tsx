@@ -86,8 +86,8 @@ const Auth = () => {
   const { toast } = useToast();
 
   // Read initial state from navigation (from Landing page)
-  const initialMode = (location.state as any)?.mode;
-  const initialRole = (location.state as any)?.role;
+  const initialMode = (location.state as any)?.mode ?? searchParams.get('mode');
+  const initialRole = (location.state as any)?.role ?? searchParams.get('role');
   const initialPlan = (location.state as any)?.plan;
   const initialSavedSearchIntent = (location.state as any)?.savedSearchIntent;
   const initialReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
