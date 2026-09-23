@@ -5,13 +5,8 @@ import TopChromeStrip from '../TopChromeStrip';
 
 /**
  * Regressionsskydd: med viewport-fit=cover sträcker sig sidan in bakom iOS
- * statusrad, men Safari samplar body-färgen bara en gång vid sidladdning.
- * Vid SPA-navigering (t.ex. startsida → /auth) lämnas en rand i den gamla
- * färgens färg kvar högst upp. TopChromeStrip målar därför alltid rätt
- * ruttfärg över safe-area på touch-enheter — precis som BottomChromeStrip.
- *
- * Content-offset ska alltid motsvara remsans höjd på touch-enheter, annars
- * täcker överlappet toppmenyn när webbläsaren rapporterar 0 px safe-area.
+ * statusrad i installerat app-läge. I vanlig Safari börjar viewporten redan
+ * under statusfältet och en egen remsa skulle bli en synlig dubbelrad.
  */
 const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   vi.stubGlobal(
@@ -44,17 +39,13 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar remsa över safe-area i vanlig mobilwebbläsare med content-offset', () => {
+  it('renderar ingen extra remsa i vanlig mobil-Safari', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
-    const strip = container.firstChild as HTMLElement;
-    expect(strip).not.toBeNull();
-    // jsdom tappar calc(env(...))-höjden — asserta position och färg i stället.
-    expect(strip.style.top).toBe('0px');
-    expect(strip.style.backgroundColor).toBe('rgb(42, 42, 42)');
+    expect(container.firstChild).toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
-    ).toContain('safe-area-inset-top');
+    ).toBe('0px');
   });
 
   it('renderar ingen remsa på desktop', () => {
