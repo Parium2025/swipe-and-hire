@@ -297,7 +297,9 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
     enabled: !!user,
     staleTime: 60_000,
     gcTime: Infinity,
-    refetchOnMount: false,
+    // Refetcha vid mount när cachen invaliderats (t.ex. sparat i Swipe Mode),
+    // annars visade sidan ett gammalt antal tills man laddade om.
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     structuralSharing: false,
     placeholderData: () => {
