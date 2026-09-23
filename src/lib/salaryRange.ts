@@ -32,7 +32,7 @@ const HOURLY_TYPES = new Set(['hourly', 'rorlig', 'timlon', 'timlön']);
 
 /** Formaterar heltal enligt svensk typografi, exempelvis 100 000. */
 export function formatSwedishAmount(value: number): string {
-  return value.toLocaleString('sv-SE');
+  return value.toLocaleString('sv-SE').replace(/[\u00a0\u202f]/g, ' ');
 }
 
 /** Formaterar lagrade lönespann, exempelvis 40 000 – 50 000 kr/mån. */
