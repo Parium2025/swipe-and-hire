@@ -18,9 +18,7 @@ const removeLegacySentinels = () => {
 };
 
 const nudgeColor = (color: string) => {
-  // Safari kan ignorera en SPA-uppdatering när samma meta-nod återanvänds.
-  // En osynligt liten färgskillnad följd av målfärgen nästa bildruta tvingar
-  // webbläsaren att läsa om theme-color utan timers eller omladdningar.
+  // Minimal färgskillnad som tvingar Safari att läsa om theme-color.
   const hex = color.replace('#', '');
   if (hex.length !== 6) return color;
   const blue = Number.parseInt(hex.slice(4, 6), 16);
@@ -123,6 +121,23 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   setThemeColor(color);
   notifyChromeStrips(pathname, color);
+
+  // Safari kan ignorera den första dynamiska uppdateringen. Den fungerande
+  // lösningen återapplicerar färgen medan nästa sida målas. Gamla timers
+  // avbryts och varje callback verifierar aktuell rutt, så en tidigare sida
+  // kan aldrig skriva tillbaka sin färg efter snabb navigering.
+  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
+  pendingSyncTimers = [];
+  [80, 260, 640, 1200, 2000].forEach((delay) => {
+    pendingSyncTimers.push(
+      window.setTimeout(() => {
+        if (window.location.pathname !== pathname) return;
+        setChromeCssColor(color);
+        setThemeColor(color);
+        notifyChromeStrips(pathname, color);
+      }, delay)
+    );
+  });
 
 };
 

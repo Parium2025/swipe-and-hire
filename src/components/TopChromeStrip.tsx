@@ -25,14 +25,7 @@ const detectStandalone = () => {
   return window.matchMedia('(display-mode: standalone)').matches;
 };
 
-/**
- * Färgankare för Safari på touch-enheter.
- *
- * Vanlig Safari behöver ett faktiskt färgat element vid viewportens överkant
- * för att läsa om sin chrome-färg efter SPA-navigering. Ankaret överlappar de
- * översta 14 pixlarna och reserverar därför inget extra sidutrymme. Installerat
- * läge fyller fortsatt hela safe-area och flyttar innehållet som tidigare.
- */
+/** Färgankare som låter Safari måla rätt ruttfärg bakom statusfältet. */
 const TopChromeStrip = () => {
   const location = useLocation();
   // Detect synchronously in the browser. Waiting for useEffect caused the
@@ -84,18 +77,16 @@ const TopChromeStrip = () => {
   const displayColor = forcedColor ?? color;
 
   const shouldShowStrip = isTouch;
-  const stripHeight = isStandalone
-    ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
-    : '14px';
-  const chromeOffset = isTouch && isStandalone ? stripHeight : '0px';
+  const stripInset = isStandalone ? '22px' : '14px';
+  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isTouch && isStandalone) {
+    if (isTouch) {
       root.style.setProperty('--top-chrome-content-offset', chromeOffset);
     } else {
-      root.style.setProperty('--top-chrome-content-offset', '0px');
+      root.style.removeProperty('--top-chrome-content-offset');
     }
     return () => {
       root.style.removeProperty('--top-chrome-content-offset');
@@ -115,7 +106,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        height: stripHeight,
+        height: chromeOffset,
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',

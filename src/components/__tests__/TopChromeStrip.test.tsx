@@ -35,14 +35,14 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar färgankare utan innehållsförskjutning i vanlig mobil-Safari', () => {
+  it('renderar färgankare och matchande offset i vanlig mobil-Safari', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
     expect(container.firstChild).not.toBeNull();
-    expect((container.firstChild as HTMLElement).style.height).toBe('14px');
+    expect((container.firstChild as HTMLElement).style.height).toContain('safe-area-inset-top');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
-    ).toBe('0px');
+    ).toContain('safe-area-inset-top');
   });
 
   it('renderar ingen remsa på desktop', () => {
