@@ -363,7 +363,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
   if (!standalone) return content;
 
   return (
-    <FullscreenSkeletonPortal activePaths={['/home']}>
+    <FullscreenSkeletonPortal>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -389,7 +389,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
  */
 export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
   return (
-    <FullscreenSkeletonPortal activePaths={['/my-candidates']}>
+    <FullscreenSkeletonPortal activePaths={['/home']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -439,7 +439,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
   const isDesktop = useDevice() === 'desktop';
   const stageCount = 5;
   return (
-    <FullscreenSkeletonPortal activePaths={['/candidates']}>
+    <FullscreenSkeletonPortal activePaths={['/my-candidates']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -526,7 +526,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
 export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkeleton() {
   const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.allCandidates, 5, 8);
   return (
-    <FullscreenSkeletonPortal activePaths={['/messages']}>
+    <FullscreenSkeletonPortal activePaths={['/candidates']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -584,7 +584,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({
     cap: viewportRowCap(76),
   });
   return (
-    <FullscreenSkeletonPortal activePaths={['/company-profile']}>
+    <FullscreenSkeletonPortal activePaths={['/messages']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -650,7 +650,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({
  */
 export const EmployerCompanyProfileSkeleton = memo(function EmployerCompanyProfileSkeleton() {
   return (
-    <FullscreenSkeletonPortal activePaths={['/settings']}>
+    <FullscreenSkeletonPortal activePaths={['/company-profile']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -698,7 +698,7 @@ export const EmployerCompanyProfileSkeleton = memo(function EmployerCompanyProfi
  */
 export const EmployerSettingsSkeleton = memo(function EmployerSettingsSkeleton() {
   return (
-    <FullscreenSkeletonPortal>
+    <FullscreenSkeletonPortal activePaths={['/settings']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
