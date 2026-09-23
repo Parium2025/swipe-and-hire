@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, Hourglass, Trash2 } from 'lucide-react';
+import { Calendar, CalendarPlus, Video, Building2, CheckCircle2, Clock3, Hourglass, Trash2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { useInterviews, Interview } from '@/hooks/useInterviews';
@@ -22,12 +22,12 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -357,28 +357,44 @@ export const EmployerInterviewsCard = memo(() => {
     </Card>
 
     <AlertDialog open={!!pendingDismiss} onOpenChange={(open) => { if (!open) setPendingDismiss(null); }}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Vill du ta bort den här intervjun</AlertDialogTitle>
-          <AlertDialogDescription>
+      <AlertDialogContentNoFocus
+        elevated
+        className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+      >
+        <AlertDialogHeader className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-2.5">
+            <div className="bg-red-500/20 p-2 rounded-full">
+              <AlertTriangle className="h-4 w-4 text-white" />
+            </div>
+            <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+              Vill du ta bort den här intervjun
+            </AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-white text-sm leading-relaxed">
             {pendingDismiss
               ? `Mötet med ${pendingDismiss.candidate_name} försvinner från översikten. Kalendern och kandidatens vy påverkas inte.`
               : ''}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Avbryt</AlertDialogCancel>
+        <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+          <AlertDialogCancel
+            className="btn-dialog-action flex-1 mt-0 flex items-center justify-center rounded-full bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+          >
+            Avbryt
+          </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            variant="destructiveSoft"
+            className="btn-dialog-action flex-1 text-sm flex items-center justify-center rounded-full"
             onClick={() => {
               if (pendingDismiss) dismissInterview.mutate(pendingDismiss.id);
               setPendingDismiss(null);
             }}
           >
+            <Trash2 className="h-4 w-4 mr-1.5" />
             Ta bort
           </AlertDialogAction>
         </AlertDialogFooter>
-      </AlertDialogContent>
+      </AlertDialogContentNoFocus>
     </AlertDialog>
     </>
   );
