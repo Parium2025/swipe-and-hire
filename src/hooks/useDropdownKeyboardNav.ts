@@ -106,5 +106,19 @@ export function useDropdownKeyboardNav<T>(params: {
     [isOpen, items, highlightedIndex, onOpen, onClose, onSelect]
   );
 
-  return { highlightedIndex, setHighlightedIndex, listRef, handleKeyDown };
+  // Pointer-driven highlight (onMouseEnter) is ignored on touch-only devices:
+  // taps fire synthetic mouseenter events that would leave a row looking
+  // hovered. Keyboard navigation above uses the raw setter and is unaffected.
+  const setPointerHighlightedIndex = useCallback((index: number) => {
+    if (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    ) {
+      return;
+    }
+    setHighlightedIndex(index);
+  }, []);
+
+  return { highlightedIndex, setHighlightedIndex: setPointerHighlightedIndex, listRef, handleKeyDown };
 }
