@@ -23,7 +23,6 @@ import { cn } from '@/lib/utils';
 import { useCandidateInterviews } from '@/hooks/useInterviews';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
 import { getMeetingUrl } from '@/lib/interviewTime';
-import { swedishTimeHint } from '@/lib/localTime';
 import { toast } from 'sonner';
 
 interface CandidateInterviewCardProps {
@@ -56,8 +55,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
   const isLive = minutesUntil <= 15 && minutesUntil >= -interview.duration_minutes;
   const isPending = interview.status === 'pending';
   const isConfirmed = interview.status === 'confirmed';
-  // Visas bara när kandidaten befinner sig utanför svensk tidszon.
-  const zoneHint = swedishTimeHint(scheduledDate);
+  // Tiden visas i kandidatens egen tidszon — ingen tidszonstext läggs till.
 
   // Format date nicely
   const getDateLabel = () => {
