@@ -1,16 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
-
-const LANDING_COLOR = '#2a2a2a';
-const PARIUM_COLOR = '#00193D';
-const AUDIENCE_LANDING_COLOR = '#001F3D';
-const AUTH_COLOR = '#062B5E';
-
-const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
-const isAudienceLandingPath = (pathname: string) =>
-  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
-const isAuthPath = (pathname: string) => pathname === '/auth';
 
 const detectTouch = () => {
   if (typeof window === 'undefined') return false;
@@ -31,7 +20,6 @@ const TopChromeStrip = () => {
   // Detect synchronously in the browser. Waiting for useEffect caused the
   // top offset to appear one frame after login, which looked like a dark gap.
   const [isTouch, setIsTouch] = useState(detectTouch);
-  const [forcedColor, setForcedColor] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(detectStandalone);
 
   useEffect(() => {
@@ -51,30 +39,6 @@ const TopChromeStrip = () => {
     mq.addEventListener?.('change', apply);
     return () => mq.removeEventListener?.('change', apply);
   }, []);
-
-  const color = isLandingVideoPath(location.pathname)
-    ? LANDING_COLOR
-    : isAudienceLandingPath(location.pathname)
-      ? AUDIENCE_LANDING_COLOR
-      : isAuthPath(location.pathname)
-        ? AUTH_COLOR
-        : PARIUM_COLOR;
-
-  useEffect(() => {
-    setForcedColor(null);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const onChromeColor = (event: Event) => {
-      const detail = (event as CustomEvent<{ color?: string }>).detail;
-      if (detail?.color) setForcedColor(detail.color);
-    };
-    window.addEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
-    return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
-  }, []);
-
-  const displayColor = forcedColor ?? color;
 
   // iPhone Safari behåller annars föregående rutts färg tills en full reload.
   // Ankaret behövs därför även i vanlig Safari, inte bara installerat läge.
@@ -100,7 +64,7 @@ const TopChromeStrip = () => {
   return (
     <div
       data-browser-chrome-strip="top"
-      key={displayColor}
+      key={location.pathname}
       aria-hidden="true"
       style={{
         position: 'fixed',
@@ -108,7 +72,7 @@ const TopChromeStrip = () => {
         right: 0,
         top: 0,
         height: chromeOffset,
-        backgroundColor: displayColor,
+        backgroundColor: 'var(--active-browser-chrome-color, #00193D)',
         zIndex: 2147483647,
         pointerEvents: 'none',
         // Ingen färgövergång: remsan måste byta färg i samma frame som
