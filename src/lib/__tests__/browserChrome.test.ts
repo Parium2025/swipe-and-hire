@@ -20,7 +20,7 @@ describe('browserChrome', () => {
 
     const landingTags = themeColorTags();
     expect(landingTags).toHaveLength(3);
-    expect(landingTags.every((tag) => tag.content === '#2a2a2a')).toBe(true);
+    expect(landingTags.every((tag) => tag.content === '#2a2a2b')).toBe(true);
 
     syncBrowserChrome('/auth');
 
