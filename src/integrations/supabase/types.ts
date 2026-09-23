@@ -1989,7 +1989,9 @@ export type Database = {
           image_updated_at: string
           is_active: boolean | null
           job_image_card_url: string | null
+          job_image_desktop_original_url: string | null
           job_image_desktop_url: string | null
+          job_image_original_url: string | null
           job_image_url: string | null
           location: string | null
           occupation: string | null
@@ -2047,7 +2049,9 @@ export type Database = {
           image_updated_at?: string
           is_active?: boolean | null
           job_image_card_url?: string | null
+          job_image_desktop_original_url?: string | null
           job_image_desktop_url?: string | null
+          job_image_original_url?: string | null
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
@@ -2105,7 +2109,9 @@ export type Database = {
           image_updated_at?: string
           is_active?: boolean | null
           job_image_card_url?: string | null
+          job_image_desktop_original_url?: string | null
           job_image_desktop_url?: string | null
+          job_image_original_url?: string | null
           job_image_url?: string | null
           location?: string | null
           occupation?: string | null
@@ -5049,7 +5055,9 @@ export type Database = {
           image_updated_at: string
           is_active: boolean | null
           job_image_card_url: string | null
+          job_image_desktop_original_url: string | null
           job_image_desktop_url: string | null
+          job_image_original_url: string | null
           job_image_url: string | null
           location: string | null
           occupation: string | null

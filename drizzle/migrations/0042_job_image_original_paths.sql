@@ -1,0 +1,1 @@
+ALTER TABLE public.job_postings ADD COLUMN IF NOT EXISTS job_image_original_url text, ADD COLUMN IF NOT EXISTS job_image_desktop_original_url text;
