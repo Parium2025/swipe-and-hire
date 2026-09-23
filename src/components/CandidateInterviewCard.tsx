@@ -153,7 +153,6 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
                 'HH:mm',
                 { locale: sv }
               )}
-              {zoneHint && <span className="text-white/70"> ({zoneHint})</span>}
             </span>
           </div>
           <Badge variant="glass" className="text-xs">
