@@ -135,7 +135,10 @@ export const EmployerInterviewsCard = memo(() => {
             </div>
           ) : (
             <>
-              <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1 scrollbar-hide">
+              <div className={cn(
+                'flex-1 min-h-0 space-y-1.5 pr-1 scrollbar-hide',
+                useTouchCarousel ? 'overflow-hidden' : 'overflow-y-auto',
+              )}>
                 <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
                 {visibleInterviews.map((interview) => {
                   const LocationIcon = getLocationIcon(interview.location_type);
@@ -303,6 +306,7 @@ export const EmployerInterviewsCard = memo(() => {
                   }}
                   label="Visa intervju"
                   alwaysRender
+                  maxVisible={4}
                 />
               )}
             </>

@@ -7,23 +7,32 @@ interface DashboardCarouselDotsProps {
   onSelect: (index: number) => void;
   label: string;
   alwaysRender?: boolean;
+  maxVisible?: number;
 }
 
-export const DashboardCarouselDots = memo(({ count, currentIndex, onSelect, label, alwaysRender = false }: DashboardCarouselDotsProps) => {
+export const DashboardCarouselDots = memo(({ count, currentIndex, onSelect, label, alwaysRender = false, maxVisible }: DashboardCarouselDotsProps) => {
   if (!alwaysRender && count <= 1) return null;
+
+  const visibleCount = Math.min(count, Math.max(1, maxVisible ?? count));
+  const maxStartIndex = Math.max(0, count - visibleCount);
+  const startIndex = Math.min(
+    Math.max(0, currentIndex - Math.floor((visibleCount - 1) / 2)),
+    maxStartIndex,
+  );
+  const visibleIndexes = Array.from({ length: visibleCount }, (_, index) => startIndex + index);
 
   const dots = (
     <div className="flex items-center gap-1.5 leading-none">
-      {Array.from({ length: count }).map((_, i) => (
+      {visibleIndexes.map((index) => (
         <button
           type="button"
-          key={i}
-          onClick={() => onSelect(i)}
+          key={index}
+          onClick={() => onSelect(index)}
           className={cn(
             "block flex-none p-0 m-0 border-0 appearance-none w-2.5 h-2.5 rounded-full touch-manipulation transition-none align-middle",
-            i === currentIndex ? "bg-white" : "bg-white/30"
+            index === currentIndex ? "bg-white" : "bg-white/30"
           )}
-          aria-label={`${label} ${i + 1}`}
+          aria-label={`${label} ${index + 1}`}
         />
       ))}
     </div>
