@@ -60,11 +60,9 @@
           // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
           // Inline-style har högre specificity än <style>-block → överrider safe default.
           document.documentElement.style.backgroundColor = chromeColor;
-          // Ge Safari samma tre färgkällor redan vid första paint som används
-          // vid senare sidbyten. browserChrome.ts skapar om dem vid SPA-nav.
-          document.write('<meta name="theme-color" content="' + chromeColor + '">');
-          document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: light)">');
-          document.write('<meta name="theme-color" content="' + chromeColor + '" media="(prefers-color-scheme: dark)">');
+          // En enda stabil nod. Flera light/dark-varianter gjorde att Safari
+          // kunde behålla den första ruttens färg efter SPA-navigation.
+          document.write('<meta id="parium-theme-color" name="theme-color" content="' + chromeColor + '">');
 
           // KRITISKT: Injicera en inline <style> som tvingar html/body till rätt
           // bakgrundsfärg vid FÖRSTA paint. Utan denna samplar iOS Safari sin
@@ -92,7 +90,7 @@
             }
           }, { once: true });
         } catch (e) {
-          document.write('<meta name="theme-color" content="#00193D">');
+          document.write('<meta id="parium-theme-color" name="theme-color" content="#00193D">');
         }
       })();
     </script>

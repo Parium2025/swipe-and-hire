@@ -14,31 +14,25 @@ describe('browserChrome', () => {
     document.body.className = '';
   });
 
-  it('skapar om alla färgtaggar när rutten byts så Safari läser den nya färgen', () => {
-    vi.useFakeTimers();
+  it('behåller en stabil färgtagg när rutten byts så Safari läser den nya färgen', () => {
     syncBrowserChrome('/');
 
     const landingTags = themeColorTags();
-    expect(landingTags).toHaveLength(3);
-    expect(landingTags.every((tag) => tag.content === '#2a2a2b')).toBe(true);
+    expect(landingTags).toHaveLength(1);
+    expect(landingTags[0]?.content).toBe('#2a2a2a');
 
     syncBrowserChrome('/auth');
 
     const authTags = themeColorTags();
-    expect(authTags).toHaveLength(3);
-    expect(authTags.every((tag) => tag.content === '#062B5f')).toBe(true);
-    expect(landingTags.every((tag) => !tag.isConnected)).toBe(true);
-
-    vi.runAllTimers();
-    expect(themeColorTags().every((tag) => tag.content === '#062B5E')).toBe(true);
+    expect(authTags).toHaveLength(1);
+    expect(authTags[0]).toBe(landingTags[0]);
+    expect(authTags[0]?.content).toBe('#062B5E');
   });
 
   it('synkar målgruppssidornas toppfärg till blått', () => {
-    vi.useFakeTimers();
     syncBrowserChrome('/jobbsokare');
-    vi.runAllTimers();
 
-    expect(themeColorTags()).toHaveLength(3);
+    expect(themeColorTags()).toHaveLength(1);
     expect(themeColorTags().every((tag) => tag.content === '#001F3D')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
@@ -46,13 +40,11 @@ describe('browserChrome', () => {
   });
 
   it('förbereder målruttens färg före SPA-navigation och stoppar gamla ruttskrivningar', () => {
-    vi.useFakeTimers();
     syncBrowserChrome('/');
 
     primeBrowserChrome('/auth');
-    vi.runAllTimers();
 
-    expect(themeColorTags()).toHaveLength(3);
+    expect(themeColorTags()).toHaveLength(1);
     expect(themeColorTags().every((tag) => tag.content === '#062B5E')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
