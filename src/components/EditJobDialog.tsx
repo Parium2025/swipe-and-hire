@@ -921,14 +921,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           .getPublicUrl(url);
         if (publicUrl) {
           setJobImageDisplayUrl(publicUrl);
-          setOriginalImageUrl(url); // Keep storage path as original
+          setOriginalImageUrl(prev => prev ?? (((job as any)?.job_image_url === url && (job as any)?.job_image_original_url) || url));
           return;
         }
       }
 
       // Otherwise use URL as-is
       setJobImageDisplayUrl(url);
-      setOriginalImageUrl(url);
+      setOriginalImageUrl(prev => prev ?? (((job as any)?.job_image_url === url && (job as any)?.job_image_original_url) || url));
     };
     
     loadJobImage();
@@ -954,14 +954,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           .getPublicUrl(desktopUrl);
         if (publicUrl) {
           setJobImageDesktopDisplayUrl(publicUrl);
-          setOriginalDesktopImageUrl(desktopUrl);
+          setOriginalDesktopImageUrl(prev => prev ?? (((job as any)?.job_image_desktop_url === desktopUrl && (job as any)?.job_image_desktop_original_url) || desktopUrl));
           return;
         }
       }
       
       // Otherwise use URL as-is
       setJobImageDesktopDisplayUrl(desktopUrl);
-      setOriginalDesktopImageUrl(desktopUrl);
+      setOriginalDesktopImageUrl(prev => prev ?? (((job as any)?.job_image_desktop_url === desktopUrl && (job as any)?.job_image_desktop_original_url) || desktopUrl));
     };
     
     loadDesktopJobImage();
