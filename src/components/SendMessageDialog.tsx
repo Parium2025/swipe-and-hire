@@ -479,7 +479,7 @@ export function SendMessageDialog({
             <AlertDialogAction
               onClick={handleDiscardAndClose}
               {...noFocusRingProps}
-              className="order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm bg-red-500/20 backdrop-blur-sm text-white border border-red-500/40 md:hover:bg-red-500/30 md:hover:border-red-500/50 transition-all duration-300 whitespace-nowrap outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="order-1 w-full sm:w-auto min-h-[44px] rounded-full px-4 py-2 text-sm border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white transition-all duration-300 whitespace-nowrap outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               Lämna utan att spara
             </AlertDialogAction>
