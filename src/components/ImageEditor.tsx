@@ -325,20 +325,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     
     setIsSaving(true);
     
-    // Om användaren INTE gjort några ändringar, behåll originalet
-    if (!hasUserMadeChanges && onRestoreOriginal) {
-      console.log('ImageEditor: No changes made, keeping original image...');
-      try {
-        await onRestoreOriginal();
-        console.log('ImageEditor: Original kept successfully');
-        onClose();
-      } catch (error) {
-        console.error('ImageEditor: Keep original failed:', error);
-        setIsSaving(false);
-      }
-      return;
-    }
-    
+    // Spara alltid exakt det som syns i redigeraren (WYSIWYG) — även efter
+    // att bilden zoomats tillbaka till originalläget.
     console.log('ImageEditor: Starting save process...');
     
     try {
