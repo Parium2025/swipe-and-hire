@@ -28,6 +28,7 @@ const nudgeColor = (color: string) => {
 };
 
 let pendingThemeFrame: number | null = null;
+let pendingSyncTimers: number[] = [];
 
 const writeThemeColor = (color: string) => {
   // iOS Safari läser ofta inte om browser-chrome när bara `content` ändras på
@@ -62,6 +63,30 @@ const setThemeColor = (color: string) => {
   writeThemeColor(color);
 };
 
+const getChromeColor = (pathname: string) => {
+  if (isLandingVideoPath(pathname)) return LANDING_CHROME_COLOR;
+  if (isAudienceLandingPath(pathname)) return AUDIENCE_LANDING_CHROME_COLOR;
+  if (isAuthPath(pathname)) return AUTH_CHROME_COLOR;
+  return PARIUM_CHROME_COLOR;
+};
+
+const cancelPendingRouteWrites = () => {
+  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
+  pendingSyncTimers = [];
+};
+
+/**
+ * Förbered Safaris systemfält medan navigationen fortfarande sker i samma
+ * användargest. iOS kan ignorera en theme-color som skrivs först efter att
+ * React Router redan har bytt vy.
+ */
+export const primeBrowserChrome = (pathname: string) => {
+  const color = getChromeColor(pathname);
+  cancelPendingRouteWrites();
+  setThemeColor(color);
+  setChromeCssColor(color);
+};
+
 
 
 const notifyChromeStrips = (pathname: string, color: string) => {
@@ -85,19 +110,9 @@ const setChromeCssColor = (color: string) => {
  * och body-färgen byts dock korrekt. Hard reloads tas bort eftersom de orsakade
  * vit/trasig sida i kombination med cache-killswitchen i index.html.
  */
-let pendingSyncTimers: number[] = [];
-
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
-  const isAudienceLanding = isAudienceLandingPath(pathname);
-  const isAuth = isAuthPath(pathname);
-  const color = isLandingVideo
-    ? LANDING_CHROME_COLOR
-    : isAudienceLanding
-      ? AUDIENCE_LANDING_CHROME_COLOR
-      : isAuth
-        ? AUTH_CHROME_COLOR
-        : PARIUM_CHROME_COLOR;
+  const color = getChromeColor(pathname);
 
   removeLegacySentinels();
 
@@ -121,8 +136,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   // lösningen återapplicerar färgen medan nästa sida målas. Gamla timers
   // avbryts och varje callback verifierar aktuell rutt, så en tidigare sida
   // kan aldrig skriva tillbaka sin färg efter snabb navigering.
-  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
-  pendingSyncTimers = [];
+  cancelPendingRouteWrites();
   [80, 260, 640, 1200, 2000].forEach((delay) => {
     pendingSyncTimers.push(
       window.setTimeout(() => {

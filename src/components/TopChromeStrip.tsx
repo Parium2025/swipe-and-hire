@@ -76,14 +76,17 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  const shouldShowStrip = isTouch;
+  // Vanlig Safari har redan ett eget statusfält. Ett extra 14 px-ankare blev
+  // den andra synliga remsan mellan systemfältet och sidan. Endast installerat
+  // helskärmsläge behöver en egen safe-area-yta.
+  const shouldShowStrip = isTouch && isStandalone;
   const stripInset = isStandalone ? '22px' : '14px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isTouch) {
+    if (shouldShowStrip) {
       root.style.setProperty('--top-chrome-content-offset', chromeOffset);
     } else {
       root.style.removeProperty('--top-chrome-content-offset');
@@ -91,7 +94,7 @@ const TopChromeStrip = () => {
     return () => {
       root.style.removeProperty('--top-chrome-content-offset');
     };
-  }, [isTouch, isStandalone, chromeOffset]);
+  }, [shouldShowStrip, chromeOffset]);
 
   if (!shouldShowStrip) return null;
 

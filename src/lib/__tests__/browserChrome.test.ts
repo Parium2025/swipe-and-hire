@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { syncBrowserChrome } from '../browserChrome';
+import { primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
 
 const themeColorTags = () =>
   Array.from(document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'));
@@ -43,5 +43,19 @@ describe('browserChrome', () => {
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
     ).toBe('#001F3D');
+  });
+
+  it('förbereder målruttens färg före SPA-navigation och stoppar gamla ruttskrivningar', () => {
+    vi.useFakeTimers();
+    syncBrowserChrome('/');
+
+    primeBrowserChrome('/auth');
+    vi.runAllTimers();
+
+    expect(themeColorTags()).toHaveLength(3);
+    expect(themeColorTags().every((tag) => tag.content === '#062B5E')).toBe(true);
+    expect(
+      document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
+    ).toBe('#062B5E');
   });
 });
