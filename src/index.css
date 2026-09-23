@@ -700,7 +700,7 @@ All colors MUST be HSL.
      header from shifting down one frame after login when touch detection runs. */
   @media (any-pointer: coarse), (hover: none), (any-hover: none) {
     :root {
-      --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 0px);
+      --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 14px);
     }
   }
 
