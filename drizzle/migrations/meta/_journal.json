@@ -309,6 +309,13 @@
       "when": 1790185064245,
       "tag": "0043_org_image_library",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790185453861,
+      "tag": "0044_image_library_access_platform_admin",
+      "breakpoints": true
     }
   ]
 }
