@@ -41,7 +41,7 @@ describe('TopChromeStrip', () => {
     expect(container.firstChild).not.toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
-    ).toBe('0px');
+    ).toBe('calc(env(safe-area-inset-top, 0px) + 14px)');
   });
 
   it('renderar ingen remsa på desktop', () => {
