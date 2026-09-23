@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const DateTimeDisplay = memo(() => {
@@ -91,8 +92,23 @@ const JobSeekerHome = memo(() => {
 
   if (!showContent) {
     return (
-      <div className="space-y-6 responsive-container-wide py-8 opacity-0">
-        {/* Invisible placeholder */}
+      <div className="space-y-3 sm:space-y-6 responsive-container-wide py-2 sm:py-3 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]" aria-busy="true" aria-label="Laddar startsidan">
+        <div className="flex flex-col items-center gap-2 md:items-start">
+          <Skeleton className="h-8 sm:h-11 w-3/4 max-w-md bg-white/10" />
+          <Skeleton className="h-4 w-40 bg-white/10" />
+          <Skeleton className="h-4 w-56 bg-white/10" />
+        </div>
+        <div className="dashboard-page-stack">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-28 bg-white/10" />
+            <Skeleton className="h-5 w-5 bg-white/10" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+            {[1, 2, 3, 4].map(i => (
+              <Skeleton key={i} className="dashboard-card-height rounded-lg bg-white/10" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

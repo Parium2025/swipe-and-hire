@@ -80,7 +80,7 @@ const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
   return createPortal(children, document.body);
 };
 
-const SkeletonChrome = memo(function SkeletonChrome() {
+const SkeletonChrome = memo(function SkeletonChrome({ audience = 'employer' }: { audience?: 'employer' | 'job_seeker' }) {
   // Följ appens riktiga brytpunkt (1180px + overflow-guard) i stället för
   // Tailwinds `lg` (1024px), annars visar skelettet fel header.
   const isDesktop = useDevice() === 'desktop';
@@ -100,7 +100,7 @@ const SkeletonChrome = memo(function SkeletonChrome() {
         </div>
       </header>
       )}
-      {/* DESKTOP chrome — mirrors EmployerTopNav layout exactly.
+      {/* DESKTOP chrome — mirrors the active role's top navigation exactly.
           Real order (left→right):
             LEFT: logo | Annonser | Kandidater | Chattar | Företag | Notif | Profil-avatar
             RIGHT (extraRight): Skapa ny annons */}
@@ -111,25 +111,32 @@ const SkeletonChrome = memo(function SkeletonChrome() {
           <div className="flex items-center gap-1">
             {/* Parium-logo (PariumLogoButton är 40x40) */}
             <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
-            <div className="flex items-center gap-1 ml-1">
-              {/* Annonser (LayoutDashboard + text + count + chevron) */}
-              <div className={`h-10 w-[140px] rounded-lg ${SHAPE}`} />
-              {/* Kandidater */}
-              <div className={`h-10 w-[135px] rounded-lg ${SHAPE}`} />
-              {/* Chattar (utan count-pil, smalare) */}
-              <div className={`h-10 w-[110px] rounded-lg ${SHAPE}`} />
-              {/* Företag (avatar-cirkel + text + chevron) */}
-              <div className={`h-10 w-[128px] rounded-lg ${SHAPE}`} />
-              {/* NotificationCenter (rect variant, klocka) */}
-              <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
-              {/* Profil-dropdown (avatar + chevron) */}
-              <div className={`h-10 w-[64px] rounded-lg ${SHAPE}`} />
-            </div>
+            {audience === 'employer' ? (
+              <div className="flex items-center gap-1 ml-1">
+                <div className={`h-10 w-[140px] rounded-lg ${SHAPE}`} />
+                <div className={`h-10 w-[135px] rounded-lg ${SHAPE}`} />
+                <div className={`h-10 w-[110px] rounded-lg ${SHAPE}`} />
+                <div className={`h-10 w-[128px] rounded-lg ${SHAPE}`} />
+                <div className={`h-10 w-10 rounded-lg ${SHAPE}`} />
+                <div className={`h-10 w-[64px] rounded-lg ${SHAPE}`} />
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 ml-1">
+                <div className={`h-9 w-[92px] rounded-lg ${SHAPE}`} />
+                <div className={`h-9 w-[104px] rounded-lg ${SHAPE}`} />
+                <div className={`h-9 w-[112px] rounded-lg ${SHAPE}`} />
+                <div className={`h-9 w-[104px] rounded-lg ${SHAPE}`} />
+                <div className={`h-9 w-9 rounded-lg ${SHAPE}`} />
+                <div className={`h-9 w-[68px] rounded-lg ${SHAPE}`} />
+              </div>
+            )}
           </div>
           {/* Right group — extraRight: Skapa ny annons */}
-          <div className="flex items-center gap-3">
-            <div className={`h-10 w-[164px] rounded-lg ${SHAPE}`} />
-          </div>
+          {audience === 'employer' && (
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-[164px] rounded-lg ${SHAPE}`} />
+            </div>
+          )}
         </div>
       </header>
       )}
@@ -425,6 +432,7 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
   const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   const isDesktop = useDevice() === 'desktop';
+  const stageCount = 5;
   return (
     <FullscreenSkeletonPortal>
       <motion.div
@@ -436,43 +444,70 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
       >
         <SkeletonChrome />
         <div className="flex-1 min-h-0 overflow-hidden p-3">
-          <div className="responsive-container-wide space-y-4">
-            {/* Page title */}
-            <div className="flex justify-center items-center mb-4">
-              <div className={`h-7 w-40 rounded ${SHAPE}`} />
+          <div className="responsive-container-wide">
+            {/* Exakt samma sammanhållna rubrikyta som den färdiga sidan. */}
+            <div className="mb-6 rounded-lg border border-white/20 bg-white/5 p-3 md:p-4">
+              <div className="mb-4 flex flex-col items-center gap-2">
+                <div className={`h-7 w-40 rounded ${SHAPE}`} />
+                <div className={`h-4 w-72 max-w-full rounded ${SHAPE}`} />
+              </div>
+              <div className={`mx-auto h-11 w-full rounded-md ${SHAPE}`} />
+              <div className="mt-3 flex justify-center">
+                <div className={`h-10 w-24 rounded-full ${SHAPE}`} />
+              </div>
+              {isDesktop && (
+                <div className="mt-3 flex justify-center gap-2 overflow-hidden">
+                  {Array.from({ length: stageCount + 1 }).map((_, i) => (
+                    <div key={i} className={`h-8 shrink-0 rounded-full ${SHAPE}`} style={{ width: i === 0 ? 72 : 96 }} />
+                  ))}
+                </div>
+              )}
             </div>
-            {/* Search + selection toggle */}
-            <div className="flex items-center gap-2">
-              <div className={`flex-1 h-11 rounded-xl ${SHAPE}`} />
-              <div className={`h-11 w-11 rounded-xl ${SHAPE}`} />
-            </div>
-            {/* Stage filter pills (scrollable) */}
-            <div className="flex gap-2 overflow-hidden">
-              {[20, 24, 20, 28, 20].map((w, i) => (
-                <div key={i} className={`h-9 w-${w} rounded-full ${SHAPE}`} style={{ width: `${w * 4}px` }} />
-              ))}
-            </div>
-            {/* Swipe-läge-knappen (mobilvyn) — samma plats som i den riktiga sidan */}
-            {!isDesktop && (
-              <div className="flex justify-center pb-3">
-                <div className={`h-11 w-40 rounded-full ${SHAPE}`} />
+
+            {!isDesktop ? (
+              <>
+                <div className="flex justify-center pb-6">
+                  <div className={`h-11 w-40 rounded-full ${SHAPE}`} />
+                </div>
+                <div className="flex gap-1.5 overflow-hidden pb-4">
+                  {Array.from({ length: stageCount }).map((_, i) => (
+                    <div key={i} className={`h-8 w-24 shrink-0 rounded-md ${SHAPE}`} />
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  {Array.from({ length: Math.min(8, candidateCount) }).map((_, i) => (
+                    <div key={i} className="flex min-h-touch items-center gap-3 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/10">
+                      <div className={`h-10 w-10 shrink-0 rounded-full ${SHAPE}`} />
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <div className={`h-3.5 w-2/3 rounded ${SHAPE}`} />
+                        <div className={`h-2.5 w-1/2 rounded ${SHAPE}`} />
+                      </div>
+                      <div className={`h-9 w-9 shrink-0 rounded-full ${SHAPE}`} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex h-[calc(100vh-300px)] gap-3 overflow-hidden pb-4 pt-2">
+                {Array.from({ length: stageCount }).map((_, stageIndex) => (
+                  <div key={stageIndex} className="flex min-w-0 flex-1 flex-col">
+                    <div className={`mb-2 h-8 w-full rounded-md ${SHAPE}`} />
+                    <div className="h-full space-y-1.5 rounded-lg bg-white/5 p-2 ring-1 ring-inset ring-white/10">
+                      {Array.from({ length: Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount))) }).map((_, rowIndex) => (
+                        <div key={rowIndex} className="flex min-h-14 items-center gap-2 rounded-md bg-white/5 px-2 py-1.5">
+                          <div className={`h-9 w-9 shrink-0 rounded-full ${SHAPE}`} />
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <div className={`h-3 w-3/4 rounded ${SHAPE}`} />
+                            <div className={`h-2.5 w-1/2 rounded ${SHAPE}`} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div className={`h-8 min-w-0 flex-1 rounded-md ${SHAPE}`} />
               </div>
             )}
-            {/* Candidate cards */}
-            <div className="space-y-3">
-              {Array.from({ length: candidateCount }).map((_, i) => (
-                <div key={i} className="p-4 rounded-lg bg-white/5 border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-12 w-12 rounded-full ${SHAPE}`} />
-                    <div className="flex-1 space-y-2">
-                      <div className={`h-4 w-2/3 rounded ${SHAPE}`} />
-                      <div className={`h-3 w-1/2 rounded ${SHAPE}`} />
-                    </div>
-                    <div className={`h-6 w-16 rounded-full ${SHAPE}`} />
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </motion.div>
@@ -505,7 +540,7 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
               <div className={`h-11 w-full rounded-xl ${SHAPE}`} />
               <div className="flex justify-center gap-2">
                 <div className={`h-9 w-40 rounded-full ${SHAPE}`} />
-                <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
+                <div className={`h-11 w-36 rounded-full ${SHAPE}`} />
               </div>
               {/* Swipe-läge-knappen ligger på egen rad under filtren */}
               <div className="flex justify-center">
@@ -535,7 +570,7 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
 /**
  * Skeleton for /messages — mirrors conversation list (mobile) / split view (desktop).
  */
-export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton() {
+export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({ audience = 'employer' }: { audience?: 'employer' | 'job_seeker' }) {
   // Live-antal konversationer ur cachen → exakt lika många rader som listan
   // faktiskt renderar, clampat till vad som får plats i vyn.
   const messageCount = useLiveSkeletonCount({
@@ -552,7 +587,7 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton()
         className="flex flex-col overflow-hidden [padding-top:var(--top-chrome-content-offset,0px)]"
         style={fullscreenSkeletonStyle}
       >
-        <SkeletonChrome />
+        <SkeletonChrome audience={audience} />
         <div className="flex-1 min-h-0 overflow-hidden p-3">
           <div className="responsive-container-wide space-y-4 h-full flex flex-col">
             {/* Header — mirrors Messages page icon/title group + optional new conversation action */}
@@ -670,15 +705,8 @@ export const EmployerSettingsSkeleton = memo(function EmployerSettingsSkeleton()
             <div className="flex justify-center items-center mb-2">
               <div className={`h-7 w-32 rounded ${SHAPE}`} />
             </div>
-            {[1, 2, 3, 4].map(section => (
-              <div key={section} className="rounded-xl border border-white/20 bg-white/5 p-4 space-y-3">
-                <div className={`h-5 w-40 rounded ${SHAPE}`} />
-                <div className={`h-3 w-56 rounded ${SHAPE}`} />
-                <div className="space-y-2 pt-2">
-                  <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
-                  <div className={`h-11 w-full rounded-lg ${SHAPE}`} />
-                </div>
-              </div>
+            {Array.from({ length: 9 }).map((_, section) => (
+              <div key={section} className={`h-14 w-full rounded-lg ${SHAPE}`} />
             ))}
           </div>
         </div>

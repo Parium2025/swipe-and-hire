@@ -112,12 +112,22 @@ export const JobSeekerInterviewsCard = memo(() => {
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5" />
-        <CardContent className="relative p-4 h-full">
-          <div className="flex items-center gap-2 mb-4">
+        <CardContent className="relative p-3 h-full flex flex-col">
+          <div className="flex items-center justify-between mb-2">
             <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
-            <Skeleton className="h-4 w-24 bg-white/20" />
+            <Skeleton className="h-3 w-20 bg-white/20" />
           </div>
-          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+          <div className="flex-1 min-h-0 space-y-1.5 overflow-hidden">
+            {[0, 1].map(item => (
+              <div key={item} className="flex min-h-[52px] items-center gap-2 rounded-lg bg-white/10 p-2">
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-3/4 bg-white/20" />
+                  <Skeleton className="h-2.5 w-1/2 bg-white/20" />
+                </div>
+                <Skeleton className="h-7 w-20 rounded bg-white/20" />
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     );

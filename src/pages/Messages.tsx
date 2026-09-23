@@ -319,7 +319,7 @@ export default function Messages() {
   }
 
   if (showSkeleton) {
-    return <EmployerMessagesSkeleton />;
+    return <EmployerMessagesSkeleton audience={userRole === 'employer' ? 'employer' : 'job_seeker'} />;
   }
 
 
