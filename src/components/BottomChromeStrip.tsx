@@ -116,6 +116,9 @@ const BottomChromeStrip = () => {
 
   return (
     <div
+      // Ny nod vid färgbyte: iOS Safari (flytande verktygsfält) samplar om
+      // statusrad/verktygsfält först när ett nytt fixed-element dyker upp.
+      key={displayColor}
       aria-hidden="true"
       style={{
         position: 'fixed',
