@@ -773,9 +773,9 @@ const InlineHeroPhone = ({
 
     observer.observe(wrapper);
     return () => observer.disconnect();
-  }, [enabled]);
+  }, [enabled, metrics]);
 
-  if (!enabled) return null;
+  if (!enabled || !metrics) return null;
 
   return (
     <div
