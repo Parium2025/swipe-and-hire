@@ -57,12 +57,9 @@ export const EmployerInterviewsCard = memo(() => {
       return aDone ? bTime - aTime : aTime - bTime;
     });
   }, [interviews, now]);
-  const upcomingInterviews = liveInterviews.slice(0, 5);
-  const hasMore = liveInterviews.length > 5;
-
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
+      <Card className={`relative h-[320px] overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg sm:h-[200px] md:h-[220px] lg:h-[240px]`}>
         <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-4 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -76,7 +73,7 @@ export const EmployerInterviewsCard = memo(() => {
   }
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
+    <Card className={`relative h-[320px] overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg sm:h-[200px] md:h-[220px] lg:h-[240px]`}>
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
 
@@ -89,7 +86,7 @@ export const EmployerInterviewsCard = memo(() => {
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          {upcomingInterviews.length === 0 ? (
+          {liveInterviews.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Calendar className="h-8 w-8 text-white mb-2" />
               {/* Ett hämtningsfel får aldrig se ut som "inga intervjuer". */}
@@ -102,7 +99,7 @@ export const EmployerInterviewsCard = memo(() => {
             </div>
           ) : (
             <div className="space-y-1.5 overflow-y-auto h-full pr-1 scrollbar-hide">
-              {upcomingInterviews.map((interview) => {
+              {liveInterviews.map((interview) => {
                 const LocationIcon = getLocationIcon(interview.location_type);
                 const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
                 const isDeclined = interview.status === 'declined';
@@ -222,14 +219,6 @@ export const EmployerInterviewsCard = memo(() => {
           )}
         </div>
 
-        {hasMore && (
-          <button
-            onClick={() => navigate('/my-candidates')}
-            className="text-[10px] text-white hover:text-white underline underline-offset-2 mt-1 text-center"
-          >
-            Se alla ({liveInterviews.length})
-          </button>
-        )}
       </CardContent>
     </Card>
   );

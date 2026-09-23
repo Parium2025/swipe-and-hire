@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import NotificationCenter from '../NotificationCenter';
 
@@ -57,5 +57,16 @@ describe('NotificationCenter', () => {
     expect(trigger.className).toContain('[@media(hover:hover)]:rounded-full');
     expect(trigger.className).not.toMatch(/(?:^|\s)rounded-full(?:\s|$)/);
     expect(trigger.className).not.toMatch(/(?:^|\s)hover:bg-white\/10(?:\s|$)/);
+  });
+
+  it('stänger panelen när rubrikraden trycks', async () => {
+    render(<NotificationCenter />);
+    fireEvent.click(screen.getByLabelText('Notifikationer'));
+
+    fireEvent.click(screen.getByLabelText('Stäng notifikationer'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Notifikationer', { selector: 'h3' })).toBeNull();
+    });
   });
 });

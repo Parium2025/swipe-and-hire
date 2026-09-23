@@ -535,17 +535,30 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
           ref={panelRef}
           initial={{ opacity: 0, scale: 0.95, y: -8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -8 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          exit={{ opacity: 0, scaleY: 0.08, y: -14 }}
+          transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
           className="fixed z-[10000] w-[min(340px,calc(100vw-24px))] max-h-[min(70vh,600px)] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-xl p-0 overflow-hidden flex flex-col"
           style={{
             top: '60px',
             left: '50%',
             x: '-50%',
+            transformOrigin: 'top center',
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Stäng notifikationer"
+            onClick={() => setOpen(false)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setOpen(false);
+              }
+            }}
+            className="flex cursor-pointer items-center justify-between px-4 py-3 border-b border-white/10 transition-colors pointer-fine:hover:bg-white/5"
+          >
             <h3 className="text-sm font-semibold text-white">Notifikationer</h3>
             <div className="flex items-center gap-1">
               {unreadCount > 0 && (
@@ -560,7 +573,11 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => setConfirmClearOpen(true)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setOpen(false);
+                        setConfirmClearOpen(true);
+                      }}
                       className="flex h-7 w-7 items-center justify-center rounded-full border border-0 bg-red-500/80 text-white transition-colors md:hover:!bg-red-500 md:hover:!text-white"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -634,7 +651,8 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
 
       <AlertDialog open={confirmClearOpen} onOpenChange={setConfirmClearOpen}>
         <AlertDialogContentNoFocus
-          className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
+          elevated
+          className="no-chrome-pad border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] max-h-[calc(100dvh-2rem)] overflow-visible p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0"
         >
           <AlertDialogHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center gap-2.5">
