@@ -290,7 +290,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setPosition(current => clampPosition(current, nextScale));
       return nextScale;
     });
-    setHasUserMadeChanges(isMobileJobCard);
+    setHasUserMadeChanges(true);
   };
 
   const resetPosition = () => {
@@ -298,7 +298,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     setPosition({ x: 0, y: 0 });
     // Återställningen är ett aktivt val och ska sparas som den beskärning som
     // syns i redigeraren, inte växla tillbaka till en annan lagrad fil.
-    setHasUserMadeChanges(true);
+    setHasUserMadeChanges(isMobileJobCard);
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
