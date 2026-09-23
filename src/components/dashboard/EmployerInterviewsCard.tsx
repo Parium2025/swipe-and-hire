@@ -114,8 +114,8 @@ export const EmployerInterviewsCard = memo(() => {
     }
     if (useTouchCarousel) swipeHandlers.onTouchMove(event);
   }, [swipeHandlers, useTouchCarousel]);
-  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
-    if (useTouchCarousel) swipeHandlers.onTouchEnd(event);
+  const handleTouchEnd = useCallback(() => {
+    if (useTouchCarousel) swipeHandlers.onTouchEnd();
   }, [swipeHandlers, useTouchCarousel]);
   /** Ett tryck som följer på scroll eller svep ska ignoreras helt. */
   const isAccidentalTap = useCallback(() => {
