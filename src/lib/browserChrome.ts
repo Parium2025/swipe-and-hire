@@ -11,6 +11,28 @@ const isAudienceLandingPath = (pathname: string) =>
   pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 const isAuthPath = (pathname: string) => pathname === '/auth';
 
+/**
+ * Vanlig iPhone/iPad-webbläsare låser topp- och bottenfältens samplade färg
+ * till dokumentet. Ett SPA-byte kan därför visa den gamla systemfärgen ovanpå
+ * vår nya remsa. Installerat läge har inte samma browser chrome.
+ */
+export const needsFullPageChromeNavigation = () => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  return isIos && !isStandalone;
+};
+
+export const navigateAcrossChromeColor = (target: string, spaNavigate: () => void) => {
+  cancelPendingRouteWrites();
+  if (needsFullPageChromeNavigation()) {
+    window.location.assign(target);
+    return;
+  }
+  spaNavigate();
+};
+
 const removeLegacySentinels = () => {
   ['parium-browser-chrome-top', 'parium-browser-chrome-bottom', 'parium-bottom-chrome'].forEach((id) => {
     const el = document.getElementById(id);
@@ -47,6 +69,7 @@ const nudgeColor = (color: string) => {
 
 let pendingThemeFrame: number | null = null;
 let pendingSyncTimers: number[] = [];
+let committedDocumentColor: string | null = null;
 
 const setThemeColor = (color: string) => {
   if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
@@ -119,6 +142,21 @@ const setChromeCssColor = (color: string) => {
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const color = getChromeColor(pathname);
+
+  // Fångar även browser-back, redirects efter inloggning och andra centrala
+  // routebyten som inte går genom navigateAcrossChromeColor(). När färgen
+  // ändras i vanlig iOS Safari krävs ett nytt dokument för att dess egna
+  // topp- och bottenfält ska sampla samma färg som våra remsor. useLayoutEffect
+  // anropar detta före paint, så den felaktiga tvåfärgsramen hinner inte visas.
+  if (
+    committedDocumentColor !== null &&
+    committedDocumentColor !== color &&
+    needsFullPageChromeNavigation()
+  ) {
+    window.location.reload();
+    return;
+  }
+  committedDocumentColor = color;
 
   removeLegacySentinels();
 

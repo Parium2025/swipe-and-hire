@@ -13,6 +13,7 @@ import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { useAuth } from '@/hooks/useAuth';
+import { navigateAcrossChromeColor } from '@/lib/browserChrome';
 
 export interface LandingNavLink {
   label: string;
@@ -45,7 +46,7 @@ const LandingNav = ({ onLoginClick, links = [] }: LandingNavProps) => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       sessionStorage.setItem('parium-skip-splash', '1');
-      navigate('/');
+      navigateAcrossChromeColor('/', () => navigate('/'));
     }
   };
 

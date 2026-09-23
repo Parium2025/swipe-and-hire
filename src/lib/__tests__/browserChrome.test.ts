@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
+import { needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
 
 const themeColorTags = () =>
   Array.from(document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'));
@@ -42,6 +42,10 @@ describe('browserChrome', () => {
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
     ).toBe('#001F3D');
+  });
+
+  it('begränsar full sidväxling till vanlig iOS-webbläsare', () => {
+    expect(needsFullPageChromeNavigation()).toBe(false);
   });
 
   it('behåller aktuell färg under utgångsanimationen och byter först när målvägen visas', () => {

@@ -3,7 +3,7 @@ import { Link, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { primeBrowserChrome } from '@/lib/browserChrome';
+import { navigateAcrossChromeColor } from '@/lib/browserChrome';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -1889,13 +1889,12 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    primeBrowserChrome('/auth');
-    requestAnimationFrame(() => navigate('/auth'));
+    navigateAcrossChromeColor('/auth', () => navigate('/auth'));
   };
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    primeBrowserChrome('/auth');
-    requestAnimationFrame(() => navigate('/auth', { state: { mode: 'register', role: audience } }));
+    const target = `/auth?mode=register&role=${audience}`;
+    navigateAcrossChromeColor(target, () => navigate('/auth', { state: { mode: 'register', role: audience } }));
   };
 
   const navLinks: LandingNavLink[] = [

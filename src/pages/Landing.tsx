@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 
-import { primeBrowserChrome } from '@/lib/browserChrome';
+import { navigateAcrossChromeColor } from '@/lib/browserChrome';
 import { useAuth } from '@/hooks/useAuth';
 
 const Landing = () => {
@@ -85,8 +85,7 @@ const Landing = () => {
 
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    primeBrowserChrome('/auth');
-    requestAnimationFrame(() => navigate('/auth'));
+    navigateAcrossChromeColor('/auth', () => navigate('/auth'));
   };
 
   if (shouldRedirectHome) {
