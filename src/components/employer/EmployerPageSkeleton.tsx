@@ -611,7 +611,11 @@ export const EmployerMessagesSkeleton = memo(function EmployerMessagesSkeleton({
               {hasTeam && <div className={`absolute right-0 h-10 w-12 sm:w-40 rounded-lg ${SHAPE}`} />}
             </div>
             <div className={`flex-1 min-h-0 flex overflow-hidden ${isDesktop ? 'gap-4' : ''}`}>
-              <div className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0">
+              <div
+                className={isDesktop
+                  ? 'w-80 lg:w-96 flex-shrink-0 flex flex-col min-h-0'
+                  : 'w-full flex-shrink-0 flex flex-col min-h-0'}
+              >
                 {/* Arbetsgivare med team har samma tvådelade Jobb/Kollegor-rad. */}
                 {hasTeam && (
                   <div className="flex h-9 gap-0.5 rounded-lg border border-white/10 bg-white/5 p-1 mb-3">
