@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useCloseOnRouteChange } from '@/hooks/useCloseOnRouteChange';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CandidateSlide, type CandidateSlideSwipeApi } from './CandidateSlide';
 import { CandidateSlideActions } from './CandidateSlideActions';
@@ -231,6 +232,8 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
       // Vissa webbläsare blockerar vibration — ignorera tyst.
     }
   }, [open, currentIndex]);
+
+  useCloseOnRouteChange(open, onClose);
 
   // Lock body scroll when open
   useEffect(() => {

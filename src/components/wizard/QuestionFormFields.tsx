@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +29,18 @@ export const QuestionFormFields = ({
   onRemoveOption,
   questionTypeDropdown,
 }: QuestionFormFieldsProps) => {
+  // Stabila nycklar per svarsalternativ så att rätt rad tas bort och
+  // markören inte hoppar till fel ruta när en rad i mitten raderas.
+  const optionKeysRef = useRef<number[]>([]);
+  const nextOptionKeyRef = useRef(0);
+  const optionCount = (question.options || []).length;
+  while (optionKeysRef.current.length < optionCount) optionKeysRef.current.push(nextOptionKeyRef.current++);
+  if (optionKeysRef.current.length > optionCount) optionKeysRef.current.length = optionCount;
+  const handleRemoveOption = (index: number) => {
+    optionKeysRef.current.splice(index, 1);
+    onRemoveOption(index);
+  };
+
   return (
     <div className="space-y-4">
       {/* Question Type Dropdown */}
@@ -67,7 +80,7 @@ export const QuestionFormFields = ({
           </Label>
           <div className="space-y-2">
             {(question.options || []).map((option, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={optionKeysRef.current[index] ?? index} className="flex items-center gap-2">
                 <Input
                   value={option}
                   onChange={(e) => onUpdateOption(index, e.target.value)}
@@ -76,7 +89,7 @@ export const QuestionFormFields = ({
                 />
                 <button
                   type="button"
-                  onClick={() => onRemoveOption(index)}
+                  onClick={() => handleRemoveOption(index)}
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-0 bg-red-500/80 text-white transition-colors duration-150 flex-shrink-0 md:hover:!bg-red-500 md:hover:!text-white"
                 >
                   <Trash2 className="h-4 w-4" />

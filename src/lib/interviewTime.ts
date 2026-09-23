@@ -2,7 +2,6 @@ import {
   formatLocalShortDate,
   formatLocalTime,
   localDayDiff,
-  swedishTimeHint,
 } from '@/lib/localTime';
 
 /**
@@ -26,15 +25,12 @@ export const formatInterviewTime = (dateStr: string): string => {
 };
 
 /**
- * "08:00 (14:00 svensk tid)" när enheten står i en annan tidszon — annars
- * bara "14:00". Ingen manuell inställning behövs: enhetens tidszon avgör.
+ * Intervjutiden visas i användarens egen tidszon — ingen tidszonstext läggs till.
  */
 export const formatInterviewTimeWithZone = (dateStr: string): string => {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return '';
-  const local = formatLocalTime(date);
-  const hint = swedishTimeHint(date);
-  return hint ? `${local} (${hint})` : local;
+  return formatLocalTime(date);
 };
 
 /** Calendar-day difference in local time so "Imorgon" always means tomorrow. */

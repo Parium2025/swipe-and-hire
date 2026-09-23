@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useCloseOnRouteChange } from '@/hooks/useCloseOnRouteChange';
 import { X, Plus, Minus, RotateCcw, Download } from 'lucide-react';
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
@@ -17,6 +18,7 @@ interface AttachmentImageViewerProps {
  * samma känsla som CV-visaren, men för bilder i chatten.
  */
 export function AttachmentImageViewer({ open, onClose, src, fileName }: AttachmentImageViewerProps) {
+  useCloseOnRouteChange(open, onClose);
   const imgRef = useRef<HTMLImageElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
