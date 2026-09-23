@@ -5252,7 +5252,7 @@ const MobileJobWizard = ({
             onSave={handleImageEdit}
             onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
-            aspectRatio={16/9}
+            aspectRatio={editingImageType === 'mobile' ? 2 : 16 / 9}
           />
         )}
 

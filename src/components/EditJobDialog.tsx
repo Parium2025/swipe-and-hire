@@ -4573,7 +4573,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
             }
           }}
           isCircular={false}
-          aspectRatio={16 / 9}
+          aspectRatio={editingImageType === 'mobile' ? 2 : 16 / 9}
         />
       )}
     </>

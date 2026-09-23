@@ -41,6 +41,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_SIZE * aspectRatio);
   const MAX_SCALE = 3;
 
+  const clampPosition = useCallback((nextPosition: { x: number; y: number }, nextScale: number) => {
+    const img = imageRef.current;
+    if (!img) return nextPosition;
+
+    const overflowX = Math.max(0, (img.width * nextScale - CANVAS_WIDTH) / 2);
+    const overflowY = Math.max(0, (img.height * nextScale - CANVAS_HEIGHT) / 2);
+
+    return {
+      x: Math.max(-overflowX, Math.min(overflowX, nextPosition.x)),
+      y: Math.max(-overflowY, Math.min(overflowY, nextPosition.y)),
+    };
+  }, [CANVAS_HEIGHT, CANVAS_WIDTH]);
+
   // Reset state when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
@@ -75,7 +88,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // ALLTID använd "cover" som initial scale (fyller hela området utan luckor)
           // Detta ger identiskt zoom-beteende för både cirkulär och rektangulär
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(Math.min(scaleX, scaleY) * 0.5); // minScale baserat på contain
+          setMinScale(initialScale);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -113,7 +126,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           
           // ALLTID använd "cover" som initial scale
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(Math.min(scaleX, scaleY) * 0.5);
+          setMinScale(initialScale);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -198,7 +211,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newX = e.clientX - rect.left - dragStart.x;
     const newY = e.clientY - rect.top - dragStart.y;
     
-    setPosition({ x: newX, y: newY });
+    setPosition(clampPosition({ x: newX, y: newY }, scale));
     setHasUserMadeChanges(true); // User made manual change
   };
 
@@ -231,7 +244,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newX = touch.clientX - rect.left - dragStart.x;
     const newY = touch.clientY - rect.top - dragStart.y;
     
-    setPosition({ x: newX, y: newY });
+    setPosition(clampPosition({ x: newX, y: newY }, scale));
     setHasUserMadeChanges(true); // User made manual change
   };
 
@@ -245,20 +258,30 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   
   const zoomIn = () => {
     if (isSaving) return;
-    setScale(prev => Math.min(prev * (1 + ZOOM_STEP), MAX_SCALE));
+    setScale(prev => {
+      const nextScale = Math.min(prev * (1 + ZOOM_STEP), Math.max(MAX_SCALE, minScale));
+      setPosition(current => clampPosition(current, nextScale));
+      return nextScale;
+    });
     setHasUserMadeChanges(true);
   };
 
   const zoomOut = () => {
     if (isSaving) return;
-    setScale(prev => Math.max(prev * (1 - ZOOM_STEP), minScale));
+    setScale(prev => {
+      const nextScale = Math.max(prev * (1 - ZOOM_STEP), minScale);
+      setPosition(current => clampPosition(current, nextScale));
+      return nextScale;
+    });
     setHasUserMadeChanges(true);
   };
 
   const resetPosition = () => {
     if (isSaving) return;
     setPosition({ x: 0, y: 0 });
-    setHasUserMadeChanges(false); // Reset means back to original - no changes
+    // Återställningen är ett aktivt val och ska sparas som den beskärning som
+    // syns i redigeraren, inte växla tillbaka till en annan lagrad fil.
+    setHasUserMadeChanges(true);
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
@@ -337,19 +360,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         </DialogHeader>
         
         <div className="flex flex-col flex-1 min-h-0 gap-4">
-          {/* Canvas — fyller all ledig höjd på mobil så ingen död yta uppstår */}
-          <div className="flex-1 min-h-0 flex items-center justify-center">
-            <div className="relative h-full flex items-center justify-center">
+          {/* Rektangulära jobbilder använder hela mobilbredden i jobbkortets
+              faktiska format. Profilbilder behåller sin tidigare layout. */}
+          <div className={isCircular ? 'flex-1 min-h-0 flex items-center justify-center' : 'shrink-0 w-full flex items-center justify-center md:flex-1 md:min-h-0'}>
+            <div className={isCircular ? 'relative h-full flex items-center justify-center' : 'relative w-full flex items-center justify-center md:h-full'}>
               <canvas
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isSaving ? 'opacity-50' : ''} max-h-full md:max-h-[min(55vh,360px)]`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full max-h-full' : 'rounded-lg w-full'} ${isSaving ? 'opacity-50' : ''} md:max-h-[min(55vh,360px)]`}
                 style={{
                   backgroundColor: 'transparent',
                   maxWidth: '100%',
                   height: 'auto',
-                  width: 'auto',
+                  width: isCircular ? 'auto' : '100%',
+                  touchAction: 'none',
                 }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
