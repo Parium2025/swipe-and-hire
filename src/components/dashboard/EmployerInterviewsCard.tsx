@@ -98,6 +98,33 @@ export const EmployerInterviewsCard = memo(() => {
     setMobileIndex(current => (current - 1 + liveInterviews.length) % liveInterviews.length);
   }, [liveInterviews.length]);
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: showNext, onSwipeRight: showPrevious });
+  const touchStartPointRef = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    touchMovedRef.current = false;
+    const touch = event.touches[0];
+    touchStartPointRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+    if (useTouchCarousel) swipeHandlers.onTouchStart(event);
+  }, [swipeHandlers, useTouchCarousel]);
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    const start = touchStartPointRef.current;
+    const touch = event.touches[0];
+    if (start && touch) {
+      const moved = Math.abs(touch.clientX - start.x) > 8 || Math.abs(touch.clientY - start.y) > 8;
+      if (moved) touchMovedRef.current = true;
+    }
+    if (useTouchCarousel) swipeHandlers.onTouchMove(event);
+  }, [swipeHandlers, useTouchCarousel]);
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
+    if (useTouchCarousel) swipeHandlers.onTouchEnd(event);
+  }, [swipeHandlers, useTouchCarousel]);
+  /** Ett tryck som följer på scroll eller svep ska ignoreras helt. */
+  const isAccidentalTap = useCallback(() => {
+    if (touchMovedRef.current) {
+      touchMovedRef.current = false;
+      return true;
+    }
+    return Date.now() - lastSwipeRef.current < 500;
+  }, []);
   const visibleInterviews = useTouchCarousel
     ? liveInterviews.slice(activeIndex, activeIndex + 1)
     : liveInterviews;
