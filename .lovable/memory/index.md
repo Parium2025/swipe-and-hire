@@ -47,3 +47,4 @@
 - [Videopipeline](mem://architecture/video-upload-pipeline) — 720p H.264-komprimering i enheten, posterbild, 90 s gräns.
 - [Statistik: visningar](mem://features/analytics-view-counting) — Endast inloggade besök räknas; interna visningar exkluderas; 6 h cache-TTL.
 - [Kandidatlistor – personbaserade ikoner](mem://features/candidate-list-icon-rules) — Plus/bock per applicant_id; bock öppnar listväljare för flytt/kollega.
+- [Bildbibliotek](mem://features/org-image-library) — Delat annonsbildbibliotek per organisation, Växa/Pro, alla får ta bort, städning skyddar.
