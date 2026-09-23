@@ -338,7 +338,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         
         <div className="flex flex-col flex-1 min-h-0 gap-4">
           {/* Canvas — fyller all ledig höjd på mobil så ingen död yta uppstår */}
-          <div className="flex-1 min-h-0 flex items-center justify-center">
+          <div className="h-[calc(92dvh-270px)] md:h-auto flex items-center justify-center">
             <div className="relative h-full flex items-center justify-center">
               <canvas
                 ref={canvasRef}
