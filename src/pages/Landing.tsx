@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 
-import { syncBrowserChrome } from '@/lib/browserChrome';
+import { primeBrowserChrome } from '@/lib/browserChrome';
 import { useAuth } from '@/hooks/useAuth';
 
 const Landing = () => {
@@ -83,15 +83,10 @@ const Landing = () => {
     };
   }, []);
 
-  // Browser chrome synkas centralt i App.tsx via route-effekten.
-  // Ingen lokal cleanup här — den racear annars med App.tsx vid navigation.
-  useEffect(() => {
-    syncBrowserChrome('/');
-  }, []);
-
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    navigate('/auth');
+    primeBrowserChrome('/auth');
+    requestAnimationFrame(() => navigate('/auth'));
   };
 
   if (shouldRedirectHome) {

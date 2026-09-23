@@ -3,7 +3,7 @@ import { Link, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { syncBrowserChrome } from '@/lib/browserChrome';
+import { primeBrowserChrome } from '@/lib/browserChrome';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -1848,8 +1848,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
 
   useEffect(() => {
-    syncBrowserChrome(window.location.pathname);
-
     const isSeeker = audience === 'job_seeker';
     const title = isSeeker
       ? 'Hitta jobb som passar dig | Parium – för jobbsökare'
@@ -1891,11 +1889,13 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
 
   const handleLogin = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    navigate('/auth');
+    primeBrowserChrome('/auth');
+    requestAnimationFrame(() => navigate('/auth'));
   };
   const handleStart = () => {
     sessionStorage.setItem('parium-skip-splash', '1');
-    navigate('/auth', { state: { mode: 'register', role: audience } });
+    primeBrowserChrome('/auth');
+    requestAnimationFrame(() => navigate('/auth', { state: { mode: 'register', role: audience } }));
   };
 
   const navLinks: LandingNavLink[] = [

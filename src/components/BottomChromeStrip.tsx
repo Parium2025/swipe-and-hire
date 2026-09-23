@@ -27,6 +27,11 @@ const detectTabletLandscape = () => {
   ).matches;
 };
 
+const detectStandalone = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(display-mode: standalone)').matches;
+};
+
 /** Färgankare som låter Safari måla rätt ruttfärg bakom bottenfältet. */
 const BottomChromeStrip = () => {
   const location = useLocation();
@@ -35,6 +40,7 @@ const BottomChromeStrip = () => {
   // the entire mobile shell look as though the top edge had jumped.
   const [isTouch, setIsTouch] = useState(detectTouch);
   const [isTabletLandscape, setIsTabletLandscape] = useState(detectTabletLandscape);
+  const [isStandalone, setIsStandalone] = useState(detectStandalone);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,6 +61,15 @@ const BottomChromeStrip = () => {
       mqTouch.removeEventListener?.('change', apply);
       mqTablet.removeEventListener?.('change', apply);
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(display-mode: standalone)');
+    const apply = () => setIsStandalone(mq.matches);
+    apply();
+    mq.addEventListener?.('change', apply);
+    return () => mq.removeEventListener?.('change', apply);
   }, []);
 
   const color = isLandingVideoPath(location.pathname)
@@ -87,7 +102,7 @@ const BottomChromeStrip = () => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    const shouldReserveChrome = isTouch && !isAuthPath(location.pathname);
+    const shouldReserveChrome = isTouch && isStandalone && !isAuthPath(location.pathname);
     if (shouldReserveChrome) {
       const basePx = isTabletLandscape ? 120 : 68;
       root.dataset.touchChrome = 'true';
@@ -103,9 +118,11 @@ const BottomChromeStrip = () => {
       delete root.dataset.touchChrome;
       root.style.removeProperty('--chrome-strip-pad');
     };
-  }, [isTouch, isTabletLandscape, location.pathname]);
+  }, [isTouch, isStandalone, isTabletLandscape, location.pathname]);
 
-  if (!isTouch) return null;
+  // I vanlig Safari är detta en extra remsa ovanför webbläsarens eget fält.
+  // Safe-area-ankaret behövs bara när appen körs installerad utan Safari-UI.
+  if (!isTouch || !isStandalone) return null;
 
   return (
     <div

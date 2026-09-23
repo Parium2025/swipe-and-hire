@@ -8,7 +8,7 @@
 type SplashListener = (visible: boolean) => void;
 type AuthSplashRole = 'job_seeker' | 'employer';
 
-import { syncBrowserChrome } from '@/lib/browserChrome';
+import { primeBrowserChrome, syncBrowserChrome } from '@/lib/browserChrome';
 
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
@@ -164,7 +164,7 @@ export const authSplashEvents = {
     // click-framen. Förbered auth-färgen innan Safari hinner sampla den gamla
     // sidans nederkant. Login startar redan på /auth och synkas av rutten.
     if (typeof window !== 'undefined' && window.location.pathname !== '/auth') {
-      syncBrowserChrome('/auth');
+      primeBrowserChrome('/auth');
     }
     // Täcker skärmen synkront i samma click-frame, innan React hinner committa
     // splash-komponenten. Det eliminerar mini-blixten vid login/logout.

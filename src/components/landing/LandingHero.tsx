@@ -5,6 +5,7 @@ import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
+import { primeBrowserChrome } from '@/lib/browserChrome';
 
 
 
@@ -193,6 +194,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     setSelectedRole(role);
     const target = role === 'job_seeker' ? '/jobbsokare' : '/arbetsgivare';
     sessionStorage.setItem('parium-skip-splash', '1');
+    // Sätt Safaris systemfärg i själva tryckgesten. Efter route-commit är det
+    // för sent på vissa iOS-versioner och den grå landningsfärgen blir kvar.
+    primeBrowserChrome(target);
     window.setTimeout(() => {
       // SPA-nav: chrome-färgen synkas centralt först efter route-bytet,
       // så toppremsan byter färg när målsidan faktiskt har landat.
