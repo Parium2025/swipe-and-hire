@@ -17,18 +17,7 @@ const removeLegacySentinels = () => {
   });
 };
 
-const nudgeColor = (color: string) => {
-  // Minimal färgskillnad (osynlig för ögat) som tvingar Safari att se
-  // theme-color som "ändrad" och därmed re-sampla URL-/verktygsbaren.
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return color;
-  const b = parseInt(hex.slice(4, 6), 16);
-  const nb = (b === 255 ? b - 1 : b + 1).toString(16).padStart(2, '0');
-  return `#${hex.slice(0, 4)}${nb}`;
-};
-
 const THEME_META_ID = 'parium-theme-color';
-let pendingThemeFrame: number | null = null;
 
 const writeThemeColor = (color: string) => {
   // EN enda stabil theme-color-nod. Att ta bort och återskapa noden (vilket vi
@@ -53,23 +42,7 @@ const writeThemeColor = (color: string) => {
 };
 
 const setThemeColor = (color: string) => {
-  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
-    cancelAnimationFrame(pendingThemeFrame);
-    pendingThemeFrame = null;
-  }
-
-  // Skriv först en nästan identisk färg, sedan målfärgen på nästa frame.
-  // iOS Safari ignorerar annars ibland en uppdatering vid back-navigation
-  // eftersom värdet uppfattas som oförändrat sedan förra samplingen.
-  writeThemeColor(nudgeColor(color));
-  if (typeof requestAnimationFrame === 'function') {
-    pendingThemeFrame = requestAnimationFrame(() => {
-      pendingThemeFrame = null;
-      writeThemeColor(color);
-    });
-  } else {
-    writeThemeColor(color);
-  }
+  writeThemeColor(color);
 };
 
 
@@ -95,8 +68,6 @@ const setChromeCssColor = (color: string) => {
  * och body-färgen byts dock korrekt. Hard reloads tas bort eftersom de orsakade
  * vit/trasig sida i kombination med cache-killswitchen i index.html.
  */
-let pendingSyncTimers: number[] = [];
-
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const isAudienceLanding = isAudienceLandingPath(pathname);
@@ -126,22 +97,6 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
 
   setThemeColor(color);
   notifyChromeStrips(pathname, color);
-
-  // iOS Safari kan ignorera första dynamiska theme-color-uppdateringen under
-  // SPA-nav. Re-applicera efter att målsidan har landat visuellt.
-  // Gamla timers avbryts först — annars kan en tidigare rutts färg skrivas
-  // tillbaka efter en snabb back-navigation (blå färg kvar på landningssidan).
-  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
-  pendingSyncTimers = [];
-  [80, 260, 640, 1200, 2000].forEach((delay) => {
-    pendingSyncTimers.push(
-      window.setTimeout(() => {
-        setChromeCssColor(color);
-        setThemeColor(color);
-        notifyChromeStrips(pathname, color);
-      }, delay)
-    );
-  });
 
 };
 

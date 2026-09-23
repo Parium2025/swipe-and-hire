@@ -696,11 +696,11 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Reserve the mobile top strip before React mounts. This prevents the
-     header from shifting down one frame after login when touch detection runs. */
+  /* Vanlig mobil-Safari börjar redan under statusfältet. En extra reserverad
+     remshöjd här skapade den synliga dubbla färgraden. */
   @media (any-pointer: coarse), (hover: none), (any-hover: none) {
     :root {
-      --top-chrome-content-offset: calc(env(safe-area-inset-top, 0px) + 14px);
+      --top-chrome-content-offset: 0px;
     }
   }
 

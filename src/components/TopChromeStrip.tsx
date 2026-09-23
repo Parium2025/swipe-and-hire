@@ -26,7 +26,7 @@ const detectStandalone = () => {
 };
 
 /**
- * Tunn färgremsa längst upp — speglar BottomChromeStrip exakt.
+ * Safe-area-fyllning längst upp för installerat app-läge.
  *
  * Med `viewport-fit=cover` sträcker sig sidan in bakom iOS statusrad.
  * iOS Safari samplar body's bakgrundsfärg EN gång vid sidladdning och
@@ -35,11 +35,10 @@ const detectStandalone = () => {
  * Samma problem som bottenremsan löser, samma lösning: en fixed remsa som
  * lyssnar på react-router location och alltid målar rätt ruttfärg.
  *
- * Remsan ligger ovanför appens innehåll. Samma höjd sätts därför alltid som
- * content-offset på touch-enheter, så att den aldrig kan täcka eller klippa
- * toppmenyn när en webbläsare rapporterar 0 px safe-area.
+ * Vanlig iPhone-Safari har sitt innehåll under webbläsarens statusfält. En
+ * fixed remsa där hamnar därför i webbsidan och blir en dubbel färgrad.
  *
- * Synlig endast på touch-enheter (telefon/surfplatta). Desktop slipper.
+ * Synlig endast på touch-enheter i installerat app-läge.
  */
 const TopChromeStrip = () => {
   const location = useLocation();
@@ -91,32 +90,21 @@ const TopChromeStrip = () => {
 
   const displayColor = forcedColor ?? color;
 
-  // Remsan visas på alla touch-enheter och dess fulla höjd reserveras ovanför
-  // appens toppmeny. Annars täcker 14 px-överlappet ikonernas överkant när
-  // Safari rapporterar safe-area som 0.
-  const shouldShowStrip = isTouch;
-  // Samma 14 px överlapp som BottomChromeStrip. Safe-area kan rapporteras
-  // som 0 i vanlig iPhone-Safari; överlappet ser då till att remsan ändå
-  // målar ända in bakom den övre webbläsarkanten i stället för att bli 0 px.
-  // Vanlig Safari: remsan får ALDRIG sticka ut under statusraden. Nyare iOS
-  // (flytande verktygsfält) visar annars de extra pixlarna som en mörk rad
-  // mellan statusraden och toppmenyn. Endast installerat app-läge behåller
-  // sitt extra andrum.
-  const stripInset = isStandalone ? '22px' : '14px';
-  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
+  const shouldShowStrip = isTouch && isStandalone;
+  const chromeOffset = 'calc(env(safe-area-inset-top, 0px) + 22px)';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isTouch) {
+    if (shouldShowStrip) {
       root.style.setProperty('--top-chrome-content-offset', chromeOffset);
     } else {
-      root.style.removeProperty('--top-chrome-content-offset');
+      root.style.setProperty('--top-chrome-content-offset', '0px');
     }
     return () => {
       root.style.removeProperty('--top-chrome-content-offset');
     };
-  }, [isTouch, isStandalone, chromeOffset]);
+  }, [shouldShowStrip, chromeOffset]);
 
   if (!shouldShowStrip) return null;
 

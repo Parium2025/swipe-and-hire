@@ -27,13 +27,15 @@ const detectTabletLandscape = () => {
   ).matches;
 };
 
+const detectStandalone = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(display-mode: standalone)').matches;
+};
+
 /**
- * Tunn färgremsa längst ner — endast på mobil/touch.
- * Säkerställer att området bakom iOS Safaris bottenverktygsfält alltid har
- * rätt färg vid SPA-navigering (Safari samplar annars body en gång per
- * sidladdning och uppdaterar inte vid route-byte).
+ * Safe-area-fyllning längst ner för installerat app-läge.
  *
- * Synlig endast på touch-enheter (telefon/surfplatta). Desktop slipper.
+ * I vanlig Safari blir en fixed remsa en synlig extrarad ovanför verktygsfältet.
  */
 const BottomChromeStrip = () => {
   const location = useLocation();
@@ -42,6 +44,7 @@ const BottomChromeStrip = () => {
   // the entire mobile shell look as though the top edge had jumped.
   const [isTouch, setIsTouch] = useState(detectTouch);
   const [isTabletLandscape, setIsTabletLandscape] = useState(detectTabletLandscape);
+  const [isStandalone, setIsStandalone] = useState(detectStandalone);
   const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,6 +65,15 @@ const BottomChromeStrip = () => {
       mqTouch.removeEventListener?.('change', apply);
       mqTablet.removeEventListener?.('change', apply);
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(display-mode: standalone)');
+    const apply = () => setIsStandalone(mq.matches);
+    apply();
+    mq.addEventListener?.('change', apply);
+    return () => mq.removeEventListener?.('change', apply);
   }, []);
 
   const color = isLandingVideoPath(location.pathname)
@@ -112,7 +124,7 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isTabletLandscape, location.pathname]);
 
-  if (!isTouch) return null;
+  if (!isTouch || !isStandalone) return null;
 
   return (
     <div
