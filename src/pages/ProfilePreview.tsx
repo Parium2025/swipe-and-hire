@@ -464,7 +464,7 @@ export default function ProfilePreview() {
   };
 
   if (loading) {
-    return <ProfilePreviewSkeleton />;
+    return <ProfilePreviewSkeleton viewMode={viewMode} />;
   }
 
   // Desktop view - stor profil som mobilvyn men desktop-layout
