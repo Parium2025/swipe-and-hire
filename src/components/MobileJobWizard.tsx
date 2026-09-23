@@ -5215,6 +5215,18 @@ const MobileJobWizard = ({
                           </div>
                         </div>
 
+                        {/* Fokuspunkt — visas under datorbilden när ingen mobilbild finns,
+                            eftersom datorbilden då är den som syns på jobbkorten */}
+                        {!jobImageDisplayUrl && (
+                          <div className="mt-3">
+                            <JobImagePositioner
+                              imageUrl={jobImageDesktopDisplayUrl}
+                              focusPercent={parseFocusPosition(formData.image_focus_position)}
+                              onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
+                            />
+                          </div>
+                        )}
+
                       </>
                     )}
                   </div>
