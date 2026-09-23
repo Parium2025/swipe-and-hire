@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseSalary, formatSalary } from "@/lib/salaryRange";
+import { parseSalary, formatSalary, formatSalaryTransparencyValue } from "@/lib/salaryRange";
 import { getJobBadgeSalary } from "@/lib/swipeJobSalary";
 
 describe("parseSalary", () => {
@@ -38,7 +38,7 @@ describe("parseSalary", () => {
 
 describe("formatSalary", () => {
   it("formaterar intervall på svenska", () => {
-    expect(formatSalary({ salary_min: 30000, salary_max: 40000 })).toBe(`${(30000).toLocaleString('sv-SE')} – ${(40000).toLocaleString('sv-SE')} kr/mån`);
+    expect(formatSalary({ salary_min: 30000, salary_max: 40000 })).toBe("30 000 – 40 000 kr/mån");
   });
 
   it("visar intervjutexten för after_interview", () => {
@@ -50,6 +50,16 @@ describe("formatSalary", () => {
   });
 });
 
+describe("formatSalaryTransparencyValue", () => {
+  it("formaterar lagrade intervall med svenskt tusentalsavstånd och tankstreck", () => {
+    expect(formatSalaryTransparencyValue("40000-50000")).toBe("40 000 – 50 000 kr/mån");
+  });
+
+  it("skriver miniminivå grammatiskt i stället för med plustecken", () => {
+    expect(formatSalaryTransparencyValue("100000+")).toBe("100 000 kr/mån eller mer");
+  });
+});
+
 describe("getJobBadgeSalary (swipe)", () => {
   it("använder svensk intervju-etikett för after_interview", () => {
     expect(getJobBadgeSalary({ salary_transparency: "after_interview" })).toBe("Lön efter intervju");
@@ -57,11 +67,15 @@ describe("getJobBadgeSalary (swipe)", () => {
 
   it("formaterar intervall i badgen", () => {
     const text = getJobBadgeSalary({ salary_min: 25000, salary_max: 30000, salary_type: "monthly" });
-    expect(text).toBe(`${(25000).toLocaleString('sv-SE')} – ${(30000).toLocaleString('sv-SE')} kr/mån`);
+    expect(text).toBe("25 000 – 30 000 kr/mån");
   });
 
   it("faller tillbaka på salary_transparency-intervall", () => {
     expect(getJobBadgeSalary({ salary_transparency: "200-250", salary_type: "hourly" })).toBe("200 – 250 kr/tim");
+  });
+
+  it("formaterar öppen övre lönegräns utan rått plustecken", () => {
+    expect(getJobBadgeSalary({ salary_transparency: "100000+", salary_type: "monthly" })).toBe("100 000 kr/mån eller mer");
   });
 
   it("returnerar null helt utan lönedata", () => {

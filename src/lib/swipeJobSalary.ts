@@ -1,4 +1,5 @@
 import type { SwipeJob } from '@/components/swipe/types';
+import { formatSalaryTransparencyValue, formatSwedishAmount } from '@/lib/salaryRange';
 
 /**
  * Returnerar formaterad löne-text för swipe-kortets badge,
@@ -26,19 +27,14 @@ export function getJobBadgeSalary(
 
   if (job.salary_min || job.salary_max) {
     if (job.salary_min && job.salary_max) {
-      return `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
+      return `${formatSwedishAmount(job.salary_min)} – ${formatSwedishAmount(job.salary_max)} ${typeLabel}`;
     }
-    return `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
+    const amount = job.salary_min || job.salary_max;
+    return amount ? `Från ${formatSwedishAmount(amount)} ${typeLabel}` : null;
   }
 
   if (job.salary_transparency && /^\d/.test(job.salary_transparency)) {
-    const match = job.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-    if (match) {
-      const min = parseInt(match[1], 10);
-      const max = parseInt(match[2], 10);
-      return `${min.toLocaleString('sv-SE')} – ${max.toLocaleString('sv-SE')} ${typeLabel}`;
-    }
-    return `${job.salary_transparency} ${typeLabel}`;
+    return formatSalaryTransparencyValue(job.salary_transparency, typeLabel);
   }
 
   return null;
