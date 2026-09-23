@@ -22,6 +22,10 @@ export function useEmailSubscription() {
     queryKey: ['email-subscription', userId],
     enabled: !!userId,
     staleTime: 60_000,
+    // Avregistrering kan ske utanför appen (länken i mejlet). Hämta om vid
+    // sidbesök och när fliken får fokus så reglagen aldrig visar fel läge.
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<EmailSubscriptionState | null> => {
       const { data, error } = await supabase.functions.invoke('email-subscription', {
         body: { action: 'status' },
