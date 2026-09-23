@@ -363,7 +363,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
   if (!standalone) return content;
 
   return (
-    <FullscreenSkeletonPortal>
+    <FullscreenSkeletonPortal activePaths={['/dashboard', '/my-jobs']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
