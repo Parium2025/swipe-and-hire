@@ -793,12 +793,12 @@ export default function ProfilePreview() {
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            {/* Desktop monitor frame - professional mockup - något komprimerad för bättre proportioner */}
-            <div className="relative transform scale-[0.88] origin-top">
+            {/* Desktop monitor frame — exakt samma mått som jobbannonsens förhandsvisning */}
+            <div className="relative w-full mx-auto" style={{ maxWidth: 'clamp(220px, calc((100vh - 380px) * 1.6), 520px)' }}>
               {/* Monitor screen */}
-              <div className="relative w-[340px] sm:w-[520px] md:w-[700px] max-w-[90vw] rounded-t-xl bg-black p-2 sm:p-3 shadow-2xl">
-                {/* Screen bezel - höjd krympt ~12 % för tajtare proportioner */}
-                <div className="relative w-full h-[176px] sm:h-[264px] md:h-[368px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+              <div className="relative w-full rounded-t-xl bg-black p-2 shadow-2xl">
+                {/* Screen bezel — 16/10 som i annonsens datorvy */}
+                <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                   {/* Innehåll med exakt samma preview-struktur som mobilvyn */}
                   <div 
                     className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar"
