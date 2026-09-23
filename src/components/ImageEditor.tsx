@@ -329,7 +329,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] flex flex-col overflow-y-auto bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] grid-rows-[auto_minmax(0,1fr)] overflow-y-auto bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
