@@ -665,11 +665,18 @@ const InlineHeroPhone = ({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(() => getInlinePhonePlacement() === placement);
   const [active, setActive] = useState(() => getInlinePhonePlacement() === placement);
-  const [metrics, setMetrics] = useState(() => calculateInlinePhoneMetrics(variant));
+  // null tills måtten är uppmätta mot den FÄRDIGA layouten (text + typsnitt
+  // inladdade). Telefonen renderas aldrig med en gissad storlek som sedan
+  // korrigeras — det var det som gav det synliga storlekshoppet på mobil.
+  const [metrics, setMetrics] = useState<ReturnType<typeof calculateInlinePhoneMetrics> | null>(null);
+  // När telefonen väl visats fryser storleken. Enda undantaget: skärmens
+  // BREDD ändras (rotation, split-view, fönster-resize) — då räknas allt om.
+  // Verktygsradskollaps, fontladdning och scroll påverkar aldrig storleken.
+  const revealedRef = useRef(false);
+  const revealWidthRef = useRef<number | null>(null);
+  const pendingMetricsRef = useRef<ReturnType<typeof calculateInlinePhoneMetrics> | null>(null);
 
-  
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     let frame = 0;
     const measureTop = () => {
       const el = wrapperRef.current;
@@ -680,10 +687,28 @@ const InlineHeroPhone = ({
       return rect.top;
     };
 
+    const reveal = () => {
+      if (revealedRef.current) return;
+      revealedRef.current = true;
+      revealWidthRef.current = getSizingViewportSize().width;
+      setMetrics(pendingMetricsRef.current ?? calculateInlinePhoneMetrics(variant, measureTop()));
+    };
+
     const sync = () => {
       frame = 0;
       setEnabled(getInlinePhonePlacement() === placement);
       const next = calculateInlinePhoneMetrics(variant, measureTop());
+      if (!revealedRef.current) {
+        // Före avslöjandet: spara bara det senaste måttet. Telefonen syns
+        // först när texten ovanför är färdiglayoutad (fonts.ready/timeout).
+        pendingMetricsRef.current = next;
+        return;
+      }
+      const { width } = getSizingViewportSize();
+      if (revealWidthRef.current !== null && Math.abs(width - revealWidthRef.current) <= 1) {
+        return; // Fryst — ingen storleksändring efter att telefonen visats.
+      }
+      revealWidthRef.current = width;
       setMetrics((prev) => {
         // Dämpning: ignorera mikroskillnader (<3px) så att en centrerad
         // layout inte kan hamna i en oändlig mät→ändra→mät-loop.
@@ -705,10 +730,12 @@ const InlineHeroPhone = ({
     };
 
     sync();
-    // Andra passet efter layout/fontladdning så mätvärdet är korrekt.
+    // Andra passet efter layout så mätvärdet är korrekt.
     schedule();
-    const settle = window.setTimeout(schedule, 250);
-    document.fonts?.ready?.then(schedule).catch(() => {});
+    // Avslöja först när typsnitten är klara (textens slutliga höjd känd)
+    // eller efter 300 ms som tak — aldrig en synlig storlekskorrigering.
+    const settle = window.setTimeout(reveal, 300);
+    document.fonts?.ready?.then(reveal).catch(() => {});
 
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule, { passive: true });
