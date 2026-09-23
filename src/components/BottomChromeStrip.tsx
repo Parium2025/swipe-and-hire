@@ -35,7 +35,8 @@ const detectStandalone = () => {
 /**
  * Färgankare för Safari längst ner och safe-area-fyllning i installerat läge.
  *
- * En pixel vid kanten ger Safari rätt färg utan en synlig extrarad.
+ * WebKit testar fyra pixlar innanför kanten, därför används fem pixlar utan
+ * reserverat layoututrymme i vanlig Safari.
  */
 const BottomChromeStrip = () => {
   const location = useLocation();
@@ -141,7 +142,7 @@ const BottomChromeStrip = () => {
         // bottenlist och aldrig synas som en mörk rad ovanför den.
         height: isStandalone
           ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)'
-          : '1px',
+          : '5px',
         backgroundColor: displayColor,
         zIndex: 2147483647,
         pointerEvents: 'none',

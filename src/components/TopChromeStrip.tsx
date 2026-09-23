@@ -36,8 +36,8 @@ const detectStandalone = () => {
  * lyssnar på react-router location och alltid målar rätt ruttfärg.
  *
  * Safari 26 hämtar inte längre webbläsarfärgen från theme-color utan från ett
- * fixed/sticky element som möter viewportens kant. I vanlig Safari räcker en
- * enda pixel: den triggar rätt färg men skapar ingen synlig extrarad.
+ * fixed/sticky element som möter viewportens kant. WebKit testar fyra pixlar
+ * innanför kanten, så färgankaret måste täcka den punkten.
  *
  * Installerat app-läge fyller fortfarande hela safe-area.
  */
@@ -94,7 +94,7 @@ const TopChromeStrip = () => {
   const shouldShowStrip = isTouch;
   const stripHeight = isStandalone
     ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
-    : '1px';
+    : '5px';
   const chromeOffset = isStandalone ? stripHeight : '0px';
 
   useLayoutEffect(() => {
