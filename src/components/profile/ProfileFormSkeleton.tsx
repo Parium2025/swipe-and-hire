@@ -34,26 +34,24 @@ export const ProfileFormSkeleton = memo(function ProfileFormSkeleton({
       aria-busy="true"
       aria-label="Laddar profil"
     >
-      {/* Sidtitel */}
+      {/* Sidtitel + undertext (två rader) */}
       <div className="text-center mb-6 space-y-2">
         <div className={`h-6 w-40 mx-auto rounded ${SHAPE}`} />
         <div className={`h-3 w-56 mx-auto rounded ${SHAPE}`} />
+        {variant === 'job_seeker' && <div className={`h-3 w-44 mx-auto rounded ${SHAPE}`} />}
       </div>
 
-      {/* Mediakort — rubrik, ikonrad, stor avatar, hjälptext */}
+      {/* Mediakort — profilväljare, stor avatar, hjälptext, mediaknappar */}
       <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="p-6 md:p-4 space-y-3">
-          <div className={`h-4 w-48 mx-auto rounded ${SHAPE}`} />
-          <div className={`h-3 w-72 max-w-full mx-auto rounded ${SHAPE}`} />
-          <div className="flex items-center justify-center gap-4 pt-1">
-            <div className={`h-16 w-16 rounded-full ${SHAPE}`} />
-            <div className={`h-3 w-8 rounded ${SHAPE}`} />
-            <div className={`h-16 w-16 rounded-full ${SHAPE}`} />
-          </div>
-        </div>
         <div className="p-4 flex flex-col items-center space-y-4">
+          {variant === 'job_seeker' && <div className={`h-11 w-40 rounded-lg ${SHAPE}`} />}
           <div className={`h-32 w-32 rounded-full ${SHAPE}`} />
-          <div className={`h-3 w-64 max-w-full rounded ${SHAPE}`} />
+          <div className={`h-3 w-72 max-w-full rounded ${SHAPE}`} />
+          <div className="flex items-center justify-center gap-2">
+            <div className={`h-8 w-20 rounded-full ${SHAPE}`} />
+            <div className={`h-8 w-24 rounded-full ${SHAPE}`} />
+          </div>
+          <div className={`h-8 w-36 rounded-full ${SHAPE}`} />
         </div>
       </div>
 

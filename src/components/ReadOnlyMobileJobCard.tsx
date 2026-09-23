@@ -218,7 +218,8 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
       {/* Visual header — both layers stay mounted so image ↔ initials never changes layout/compositing structure */}
       <div className="job-card-mobile-media relative w-full overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-4xl font-bold text-white/70">{getCompanyInitials(companyName)}</span>
+          {/* Initialer bara när jobbet saknar bild — annars blinkar "HM" till innan bilden hunnit laddas */}
+          <span className={`text-4xl font-bold text-white/70 ${displayUrl ? 'opacity-0' : 'opacity-100'}`}>{getCompanyInitials(companyName)}</span>
         </div>
         <div className="absolute inset-0 transform-gpu overflow-hidden">
           <ResilientImage
