@@ -23,14 +23,13 @@ export function useDropdownKeyboardNav<T>(params: {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  // Reset highlight when dropdown closes or items shrink to nothing
+  // Do not pre-highlight the first row when a dropdown opens. Touch browsers
+  // otherwise make it look hovered before the user has interacted with it.
   useEffect(() => {
     if (!isOpen) {
       setHighlightedIndex(-1);
-    } else if (items.length > 0 && highlightedIndex === -1) {
-      setHighlightedIndex(0);
     }
-  }, [isOpen, items.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Clamp highlight if items list shrinks
   useEffect(() => {
@@ -55,6 +54,8 @@ export function useDropdownKeyboardNav<T>(params: {
         if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
           if (onOpen) {
             e.preventDefault();
+            // Keyboard users still get the expected initial highlight.
+            setHighlightedIndex(items.length > 0 ? 0 : -1);
             onOpen();
           }
         }
