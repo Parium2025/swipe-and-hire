@@ -721,50 +721,65 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     };
   };
 
+  const resolveEditableImageUrl = (source: string): string | null => {
+    if (source.startsWith('http') || source.startsWith('blob:') || source.startsWith('data:')) {
+      return source;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('job-images').getPublicUrl(source);
+    return publicUrl || null;
+  };
+
   const openImageEditor = async () => {
     try {
-      const source = originalImageUrl || formData.job_image_url || jobImageDisplayUrl;
-      if (!source) return;
-
-      let urlToEdit = source;
-      if (!source.startsWith('http')) {
-        // Use public URL from job-images bucket (no expiration)
-        const { data: { publicUrl } } = supabase.storage
-          .from('job-images')
-          .getPublicUrl(source);
-        if (publicUrl) urlToEdit = publicUrl;
+      const candidates = [originalImageUrl, formData.job_image_url, jobImageDisplayUrl].filter(Boolean) as string[];
+      for (const source of candidates) {
+        const urlToEdit = resolveEditableImageUrl(source);
+        if (urlToEdit) {
+          setEditingImageUrl(urlToEdit);
+          setEditingImageType('mobile');
+          setShowImageEditor(true);
+          return;
+        }
       }
-      setEditingImageUrl(urlToEdit);
-      setEditingImageType('mobile');
-      setShowImageEditor(true);
+      toast({
+        title: 'Kunde inte öppna bilden',
+        description: 'Ladda upp bilden igen och försök på nytt.',
+        variant: 'destructive',
+      });
     } catch (e) {
       console.error('Failed to open editor', e);
+      toast({
+        title: 'Kunde inte öppna bilden',
+        description: 'Något gick fel. Försök igen.',
+        variant: 'destructive',
+      });
     }
   };
 
   const openDesktopImageEditor = async () => {
     try {
-      // ALLTID prioritera originalDesktopImageUrl för att redigera från originalet - precis som mobile
-      const source = originalDesktopImageUrl;
-      if (!source) {
-        console.log('No original desktop image URL available');
-        return;
+      const candidates = [originalDesktopImageUrl, formData.job_image_desktop_url, jobImageDesktopDisplayUrl].filter(Boolean) as string[];
+      for (const source of candidates) {
+        const urlToEdit = resolveEditableImageUrl(source);
+        if (urlToEdit) {
+          setEditingImageUrl(urlToEdit);
+          setEditingImageType('desktop');
+          setShowImageEditor(true);
+          return;
+        }
       }
-
-      let urlToEdit = source;
-      if (!source.startsWith('http')) {
-        // Use public URL from job-images bucket (no expiration)
-        const { data: { publicUrl } } = supabase.storage
-          .from('job-images')
-          .getPublicUrl(source);
-        if (publicUrl) urlToEdit = publicUrl;
-      }
-      console.log('Opening desktop image editor with ORIGINAL:', urlToEdit);
-      setEditingImageUrl(urlToEdit);
-      setEditingImageType('desktop');
-      setShowImageEditor(true);
+      toast({
+        title: 'Kunde inte öppna bilden',
+        description: 'Ladda upp bilden igen och försök på nytt.',
+        variant: 'destructive',
+      });
     } catch (e) {
       console.error('Failed to open desktop editor', e);
+      toast({
+        title: 'Kunde inte öppna bilden',
+        description: 'Något gick fel. Försök igen.',
+        variant: 'destructive',
+      });
     }
   };
 
