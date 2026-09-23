@@ -18,7 +18,6 @@ import {
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
-import { DashboardCarouselDots } from './DashboardCarouselDots';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,7 +96,7 @@ export const EmployerInterviewsCard = memo(() => {
     setSwipeDirection(-1);
     setMobileIndex(current => (current - 1 + liveInterviews.length) % liveInterviews.length);
   }, [liveInterviews.length]);
-  const swipeHandlers = useSwipeGesture({ onSwipeLeft: showNext, onSwipeRight: showPrevious });
+  const swipeHandlers = useSwipeGesture({ onSwipeLeft: showNext, onSwipeRight: showPrevious, threshold: 32 });
   const touchStartPointRef = useRef<{ x: number; y: number } | null>(null);
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     touchMovedRef.current = false;
@@ -178,10 +177,10 @@ export const EmployerInterviewsCard = memo(() => {
           ) : (
             <>
               <div className={cn(
-                'flex-1 min-h-0 space-y-1.5 pr-1 scrollbar-hide',
-                useTouchCarousel ? 'overflow-hidden' : 'overflow-y-auto',
+                'flex-1 min-h-0 scrollbar-hide',
+                useTouchCarousel ? 'relative overflow-hidden' : 'space-y-1.5 pr-1 overflow-y-auto',
               )}>
-                <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
+                <AnimatePresence mode="sync" initial={false} custom={swipeDirection}>
                 {visibleInterviews.map((interview) => {
                   const LocationIcon = getLocationIcon(interview.location_type);
                   const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
@@ -212,7 +211,7 @@ export const EmployerInterviewsCard = memo(() => {
                       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                       className={cn(
                         'rounded-lg cursor-pointer transition-colors',
-                        useTouchCarousel ? 'h-full min-h-[108px] px-3 py-2.5' : 'p-2',
+                        useTouchCarousel ? 'absolute inset-0 h-full min-h-[108px] px-3 py-2.5' : 'p-2',
                         canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
                       )}
                       onClick={() => {
@@ -340,17 +339,15 @@ export const EmployerInterviewsCard = memo(() => {
               </div>
 
               {useTouchCarousel && (
-                <DashboardCarouselDots
-                  count={liveInterviews.length}
-                  currentIndex={activeIndex}
-                  onSelect={(index) => {
-                    setSwipeDirection(index >= activeIndex ? 1 : -1);
-                    setMobileIndex(index);
-                  }}
-                  label="Visa intervju"
-                  alwaysRender
-                  maxVisible={4}
-                />
+                <div
+                  className="mt-auto flex h-6 shrink-0 items-center justify-center"
+                  aria-live="polite"
+                  aria-label={`Intervju ${activeIndex + 1} av ${liveInterviews.length}`}
+                >
+                  <span className="inline-flex min-w-[4.75rem] items-center justify-center rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold leading-none tabular-nums text-white">
+                    {activeIndex + 1} av {liveInterviews.length}
+                  </span>
+                </div>
               )}
             </>
           )}
