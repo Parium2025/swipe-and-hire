@@ -21,7 +21,7 @@ export const SALARY_OPTIONS: { value: string; label: string }[] = [
   { value: '80000-85000', label: '80 000 – 85 000 kr/mån' },
   { value: '85000-90000', label: '85 000 – 90 000 kr/mån' },
   { value: '90000-100000', label: '90 000 – 100 000 kr/mån' },
-  { value: '100000+', label: '100 000+ kr/mån' },
+  { value: '100000+', label: '100 000 kr/mån eller mer' },
 ];
 
 export const TIME_FILTER_OPTIONS = [

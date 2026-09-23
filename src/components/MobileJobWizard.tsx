@@ -64,6 +64,7 @@ import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
 import { isEmployerJobDraft } from '@/lib/jobStatus';
+import { formatSalaryTransparencyValue } from '@/lib/salaryRange';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -1772,13 +1773,13 @@ const MobileJobWizard = ({
       const max = parseInt(legacyMatch[2]);
       // Check if it's the old format (values > 100 means it's in SEK, not thousands)
       if (min >= 1000 || max >= 1000) {
-        return `${min.toLocaleString('sv-SE')} - ${max.toLocaleString('sv-SE')} kr`;
+        return formatSalaryTransparencyValue(`${min}-${max}`, 'kr');
       }
     }
     
     // Handle "100+" format
     if (formData.salary_transparency === '100+') {
-      return '100 000+ kr';
+      return '100 000 kr eller mer';
     }
     
     // Fallback: just display the raw value
@@ -1889,25 +1890,25 @@ const MobileJobWizard = ({
 
   // Salary Transparency options (EU directive 2026) - matching CreateTemplateWizard & EditJobDialog format
   const salaryTransparencyOptions = [
-    { value: '0-5000', label: '0 - 5 000 kr' },
-    { value: '5000-10000', label: '5 000 - 10 000 kr' },
-    { value: '10000-15000', label: '10 000 - 15 000 kr' },
-    { value: '15000-20000', label: '15 000 - 20 000 kr' },
-    { value: '20000-25000', label: '20 000 - 25 000 kr' },
-    { value: '25000-30000', label: '25 000 - 30 000 kr' },
-    { value: '30000-40000', label: '30 000 - 40 000 kr' },
-    { value: '40000-45000', label: '40 000 - 45 000 kr' },
-    { value: '45000-50000', label: '45 000 - 50 000 kr' },
-    { value: '50000-55000', label: '50 000 - 55 000 kr' },
-    { value: '55000-60000', label: '55 000 - 60 000 kr' },
-    { value: '60000-65000', label: '60 000 - 65 000 kr' },
-    { value: '65000-70000', label: '65 000 - 70 000 kr' },
-    { value: '70000-75000', label: '70 000 - 75 000 kr' },
-    { value: '75000-80000', label: '75 000 - 80 000 kr' },
-    { value: '80000-85000', label: '80 000 - 85 000 kr' },
-    { value: '85000-90000', label: '85 000 - 90 000 kr' },
-    { value: '90000-100000', label: '90 000 - 100 000 kr' },
-    { value: '100000+', label: '100 000+ kr' },
+    { value: '0-5000', label: '0 – 5 000 kr' },
+    { value: '5000-10000', label: '5 000 – 10 000 kr' },
+    { value: '10000-15000', label: '10 000 – 15 000 kr' },
+    { value: '15000-20000', label: '15 000 – 20 000 kr' },
+    { value: '20000-25000', label: '20 000 – 25 000 kr' },
+    { value: '25000-30000', label: '25 000 – 30 000 kr' },
+    { value: '30000-40000', label: '30 000 – 40 000 kr' },
+    { value: '40000-45000', label: '40 000 – 45 000 kr' },
+    { value: '45000-50000', label: '45 000 – 50 000 kr' },
+    { value: '50000-55000', label: '50 000 – 55 000 kr' },
+    { value: '55000-60000', label: '55 000 – 60 000 kr' },
+    { value: '60000-65000', label: '60 000 – 65 000 kr' },
+    { value: '65000-70000', label: '65 000 – 70 000 kr' },
+    { value: '70000-75000', label: '70 000 – 75 000 kr' },
+    { value: '75000-80000', label: '75 000 – 80 000 kr' },
+    { value: '80000-85000', label: '80 000 – 85 000 kr' },
+    { value: '85000-90000', label: '85 000 – 90 000 kr' },
+    { value: '90000-100000', label: '90 000 – 100 000 kr' },
+    { value: '100000+', label: '100 000 kr eller mer' },
   ];
 
   const filteredSalaryTransparencyOptions = salaryTransparencyOptions.filter(option =>
