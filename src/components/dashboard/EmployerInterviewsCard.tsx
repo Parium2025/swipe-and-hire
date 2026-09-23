@@ -145,6 +145,7 @@ export const EmployerInterviewsCard = memo(() => {
   }
 
   return (
+    <>
     <Card
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onTouchStart={handleTouchStart}
