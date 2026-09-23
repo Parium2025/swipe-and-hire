@@ -5,6 +5,7 @@ import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount } from '@/lib/useLiveSkeletonCount';
 import { useDevice } from '@/hooks/use-device';
 import { JobCardGridSkeleton } from '@/components/search/JobCardGridSkeleton';
+import { useLocation } from 'react-router-dom';
 
 /**
  * Full-screen skeleton overlay for SearchJobs.
@@ -38,7 +39,11 @@ const fullscreenSkeletonStyle: CSSProperties = {
   overscrollBehavior: 'none',
 };
 
-const FullscreenSkeletonPortal = ({ children }: { children: ReactNode }) => {
+const FullscreenSkeletonPortal = ({ children, activePaths }: { children: ReactNode; activePaths: string[] }) => {
+  const { pathname } = useLocation();
+  // KeepAlive-sidor ligger kvar dolda. Portaler hamnar utanför den dolda
+  // föräldern och måste därför själva säkerställa att deras sida är aktiv.
+  if (!activePaths.includes(pathname)) return null;
   if (typeof document === 'undefined') return <>{children}</>;
   return createPortal(children, document.body);
 };
@@ -103,7 +108,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
   });
   const touch = isTouchDevice();
   return (
-    <FullscreenSkeletonPortal>
+    <FullscreenSkeletonPortal activePaths={['/search-jobs', '/index']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -175,7 +180,7 @@ export const JobListSkeleton = memo(function JobListSkeleton() {
 
 export const SwipeModeSkeleton = memo(function SwipeModeSkeleton() {
   return (
-    <FullscreenSkeletonPortal>
+    <FullscreenSkeletonPortal activePaths={['/search-jobs', '/index']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -296,7 +301,7 @@ export const MyApplicationsSkeleton = memo(function MyApplicationsSkeleton({
   });
   const interviewCount = readCachedCount(SKELETON_COUNT_KEYS.myApplicationsInterviews, 0, 3);
   return (
-    <FullscreenSkeletonPortal>
+    <FullscreenSkeletonPortal activePaths={['/my-applications']}>
       <motion.div
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}

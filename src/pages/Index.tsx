@@ -60,7 +60,15 @@ import { QuestionFilter, QuestionFilterValue } from '@/components/QuestionFilter
 import { useDevice } from '@/hooks/use-device';
 import { useTouchCapable, useSwipeCapable } from '@/hooks/useInputCapability';
 import { readCachedCount, writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
-import { EmployerCandidatesSkeleton, EmployerDashboardSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import {
+  EmployerCandidatesSkeleton,
+  EmployerCompanyProfileSkeleton,
+  EmployerDashboardSkeleton,
+  EmployerHomeSkeleton,
+  EmployerMessagesSkeleton,
+  EmployerMyCandidatesSkeleton,
+  EmployerSettingsSkeleton,
+} from '@/components/employer/EmployerPageSkeleton';
 
 // 🔥 Persistent-mount routes — these pages stay alive across navigation so that
 // data + DOM is loaded once per session and re-visiting feels instant.
@@ -93,6 +101,29 @@ const JOB_SEEKER_KEEP_KEYS = [
   '/subscription',
   '/support',
 ];
+
+const renderEmployerColdSkeleton = (pathname: string) => {
+  switch (pathname) {
+    case '/home':
+      return <EmployerHomeSkeleton />;
+    case '/dashboard':
+      return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" standalone />;
+    case '/my-jobs':
+      return <EmployerDashboardSkeleton showDrafts titleWidthClass="w-48" standalone />;
+    case '/candidates':
+      return <EmployerCandidatesSkeleton />;
+    case '/my-candidates':
+      return <EmployerMyCandidatesSkeleton />;
+    case '/messages':
+      return <EmployerMessagesSkeleton audience="employer" />;
+    case '/company-profile':
+      return <EmployerCompanyProfileSkeleton />;
+    case '/settings':
+      return <EmployerSettingsSkeleton />;
+    default:
+      return <div className="min-h-screen bg-gradient-parium" />;
+  }
+};
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -589,7 +620,7 @@ const Index = () => {
   // Tidigare ritades bara en tom blå yta under session- och profilhämtningen.
   if (loading && !user && authAction !== 'logout') {
     return lastKnownRole === 'employer'
-      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" standalone />
+      ? renderEmployerColdSkeleton(location.pathname)
       : <div className="min-h-screen bg-gradient-parium" />;
   }
 
@@ -602,7 +633,7 @@ const Index = () => {
   // rollens riktiga sidstruktur under tiden i stället för ännu en tom skärm.
   if (!profile) {
     return lastKnownRole === 'employer'
-      ? <EmployerDashboardSkeleton showDrafts titleWidthClass="w-28" standalone />
+      ? renderEmployerColdSkeleton(location.pathname)
       : <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
 
