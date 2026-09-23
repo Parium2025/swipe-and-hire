@@ -90,7 +90,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   // Faller tillbaka på preloaded värde när context inte är mountad (t.ex. innan
   // första conversations-fetchen). Samma mönster som JobSeekerTopNav använder.
   const conversationsCtx = useConversationsContext();
-  const unreadMessages = conversationsCtx
+  const unreadMessages = conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
     : preloadedUnreadMessages;
   

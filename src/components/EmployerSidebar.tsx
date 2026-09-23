@@ -151,7 +151,7 @@ export function EmployerSidebar() {
   // När context är mountad (även med värde 0) ska live alltid vinna över det cachade
   // värdet, annars står en gammal siffra kvar efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const unreadMessages = conversationsCtx
+  const unreadMessages = conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
     : preloadedUnreadMessages;
   const { isPlatformAdmin } = useIsPlatformAdmin();
