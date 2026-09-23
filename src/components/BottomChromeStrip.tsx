@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
-
-const LANDING_COLOR = '#2a2a2a';
-const PARIUM_COLOR = '#00193D';
-const AUDIENCE_LANDING_COLOR = '#001F3D';
-const AUTH_COLOR = '#062B5E';
-
-const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
-const isAudienceLandingPath = (pathname: string) =>
-  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
 const isAuthPath = (pathname: string) => pathname === '/auth';
 
 const detectTouch = () => {
@@ -41,7 +31,6 @@ const BottomChromeStrip = () => {
   const [isTouch, setIsTouch] = useState(detectTouch);
   const [isTabletLandscape, setIsTabletLandscape] = useState(detectTabletLandscape);
   const [isStandalone, setIsStandalone] = useState(detectStandalone);
-  const [forcedColor, setForcedColor] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -72,30 +61,6 @@ const BottomChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  const color = isLandingVideoPath(location.pathname)
-    ? LANDING_COLOR
-    : isAudienceLandingPath(location.pathname)
-      ? AUDIENCE_LANDING_COLOR
-      : isAuthPath(location.pathname)
-        ? AUTH_COLOR
-        : PARIUM_COLOR;
-
-  useEffect(() => {
-    setForcedColor(null);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const onChromeColor = (event: Event) => {
-      const detail = (event as CustomEvent<{ color?: string }>).detail;
-      if (detail?.color) setForcedColor(detail.color);
-    };
-    window.addEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
-    return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
-  }, []);
-
-  const displayColor = forcedColor ?? color;
-
   // Sync CSS variable so scroll containers always reserve space
   // matching the strip — independent of @media (pointer: coarse).
   // Tablet i landskap: ramen/fodralet täcker mer → extra andrum.
@@ -120,23 +85,22 @@ const BottomChromeStrip = () => {
     };
   }, [isTouch, isStandalone, isTabletLandscape, location.pathname]);
 
-  // I vanlig Safari är detta en extra remsa ovanför webbläsarens eget fält.
-  // Safe-area-ankaret behövs bara när appen körs installerad utan Safari-UI.
-  if (!isTouch || !isStandalone) return null;
+  // Safari samplar bottenfärgen från dokumentkanten och uppdaterar den inte
+  // säkert efter SPA-navigation. Ankaret håller färgen kopplad till rutten.
+  if (!isTouch) return null;
 
   return (
     <div
-      // Ny nod vid färgbyte: iOS Safari (flytande verktygsfält) samplar om
-      // statusrad/verktygsfält först när ett nytt fixed-element dyker upp.
-      key={displayColor}
+      data-browser-chrome-strip="bottom"
+      key={location.pathname}
       aria-hidden="true"
       style={{
         position: 'fixed',
         left: 0,
         right: 0,
         bottom: 0,
-        height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
-        backgroundColor: displayColor,
+        height: isStandalone ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)' : '5px',
+        backgroundColor: 'var(--active-browser-chrome-color, #00193D)',
         zIndex: 2147483647,
         pointerEvents: 'none',
         // Ingen färgövergång — samma frame som innehållet (se TopChromeStrip).

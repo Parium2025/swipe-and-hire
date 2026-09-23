@@ -1,16 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BROWSER_CHROME_COLOR_EVENT } from '@/lib/browserChrome';
-
-const LANDING_COLOR = '#2a2a2a';
-const PARIUM_COLOR = '#00193D';
-const AUDIENCE_LANDING_COLOR = '#001F3D';
-const AUTH_COLOR = '#062B5E';
-
-const isLandingVideoPath = (pathname: string) => pathname === '/' || pathname === '';
-const isAudienceLandingPath = (pathname: string) =>
-  pathname === '/arbetsgivare' || pathname === '/jobbsokare';
-const isAuthPath = (pathname: string) => pathname === '/auth';
 
 const detectTouch = () => {
   if (typeof window === 'undefined') return false;
@@ -31,7 +20,6 @@ const TopChromeStrip = () => {
   // Detect synchronously in the browser. Waiting for useEffect caused the
   // top offset to appear one frame after login, which looked like a dark gap.
   const [isTouch, setIsTouch] = useState(detectTouch);
-  const [forcedColor, setForcedColor] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(detectStandalone);
 
   useEffect(() => {
@@ -52,36 +40,13 @@ const TopChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  const color = isLandingVideoPath(location.pathname)
-    ? LANDING_COLOR
-    : isAudienceLandingPath(location.pathname)
-      ? AUDIENCE_LANDING_COLOR
-      : isAuthPath(location.pathname)
-        ? AUTH_COLOR
-        : PARIUM_COLOR;
-
-  useEffect(() => {
-    setForcedColor(null);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const onChromeColor = (event: Event) => {
-      const detail = (event as CustomEvent<{ color?: string }>).detail;
-      if (detail?.color) setForcedColor(detail.color);
-    };
-    window.addEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
-    return () => window.removeEventListener(BROWSER_CHROME_COLOR_EVENT, onChromeColor);
-  }, []);
-
-  const displayColor = forcedColor ?? color;
-
-  // Vanlig Safari har redan ett eget statusfält. Ett extra 14 px-ankare blev
-  // den andra synliga remsan mellan systemfältet och sidan. Endast installerat
-  // helskärmsläge behöver en egen safe-area-yta.
-  const shouldShowStrip = isTouch && isStandalone;
-  const stripInset = isStandalone ? '22px' : '14px';
-  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
+  // iPhone Safari behåller annars föregående rutts färg tills en full reload.
+  // Ankaret behövs därför även i vanlig Safari, inte bara installerat läge.
+  const shouldShowStrip = isTouch;
+  const stripHeight = isStandalone
+    ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
+    : '5px';
+  const chromeOffset = isStandalone ? stripHeight : '0px';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
@@ -100,17 +65,16 @@ const TopChromeStrip = () => {
 
   return (
     <div
-      // Ny nod vid färgbyte: iOS Safari (flytande verktygsfält) samplar om
-      // statusrad/verktygsfält först när ett nytt fixed-element dyker upp.
-      key={displayColor}
+      data-browser-chrome-strip="top"
+      key={location.pathname}
       aria-hidden="true"
       style={{
         position: 'fixed',
         left: 0,
         right: 0,
         top: 0,
-        height: chromeOffset,
-        backgroundColor: displayColor,
+        height: stripHeight,
+        backgroundColor: 'var(--active-browser-chrome-color, #00193D)',
         zIndex: 2147483647,
         pointerEvents: 'none',
         // Ingen färgövergång: remsan måste byta färg i samma frame som

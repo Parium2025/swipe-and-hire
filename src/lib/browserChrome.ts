@@ -37,11 +37,46 @@ const writeThemeColor = (color: string) => {
   meta.content = color;
 };
 
+const nudgeColor = (color: string) => {
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return color;
+  const blue = Number.parseInt(hex.slice(4, 6), 16);
+  const nudgedBlue = (blue === 255 ? blue - 1 : blue + 1).toString(16).padStart(2, '0');
+  return `#${hex.slice(0, 4)}${nudgedBlue}`;
+};
+
+let pendingThemeFrame: number | null = null;
+let pendingSyncTimers: number[] = [];
+
+const setThemeColor = (color: string) => {
+  if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(pendingThemeFrame);
+    pendingThemeFrame = null;
+  }
+
+  // Safari kan behålla föregående färg när samma meta-nod uppdateras under
+  // SPA-navigation. En osynligt liten färgändring tvingar en ny avläsning.
+  writeThemeColor(nudgeColor(color));
+  if (typeof requestAnimationFrame === 'function') {
+    pendingThemeFrame = requestAnimationFrame(() => {
+      pendingThemeFrame = null;
+      writeThemeColor(color);
+    });
+  } else {
+    writeThemeColor(color);
+  }
+};
+
 const getChromeColor = (pathname: string) => {
   if (isLandingVideoPath(pathname)) return LANDING_CHROME_COLOR;
   if (isAudienceLandingPath(pathname)) return AUDIENCE_LANDING_CHROME_COLOR;
   if (isAuthPath(pathname)) return AUTH_CHROME_COLOR;
   return PARIUM_CHROME_COLOR;
+};
+
+const cancelPendingRouteWrites = () => {
+  pendingSyncTimers.forEach((id) => window.clearTimeout(id));
+  pendingSyncTimers = [];
 };
 
 /**
@@ -51,8 +86,10 @@ const getChromeColor = (pathname: string) => {
  */
 export const primeBrowserChrome = (pathname: string) => {
   const color = getChromeColor(pathname);
-  writeThemeColor(color);
+  cancelPendingRouteWrites();
+  setThemeColor(color);
   setChromeCssColor(color);
+  notifyChromeStrips(pathname, color);
 };
 
 
@@ -97,8 +134,23 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   // byter färg samtidigt som route-syncen, utan att vara beroende av att
   // Safari uppdaterar sin native theme-color direkt.
 
-  writeThemeColor(color);
+  setThemeColor(color);
   notifyChromeStrips(pathname, color);
+
+  // iPhone Safari kan missa den första färgändringen medan nästa vy målas.
+  // Repetera bara den aktuella ruttens färg och avbryt alltid äldre skrivningar,
+  // så en snabb navigering aldrig kan återställa föregående färg.
+  cancelPendingRouteWrites();
+  [80, 260, 640, 1200].forEach((delay) => {
+    pendingSyncTimers.push(
+      window.setTimeout(() => {
+        if (window.location.pathname !== pathname) return;
+        setChromeCssColor(color);
+        setThemeColor(color);
+        notifyChromeStrips(pathname, color);
+      }, delay)
+    );
+  });
 };
 
 // Mountar lyssnare som re-syncar chrome när Safari restorar sidan från
