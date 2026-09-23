@@ -329,26 +329,25 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className="max-w-md max-h-[92vh] overflow-y-auto bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Canvas */}
-          <div className="flex justify-center">
-            <div className="relative">
+        <div className="flex flex-col flex-1 min-h-0 gap-4">
+          {/* Canvas — fyller all ledig höjd på mobil så ingen död yta uppstår */}
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div className="relative h-full flex items-center justify-center">
               <canvas
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isSaving ? 'opacity-50' : ''}`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isSaving ? 'opacity-50' : ''} max-h-full md:max-h-[min(55vh,360px)]`}
                 style={{
                   backgroundColor: 'transparent',
                   maxWidth: '100%',
-                  maxHeight: 'min(55vh, 360px)',
                   height: 'auto',
                   width: 'auto',
                 }}
