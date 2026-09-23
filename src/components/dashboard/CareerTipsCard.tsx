@@ -58,12 +58,24 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
     return (
       <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5" />
-        <CardContent className="relative p-6 h-full">
-          <div className="flex items-center gap-2 mb-4">
+        <CardContent className="relative p-4 h-full flex flex-col">
+          <div className="flex items-center justify-between mb-4">
             <Skeleton className="h-10 w-10 rounded-xl bg-white/20" />
-            <Skeleton className="h-4 w-32 bg-white/20" />
+            <Skeleton className="h-3 w-16 bg-white/20" />
           </div>
-          <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-4/5 bg-white/10" />
+            <Skeleton className="h-4 w-3/5 bg-white/10" />
+            <Skeleton className="h-3 w-full bg-white/10" />
+            <Skeleton className="h-3 w-5/6 bg-white/10" />
+          </div>
+          <div className="mt-auto flex h-6 items-center justify-between">
+            <Skeleton className="h-3 w-16 bg-white/10" />
+            <div className="flex gap-1.5">
+              {[0, 1, 2].map(item => <Skeleton key={item} className="h-2 w-2 rounded-full bg-white/20" />)}
+            </div>
+            <Skeleton className="h-3 w-14 bg-white/10" />
+          </div>
         </CardContent>
       </Card>
     );
