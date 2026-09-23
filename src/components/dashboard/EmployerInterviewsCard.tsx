@@ -105,7 +105,7 @@ export const EmployerInterviewsCard = memo(() => {
             </div>
           ) : (
             <>
-              <div className="flex-1 space-y-1.5 sm:overflow-y-auto h-full sm:pr-1 scrollbar-hide">
+              <div className="flex-1 min-h-0 space-y-1.5 sm:overflow-y-auto sm:pr-1 scrollbar-hide">
                 {liveInterviews.map((interview, index) => {
                   const LocationIcon = getLocationIcon(interview.location_type);
                   const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
@@ -132,7 +132,7 @@ export const EmployerInterviewsCard = memo(() => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       className={cn(
-                        'rounded-lg p-3 sm:p-2 cursor-pointer transition-colors',
+                        'rounded-lg px-3 py-2.5 sm:p-2 cursor-pointer transition-colors',
                         canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
                         // Mobil: endast den valda intervjun syns — en per kortyta.
                         index !== activeIndex && 'hidden sm:block',
@@ -155,7 +155,7 @@ export const EmployerInterviewsCard = memo(() => {
                         </div>
                         <div className="flex w-[104px] sm:w-[88px] shrink-0 flex-col items-center gap-1.5 sm:gap-1">
                           <span className={cn(
-                            "flex h-8 sm:h-5 w-full items-center justify-center gap-1 rounded px-2 sm:px-1.5 text-xs sm:text-[10px] font-medium leading-none whitespace-nowrap text-white",
+                            "flex h-7 sm:h-5 w-full items-center justify-center gap-1 rounded px-2 sm:px-1.5 text-xs sm:text-[10px] font-medium leading-none whitespace-nowrap text-white",
                             (isUrgent || canDismiss) && "bg-white/10"
                           )}>
                             {!canDismiss && <Clock3 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />}
@@ -168,7 +168,7 @@ export const EmployerInterviewsCard = memo(() => {
                                 event.stopPropagation();
                                 dismissInterview.mutate(interview.id);
                               }}
-                              className="flex h-8 sm:h-5 w-full items-center justify-center gap-1 rounded bg-white/10 px-2 sm:px-1.5 text-xs sm:text-[10px] font-medium leading-none text-white hover:bg-white/15"
+                              className="flex h-7 sm:h-5 w-full items-center justify-center gap-1 rounded bg-white/10 px-2 sm:px-1.5 text-xs sm:text-[10px] font-medium leading-none text-white hover:bg-white/15"
                               aria-label="Ta bort från översikten"
                             >
                               <Trash2 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
@@ -176,7 +176,7 @@ export const EmployerInterviewsCard = memo(() => {
                             </button>
 
                           ) : (
-                            <span className="flex h-8 sm:h-5 w-full items-center justify-center gap-1 rounded px-1 whitespace-nowrap text-xs sm:text-[9px] font-medium leading-none text-white">
+                            <span className="flex h-7 sm:h-5 w-full items-center justify-center gap-1 rounded px-1 whitespace-nowrap text-xs sm:text-[9px] font-medium leading-none text-white">
                               {interview.status === 'confirmed' ? (
                                 <CheckCircle2 className="h-3.5 sm:h-2.5 w-3.5 sm:w-2.5 shrink-0" aria-hidden="true" />
                               ) : (
@@ -187,7 +187,7 @@ export const EmployerInterviewsCard = memo(() => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 sm:gap-2 mt-2 sm:mt-1 text-xs sm:text-[10px] leading-none text-white">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 sm:gap-2 mt-1.5 sm:mt-1 text-xs sm:text-[10px] leading-none text-white">
                         <span className="leading-none whitespace-nowrap">{formatInterviewDate(interview.scheduled_at)}</span>
                         <span className="leading-none whitespace-nowrap">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
                         <span className="flex items-center gap-1 leading-none whitespace-nowrap">
@@ -228,7 +228,7 @@ export const EmployerInterviewsCard = memo(() => {
 
               {/* Mobil: prickar för att växla mellan intervjuerna, en per yta. */}
               {liveInterviews.length > 1 && (
-                <div className="mt-2 flex items-center justify-center gap-1.5 sm:hidden">
+                <div className="mt-1.5 flex items-center justify-center gap-1.5 sm:hidden">
                   {liveInterviews.map((interview, index) => (
                     <button
                       key={interview.id}
@@ -238,7 +238,7 @@ export const EmployerInterviewsCard = memo(() => {
                         event.stopPropagation();
                         setMobileIndex(index);
                       }}
-                      className="flex h-5 w-5 items-center justify-center"
+                      className="flex h-4 w-4 items-center justify-center"
                     >
                       <span
                         className={cn(
