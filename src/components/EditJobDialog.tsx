@@ -4574,6 +4574,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           }}
           isCircular={false}
           aspectRatio={editingImageType === 'mobile' ? 2 : 16 / 9}
+          cropMode={editingImageType === 'mobile' ? 'mobile-job-card' : 'default'}
         />
       )}
     </>

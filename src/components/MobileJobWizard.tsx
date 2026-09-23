@@ -5253,6 +5253,7 @@ const MobileJobWizard = ({
             onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
             aspectRatio={editingImageType === 'mobile' ? 2 : 16 / 9}
+            cropMode={editingImageType === 'mobile' ? 'mobile-job-card' : 'default'}
           />
         )}
 

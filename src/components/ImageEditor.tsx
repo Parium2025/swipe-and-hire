@@ -13,6 +13,7 @@ interface ImageEditorProps {
   onRestoreOriginal?: () => void | Promise<void>; // New: callback to restore original image
   isCircular?: boolean;
   aspectRatio?: number; // width/height ratio
+  cropMode?: 'default' | 'mobile-job-card';
 }
 
 const ImageEditor: React.FC<ImageEditorProps> = ({
@@ -22,7 +23,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   onSave,
   onRestoreOriginal,
   isCircular = true,
-  aspectRatio = 1
+  aspectRatio = 1,
+  cropMode = 'default',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -40,8 +42,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const CANVAS_HEIGHT = BASE_CANVAS_SIZE;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_SIZE * aspectRatio);
   const MAX_SCALE = 3;
+  const isMobileJobCard = cropMode === 'mobile-job-card';
 
   const clampPosition = useCallback((nextPosition: { x: number; y: number }, nextScale: number) => {
+    if (!isMobileJobCard) return nextPosition;
     const img = imageRef.current;
     if (!img) return nextPosition;
 
@@ -52,7 +56,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       x: Math.max(-overflowX, Math.min(overflowX, nextPosition.x)),
       y: Math.max(-overflowY, Math.min(overflowY, nextPosition.y)),
     };
-  }, [CANVAS_HEIGHT, CANVAS_WIDTH]);
+  }, [CANVAS_HEIGHT, CANVAS_WIDTH, isMobileJobCard]);
 
   // Reset state when dialog opens/closes
   useEffect(() => {
@@ -88,7 +92,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // ALLTID använd "cover" som initial scale (fyller hela området utan luckor)
           // Detta ger identiskt zoom-beteende för både cirkulär och rektangulär
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(initialScale);
+          setMinScale(isMobileJobCard ? initialScale : Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -126,7 +130,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           
           // ALLTID använd "cover" som initial scale
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(initialScale);
+          setMinScale(isMobileJobCard ? initialScale : Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -145,7 +149,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
 
     loadImage();
-  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT]);
+  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT, isMobileJobCard]);
 
   // Draw canvas
   const drawCanvas = useCallback(() => {
@@ -263,7 +267,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setPosition(current => clampPosition(current, nextScale));
       return nextScale;
     });
-    setHasUserMadeChanges(true);
+    setHasUserMadeChanges(isMobileJobCard);
   };
 
   const zoomOut = () => {
@@ -362,18 +366,18 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         <div className="flex flex-col flex-1 min-h-0 gap-4">
           {/* Rektangulära jobbilder använder hela mobilbredden i jobbkortets
               faktiska format. Profilbilder behåller sin tidigare layout. */}
-          <div className={isCircular ? 'flex-1 min-h-0 flex items-center justify-center' : 'shrink-0 w-full flex items-center justify-center md:flex-1 md:min-h-0'}>
-            <div className={isCircular ? 'relative h-full flex items-center justify-center' : 'relative w-full flex items-center justify-center md:h-full'}>
+          <div className={isMobileJobCard ? 'shrink-0 w-full flex items-center justify-center md:flex-1 md:min-h-0' : 'flex-1 min-h-0 flex items-center justify-center'}>
+            <div className={isMobileJobCard ? 'relative w-full flex items-center justify-center md:h-full' : 'relative h-full flex items-center justify-center'}>
               <canvas
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full max-h-full' : 'rounded-lg w-full'} ${isSaving ? 'opacity-50' : ''} md:max-h-[min(55vh,360px)]`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isMobileJobCard ? 'w-full' : 'max-h-full'} ${isSaving ? 'opacity-50' : ''} md:max-h-[min(55vh,360px)]`}
                 style={{
                   backgroundColor: 'transparent',
                   maxWidth: '100%',
                   height: 'auto',
-                  width: isCircular ? 'auto' : '100%',
+                  width: isMobileJobCard ? '100%' : 'auto',
                   touchAction: 'none',
                 }}
                 onMouseDown={handleMouseDown}
