@@ -19,6 +19,16 @@ import {
 import { GRADIENTS } from './dashboardConstants';
 import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
 import { DashboardCarouselDots } from './DashboardCarouselDots';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
