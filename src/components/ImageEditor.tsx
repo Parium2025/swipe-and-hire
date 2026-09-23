@@ -13,6 +13,7 @@ interface ImageEditorProps {
   onRestoreOriginal?: () => void | Promise<void>; // New: callback to restore original image
   isCircular?: boolean;
   aspectRatio?: number; // width/height ratio
+  cropMode?: 'default' | 'mobile-job-card';
 }
 
 const ImageEditor: React.FC<ImageEditorProps> = ({
@@ -22,7 +23,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   onSave,
   onRestoreOriginal,
   isCircular = true,
-  aspectRatio = 1
+  aspectRatio = 1,
+  cropMode = 'default',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -40,6 +42,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const CANVAS_HEIGHT = BASE_CANVAS_SIZE;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_SIZE * aspectRatio);
   const MAX_SCALE = 3;
+  const isMobileJobCard = cropMode === 'mobile-job-card';
+
+  const clampPosition = useCallback((nextPosition: { x: number; y: number }, nextScale: number) => {
+    if (!isMobileJobCard) return nextPosition;
+    const img = imageRef.current;
+    if (!img) return nextPosition;
+
+    const overflowX = Math.max(0, (img.width * nextScale - CANVAS_WIDTH) / 2);
+    const overflowY = Math.max(0, (img.height * nextScale - CANVAS_HEIGHT) / 2);
+
+    return {
+      x: Math.max(-overflowX, Math.min(overflowX, nextPosition.x)),
+      y: Math.max(-overflowY, Math.min(overflowY, nextPosition.y)),
+    };
+  }, [CANVAS_HEIGHT, CANVAS_WIDTH, isMobileJobCard]);
 
   // Reset state when dialog opens/closes
   useEffect(() => {
@@ -75,7 +92,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // ALLTID använd "cover" som initial scale (fyller hela området utan luckor)
           // Detta ger identiskt zoom-beteende för både cirkulär och rektangulär
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(Math.min(scaleX, scaleY) * 0.5); // minScale baserat på contain
+          setMinScale(isMobileJobCard ? initialScale : Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -113,7 +130,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           
           // ALLTID använd "cover" som initial scale
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(Math.min(scaleX, scaleY) * 0.5);
+          setMinScale(isMobileJobCard ? initialScale : Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -132,7 +149,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
 
     loadImage();
-  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT]);
+  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT, isMobileJobCard]);
 
   // Draw canvas
   const drawCanvas = useCallback(() => {
@@ -173,6 +190,17 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     // Ingen border ritas in i bilden - kanter hanteras visuellt i UI
   }, [scale, position, imageLoaded, CANVAS_WIDTH, CANVAS_HEIGHT]);
 
+  const getCanvasPoint = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
+
   // Redraw when properties change
   useEffect(() => {
     drawCanvas();
@@ -182,11 +210,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isSaving) return;
     setIsDragging(true);
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) {
+    const point = getCanvasPoint(e.clientX, e.clientY);
+    if (point) {
       setDragStart({
-        x: e.clientX - rect.left - position.x,
-        y: e.clientY - rect.top - position.y
+        x: point.x - position.x,
+        y: point.y - position.y,
       });
     }
   };
@@ -194,11 +222,12 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !canvasRef.current || isSaving) return;
     
-    const rect = canvasRef.current.getBoundingClientRect();
-    const newX = e.clientX - rect.left - dragStart.x;
-    const newY = e.clientY - rect.top - dragStart.y;
+    const point = getCanvasPoint(e.clientX, e.clientY);
+    if (!point) return;
+    const newX = point.x - dragStart.x;
+    const newY = point.y - dragStart.y;
     
-    setPosition({ x: newX, y: newY });
+    setPosition(clampPosition({ x: newX, y: newY }, scale));
     setHasUserMadeChanges(true); // User made manual change
   };
 
@@ -212,11 +241,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     e.preventDefault();
     const touch = e.touches[0];
     setIsDragging(true);
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) {
+    const point = getCanvasPoint(touch.clientX, touch.clientY);
+    if (point) {
       setDragStart({
-        x: touch.clientX - rect.left - position.x,
-        y: touch.clientY - rect.top - position.y
+        x: point.x - position.x,
+        y: point.y - position.y,
       });
     }
   };
@@ -227,11 +256,12 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     if (!isDragging || !canvasRef.current) return;
     
     const touch = e.touches[0];
-    const rect = canvasRef.current.getBoundingClientRect();
-    const newX = touch.clientX - rect.left - dragStart.x;
-    const newY = touch.clientY - rect.top - dragStart.y;
+    const point = getCanvasPoint(touch.clientX, touch.clientY);
+    if (!point) return;
+    const newX = point.x - dragStart.x;
+    const newY = point.y - dragStart.y;
     
-    setPosition({ x: newX, y: newY });
+    setPosition(clampPosition({ x: newX, y: newY }, scale));
     setHasUserMadeChanges(true); // User made manual change
   };
 
@@ -245,20 +275,31 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   
   const zoomIn = () => {
     if (isSaving) return;
-    setScale(prev => Math.min(prev * (1 + ZOOM_STEP), MAX_SCALE));
+    setScale(prev => {
+      const maxScale = Math.max(MAX_SCALE, initialScaleRef.current * 3);
+      const nextScale = Math.min(prev * (1 + ZOOM_STEP), maxScale);
+      setPosition(current => clampPosition(current, nextScale));
+      return nextScale;
+    });
     setHasUserMadeChanges(true);
   };
 
   const zoomOut = () => {
     if (isSaving) return;
-    setScale(prev => Math.max(prev * (1 - ZOOM_STEP), minScale));
+    setScale(prev => {
+      const nextScale = Math.max(prev * (1 - ZOOM_STEP), minScale);
+      setPosition(current => clampPosition(current, nextScale));
+      return nextScale;
+    });
     setHasUserMadeChanges(true);
   };
 
   const resetPosition = () => {
     if (isSaving) return;
     setPosition({ x: 0, y: 0 });
-    setHasUserMadeChanges(false); // Reset means back to original - no changes
+    // Återställningen är ett aktivt val och ska sparas som den beskärning som
+    // syns i redigeraren, inte växla tillbaka till en annan lagrad fil.
+    setHasUserMadeChanges(isMobileJobCard);
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
@@ -329,7 +370,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className={`max-w-md max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm ${isMobileJobCard ? 'h-auto' : 'h-[92dvh] md:h-auto'}`}>
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
@@ -337,19 +378,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         </DialogHeader>
         
         <div className="flex flex-col flex-1 min-h-0 gap-4">
-          {/* Canvas — fyller all ledig höjd på mobil så ingen död yta uppstår */}
-          <div className="flex-1 min-h-0 flex items-center justify-center">
-            <div className="relative h-full flex items-center justify-center">
+          {/* Rektangulära jobbilder använder hela mobilbredden i jobbkortets
+              faktiska format. Profilbilder behåller sin tidigare layout. */}
+          <div className={isMobileJobCard ? 'shrink-0 w-full flex items-center justify-center md:flex-1 md:min-h-0' : 'flex-1 min-h-0 flex items-center justify-center'}>
+            <div className={isMobileJobCard ? 'relative w-full flex items-center justify-center md:h-full' : 'relative h-full flex items-center justify-center'}>
               <canvas
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isSaving ? 'opacity-50' : ''} max-h-full md:max-h-[min(55vh,360px)]`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isMobileJobCard ? 'w-full' : 'max-h-full'} ${isSaving ? 'opacity-50' : ''} md:max-h-[min(55vh,360px)]`}
                 style={{
                   backgroundColor: 'transparent',
                   maxWidth: '100%',
                   height: 'auto',
-                  width: 'auto',
+                  width: isMobileJobCard ? '100%' : 'auto',
+                  touchAction: 'none',
                 }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -396,7 +439,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={zoomIn}
-              disabled={scale >= MAX_SCALE || isSaving}
+              disabled={scale >= Math.max(MAX_SCALE, initialScaleRef.current * 3) || isSaving}
               className="!transition-none bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/10 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10 disabled:opacity-50 disabled:hover:bg-white/5 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
             >
               <ZoomIn className="h-4 w-4" />

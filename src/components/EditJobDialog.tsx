@@ -4552,6 +4552,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           }}
           onRestoreOriginal={() => {
             if (editingImageType === 'desktop' && originalDesktopImageUrl) {
+              handleInputChange('job_image_desktop_url', originalDesktopImageUrl);
+              desktopImageClearedRef.current = false;
               // For desktop, get public URL if it's a storage path
               if (!originalDesktopImageUrl.startsWith('http')) {
                 const { data: { publicUrl } } = supabase.storage
@@ -4562,6 +4564,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                 setJobImageDesktopDisplayUrl(originalDesktopImageUrl);
               }
             } else if (originalImageUrl) {
+              handleInputChange('job_image_url', originalImageUrl);
+              imageClearedRef.current = false;
+              setManualFocus(null);
               if (!originalImageUrl.startsWith('http')) {
                 const { data: { publicUrl } } = supabase.storage
                   .from('job-images')
@@ -4573,7 +4578,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
             }
           }}
           isCircular={false}
-          aspectRatio={16 / 9}
+          aspectRatio={editingImageType === 'mobile' ? 2 : 16 / 9}
+          cropMode={editingImageType === 'mobile' ? 'mobile-job-card' : 'default'}
         />
       )}
     </>
