@@ -1,9 +1,9 @@
 /**
- * Shared helpers for job hero image focus / crop.
+ * Shared helpers for job card image focus / crop.
  *
  * Ett värde lagras som antingen legacy-nyckelord ('top' | 'center' | 'bottom')
  * eller sträng-procent ('0'–'100'). All logik för att tolka värdet finns HÄR
- * så att kort, positionerare och hero croppar identiskt.
+ * så att kort och positionerare croppar identiskt.
  */
 
 export type FocusValue = string | null | undefined;
@@ -24,7 +24,7 @@ export function toObjectPosition(value: FocusValue): string {
 }
 
 /**
- * Delat aspect-ratio-token för jobbmedia (kort / positionerare / hero).
+ * Delat aspect-ratio-token för jobbmedia (kort / positionerare).
  * Håll i sync med `--job-media-aspect` i `src/index.css`.
  */
 export const JOB_MEDIA_ASPECT = '2 / 1';

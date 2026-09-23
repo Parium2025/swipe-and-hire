@@ -4381,7 +4381,6 @@ const MobileJobWizard = ({
                               companyName: profile?.company_name || 'Företag',
                               companyLogoUrl: profile?.company_logo_url,
                               imageUrl: jobImageDisplayUrl,
-                              imageFocusPosition: formData.image_focus_position,
                               employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                               employmentTypeDetail: formatEmploymentDetails({
                                 employment_type: formData.employment_type,
@@ -4930,7 +4929,6 @@ const MobileJobWizard = ({
                                   companyName: profile?.company_name || 'Företag',
                                   companyLogoUrl: profile?.company_logo_url,
                                   imageUrl: jobImageDesktopDisplayUrl,
-                                  imageFocusPosition: formData.image_focus_position_desktop || formData.image_focus_position,
                                   employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                                   employmentTypeDetail: formatEmploymentDetails({
                                     employment_type: formData.employment_type,
@@ -5199,14 +5197,6 @@ const MobileJobWizard = ({
                           </div>
                         </div>
 
-                        {/* Drag-based focus position picker for desktop */}
-                        <div className="mt-3">
-                          <JobImagePositioner
-                            imageUrl={jobImageDesktopDisplayUrl}
-                            focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
-                            onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
-                          />
-                        </div>
                       </>
                     )}
                   </div>

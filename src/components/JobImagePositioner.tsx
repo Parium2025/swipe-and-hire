@@ -52,8 +52,8 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
   return (
     <div className="space-y-2">
       <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt.</p>
-      {/* Match job card & hero aspect ratio (2:1) exakt — annars croppar
-          samma object-position olika mycket i preview vs kort vs hero. */}
+      {/* Matchar jobbkortets bildyta exakt. Fokusvärdet påverkar endast kortet,
+          inte telefon-, dator- eller annonsförhandsvisningen. */}
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
