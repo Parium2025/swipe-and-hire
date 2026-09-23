@@ -694,6 +694,7 @@ export const BookInterviewDialog = ({
   };
 
   const endTime = getEndTime(time, duration);
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContentNoFocus 
