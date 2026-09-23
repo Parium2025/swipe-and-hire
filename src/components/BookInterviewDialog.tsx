@@ -694,20 +694,6 @@ export const BookInterviewDialog = ({
   };
 
   const endTime = getEndTime(time, duration);
-
-  // Tidsvalet tolkas i rekryterarens egen tidszon. Sitter man utomlands visas
-  // motsvarande svensk tid automatiskt, så ingen bokar fel timme.
-  const zoneNotice = (() => {
-    if (!date || isSwedishTimeZone()) return null;
-    const [h, m] = time.split(':').map(Number);
-    const start = new Date(date);
-    start.setHours(h, m, 0, 0);
-    const end = new Date(start.getTime() + parseInt(duration) * 60_000);
-    const swedishStart = formatSwedishTime(start);
-    if (swedishStart === time) return null;
-    return `${time}\u2013${endTime} i ${getLocalTimeZoneCity()} = ${swedishStart}\u2013${formatSwedishTime(end)} svensk tid`;
-  })();
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContentNoFocus 
