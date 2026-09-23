@@ -11,6 +11,7 @@ const APP_TO_AUTH_COVER_MS = 620;
 const AUTH_TO_APP_MIN_COVER_MS = 920;
 const AUTH_TO_APP_MAX_COVER_MS = 2400;
 const CONTENT_FADE_OUT_MS = 220;
+const SHELL_FADE_OUT_MS = 240;
 
 /**
  * AuthSplashScreen - Premium "loading shell" för auth-sidan.
@@ -30,6 +31,7 @@ export function AuthSplashScreen() {
   const [isFadingIn, setIsFadingIn] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [dotsFading, setDotsFading] = useState(false);
+  const [shellFading, setShellFading] = useState(false);
   // Loggan är en inbäddad data-URI och för-dekodas i main.tsx. Vänta därför
   // inte på img.onload för att visa text/logga — på iOS/Safari kan just den
   // väntan skapa en kort blank blink i själva splashen.
@@ -155,12 +157,19 @@ export function AuthSplashScreen() {
       // Background stays OPAQUE the whole time. When the content is fully
       // invisible we remove the shell in a single frame — no fade of the
       // background layer, so the app beneath never bleeds through.
+      // När innehållet är borta är målsidan redan färdigmålad under oss —
+      // då tonar vi ut själva bakgrunden mjukt i stället för ett hårt klipp
+      // från mörk splash till sidans ljusare bakgrund (den upplevda "blixten").
       finishTimer = setTimeout(() => {
-        isVisibleRef.current = false;
-        setIsVisible(false);
-        setIsFadingOut(false);
-        setDotsFading(false);
-        authSplashEvents.hide();
+        setShellFading(true);
+        finishTimer = setTimeout(() => {
+          isVisibleRef.current = false;
+          setIsVisible(false);
+          setIsFadingOut(false);
+          setDotsFading(false);
+          setShellFading(false);
+          authSplashEvents.hide();
+        }, SHELL_FADE_OUT_MS);
       }, CONTENT_FADE_OUT_MS);
     };
 
@@ -228,7 +237,8 @@ export function AuthSplashScreen() {
         // Background is ALWAYS fully opaque — we never fade the shell itself,
         // only the inner content. This eliminates the "blink through" effect
         // where the app beneath was visible during a semi-transparent fade.
-        opacity: 1,
+        opacity: shellFading ? 0 : 1,
+        transition: shellFading ? `opacity ${SHELL_FADE_OUT_MS}ms ease-out` : 'none',
         transform: 'translateZ(0)',
         pointerEvents: isFadingOut ? 'none' : 'auto',
       }}
