@@ -4430,14 +4430,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 </div>
                               </div>
 
-                              {/* Drag-based focus position picker for desktop */}
-                              <div className="mt-3">
-                                <JobImagePositioner
-                                  imageUrl={jobImageDesktopDisplayUrl}
-                                  focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
-                                  onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
-                                />
-                              </div>
                             </>
                           )}
                         </div>

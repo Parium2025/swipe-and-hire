@@ -1019,7 +1019,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 createdAt={job.created_at}
                 expiresAt={job.expires_at}
                 overlayTextColor={job.overlay_text_color}
-                imageFocusPosition={(job as any).image_focus_position}
               />
             )}
 
