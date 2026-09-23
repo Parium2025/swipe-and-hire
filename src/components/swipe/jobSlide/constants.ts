@@ -4,8 +4,10 @@
 // blir en nätverksladdning.
 
 export const SWIPE_IMG_TRANSFORM = {
-  width: 800,
-  height: 1000,
+  // Samma 1:2-format som mobilens bildredigerare och telefonförhandsvisning.
+  // Då lägger bildservern inte på en andra, dold beskärning efter sparningen.
+  width: 640,
+  height: 1280,
   quality: 78,
   resize: 'cover' as const,
 };

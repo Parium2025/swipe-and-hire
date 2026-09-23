@@ -1102,7 +1102,7 @@ const MobileJobWizard = ({
       }
 
       // Skapa ett unikt filnamn för den redigerade bilden
-      const fileExt = 'png'; // ImageEditor sparar alltid som PNG
+      const fileExt = 'webp'; // ImageEditor exporterar WebP
       const fileName = `${user.data.user.id}/${Date.now()}-edited-${editingImageType}-job-image.${fileExt}`;
 
       console.log('MobileJobWizard handleImageEdit: Uploading to path:', fileName);
@@ -5252,8 +5252,8 @@ const MobileJobWizard = ({
             onSave={handleImageEdit}
             onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
-            aspectRatio={editingImageType === 'mobile' ? 2 : 16 / 9}
-            cropMode={editingImageType === 'mobile' ? 'mobile-job-card' : 'default'}
+            aspectRatio={editingImageType === 'mobile' ? 1 / 2 : 16 / 9}
+            cropMode={editingImageType === 'mobile' ? 'mobile-swipe' : 'default'}
           />
         )}
 

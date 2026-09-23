@@ -13,7 +13,7 @@ interface ImageEditorProps {
   onRestoreOriginal?: () => void | Promise<void>; // New: callback to restore original image
   isCircular?: boolean;
   aspectRatio?: number; // width/height ratio
-  cropMode?: 'default' | 'mobile-job-card';
+  cropMode?: 'default' | 'mobile-swipe';
 }
 
 const ImageEditor: React.FC<ImageEditorProps> = ({
@@ -42,10 +42,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const CANVAS_HEIGHT = BASE_CANVAS_SIZE;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_SIZE * aspectRatio);
   const MAX_SCALE = 3;
-  const isMobileJobCard = cropMode === 'mobile-job-card';
+  const isMobileSwipe = cropMode === 'mobile-swipe';
 
   const clampPosition = useCallback((nextPosition: { x: number; y: number }, nextScale: number) => {
-    if (!isMobileJobCard) return nextPosition;
+    if (!isMobileSwipe) return nextPosition;
     const img = imageRef.current;
     if (!img) return nextPosition;
 
@@ -56,7 +56,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       x: Math.max(-overflowX, Math.min(overflowX, nextPosition.x)),
       y: Math.max(-overflowY, Math.min(overflowY, nextPosition.y)),
     };
-  }, [CANVAS_HEIGHT, CANVAS_WIDTH, isMobileJobCard]);
+  }, [CANVAS_HEIGHT, CANVAS_WIDTH, isMobileSwipe]);
 
   // Reset state when dialog opens/closes
   useEffect(() => {
@@ -74,6 +74,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       try {
         // Try to fetch the image as blob first to avoid CORS issues
         const response = await fetch(imageSrc);
+        if (!response.ok) throw new Error(`Image request failed (${response.status})`);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
         
@@ -92,7 +93,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // ALLTID använd "cover" som initial scale (fyller hela området utan luckor)
           // Detta ger identiskt zoom-beteende för både cirkulär och rektangulär
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(isMobileJobCard ? initialScale : Math.min(scaleX, scaleY) * 0.5);
+          setMinScale(isMobileSwipe ? initialScale : Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -130,7 +131,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           
           // ALLTID använd "cover" som initial scale
           const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(isMobileJobCard ? initialScale : Math.min(scaleX, scaleY) * 0.5);
+          setMinScale(isMobileSwipe ? initialScale : Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           initialScaleRef.current = initialScale; // Store for comparison
@@ -149,7 +150,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
 
     loadImage();
-  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT, isMobileJobCard]);
+  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT, isMobileSwipe]);
 
   // Draw canvas
   const drawCanvas = useCallback(() => {
@@ -299,7 +300,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     setPosition({ x: 0, y: 0 });
     // Återställningen är ett aktivt val och ska sparas som den beskärning som
     // syns i redigeraren, inte växla tillbaka till en annan lagrad fil.
-    setHasUserMadeChanges(isMobileJobCard);
+    setHasUserMadeChanges(isMobileSwipe);
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
@@ -370,7 +371,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className={`max-w-md max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm ${isMobileJobCard ? 'h-auto' : 'h-[92dvh] md:h-auto'}`}>
+      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
@@ -378,20 +379,20 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         </DialogHeader>
         
         <div className="flex flex-col flex-1 min-h-0 gap-4">
-          {/* Rektangulära jobbilder använder hela mobilbredden i jobbkortets
-              faktiska format. Profilbilder behåller sin tidigare layout. */}
-          <div className={isMobileJobCard ? 'shrink-0 w-full flex items-center justify-center md:flex-1 md:min-h-0' : 'flex-1 min-h-0 flex items-center justify-center'}>
-            <div className={isMobileJobCard ? 'relative w-full flex items-center justify-center md:h-full' : 'relative h-full flex items-center justify-center'}>
+          {/* Mobilbilden visas i Swipe Modes stående 1:2-format. Den separata
+              fokusväljaren i jobbflödet styr endast de breda 2:1-jobbkorten. */}
+          <div className="flex-1 min-h-0 w-full flex items-center justify-center">
+            <div className="relative h-full w-full flex items-center justify-center">
               <canvas
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isMobileJobCard ? 'w-full' : 'max-h-full'} ${isSaving ? 'opacity-50' : ''} md:max-h-[min(55vh,360px)]`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} max-h-full max-w-full ${isSaving ? 'opacity-50' : ''} md:max-h-[min(55vh,360px)]`}
                 style={{
                   backgroundColor: 'transparent',
                   maxWidth: '100%',
                   height: 'auto',
-                  width: isMobileJobCard ? '100%' : 'auto',
+                  width: 'auto',
                   touchAction: 'none',
                 }}
                 onMouseDown={handleMouseDown}
