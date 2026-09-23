@@ -53,6 +53,23 @@ Deno.serve(async (req) => {
       if (m?.[1]) paths.push(m[1].split('?')[0]);
     }
 
+    // Bilder som ligger i bolagets bildbibliotek eller används av andra
+    // annonser får aldrig raderas.
+    if (paths.length > 0) {
+      const protectedPaths = new Set<string>();
+      for (let i = 0; i < paths.length; i += 100) {
+        const batch = paths.slice(i, i + 100);
+        const { data: lib } = await supabase
+          .from('org_image_library').select('storage_path').in('storage_path', batch);
+        (lib ?? []).forEach((r: { storage_path: string }) => protectedPaths.add(r.storage_path));
+        for (const col of ['job_image_url', 'job_image_desktop_url', 'job_image_original_url', 'job_image_desktop_original_url']) {
+          const { data: used } = await supabase.from('job_postings').select(col).in(col, batch);
+          (used ?? []).forEach((r: Record<string, string>) => r[col] && protectedPaths.add(r[col]));
+        }
+      }
+      for (let i = paths.length - 1; i >= 0; i--) if (protectedPaths.has(paths[i])) paths.splice(i, 1);
+    }
+
     let removedImages = 0;
     if (paths.length > 0) {
       // Batcha i grupper om 100 (storage-API-gräns)

@@ -34,6 +34,8 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TruncatedText } from '@/components/TruncatedText';
+import { ImageLibraryPicker } from '@/components/ImageLibraryPicker';
+import { useOrgImageLibrary } from '@/hooks/useOrgImageLibrary';
 import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { celebrate } from '@/lib/celebrate';
@@ -868,6 +870,7 @@ const MobileJobWizard = ({
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [jobImageDesktopDisplayUrl, setJobImageDesktopDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const { addToLibrary } = useOrgImageLibrary();
   const [originalDesktopImageUrl, setOriginalDesktopImageUrl] = useState<string | null>(null);
   const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null); // Original storage path before editing
   const [originalDesktopStoragePath, setOriginalDesktopStoragePath] = useState<string | null>(null);
@@ -5110,10 +5113,12 @@ const MobileJobWizard = ({
                     </p>
                     
                     {!jobImageDisplayUrl && (
+                      <>
                       <FileUpload
                         mediaType="job-image"
                         uploadType="image"
                         onFileUploaded={async (storagePath, fileName) => {
+                        void addToLibrary(storagePath, fileName);
                           handleInputChange('job_image_url', storagePath);
                           setOriginalStoragePath(storagePath);
                           setImageIsEdited(false);
@@ -5124,6 +5129,15 @@ const MobileJobWizard = ({
                         acceptedFileTypes={['image/*']}
                         maxFileSize={50 * 1024 * 1024}
                       />
+                      <ImageLibraryPicker onSelect={async (storagePath: string) => {
+                          handleInputChange('job_image_url', storagePath);
+                          setOriginalStoragePath(storagePath);
+                          setImageIsEdited(false);
+                          const { getMediaUrl } = await import('@/lib/mediaManager');
+                          const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
+                          setOriginalImageUrl(signedUrl || storagePath);
+                        }} />
+                      </>
                     )}
                     
                     {jobImageDisplayUrl && (
@@ -5206,10 +5220,12 @@ const MobileJobWizard = ({
                     </p>
                     
                     {!jobImageDesktopDisplayUrl && (
+                      <>
                       <FileUpload
                         mediaType="job-image"
                         uploadType="image"
                         onFileUploaded={async (storagePath, fileName) => {
+                        void addToLibrary(storagePath, fileName);
                           handleInputChange('job_image_desktop_url', storagePath);
                           setOriginalDesktopStoragePath(storagePath);
                           setDesktopImageIsEdited(false);
@@ -5220,6 +5236,15 @@ const MobileJobWizard = ({
                         acceptedFileTypes={['image/*']}
                         maxFileSize={50 * 1024 * 1024}
                       />
+                      <ImageLibraryPicker onSelect={async (storagePath: string) => {
+                          handleInputChange('job_image_desktop_url', storagePath);
+                          setOriginalDesktopStoragePath(storagePath);
+                          setDesktopImageIsEdited(false);
+                          const { getMediaUrl } = await import('@/lib/mediaManager');
+                          const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
+                          setOriginalDesktopImageUrl(signedUrl || storagePath);
+                        }} />
+                      </>
                     )}
                     
                     {jobImageDesktopDisplayUrl && (

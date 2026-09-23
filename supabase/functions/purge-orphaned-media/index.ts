@@ -64,8 +64,16 @@ const BUCKETS: BucketConfig[] = [
     sources: [
       {
         table: 'job_postings',
-        columns: ['job_image_url', 'job_image_desktop_url', 'job_image_card_url'],
+        columns: [
+          'job_image_url',
+          'job_image_desktop_url',
+          'job_image_card_url',
+          'job_image_original_url',
+          'job_image_desktop_original_url',
+        ],
       },
+      // Bolagets gemensamma bildbibliotek – får aldrig städas bort.
+      { table: 'org_image_library', columns: ['storage_path'] },
     ],
   },
   {

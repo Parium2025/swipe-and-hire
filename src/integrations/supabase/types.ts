@@ -2746,6 +2746,41 @@ export type Database = {
           },
         ]
       }
+      org_image_library: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          id: string
+          organization_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          organization_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          organization_id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_image_library_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invitations: {
         Row: {
           accepted_at: string | null
@@ -4791,6 +4826,7 @@ export type Database = {
         Returns: boolean
       }
       has_applied_to_job: { Args: { p_job_id: string }; Returns: boolean }
+      has_image_library_access: { Args: { _user_id: string }; Returns: boolean }
       has_premium: { Args: { p_user_id: string }; Returns: boolean }
       heartbeat_session: { Args: { p_session_token: string }; Returns: boolean }
       increment_app_exception_count: {
