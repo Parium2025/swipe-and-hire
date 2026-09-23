@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
@@ -146,6 +147,13 @@ export function EmployerSidebar() {
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
   const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
+  // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt).
+  // När context är mountad (även med värde 0) ska live alltid vinna över det cachade
+  // värdet, annars står en gammal siffra kvar efter att olästa nollställts.
+  const conversationsCtx = useConversationsContext();
+  const unreadMessages = conversationsCtx
+    ? conversationsCtx.totalUnreadCount
+    : preloadedUnreadMessages;
   const { isPlatformAdmin } = useIsPlatformAdmin();
   const navigate = useNavigate();
   const location = useLocation();
