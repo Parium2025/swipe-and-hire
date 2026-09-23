@@ -85,11 +85,12 @@ const cancelPendingRouteWrites = () => {
  * React Router redan har bytt vy.
  */
 export const primeBrowserChrome = (pathname: string) => {
-  const color = getChromeColor(pathname);
+  // Avbryt gamla route-skrivningar redan i tryckgesten, men byt ingen synlig
+  // färg ännu. Målvägen kan ha en utgångsanimation (t.ex. landningsvideons
+  // 860 ms), och chrome ska följa den nya sidan först när routen är committed.
+  // syncBrowserChrome() körs synkront i Appens layout-effect vid routebytet.
+  void pathname;
   cancelPendingRouteWrites();
-  setThemeColor(color);
-  setChromeCssColor(color);
-  notifyChromeStrips(pathname, color);
 };
 
 

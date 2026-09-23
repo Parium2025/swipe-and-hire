@@ -99,7 +99,8 @@ const BottomChromeStrip = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        height: isStandalone ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)' : '5px',
+        // Samma 14 px-överlapp som den tidigare fungerande Safari-lösningen.
+        height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
         backgroundColor: 'var(--active-browser-chrome-color, #00193D)',
         zIndex: 2147483647,
         pointerEvents: 'none',

@@ -44,14 +44,23 @@ describe('browserChrome', () => {
     ).toBe('#001F3D');
   });
 
-  it('förbereder målruttens färg före SPA-navigation och stoppar gamla ruttskrivningar', () => {
+  it('behåller aktuell färg under utgångsanimationen och byter först när målvägen visas', () => {
     vi.useFakeTimers();
     syncBrowserChrome('/');
+    vi.advanceTimersByTime(20);
 
     primeBrowserChrome('/auth');
     vi.advanceTimersByTime(20);
 
     expect(themeColorTags()).toHaveLength(1);
+    expect(themeColorTags().every((tag) => tag.content === '#2a2a2a')).toBe(true);
+    expect(
+      document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
+    ).toBe('#2a2a2a');
+
+    syncBrowserChrome('/auth');
+    vi.advanceTimersByTime(20);
+
     expect(themeColorTags().every((tag) => tag.content === '#062B5E')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
