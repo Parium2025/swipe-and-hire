@@ -845,6 +845,12 @@ export const BookInterviewDialog = ({
                   align="start"
                   side="bottom"
                   sideOffset={4}
+                  // Ligger alltid under tidsfältet – annars vänder den upp över
+                  // fältet när mobilens tangentbord krymper vyn.
+                  avoidCollisions={false}
+                  // Inget autofokus: tangentbordet ska inte slå upp direkt när
+                  // menyn öppnas, utan först när man trycker i fältet.
+                  onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <Input
                     value={timeDraft}
