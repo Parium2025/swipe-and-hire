@@ -276,7 +276,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const zoomIn = () => {
     if (isSaving) return;
     setScale(prev => {
-      const nextScale = Math.min(prev * (1 + ZOOM_STEP), Math.max(MAX_SCALE, minScale));
+      const maxScale = Math.max(MAX_SCALE, initialScaleRef.current * 3);
+      const nextScale = Math.min(prev * (1 + ZOOM_STEP), maxScale);
       setPosition(current => clampPosition(current, nextScale));
       return nextScale;
     });
@@ -438,7 +439,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={zoomIn}
-              disabled={scale >= MAX_SCALE || isSaving}
+              disabled={scale >= Math.max(MAX_SCALE, initialScaleRef.current * 3) || isSaving}
               className="!transition-none bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/10 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10 disabled:opacity-50 disabled:hover:bg-white/5 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
             >
               <ZoomIn className="h-4 w-4" />
