@@ -399,14 +399,29 @@ const MobileJobWizard = ({
         // Återställ kopplingen till originalbilderna så "Anpassa bild" alltid
         // öppnar originalet, även efter att annonsen sparats och öppnats igen.
         {
-          const mobileOriginal = (existingJob as any).job_image_original_url || restoredFormData.job_image_url || null;
-          const desktopOriginal = (existingJob as any).job_image_desktop_original_url || restoredFormData.job_image_desktop_url || null;
-          setOriginalStoragePath(mobileOriginal);
-          setOriginalDesktopStoragePath(desktopOriginal);
-          setImageIsEdited(!!mobileOriginal && mobileOriginal !== restoredFormData.job_image_url);
-          setDesktopImageIsEdited(!!desktopOriginal && desktopOriginal !== restoredFormData.job_image_desktop_url);
+          const mobileOriginalInitial: string | null = restoredFormData.job_image_url || null;
+          const desktopOriginalInitial: string | null = restoredFormData.job_image_desktop_url || null;
+          setOriginalStoragePath(mobileOriginalInitial);
+          setOriginalDesktopStoragePath(desktopOriginalInitial);
           (async () => {
             const { getMediaUrl } = await import('@/lib/mediaManager');
+            let mobileOriginal = mobileOriginalInitial;
+            let desktopOriginal = desktopOriginalInitial;
+            const { data: originals } = await supabase
+              .from('job_postings')
+              .select('job_image_url, job_image_desktop_url, job_image_original_url, job_image_desktop_original_url')
+              .eq('id', existingJob.id)
+              .maybeSingle();
+            if (originals?.job_image_original_url && originals.job_image_url === restoredFormData.job_image_url) {
+              mobileOriginal = originals.job_image_original_url;
+              setOriginalStoragePath(mobileOriginal);
+              setImageIsEdited(mobileOriginal !== restoredFormData.job_image_url);
+            }
+            if (originals?.job_image_desktop_original_url && originals.job_image_desktop_url === restoredFormData.job_image_desktop_url) {
+              desktopOriginal = originals.job_image_desktop_original_url;
+              setOriginalDesktopStoragePath(desktopOriginal);
+              setDesktopImageIsEdited(desktopOriginal !== restoredFormData.job_image_desktop_url);
+            }
             if (mobileOriginal) {
               const signed = mobileOriginal.startsWith('http') ? mobileOriginal : await getMediaUrl(mobileOriginal, 'job-image', 86400);
               setOriginalImageUrl(signed || mobileOriginal);
