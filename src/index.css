@@ -1082,6 +1082,21 @@ All colors MUST be HSL.
     height: 0 !important;
   }
 
+  /* Egna inline-dropdowns (t.ex. jobbwizardens glas-listor) renderas inte i
+     Radix-portaler men ska heller aldrig få chrome-strip-tomrum i botten. */
+  .glass-dropdown.overflow-y-auto::after,
+  .glass-dropdown.overflow-auto::after,
+  .glass-dropdown.overflow-y-scroll::after {
+    content: none !important;
+    height: 0 !important;
+  }
+
+  .glass-dropdown.overflow-y-auto,
+  .glass-dropdown.overflow-auto,
+  .glass-dropdown.overflow-y-scroll {
+    scroll-padding-bottom: 0 !important;
+  }
+
   [data-radix-popper-content-wrapper] .overflow-y-auto,
   [data-radix-popper-content-wrapper] .overflow-auto,
   [data-radix-popper-content-wrapper] .overflow-y-scroll {
