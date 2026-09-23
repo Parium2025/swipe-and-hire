@@ -102,7 +102,7 @@ const TopChromeStrip = () => {
   // (flytande verktygsfält) visar annars de extra pixlarna som en mörk rad
   // mellan statusraden och toppmenyn. Endast installerat app-läge behåller
   // sitt extra andrum.
-  const stripInset = isStandalone ? '22px' : '0px';
+  const stripInset = isStandalone ? '22px' : '14px';
   const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
 
   useLayoutEffect(() => {
