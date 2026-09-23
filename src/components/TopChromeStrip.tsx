@@ -43,8 +43,10 @@ const TopChromeStrip = () => {
   // iPhone Safari behåller annars föregående rutts färg tills en full reload.
   // Ankaret behövs därför även i vanlig Safari, inte bara installerat läge.
   const shouldShowStrip = isTouch;
-  const stripInset = isStandalone ? '22px' : '14px';
-  const chromeOffset = `calc(env(safe-area-inset-top, 0px) + ${stripInset})`;
+  const stripHeight = isStandalone
+    ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
+    : '5px';
+  const chromeOffset = isStandalone ? stripHeight : '0px';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
@@ -71,7 +73,7 @@ const TopChromeStrip = () => {
         left: 0,
         right: 0,
         top: 0,
-        height: chromeOffset,
+        height: stripHeight,
         backgroundColor: 'var(--active-browser-chrome-color, #00193D)',
         zIndex: 2147483647,
         pointerEvents: 'none',

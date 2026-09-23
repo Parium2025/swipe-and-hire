@@ -67,7 +67,7 @@ const BottomChromeStrip = () => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    const shouldReserveChrome = isTouch && !isAuthPath(location.pathname);
+    const shouldReserveChrome = isTouch && isStandalone && !isAuthPath(location.pathname);
     if (shouldReserveChrome) {
       const basePx = isTabletLandscape ? 120 : 68;
       root.dataset.touchChrome = 'true';
@@ -99,7 +99,7 @@ const BottomChromeStrip = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
+        height: isStandalone ? 'calc(env(safe-area-inset-bottom, 0px) + 14px)' : '5px',
         backgroundColor: 'var(--active-browser-chrome-color, #00193D)',
         zIndex: 2147483647,
         pointerEvents: 'none',
