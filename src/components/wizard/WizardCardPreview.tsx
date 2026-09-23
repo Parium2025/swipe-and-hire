@@ -525,6 +525,12 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
     const match = input.salaryTransparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
     if (match) {
       salaryText = `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${salaryTypeLabel}`;
+    } else {
+      // T.ex. "100000+" eller ett enskilt belopp — visa exakt som jobbsökaren ser det.
+      const plus = input.salaryTransparency.match(/^(\d+)\s*\+$/);
+      salaryText = plus
+        ? `${parseInt(plus[1], 10).toLocaleString('sv-SE')}+ ${salaryTypeLabel}`
+        : `${input.salaryTransparency} ${salaryTypeLabel}`;
     }
   }
 
