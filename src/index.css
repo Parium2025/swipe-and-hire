@@ -2182,6 +2182,19 @@ All colors MUST be HSL.
   @apply absolute z-50 glass-panel rounded-md mt-1;
 }
 
+/* Touch has no hover state. Safari can synthesize :hover/focus after a tap,
+   so dropdown rows must stay neutral until they are actually selected. */
+@media (any-pointer: coarse), (hover: none), (any-hover: none) {
+  .glass-dropdown button:not([aria-pressed="true"]):hover,
+  .glass-dropdown button:not([aria-pressed="true"]):focus,
+  [role="listbox"] [role="option"]:not([aria-selected="true"]):hover,
+  [role="listbox"] [role="option"]:not([aria-selected="true"]):focus,
+  [role="menu"] [role="menuitem"]:hover,
+  [role="menu"] [role="menuitem"]:focus {
+    background-color: transparent !important;
+  }
+}
+
 
 /* Dölj iOS Safaris native play-knapp på hero-videon (Low Power Mode visar
    annars en stor play-glyph över hela videon även om autoplay är aktiverad).
