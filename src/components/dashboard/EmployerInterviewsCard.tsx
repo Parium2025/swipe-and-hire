@@ -358,6 +358,32 @@ export const EmployerInterviewsCard = memo(() => {
 
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!pendingDismiss} onOpenChange={(open) => { if (!open) setPendingDismiss(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Vill du ta bort den här intervjun</AlertDialogTitle>
+          <AlertDialogDescription>
+            {pendingDismiss
+              ? `Mötet med ${pendingDismiss.candidate_name} försvinner från översikten. Kalendern och kandidatens vy påverkas inte.`
+              : ''}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Avbryt</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => {
+              if (pendingDismiss) dismissInterview.mutate(pendingDismiss.id);
+              setPendingDismiss(null);
+            }}
+          >
+            Ta bort
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 });
 
