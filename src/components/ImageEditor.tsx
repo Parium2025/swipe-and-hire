@@ -370,7 +370,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className={`max-w-md max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm ${isMobileJobCard ? 'h-auto' : 'h-[92dvh] md:h-auto'}`}>
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
