@@ -105,7 +105,7 @@ export const EmployerInterviewsCard = memo(() => {
             </div>
           ) : (
             <>
-              <div className="flex-1 space-y-1.5 sm:overflow-y-auto h-full sm:pr-1 scrollbar-hide">
+              <div className="flex-1 min-h-0 space-y-1.5 sm:overflow-y-auto sm:pr-1 scrollbar-hide">
                 {liveInterviews.map((interview, index) => {
                   const LocationIcon = getLocationIcon(interview.location_type);
                   const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
@@ -132,7 +132,7 @@ export const EmployerInterviewsCard = memo(() => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       className={cn(
-                        'rounded-lg p-3 sm:p-2 cursor-pointer transition-colors',
+                        'rounded-lg px-3 py-2.5 sm:p-2 cursor-pointer transition-colors',
                         canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
                         // Mobil: endast den valda intervjun syns — en per kortyta.
                         index !== activeIndex && 'hidden sm:block',
