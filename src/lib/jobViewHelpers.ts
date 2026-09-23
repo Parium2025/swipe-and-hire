@@ -1,3 +1,5 @@
+import { formatSalaryTransparencyValue, formatSwedishAmount } from '@/lib/salaryRange';
+
 /**
  * Pure helper/utility functions for JobView display formatting.
  * Extracted from JobView.tsx for reuse and maintainability.
@@ -21,11 +23,10 @@ export const getSalaryTypeLabel = (salaryType: string): string => {
 /** Format salary range for display */
 export const formatSalary = (min?: number, max?: number, salaryType?: string) => {
   const suffix = salaryType === 'hourly' ? 'kr/tim' : 'kr/mån';
-  const fmt = (n: number) => n.toLocaleString('sv-SE');
   if (!min && !max) return null;
-  if (min && max) return `${fmt(min)} – ${fmt(max)} ${suffix}`;
-  if (min) return `Från ${fmt(min)} ${suffix}`;
-  if (max) return `Upp till ${fmt(max)} ${suffix}`;
+  if (min && max) return `${formatSwedishAmount(min)} – ${formatSwedishAmount(max)} ${suffix}`;
+  if (min) return `Från ${formatSwedishAmount(min)} ${suffix}`;
+  if (max) return `Upp till ${formatSwedishAmount(max)} ${suffix}`;
   return null;
 };
 
@@ -59,17 +60,5 @@ export const getSalaryTransparencyLabel = (value?: string) => {
   if (!value) return null;
   // Known label → return it
   if (labels[value]) return labels[value];
-  // Detect salary range strings like "75000-80000" and format them nicely
-  const rangeMatch = value.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-  if (rangeMatch) {
-    const min = parseInt(rangeMatch[1]).toLocaleString('sv-SE');
-    const max = parseInt(rangeMatch[2]).toLocaleString('sv-SE');
-    return `${min} – ${max} kr/mån`;
-  }
-  // Single number
-  const singleMatch = value.match(/^(\d+)$/);
-  if (singleMatch) {
-    return `${parseInt(singleMatch[1]).toLocaleString('sv-SE')} kr/mån`;
-  }
-  return value;
+  return formatSalaryTransparencyValue(value) || value;
 };

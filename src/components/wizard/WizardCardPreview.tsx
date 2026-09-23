@@ -27,6 +27,7 @@ import {
 import { formatDateShortSv } from '@/lib/date';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { formatSalaryTransparencyValue, formatSwedishAmount } from '@/lib/salaryRange';
 
 
 
@@ -518,20 +519,12 @@ export function buildWizardPreviewData(input: BuildPreviewInput): WizardPreviewD
   if (input.salaryTransparency === 'after_interview') {
     salaryText = 'Lön efter intervju';
   } else if (min && max) {
-    salaryText = `${min.toLocaleString('sv-SE')} – ${max.toLocaleString('sv-SE')} ${salaryTypeLabel}`;
+    salaryText = `${formatSwedishAmount(min)} – ${formatSwedishAmount(max)} ${salaryTypeLabel}`;
   } else if (min || max) {
-    salaryText = `Från ${(min || max)!.toLocaleString('sv-SE')} ${salaryTypeLabel}`;
+    const amount = min || max;
+    salaryText = amount ? `Från ${formatSwedishAmount(amount)} ${salaryTypeLabel}` : null;
   } else if (input.salaryTransparency && /^\d/.test(input.salaryTransparency)) {
-    const match = input.salaryTransparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-    if (match) {
-      salaryText = `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${salaryTypeLabel}`;
-    } else {
-      // T.ex. "100000+" eller ett enskilt belopp — visa exakt som jobbsökaren ser det.
-      const plus = input.salaryTransparency.match(/^(\d+)\s*\+$/);
-      salaryText = plus
-        ? `${parseInt(plus[1], 10).toLocaleString('sv-SE')}+ ${salaryTypeLabel}`
-        : `${input.salaryTransparency} ${salaryTypeLabel}`;
-    }
+    salaryText = formatSalaryTransparencyValue(input.salaryTransparency, salaryTypeLabel);
   }
 
   // Days-left används bara för faktisk utgången status — aldrig som standardpill.

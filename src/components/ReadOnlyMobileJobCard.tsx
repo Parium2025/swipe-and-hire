@@ -18,6 +18,7 @@ import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { saveScrollNow } from '@/lib/scrollRestoration';
 import { hapticLight } from '@/lib/haptics';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 
 
 interface ReadOnlyMobileJobCardProps {
@@ -385,27 +386,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           })()}
           {/* Salary badge */}
           {(() => {
-            let salaryText: string | null = null;
-            const typeLabel = job.salary_type === 'monthly' || job.salary_type === 'fast' ? 'kr/mån'
-              : job.salary_type === 'hourly' || job.salary_type === 'rorlig' ? 'kr/tim'
-              : job.salary_type === 'fast-rorlig' ? 'kr/mån' : 'kr/mån';
-
-            if (job.salary_transparency === 'after_interview') {
-              salaryText = 'Lön efter intervju';
-            } else if (job.salary_min || job.salary_max) {
-              if (job.salary_min && job.salary_max) {
-                salaryText = `${job.salary_min.toLocaleString('sv-SE')} – ${job.salary_max.toLocaleString('sv-SE')} ${typeLabel}`;
-              } else {
-                salaryText = `Från ${(job.salary_min || job.salary_max)!.toLocaleString('sv-SE')} ${typeLabel}`;
-              }
-            } else if (job.salary_transparency && /^\d/.test(job.salary_transparency)) {
-              const match = job.salary_transparency.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-              if (match) {
-                salaryText = `${parseInt(match[1], 10).toLocaleString('sv-SE')} – ${parseInt(match[2], 10).toLocaleString('sv-SE')} ${typeLabel}`;
-              } else {
-                salaryText = `${job.salary_transparency} ${typeLabel}`;
-              }
-            }
+            const salaryText = getJobBadgeSalary(job);
             if (!salaryText) return null;
             return (
               <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">

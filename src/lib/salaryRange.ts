@@ -30,6 +30,44 @@ export interface ParsedSalary {
 
 const HOURLY_TYPES = new Set(['hourly', 'rorlig', 'timlon', 'timlön']);
 
+/** Formaterar heltal enligt svensk typografi, exempelvis 100 000. */
+export function formatSwedishAmount(value: number): string {
+  return value.toLocaleString('sv-SE');
+}
+
+/** Formaterar lagrade lönespann, exempelvis 40 000 – 50 000 kr/mån. */
+export function formatSalaryTransparencyValue(
+  value?: string | null,
+  unitLabel = 'kr/mån',
+): string | null {
+  const normalized = value?.trim();
+  if (!normalized) return null;
+  if (normalized === 'after_interview') return 'Lön diskuteras vid intervju';
+
+  const range = normalized.match(/^(\d[\d\s]*)\s*[-–—]\s*(\d[\d\s]*)$/);
+  if (range) {
+    const min = Number(range[1].replace(/\s/g, ''));
+    const max = Number(range[2].replace(/\s/g, ''));
+    if (Number.isFinite(min) && Number.isFinite(max)) {
+      return `${formatSwedishAmount(min)} – ${formatSwedishAmount(max)} ${unitLabel}`;
+    }
+  }
+
+  const minimum = normalized.match(/^(\d[\d\s]*)\s*\+$/);
+  if (minimum) {
+    const amount = Number(minimum[1].replace(/\s/g, ''));
+    if (Number.isFinite(amount)) return `${formatSwedishAmount(amount)} ${unitLabel} eller mer`;
+  }
+
+  const single = normalized.match(/^(\d[\d\s]*)$/);
+  if (single) {
+    const amount = Number(single[1].replace(/\s/g, ''));
+    if (Number.isFinite(amount)) return `${formatSwedishAmount(amount)} ${unitLabel}`;
+  }
+
+  return normalized;
+}
+
 export function parseSalary(job: SalaryJobFields): ParsedSalary | null {
   const type = (job.salary_type || '').toLowerCase();
   const isHourly = HOURLY_TYPES.has(type) || type.includes('tim');
@@ -69,8 +107,8 @@ export function formatSalary(job: SalaryJobFields): string | null {
   const s = parseSalary(job);
   if (!s) return null;
   if (s.afterInterview) return 'Lön diskuteras vid intervju';
-  const fmt = (n: number) => n.toLocaleString('sv-SE');
-  if (s.min !== null && s.max !== null) return `${fmt(s.min)} – ${fmt(s.max)} ${s.unitLabel}`;
-  if (s.min !== null) return `Från ${fmt(s.min)} ${s.unitLabel}`;
-  return `Upp till ${fmt(s.max!)} ${s.unitLabel}`;
+  if (s.min !== null && s.max !== null) return `${formatSwedishAmount(s.min)} – ${formatSwedishAmount(s.max)} ${s.unitLabel}`;
+  if (s.min !== null) return `Från ${formatSwedishAmount(s.min)} ${s.unitLabel}`;
+  if (s.max !== null) return `Upp till ${formatSwedishAmount(s.max)} ${s.unitLabel}`;
+  return null;
 }

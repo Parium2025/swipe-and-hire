@@ -143,8 +143,8 @@ export const getSalaryTypeLabel = (type: string): string => {
 
 // Salary transparency options
 export const SALARY_TRANSPARENCY_OPTIONS: DropdownOption[] = [
-  { value: '0-5000', label: '0 - 5 000 kr' },
-  { value: '5000-10000', label: '5 000 - 10 000 kr' },
+  { value: '0-5000', label: '0 – 5 000 kr' },
+  { value: '5000-10000', label: '5 000 – 10 000 kr' },
   { value: '10000-15000', label: '10 000 - 15 000 kr' },
   { value: '15000-20000', label: '15 000 - 20 000 kr' },
   { value: '20000-25000', label: '20 000 - 25 000 kr' },
@@ -161,7 +161,7 @@ export const SALARY_TRANSPARENCY_OPTIONS: DropdownOption[] = [
   { value: '80000-85000', label: '80 000 - 85 000 kr' },
   { value: '85000-90000', label: '85 000 - 90 000 kr' },
   { value: '90000-100000', label: '90 000 - 100 000 kr' },
-  { value: '100000+', label: '100 000+ kr' },
+  { value: '100000+', label: '100 000 kr eller mer' },
 ];
 
 export const getSalaryTransparencyLabel = (value: string): string => {
