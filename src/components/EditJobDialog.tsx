@@ -897,6 +897,28 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
     desktopImageClearedRef.current = false;
   }, [job?.id, open]);
 
+  // Hämta sparade originalbilder så "Anpassa bild" alltid öppnar originalet,
+  // även om annonslistan inte innehåller originalfälten.
+  useEffect(() => {
+    if (!open || !job?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('job_postings')
+        .select('job_image_url, job_image_desktop_url, job_image_original_url, job_image_desktop_original_url')
+        .eq('id', job.id)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      if (data.job_image_original_url && !imageClearedRef.current) {
+        setOriginalImageUrl(prev => (!prev || prev === data.job_image_url) ? data.job_image_original_url : prev);
+      }
+      if (data.job_image_desktop_original_url && !desktopImageClearedRef.current) {
+        setOriginalDesktopImageUrl(prev => (!prev || prev === data.job_image_desktop_url) ? data.job_image_desktop_original_url : prev);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [job?.id, open]);
+
   // Load job image if exists - use public URL from job-images bucket (mobile)
   useEffect(() => {
     const loadJobImage = async () => {
@@ -921,14 +943,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           .getPublicUrl(url);
         if (publicUrl) {
           setJobImageDisplayUrl(publicUrl);
-          setOriginalImageUrl(url); // Keep storage path as original
+          setOriginalImageUrl(prev => prev ?? (((job as any)?.job_image_url === url && (job as any)?.job_image_original_url) || url));
           return;
         }
       }
 
       // Otherwise use URL as-is
       setJobImageDisplayUrl(url);
-      setOriginalImageUrl(url);
+      setOriginalImageUrl(prev => prev ?? (((job as any)?.job_image_url === url && (job as any)?.job_image_original_url) || url));
     };
     
     loadJobImage();
@@ -954,14 +976,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
           .getPublicUrl(desktopUrl);
         if (publicUrl) {
           setJobImageDesktopDisplayUrl(publicUrl);
-          setOriginalDesktopImageUrl(desktopUrl);
+          setOriginalDesktopImageUrl(prev => prev ?? (((job as any)?.job_image_desktop_url === desktopUrl && (job as any)?.job_image_desktop_original_url) || desktopUrl));
           return;
         }
       }
       
       // Otherwise use URL as-is
       setJobImageDesktopDisplayUrl(desktopUrl);
-      setOriginalDesktopImageUrl(desktopUrl);
+      setOriginalDesktopImageUrl(prev => prev ?? (((job as any)?.job_image_desktop_url === desktopUrl && (job as any)?.job_image_desktop_original_url) || desktopUrl));
     };
     
     loadDesktopJobImage();
@@ -1165,6 +1187,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_original_url: formData.job_image_url ? (originalImageUrl || formData.job_image_url) : null,
+        job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopImageUrl || formData.job_image_desktop_url) : null,
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
@@ -1898,6 +1922,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_original_url: formData.job_image_url ? (originalImageUrl || formData.job_image_url) : null,
+        job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopImageUrl || formData.job_image_desktop_url) : null,
         image_focus_position: formData.image_focus_position || 'center',
         image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),

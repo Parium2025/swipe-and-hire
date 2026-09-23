@@ -395,6 +395,43 @@ const MobileJobWizard = ({
           .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
 
         setFormData(restoredFormData);
+
+        // Återställ kopplingen till originalbilderna så "Anpassa bild" alltid
+        // öppnar originalet, även efter att annonsen sparats och öppnats igen.
+        {
+          const mobileOriginalInitial: string | null = restoredFormData.job_image_url || null;
+          const desktopOriginalInitial: string | null = restoredFormData.job_image_desktop_url || null;
+          setOriginalStoragePath(mobileOriginalInitial);
+          setOriginalDesktopStoragePath(desktopOriginalInitial);
+          (async () => {
+            const { getMediaUrl } = await import('@/lib/mediaManager');
+            let mobileOriginal = mobileOriginalInitial;
+            let desktopOriginal = desktopOriginalInitial;
+            const { data: originals } = await supabase
+              .from('job_postings')
+              .select('job_image_url, job_image_desktop_url, job_image_original_url, job_image_desktop_original_url')
+              .eq('id', existingJob.id)
+              .maybeSingle();
+            if (originals?.job_image_original_url && originals.job_image_url === restoredFormData.job_image_url) {
+              mobileOriginal = originals.job_image_original_url;
+              setOriginalStoragePath(mobileOriginal);
+              setImageIsEdited(mobileOriginal !== restoredFormData.job_image_url);
+            }
+            if (originals?.job_image_desktop_original_url && originals.job_image_desktop_url === restoredFormData.job_image_desktop_url) {
+              desktopOriginal = originals.job_image_desktop_original_url;
+              setOriginalDesktopStoragePath(desktopOriginal);
+              setDesktopImageIsEdited(desktopOriginal !== restoredFormData.job_image_desktop_url);
+            }
+            if (mobileOriginal) {
+              const signed = mobileOriginal.startsWith('http') ? mobileOriginal : await getMediaUrl(mobileOriginal, 'job-image', 86400);
+              setOriginalImageUrl(signed || mobileOriginal);
+            } else setOriginalImageUrl(null);
+            if (desktopOriginal) {
+              const signed = desktopOriginal.startsWith('http') ? desktopOriginal : await getMediaUrl(desktopOriginal, 'job-image', 86400);
+              setOriginalDesktopImageUrl(signed || desktopOriginal);
+            } else setOriginalDesktopImageUrl(null);
+          })();
+        }
         if (bestStepSource) {
           setCurrentStep(bestStepSource.currentStep);
         }
@@ -2439,6 +2476,8 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_original_url: formData.job_image_url ? (originalStoragePath || formData.job_image_url) : null,
+        job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopStoragePath || formData.job_image_desktop_url) : null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         expires_at: null,
@@ -2629,6 +2668,8 @@ const MobileJobWizard = ({
         pitch: formData.pitch || null,
         job_image_url: formData.job_image_url || null,
         job_image_desktop_url: formData.job_image_desktop_url || null,
+        job_image_original_url: formData.job_image_url ? (originalStoragePath || formData.job_image_url) : null,
+        job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopStoragePath || formData.job_image_desktop_url) : null,
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         // Databasen håller nya/återpublicerade annonser dolda tills både annons

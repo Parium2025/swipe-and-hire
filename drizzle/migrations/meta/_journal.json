@@ -295,6 +295,13 @@
       "when": 1790110624224,
       "tag": "0041_no_cancel_message_when_candidate_declines",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790184726846,
+      "tag": "0042_job_image_original_paths",
+      "breakpoints": true
     }
   ]
 }
