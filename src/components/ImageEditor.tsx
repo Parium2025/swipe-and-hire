@@ -329,7 +329,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
-      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] !flex flex-col overflow-y-auto bg-white/5 border-white/20 backdrop-blur-sm">
+      <DialogContentNoFocus className="max-w-md h-[92dvh] md:h-auto max-h-[92dvh] !flex flex-col overflow-y-auto no-chrome-pad bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
@@ -338,7 +338,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         
         <div className="flex flex-col flex-1 min-h-0 gap-4">
           {/* Canvas — fyller all ledig höjd på mobil så ingen död yta uppstår */}
-          <div className="h-[calc(92dvh-270px)] md:h-auto flex items-center justify-center">
+          <div className="flex-1 min-h-0 flex items-center justify-center">
             <div className="relative h-full flex items-center justify-center">
               <canvas
                 ref={canvasRef}
