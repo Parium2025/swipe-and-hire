@@ -45,6 +45,8 @@ import { Switch } from '@/components/ui/switch';
 import { searchOccupations } from '@/lib/occupations';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
+import { ImageLibraryPicker } from '@/components/ImageLibraryPicker';
+import { useOrgImageLibrary } from '@/hooks/useOrgImageLibrary';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
@@ -4302,10 +4304,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                           </p>
                           
                           {!jobImageDisplayUrl && (
+                            <>
                             <FileUpload
                               mediaType="job-image"
                               uploadType="image"
                               onFileUploaded={async (storagePath, fileName) => {
+                              void addToLibrary(storagePath, fileName);
                                 handleInputChange('job_image_url', storagePath);
                                 setOriginalImageUrl(storagePath);
                                 
@@ -4323,6 +4327,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               acceptedFileTypes={['image/*']}
                               maxFileSize={50 * 1024 * 1024}
                             />
+                            <ImageLibraryPicker onSelect={async (storagePath: string) => {
+                                handleInputChange('job_image_url', storagePath);
+                                setOriginalImageUrl(storagePath);
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('job-images')
+                                  .getPublicUrl(storagePath);
+                                  
+                                if (publicUrl) {
+                                  imageClearedRef.current = false;
+                                  setJobImageDisplayUrl(publicUrl);
+                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+                                  await preloadSingleFile(publicUrl);
+                                }
+                              }}} />
+                            </>
                           )}
                           
                           {jobImageDisplayUrl && (
@@ -4408,10 +4428,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                           </p>
                           
                           {!jobImageDesktopDisplayUrl && (
+                            <>
                             <FileUpload
                               mediaType="job-image"
                               uploadType="image"
                               onFileUploaded={async (storagePath, fileName) => {
+                              void addToLibrary(storagePath, fileName);
                                 handleInputChange('job_image_desktop_url', storagePath);
                                 setOriginalDesktopImageUrl(storagePath);
                                 
@@ -4429,6 +4451,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               acceptedFileTypes={['image/*']}
                               maxFileSize={50 * 1024 * 1024}
                             />
+                            <ImageLibraryPicker onSelect={async (storagePath: string) => {
+                                handleInputChange('job_image_desktop_url', storagePath);
+                                setOriginalDesktopImageUrl(storagePath);
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('job-images')
+                                  .getPublicUrl(storagePath);
+                                  
+                                if (publicUrl) {
+                                  desktopImageClearedRef.current = false;
+                                  setJobImageDesktopDisplayUrl(publicUrl);
+                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+                                  await preloadSingleFile(publicUrl);
+                                }
+                              }}} />
+                            </>
                           )}
                           
                           {jobImageDesktopDisplayUrl && (
