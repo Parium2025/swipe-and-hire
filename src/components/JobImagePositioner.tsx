@@ -53,8 +53,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, cont
   return (
     <div className="space-y-2">
       <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt.</p>
-      {/* Matchar jobbkortets bildyta exakt. Fokusvärdet påverkar endast kortet,
-          inte telefon-, dator- eller annonsförhandsvisningen. */}
+      {/* Samma breda bildyta används för jobbkort och öppnad annons. */}
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
