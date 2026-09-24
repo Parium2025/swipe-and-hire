@@ -723,6 +723,7 @@ const SearchJobs = memo(() => {
       applications_count: job.applications_count,
       created_at: job.created_at,
       expires_at: job.expires_at,
+      start_date: job.start_date,
       employer_id: job.employer_id,
       description: job.description,
       salary_min: job.salary_min,

@@ -18,6 +18,7 @@ export interface SwipeJob {
   applications_count: number;
   created_at: string;
   expires_at?: string;
+  start_date?: string | null;
   employer_id?: string;
   description?: string;
   salary_min?: number;

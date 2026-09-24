@@ -159,6 +159,7 @@ export interface SearchJob {
   updated_at: string;
   image_updated_at?: string | null;
   expires_at: string | null;
+  start_date: string | null;
   search_rank: number;
   image_focus_position: string;
   image_focus_position_desktop: string;
