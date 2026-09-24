@@ -122,7 +122,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const cardImageFocus = job.job_image_url
     ? job.image_focus_position
     : job.image_focus_position_desktop;
-  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 300, quality: 75, resize: 'cover' });
+  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, quality: 75 });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';

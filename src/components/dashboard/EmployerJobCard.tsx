@@ -108,7 +108,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
   const cardImageFocus = job.job_image_url
     ? job.image_focus_position
     : job.image_focus_position_desktop;
-  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
+  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, quality: 75 });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
 
