@@ -4156,7 +4156,7 @@ const MobileJobWizard = ({
                                   job_image_url: jobImageDisplayUrl || jobImageDesktopDisplayUrl || undefined,
                                   image_focus_position: jobImageDisplayUrl ? (formData.image_focus_position || 'center') : (formData.image_focus_position_desktop || 'center'),
                                   company_name: profile?.company_name || 'Företag',
-                                  company_logo_url: preparedCompanyLogoUrl || undefined,
+                                  company_logo_url: profile?.company_logo_url || preparedCompanyLogoUrl || undefined,
                                   salary_min: formData.salary_min ? parseInt(String(formData.salary_min), 10) : null,
                                   salary_max: formData.salary_max ? parseInt(String(formData.salary_max), 10) : null,
                                   salary_type: formData.salary_type,
