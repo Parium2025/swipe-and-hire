@@ -1856,6 +1856,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
              isValidSwedishPostalCode(formData.workplace_postal_code) && 
              formData.workplace_city.trim();
     }
+
+    if (currentStep === 3) {
+      return Boolean(formData.job_image_url);
+    }
     
     return true;
   };
