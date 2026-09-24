@@ -437,14 +437,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         if (resolved) {
           setCanonicalImageUrl(resolved);
           const cachedBlob = imageCache.getCachedUrl(resolved);
-          setImageUrl(prev => {
-            if (!prev) return cachedBlob || resolved;
-            if (prev.startsWith('blob:')) return cachedBlob || resolved;
-            if (navigationImageState.initialHeroImageUrl && prev === navigationImageState.initialHeroImageUrl && prev !== resolved) {
-              return cachedBlob || resolved;
-            }
-            return prev;
-          });
+          // Förhandsladdningen kan ha skickat med mobilkortets bild. Ersätt den
+          // alltid med annonsens kanoniska datorbild när annonsen är hämtad.
+          setImageUrl(cachedBlob || resolved);
           if (!cachedBlob) {
             // Warm the cache in background — do NOT swap src after; let the browser keep its loaded bitmap
             imageCache.loadImage(resolved).catch(() => {});
