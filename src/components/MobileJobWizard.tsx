@@ -3965,7 +3965,7 @@ const MobileJobWizard = ({
                                         event.stopPropagation();
                                         setShowApplicationForm(false);
                                       }}
-                                      className="sticky top-0 ml-auto -mt-1 -mb-4 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
+                                      className="sticky top-0 ml-auto -mt-2 -mb-4 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
                                     >
                                       <X className="h-4 w-4 -translate-y-1" />
                                     </Button>
