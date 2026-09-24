@@ -4,6 +4,7 @@ import { isValidClockTime } from '@/lib/clockTime';
 import { useDropdownKeyboardNav } from '@/hooks/useDropdownKeyboardNav';
 import { useFitScale } from '@/hooks/useFitScale';
 import { AutoFitTitle } from '@/components/ui/AutoFitTitle';
+import { WizardDesktopCardPreview } from '@/components/wizard/WizardDesktopCardPreview';
 import { WizardSwipePreview, WizardListPreview, buildWizardPreviewData } from '@/components/wizard/WizardCardPreview';
 import { StartDatePicker } from '@/components/StartDatePicker';
 import { useNavigate } from 'react-router-dom';
@@ -3983,7 +3984,7 @@ const MobileJobWizard = ({
                                         title: getDisplayTitle(),
                                         description: formData.description,
                                         imageUrl: jobImageDesktopDisplayUrl || jobImageDisplayUrl,
-                                        imageFocusPosition: 'center',
+                                        imageFocusPosition: jobImageDesktopDisplayUrl ? (formData.image_focus_position_desktop || 'center') : (formData.image_focus_position || 'center'),
                                         companyName: profile?.company_name || 'Företag',
                                         companyLogoUrl: preparedCompanyLogoUrl,
                                         location: formData.location,
@@ -4030,7 +4031,7 @@ const MobileJobWizard = ({
                               companyName: profile?.company_name || 'Företag',
                               companyLogoUrl: preparedCompanyLogoUrl,
                               imageUrl: jobImageDisplayUrl,
-                              imageFocusPosition: 'center',
+                              imageFocusPosition: formData.image_focus_position || 'center',
                               employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                               employmentTypeDetail: formatEmploymentDetails({
                                 employment_type: formData.employment_type,
@@ -4096,7 +4097,7 @@ const MobileJobWizard = ({
                                           title: getDisplayTitle(),
                                           description: formData.description,
                                           imageUrl: jobImageDesktopDisplayUrl || jobImageDisplayUrl,
-                                          imageFocusPosition: 'center',
+                                          imageFocusPosition: jobImageDesktopDisplayUrl ? (formData.image_focus_position_desktop || 'center') : (formData.image_focus_position || 'center'),
                                           companyName: profile?.company_name || 'Företag',
                                           companyLogoUrl: preparedCompanyLogoUrl,
                                           location: formData.location,
@@ -4137,36 +4138,32 @@ const MobileJobWizard = ({
 
                                   {/* Job card view (when opened job is closed) */}
                                   {!showDesktopApplicationForm && (
-                              <WizardListPreview
-                                {...buildWizardPreviewData({
-                                  title: formData.title || 'Jobbtitel',
-                                  occupation: formData.occupation,
-                                  companyName: profile?.company_name || 'Företag',
-                                  companyLogoUrl: preparedCompanyLogoUrl,
-                                  imageUrl: jobImageDisplayUrl,
-                                  imageFocusPosition: 'center',
-                                  employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
-                                  employmentTypeDetail: formatEmploymentDetails({
-                                    employment_type: formData.employment_type,
-                                    part_time_days: formData.part_time_days,
-                                    part_time_shifts: formData.part_time_shifts,
-                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
-                                    duration_unit: formData.duration_unit,
-                                  }),
-                                  workStartTime: formData.work_start_time,
-                                  workEndTime: formData.work_end_time,
-                                  workSchedule: formData.work_schedule,
+                              <WizardDesktopCardPreview
+                                job={{
+                                  id: (null as any)?.id || 'preview',
+                                  title: getDisplayTitle(),
                                   location: formData.workplace_city || formData.location || '',
-                                  salaryMin: formData.salary_min,
-                                  salaryMax: formData.salary_max,
-                                  salaryType: formData.salary_type,
-                                  salaryTransparency: formData.salary_transparency,
+                                  employment_type: formData.employment_type,
+                                  part_time_days: formData.part_time_days as any,
+                                  part_time_shifts: formData.part_time_shifts as any,
+                                  duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                  duration_unit: formData.duration_unit as any,
+                                  is_active: true,
+                                  views_count: (null as any)?.views_count ?? 0,
+                                  applications_count: (null as any)?.applications_count ?? 0,
+                                  created_at: (null as any)?.created_at ?? new Date().toISOString(),
+                                  expires_at: (formData as any).expires_at ?? (null as any)?.expires_at ?? undefined,
+                                  job_image_url: jobImageDisplayUrl || jobImageDesktopDisplayUrl || undefined,
+                                  image_focus_position: jobImageDisplayUrl ? (formData.image_focus_position || 'center') : (formData.image_focus_position_desktop || 'center'),
+                                  company_name: profile?.company_name || 'Företag',
+                                  company_logo_url: preparedCompanyLogoUrl || undefined,
+                                  salary_min: formData.salary_min ? parseInt(String(formData.salary_min), 10) : null,
+                                  salary_max: formData.salary_max ? parseInt(String(formData.salary_max), 10) : null,
+                                  salary_type: formData.salary_type,
+                                  salary_transparency: formData.salary_transparency,
+                                  overlay_text_color: formData.overlay_text_color,
                                   benefits: formData.benefits,
-                                  overlayTextColor: formData.overlay_text_color,
-                                  recruiterName: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : null,
-                                  startDate: formData.start_date,
-                                  questionsCount: customQuestions.length,
-                                })}
+                                }}
                                 onOpenForm={() => setShowDesktopApplicationForm(true)}
                               />
                             )}
