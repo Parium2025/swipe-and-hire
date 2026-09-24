@@ -55,6 +55,7 @@ import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePos
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { usePreparedCompanyLogo } from '@/hooks/usePreparedCompanyLogo';
 import { JobPostingPreviewContent } from '@/components/jobview';
+import { SwipeJobDetailPreviewContent } from '@/components/swipe/jobDetail/SwipeJobDetailPreviewContent';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
@@ -3179,14 +3180,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                     >
                                       <X className="h-4 w-4" />
                                     </Button>
-                                    <JobPostingPreviewContent
+                                    <SwipeJobDetailPreviewContent
                                       data={{
                                         title: getDisplayTitle(),
                                         description: formData.description,
-                                        imageUrl: jobImageDesktopDisplayUrl || jobImageDisplayUrl,
-                                        imageFocusPosition: jobImageDesktopDisplayUrl ? (formData.image_focus_position_desktop || 'center') : (formData.image_focus_position || 'center'),
+                                        requirements: formData.requirements,
+                                        pitch: formData.pitch,
+                                        applicationInstructions: formData.application_instructions,
                                         companyName: profile?.company_name || 'Företag',
-                                        companyLogoUrl: preparedCompanyLogoUrl,
                                         location: formData.location,
                                         employmentType: formData.employment_type,
                                         partTimeDays: formData.part_time_days,
@@ -3212,12 +3213,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         salaryTransparency: formData.salary_transparency,
                                         contactEmail: formData.contact_email,
                                         benefits: formData.benefits,
-                                        overlayTextColor: formData.overlay_text_color,
                                       }}
                                       questions={customQuestions}
-                                      answers={previewAnswers}
-                                      onAnswerChange={(questionId, value) => setPreviewAnswers((current) => ({ ...current, [questionId]: value }))}
-                                      onOpenCompany={() => setShowCompanyProfile(true)}
                                       scale={0.36}
                                     />
                                   </div>
