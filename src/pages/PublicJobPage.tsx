@@ -46,6 +46,7 @@ type Job = {
   company_logo_url: string | null;
   job_image_url: string | null;
   job_image_desktop_url: string | null;
+  image_focus_position: string | null;
   image_focus_position_desktop: string | null;
   benefits: string[] | null;
   created_at: string;
@@ -457,7 +458,7 @@ const PublicJobPage = () => {
               src={resolvedJobImageUrl}
               alt={`${job.title} hos ${company}`}
               className="w-full h-auto aspect-[16/9] object-cover"
-              style={{ objectPosition: toObjectPosition(job.image_focus_position_desktop) }}
+              style={{ objectPosition: toObjectPosition(job.job_image_desktop_url ? job.image_focus_position_desktop : job.image_focus_position) }}
               width={1200}
               height={675}
               decoding="async"
