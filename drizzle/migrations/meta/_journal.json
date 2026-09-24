@@ -316,6 +316,13 @@
       "when": 1790185453861,
       "tag": "0044_image_library_access_platform_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790265987366,
+      "tag": "0045_include_desktop_image_in_public_job",
+      "breakpoints": true
     }
   ]
 }
