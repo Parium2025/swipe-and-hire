@@ -3974,7 +3974,7 @@ const MobileJobWizard = ({
                                         event.stopPropagation();
                                         setShowApplicationForm(false);
                                       }}
-                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full text-white transition-colors duration-200 [@media(hover:hover)]:hover:bg-white/15 hover:backdrop-blur-md active:bg-white/25"
+                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full text-white transition-colors duration-200 [@media(hover:hover)]:hover:bg-black/50 hover:backdrop-blur-md active:bg-black/60"
                                     >
                                       <X className="h-4 w-4" />
                                     </Button>
@@ -4087,7 +4087,7 @@ const MobileJobWizard = ({
                                           event.stopPropagation();
                                           setShowDesktopApplicationForm(false);
                                         }}
-                                        className="sticky top-0 ml-auto -mb-10 z-30 flex h-9 w-9 rounded-full text-white transition-colors duration-200 [@media(hover:hover)]:hover:bg-white/15 hover:backdrop-blur-md active:bg-white/25"
+                                        className="sticky top-0 ml-auto -mb-10 z-30 flex h-9 w-9 rounded-full text-white transition-colors duration-200 [@media(hover:hover)]:hover:bg-black/50 hover:backdrop-blur-md active:bg-black/60"
                                       >
                                         <X className="h-4 w-4" />
                                       </Button>
