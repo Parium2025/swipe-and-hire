@@ -3216,6 +3216,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         benefits: formData.benefits,
                                       }}
                                       questions={customQuestions}
+                                      onScrollTopChange={setIsScrolledTop}
                                     />
                                   </div>
                                 )}

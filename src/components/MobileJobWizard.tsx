@@ -4010,6 +4010,7 @@ const MobileJobWizard = ({
                                         benefits: formData.benefits,
                                       }}
                                       questions={customQuestions}
+                                      onScrollTopChange={setIsScrolledTop}
                                     />
                                   </div>
                                 )}
