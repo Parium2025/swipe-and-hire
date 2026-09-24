@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { MoveVertical } from 'lucide-react';
 import { parseFocusPercent, type FocusValue } from '@/lib/jobImageFocus';
 
