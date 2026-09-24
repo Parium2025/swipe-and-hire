@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { MoveVertical } from 'lucide-react';
 import { parseFocusPercent, type FocusValue } from '@/lib/jobImageFocus';
 
@@ -24,6 +24,8 @@ interface JobImagePositionerProps {
 export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
   const startY = useRef(0);
   const startPercent = useRef(focusPercent);
 
@@ -31,24 +33,47 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
+    isDraggingRef.current = true;
+    activePointerIdRef.current = e.pointerId;
     setIsDragging(true);
     startY.current = e.clientY;
     startPercent.current = focusPercent;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
   }, [focusPercent]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging || !containerRef.current) return;
+    if (!isDraggingRef.current || activePointerIdRef.current !== e.pointerId || !containerRef.current) return;
     const containerHeight = containerRef.current.clientHeight;
     // Sensitivity: moving pointer down → image shifts up → higher % (shows lower part)
     const deltaY = e.clientY - startY.current;
     const deltaPct = (deltaY / containerHeight) * 100;
     onFocusChange(clamp(startPercent.current + deltaPct));
-  }, [isDragging, onFocusChange]);
+  }, [onFocusChange]);
 
-  const handlePointerUp = useCallback(() => {
+  const stopDragging = useCallback(() => {
+    isDraggingRef.current = false;
+    activePointerIdRef.current = null;
     setIsDragging(false);
   }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    stopDragging();
+  }, [stopDragging]);
+
+  useEffect(() => {
+    const stop = () => stopDragging();
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    window.addEventListener('blur', stop);
+    return () => {
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      window.removeEventListener('blur', stop);
+    };
+  }, [stopDragging]);
 
   return (
     <div className="space-y-2">
@@ -67,7 +92,8 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
+        onPointerCancel={stopDragging}
+        onLostPointerCapture={stopDragging}
       >
         <img
           src={imageUrl}

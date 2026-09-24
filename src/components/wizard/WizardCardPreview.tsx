@@ -2,9 +2,7 @@ import { memo, useMemo, type CSSProperties, type MouseEvent, type ReactNode } fr
 import {
   Bookmark,
   Building2,
-  CalendarDays,
   ChevronDown,
-  Clock,
   Eye,
   FileQuestion,
   Heart,
@@ -96,8 +94,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   benefitsCount = 0,
   applicationsCount = 0,
   publishedLabel,
-  startDateLabel,
-  questionsCount = 0,
+  daysLeftLabel,
   overlayTextColor,
   onOpenForm,
   onOpenCompany,
@@ -215,28 +212,23 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             </Tooltip>
           )}
 
-          {/* Badge-rad — i samma ordning som swipe mode, staplade vertikalt */}
-          <div className="mt-2 flex flex-col items-center justify-center gap-1 md:mt-3 md:gap-2">
-            {workingHours && (
-              <PreviewPill
-                icon={<Clock className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
-                text={workingHours}
-              />
-            )}
-            {startDateLabel && (
-              <PreviewPill
-                icon={<CalendarDays className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
-                text={`Start ${startDateLabel}`}
-              />
-            )}
+          {/* Samma innehåll och ordning som den riktiga Swipe Mode-raden. */}
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-1 md:mt-3 md:gap-2">
             {salaryText && <PreviewPill text={salaryText} />}
+            {publishedLabel && (
+              <PreviewPill text={[`Publicerad ${publishedLabel}`, daysLeftLabel].filter(Boolean).join(' • ')} />
+            )}
             {benefitsCount > 0 && (
               <PreviewPill
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
-            {/* Frågor visas inte i swipe-preview — de dyker upp när kandidaten öppnar annonsen */}
-            {publishedLabel && <PreviewPill text={`Publicerad ${publishedLabel}`} />}
+            {applicationsCount > 0 && (
+              <PreviewPill
+                icon={<Users className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
+                text={`${applicationsCount} sökande`}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -9,7 +9,8 @@ export const SWIPE_IMG_TRANSFORM = {
   width: 640,
   height: 1280,
   quality: 78,
-  resize: 'cover' as const,
+  // Ingen förbeskärning: Swipe Mode ska själv applicera annonsens fokuspunkt.
+  resize: 'contain' as const,
 };
 
 export const SWIPE_LOGO_TRANSFORM = {
