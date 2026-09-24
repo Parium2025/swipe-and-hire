@@ -1,16 +1,9 @@
-// Delade konstanter för JobSlide-familjen. Ändra ALDRIG dessa utan att
-// samtidigt uppdatera useSwipeImagePreloader — transforms måste matcha
-// exakt, annars hamnar preloader-cachen på fel key och första framen
-// blir en nätverksladdning.
+// Delade konstanter för JobSlide-familjen.
+// Bildtransformen importeras från den centrala källan så renderingen och
+// preload-cachen aldrig kan glida isär.
+import { SWIPE_CARD_TRANSFORM } from '@/lib/imageTransforms';
 
-export const SWIPE_IMG_TRANSFORM = {
-  // Begränsa bara bredden så hela originalets höjd finns kvar när den
-  // sparade fokuspunkten appliceras i Swipe Mode.
-  width: 640,
-  quality: 78,
-  // Ingen förbeskärning: Swipe Mode ska själv applicera annonsens fokuspunkt.
-  resize: 'contain' as const,
-};
+export const SWIPE_IMG_TRANSFORM = SWIPE_CARD_TRANSFORM;
 
 export const SWIPE_LOGO_TRANSFORM = {
   width: 64,

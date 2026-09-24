@@ -21,7 +21,7 @@ interface JobImagePositionerProps {
  * A card-shaped preview where the user can drag the image vertically
  * to set the exact crop position. Stores a 0-100 percentage value.
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, context = 'job card' }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
@@ -78,14 +78,17 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
   return (
     <div className="space-y-2">
       <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt.</p>
-      {/* Samma breda bildyta används för jobbkort och öppnad annons. */}
+      {/* Annonsbilden motsvarar Swipe Mode; bilden i annonsen motsvarar 2:1-heron. */}
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
         style={{
-          aspectRatio: 'var(--job-media-aspect, 2 / 1)',
+          aspectRatio: context === 'job card' ? '1 / 2' : 'var(--job-media-aspect, 2 / 1)',
+          maxHeight: context === 'job card' ? '420px' : undefined,
+          marginInline: context === 'job card' ? 'auto' : undefined,
+          maxWidth: context === 'job card' ? '210px' : undefined,
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
         }}
