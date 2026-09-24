@@ -2808,11 +2808,6 @@ const MobileJobWizard = ({
               <DialogTitle className="premium-edit-title">
                 {steps[currentStep].title}
               </DialogTitle>
-              {currentStep === steps.length - 1 && previewMode === 'mobile' && (
-                <p className="text-white text-[11px] font-medium tracking-wide mb-0.5">
-                  (från swipe mode)
-                </p>
-              )}
               <div className="premium-edit-step-meta !text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
@@ -3899,6 +3894,9 @@ const MobileJobWizard = ({
                 {/* Preview Mode Toggle */}
                 <div className="flex flex-col items-center space-y-4">
                   <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
+                  {previewMode === 'mobile' && !showApplicationForm && (
+                    <p className="-mt-2 text-white text-[11px] font-medium tracking-wide">(från swipe mode)</p>
+                  )}
                   
                   <h3
                     className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
@@ -3975,7 +3973,7 @@ const MobileJobWizard = ({
                                         event.stopPropagation();
                                         setShowApplicationForm(false);
                                       }}
-                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
+                                      className="sticky top-0 ml-auto -mt-4 -mb-5 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
                                     >
                                       <X className="h-4 w-4" />
                                     </Button>
