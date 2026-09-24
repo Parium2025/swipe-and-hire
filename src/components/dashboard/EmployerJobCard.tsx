@@ -39,8 +39,10 @@ interface EmployerJobCardProps {
     expires_at?: string;
     overlay_text_color?: string | null;
     job_image_url?: string;
+    job_image_desktop_url?: string;
     company_logo_url?: string;
     image_focus_position?: string;
+    image_focus_position_desktop?: string;
     salary_min?: number;
     salary_max?: number;
     salary_type?: string;
@@ -102,6 +104,9 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
   // annonser som saknar dedikerad kortbild (samma regel som MobileJobCard).
   const imageVersion = getImageVersion(job as any);
   const cardImageSource = job.job_image_url ?? (job as any).job_image_desktop_url ?? null;
+  const cardImageFocus = job.job_image_url
+    ? job.image_focus_position
+    : job.image_focus_position_desktop;
   const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
@@ -143,7 +148,7 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
             aria-hidden={displayUrl ? undefined : true}
             className="w-full h-full object-cover"
             style={{ objectPosition: `center ${(() => {
-              const v = job.image_focus_position;
+              const v = cardImageFocus;
               if (!v || v === 'center') return '50%';
               if (v === 'top') return '20%';
               if (v === 'bottom') return '80%';

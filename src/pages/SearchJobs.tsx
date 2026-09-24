@@ -83,6 +83,7 @@ interface Job {
   job_image_url?: string;
   job_image_desktop_url?: string;
   image_focus_position?: string;
+  image_focus_position_desktop?: string;
   image_updated_at?: string | null;
   updated_at?: string | null;
   employer_id?: string;
@@ -715,7 +716,9 @@ const SearchJobs = memo(() => {
       // laddat upp datorbilden faller vi tillbaka på den istället för att
       // visa ett kort helt utan bild (listvyn gör redan samma fallback).
       job_image_url: job.job_image_url || job.job_image_desktop_url || undefined,
-      image_focus_position: job.image_focus_position,
+      image_focus_position: job.job_image_url
+        ? job.image_focus_position
+        : job.image_focus_position_desktop,
       views_count: job.views_count,
       applications_count: job.applications_count,
       created_at: job.created_at,
@@ -1082,6 +1085,7 @@ const SearchJobs = memo(() => {
                       job_image_url: job.job_image_url,
                       job_image_desktop_url: job.job_image_desktop_url,
                       image_focus_position: job.image_focus_position,
+                       image_focus_position_desktop: job.image_focus_position_desktop,
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,
                       employer_id: job.employer_id,

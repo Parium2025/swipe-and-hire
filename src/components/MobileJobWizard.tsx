@@ -5111,6 +5111,7 @@ const MobileJobWizard = ({
                             const desktopUrl = formData.job_image_desktop_url;
                             if (desktopUrl) {
                               handleInputChange('job_image_url', desktopUrl);
+                              handleInputChange('image_focus_position', formData.image_focus_position_desktop || 'center');
                               setOriginalStoragePath(originalDesktopStoragePath);
                               setImageIsEdited(false);
                               const { getMediaUrl } = await import('@/lib/mediaManager');
@@ -5218,6 +5219,7 @@ const MobileJobWizard = ({
                             const mobileUrl = formData.job_image_url;
                             if (mobileUrl) {
                               handleInputChange('job_image_desktop_url', mobileUrl);
+                              handleInputChange('image_focus_position_desktop', formData.image_focus_position || 'center');
                               setOriginalDesktopStoragePath(originalStoragePath);
                               setDesktopImageIsEdited(false);
                               const { getMediaUrl } = await import('@/lib/mediaManager');

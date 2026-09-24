@@ -27,6 +27,7 @@ export const MY_APPLICATIONS_JOB_POSTINGS_SELECT = `
   job_image_url,
   job_image_desktop_url,
   image_focus_position,
+  image_focus_position_desktop,
   positions_count,
   company_logo_url,
   overlay_text_color
@@ -58,6 +59,7 @@ export interface MyApplicationsJobPosting {
   job_image_url: string | null;
   job_image_desktop_url: string | null;
   image_focus_position: string | null;
+  image_focus_position_desktop: string | null;
   positions_count: number | null;
   company_logo_url: string | null;
   overlay_text_color: string | null;
