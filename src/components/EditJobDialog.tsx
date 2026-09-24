@@ -3167,19 +3167,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                     className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium px-2 pb-2 pt-5 custom-scrollbar overscroll-contain"
                                     onScroll={(event) => setIsScrolledTop(event.currentTarget.scrollTop === 0)}
                                   >
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      aria-label="Stäng annonsen"
-                                      onClick={(event) => {
-                                        event.stopPropagation();
-                                        setShowApplicationForm(false);
-                                      }}
-                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md [@media(hover:hover)]:hover:bg-black/70 active:bg-black/75"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
+                                    <div className="sticky top-0 z-30 -mx-2 -mt-5 mb-2 flex items-center justify-between rounded-t-[1.6rem] border-b border-white/20 bg-black/20 px-2 pb-1.5 pt-2">
+                                      <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                                      <button
+                                        type="button"
+                                        onClick={() => setShowApplicationForm(false)}
+                                        className="text-xs text-white transition-colors md:hover:text-white"
+                                        aria-label="Stäng ansökningsformulär"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
                                     <JobPostingPreviewContent
                                       data={{
                                         title: getDisplayTitle(),
@@ -3281,19 +3279,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   {/* Opened job view — same shared content as the real job page */}
                                   {showDesktopApplicationForm && (
                                     <div className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium p-3 custom-scrollbar overscroll-contain">
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        aria-label="Stäng annonsen"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          setShowDesktopApplicationForm(false);
-                                        }}
-                                        className="sticky top-0 ml-auto -mb-10 z-30 flex h-9 w-9 rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md [@media(hover:hover)]:hover:bg-black/70 active:bg-black/75"
-                                      >
-                                        <X className="h-4 w-4" />
-                                      </Button>
+                                      <div className="sticky top-0 z-30 -mx-3 -mt-3 mb-3 flex items-center justify-between border-b border-white/20 bg-black/20 px-4 py-2">
+                                        <div className="text-sm font-bold text-white">Ansökningsformulär</div>
+                                        <button
+                                          type="button"
+                                          onClick={() => setShowDesktopApplicationForm(false)}
+                                          className="text-sm text-white hover:text-white"
+                                          aria-label="Stäng ansökningsformulär"
+                                        >
+                                          ✕
+                                        </button>
+                                      </div>
                                       <JobPostingPreviewContent
                                         data={{
                                           title: getDisplayTitle(),
