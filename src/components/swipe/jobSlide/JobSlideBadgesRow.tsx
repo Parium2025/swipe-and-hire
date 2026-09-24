@@ -23,6 +23,9 @@ export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
   job,
 }: JobSlideBadgesRowProps) {
   const salaryText = getJobBadgeSalary(job);
+  const startDateText = job.start_date
+    ? `Start ${format(parseISO(job.start_date), 'd MMM', { locale: sv })}`
+    : null;
   const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
   const daysLeft = job.expires_at
     ? differenceInDays(parseISO(job.expires_at), new Date())
@@ -42,6 +45,11 @@ export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
       {salaryText && (
         <div className={pillClass}>
           <span className={textClass}>{salaryText}</span>
+        </div>
+      )}
+      {startDateText && (
+        <div className={pillClass}>
+          <span className={textClass}>{startDateText}</span>
         </div>
       )}
       <div className={pillClass}>
