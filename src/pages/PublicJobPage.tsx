@@ -18,6 +18,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { TruncatedText } from '@/components/TruncatedText';
 import { parseSalary, formatSalary } from '@/lib/salaryRange';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
  
 
@@ -45,6 +46,8 @@ type Job = {
   company_logo_url: string | null;
   job_image_url: string | null;
   job_image_desktop_url: string | null;
+  image_focus_position: string | null;
+  image_focus_position_desktop: string | null;
   benefits: string[] | null;
   created_at: string;
   expires_at: string | null;
@@ -455,6 +458,7 @@ const PublicJobPage = () => {
               src={resolvedJobImageUrl}
               alt={`${job.title} hos ${company}`}
               className="w-full h-auto aspect-[16/9] object-cover"
+              style={{ objectPosition: toObjectPosition(job.job_image_desktop_url ? job.image_focus_position_desktop : job.image_focus_position) }}
               width={1200}
               height={675}
               decoding="async"

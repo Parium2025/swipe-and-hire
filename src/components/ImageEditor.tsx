@@ -377,8 +377,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         </DialogHeader>
         
         <div className="flex flex-col flex-1 min-h-0 gap-4">
-          {/* Mobilbilden visas i Swipe Modes stående 1:2-format. Den separata
-              fokusväljaren i jobbflödet styr endast de breda 2:1-jobbkorten. */}
+          {/* Annonsbilden använder Swipe Modes stående 1:2-format. Bilden i
+              annonsen använder det breda formatet för den öppnade annonsen. */}
           <div className="flex-1 min-h-0 w-full flex items-center justify-center">
             <div className="relative h-full w-full flex items-center justify-center">
               <canvas

@@ -72,6 +72,8 @@ interface JobPosting {
   employer_id: string;
   job_image_url?: string;
   job_image_desktop_url?: string;
+  image_focus_position?: string | null;
+  image_focus_position_desktop?: string | null;
   company_logo_url?: string | null;
   overlay_text_color?: string | null;
   // Legacy: callers may still pass profiles; we no longer query it.
@@ -1007,6 +1009,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 createdAt={job.created_at}
                 expiresAt={job.expires_at}
                 overlayTextColor={job.overlay_text_color}
+                focusPosition={job.job_image_desktop_url ? job.image_focus_position_desktop : job.image_focus_position}
               />
             )}
 

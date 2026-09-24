@@ -20,6 +20,7 @@ import { useUndoEntryAnimation } from './jobSlide/useUndoEntryAnimation';
 import { useTapHint } from './jobSlide/useTapHint';
 import { useSwipeCardGesture, type SwipeDirection } from './jobSlide/useSwipeCardGesture';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 export interface JobSlideSwipeApi {
   swipe: (direction: SwipeDirection) => void;
@@ -246,7 +247,7 @@ export const JobSlide = memo(function JobSlide({
                 src={imageUrl}
                 alt={job.title}
                 className="w-full h-full object-cover"
-                style={{ objectPosition: 'center center' }}
+                style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
                 loading={isVisible ? 'eager' : 'lazy'}
                 decoding="async"
                 {...fetchPriority(isVisible ? 'high' : 'auto')}
