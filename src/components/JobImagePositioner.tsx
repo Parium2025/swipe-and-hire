@@ -97,9 +97,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, cont
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        {context === 'job view'
-          ? 'Så här kommer bilden att klippas när annonsen öppnas.'
-          : 'Så här kommer bilden att klippas i jobbkorten.'}
+        Så här kommer bilden att klippas i verkligheten.
       </p>
     </div>
   );
