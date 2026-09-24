@@ -44,10 +44,11 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, cont
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDraggingRef.current || activePointerIdRef.current !== e.pointerId || !containerRef.current) return;
     const containerHeight = containerRef.current.clientHeight;
-    // Sensitivity: moving pointer down → image shifts up → higher % (shows lower part)
+    // Direktmanipulation: bilden följer fingret/musen. Drar man ned bilden
+    // visas mer av dess övre del, alltså ska object-position minska.
     const deltaY = e.clientY - startY.current;
     const deltaPct = (deltaY / containerHeight) * 100;
-    onFocusChange(clamp(startPercent.current + deltaPct));
+    onFocusChange(clamp(startPercent.current - deltaPct));
   }, [onFocusChange]);
 
   const stopDragging = useCallback(() => {

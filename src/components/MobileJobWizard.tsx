@@ -4013,7 +4013,6 @@ const MobileJobWizard = ({
                                         benefits: formData.benefits,
                                       }}
                                       questions={customQuestions}
-                                      scale={0.36}
                                     />
                                   </div>
                                 )}
@@ -4477,7 +4476,7 @@ const MobileJobWizard = ({
             onSave={handleImageEdit}
             onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
-            aspectRatio={editingImageType === 'mobile' ? 1 / 2 : 16 / 9}
+            aspectRatio={editingImageType === 'mobile' ? 1 / 2 : 2 / 1}
             cropMode={editingImageType === 'mobile' ? 'mobile-swipe' : 'default'}
           />
         )}
