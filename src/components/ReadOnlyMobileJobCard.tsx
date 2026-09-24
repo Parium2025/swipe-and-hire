@@ -2,7 +2,7 @@ import { memo, useMemo, useCallback, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote, Clock } from 'lucide-react';
+import { Eye, Users, MapPin, Building2, Heart, Timer, CheckCircle, Briefcase, UserCheck, Trash2, Gift, Banknote, Clock, Calendar } from 'lucide-react';
 import { getEmploymentTypeLabel, formatEmploymentDetails, formatPartTimeDays, formatPartTimeShifts } from '@/lib/employmentTypes';
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
@@ -19,6 +19,9 @@ import { saveScrollNow } from '@/lib/scrollRestoration';
 import { hapticLight } from '@/lib/haptics';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
+import { effectiveStartDate } from '@/lib/startDate';
+import { format, parseISO } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 
 interface ReadOnlyMobileJobCardProps {
@@ -52,6 +55,7 @@ interface ReadOnlyMobileJobCardProps {
     salary_max?: number | null;
     salary_type?: string | null;
     salary_transparency?: string | null;
+    start_date?: string | null;
     benefits?: string[] | null;
     profiles?: {
       company_name: string | null;
@@ -399,6 +403,19 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
               <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
                 <Banknote className="h-3 w-3 mr-1 flex-shrink-0" />
                 <span className="leading-snug">{salaryText}</span>
+              </Badge>
+            );
+          })()}
+          {/* Startdatum — samma tagg som i Swipe Mode */}
+          {(() => {
+            const startDate = effectiveStartDate(job.start_date ?? null);
+            const label = startDate
+              ? `Start ${format(parseISO(startDate), 'd MMM', { locale: sv })}`
+              : 'Start omgående';
+            return (
+              <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center text-white">
+                <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                <span className="leading-snug">{label}</span>
               </Badge>
             );
           })()}
