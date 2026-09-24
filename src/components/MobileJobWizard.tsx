@@ -3965,6 +3965,19 @@ const MobileJobWizard = ({
                                     className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium px-2 pb-2 pt-5 custom-scrollbar overscroll-contain"
                                     onScroll={(event) => setIsScrolledTop(event.currentTarget.scrollTop === 0)}
                                   >
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      aria-label="Stäng annonsen"
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        setShowApplicationForm(false);
+                                      }}
+                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md [@media(hover:hover)]:hover:bg-black/70 active:bg-black/75"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
                                     <JobPostingPreviewContent
                                       data={{
                                         title: getDisplayTitle(),
@@ -4065,6 +4078,19 @@ const MobileJobWizard = ({
                             {/* Opened job view — same shared content as the real job page */}
                                   {showDesktopApplicationForm && (
                                     <div className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium p-3 custom-scrollbar overscroll-contain">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label="Stäng annonsen"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          setShowDesktopApplicationForm(false);
+                                        }}
+                                        className="sticky top-0 ml-auto -mb-10 z-30 flex h-9 w-9 rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md [@media(hover:hover)]:hover:bg-black/70 active:bg-black/75"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
                                       <JobPostingPreviewContent
                                         data={{
                                           title: getDisplayTitle(),
