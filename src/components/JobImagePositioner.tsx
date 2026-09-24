@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { MoveVertical } from 'lucide-react';
 import { parseFocusPercent, type FocusValue } from '@/lib/jobImageFocus';
 
@@ -29,16 +29,22 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
 
   const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
 
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
     setIsDragging(true);
     startY.current = e.clientY;
     startPercent.current = focusPercent;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* ignore */ }
   }, [focusPercent]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging || !containerRef.current) return;
+    // Mouse released outside the window without a pointerup → stop dragging
+    if (e.pointerType === 'mouse' && e.buttons === 0) {
+      setIsDragging(false);
+      return;
+    }
     const containerHeight = containerRef.current.clientHeight;
     // Sensitivity: moving pointer down → image shifts up → higher % (shows lower part)
     const deltaY = e.clientY - startY.current;
@@ -49,6 +55,20 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
   }, []);
+
+  // Safety net: always release when the button is let go anywhere or the window loses focus
+  useEffect(() => {
+    if (!isDragging) return;
+    const stop = () => setIsDragging(false);
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    window.addEventListener('blur', stop);
+    return () => {
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      window.removeEventListener('blur', stop);
+    };
+  }, [isDragging]);
 
   return (
     <div className="space-y-2">
@@ -68,6 +88,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onLostPointerCapture={handlePointerUp}
       >
         <img
           src={imageUrl}
