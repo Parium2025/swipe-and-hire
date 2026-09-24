@@ -129,39 +129,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         
         img.src = blobUrl;
       } catch (error) {
+        if (cancelled) return;
         console.error('Failed to fetch image:', error);
         // Fallback to direct loading
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
+          if (cancelled) return;
           imageRef.current = img;
-          
-          const containerWidth = CANVAS_WIDTH;
-          const containerHeight = CANVAS_HEIGHT;
-          const scaleX = containerWidth / img.width;
-          const scaleY = containerHeight / img.height;
-          
-          // ALLTID använd "cover" som initial scale
-          const initialScale = Math.max(scaleX, scaleY);
-          setMinScale(isMobileSwipe ? initialScale : Math.min(scaleX, scaleY) * 0.5);
-          
-          setScale(initialScale);
-          initialScaleRef.current = initialScale; // Store for comparison
-          setPosition({ x: 0, y: 0 });
-          setImageLoaded(true);
-          setHasUserMadeChanges(false); // Reset on new image load
-        };
-        img.onerror = () => {
-          console.error('Image failed to load directly');
-          toast.error('Kunde inte visa bilden', {
-            description: 'Formatet stöds inte här. Prova med en JPG- eller PNG-bild.',
-          });
-        };
+...
         img.src = imageSrc;
       }
     };
 
     loadImage();
+    return () => { cancelled = true; };
   }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT, isMobileSwipe]);
 
   // Draw canvas
