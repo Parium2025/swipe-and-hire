@@ -7,7 +7,7 @@ import { getEmploymentTypeLabel, formatEmploymentDetails, formatPartTimeDays, fo
 import { getTimeRemaining } from '@/lib/date';
 import { useSavedJobs } from '@/hooks/useSavedJobs';
 import { useCardImage } from '@/hooks/useCardImage';
-import { JOB_CARD_TRANSFORM, JOB_VIEW_HERO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms';
+import { JOB_VIEW_HERO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
@@ -118,7 +118,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const cardImageFocus = job.job_image_url
     ? job.image_focus_position
     : job.image_focus_position_desktop;
-  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, JOB_CARD_TRANSFORM);
+  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 300, quality: 75, resize: 'cover' });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
   const companyName = job.workplace_name || job.company_name || 'Okänt företag';

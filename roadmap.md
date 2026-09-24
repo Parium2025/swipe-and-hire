@@ -3,5 +3,3 @@
 - [x] Keep interview response tokens on the public response page instead of password reset
 - [x] Audit remaining interview booking, reminder, email and visibility failure paths
 - [x] Tighten the declined interview status and remove action layout
-
-- [x] Make the mobile opened-job preview reuse the real Swipe Mode job-detail layout, including fixed apply action

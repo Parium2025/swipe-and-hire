@@ -10,7 +10,7 @@ import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmen
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
 import { isEmployerJobDraft, isEmployerJobExpired } from '@/lib/jobStatus';
 import { useCardImage } from '@/hooks/useCardImage';
-import { getImageVersion, JOB_CARD_TRANSFORM } from '@/lib/imageTransforms';
+import { getImageVersion } from '@/lib/imageTransforms';
 
 import { useCompactWidth } from '@/hooks/useCompactWidth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -103,7 +103,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
     : null;
 
   // Centraliserad bild-hantering — eliminerar 14 hooks per kort
-  // Transformen bevarar hela bilden; kortets object-position gör den enda beskärningen.
+  // 🚀 Transform: kortbild ~600px bred / ~400px hög, logo ~48px → 5-10× mindre filer, snabbare listor
   // 🔑 `imageVersion` (image_updated_at) MÅSTE med: utan `?v=` pekar URL:en på
   // exakt samma adress efter en bildredigering och webbläsaren serverar den
   // gamla bilden ur sin cache — arbetsgivaren ser sin gamla bild kvar.
@@ -115,7 +115,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
   const cardImageFocus = job.job_image_url
     ? job.image_focus_position
     : (job as any).image_focus_position_desktop;
-  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, JOB_CARD_TRANSFORM);
+  const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
 
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 

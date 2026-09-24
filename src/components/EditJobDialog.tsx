@@ -55,7 +55,6 @@ import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePos
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { usePreparedCompanyLogo } from '@/hooks/usePreparedCompanyLogo';
 import { JobPostingPreviewContent } from '@/components/jobview';
-import { SwipeJobDetailPreviewContent } from '@/components/swipe/jobDetail/SwipeJobDetailPreviewContent';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
@@ -1856,10 +1855,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
              isValidSwedishPostalCode(formData.workplace_postal_code) && 
              formData.workplace_city.trim();
     }
-
-    if (currentStep === 3) {
-      return Boolean(formData.job_image_url);
-    }
     
     return true;
   };
@@ -2078,6 +2073,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                 <DialogTitle className="premium-edit-title">
                   {steps[currentStep].title}
                 </DialogTitle>
+                {currentStep === steps.length - 1 && previewMode === 'mobile' && (
+                  <p className="text-white text-[11px] font-medium tracking-wide mb-0.5">
+                    (från swipe mode)
+                  </p>
+                )}
                 <div className="premium-edit-step-meta !text-white">
                   Steg {currentStep + 1} av {steps.length}
                 </div>
@@ -3105,9 +3105,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                       {/* Preview Mode Toggle */}
                       <div className="flex flex-col items-center space-y-4">
                         <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
-                        <p className="text-white text-[11px] font-medium tracking-wide">
-                          {previewMode === 'mobile' ? 'Från Swipe Mode' : 'Från sökresultatet'}
-                        </p>
                         
                         <h3
                           className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
@@ -3167,7 +3164,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-2 w-10 rounded-full bg-black border border-gray-800"></div>
 
                                 {showApplicationForm && (
-                                  <div className="absolute inset-0 bg-card-parium pt-5">
+                                  <div
+                                    className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium px-2 pb-2 pt-5 custom-scrollbar overscroll-contain"
+                                    onScroll={(event) => setIsScrolledTop(event.currentTarget.scrollTop === 0)}
+                                  >
                                     <Button
                                       type="button"
                                       variant="ghost"
@@ -3177,18 +3177,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         event.stopPropagation();
                                         setShowApplicationForm(false);
                                       }}
-                                      className="absolute right-2 top-5 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
+                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
                                     >
                                       <X className="h-4 w-4" />
                                     </Button>
-                                    <SwipeJobDetailPreviewContent
+                                    <JobPostingPreviewContent
                                       data={{
                                         title: getDisplayTitle(),
                                         description: formData.description,
-                                        requirements: formData.requirements,
-                                        pitch: formData.pitch,
-                                        applicationInstructions: formData.application_instructions,
+                                        imageUrl: jobImageDesktopDisplayUrl || jobImageDisplayUrl,
+                                        imageFocusPosition: jobImageDesktopDisplayUrl ? (formData.image_focus_position_desktop || 'center') : (formData.image_focus_position || 'center'),
                                         companyName: profile?.company_name || 'Företag',
+                                        companyLogoUrl: preparedCompanyLogoUrl,
                                         location: formData.location,
                                         employmentType: formData.employment_type,
                                         partTimeDays: formData.part_time_days,
@@ -3214,9 +3214,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         salaryTransparency: formData.salary_transparency,
                                         contactEmail: formData.contact_email,
                                         benefits: formData.benefits,
+                                        overlayTextColor: formData.overlay_text_color,
                                       }}
                                       questions={customQuestions}
-                                      onScrollTopChange={setIsScrolledTop}
+                                      answers={previewAnswers}
+                                      onAnswerChange={(questionId, value) => setPreviewAnswers((current) => ({ ...current, [questionId]: value }))}
+                                      onOpenCompany={() => setShowCompanyProfile(true)}
+                                      scale={0.36}
                                     />
                                   </div>
                                 )}
@@ -3436,7 +3440,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                           <div className="flex items-center gap-2 mb-2">
                             <Smartphone className="h-4 w-4 text-white" />
-                            <span className="text-white font-medium text-sm sm:text-base">Annonsbild</span>
+                            <span className="text-white font-medium text-sm sm:text-base">Annonsbild (valfritt)</span>
                             {jobImageDesktopDisplayUrl && !jobImageDisplayUrl && (
                               <button
                                 type="button"
@@ -3810,7 +3814,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
             }
           }}
           isCircular={false}
-          aspectRatio={editingImageType === 'mobile' ? 1 / 2 : 2 / 1}
+          aspectRatio={editingImageType === 'mobile' ? 1 / 2 : 16 / 9}
           cropMode={editingImageType === 'mobile' ? 'mobile-swipe' : 'default'}
         />
       )}
