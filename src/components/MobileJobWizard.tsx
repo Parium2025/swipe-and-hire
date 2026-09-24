@@ -4459,6 +4459,7 @@ const MobileJobWizard = ({
                               companyName: profile?.company_name || 'Företag',
                               companyLogoUrl: profile?.company_logo_url,
                               imageUrl: jobImageDisplayUrl,
+                              imageFocusPosition: formData.image_focus_position,
                               employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                               employmentTypeDetail: formatEmploymentDetails({
                                 employment_type: formData.employment_type,
