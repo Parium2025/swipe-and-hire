@@ -1,3 +1,4 @@
+import { effectiveStartDate } from '@/lib/startDate';
 import { memo } from 'react';
 import { TruncatedText } from '@/components/TruncatedText';
 import {
@@ -51,8 +52,9 @@ export const JobViewDetails = memo(function JobViewDetails(props: JobViewDetails
     salaryType, salaryTransparency, contactEmail, jobTitle,
   } = props;
 
-  const startDateLabel = startDate
-    ? new Date(startDate).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+  const validStart = effectiveStartDate(startDate);
+  const startDateLabel = validStart
+    ? new Date(validStart).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
     : 'Omgående';
 
   // Arbetsgivar-preview-stil: label v\u00e4nster (dimmad), v\u00e4rde h\u00f6gerjusterat (vitt),

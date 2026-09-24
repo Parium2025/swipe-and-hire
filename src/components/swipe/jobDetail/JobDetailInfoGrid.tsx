@@ -1,3 +1,4 @@
+import { effectiveStartDate } from '@/lib/startDate';
 import { memo } from 'react';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -36,8 +37,8 @@ export const JobDetailInfoGrid = memo(function JobDetailInfoGrid({
         <div className="flex items-center text-white text-[15px] sm:text-sm">
           <span className="shrink-0 w-[110px] text-white">Start:</span>
           <span className="font-medium">
-            {detail.start_date
-              ? new Date(detail.start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+            {effectiveStartDate(detail.start_date)
+              ? new Date(effectiveStartDate(detail.start_date)!).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
               : 'Omgående'}
           </span>
         </div>
