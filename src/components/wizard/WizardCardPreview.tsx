@@ -221,11 +221,17 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
               lön, start, publicerad • dagar kvar, förmåner, sökande */}
           <div className="mt-2 flex flex-wrap items-center justify-center gap-1 md:mt-3 md:gap-1.5">
             {salaryText && <PreviewPill text={salaryText} />}
-            <PreviewPill text={`Start ${startDateLabel || 'omgående'}`} />
+            <PreviewPill
+              text={`Start ${
+                !startDateLabel || startDateLabel === 'Omgående'
+                  ? 'omgående'
+                  : toSwipeDate(startDateLabel)
+              }`}
+            />
             <PreviewPill
               text={[
-                `Publicerad ${publishedLabel || formatDateShortSv(new Date().toISOString())}`,
-                daysLeftLabel,
+                `Publicerad ${toSwipeDate(publishedLabel || formatDateShortSv(new Date().toISOString()))}`,
+                daysLeftLabel === 'Utgången' ? null : daysLeftLabel,
               ]
                 .filter(Boolean)
                 .join(' • ')}
@@ -257,6 +263,11 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
     </TooltipProvider>
   );
 });
+
+/** Swipe mode visar 'd MMM' ("23 sep") — ta bort punkt och årtal. */
+function toSwipeDate(label: string): string {
+  return label.replace(/\.?\s*\d{4}$/, '').replace(/\.$/, '').trim();
+}
 
 function PreviewPill({ icon, text }: { icon?: React.ReactNode; text: string }) {
   return (
