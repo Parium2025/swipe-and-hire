@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react';
 import { TruncatedText } from '@/components/TruncatedText';
+import { Button } from '@/components/ui/button';
 import type { JobPostingContentData } from '@/components/jobview/JobPostingContent';
 import type { JobQuestion } from '@/types/jobWizard';
 import type { FullJobData } from '../hooks/useJobDetailData';
@@ -9,10 +9,9 @@ import { SwipeJobDetailSections } from './SwipeJobDetailSections';
 interface SwipeJobDetailPreviewContentProps {
   data: JobPostingContentData;
   questions: JobQuestion[];
-  scale: number;
 }
 
-export function SwipeJobDetailPreviewContent({ data, questions, scale }: SwipeJobDetailPreviewContentProps) {
+export function SwipeJobDetailPreviewContent({ data, questions }: SwipeJobDetailPreviewContentProps) {
   const resolvedQuestions = questions.map((question, index) => ({
     ...question,
     id: question.id || `preview-question-${index}`,
@@ -65,21 +64,26 @@ export function SwipeJobDetailPreviewContent({ data, questions, scale }: SwipeJo
   };
 
   return (
-    <div className="origin-top-left" style={{ width: `${100 / scale}%`, zoom: scale } as CSSProperties}>
-      <div className="px-1 pr-12 pb-1">
-        <div className="flex items-start gap-2 mt-1 text-white text-[15px] sm:text-sm min-w-0">
-          <TruncatedText text={data.companyName} className="font-medium min-w-0 max-w-full line-clamp-2" tooltipSide="bottom" />
-          {job.location && <><span className="text-white/50 shrink-0">·</span><span className="shrink-0">{job.location}</span></>}
+    <div className="h-full overflow-hidden [--swipe-detail-preview-scale:0.4] md:[--swipe-detail-preview-scale:0.55]">
+      <div
+        className="flex h-[calc(100%/var(--swipe-detail-preview-scale))] w-[calc(100%/var(--swipe-detail-preview-scale))] origin-top-left flex-col"
+        style={{ zoom: 'var(--swipe-detail-preview-scale)' }}
+      >
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-2 space-y-3 touch-pan-y">
+          <div className="px-1 pr-12 pb-1">
+            <div className="flex items-start gap-2 mt-1 text-white text-[15px] sm:text-sm min-w-0">
+              <TruncatedText text={data.companyName} className="font-medium min-w-0 max-w-full line-clamp-2" tooltipSide="bottom" />
+              {job.location && <><span className="text-white/50 shrink-0">·</span><span className="shrink-0">{job.location}</span></>}
+            </div>
+            <TruncatedText text={data.title} className="text-xl font-bold text-white leading-[1.2] mt-0.5 line-clamp-2 pb-[0.12em]" tooltipSide="bottom" />
+          </div>
+          <SwipeJobDetailSections job={job} detail={detail} displayCompanyName={data.companyName} questions={resolvedQuestions} />
         </div>
-        <TruncatedText text={data.title} className="text-xl font-bold text-white leading-[1.2] mt-0.5 line-clamp-2 pb-[0.12em]" tooltipSide="bottom" />
-      </div>
-      <div className="space-y-3">
-        <SwipeJobDetailSections job={job} detail={detail} displayCompanyName={data.companyName} questions={resolvedQuestions} />
-      </div>
-      <div className="sticky bottom-0 mt-3 px-1 pb-2 pt-3 border-t border-white/10 bg-parium-gradient">
-        <button type="button" className="w-full h-14 rounded-full bg-green-500 text-white font-semibold text-base shadow-lg shadow-green-500/30">
-          Skicka ansökan
-        </button>
+        <div className="shrink-0 px-5 pb-5 pt-3 border-t border-white/10 bg-parium-gradient">
+          <Button type="button" className="w-full h-14 rounded-full bg-green-500 text-white font-semibold text-base shadow-lg shadow-green-500/30 md:hover:bg-green-500">
+            Skicka ansökan
+          </Button>
+        </div>
       </div>
     </div>
   );

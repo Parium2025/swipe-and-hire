@@ -3215,7 +3215,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         benefits: formData.benefits,
                                       }}
                                       questions={customQuestions}
-                                      scale={0.36}
                                     />
                                   </div>
                                 )}

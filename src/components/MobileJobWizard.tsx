@@ -4013,7 +4013,6 @@ const MobileJobWizard = ({
                                         benefits: formData.benefits,
                                       }}
                                       questions={customQuestions}
-                                      scale={0.36}
                                     />
                                   </div>
                                 )}
