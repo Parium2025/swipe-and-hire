@@ -67,6 +67,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
 import { isEmployerJobDraft } from '@/lib/jobStatus';
 import { formatSalaryTransparencyValue } from '@/lib/salaryRange';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -4002,7 +4003,24 @@ const MobileJobWizard = ({
                                  setIsScrolledTop(target.scrollTop === 0);
                                }}
                              >
-                              <div className="space-y-1 pb-2">{/* Minimal botten-padding */}
+                               <div className="space-y-1 pb-2">{/* Minimal botten-padding */}
+                                  {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) && (
+                                    <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-white/20 bg-white/10">
+                                      <img
+                                        src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
+                                        alt="Bild i annonsen"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                        style={{
+                                          objectPosition: toObjectPosition(
+                                            jobImageDesktopDisplayUrl
+                                              ? formData.image_focus_position_desktop
+                                              : formData.image_focus_position,
+                                          ),
+                                        }}
+                                        draggable={false}
+                                      />
+                                    </div>
+                                  )}
                                
                                   {/* Företagsinformation */}
                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
@@ -4538,6 +4556,23 @@ const MobileJobWizard = ({
 
                                 <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar overscroll-contain">
                                   <div className="space-y-2">
+                                    {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) && (
+                                      <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-white/20 bg-white/10">
+                                        <img
+                                          src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
+                                          alt="Bild i annonsen"
+                                          className="absolute inset-0 h-full w-full object-cover"
+                                          style={{
+                                            objectPosition: toObjectPosition(
+                                              jobImageDesktopDisplayUrl
+                                                ? formData.image_focus_position_desktop
+                                                : formData.image_focus_position,
+                                            ),
+                                          }}
+                                          draggable={false}
+                                        />
+                                      </div>
+                                    )}
                                     {/* Företagsinformation */}
                                     <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                       <div className="flex items-center justify-between">

@@ -58,6 +58,7 @@ import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 import { formatSalaryTransparencyValue } from '@/lib/salaryRange';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
@@ -3192,6 +3193,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                        }}
                                      >
                                        <div className="space-y-1 pb-2">
+                                         {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) && (
+                                           <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-white/20 bg-white/10">
+                                             <img
+                                               src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
+                                               alt="Bild i annonsen"
+                                               className="absolute inset-0 h-full w-full object-cover"
+                                               style={{
+                                                 objectPosition: toObjectPosition(
+                                                   jobImageDesktopDisplayUrl
+                                                     ? formData.image_focus_position_desktop
+                                                     : formData.image_focus_position,
+                                                 ),
+                                               }}
+                                               draggable={false}
+                                             />
+                                           </div>
+                                         )}
                                          <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
                                           <div className="flex items-center">
                                             {profile?.company_logo_url ? (
@@ -3730,6 +3748,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
 
                                       <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar overscroll-contain">
                                         <div className="space-y-2">
+                                          {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) && (
+                                            <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-white/20 bg-white/10">
+                                              <img
+                                                src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
+                                                alt="Bild i annonsen"
+                                                className="absolute inset-0 h-full w-full object-cover"
+                                                style={{
+                                                  objectPosition: toObjectPosition(
+                                                    jobImageDesktopDisplayUrl
+                                                      ? formData.image_focus_position_desktop
+                                                      : formData.image_focus_position,
+                                                  ),
+                                                }}
+                                                draggable={false}
+                                              />
+                                            </div>
+                                          )}
                                           {/* Company info */}
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                             <div className="flex items-center justify-between">
