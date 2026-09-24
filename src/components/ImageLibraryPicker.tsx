@@ -49,8 +49,8 @@ export function ImageLibraryPicker({ onSelect }: ImageLibraryPickerProps) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className={`mt-3 w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-full bg-white/5 border border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/15 md:hover:border-white/50 ${noFocusRing}`}
+        onClick={(e) => { e.currentTarget.blur(); setOpen(true); }}
+        className={`mt-3 w-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/20 text-white text-sm transition-colors duration-150 md:hover:bg-white/10 touch-border-white [-webkit-tap-highlight-color:transparent] ${noFocusRing}`}
       >
         <Images className="h-4 w-4" />
         <span>Välj från bildbiblioteket{images.length > 0 ? ` (${images.length})` : ''}</span>
