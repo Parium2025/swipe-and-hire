@@ -5244,6 +5244,7 @@ export type Database = {
           salary_transparency: string
           salary_type: string
           search_rank: number
+          start_date: string
           title: string
           updated_at: string
           views_count: number
