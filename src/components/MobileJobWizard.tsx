@@ -225,6 +225,7 @@ const MobileJobWizard = ({
     }
   }, [open]);
   
+  const originalLoadTokenRef = useRef(0);
   // Initialize and restore draft state when opening
   useEffect(() => {
     if (open) {
@@ -277,6 +278,12 @@ const MobileJobWizard = ({
         }
 
         if (bestDraft) {
+          // Originalbilder hör till en specifik annons — rensa alltid kvarvarande
+          // original från en tidigare öppnad annons innan utkastet återställs.
+          setOriginalImageUrl(null);
+          setOriginalDesktopImageUrl(null);
+          setOriginalStoragePath(bestDraft.formData?.job_image_url || null);
+          setOriginalDesktopStoragePath(bestDraft.formData?.job_image_desktop_url || null);
           setFormData(bestDraft.formData);
           setCustomQuestions(bestDraft.customQuestions);
           // Set initialFormData to empty so the change detection knows there's unsaved work
@@ -302,6 +309,7 @@ const MobileJobWizard = ({
       setHasUnsavedChanges(false);
       setJobImageDisplayUrl(null);
       setJobImageDesktopDisplayUrl(null);
+      originalLoadTokenRef.current++;
       setOriginalImageUrl(null);
       setOriginalDesktopImageUrl(null);
       setOriginalStoragePath(null);
@@ -405,6 +413,7 @@ const MobileJobWizard = ({
           const desktopOriginalInitial: string | null = restoredFormData.job_image_desktop_url || null;
           setOriginalStoragePath(mobileOriginalInitial);
           setOriginalDesktopStoragePath(desktopOriginalInitial);
+          const loadToken = ++originalLoadTokenRef.current;
           (async () => {
             const { getMediaUrl } = await import('@/lib/mediaManager');
             let mobileOriginal = mobileOriginalInitial;
@@ -424,12 +433,16 @@ const MobileJobWizard = ({
               setOriginalDesktopStoragePath(desktopOriginal);
               setDesktopImageIsEdited(desktopOriginal !== restoredFormData.job_image_desktop_url);
             }
+            // Svar från en tidigare öppnad annons får aldrig skriva över denna.
+            if (loadToken !== originalLoadTokenRef.current) return;
             if (mobileOriginal) {
               const signed = mobileOriginal.startsWith('http') ? mobileOriginal : await getMediaUrl(mobileOriginal, 'job-image', 86400);
+              if (loadToken !== originalLoadTokenRef.current) return;
               setOriginalImageUrl(signed || mobileOriginal);
             } else setOriginalImageUrl(null);
             if (desktopOriginal) {
               const signed = desktopOriginal.startsWith('http') ? desktopOriginal : await getMediaUrl(desktopOriginal, 'job-image', 86400);
+              if (loadToken !== originalLoadTokenRef.current) return;
               setOriginalDesktopImageUrl(signed || desktopOriginal);
             } else setOriginalDesktopImageUrl(null);
           })();

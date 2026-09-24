@@ -62,28 +62,36 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
   }, [CANVAS_HEIGHT, CANVAS_WIDTH, isMobileSwipe]);
 
-  // Reset state when dialog opens/closes
+  // Reset state when dialog opens/closes — en tidigare bild får aldrig
+  // ligga kvar och visas när redigeraren öppnas för en annan annons.
   useEffect(() => {
     if (!isOpen) {
       setIsSaving(false);
       setHasUserMadeChanges(false);
+      setImageLoaded(false);
+      imageRef.current = null;
     }
   }, [isOpen]);
 
   // Load and setup image
   useEffect(() => {
     if (!imageSrc || !isOpen) return;
+    let cancelled = false;
+    setImageLoaded(false);
+    imageRef.current = null;
 
     const loadImage = async () => {
       try {
         // Try to fetch the image as blob first to avoid CORS issues
-        const response = await fetch(imageSrc);
+        const response = await fetch(imageSrc, { cache: 'no-store' });
         if (!response.ok) throw new Error(`Image request failed (${response.status})`);
         const blob = await response.blob();
+        if (cancelled) return;
         const blobUrl = URL.createObjectURL(blob);
         
         const img = new Image();
         img.onload = () => {
+          if (cancelled) { URL.revokeObjectURL(blobUrl); return; }
           imageRef.current = img;
           
           // Calculate initial scale - IDENTISKT för alla bilder (cover)
@@ -121,29 +129,26 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         
         img.src = blobUrl;
       } catch (error) {
+        if (cancelled) return;
         console.error('Failed to fetch image:', error);
         // Fallback to direct loading
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
+          if (cancelled) return;
           imageRef.current = img;
-          
-          const containerWidth = CANVAS_WIDTH;
-          const containerHeight = CANVAS_HEIGHT;
-          const scaleX = containerWidth / img.width;
-          const scaleY = containerHeight / img.height;
-          
-          // ALLTID använd "cover" som initial scale
+          const scaleX = CANVAS_WIDTH / img.width;
+          const scaleY = CANVAS_HEIGHT / img.height;
           const initialScale = Math.max(scaleX, scaleY);
           setMinScale(isMobileSwipe ? initialScale : Math.min(scaleX, scaleY) * 0.5);
-          
           setScale(initialScale);
-          initialScaleRef.current = initialScale; // Store for comparison
+          initialScaleRef.current = initialScale;
           setPosition({ x: 0, y: 0 });
           setImageLoaded(true);
-          setHasUserMadeChanges(false); // Reset on new image load
+          setHasUserMadeChanges(false);
         };
         img.onerror = () => {
+          if (cancelled) return;
           console.error('Image failed to load directly');
           toast.error('Kunde inte visa bilden', {
             description: 'Formatet stöds inte här. Prova med en JPG- eller PNG-bild.',
@@ -154,6 +159,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
 
     loadImage();
+    return () => { cancelled = true; };
   }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT, isMobileSwipe]);
 
   // Draw canvas
