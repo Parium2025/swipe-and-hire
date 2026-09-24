@@ -8,6 +8,7 @@ import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 interface JobViewHeroProps {
   title: string;
@@ -26,6 +27,7 @@ interface JobViewHeroProps {
   createdAt?: string;
   expiresAt?: string | null;
   overlayTextColor?: string | null;
+  focusPosition?: string | null;
 }
 
 
@@ -87,6 +89,7 @@ export const JobViewHero = memo(function JobViewHero({
   createdAt,
   expiresAt,
   overlayTextColor,
+  focusPosition,
 }: JobViewHeroProps) {
   const positionsText = (positionsCount || 1) === 1 ? '1 ledig tjänst' : `${positionsCount} lediga tjänster`;
   const gradient = useMemo(() => getGradientForName(companyName), [companyName]);
@@ -118,6 +121,7 @@ export const JobViewHero = memo(function JobViewHero({
         fallbackSrcs={[fallbackImageUrl]}
         alt={`${title} hos ${companyName}`}
         className="w-full h-full object-cover"
+        style={{ objectPosition: toObjectPosition(focusPosition) }}
         loading="eager"
         {...fetchPriority('high')}
         decoding="sync"

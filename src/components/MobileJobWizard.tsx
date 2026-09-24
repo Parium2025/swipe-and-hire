@@ -1216,7 +1216,7 @@ const MobileJobWizard = ({
       
       toast({
         title: "Bild justerad",
-        description: editingImageType === 'desktop' ? "Datorbilden har sparats" : "Mobilbilden har sparats",
+        description: editingImageType === 'desktop' ? "Bilden i annonsen har sparats." : "Annonsbilden har sparats.",
       });
       
       console.log('MobileJobWizard handleImageEdit: Function complete');
@@ -2494,6 +2494,8 @@ const MobileJobWizard = ({
         job_image_desktop_url: formData.job_image_desktop_url || null,
         job_image_original_url: formData.job_image_url ? (originalStoragePath || formData.job_image_url) : null,
         job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopStoragePath || formData.job_image_desktop_url) : null,
+        image_focus_position: formData.image_focus_position || 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         expires_at: null,
@@ -2686,6 +2688,8 @@ const MobileJobWizard = ({
         job_image_desktop_url: formData.job_image_desktop_url || null,
         job_image_original_url: formData.job_image_url ? (originalStoragePath || formData.job_image_url) : null,
         job_image_desktop_original_url: formData.job_image_desktop_url ? (originalDesktopStoragePath || formData.job_image_desktop_url) : null,
+        image_focus_position: formData.image_focus_position || 'center',
+        image_focus_position_desktop: formData.image_focus_position_desktop || 'center',
         overlay_text_color: normalizeJobOverlayTextColor(formData.overlay_text_color),
         category: category || null,
         // Databasen håller nya/återpublicerade annonser dolda tills både annons
@@ -5098,7 +5102,7 @@ const MobileJobWizard = ({
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                     <div className="flex items-center gap-2 mb-2">
                       <Smartphone className="h-4 w-4 text-white" />
-                      <span className="text-white font-medium text-sm sm:text-base">Mobilbild + Jobbkort (valfritt)</span>
+                      <span className="text-white font-medium text-sm sm:text-base">Annonsbild (valfritt)</span>
                       {jobImageDesktopDisplayUrl && !jobImageDisplayUrl && (
                         <button
                           type="button"
@@ -5116,13 +5120,13 @@ const MobileJobWizard = ({
                           className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
                         >
                           <Copy className="w-3 h-3" />
-                          <span>Använd datorbild</span>
+                          <span>Använd bilden i annonsen</span>
                         </button>
                       )}
                     </div>
 
                     <p className="text-white text-xs sm:text-sm mb-3">
-                      Bild som visas i mobilförhandsvisningen
+                      Visas i jobbkort, söklistor och Swipe Mode.
                     </p>
                     
                     {!jobImageDisplayUrl && (
@@ -5158,7 +5162,7 @@ const MobileJobWizard = ({
                         <div className="mt-3 flex justify-center">
                           <img 
                             src={jobImageDisplayUrl} 
-                            alt="Mobilbild förhandsvisning" 
+                            alt="Förhandsvisning av annonsbild" 
                             className="w-full max-w-md h-48 object-contain rounded-lg"
                           />
                         </div>
@@ -5206,7 +5210,7 @@ const MobileJobWizard = ({
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                     <div className="flex items-center gap-2 mb-2">
                       <Monitor className="h-4 w-4 text-white" />
-                      <span className="text-white font-medium text-sm sm:text-base">Datorbild (valfritt)</span>
+                      <span className="text-white font-medium text-sm sm:text-base">Bild i annonsen (valfritt)</span>
                       {jobImageDisplayUrl && !jobImageDesktopDisplayUrl && (
                         <button
                           type="button"
@@ -5224,12 +5228,12 @@ const MobileJobWizard = ({
                           className="ml-auto premium-edit-pill-action inline-flex items-center gap-1.5 bg-primary/20 border border-primary/30 text-white text-xs transition-all duration-200 hover:bg-primary/30"
                         >
                           <Copy className="w-3 h-3" />
-                          <span>Använd mobilbild</span>
+                          <span>Använd annonsbilden</span>
                         </button>
                       )}
                     </div>
                     <p className="text-white text-xs sm:text-sm mb-3">
-                      Separat bild för dator/tablet. Om ingen laddas upp används mobilbilden.
+                      Visas när jobbet öppnas, på alla skärmstorlekar. Om ingen bild väljs används annonsbilden.
                     </p>
                     
                     {!jobImageDesktopDisplayUrl && (
@@ -5265,7 +5269,7 @@ const MobileJobWizard = ({
                         <div className="mt-3 flex justify-center">
                           <img 
                             src={jobImageDesktopDisplayUrl} 
-                            alt="Datorbild förhandsvisning" 
+                            alt="Förhandsvisning av bild i annonsen" 
                             className="w-full max-w-md h-48 object-contain rounded-lg"
                           />
                         </div>
@@ -5295,17 +5299,13 @@ const MobileJobWizard = ({
                           </div>
                         </div>
 
-                        {/* Fokuspunkt — visas under datorbilden när ingen mobilbild finns,
-                            eftersom datorbilden då är den som syns på jobbkorten */}
-                        {!jobImageDisplayUrl && (
-                          <div className="mt-3">
-                            <JobImagePositioner
-                              imageUrl={jobImageDesktopDisplayUrl}
-                              focusPercent={parseFocusPosition(formData.image_focus_position)}
-                              onFocusChange={(pct) => handleInputChange('image_focus_position', String(pct))}
-                            />
-                          </div>
-                        )}
+                        <div className="mt-3">
+                          <JobImagePositioner
+                            imageUrl={jobImageDesktopDisplayUrl}
+                            focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
+                            onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                          />
+                        </div>
 
                       </>
                     )}

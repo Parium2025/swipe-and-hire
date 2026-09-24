@@ -7,6 +7,7 @@ import { useCardImage } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
 import { SWIPE_IMG_TRANSFORM, SWIPE_LOGO_TRANSFORM } from './constants';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
 interface NextCardUnderlayProps {
   job: SwipeJob;
@@ -84,7 +85,7 @@ export const NextCardUnderlay = memo(function NextCardUnderlay({
             src={imageUrl}
             alt=""
             className="h-full w-full object-cover"
-            style={{ objectPosition: 'center center' }}
+            style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
             loading="eager"
             decoding="async"
             {...fetchPriority('high')}
