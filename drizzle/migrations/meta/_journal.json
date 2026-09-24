@@ -330,6 +330,13 @@
       "when": 1790266648413,
       "tag": "0046_expose_public_job_image_focus",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790266698713,
+      "tag": "0047_expose_both_public_job_image_focus_values",
+      "breakpoints": true
     }
   ]
 }
