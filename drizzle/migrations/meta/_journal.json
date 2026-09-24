@@ -337,6 +337,13 @@
       "when": 1790266698713,
       "tag": "0047_expose_both_public_job_image_focus_values",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1790280144495,
+      "tag": "0048_add_start_date_to_search_jobs",
+      "breakpoints": true
     }
   ]
 }
