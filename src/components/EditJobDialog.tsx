@@ -3125,7 +3125,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>
                                 {/* Left tooltip (company name) */}
-                                <div className="pointer-events-none absolute z-[999] top-14 -left-[115px] flex items-center gap-1">
+                                <div className="pointer-events-none absolute z-[999] top-[104px] md:top-[132px] -left-[115px] flex items-center gap-1">
                                   <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                     Obs, tryck här!
                                   </div>
