@@ -27,6 +27,7 @@ interface JobPostingShape {
   id: string;
   title: string;
   image_focus_position?: string | null;
+  image_focus_position_desktop?: string | null;
   location: string | null;
   workplace_city: string | null;
   workplace_county: string | null;
@@ -98,6 +99,7 @@ function normalizeJobPostingShape(input: unknown): JobPostingShape | null {
     id,
     title,
     image_focus_position: asNullableString(record.image_focus_position),
+    image_focus_position_desktop: asNullableString(record.image_focus_position_desktop),
     location: asNullableString(record.location),
     workplace_city: asNullableString(record.workplace_city),
     workplace_county: asNullableString(record.workplace_county),
@@ -215,6 +217,7 @@ const SAVED_SELECT = `
     id,
     title,
     image_focus_position,
+    image_focus_position_desktop,
     location,
     workplace_city,
     workplace_county,

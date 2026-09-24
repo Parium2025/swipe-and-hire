@@ -3650,6 +3650,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                       companyName: profile?.company_name || 'Företag',
                                       companyLogoUrl: profile?.company_logo_url,
                                       imageUrl: jobImageDisplayUrl,
+                                      imageFocusPosition: formData.image_focus_position,
                                       employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                                       employmentTypeDetail: formatEmploymentDetails({
                                         employment_type: formData.employment_type,
@@ -4282,6 +4283,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   const desktopUrl = formData.job_image_desktop_url;
                                   if (desktopUrl) {
                                     handleInputChange('job_image_url', desktopUrl);
+                                    handleInputChange('image_focus_position', formData.image_focus_position_desktop || 'center');
                                     setOriginalImageUrl(originalDesktopImageUrl);
                                     const { data: { publicUrl } } = supabase.storage
                                       .from('job-images')
@@ -4406,6 +4408,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                   const mobileUrl = formData.job_image_url;
                                   if (mobileUrl) {
                                     handleInputChange('job_image_desktop_url', mobileUrl);
+                                    handleInputChange('image_focus_position_desktop', formData.image_focus_position || 'center');
                                     setOriginalDesktopImageUrl(originalImageUrl);
                                     const { data: { publicUrl } } = supabase.storage
                                       .from('job-images')

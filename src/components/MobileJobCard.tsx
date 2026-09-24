@@ -112,6 +112,9 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
   // som bara har en desktop-bild (äldre/importerade) visade annars bara en
   // gradient här — bild fanns hos jobbsökaren men inte i "Mina annonser".
   const cardImageSource = job.job_image_url ?? (job as any).job_image_desktop_url ?? null;
+  const cardImageFocus = job.job_image_url
+    ? job.image_focus_position
+    : (job as any).image_focus_position_desktop;
   const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 400, quality: 75, resize: 'cover' });
 
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
@@ -188,7 +191,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
             decoding="sync"
             className="w-full h-full object-cover"
             style={{ objectPosition: `center ${(() => {
-              const v = job.image_focus_position;
+              const v = cardImageFocus;
               if (!v || v === 'center') return '50%';
               if (v === 'top') return '20%';
               if (v === 'bottom') return '80%';

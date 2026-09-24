@@ -39,6 +39,7 @@ interface ReadOnlyMobileJobCardProps {
     job_image_url?: string;
     job_image_desktop_url?: string;
     image_focus_position?: string;
+    image_focus_position_desktop?: string;
     company_name?: string;
     workplace_name?: string;
     employer_id?: string;
@@ -114,6 +115,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   // 🚀 Transform: kortbild ~600x400 (5-10× mindre), logo ~64px
   const imageVersion = getImageVersion(job);
   const cardImageSource = job.job_image_url ?? job.job_image_desktop_url ?? null;
+  const cardImageFocus = job.job_image_url
+    ? job.image_focus_position
+    : job.image_focus_position_desktop;
   const { displayUrl, handleError: handleImageError } = useCardImage(cardImageSource, 'job-images', imageVersion, { width: 600, height: 300, quality: 75, resize: 'cover' });
   const { displayUrl: logoUrl, handleError: handleLogoError } = useCardImage(job.company_logo_url ?? null, 'company-logos', imageVersion, { width: 64, height: 64, quality: 80, resize: 'contain' });
 
@@ -230,7 +234,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
             aria-hidden={displayUrl ? undefined : true}
             decoding="sync"
             className="w-full h-full object-cover"
-            style={{ objectPosition: toObjectPosition(job.image_focus_position) }}
+            style={{ objectPosition: toObjectPosition(cardImageFocus) }}
             loading={cardIndex < 6 ? 'eager' : 'lazy'}
             onError={handleImageError}
             fallbackClassName="w-full h-full"
