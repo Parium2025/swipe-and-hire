@@ -4,4 +4,4 @@
 - [x] Audit remaining interview booking, reminder, email and visibility failure paths
 - [x] Tighten the declined interview status and remove action layout
 
-- [ ] Make the mobile opened-job preview reuse the real Swipe Mode job-detail layout, including fixed apply action
+- [x] Make the mobile opened-job preview reuse the real Swipe Mode job-detail layout, including fixed apply action
