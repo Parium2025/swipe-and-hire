@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { MoveVertical } from 'lucide-react';
 import { parseFocusPercent, type FocusValue } from '@/lib/jobImageFocus';
 
@@ -21,9 +21,11 @@ interface JobImagePositionerProps {
  * A card-shaped preview where the user can drag the image vertically
  * to set the exact crop position. Stores a 0-100 percentage value.
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, context = 'job card' }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
   const startY = useRef(0);
   const startPercent = useRef(focusPercent);
 
@@ -31,43 +33,70 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
+    isDraggingRef.current = true;
+    activePointerIdRef.current = e.pointerId;
     setIsDragging(true);
     startY.current = e.clientY;
     startPercent.current = focusPercent;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
   }, [focusPercent]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging || !containerRef.current) return;
+    if (!isDraggingRef.current || activePointerIdRef.current !== e.pointerId || !containerRef.current) return;
     const containerHeight = containerRef.current.clientHeight;
     // Sensitivity: moving pointer down → image shifts up → higher % (shows lower part)
     const deltaY = e.clientY - startY.current;
     const deltaPct = (deltaY / containerHeight) * 100;
     onFocusChange(clamp(startPercent.current + deltaPct));
-  }, [isDragging, onFocusChange]);
+  }, [onFocusChange]);
 
-  const handlePointerUp = useCallback(() => {
+  const stopDragging = useCallback(() => {
+    isDraggingRef.current = false;
+    activePointerIdRef.current = null;
     setIsDragging(false);
   }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    stopDragging();
+  }, [stopDragging]);
+
+  useEffect(() => {
+    const stop = () => stopDragging();
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    window.addEventListener('blur', stop);
+    return () => {
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      window.removeEventListener('blur', stop);
+    };
+  }, [stopDragging]);
 
   return (
     <div className="space-y-2">
       <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt.</p>
-      {/* Samma breda bildyta används för jobbkort och öppnad annons. */}
+      {/* Annonsbilden motsvarar Swipe Mode; bilden i annonsen motsvarar 2:1-heron. */}
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
           isDragging ? 'border-white/60' : 'border-white/20'
         }`}
         style={{
-          aspectRatio: 'var(--job-media-aspect, 2 / 1)',
+          aspectRatio: context === 'job card' ? '1 / 2' : 'var(--job-media-aspect, 2 / 1)',
+          maxHeight: context === 'job card' ? '420px' : undefined,
+          marginInline: context === 'job card' ? 'auto' : undefined,
+          maxWidth: context === 'job card' ? '210px' : undefined,
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
+        onPointerCancel={stopDragging}
+        onLostPointerCapture={stopDragging}
       >
         <img
           src={imageUrl}

@@ -10,7 +10,7 @@
 
 export interface ImageTransform {
   width: number;
-  height: number;
+  height?: number;
   quality: number;
   resize: 'cover' | 'contain' | 'fill';
 }
@@ -18,9 +18,11 @@ export interface ImageTransform {
 // Card thumbnail (jobblista, swipe-kort baksida etc.)
 export const JOB_CARD_TRANSFORM: ImageTransform = {
   width: 600,
-  height: 300,
   quality: 75,
-  resize: 'cover',
+  // Bevara hela bilden. Den synliga 2:1-beskärningen och fokuspositionen
+  // appliceras först i webbläsaren; en cover-transform här skulle annars
+  // kapa bilden centralt innan användarens sparade fokus kan användas.
+  resize: 'contain',
 };
 
 // Hero/detaljsida — MÅSTE matcha byte-för-byte mellan card-preload,
@@ -28,18 +30,16 @@ export const JOB_CARD_TRANSFORM: ImageTransform = {
 // annars stämmer inte cache-key och bilden laddas synligt.
 export const JOB_VIEW_HERO_TRANSFORM: ImageTransform = {
   width: 1200,
-  height: 600,
   quality: 75,
-  resize: 'cover',
+  resize: 'contain',
 };
 
 // Swipe-kortet — täcker viewporten (~400px bred på mobil), ~800px räcker för 2× retina.
 // MÅSTE matcha exakt det som useSwipeImagePreloader warmar, annars cache-miss.
 export const SWIPE_CARD_TRANSFORM: ImageTransform = {
-  width: 800,
-  height: 1000,
+  width: 640,
   quality: 78,
-  resize: 'cover',
+  resize: 'contain',
 };
 
 // Företagslogo (alla ytor)

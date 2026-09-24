@@ -2073,11 +2073,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                 <DialogTitle className="premium-edit-title">
                   {steps[currentStep].title}
                 </DialogTitle>
-                {currentStep === steps.length - 1 && previewMode === 'mobile' && (
-                  <p className="text-white text-[11px] font-medium tracking-wide mb-0.5">
-                    (från swipe mode)
-                  </p>
-                )}
                 <div className="premium-edit-step-meta !text-white">
                   Steg {currentStep + 1} av {steps.length}
                 </div>
@@ -3105,6 +3100,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                       {/* Preview Mode Toggle */}
                       <div className="flex flex-col items-center space-y-4">
                         <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
+                        <p className="text-white text-[11px] font-medium tracking-wide">
+                          {previewMode === 'mobile' ? 'Från Swipe Mode' : 'Från sökresultatet'}
+                        </p>
                         
                         <h3
                           className="text-white font-medium text-center text-sm cursor-pointer hover:text-white transition-colors underline underline-offset-2"
