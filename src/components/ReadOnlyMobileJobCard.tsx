@@ -122,7 +122,9 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
   const gradient = useMemo(() => getGradientForId(job.id), [job.id]);
   const overlayTextStyle = useMemo(() => getJobOverlayTextStyle(job.overlay_text_color), [job.overlay_text_color]);
   const getCachedJobViewHeroUrl = useCallback(() => {
-    const raw = job.job_image_url || (job as any).job_image_desktop_url;
+    // Den fullständiga annonsvyn visar datorbilden på alla skärmstorlekar.
+    // Skicka därför aldrig mobilkortets bild som första bild till JobView.
+    const raw = (job as any).job_image_desktop_url || job.job_image_url;
     if (!raw) return null;
     try {
       const base = raw.startsWith('http')

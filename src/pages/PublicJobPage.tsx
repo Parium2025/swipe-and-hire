@@ -44,6 +44,7 @@ type Job = {
   workplace_name: string | null;
   company_logo_url: string | null;
   job_image_url: string | null;
+  job_image_desktop_url: string | null;
   benefits: string[] | null;
   created_at: string;
   expires_at: string | null;
@@ -328,7 +329,7 @@ const PublicJobPage = () => {
     'Visstid': 'TEMPORARY', 'Sommarjobb': 'TEMPORARY', 'Konsult': 'CONTRACTOR',
     'Praktik': 'INTERN', 'Volontär': 'VOLUNTEER',
   };
-  const resolvedJobImageUrl = resolveStorageImageUrl(job.job_image_url, 'job-images');
+  const resolvedJobImageUrl = resolveStorageImageUrl(job.job_image_desktop_url || job.job_image_url, 'job-images');
   const resolvedLogoUrl = resolveStorageImageUrl(job.company_logo_url, 'company-logos');
   const employmentLabel = getEmploymentTypeLabel(job.employment_type || undefined);
   const employmentTypeLD = employmentTypeMap[job.employment_type || '']
