@@ -137,7 +137,23 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         img.onload = () => {
           if (cancelled) return;
           imageRef.current = img;
-...
+          const scaleX = CANVAS_WIDTH / img.width;
+          const scaleY = CANVAS_HEIGHT / img.height;
+          const initialScale = Math.max(scaleX, scaleY);
+          setMinScale(isMobileSwipe ? initialScale : Math.min(scaleX, scaleY) * 0.5);
+          setScale(initialScale);
+          initialScaleRef.current = initialScale;
+          setPosition({ x: 0, y: 0 });
+          setImageLoaded(true);
+          setHasUserMadeChanges(false);
+        };
+        img.onerror = () => {
+          if (cancelled) return;
+          console.error('Image failed to load directly');
+          toast.error('Kunde inte visa bilden', {
+            description: 'Formatet stöds inte här. Prova med en JPG- eller PNG-bild.',
+          });
+        };
         img.src = imageSrc;
       }
     };
