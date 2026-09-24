@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { imageCache } from '@/lib/imageCache';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import {
   JOB_CARD_TRANSFORM,
   JOB_VIEW_HERO_TRANSFORM,
@@ -92,7 +93,12 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
         // säkra RPC:n som returnerar hela den egna profilen.
         const { data: myProfileRows } = await fetchMyProfile();
         const currentProfile = (Array.isArray(myProfileRows) ? myProfileRows[0] : null) as
-          | { profile_image_url?: string | null; cover_image_url?: string | null; video_url?: string | null }
+          | {
+              profile_image_url?: string | null;
+              cover_image_url?: string | null;
+              video_url?: string | null;
+              company_logo_url?: string | null;
+            }
           | null;
 
         if (currentProfile) {
@@ -100,6 +106,12 @@ export const useGlobalImagePreloader = (enabled: boolean = true) => {
           if (currentProfile.profile_image_url) tasks.push(prefetchMediaUrl(currentProfile.profile_image_url, 'profile-image'));
           if (currentProfile.cover_image_url) tasks.push(prefetchMediaUrl(currentProfile.cover_image_url, 'cover-image'));
           if (currentProfile.video_url) tasks.push(prefetchMediaUrl(currentProfile.video_url, 'profile-video'));
+          const companyLogoUrl = resolveCompanyLogoUrl(currentProfile.company_logo_url);
+          if (companyLogoUrl) {
+            // Företagsloggan är kritisk i skapa-/redigeraflödet. Värm och
+            // dekoda exakt samma 128 px-variant som förhandsvisningarna använder.
+            tasks.push(imageCache.loadImage(companyLogoUrl, true).then(() => undefined));
+          }
           if (tasks.length > 0) await Promise.allSettled(tasks);
         }
 
