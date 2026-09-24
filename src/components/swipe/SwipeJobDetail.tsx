@@ -1,17 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { recordJobView } from '@/lib/recordJobView';
 import { useAuth } from '@/hooks/useAuth';
 import { X } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
-import { getBenefitLabel } from '@/types/jobWizard';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SwipeJob } from './types';
 import { useSheetDragDismiss } from './hooks/useSheetDragDismiss';
 import { useJobDetailData } from './hooks/useJobDetailData';
-import { JobDetailInfoGrid } from './jobDetail/JobDetailInfoGrid';
-import { JobDetailQuestions } from './jobDetail/JobDetailQuestions';
+import { SwipeJobDetailSections } from './jobDetail/SwipeJobDetailSections';
 
 interface SwipeJobDetailProps {
   job: SwipeJob;
@@ -19,28 +16,6 @@ interface SwipeJobDetailProps {
   onClose: () => void;
   onApply: () => void;
   hasApplied: boolean;
-}
-
-function DescriptionSection({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const needsTruncation = text.length > 300;
-
-  return (
-    <div className="bg-white/10 rounded-lg p-4">
-      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Om tjänsten</h3>
-      <p className={`text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap ${!expanded && needsTruncation ? 'line-clamp-6' : ''}`}>
-        {text}
-      </p>
-      {needsTruncation && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-[15px] sm:text-sm font-medium text-white hover:text-white/80 transition-colors"
-        >
-          {expanded ? 'Visa mindre' : 'Visa mer'}
-        </button>
-      )}
-    </div>
-  );
 }
 
 export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: SwipeJobDetailProps) {
@@ -174,62 +149,14 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
                   </div>
                 </div>
               ) : detail ? (
-                <>
-                  {/* 1. Om tjänsten */}
-                  {detail.description && <DescriptionSection text={detail.description} />}
-
-                  {/* 2. Detaljer om tjänsten */}
-                  <JobDetailInfoGrid job={job} detail={detail} displayCompanyName={displayCompanyName} />
-
-                  {/* 3. Förmåner */}
-                  {detail.benefits && detail.benefits.length > 0 && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Förmåner</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {detail.benefits.map((benefit, index) => (
-                          <Badge key={index} variant="secondary" className="text-[13px] sm:text-xs bg-white/20 text-white border-white/30">
-                            {getBenefitLabel(benefit)}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 4. Pitch */}
-                  {detail.pitch && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Varför jobba hos oss?</h3>
-                      <p className="text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap">{detail.pitch}</p>
-                    </div>
-                  )}
-
-                  {/* 5. Krav */}
-                  {detail.requirements && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Krav & kvalifikationer</h3>
-                      <p className="text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap">{detail.requirements}</p>
-                    </div>
-                  )}
-
-                  {/* 6. Ansökningsfrågor */}
-                  <JobDetailQuestions questions={questions} myAnswers={myAnswers} hasApplied={hasApplied} />
-
-                  {/* 7. Ansökningsinstruktioner */}
-                  {detail.application_instructions && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Ansökningsinstruktioner</h3>
-                      <p className="text-white text-[15px] sm:text-sm leading-[1.6] sm:leading-relaxed whitespace-pre-wrap">{detail.application_instructions}</p>
-                    </div>
-                  )}
-
-                  {/* 8. Kontakt */}
-                  {detail.contact_email && (
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Kontakt</h3>
-                      <p className="text-white text-[15px] sm:text-sm break-all">{detail.contact_email}</p>
-                    </div>
-                  )}
-                </>
+                <SwipeJobDetailSections
+                  job={job}
+                  detail={detail}
+                  displayCompanyName={displayCompanyName}
+                  questions={questions}
+                  myAnswers={myAnswers}
+                  hasApplied={hasApplied}
+                />
               ) : hasError ? (
                 <div className="bg-white/10 rounded-lg p-4 text-center space-y-3">
                   <p className="text-white text-[15px] sm:text-sm">

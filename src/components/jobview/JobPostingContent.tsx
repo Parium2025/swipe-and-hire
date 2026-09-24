@@ -9,6 +9,9 @@ import { TruncatedText } from '@/components/TruncatedText';
 export interface JobPostingContentData {
   title: string;
   description?: string | null;
+  requirements?: string | null;
+  pitch?: string | null;
+  applicationInstructions?: string | null;
   imageUrl?: string | null;
   fallbackImageUrl?: string | null;
   imageFocusPosition?: string | null;
