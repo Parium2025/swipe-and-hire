@@ -5006,7 +5006,8 @@ const MobileJobWizard = ({
                                   occupation: formData.occupation,
                                   companyName: profile?.company_name || 'Företag',
                                   companyLogoUrl: profile?.company_logo_url,
-                                  imageUrl: jobImageDesktopDisplayUrl,
+                                  imageUrl: jobImageDisplayUrl,
+                                  imageFocusPosition: formData.image_focus_position,
                                   employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                                   employmentTypeDetail: formatEmploymentDetails({
                                     employment_type: formData.employment_type,
@@ -5097,8 +5098,7 @@ const MobileJobWizard = ({
                       ))}
                     </div>
                   </div>
-                  {/* Mobile image section — endast i mobilvyn */}
-{previewMode === 'mobile' && (
+                  {/* Annonsbild — redigerbar i både mobil- och datorvyn */}
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                     <div className="flex items-center gap-2 mb-2">
                       <Smartphone className="h-4 w-4 text-white" />
@@ -5204,7 +5204,6 @@ const MobileJobWizard = ({
                       </>
                     )}
                   </div>
-)}
 
                   {/* Desktop image section */}
                   <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
@@ -5304,6 +5303,7 @@ const MobileJobWizard = ({
                             imageUrl={jobImageDesktopDisplayUrl}
                             focusPercent={parseFocusPosition(formData.image_focus_position_desktop)}
                             onFocusChange={(pct) => handleInputChange('image_focus_position_desktop', String(pct))}
+                            context="job view"
                           />
                         </div>
 

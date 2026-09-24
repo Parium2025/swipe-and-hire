@@ -14,13 +14,14 @@ interface JobImagePositionerProps {
   imageUrl: string;
   focusPercent: number;
   onFocusChange: (percent: number) => void;
+  context?: 'job card' | 'job view';
 }
 
 /**
  * A card-shaped preview where the user can drag the image vertically
  * to set the exact crop position. Stores a 0-100 percentage value.
  */
-export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: JobImagePositionerProps) {
+export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange, context = 'job card' }: JobImagePositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
@@ -52,8 +53,7 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
   return (
     <div className="space-y-2">
       <p className="text-white text-xs font-medium">Dra bilden för att välja fokuspunkt.</p>
-      {/* Matchar jobbkortets bildyta exakt. Fokusvärdet påverkar endast kortet,
-          inte telefon-, dator- eller annonsförhandsvisningen. */}
+      {/* Samma breda bildyta används för jobbkort och öppnad annons. */}
       <div
         ref={containerRef}
         className={`relative w-full rounded-xl overflow-hidden border-2 transition-colors select-none ${
@@ -97,7 +97,9 @@ export function JobImagePositioner({ imageUrl, focusPercent, onFocusChange }: Jo
         />
       </div>
       <p className="text-white text-[10px] text-center">
-        Så här kommer bilden att klippas i jobbkorten.
+        {context === 'job view'
+          ? 'Så här kommer bilden att klippas när annonsen öppnas.'
+          : 'Så här kommer bilden att klippas i jobbkorten.'}
       </p>
     </div>
   );
