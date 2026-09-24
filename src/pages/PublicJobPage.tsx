@@ -18,6 +18,7 @@ import SeoBubbles from '@/components/seo/SeoBubbles';
 import { TruncatedText } from '@/components/TruncatedText';
 import { parseSalary, formatSalary } from '@/lib/salaryRange';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { toObjectPosition } from '@/lib/jobImageFocus';
 
  
 
