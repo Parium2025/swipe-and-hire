@@ -3921,7 +3921,7 @@ const MobileJobWizard = ({
                     {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                       <>
                         {/* Left tooltip (company name) */}
-                        <div className="pointer-events-none absolute z-[999] top-[112px] md:top-[140px] -left-[98px] md:-left-[104px] flex items-center gap-1">
+                        <div className="pointer-events-none absolute z-[999] top-[126px] md:top-[156px] -left-[98px] md:-left-[104px] flex items-center gap-1">
                           <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                             Obs, tryck här!
                           </div>
