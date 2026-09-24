@@ -62,28 +62,36 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
   }, [CANVAS_HEIGHT, CANVAS_WIDTH, isMobileSwipe]);
 
-  // Reset state when dialog opens/closes
+  // Reset state when dialog opens/closes — en tidigare bild får aldrig
+  // ligga kvar och visas när redigeraren öppnas för en annan annons.
   useEffect(() => {
     if (!isOpen) {
       setIsSaving(false);
       setHasUserMadeChanges(false);
+      setImageLoaded(false);
+      imageRef.current = null;
     }
   }, [isOpen]);
 
   // Load and setup image
   useEffect(() => {
     if (!imageSrc || !isOpen) return;
+    let cancelled = false;
+    setImageLoaded(false);
+    imageRef.current = null;
 
     const loadImage = async () => {
       try {
         // Try to fetch the image as blob first to avoid CORS issues
-        const response = await fetch(imageSrc);
+        const response = await fetch(imageSrc, { cache: 'no-store' });
         if (!response.ok) throw new Error(`Image request failed (${response.status})`);
         const blob = await response.blob();
+        if (cancelled) return;
         const blobUrl = URL.createObjectURL(blob);
         
         const img = new Image();
         img.onload = () => {
+          if (cancelled) { URL.revokeObjectURL(blobUrl); return; }
           imageRef.current = img;
           
           // Calculate initial scale - IDENTISKT för alla bilder (cover)
