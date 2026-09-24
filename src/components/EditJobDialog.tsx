@@ -53,6 +53,7 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 import { usePreparedCompanyLogo } from '@/hooks/usePreparedCompanyLogo';
+import { JobPostingPreviewContent } from '@/components/jobview';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
@@ -3161,499 +3162,54 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 {/* Dynamic Island-style notch */}
                                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-2 w-10 rounded-full bg-black border border-gray-800"></div>
 
-                                <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden bg-card-parium">
-                                  
-                                  <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                                     <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem] gap-1">
-                                       <div className="text-[10px] font-bold text-white truncate min-w-0">Ansökan</div>
-                                      <div className="relative">
-                                        {showCompanyTooltip && isScrolledTop && (
-                                          <div className="pointer-events-none absolute z-[999] top-0 -right-28 flex items-center gap-1">
-                                            <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
-                                              <path d="M46 14 Q 24 0, 2 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadLeft)" />
-                                              <defs>
-                                                <marker id="arrowheadLeft" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                                                  <polygon points="6 0, 0 3, 6 6" fill="currentColor" />
-                                                </marker>
-                                              </defs>
-                                            </svg>
-                                            <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                                              Obs, tryck här!
-                                            </div>
-                                          </div>
-                                        )}
-                                        <button onClick={() => setShowApplicationForm(false)} className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors" aria-label="Stäng ansökningsformulär"><X className="h-3.5 w-3.5" /></button>
-                                      </div>
-                                    </div>
-
-                                     <div 
-                                       className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
-                                       onScroll={(e) => {
-                                         const target = e.currentTarget;
-                                         setIsScrolledTop(target.scrollTop === 0);
-                                       }}
-                                     >
-                                       <div className="space-y-1 pb-2">
-                                         {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) && (
-                                           <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-white/20 bg-white/10">
-                                             <img
-                                               src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
-                                               alt="Bild i annonsen"
-                                               className="absolute inset-0 h-full w-full object-cover"
-                                               style={{ objectPosition: 'center center' }}
-                                               draggable={false}
-                                             />
-                                           </div>
-                                         )}
-                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
-                                          <div className="flex items-center">
-                                            {preparedCompanyLogoUrl ? (
-                                              <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
-                                                <img 
-                                                  src={preparedCompanyLogoUrl} 
-                                                  alt="Företagslogotyp" 
-                                                  className="w-full h-full object-contain"
-                                                />
-                                              </div>
-                                            ) : (
-                                              <div className="w-4 h-4 bg-primary/20 rounded-full mr-1 flex items-center justify-center">
-                                                <Building2 className="h-2 w-2 text-primary-foreground" />
-                                              </div>
-                                            )}
-                                             <button 
-                                               onClick={() => setShowCompanyProfile(true)}
-                                               className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer leading-tight text-left min-w-0"
-                                             >
-                                               <TruncatedText text={profile?.company_name || 'Företagsnamn'} className="line-clamp-2 text-xs font-bold text-white leading-tight" tooltipSide="bottom" />
-                                             </button>
-                                          </div>
-                                        </div>
-
-                                         {formData.occupation && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               <Briefcase className="h-2 w-2 mr-1 text-white" />
-                                               Yrke
-                                             </h5>
-                                             <div className="text-white">
-                                               <div 
-                                                 ref={occupationRef}
-                                                 className="text-xs leading-relaxed break-words inline-block pr-2 overflow-visible"
-                                               >
-                                                 {formData.occupation}
-                                               </div>
-                                             </div>
-                                           </div>
-                                         )}
-
-                                         {formData.description && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                             <h5 className="text-xs font-medium text-white mb-0.5">Jobbeskrivning</h5>
-                                             <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-0.5 [&>*:last-child]:mb-0">
-                                              {formData.description.split('\n').map((line, index) => {
-                                                const trimmedLine = line.trim();
-                                                const bulletMatch = trimmedLine.match(/^([•\-\*]|\d+[\.\)])\s*(.*)$/);
-                                                
-                                                if (bulletMatch) {
-                                                  const [, bullet, text] = bulletMatch;
-                                                  return (
-                                                    <div key={index} className="flex">
-                                                      <span className="flex-shrink-0 mr-1">{bullet}</span>
-                                                      <span className="flex-1 break-words">{text}</span>
-                                                    </div>
-                                                  );
-                                                }
-                                                
-                                                return trimmedLine ? (
-                                                  <div key={index}>{trimmedLine}</div>
-                                                ) : (
-                                                  <div key={index} className="h-3"></div>
-                                                );
-                                              })}
-                                            </div>
-                                          </div>
-                                         )}
-
-                                          {/* Anställningsform */}
-                                          {formData.employment_type && (
-                                            <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Briefcase className="h-2 w-2 mr-1 text-white" />
-                                                Anställningsform
-                                              </h5>
-                                              <div className="text-xs text-white leading-relaxed break-words">
-                                                <div className="font-medium">
-                                                  {getEmploymentTypeLabel(formData.employment_type)}
-                                                  {formatEmploymentDetails({
-                                                    employment_type: formData.employment_type,
-                                                    part_time_days: formData.part_time_days,
-                                                    part_time_shifts: formData.part_time_shifts,
-                                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
-                                                    duration_unit: formData.duration_unit,
-                                                  }) && ` · ${formatEmploymentDetails({
-                                                    employment_type: formData.employment_type,
-                                                    part_time_days: formData.part_time_days,
-                                                    part_time_shifts: formData.part_time_shifts,
-                                                    duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
-                                                    duration_unit: formData.duration_unit,
-                                                  })}`}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          )}
-
-                                          {(formData.salary_min || formData.salary_max || formData.salary_type) && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               Lön
-                                             </h5>
-                                             <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
-                                              {formatSalaryInfo().map((info, index) => (
-                                                <div key={index} className="font-medium">{info}</div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-
-                                         {formData.positions_count && parseInt(formData.positions_count) > 0 && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               Antal rekryteringar
-                                             </h5>
-                                             <div className="text-xs text-white leading-relaxed break-words">
-                                              <div className="font-medium">{formatPositionsCount()}</div>
-                                            </div>
-                                          </div>
-                                         )}
-
-                                         {/* Lönetransparens */}
-                                         {formData.salary_transparency && formatSalaryTransparency() && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               Lönetransparens
-                                             </h5>
-                                             <div className="text-xs text-white leading-relaxed break-words">
-                                               <div className="font-medium">{formatSalaryTransparency()}</div>
-                                             </div>
-                                           </div>
-                                         )}
-
-                                         {/* Arbetstider */}
-                                         {(formData.work_start_time || formData.work_end_time) && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               Arbetstider
-                                             </h5>
-                                             <div className="text-xs text-white leading-relaxed break-words">
-                                               <div className="font-medium">
-                                                 {formData.work_start_time && formData.work_end_time 
-                                                   ? `${formData.work_start_time} – ${formData.work_end_time}`
-                                                   : formData.work_start_time || formData.work_end_time}
-                                               </div>
-                                             </div>
-                                           </div>
-                                         )}
-
-                                         {/* Förmåner */}
-                                         {formData.benefits && formData.benefits.length > 0 && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
-                                             <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                               Förmåner
-                                             </h5>
-                                             <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
-                                               {formData.benefits.map((benefit, idx) => (
-                                                 <div key={idx} className="flex items-start">
-                                                   <span className="flex-shrink-0 mr-1">•</span>
-                                                   <span className="break-words">{benefit}</span>
-                                                 </div>
-                                               ))}
-                                             </div>
-                                           </div>
-                                         )}
-
-                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 overflow-hidden">
-                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                             Bolagsnamn
-                                           </h5>
-                                           <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
-                                            {formData.workplace_name && (
-                                              <div className="font-medium">{formData.workplace_name}</div>
-                                            )}
-                                            {formData.workplace_address && (
-                                              <div>{formData.workplace_address}</div>
-                                            )}
-                                            {(formData.workplace_postal_code || formData.workplace_city) && (
-                                              <div>
-                                                {formData.workplace_postal_code && formData.workplace_city ? (
-                                                  <div>
-                                                    {formData.workplace_postal_code} {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
-                                                  </div>
-                                                ) : formData.workplace_city ? (
-                                                  <div>
-                                                    {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
-                                                  </div>
-                                                ) : (
-                                                  <div>{formData.workplace_postal_code}</div>
-                                                )}
-                                                <div>{getWorkLocationDisplayText()}</div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-
-                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                           <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                             Kontakt
-                                           </h5>
-                                           <div className="text-xs text-white leading-relaxed break-words">
-                                            {formData.contact_email && (
-                                              <a 
-                                                href={`mailto:${formData.contact_email}`}
-                                                className={`text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer ${getEmailTextSize(formData.contact_email)}`}
-                                              >
-                                                {formData.contact_email}
-                                              </a>
-                                            )}
-                                          </div>
-                                        </div>
-
-                                         {formData.requirements && (
-                                           <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                             <h4 className="text-xs font-semibold text-white mb-0.5">Kvalifikationer</h4>
-                                             <p className="text-xs text-white leading-relaxed">
-                                              {formData.requirements.length > 100 
-                                                ? formData.requirements.substring(0, 100) + '...' 
-                                                : formData.requirements
-                                              }
-                                            </p>
-                                          </div>
-                                        )}
-
-                                         <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
-                                           <p className="text-xs text-white mb-2 leading-relaxed">
-                                             Följande information samlas automatiskt in från alla kandidater som har sökt:
-                                           </p>
-                                           
-                                           <div className="space-y-1">
-                                             {[
-                                               'Namn',
-                                               'Efternamn',
-                                               'Ålder',
-                                               'E-post',
-                                               'Telefonnummer',
-                                               'Ort/stad',
-                                               'Presentation',
-                                               'CV',
-                                               'Nuvarande anställningsform',
-                                               'Tillgänglighet',
-                                             ].map((label, idx) => (
-                                               <div key={idx} className="text-xs flex">
-                                                 <span className="flex-shrink-0 mr-1 text-white">•</span>
-                                                 <span className="flex-1 text-white leading-tight break-words">{label}</span>
-                                               </div>
-                                             ))}
-                                           </div>
-                                         </div>
-
-                                         {/* Anpassade frågor - individuella kort */}
-                                         {customQuestions.length > 0 && (
-                                           <div className="space-y-1.5">
-                                             {customQuestions.map((question, index) => {
-                                               const typeLabels = {
-                                                 number: 'Siffra',
-                                                 text: 'Text',
-                                                 multiple_choice: 'Flerval',
-                                                 yes_no: 'Ja/Nej',
-                                                 date: 'Datum',
-                                                 file: 'Fil',
-                                                 video: 'Video',
-                                               };
-
-                                               return (
-                                                 <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                                   {/* Frågetext */}
-                                                   <div className="mb-1.5">
-                                                     <label className="text-xs font-medium text-white block leading-tight">
-                                                       {question.question_text}
-                                                     </label>
-                                                   </div>
-                                                   
-                                                    {/* Input förhandsvisning baserat på frågetyp */}
-                                                     {question.question_type === 'text' && (
-                                                        <textarea
-                                                          className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
-                                                         placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                         rows={2}
-                                                         onInput={(e) => {
-                                                           const el = e.currentTarget;
-                                                           el.style.height = 'auto';
-                                                           el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-                                                         }}
-                                                       />
-                                                     )}
-                                                  
-                                                  {question.question_type === 'yes_no' && (
-                                                    <div className="flex gap-1.5">
-                                                      <button 
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                          e.preventDefault();
-                                                          const parent = e.currentTarget.parentElement;
-                                                          if (!parent) return;
-                                                          const yesBtn = parent.querySelector('button:nth-child(1)') as HTMLButtonElement | null;
-                                                          const noBtn = parent.querySelector('button:nth-child(2)') as HTMLButtonElement | null;
-
-                                                          const isSelected = e.currentTarget.classList.contains('bg-secondary/40');
-
-                                                          // Rensa båda först
-                                                          [yesBtn, noBtn].forEach(btn => {
-                                                            btn?.classList.remove('bg-secondary/40', 'border-secondary', 'text-white');
-                                                            btn?.classList.add('bg-white/10', 'border-white/20');
-                                                          });
-
-                                                          // Om klickad knapp inte redan var vald -> välj den, annars lämna avmarkerad
-                                                          if (!isSelected) {
-                                                            e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                            e.currentTarget.classList.add('bg-secondary/40', 'border-secondary', 'text-white');
-                                                          }
-                                                        }}
-                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-1.5 py-0.5 text-xs text-white transition-colors font-medium"
-                                                      >
-                                                        Ja
-                                                      </button>
-                                                      <button 
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                          e.preventDefault();
-                                                          const parent = e.currentTarget.parentElement;
-                                                          if (!parent) return;
-                                                          const yesBtn = parent.querySelector('button:nth-child(1)') as HTMLButtonElement | null;
-                                                          const noBtn = parent.querySelector('button:nth-child(2)') as HTMLButtonElement | null;
-
-                                                          const isSelected = e.currentTarget.classList.contains('bg-secondary/40');
-
-                                                          // Rensa båda först
-                                                          [yesBtn, noBtn].forEach(btn => {
-                                                            btn?.classList.remove('bg-secondary/40', 'border-secondary', 'text-white');
-                                                            btn?.classList.add('bg-white/10', 'border-white/20');
-                                                          });
-
-                                                          // Om klickad knapp inte redan var vald -> välj den, annars lämna avmarkerad
-                                                          if (!isSelected) {
-                                                            e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                            e.currentTarget.classList.add('bg-secondary/40', 'border-secondary', 'text-white');
-                                                          }
-                                                        }}
-                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-1.5 py-0.5 text-xs text-white transition-colors font-medium"
-                                                      >
-                                                        Nej
-                                                      </button>
-                                                    </div>
-                                                  )}
-                                                  
-                                                  {question.question_type === 'multiple_choice' && (
-                                                    <div className="space-y-1.5">
-                                                      {(question.options || []).map((option: string, optionIndex: number) => {
-                                                        const questionKey = question.id || `q_${optionIndex}`;
-                                                        const selectedAnswers = previewAnswers[questionKey];
-                                                        const answersArray = typeof selectedAnswers === 'string' 
-                                                          ? selectedAnswers.split('|||') 
-                                                          : [];
-                                                        const selected = answersArray.includes(option);
-                                                        
-                                                        return (
-                                                          <button
-                                                            key={optionIndex}
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                              e.preventDefault();
-                                                              setPreviewAnswers((prev) => {
-                                                                const currentAnswers = prev[questionKey];
-                                                                const answersArray = typeof currentAnswers === 'string'
-                                                                  ? currentAnswers.split('|||').filter(a => a)
-                                                                  : [];
-                                                                
-                                                                const newAnswers = answersArray.includes(option)
-                                                                  ? answersArray.filter(a => a !== option)
-                                                                  : [...answersArray, option];
-                                                                
-                                                                return {
-                                                                  ...prev,
-                                                                  [questionKey]: newAnswers.join('|||'),
-                                                                };
-                                                              });
-                                                            }}
-                                                            className={`w-full flex items-center gap-2 p-1.5 rounded-lg border transition-all ${
-                                                              selected
-                                                                ? 'bg-secondary/40 border-secondary'
-                                                                : 'bg-white/10 border-white/20 hover:bg-white/15'
-                                                            }`}
-                                                          >
-                                                            <div className={`w-1.5 h-1.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
-                                                              selected ? 'border-secondary bg-secondary' : 'border-white/40'
-                                                            }`} />
-                                                            <span className="text-xs text-white text-left flex-1">{option}</span>
-                                                          </button>
-                                                        );
-                                                      })}
-                                                    </div>
-                                                  )}
-                                                  
-                                                  {question.question_type === 'number' && (() => {
-                                                    const minVal = question.min_value ?? 0;
-                                                    const maxVal = question.max_value ?? 100;
-                                                    const currentVal = Number(previewAnswers[question.id || `q_${index}`] || minVal);
-                                                    const percentage = ((currentVal - minVal) / (maxVal - minVal)) * 100;
-                                                    
-                                                    return (
-                                                      <div className="space-y-1.5">
-                                                        <div className="text-center text-xs font-semibold text-white">
-                                                          {currentVal}
-                                                        </div>
-                                                        <input
-                                                          type="range"
-                                                          min={minVal}
-                                                          max={maxVal}
-                                                          value={currentVal}
-                                                          className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
-                                                          style={{
-                                                            background: `linear-gradient(to right, white ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`
-                                                          }}
-                                                          onChange={(e) => setPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
-                                                        />
-                                                      </div>
-                                                    );
-                                                  })()}
-                                                  
-                                                  {question.question_type === 'date' && (
-                                                    <input
-                                                      type="date"
-                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11"
-                                                      disabled
-                                                    />
-                                                  )}
-                                                  
-                                                  {(question.question_type === 'file' || question.question_type === 'video') && (
-                                                    <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
-                                                      {question.question_type === 'file' ? (
-                                                        <FileText className="h-3 w-3 mx-auto mb-0.5 text-white" />
-                                                      ) : (
-                                                        <Video className="h-3 w-3 mx-auto mb-0.5 text-white" />
-                                                      )}
-                                                      <p className="text-xs text-white">
-                                                        {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
-                                                      </p>
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
+                                {showApplicationForm && (
+                                  <div
+                                    className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium px-2 pb-2 pt-5 custom-scrollbar overscroll-contain"
+                                    onScroll={(event) => setIsScrolledTop(event.currentTarget.scrollTop === 0)}
+                                  >
+                                    <JobPostingPreviewContent
+                                      data={{
+                                        title: getDisplayTitle(),
+                                        description: formData.description,
+                                        imageUrl: jobImageDesktopDisplayUrl || jobImageDisplayUrl,
+                                        imageFocusPosition: 'center',
+                                        companyName: profile?.company_name || 'Företag',
+                                        companyLogoUrl: preparedCompanyLogoUrl,
+                                        location: formData.location,
+                                        employmentType: formData.employment_type,
+                                        partTimeDays: formData.part_time_days,
+                                        partTimeShifts: formData.part_time_shifts,
+                                        durationAmount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                        durationUnit: formData.duration_unit,
+                                        workSchedule: formData.work_schedule,
+                                        workplaceAddress: formData.workplace_address,
+                                        workplacePostalCode: formData.workplace_postal_code,
+                                        workplaceCity: formData.workplace_city,
+                                        workplaceMunicipality: formData.workplace_municipality,
+                                        workplaceCounty: formData.workplace_county,
+                                        workLocationType: formData.work_location_type,
+                                        remoteWorkPossible: formData.remote_work_possible,
+                                        workStartTime: formData.work_start_time,
+                                        workEndTime: formData.work_end_time,
+                                        startDate: formData.start_date,
+                                        positionsCount: formData.positions_count ? parseInt(formData.positions_count, 10) : 1,
+                                        occupation: formData.occupation,
+                                        salaryMin: formData.salary_min ? parseInt(formData.salary_min, 10) : null,
+                                        salaryMax: formData.salary_max ? parseInt(formData.salary_max, 10) : null,
+                                        salaryType: formData.salary_type,
+                                        salaryTransparency: formData.salary_transparency,
+                                        contactEmail: formData.contact_email,
+                                        benefits: formData.benefits,
+                                        overlayTextColor: formData.overlay_text_color,
+                                      }}
+                                      questions={customQuestions}
+                                      answers={previewAnswers}
+                                      onAnswerChange={(questionId, value) => setPreviewAnswers((current) => ({ ...current, [questionId]: value }))}
+                                      onOpenCompany={() => setShowCompanyProfile(true)}
+                                      scale={0.36}
+                                    />
                                   </div>
-                                </div>
+                                )}
 
                                 {!showApplicationForm && (
                                   <WizardSwipePreview
@@ -3709,488 +3265,55 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                               <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                                 {/* Content with Parium background */}
                                 <div className="absolute inset-0 bg-card-parium">
-                                  {/* Application Form View (when clicked) */}
+                                  {/* Opened job view — same shared content as the real job page */}
                                   {showDesktopApplicationForm && (
-                                    <div className="flex flex-col h-full">
-                                      <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 flex-shrink-0">
-                                        <div className="text-sm font-bold text-white">Ansökningsformulär</div>
-                                        <div className="flex items-center gap-2">
-                                          {/* Tooltip pointing at X button */}
-                                          {showCompanyTooltip && (
-                                            <div className="pointer-events-none flex items-center gap-1">
-                                              <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                                                Obs, tryck här!
-                                              </div>
-                                              <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
-                                                <defs>
-                                                  <marker id="arrowheadRight_desktop_x_edit" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
-                                                    <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
-                                                  </marker>
-                                                </defs>
-                                                <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop_x_edit)" />
-                                              </svg>
-                                            </div>
-                                          )}
-                                          <button 
-                                            onClick={() => setShowDesktopApplicationForm(false)} 
-                                            className="flex h-6 w-6 items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors"
-                                            aria-label="Stäng ansökningsformulär"
-                                          >
-                                            <X className="h-3.5 w-3.5" />
-                                          </button>
-                                        </div>
-                                      </div>
-
-                                      <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar overscroll-contain">
-                                        <div className="space-y-2">
-                                          {(jobImageDesktopDisplayUrl || jobImageDisplayUrl) && (
-                                            <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-white/20 bg-white/10">
-                                              <img
-                                                src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
-                                                alt="Bild i annonsen"
-                                                className="absolute inset-0 h-full w-full object-cover"
-                                                style={{ objectPosition: 'center center' }}
-                                                draggable={false}
-                                              />
-                                            </div>
-                                          )}
-                                          {/* Company info */}
-                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                            <div className="flex items-center justify-between">
-                                              <div className="flex items-center">
-                                                {preparedCompanyLogoUrl ? (
-                                                  <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
-                                                    <img 
-                                                      src={preparedCompanyLogoUrl} 
-                                                      alt="Företagslogotyp" 
-                                                      className="w-full h-full object-contain"
-                                                    />
-                                                  </div>
-                                                ) : (
-                                                  <div className="w-5 h-5 bg-primary/20 rounded-full mr-2 flex items-center justify-center">
-                                                    <Building2 className="h-3 w-3 text-primary-foreground" />
-                                                  </div>
-                                                )}
-                                                <button 
-                                                  onClick={() => setShowCompanyProfile(true)}
-                                                  className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer min-w-0 text-left"
-                                                >
-                                                  <TruncatedText text={profile?.company_name || 'Företagsnamn'} className="line-clamp-2 text-sm font-bold text-white" tooltipSide="bottom" />
-                                                </button>
-                                              </div>
-                                              {/* Tooltip pointing at company name */}
-                                              {showCompanyTooltip && (
-                                                <div className="pointer-events-none flex items-center gap-1">
-                                                  <svg width="16" height="12" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
-                                                    <defs>
-                                                      <marker id="arrowheadLeft_desktop_edit" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
-                                                        <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
-                                                      </marker>
-                                                    </defs>
-                                                    <path d="M38 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_desktop_edit)" />
-                                                  </svg>
-                                                  <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                                                    Obs, tryck här!
-                                                  </div>
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-
-                                          {/* Yrke */}
-                                          {formData.occupation && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Briefcase className="h-3 w-3 mr-1 text-white" />
-                                                Yrke
-                                              </h5>
-                                              <p className="text-xs text-white">{formData.occupation}</p>
-                                            </div>
-                                          )}
-
-                                          {/* Jobbeskrivning */}
-                                          {formData.description && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <FileText className="h-3 w-3 mr-1 text-white" />
-                                                Jobbeskrivning
-                                              </h5>
-                                              <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words max-h-20 overflow-y-auto">
-                                                {formData.description.length > 200 
-                                                  ? formData.description.substring(0, 200) + '...' 
-                                                  : formData.description
-                                                }
-                                              </div>
-                                            </div>
-                                          )}
-
-                                          {/* Anställningsform */}
-                                          {formData.employment_type && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                <Briefcase className="h-3 w-3 mr-1 text-white" />
-                                                Anställningsform
-                                              </h5>
-                                               <div className="text-xs text-white font-medium">
-                                                 {getEmploymentTypeLabel(formData.employment_type)}
-                                                 {formatEmploymentDetails({
-                                                   employment_type: formData.employment_type,
-                                                   part_time_days: formData.part_time_days,
-                                                   part_time_shifts: formData.part_time_shifts,
-                                                   duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
-                                                   duration_unit: formData.duration_unit,
-                                                 }) && ` · ${formatEmploymentDetails({
-                                                   employment_type: formData.employment_type,
-                                                   part_time_days: formData.part_time_days,
-                                                   part_time_shifts: formData.part_time_shifts,
-                                                   duration_amount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
-                                                   duration_unit: formData.duration_unit,
-                                                 })}`}
-                                               </div>
-                                            </div>
-                                          )}
-
-                                          {/* Lön */}
-                                          {(formData.salary_min || formData.salary_max || formData.salary_type) && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Lön
-                                              </h5>
-                                              <div className="text-xs text-white leading-relaxed space-y-0.5">
-                                                {formatSalaryInfo().map((info, index) => (
-                                                  <div key={index} className="font-medium">{info}</div>
-                                                ))}
-                                              </div>
-                                            </div>
-                                          )}
-
-                                          {/* Lönetransparens */}
-                                          {formData.salary_transparency && formatSalaryTransparency() && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Lönetransparens
-                                              </h5>
-                                              <div className="text-xs text-white font-medium">{formatSalaryTransparency()}</div>
-                                            </div>
-                                          )}
-
-                                           {/* Bolagsnamn */}
-                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                            <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                              Bolagsnamn
-                                            </h5>
-                                            <div className="text-xs text-white leading-relaxed space-y-0.5">
-                                              {formData.workplace_name && <div className="font-medium">{formData.workplace_name}</div>}
-                                              {formData.workplace_address && <div>{formData.workplace_address}</div>}
-                                              {(formData.workplace_postal_code || formData.workplace_city) && (
-                                                <div>
-                                                  {formData.workplace_postal_code && formData.workplace_city ? (
-                                                    <div>
-                                                      {formData.workplace_postal_code} {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
-                                                    </div>
-                                                  ) : formData.workplace_city ? (
-                                                    <div>
-                                                      {formData.workplace_city}{(formData.workplace_county || cachedPostalCodeInfo?.county) ? `, ${formData.workplace_county || cachedPostalCodeInfo?.county}` : ''}
-                                                    </div>
-                                                  ) : (
-                                                    <div>{formData.workplace_postal_code}</div>
-                                                  )}
-                                                </div>
-                                              )}
-                                              <div>{getWorkLocationDisplayText()}</div>
-                                            </div>
-                                          </div>
-
-                                          {/* Antal rekryteringar */}
-                                          {formData.positions_count && parseInt(formData.positions_count) > 0 && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Antal rekryteringar
-                                              </h5>
-                                              <div className="text-xs text-white font-medium">{formatPositionsCount()}</div>
-                                            </div>
-                                          )}
-
-                                          {/* Arbetstider */}
-                                          {(formData.work_start_time || formData.work_end_time) && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Arbetstider
-                                              </h5>
-                                              <div className="text-xs text-white font-medium">
-                                                {formData.work_start_time && formData.work_end_time 
-                                                  ? `${formData.work_start_time} – ${formData.work_end_time}`
-                                                  : formData.work_start_time || formData.work_end_time}
-                                              </div>
-                                            </div>
-                                          )}
-
-                                          {/* Förmåner */}
-                                          {formData.benefits && formData.benefits.length > 0 && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Förmåner
-                                              </h5>
-                                              <div className="text-xs text-white space-y-0.5">
-                                                {formData.benefits.map((benefit, idx) => (
-                                                  <div key={idx} className="flex items-start">
-                                                    <span className="flex-shrink-0 mr-1">•</span>
-                                                    <span>{benefit}</span>
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            </div>
-                                          )}
-
-                                          {/* Kontakt */}
-                                          {formData.contact_email && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Kontakt
-                                              </h5>
-                                              <div className="text-xs text-white">
-                                                <a 
-                                                  href={`mailto:${formData.contact_email}`}
-                                                  className="text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer"
-                                                >
-                                                  {formData.contact_email}
-                                                </a>
-                                              </div>
-                                            </div>
-                                          )}
-
-                                          {/* Kvalifikationer */}
-                                          {formData.requirements && (
-                                            <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                              <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
-                                                Kvalifikationer
-                                              </h5>
-                                              <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
-                                                {formData.requirements}
-                                              </p>
-                                            </div>
-                                          )}
-
-                                          {/* Följande information samlas automatiskt in */}
-                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                            <p className="text-xs text-white mb-1.5 leading-relaxed">
-                                              Följande information samlas automatiskt in från alla kandidater som har sökt:
-                                            </p>
-                                            <div className="space-y-0.5">
-                                              {[
-                                                'Namn',
-                                                'Efternamn',
-                                                'Ålder',
-                                                'E-post',
-                                                'Telefonnummer',
-                                                'Ort/stad',
-                                                'Presentation',
-                                                'CV',
-                                                'Nuvarande anställningsform',
-                                                'Tillgänglighet',
-                                              ].map((label, idx) => (
-                                                <div key={idx} className="text-xs flex">
-                                                  <span className="flex-shrink-0 mr-1 text-white">•</span>
-                                                  <span className="flex-1 text-white leading-tight">{label}</span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-
-                                          {/* Anpassade frågor - individuella kort (Desktop) */}
-                                          {customQuestions.length > 0 && (
-                                            <div className="space-y-1.5">
-                                              {customQuestions.map((question, index) => {
-                                                const typeLabels: Record<string, string> = {
-                                                  number: 'Siffra',
-                                                  text: 'Text',
-                                                  multiple_choice: 'Flerval',
-                                                  yes_no: 'Ja/Nej',
-                                                  date: 'Datum',
-                                                  file: 'Fil',
-                                                  video: 'Video',
-                                                };
-
-                                                return (
-                                                  <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                                    {/* Frågetext */}
-                                                    <div className="mb-1.5">
-                                                      <label className="text-xs font-medium text-white block leading-tight">
-                                                        {question.question_text}
-                                                      </label>
-                                                    </div>
-                                                   
-                                                     {/* Input förhandsvisning baserat på frågetyp */}
-                                                     {question.question_type === 'text' && (
-                                                        <textarea
-                                                          className="preview-answer-textarea w-full min-h-[48px] border border-white/20 bg-white/10 rounded px-1.5 py-1.5 text-xs leading-tight text-white placeholder:text-xs placeholder:leading-tight placeholder:text-white/55 resize-none focus:outline-none focus:border-white/40 max-h-[120px] overflow-y-auto"
-                                                          placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                          rows={2}
-                                                          value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
-                                                          onChange={(e) => {
-                                                            const el = e.target;
-                                                            el.style.height = 'auto';
-                                                            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-                                                            setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: el.value }));
-                                                          }}
-                                                        />
-                                                     )}
-                                                   
-                                                    {question.question_type === 'yes_no' && (
-                                                      <div className="flex gap-1.5">
-                                                        <button
-                                                          type="button"
-                                                          onClick={() =>
-                                                            setDesktopPreviewAnswers((prev) => {
-                                                              const key = question.id || `q_${index}`;
-                                                              const current = prev[key];
-                                                              return {
-                                                                ...prev,
-                                                                [key]: current === 'yes' ? '' : 'yes',
-                                                              };
-                                                            })
-                                                          }
-                                                          className={
-                                                            (desktopPreviewAnswers[question.id || `q_${index}`] === 'yes'
-                                                              ? 'bg-secondary/40 border-secondary text-white '
-                                                              : 'bg-white/10 border-white/20 text-white ') +
-                                                            'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
-                                                          }
-                                                        >
-                                                          Ja
-                                                        </button>
-                                                        <button
-                                                          type="button"
-                                                          onClick={() =>
-                                                            setDesktopPreviewAnswers((prev) => {
-                                                              const key = question.id || `q_${index}`;
-                                                              const current = prev[key];
-                                                              return {
-                                                                ...prev,
-                                                                [key]: current === 'no' ? '' : 'no',
-                                                              };
-                                                            })
-                                                          }
-                                                          className={
-                                                            (desktopPreviewAnswers[question.id || `q_${index}`] === 'no'
-                                                              ? 'bg-secondary/40 border-secondary text-white '
-                                                              : 'bg-white/10 border-white/20 text-white ') +
-                                                            'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
-                                                          }
-                                                        >
-                                                          Nej
-                                                        </button>
-                                                      </div>
-                                                    )}
-                                                   
-                                                    {question.question_type === 'multiple_choice' && (
-                                                      <div className="space-y-1">
-                                                        <p className="text-[10px] text-white mb-1">Alternativ:</p>
-                                                        <div className="space-y-1 options-scroll">
-                                                          {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
-                                                            const selectedAnswers = desktopPreviewAnswers[question.id || `q_${index}`];
-                                                            const answersArray = typeof selectedAnswers === 'string' 
-                                                              ? selectedAnswers.split('|||') 
-                                                              : [];
-                                                            const selected = answersArray.includes(option);
-                                                            
-                                                            return (
-                                                              <button
-                                                                key={optIndex}
-                                                                type="button"
-                                                                onClick={() => {
-                                                                  setDesktopPreviewAnswers((prev) => {
-                                                                    const currentAnswers = prev[question.id || `q_${index}`];
-                                                                    const answersArray = typeof currentAnswers === 'string'
-                                                                      ? currentAnswers.split('|||').filter(a => a)
-                                                                      : [];
-                                                                    
-                                                                    if (answersArray.includes(option)) {
-                                                                      const newAnswers = answersArray.filter(a => a !== option);
-                                                                      return {
-                                                                        ...prev,
-                                                                        [question.id || `q_${index}`]: newAnswers.join('|||'),
-                                                                      };
-                                                                    } else {
-                                                                      return {
-                                                                        ...prev,
-                                                                        [question.id || `q_${index}`]: [...answersArray, option].join('|||'),
-                                                                      };
-                                                                    }
-                                                                  });
-                                                                }}
-                                                                className={
-                                                                  (selected
-                                                                    ? 'bg-secondary/40 border-secondary '
-                                                                    : 'bg-white/10 border-white/20 ') +
-                                                                  'text-white w-full flex items-center gap-2 rounded px-2 py-1 border transition-colors hover:bg-white/15'
-                                                                }
-                                                              >
-                                                                <div className={
-                                                                  selected
-                                                                    ? 'w-1.5 h-1.5 rounded-full border border-secondary bg-secondary flex-shrink-0'
-                                                                    : 'w-1.5 h-1.5 rounded-full border border-white/40 flex-shrink-0'
-                                                                } />
-                                                                <span className="text-xs text-white">{option}</span>
-                                                              </button>
-                                                            );
-                                                          })}
-                                                        </div>
-                                                      </div>
-                                                    )}
-                                                   
-                                                    {question.question_type === 'number' && (
-                                                      <div className="space-y-1.5">
-                                                        <div className="text-center text-sm font-semibold text-white">
-                                                          {desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
-                                                        </div>
-                                                        <input
-                                                          type="range"
-                                                          min={question.min_value ?? 0}
-                                                          max={question.max_value ?? 100}
-                                                          value={desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0}
-                                                          className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
-                                                          style={{
-                                                            background: `linear-gradient(to right, white ${((Number(desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0) - (question.min_value ?? 0)) / ((question.max_value ?? 100) - (question.min_value ?? 0))) * 100}%, rgba(255,255,255,0.3) ${((Number(desktopPreviewAnswers[question.id || `q_${index}`] || question.min_value || 0) - (question.min_value ?? 0)) / ((question.max_value ?? 100) - (question.min_value ?? 0))) * 100}%)`
-                                                          }}
-                                                          onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
-                                                        />
-                                                      </div>
-                                                    )}
-                                                   
-                                                    {question.question_type === 'date' && (
-                                                      <input
-                                                        type="date"
-                                                        className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white h-11 focus:outline-none focus:border-white/40"
-                                                        value={desktopPreviewAnswers[question.id || `q_${index}`] || ''}
-                                                        onChange={(e) => setDesktopPreviewAnswers((prev) => ({ ...prev, [question.id || `q_${index}`]: e.target.value }))}
-                                                      />
-                                                    )}
-                                                   
-                                                    {(question.question_type === 'file' || question.question_type === 'video') && (
-                                                      <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
-                                                        {question.question_type === 'file' ? (
-                                                          <FileText className="h-3 w-3 mx-auto mb-0.5 text-white" />
-                                                        ) : (
-                                                          <Video className="h-3 w-3 mx-auto mb-0.5 text-white" />
-                                                        )}
-                                                        <p className="text-xs text-white">
-                                                          {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
-                                                        </p>
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                );
-                                              })}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
+                                    <div className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium p-3 custom-scrollbar overscroll-contain">
+                                      <JobPostingPreviewContent
+                                        data={{
+                                          title: getDisplayTitle(),
+                                          description: formData.description,
+                                          imageUrl: jobImageDesktopDisplayUrl || jobImageDisplayUrl,
+                                          imageFocusPosition: 'center',
+                                          companyName: profile?.company_name || 'Företag',
+                                          companyLogoUrl: preparedCompanyLogoUrl,
+                                          location: formData.location,
+                                          employmentType: formData.employment_type,
+                                          partTimeDays: formData.part_time_days,
+                                          partTimeShifts: formData.part_time_shifts,
+                                          durationAmount: formData.duration_amount ? parseInt(formData.duration_amount, 10) : null,
+                                          durationUnit: formData.duration_unit,
+                                          workSchedule: formData.work_schedule,
+                                          workplaceAddress: formData.workplace_address,
+                                          workplacePostalCode: formData.workplace_postal_code,
+                                          workplaceCity: formData.workplace_city,
+                                          workplaceMunicipality: formData.workplace_municipality,
+                                          workplaceCounty: formData.workplace_county,
+                                          workLocationType: formData.work_location_type,
+                                          remoteWorkPossible: formData.remote_work_possible,
+                                          workStartTime: formData.work_start_time,
+                                          workEndTime: formData.work_end_time,
+                                          startDate: formData.start_date,
+                                          positionsCount: formData.positions_count ? parseInt(formData.positions_count, 10) : 1,
+                                          occupation: formData.occupation,
+                                          salaryMin: formData.salary_min ? parseInt(formData.salary_min, 10) : null,
+                                          salaryMax: formData.salary_max ? parseInt(formData.salary_max, 10) : null,
+                                          salaryType: formData.salary_type,
+                                          salaryTransparency: formData.salary_transparency,
+                                          contactEmail: formData.contact_email,
+                                          benefits: formData.benefits,
+                                          overlayTextColor: formData.overlay_text_color,
+                                        }}
+                                        questions={customQuestions}
+                                        answers={desktopPreviewAnswers}
+                                        onAnswerChange={(questionId, value) => setDesktopPreviewAnswers((current) => ({ ...current, [questionId]: value }))}
+                                        onOpenCompany={() => setShowCompanyProfile(true)}
+                                        scale={0.55}
+                                      />
                                     </div>
                                   )}
 
-                                  {/* Job card view (when form is closed) */}
-                                   {!showDesktopApplicationForm && (
+                                  {/* Job card view (when opened job is closed) */}
+                                  {!showDesktopApplicationForm && (
                                      <WizardListPreview
                                        {...buildWizardPreviewData({
                                          title: formData.title || 'Jobbtitel',

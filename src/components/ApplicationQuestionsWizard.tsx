@@ -23,6 +23,8 @@ interface ApplicationQuestionsWizardProps {
   justApplied?: boolean;
   /** Preview mode: allows navigation but disables inputs and hides submit */
   previewMode?: boolean;
+  /** Wizard-preview: keep the real controls interactive while submit remains hidden. */
+  interactivePreview?: boolean;
   profileSelector?: React.ReactNode;
 }
 
@@ -36,6 +38,7 @@ export function ApplicationQuestionsWizard({
   hasAlreadyApplied,
   justApplied = false,
   previewMode = false,
+  interactivePreview = false,
   profileSelector,
 }: ApplicationQuestionsWizardProps) {
   // If already applied, start directly on the review step
@@ -100,7 +103,7 @@ export function ApplicationQuestionsWizard({
 
   const renderQuestionInput = (question: JobQuestion) => {
     const answer = answers[question.id];
-    const isLocked = hasAlreadyApplied || previewMode;
+    const isLocked = hasAlreadyApplied || (previewMode && !interactivePreview);
 
     switch (question.question_type) {
       case 'text':

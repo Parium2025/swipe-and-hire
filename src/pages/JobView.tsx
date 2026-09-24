@@ -23,7 +23,7 @@ import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWiz
 import CandidateProfilePicker from '@/components/candidateProfiles/CandidateProfilePicker';
 import { useApplicationProfileSelection } from '@/hooks/useApplicationProfileSelection';
 import { TruncatedText } from '@/components/TruncatedText';
-import { JobViewHero, JobViewDetails, JobViewBenefits, JobViewFooter } from '@/components/jobview';
+import { JobPostingContent, JobViewFooter } from '@/components/jobview';
 import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
 import { CompanyLogoAvatar } from '@/components/jobview/CompanyLogoAvatar';
 import { getCompanyInitials } from '@/lib/companyInitials';
@@ -989,110 +989,46 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-3 space-y-3">
             
-            {/* Hero section — visas endast när det finns en riktig bild.
-                Ingen fallback-gradient/placeholder om annonsen saknar bild. */}
-            {imageUrl && (
-              <JobViewHero
-                title={job.title}
-                imageUrl={imageUrl}
-                fallbackImageUrl={canonicalImageUrl}
-                companyName={getDisplayCompanyName(job)}
-                location={job.location}
-                employmentType={job.employment_type}
-                positionsCount={job.positions_count}
-                companyLogoUrl={companyLogoUrl}
-                salaryMin={job.salary_min}
-                salaryMax={job.salary_max}
-                salaryType={job.salary_type}
-                salaryTransparency={job.salary_transparency}
-                benefits={job.benefits}
-                createdAt={job.created_at}
-                expiresAt={job.expires_at}
-                overlayTextColor={job.overlay_text_color}
-                focusPosition={job.job_image_desktop_url ? job.image_focus_position_desktop : job.image_focus_position}
-              />
-            )}
-
-            {/* Company profile + title - matchar arbetsgivar-preview */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-4 overflow-hidden space-y-3">
-              <button
-                onClick={handleOpenCompanyProfile}
-                className="flex flex-col items-center gap-2 w-full cursor-pointer hover:bg-white/10 active:bg-white/15 p-2 rounded-xl transition-all"
-                aria-label="Visa företagsprofil"
-              >
-                <CompanyLogoAvatar
-                  logoUrl={companyLogoUrl}
-                  companyName={getDisplayCompanyName(job)}
-                />
-                <div className="min-w-0 w-full overflow-hidden text-center flex flex-col items-center">
-                  <TruncatedText
-                    text={getDisplayCompanyName(job)}
-                    tooltipSide="bottom"
-
-                    className="block w-full overflow-hidden text-base font-bold leading-tight text-white line-clamp-2 text-center"
-                    style={{
-                      color: '#FFFFFF',
-                      overflowWrap: 'anywhere',
-                      wordBreak: 'break-word',
-                    }}
-                  />
-                  <div className="flex items-center justify-center text-xs mt-0.5" style={{ color: '#FFFFFF' }}>
-                    <Users className="h-3 w-3 mr-1" style={{ color: '#FFFFFF' }} />
-                    Se företagsprofil
-                  </div>
-                </div>
-              </button>
-
-              <h1
-                className="text-center font-bold text-lg sm:text-xl md:text-2xl leading-snug break-words [overflow-wrap:anywhere]"
-                style={{ color: job.overlay_text_color || '#FACC15' }}
-                title={job.title}
-              >
-                {job.title}
-              </h1>
-            </div>
-
-            {/* Description */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 overflow-hidden">
-              <h2 className="text-section-title mb-3">Om tjänsten</h2>
-              <p className="text-body whitespace-pre-wrap break-words overflow-hidden">
-                {job.description}
-              </p>
-            </div>
-
-
-            {/* Details */}
-             <JobViewDetails
-              employmentType={job.employment_type}
-              partTimeDays={(job as any).part_time_days}
-              partTimeShifts={(job as any).part_time_shifts}
-              durationAmount={(job as any).duration_amount}
-              durationUnit={(job as any).duration_unit}
-              workSchedule={job.work_schedule}
-              location={job.location}
-                workplaceName={getDisplayCompanyName(job)}
-              workplaceAddress={job.workplace_address}
-              workplacePostalCode={job.workplace_postal_code}
-              workplaceCity={job.workplace_city}
-              workplaceMunicipality={job.workplace_municipality}
-              workplaceCounty={job.workplace_county}
-              workLocationType={job.work_location_type}
-              remoteWorkPossible={job.remote_work_possible}
-              workStartTime={job.work_start_time}
-              workEndTime={job.work_end_time}
-              startDate={(job as any).start_date}
-              positionsCount={job.positions_count}
-              occupation={job.occupation}
-              salaryMin={job.salary_min}
-              salaryMax={job.salary_max}
-              salaryType={job.salary_type}
-              salaryTransparency={job.salary_transparency}
-              contactEmail={job.contact_email}
-              jobTitle={job.title}
+            <JobPostingContent
+              data={{
+                title: job.title,
+                description: job.description,
+                imageUrl,
+                fallbackImageUrl: canonicalImageUrl,
+                imageFocusPosition: job.job_image_desktop_url ? job.image_focus_position_desktop : job.image_focus_position,
+                companyName: getDisplayCompanyName(job),
+                companyLogoUrl,
+                location: job.location,
+                employmentType: job.employment_type,
+                partTimeDays: (job as any).part_time_days,
+                partTimeShifts: (job as any).part_time_shifts,
+                durationAmount: (job as any).duration_amount,
+                durationUnit: (job as any).duration_unit,
+                workSchedule: job.work_schedule,
+                workplaceAddress: job.workplace_address,
+                workplacePostalCode: job.workplace_postal_code,
+                workplaceCity: job.workplace_city,
+                workplaceMunicipality: job.workplace_municipality,
+                workplaceCounty: job.workplace_county,
+                workLocationType: job.work_location_type,
+                remoteWorkPossible: job.remote_work_possible,
+                workStartTime: job.work_start_time,
+                workEndTime: job.work_end_time,
+                startDate: (job as any).start_date,
+                positionsCount: job.positions_count,
+                occupation: job.occupation,
+                salaryMin: job.salary_min,
+                salaryMax: job.salary_max,
+                salaryType: job.salary_type,
+                salaryTransparency: job.salary_transparency,
+                contactEmail: job.contact_email,
+                benefits: job.benefits,
+                createdAt: job.created_at,
+                expiresAt: job.expires_at,
+                overlayTextColor: job.overlay_text_color,
+              }}
+              onOpenCompany={handleOpenCompanyProfile}
             />
-
-            {/* Benefits */}
-            <JobViewBenefits benefits={job.benefits || []} />
 
             {/* Questions info for unauthenticated users */}
             {!user && jobQuestions.length > 0 && !isJobExpired && (
