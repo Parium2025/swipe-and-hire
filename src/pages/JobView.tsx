@@ -228,19 +228,15 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     if (typeof navigationImageState.initialHeroImageUrl === 'string' && navigationImageState.initialHeroImageUrl) {
       return navigationImageState.initialHeroImageUrl;
     }
-    const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
-    const rawImg = isDesktopInit
-      ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
-      : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
+    // Den fullständiga annonsvyn använder alltid annonsens datorbild, även på
+    // mobil. Mobilbilden är reserverad för Swipe Mode och mobila jobbkort.
+    const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
     const resolved = appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.image_updated_at ?? (initialJob as any)?.updated_at);
     if (!resolved) return null;
     return imageCache.getCachedUrl(resolved) || resolved;
   });
   const [canonicalImageUrl, setCanonicalImageUrl] = useState<string | null>(() => {
-    const isDesktopInit = typeof window !== 'undefined' && window.innerWidth >= 1024;
-    const rawImg = isDesktopInit
-      ? (initialJob?.job_image_desktop_url || initialJob?.job_image_url)
-      : (initialJob?.job_image_url || initialJob?.job_image_desktop_url);
+    const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
     return appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.image_updated_at ?? (initialJob as any)?.updated_at);
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
@@ -433,12 +429,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       hasLoadedOnce.current = true;
       setLoading(false);
 
-      // Resolve image URL
-      // Use desktop image only on wide screens, mobile image on small screens
-      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-      const rawImageUrl = isDesktop
-        ? (data.job_image_desktop_url || data.job_image_url)
-        : (data.job_image_url || data.job_image_desktop_url);
+      // Den fullständiga annonsvyn ska vara konsekvent mellan skärmstorlekar:
+      // datorbild först, mobilbild endast som reserv.
+      const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
       if (rawImageUrl) {
         const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.image_updated_at ?? (data as any)?.updated_at);
         if (resolved) {
