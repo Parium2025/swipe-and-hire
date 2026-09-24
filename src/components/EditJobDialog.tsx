@@ -1,3 +1,4 @@
+import { effectiveStartDate } from '@/lib/startDate';
 import { fetchMyProfile } from '@/lib/myProfile';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { StartDatePicker } from '@/components/StartDatePicker';
@@ -1067,7 +1068,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         positions_count: (job.positions_count ?? 1).toString(),
         work_start_time: job.work_start_time || '',
         work_end_time: job.work_end_time || '',
-        start_date: (job as any).start_date || '',
+        start_date: effectiveStartDate((job as any).start_date) || '',
         work_location_type: job.work_location_type || '',
         remote_work_possible: job.remote_work_possible || '',
         workplace_name: job.workplace_name || '',
@@ -1940,6 +1941,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
         ...(publishMode && isDraft ? {
           is_active: true,
           created_at: new Date().toISOString(),
+          start_date: effectiveStartDate(formData.start_date),
           expires_at: new Date(Date.now() + REPUBLISH_DAYS * 24 * 60 * 60 * 1000).toISOString(),
         } : {})
       } as Record<string, any>;

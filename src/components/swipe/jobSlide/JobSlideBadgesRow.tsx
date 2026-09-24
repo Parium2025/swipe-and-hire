@@ -1,3 +1,4 @@
+import { effectiveStartDate } from '@/lib/startDate';
 import { memo } from 'react';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -23,8 +24,9 @@ export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
   job,
 }: JobSlideBadgesRowProps) {
   const salaryText = getJobBadgeSalary(job);
-  const startDateText = job.start_date
-    ? `Start ${format(parseISO(job.start_date), 'd MMM', { locale: sv })}`
+  const startDate = effectiveStartDate(job.start_date);
+  const startDateText = startDate
+    ? `Start ${format(parseISO(startDate), 'd MMM', { locale: sv })}`
     : 'Start omgående';
   const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
   const daysLeft = job.expires_at

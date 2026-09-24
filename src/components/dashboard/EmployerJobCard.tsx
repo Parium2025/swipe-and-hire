@@ -1,3 +1,4 @@
+import { effectiveStartDate } from '@/lib/startDate';
 import { memo, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -327,8 +328,8 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm leading-snug text-white flex-shrink-0">Startdatum:</span>
                   <span className="text-sm leading-snug text-white font-medium text-right">
-                    {(job as any).start_date
-                      ? new Date((job as any).start_date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+                    {effectiveStartDate((job as any).start_date)
+                      ? new Date(effectiveStartDate((job as any).start_date)!).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
                       : 'Omgående'}
                   </span>
                 </div>
