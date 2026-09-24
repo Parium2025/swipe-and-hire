@@ -3896,7 +3896,7 @@ const MobileJobWizard = ({
                 <div className="flex flex-col items-center space-y-4">
                   <PreviewModeTabs activeMode={previewMode} onModeChange={setPreviewMode} swipeContainerRef={previewSwipeRef} />
                   {previewMode === 'mobile' && !showApplicationForm && (
-                    <p className="-mt-2 text-white text-[11px] font-medium tracking-wide">(från swipe mode)</p>
+                    <p className="-mt-2 max-w-[260px] text-center text-white text-[11px] font-medium leading-snug tracking-wide">Så här ser annonsen ut i Swipe Mode. Fokuspunkten syns tydligast i Datorvy, där bilden beskärs mer.</p>
                   )}
                   
                 </div>
