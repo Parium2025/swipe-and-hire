@@ -60,6 +60,7 @@ import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { usePreparedCompanyLogo } from '@/hooks/usePreparedCompanyLogo';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
@@ -599,6 +600,7 @@ const MobileJobWizard = ({
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const preparedCompanyLogoUrl = usePreparedCompanyLogo(profile?.company_logo_url);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [showQuestionTemplates, setShowQuestionTemplates] = useState(false);
@@ -4018,10 +4020,10 @@ const MobileJobWizard = ({
                                   {/* Företagsinformation */}
                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
                                    <div className="flex items-center">
-                                    {profile?.company_logo_url ? (
+                                    {preparedCompanyLogoUrl ? (
                                       <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
                                         <img 
-                                          src={profile.company_logo_url} 
+                                          src={preparedCompanyLogoUrl} 
                                           alt="Företagslogotyp" 
                                           className="w-full h-full object-contain"
                                         />
@@ -4468,7 +4470,7 @@ const MobileJobWizard = ({
                               title: getDisplayTitle(),
                               occupation: formData.occupation,
                               companyName: profile?.company_name || 'Företag',
-                              companyLogoUrl: profile?.company_logo_url,
+                              companyLogoUrl: preparedCompanyLogoUrl,
                               imageUrl: jobImageDisplayUrl,
                               imageFocusPosition: 'center',
                               employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
@@ -4564,10 +4566,10 @@ const MobileJobWizard = ({
                                     <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center">
-                                          {profile?.company_logo_url ? (
+                                          {preparedCompanyLogoUrl ? (
                                             <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
                                               <img 
-                                                src={profile.company_logo_url} 
+                                                src={preparedCompanyLogoUrl} 
                                                 alt="Företagslogotyp" 
                                                 className="w-full h-full object-contain"
                                               />
@@ -5028,7 +5030,7 @@ const MobileJobWizard = ({
                                   title: formData.title || 'Jobbtitel',
                                   occupation: formData.occupation,
                                   companyName: profile?.company_name || 'Företag',
-                                  companyLogoUrl: profile?.company_logo_url,
+                                  companyLogoUrl: preparedCompanyLogoUrl,
                                   imageUrl: jobImageDisplayUrl,
                                   imageFocusPosition: 'center',
                                   employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),

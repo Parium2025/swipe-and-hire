@@ -52,6 +52,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { JobImagePositioner, parseFocusPosition } from '@/components/JobImagePositioner';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { usePreparedCompanyLogo } from '@/hooks/usePreparedCompanyLogo';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
@@ -196,6 +197,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
   const [isInitializing, setIsInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const preparedCompanyLogoUrl = usePreparedCompanyLogo(profile?.company_logo_url);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [showQuestionTemplates, setShowQuestionTemplates] = useState(false);
@@ -3205,10 +3207,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                          )}
                                          <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
                                           <div className="flex items-center">
-                                            {profile?.company_logo_url ? (
+                                            {preparedCompanyLogoUrl ? (
                                               <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
                                                 <img 
-                                                  src={profile.company_logo_url} 
+                                                  src={preparedCompanyLogoUrl} 
                                                   alt="Företagslogotyp" 
                                                   className="w-full h-full object-contain"
                                                 />
@@ -3659,7 +3661,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                       title: getDisplayTitle(),
                                       occupation: formData.occupation,
                                       companyName: profile?.company_name || 'Företag',
-                                      companyLogoUrl: profile?.company_logo_url,
+                                      companyLogoUrl: preparedCompanyLogoUrl,
                                       imageUrl: jobImageDisplayUrl,
                                       imageFocusPosition: 'center',
                                       employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
@@ -3756,10 +3758,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                             <div className="flex items-center justify-between">
                                               <div className="flex items-center">
-                                                {profile?.company_logo_url ? (
+                                                {preparedCompanyLogoUrl ? (
                                                   <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
                                                     <img 
-                                                      src={profile.company_logo_url} 
+                                                      src={preparedCompanyLogoUrl} 
                                                       alt="Företagslogotyp" 
                                                       className="w-full h-full object-contain"
                                                     />
@@ -4194,7 +4196,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                          title: formData.title || 'Jobbtitel',
                                          occupation: formData.occupation,
                                          companyName: profile?.company_name || 'Företag',
-                                         companyLogoUrl: profile?.company_logo_url,
+                                         companyLogoUrl: preparedCompanyLogoUrl,
                                          imageUrl: jobImageDisplayUrl,
                                          imageFocusPosition: 'center',
                                          employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
