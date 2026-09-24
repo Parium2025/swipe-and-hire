@@ -25,7 +25,7 @@ export const JobSlideBadgesRow = memo(function JobSlideBadgesRow({
   const salaryText = getJobBadgeSalary(job);
   const startDateText = job.start_date
     ? `Start ${format(parseISO(job.start_date), 'd MMM', { locale: sv })}`
-    : null;
+    : 'Start omgående';
   const publishedDate = format(parseISO(job.created_at), 'd MMM', { locale: sv });
   const daysLeft = job.expires_at
     ? differenceInDays(parseISO(job.expires_at), new Date())

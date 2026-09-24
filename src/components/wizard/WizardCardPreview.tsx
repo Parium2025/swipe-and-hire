@@ -7,6 +7,7 @@ import {
   Clock,
   Eye,
   FileQuestion,
+  Gift,
   Heart,
   Users,
   X,
@@ -95,6 +96,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   salaryText,
   benefitsCount = 0,
   applicationsCount = 0,
+  daysLeftLabel,
   publishedLabel,
   startDateLabel,
   questionsCount = 0,
@@ -215,28 +217,31 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             </Tooltip>
           )}
 
-          {/* Badge-rad — i samma ordning som swipe mode, staplade vertikalt */}
-          <div className="mt-2 flex flex-col items-center justify-center gap-1 md:mt-3 md:gap-2">
-            {workingHours && (
-              <PreviewPill
-                icon={<Clock className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
-                text={workingHours}
-              />
-            )}
-            {startDateLabel && (
-              <PreviewPill
-                icon={<CalendarDays className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
-                text={`Start ${startDateLabel}`}
-              />
-            )}
+          {/* Badge-rad — 1:1 med riktiga swipe mode (JobSlideBadgesRow):
+              lön, start, publicerad • dagar kvar, förmåner, sökande */}
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-1 md:mt-3 md:gap-1.5">
             {salaryText && <PreviewPill text={salaryText} />}
+            <PreviewPill text={`Start ${startDateLabel || 'omgående'}`} />
+            <PreviewPill
+              text={[
+                `Publicerad ${publishedLabel || formatDateShortSv(new Date().toISOString())}`,
+                daysLeftLabel,
+              ]
+                .filter(Boolean)
+                .join(' • ')}
+            />
             {benefitsCount > 0 && (
               <PreviewPill
+                icon={<Gift className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
                 text={`Förmåner ${benefitsCount <= 5 ? `${benefitsCount} st` : `${Math.floor(benefitsCount / 5) * 5}+`}`}
               />
             )}
-            {/* Frågor visas inte i swipe-preview — de dyker upp när kandidaten öppnar annonsen */}
-            {publishedLabel && <PreviewPill text={`Publicerad ${publishedLabel}`} />}
+            {applicationsCount > 0 && (
+              <PreviewPill
+                icon={<Users className="h-1.5 w-1.5 text-white md:h-2 md:w-2" />}
+                text={`${applicationsCount} sökande`}
+              />
+            )}
           </div>
         </div>
       </div>
