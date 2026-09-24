@@ -38,11 +38,15 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [hasUserMadeChanges, setHasUserMadeChanges] = useState(false); // Track if user actually edited
   const initialScaleRef = useRef<number>(1); // Store initial scale to compare
 
-  const BASE_CANVAS_SIZE = 640; // Output canvas size in px (optimal for 3x retina)
+  const isMobileSwipe = cropMode === 'mobile-swipe';
+  // Output canvas size in px. Swipe Mode renderar bilden full-bleed på
+  // moderna telefoner (~1170 px device-pixels bred), så det stående 1:2-
+  // formatet exporteras i dubbel upplösning (640×1280) för att hålla sig
+  // skarpt. Canvasen skalas ned visuellt via CSS, så editorn ser identisk ut.
+  const BASE_CANVAS_SIZE = isMobileSwipe ? 1280 : 640;
   const CANVAS_HEIGHT = BASE_CANVAS_SIZE;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_SIZE * aspectRatio);
   const MAX_SCALE = 3;
-  const isMobileSwipe = cropMode === 'mobile-swipe';
 
   const clampPosition = useCallback((nextPosition: { x: number; y: number }, nextScale: number) => {
     if (!isMobileSwipe) return nextPosition;
