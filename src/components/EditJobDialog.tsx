@@ -3163,10 +3163,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-2 w-10 rounded-full bg-black border border-gray-800"></div>
 
                                 {showApplicationForm && (
-                                  <div
-                                    className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-card-parium px-2 pb-2 pt-5 custom-scrollbar overscroll-contain"
-                                    onScroll={(event) => setIsScrolledTop(event.currentTarget.scrollTop === 0)}
-                                  >
+                                  <div className="absolute inset-0 bg-card-parium pt-5">
                                     <Button
                                       type="button"
                                       variant="ghost"
@@ -3176,7 +3173,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                         event.stopPropagation();
                                         setShowApplicationForm(false);
                                       }}
-                                      className="sticky top-0 ml-auto -mb-9 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
+                                      className="absolute right-2 top-5 z-30 flex h-8 w-8 rounded-full text-white md:hover:text-white transition-all duration-200 [@media(hover:hover)]:hover:bg-black/40 [@media(hover:hover)]:hover:backdrop-blur-md [@media(hover:hover)]:hover:scale-110 active:scale-95"
                                     >
                                       <X className="h-4 w-4" />
                                     </Button>
@@ -3434,7 +3431,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                         <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
                           <div className="flex items-center gap-2 mb-2">
                             <Smartphone className="h-4 w-4 text-white" />
-                            <span className="text-white font-medium text-sm sm:text-base">Annonsbild (valfritt)</span>
+                            <span className="text-white font-medium text-sm sm:text-base">Annonsbild</span>
                             {jobImageDesktopDisplayUrl && !jobImageDisplayUrl && (
                               <button
                                 type="button"

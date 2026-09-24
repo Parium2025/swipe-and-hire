@@ -64,11 +64,8 @@ export function SwipeJobDetailPreviewContent({ data, questions }: SwipeJobDetail
   };
 
   return (
-    <div className="h-full overflow-hidden [--swipe-detail-preview-scale:0.4] md:[--swipe-detail-preview-scale:0.55]">
-      <div
-        className="flex h-[calc(100%/var(--swipe-detail-preview-scale))] w-[calc(100%/var(--swipe-detail-preview-scale))] origin-top-left flex-col"
-        style={{ zoom: 'var(--swipe-detail-preview-scale)' }}
-      >
+    <div className="relative h-full w-full overflow-hidden">
+      <div className="absolute left-0 top-0 flex h-[780px] w-[380px] origin-top-left scale-[0.4] flex-col md:h-[785px] md:w-[385px] md:scale-[0.55]">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-2 space-y-3 touch-pan-y">
           <div className="px-1 pr-12 pb-1">
             <div className="flex items-start gap-2 mt-1 text-white text-[15px] sm:text-sm min-w-0">
