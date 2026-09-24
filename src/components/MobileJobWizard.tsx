@@ -67,7 +67,6 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { DEFAULT_JOB_OVERLAY_TEXT_COLOR, getJobOverlayTextStyle, normalizeJobOverlayTextColor } from '@/lib/jobOverlayText';
 import { isEmployerJobDraft } from '@/lib/jobStatus';
 import { formatSalaryTransparencyValue } from '@/lib/salaryRange';
-import { toObjectPosition } from '@/lib/jobImageFocus';
 
 
 import useSmartTextFit from '@/hooks/useSmartTextFit';
@@ -3922,7 +3921,7 @@ const MobileJobWizard = ({
                     {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                       <>
                         {/* Left tooltip (company name) */}
-                        <div className="pointer-events-none absolute z-[999] top-[104px] md:top-[132px] -left-[98px] md:-left-[104px] flex items-center gap-1">
+                        <div className="pointer-events-none absolute z-[999] top-[112px] md:top-[140px] -left-[98px] md:-left-[104px] flex items-center gap-1">
                           <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                             Obs, tryck här!
                           </div>
@@ -4010,13 +4009,7 @@ const MobileJobWizard = ({
                                         src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
                                         alt="Bild i annonsen"
                                         className="absolute inset-0 h-full w-full object-cover"
-                                        style={{
-                                          objectPosition: toObjectPosition(
-                                            jobImageDesktopDisplayUrl
-                                              ? formData.image_focus_position_desktop
-                                              : formData.image_focus_position,
-                                          ),
-                                        }}
+                                        style={{ objectPosition: 'center center' }}
                                         draggable={false}
                                       />
                                     </div>
@@ -4477,7 +4470,7 @@ const MobileJobWizard = ({
                               companyName: profile?.company_name || 'Företag',
                               companyLogoUrl: profile?.company_logo_url,
                               imageUrl: jobImageDisplayUrl,
-                              imageFocusPosition: formData.image_focus_position,
+                              imageFocusPosition: 'center',
                               employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                               employmentTypeDetail: formatEmploymentDetails({
                                 employment_type: formData.employment_type,
@@ -4562,13 +4555,7 @@ const MobileJobWizard = ({
                                           src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
                                           alt="Bild i annonsen"
                                           className="absolute inset-0 h-full w-full object-cover"
-                                          style={{
-                                            objectPosition: toObjectPosition(
-                                              jobImageDesktopDisplayUrl
-                                                ? formData.image_focus_position_desktop
-                                                : formData.image_focus_position,
-                                            ),
-                                          }}
+                                          style={{ objectPosition: 'center center' }}
                                           draggable={false}
                                         />
                                       </div>
@@ -5043,7 +5030,7 @@ const MobileJobWizard = ({
                                   companyName: profile?.company_name || 'Företag',
                                   companyLogoUrl: profile?.company_logo_url,
                                   imageUrl: jobImageDisplayUrl,
-                                  imageFocusPosition: formData.image_focus_position,
+                                  imageFocusPosition: 'center',
                                   employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                                   employmentTypeDetail: formatEmploymentDetails({
                                     employment_type: formData.employment_type,

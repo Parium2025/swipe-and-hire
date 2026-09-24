@@ -58,7 +58,6 @@ import { usePersistedPreviewMode } from '@/hooks/usePersistedPreviewMode';
 import { useTouchCapable } from '@/hooks/useInputCapability';
 import { safeSetItem } from '@/lib/safeStorage';
 import { formatSalaryTransparencyValue } from '@/lib/salaryRange';
-import { toObjectPosition } from '@/lib/jobImageFocus';
 
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
@@ -3125,7 +3124,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>
                                 {/* Left tooltip (company name) */}
-                                <div className="pointer-events-none absolute z-[999] top-[104px] md:top-[132px] -left-[115px] flex items-center gap-1">
+                                <div className="pointer-events-none absolute z-[999] top-[112px] md:top-[140px] -left-[115px] flex items-center gap-1">
                                   <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                     Obs, tryck här!
                                   </div>
@@ -3199,13 +3198,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
                                                alt="Bild i annonsen"
                                                className="absolute inset-0 h-full w-full object-cover"
-                                               style={{
-                                                 objectPosition: toObjectPosition(
-                                                   jobImageDesktopDisplayUrl
-                                                     ? formData.image_focus_position_desktop
-                                                     : formData.image_focus_position,
-                                                 ),
-                                               }}
+                                               style={{ objectPosition: 'center center' }}
                                                draggable={false}
                                              />
                                            </div>
@@ -3668,7 +3661,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                       companyName: profile?.company_name || 'Företag',
                                       companyLogoUrl: profile?.company_logo_url,
                                       imageUrl: jobImageDisplayUrl,
-                                      imageFocusPosition: formData.image_focus_position,
+                                      imageFocusPosition: 'center',
                                       employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                                       employmentTypeDetail: formatEmploymentDetails({
                                         employment_type: formData.employment_type,
@@ -3754,13 +3747,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                                 src={jobImageDesktopDisplayUrl || jobImageDisplayUrl || ''}
                                                 alt="Bild i annonsen"
                                                 className="absolute inset-0 h-full w-full object-cover"
-                                                style={{
-                                                  objectPosition: toObjectPosition(
-                                                    jobImageDesktopDisplayUrl
-                                                      ? formData.image_focus_position_desktop
-                                                      : formData.image_focus_position,
-                                                  ),
-                                                }}
+                                                style={{ objectPosition: 'center center' }}
                                                 draggable={false}
                                               />
                                             </div>
@@ -4209,7 +4196,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                                          companyName: profile?.company_name || 'Företag',
                                          companyLogoUrl: profile?.company_logo_url,
                                          imageUrl: jobImageDisplayUrl,
-                                         imageFocusPosition: formData.image_focus_position,
+                                         imageFocusPosition: 'center',
                                          employmentTypeLabel: getEmploymentTypeLabel(formData.employment_type),
                                          employmentTypeDetail: formatEmploymentDetails({
                                            employment_type: formData.employment_type,
