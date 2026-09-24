@@ -88,8 +88,6 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
   imageFocusPosition,
   occupation,
   metaLine,
-  workingHours,
-  employmentTypeLabel,
   salaryText,
   benefitsCount = 0,
   applicationsCount = 0,

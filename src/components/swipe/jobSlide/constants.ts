@@ -4,10 +4,9 @@
 // blir en nätverksladdning.
 
 export const SWIPE_IMG_TRANSFORM = {
-  // Samma 1:2-format som mobilens bildredigerare och telefonförhandsvisning.
-  // Då lägger bildservern inte på en andra, dold beskärning efter sparningen.
+  // Begränsa bara bredden så hela originalets höjd finns kvar när den
+  // sparade fokuspunkten appliceras i Swipe Mode.
   width: 640,
-  height: 1280,
   quality: 78,
   // Ingen förbeskärning: Swipe Mode ska själv applicera annonsens fokuspunkt.
   resize: 'contain' as const,
