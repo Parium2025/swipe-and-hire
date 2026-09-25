@@ -40,7 +40,7 @@ const EmployerMobileShell = ({
 
       <div
         data-mobile-app-shell="true"
-        className="fixed inset-x-0 bottom-auto flex h-[100dvh] w-full overflow-hidden [top:var(--keyboard-viewport-offset,0px)]"
+        className="fixed inset-0 flex h-[100dvh] w-full overflow-hidden"
         style={{
           WebkitOverflowScrolling: 'touch',
           // Håll skalet stabilt när iOS-tangentbordet öppnas. Det fokuserade

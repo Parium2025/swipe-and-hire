@@ -23,7 +23,6 @@ export function useVisualViewportBounds() {
     const layoutViewportHeight = () => Math.max(window.innerHeight, root.clientHeight);
     let revealFrame = 0;
     let revealTimer = 0;
-    let applyFrame = 0;
     let closeTimer = 0;
     let lastRevealed: Element | null = null;
 
@@ -77,12 +76,7 @@ export function useVisualViewportBounds() {
       if (!keyboardOpen) lastRevealed = null;
     };
 
-    // visualViewport can emit several resize/scroll events for one keyboard
-    // animation. Coalesce them so React/layout work never competes with typing.
-    const apply = () => {
-      window.cancelAnimationFrame(applyFrame);
-      applyFrame = window.requestAnimationFrame(applyNow);
-    };
+    const apply = applyNow;
 
     const handleFocusOut = () => {
       window.clearTimeout(closeTimer);
@@ -110,7 +104,6 @@ export function useVisualViewportBounds() {
       window.removeEventListener('focusout', handleFocusOut);
       window.removeEventListener('pageshow', apply);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.cancelAnimationFrame(applyFrame);
       window.cancelAnimationFrame(revealFrame);
       window.clearTimeout(revealTimer);
       window.clearTimeout(closeTimer);

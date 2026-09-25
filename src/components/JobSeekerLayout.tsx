@@ -178,7 +178,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
       
       <div
         data-mobile-app-shell="true"
-        className={isMessagesChrome ? "fixed inset-x-0 bottom-auto flex h-[100dvh] w-full overflow-hidden [top:var(--keyboard-viewport-offset,0px)]" : "h-[100dvh] flex w-full overflow-hidden relative"}
+        className={isMessagesChrome ? "fixed inset-0 flex h-[100dvh] w-full overflow-hidden" : "h-[100dvh] flex w-full overflow-hidden relative"}
         style={isMessagesChrome
           ? {
               WebkitOverflowScrolling: 'touch',
