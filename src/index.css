@@ -918,7 +918,8 @@ All colors MUST be HSL.
     -webkit-background-clip: text !important;
     background-clip: text !important;
     background-color: transparent !important;
-    box-shadow: none !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
   }
 
 }
