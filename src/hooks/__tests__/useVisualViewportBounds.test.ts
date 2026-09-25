@@ -39,7 +39,7 @@ describe('useVisualViewportBounds', () => {
     unmount();
   });
 
-  it('flyttar ett fokuserat fält högst en gång när tangentbordets mått varierar', async () => {
+  it('låter Safari ensam placera det fokuserade fältet när tangentbordets mått varierar', async () => {
     const viewport = new VisualViewportMock();
     vi.stubGlobal('visualViewport', viewport);
     vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
@@ -58,16 +58,14 @@ describe('useVisualViewportBounds', () => {
     document.body.append(parent);
     field.focus();
     const { unmount } = renderHook(() => useVisualViewportBounds());
-    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 120)); });
-    expect(scrollBy).toHaveBeenCalledTimes(1);
+    expect(scrollBy).not.toHaveBeenCalled();
     act(() => {
       viewport.height = 495;
       viewport.dispatchEvent(new Event('resize'));
       viewport.offsetTop = 5;
       viewport.dispatchEvent(new Event('scroll'));
     });
-    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 120)); });
-    expect(scrollBy).toHaveBeenCalledTimes(1);
+    expect(scrollBy).not.toHaveBeenCalled();
     unmount();
     parent.remove();
   });

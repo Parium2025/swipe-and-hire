@@ -22,7 +22,7 @@ describe('mobile field focus gestures', () => {
   it.each([
     ['input', <Input aria-label="Namn" />],
     ['textarea', <Textarea aria-label="Innehåll" autoResize={false} />],
-  ])('fokuserar %s efter ett stilla tryck', (_name, field) => {
+  ])('låter webbläsaren ensam hantera ett stilla tryck på %s', (_name, field) => {
     const { getByRole } = render(field);
     const element = getByRole('textbox');
     const focus = vi.spyOn(element, 'focus');
@@ -31,13 +31,13 @@ describe('mobile field focus gestures', () => {
     expect(focus).not.toHaveBeenCalled();
     dispatchPointer(element, 'pointerUp', { pointerId: 1, pointerType: 'touch', clientX: 24, clientY: 34 });
 
-    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    expect(focus).not.toHaveBeenCalled();
   });
 
   it.each([
     ['input', <Input aria-label="Namn" />],
     ['textarea', <Textarea aria-label="Innehåll" autoResize={false} />],
-  ])('fokuserar inte %s när fingret börjar skrolla', (_name, field) => {
+  ])('lägger inte till eget fokus när fingret börjar skrolla över %s', (_name, field) => {
     const { getByRole } = render(field);
     const element = getByRole('textbox');
     const focus = vi.spyOn(element, 'focus');

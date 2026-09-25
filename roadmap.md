@@ -13,3 +13,4 @@
 - [x] Match employer form focus behavior to the proven mobile chat composer and prevent Safari input zoom
 - [x] Remove the ordinary-Safari top overlay and keep the header position identical with and without the keyboard
 - [x] Release stale iOS field focus after keyboard dismissal so scrolling cannot reopen it
+- [x] Remove competing pointer focus, delayed field scrolling and global keyboard scroll padding on mobile forms
