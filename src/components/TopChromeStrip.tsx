@@ -48,7 +48,9 @@ const TopChromeStrip = () => {
   const stripHeight = isStandalone
     ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
     : 'calc(env(safe-area-inset-top, 0px) + 14px)';
-  const chromeOffset = stripHeight;
+  // I vanlig Safari börjar sidans layout redan under statusfältet. Remsan
+  // målar bara webbläsarens färg och ska inte skapa en andra tom topprad.
+  const chromeOffset = isStandalone ? stripHeight : '0px';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
