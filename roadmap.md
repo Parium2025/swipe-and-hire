@@ -3,3 +3,6 @@
 - [x] Keep interview response tokens on the public response page instead of password reset
 - [x] Audit remaining interview booking, reminder, email and visibility failure paths
 - [x] Tighten the declined interview status and remove action layout
+- [x] Fix atomic outreach template saves across multiple channels
+- [x] Keep the mobile app shell visible while the iOS keyboard is open
+- [x] Show the mandatory interview invitation email as locked

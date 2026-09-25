@@ -1065,6 +1065,17 @@ All colors MUST be HSL.
     padding-bottom: max(var(--chrome-strip-pad), calc(env(safe-area-inset-bottom, 0px) + 50px)) !important;
   }
 
+  /* iOS tangentbord äger hela nederkanten. Den fasta Safari-remsan får då
+     inte ligga ovanpå formuläret, och visualViewport-offseten ersätter det
+     vanliga extra topputrymmet medan fältet är fokuserat. */
+  :root[data-keyboard-open="true"] {
+    --chrome-strip-pad: 0px !important;
+  }
+
+  :root[data-keyboard-open="true"] [data-browser-chrome-strip="bottom"] {
+    display: none !important;
+  }
+
   /* === Undantag: flytande overlays ska ALDRIG få chrome-strip-utrymme ===
      Tooltips, popovers, dropdowns, select-listor och toasts renderas i portaler
      ovanpå sidan – de ligger inte i sidans scrollflöde.

@@ -341,6 +341,7 @@ export function AutoMessagesPanel() {
               const delay = getDelay(event);
               // Visa bara kanaler som händelsen faktiskt stödjer.
               const eventChannels = AUTO_RULE_CHANNELS.filter(({ value }) => Boolean(event.templates[value]));
+              const hasRequiredInvitationEmail = event.trigger === 'interview_scheduled';
 
               const previewEntries: PreviewEntry[] = eventChannels.map(({ value, label }) => {
                 const config = event.templates[value]!;
@@ -369,6 +370,19 @@ export function AutoMessagesPanel() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4">
+                      {hasRequiredInvitationEmail && (
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="flex items-center gap-1 text-xs text-white">
+                            <Mail className="h-3 w-3 shrink-0" />
+                            <span>Mejl</span>
+                          </div>
+                          <Switch
+                            checked
+                            disabled
+                            aria-label="Mejl: Intervjun bokas, alltid på"
+                          />
+                        </div>
+                      )}
                       {eventChannels.map(({ value, label }) => {
                         const Icon = CHANNEL_ICON[value];
                         const row = getRow(event, value);
@@ -393,11 +407,16 @@ export function AutoMessagesPanel() {
 
                   {(() => {
                     const activeHints = CHANNEL_HINTS.filter(({ value }) => Boolean(event.templates[value]) && Boolean(getRow(event, value)?.is_enabled));
-                    if (activeHints.length === 0) return null;
+                    if (activeHints.length === 0 && !hasRequiredInvitationEmail) return null;
                     return (
                       <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-2.5">
                         <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
                         <div className="min-w-0 space-y-1">
+                          {hasRequiredInvitationEmail && (
+                            <p className="min-w-0 break-words text-xs text-white">
+                              <span className="font-medium">Mejl:</span> Intervjukallelsen med mötesinformation och svarsknappar skickas alltid. Den kan därför inte stängas av här.
+                            </p>
+                          )}
                           {activeHints.map(({ value, label, hint }) => (
                             <p key={value} className="min-w-0 break-words text-xs text-white">
                               <span className="font-medium">{label}:</span> {hint}

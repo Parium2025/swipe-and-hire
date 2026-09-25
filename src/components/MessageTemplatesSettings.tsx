@@ -1032,6 +1032,7 @@ export function MessageTemplatesSettings() {
     });
 
     if (error) {
+      console.error('Kunde inte spara outreach-mall:', error);
       toast.error('Kunde inte spara mallen');
       setSavingTemplate(false);
       await fetchStudio({ silent: true });

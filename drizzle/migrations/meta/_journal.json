@@ -351,6 +351,13 @@
       "when": 1790341120443,
       "tag": "0049_revoke_anon_unneeded_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1790362541630,
+      "tag": "0050_fix_atomic_outreach_template_save",
+      "breakpoints": true
     }
   ]
 }
