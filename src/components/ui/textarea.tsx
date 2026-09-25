@@ -9,7 +9,7 @@ export interface TextareaProps
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, onBlur, onChange, autoResize: autoResizeEnabled = true, ...props }, ref) => {
+  ({ className, onBlur, onChange, onPointerDown, autoResize: autoResizeEnabled = true, ...props }, ref) => {
     const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
 
     const resizeToContent = React.useCallback((el: HTMLTextAreaElement | null) => {
@@ -62,15 +62,28 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       onBlur?.(e);
     };
 
+    // Match the proven chat composer behaviour on iOS: Safari must not first
+    // move the fixed page before visualViewport reveals the field inside the
+    // existing scroll container. Repeated taps remain native for caret moves.
+    const handlePointerDown = (e: React.PointerEvent<HTMLTextAreaElement>) => {
+      onPointerDown?.(e);
+      if (e.defaultPrevented || (e.pointerType !== 'touch' && e.pointerType !== 'pen')) return;
+      const element = e.currentTarget;
+      if (document.activeElement === element) return;
+      e.preventDefault();
+      element.focus({ preventScroll: true });
+    };
+
     return (
       <textarea
         className={cn(
-          "flex min-h-[80px] md:min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-white/40 transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-hidden",
+          "flex min-h-[80px] md:min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base md:text-sm text-foreground ring-offset-background placeholder:text-muted-foreground outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-white/40 transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-hidden",
           className
         )}
         ref={setRef}
         onBlur={handleBlur}
         onChange={handleChange}
+        onPointerDown={handlePointerDown}
         {...props}
       />
     )
