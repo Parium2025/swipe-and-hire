@@ -996,9 +996,9 @@ All colors MUST be HSL.
     scroll-padding-bottom: var(--chrome-strip-pad) !important;
   }
 
-  /* iOS tangentbord äger hela nederkanten. Den fasta Safari-remsan får då
-     inte ligga ovanpå formuläret, och visualViewport-offseten ersätter det
-     vanliga extra topputrymmet medan fältet är fokuserat. */
+  /* iOS tangentbord äger hela nederkanten. Den fasta bottenremsan får då
+     inte ligga ovanpå formuläret. Installerat läges toppyta ska däremot vara
+     identisk med och utan tangentbord så sidhuvudet aldrig hoppar. */
   :root[data-keyboard-open="true"] :is(
     .overflow-y-auto,
     .overflow-y-scroll,
@@ -1009,10 +1009,6 @@ All colors MUST be HSL.
   }
 
   :root[data-keyboard-open="true"] [data-browser-chrome-strip="bottom"] {
-    display: none !important;
-  }
-
-  :root[data-keyboard-open="true"] [data-browser-chrome-strip="top"] {
     display: none !important;
   }
 

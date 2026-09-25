@@ -35,10 +35,10 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar en synkad färgremsa i vanlig mobil-Safari', () => {
+  it('renderar ingen överliggande remsa i vanlig mobil-Safari', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
-    expect(container.firstChild).not.toBeNull();
+    expect(container.firstChild).toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('0px');
@@ -57,5 +57,18 @@ describe('TopChromeStrip', () => {
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toContain('safe-area-inset-top');
+  });
+
+  it('behåller samma installerade toppyta när tangentbordsläget ändras', () => {
+    mockMatchMedia(true, true);
+    const { container } = renderStrip();
+    document.documentElement.dataset.keyboardOpen = 'true';
+
+    expect(container.querySelector('[data-browser-chrome-strip="top"]')).not.toBeNull();
+    expect(
+      document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
+    ).toContain('safe-area-inset-top');
+
+    delete document.documentElement.dataset.keyboardOpen;
   });
 });

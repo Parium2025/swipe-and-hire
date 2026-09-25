@@ -14,7 +14,7 @@ const detectStandalone = () => {
   return window.matchMedia('(display-mode: standalone)').matches;
 };
 
-/** Färgankare som låter Safari måla rätt ruttfärg bakom statusfältet. */
+/** Färgankare för statusfältet i installerat app-läge. */
 const TopChromeStrip = () => {
   const location = useLocation();
   // Detect synchronously in the browser. Waiting for useEffect caused the
@@ -40,17 +40,14 @@ const TopChromeStrip = () => {
     return () => mq.removeEventListener?.('change', apply);
   }, []);
 
-  // iPhone Safari behåller annars föregående rutts färg tills en full reload.
-  // Ankaret behövs därför även i vanlig Safari, inte bara installerat läge.
-  const shouldShowStrip = isTouch;
-  // 14 px är den tidigare fungerande Safari-överlappningen. Fem pixlar nådde
-  // inte tillräckligt långt in i webbläsarens samplingsyta på fysisk iPhone.
-  const stripHeight = isStandalone
-    ? 'calc(env(safe-area-inset-top, 0px) + 22px)'
-    : 'calc(env(safe-area-inset-top, 0px) + 14px)';
-  // I vanlig Safari börjar sidans layout redan under statusfältet. Remsan
-  // målar bara webbläsarens färg och ska inte skapa en andra tom topprad.
-  const chromeOffset = isStandalone ? stripHeight : '0px';
+  // Vanlig Safari placerar redan sidan under statusfältet. En fixerad remsa
+  // ovanpå sidan täcker därför sidhuvudet när tangentbordet är stängt och
+  // skapar exakt den extra ramen som inte finns medan tangentbordet är öppet.
+  // Installerat läge saknar webbläsarens egen toppyta och behöver däremot en
+  // enda permanent safe-area-reserv, oberoende av tangentbordets status.
+  const shouldShowStrip = isTouch && isStandalone;
+  const stripHeight = 'calc(env(safe-area-inset-top, 0px) + 22px)';
+  const chromeOffset = shouldShowStrip ? stripHeight : '0px';
 
   useLayoutEffect(() => {
     if (typeof document === 'undefined') return;
