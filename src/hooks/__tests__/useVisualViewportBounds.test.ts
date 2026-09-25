@@ -37,4 +37,37 @@ describe('useVisualViewportBounds', () => {
 
     unmount();
   });
+
+  it('flyttar ett fokuserat fält högst en gång när tangentbordets mått varierar', async () => {
+    const viewport = new VisualViewportMock();
+    vi.stubGlobal('visualViewport', viewport);
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
+    vi.stubGlobal('innerHeight', 800);
+    const parent = document.createElement('div');
+    parent.style.overflowY = 'auto';
+    Object.defineProperties(parent, {
+      scrollHeight: { value: 1200 },
+      clientHeight: { value: 600 },
+    });
+    const field = document.createElement('textarea');
+    vi.spyOn(field, 'getBoundingClientRect').mockReturnValue({ top: 470, bottom: 590 } as DOMRect);
+    const scrollBy = vi.fn();
+    parent.scrollBy = scrollBy;
+    parent.append(field);
+    document.body.append(parent);
+    field.focus();
+    const { unmount } = renderHook(() => useVisualViewportBounds());
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 120)); });
+    expect(scrollBy).toHaveBeenCalledTimes(1);
+    act(() => {
+      viewport.height = 495;
+      viewport.dispatchEvent(new Event('resize'));
+      viewport.offsetTop = 5;
+      viewport.dispatchEvent(new Event('scroll'));
+    });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 120)); });
+    expect(scrollBy).toHaveBeenCalledTimes(1);
+    unmount();
+    parent.remove();
+  });
 });

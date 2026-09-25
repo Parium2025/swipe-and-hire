@@ -23,6 +23,7 @@ export function useVisualViewportBounds() {
     const layoutViewportHeight = () => Math.max(window.innerHeight, root.clientHeight);
     let revealFrame = 0;
     let revealTimer = 0;
+    let lastRevealed: Element | null = null;
 
     const revealFocusedField = () => {
       window.cancelAnimationFrame(revealFrame);
@@ -46,7 +47,7 @@ export function useVisualViewportBounds() {
           while (parent) {
             const style = window.getComputedStyle(parent);
             if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight) {
-              parent.scrollBy({ top: delta, behavior: 'auto' });
+              parent.scrollBy({ top: delta, behavior: 'instant' });
               return;
             }
             parent = parent.parentElement;
@@ -62,7 +63,12 @@ export function useVisualViewportBounds() {
         '--keyboard-occlusion-height',
         `${Math.max(0, Math.round(layoutViewportHeight() - vv.height - vv.offsetTop))}px`
       );
-      if (keyboardOpen) revealFocusedField();
+      const active = document.activeElement;
+      if (keyboardOpen && active !== lastRevealed) {
+        lastRevealed = active;
+        revealFocusedField();
+      }
+      if (!keyboardOpen) lastRevealed = null;
     };
 
     apply();

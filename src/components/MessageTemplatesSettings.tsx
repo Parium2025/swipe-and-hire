@@ -221,7 +221,7 @@ function RequiredMark({ filled }: { filled: boolean }) {
 
 function VariableChips({ channelLabel, onInsert }: { channelLabel: string; onInsert: (token: string) => void }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2.5">
+    <div className="pt-1">
       <div className="flex items-center gap-2">
         <p className="text-[10px] uppercase tracking-[0.16em] text-white">Variabler · {channelLabel}</p>
         <InfoHint text="Tryck på en variabel så läggs den in i texten för just den här kanalen. Värdena fylls i automatiskt när utskicket skickas." />
@@ -1869,7 +1869,7 @@ export function MessageTemplatesSettings() {
         </TabsContent>
 
         <TabsContent value="templates" className="mt-0 min-w-0">
-          <div className="min-w-0 space-y-3 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
+             <div className="min-w-0 space-y-4 p-1 sm:p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -1978,9 +1978,9 @@ export function MessageTemplatesSettings() {
               {templateForm.channels.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs text-white">Välj minst en kanal för att skapa mallen.</div>
               ) : (
-                <div className="space-y-2">
+                 <div className="space-y-5">
                   {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).map((channel) => (
-                    <div key={channel} className="space-y-2 rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.09] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] p-3">
+                     <section key={channel} className="space-y-3 pt-4 first:pt-0">
                       <div className="flex items-center justify-between gap-2">
                         <Label className="text-white">Kanal: {getOutreachChannelLabel(channel)}</Label>
                       </div>
@@ -2024,7 +2024,7 @@ export function MessageTemplatesSettings() {
                           value={templateForm.channelContent[channel].body}
                           onFocus={() => setActiveTemplateChannel(channel)}
                           onChange={(e) => setTemplateChannelContent(channel, 'body', e.target.value)}
-                          className="min-h-[120px] bg-white/5 border-white/10 text-white"
+                          className="min-h-[120px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 text-white"
                         />
                       </div>
 
@@ -2034,7 +2034,7 @@ export function MessageTemplatesSettings() {
                           setTemplateChannelContent(channel, 'body', `${templateForm.channelContent[channel].body}${token}`)
                         }
                       />
-                    </div>
+                    </section>
                   ))}
                 </div>
               )}

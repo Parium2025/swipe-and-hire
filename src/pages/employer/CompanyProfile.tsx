@@ -981,7 +981,7 @@ const CompanyProfile = () => {
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                className="max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
             </div>
 
