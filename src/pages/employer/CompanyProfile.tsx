@@ -609,13 +609,18 @@ const CompanyProfile = () => {
         company_social_media_links: JSON.parse(JSON.stringify(sanitizedFormData.company_social_media_links)),
       };
 
-      setFormData(updatedValues);
+      // Skriv aldrig tillbaka den sparade ögonblicksbilden i formuläret —
+      // användaren kan ha fortsatt skriva/radera medan sparningen pågick.
+      // Endast jämförelsebasen flyttas; osparat-läget räknas om automatiskt.
       setOriginalValues(updatedValues);
-      setHasUnsavedChanges(false);
+      // Normaliserade värden (t.ex. möteslänk) förs bara in om fältet är orört.
+      const startSnapshot = JSON.stringify(formData);
+      setFormData(prev => (JSON.stringify(prev) === startSnapshot ? updatedValues : prev));
       
       try {
-        localStorage.removeItem(DRAFT_STORAGE_KEY);
-        console.log('💾 Company profile draft cleared (saved)');
+        if (JSON.stringify(formDataRef.current) === JSON.stringify(updatedValues)) {
+          localStorage.removeItem(DRAFT_STORAGE_KEY);
+        }
       } catch (e) {
         console.warn('Failed to clear company profile draft');
       }
