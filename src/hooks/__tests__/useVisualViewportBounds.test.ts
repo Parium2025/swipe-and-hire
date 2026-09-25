@@ -51,7 +51,8 @@ describe('useVisualViewportBounds', () => {
     });
     const field = document.createElement('textarea');
     vi.spyOn(field, 'getBoundingClientRect').mockReturnValue({ top: 470, bottom: 590 } as DOMRect);
-    const scrollBy = vi.spyOn(parent, 'scrollBy').mockImplementation(() => {});
+    const scrollBy = vi.fn();
+    parent.scrollBy = scrollBy;
     parent.append(field);
     document.body.append(parent);
     field.focus();
