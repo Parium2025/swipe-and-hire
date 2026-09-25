@@ -8,7 +8,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Trash2, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
+import { Trash2, Camera, Pencil, RotateCcw, WifiOff, AlertCircle, Check, Loader2 } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -446,13 +446,16 @@ const EmployerProfile = () => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const savingRef = useRef(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleSave = async () => {
+  const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
+    const silent = !!opts?.silent;
     // Dubbelklickspärr: två parallella sparningar får inte skickas
-    if (savingRef.current) return;
+    if (savingRef.current) return false;
     if (!isOnline) {
-      showOfflineToast();
-      return;
+      if (!silent) showOfflineToast();
+      setSaveError('Ingen anslutning. Ändringen sparas när du är online igen.');
+      return false;
     }
     savingRef.current = true;
     try {
