@@ -54,7 +54,21 @@ Deno.serve(async (req) => {
   } catch {
     return Response.json({ error: 'Ogiltig ursprungsadress' }, { status: 400, headers: corsHeaders });
   }
-  const returnUrl = new URL(`/oauth/${connectorId}/return`, originUrl).toString();
+  // Endast Pariums egna adresser får ta emot användaren efter kopplingen.
+  const host = originUrl.hostname.toLowerCase();
+  const PROJECT_ID = '09c4e686-17a9-467e-89b1-3cf832371d49';
+  const allowedHost =
+    host === 'parium.se' ||
+    host === 'www.parium.se' ||
+    host === 'parium-ab.lovable.app' ||
+    (host.endsWith('.lovable.app') && host.includes(PROJECT_ID)) ||
+    (host.endsWith('.lovableproject.com') && host.includes(PROJECT_ID)) ||
+    host === 'localhost';
+  const allowedProtocol = originUrl.protocol === 'https:' || (host === 'localhost' && originUrl.protocol === 'http:');
+  if (!allowedHost || !allowedProtocol) {
+    return Response.json({ error: 'Ogiltig ursprungsadress' }, { status: 400, headers: corsHeaders });
+  }
+  const returnUrl = new URL(`/oauth/${connectorId}/return`, originUrl.origin).toString();
 
   // Återkoppling: skicka med sparad nyckel så gatewayen kan bekräfta ägarskap.
   let connectionAPIKey: string | undefined;
