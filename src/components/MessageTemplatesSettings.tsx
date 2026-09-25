@@ -2024,9 +2024,9 @@ export function MessageTemplatesSettings() {
                           value={templateForm.channelContent[channel].body}
                           onFocus={() => setActiveTemplateChannel(channel)}
                           onChange={(e) => setTemplateChannelContent(channel, 'body', e.target.value)}
-                           className="min-h-[120px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 text-white"
+                          className="min-h-[120px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 text-white"
                         />
-                       </div>
+                      </div>
 
                       <VariableChips
                         channelLabel={getOutreachChannelLabel(channel)}
@@ -2034,7 +2034,7 @@ export function MessageTemplatesSettings() {
                           setTemplateChannelContent(channel, 'body', `${templateForm.channelContent[channel].body}${token}`)
                         }
                       />
-                     </section>
+                    </section>
                   ))}
                 </div>
               )}
