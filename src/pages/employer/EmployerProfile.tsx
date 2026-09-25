@@ -8,7 +8,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Trash2, Camera, Pencil, RotateCcw, WifiOff } from 'lucide-react';
+import { Trash2, Camera, Pencil, RotateCcw, WifiOff, AlertCircle, Check, Loader2 } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -347,7 +347,7 @@ const EmployerProfile = () => {
 
       toast({
         title: "Profilbild uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din profilbild."
+        description: "Ändringen sparas automatiskt."
       });
     } catch (error) {
       console.error('Upload error:', error);
@@ -393,7 +393,7 @@ const EmployerProfile = () => {
     setHasUnsavedChanges(true);
     toast({
       title: "Profilbild borttagen",
-      description: "Tryck på \"Spara ändringar\" för att bekräfta."
+      description: "Ändringen sparas automatiskt."
     });
   };
 
@@ -406,7 +406,7 @@ const EmployerProfile = () => {
     setHasUnsavedChanges(true);
     toast({
       title: "Profilbild återställd",
-      description: "Tryck på \"Spara ändringar\" för att bekräfta."
+      description: "Ändringen sparas automatiskt."
     });
   };
 
@@ -446,13 +446,16 @@ const EmployerProfile = () => {
   const { isOnline, showOfflineToast } = useOnline();
 
   const savingRef = useRef(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleSave = async () => {
+  const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
+    const silent = !!opts?.silent;
     // Dubbelklickspärr: två parallella sparningar får inte skickas
-    if (savingRef.current) return;
+    if (savingRef.current) return false;
     if (!isOnline) {
-      showOfflineToast();
-      return;
+      if (!silent) showOfflineToast();
+      setSaveError('Ingen anslutning. Ändringen sparas när du är online igen.');
+      return false;
     }
     savingRef.current = true;
     try {
@@ -464,7 +467,8 @@ const EmployerProfile = () => {
       if (result?.error) {
         // updateProfile visar redan en svensk feltoast. Behåll utkastet
         // och osparat-läget så att ändringen inte går förlorad.
-        return;
+        setSaveError('Kunde inte spara ändringen. Försök igen.');
+        return false;
       }
 
       const updatedValues = { ...formData };
@@ -481,22 +485,74 @@ const EmployerProfile = () => {
         console.warn('Failed to clear draft:', e);
       }
 
-      toast({
-        title: "Profil uppdaterad",
-        description: "Din profil har uppdaterats.",
-        route: '/profile'
-      });
+      setSaveError(null);
+      if (!silent) {
+        toast({
+          title: "Profil uppdaterad",
+          description: "Din profil har uppdaterats.",
+          route: '/profile'
+        });
+      }
+      return true;
     } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte uppdatera profilen.",
-        variant: "destructive"
-      });
+      if (!silent) {
+        toast({
+          title: "Fel",
+          description: "Kunde inte uppdatera profilen.",
+          variant: "destructive"
+        });
+      }
+      setSaveError('Kunde inte spara ändringen. Försök igen.');
+      return false;
     } finally {
       savingRef.current = false;
       setLoading(false);
     }
   };
+
+  // 🔄 Autospar: profilen sparas direkt, precis som företagsprofilen.
+  // Ingen notis visas vid lyckad sparning — bara en diskret "Sparat"-indikator.
+  const saveRef = useRef(handleSave);
+  saveRef.current = handleSave;
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  // Skydd mot omförsöksloop: samma misslyckade data sparas inte om och om igen,
+  // men signaturen nollställs när användaren kommer online eller trycker "Försök igen".
+  const [failedSignature, setFailedSignature] = useState<string | null>(null);
+  // När nätet kommer tillbaka ska den blockerade ändringen sparas automatiskt.
+  useEffect(() => {
+    if (isOnline) setFailedSignature(null);
+  }, [isOnline]);
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    if (loading) return;
+    const signature = JSON.stringify(formData);
+    if (failedSignature === signature) return;
+    const t = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        const ok = await saveRef.current({ silent: true });
+        if (ok) {
+          setFailedSignature(null);
+          // "Sparat" ligger kvar tills användaren lämnar sidan — ingen
+          // automatisk dold, så bekräftelsen syns även när man står långt ner.
+          setSaveStatus('saved');
+        } else {
+          setFailedSignature(signature);
+          setSaveStatus('error');
+        }
+      } catch {
+        setFailedSignature(signature);
+        setSaveStatus('error');
+      }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [hasUnsavedChanges, loading, formData, failedSignature, isOnline]);
+
+  // Manuell återförsöksväg så en ändring aldrig kan gå förlorad tyst.
+  const retrySave = useCallback(() => {
+    setFailedSignature(null);
+    setSaveStatus('idle');
+  }, []);
 
   // Kallstart: visa innehållsformat skelett istället för tomma fält.
   if (authLoading && !profile) {
@@ -507,10 +563,41 @@ const EmployerProfile = () => {
      <div className="space-y-8 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Min Profil</h1>
+        <div className="mt-1 min-h-4 text-xs text-white" aria-live="polite" role="status">
+          {saveStatus === 'error' ? (
+            <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {saveError || 'Kunde inte spara ändringen.'}
+              <button
+                type="button"
+                onClick={retrySave}
+                className="underline underline-offset-2 text-white"
+              >
+                Försök igen
+              </button>
+            </span>
+          ) : (
+            <span
+              className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+            >
+              {saveStatus === 'saving' ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  Sparar…
+                </>
+              ) : (
+                <>
+                  <Check className="h-3 w-3" aria-hidden="true" />
+                  Sparat
+                </>
+              )}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
-        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
+        <form onSubmit={(e) => { e.preventDefault(); }} className="space-y-5 md:space-y-3">
             {/* Profilbild-sektion - matchar jobbsökarsidans stil */}
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
               {/* Hidden file input */}
@@ -649,22 +736,6 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="flex justify-center pt-1">
-              <button
-                type="submit"
-                disabled={loading || !hasUnsavedChanges}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-6 h-11 !min-h-0 text-sm font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full"></div>
-                    Sparar...
-                  </>
-                ) : (
-                  'Spara ändringar'
-                )}
-              </button>
-            </div>
           </form>
       </div>
 
