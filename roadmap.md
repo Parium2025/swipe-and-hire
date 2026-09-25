@@ -5,4 +5,5 @@
 - [x] Tighten the declined interview status and remove action layout
 - [x] Fix atomic outreach template saves across multiple channels
 - [x] Keep the mobile app shell visible while the iOS keyboard is open
+- [x] Keep the mobile shell stable while revealing focused fields above the iOS keyboard
 - [x] Show the mandatory interview invitation email as locked
