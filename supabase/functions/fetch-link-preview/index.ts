@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -251,7 +252,7 @@ Deno.serve(async (req) => {
 
     const { url } = await req.json();
 
-    if (!url) {
+    if (!url || typeof url !== 'string' || url.length > 2048) {
       return jsonResponse({ success: false, error: 'URL is required' }, 400);
     }
 
@@ -260,11 +261,19 @@ Deno.serve(async (req) => {
     if (validation instanceof Response) return validation;
     const parsedUrl = validation;
 
-
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
+    // Begränsa per användare så tjänsten inte kan användas som massförfrågare.
+    const limited = await enforceRateLimit(
+      supabase,
+      'fetch-link-preview',
+      [{ scope: 'user', identifier: String(claimsData.claims.sub), limit: 60, windowSeconds: 60 * 10 }],
+      corsHeaders,
+    );
+    if (limited) return limited;
 
     // Check cache first
     const { data: cached } = await supabase
