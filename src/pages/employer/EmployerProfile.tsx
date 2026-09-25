@@ -473,14 +473,14 @@ const EmployerProfile = () => {
 
       const updatedValues = { ...formData };
 
-      // Sync form with saved values to avoid second click
-      setFormData(updatedValues);
+      // Skriv aldrig tillbaka den sparade ögonblicksbilden i formuläret —
+      // användaren kan ha fortsatt skriva/radera medan sparningen pågick.
+      // Endast jämförelsebasen flyttas; osparat-läget räknas om automatiskt.
       setOriginalValues(updatedValues);
-      setHasUnsavedChanges(false);
       
-      // Clear localStorage draft after successful save
       try {
-        draftKey && localStorage.removeItem(draftKey);
+        const stillSame = JSON.stringify(formDataRef.current) === JSON.stringify(updatedValues);
+        if (stillSame && draftKey) localStorage.removeItem(draftKey);
       } catch (e) {
         console.warn('Failed to clear draft:', e);
       }
