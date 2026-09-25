@@ -2026,7 +2026,7 @@ export function MessageTemplatesSettings() {
                           onChange={(e) => setTemplateChannelContent(channel, 'body', e.target.value)}
                            className="min-h-[120px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 text-white"
                         />
-                     </section>
+                       </div>
 
                       <VariableChips
                         channelLabel={getOutreachChannelLabel(channel)}
@@ -2034,7 +2034,7 @@ export function MessageTemplatesSettings() {
                           setTemplateChannelContent(channel, 'body', `${templateForm.channelContent[channel].body}${token}`)
                         }
                       />
-                    </div>
+                     </section>
                   ))}
                 </div>
               )}

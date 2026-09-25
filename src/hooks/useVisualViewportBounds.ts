@@ -59,9 +59,6 @@ export function useVisualViewportBounds() {
     const apply = () => {
       const keyboardOpen = layoutViewportHeight() - vv.height > 150;
       root.dataset.keyboardOpen = keyboardOpen ? 'true' : 'false';
-      // Safari flyttar den synliga ytan relativt layout-viewporten när dess
-      // verktygsfält ändras. Flytta bara skalets position, aldrig dess höjd.
-      root.style.setProperty('--keyboard-viewport-offset', keyboardOpen ? `${Math.max(0, Math.round(vv.offsetTop))}px` : '0px');
       root.style.setProperty(
         '--keyboard-occlusion-height',
         `${Math.max(0, Math.round(layoutViewportHeight() - vv.height - vv.offsetTop))}px`
@@ -88,7 +85,6 @@ export function useVisualViewportBounds() {
       window.cancelAnimationFrame(revealFrame);
       window.clearTimeout(revealTimer);
       root.style.removeProperty('--keyboard-occlusion-height');
-      root.style.removeProperty('--keyboard-viewport-offset');
       delete root.dataset.keyboardOpen;
     };
   }, []);
