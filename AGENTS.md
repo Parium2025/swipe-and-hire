@@ -7,4 +7,4 @@
 - Mobile text inputs follow the chat composer: 16px text and touch focus with `preventScroll`, then `visualViewport` reveals them inside the existing scroller.
 - Keyboard-heavy employer pages use chat-style isolated inner scrolling; the mobile shell's structural main must stay non-scrolling on those routes.
 - Mobile browser-chrome spacing has one owner: only standalone mode reserves bottom space, and page shells provide the sole spacer; never add global body or nested-scroll pseudo-element reserves.
-- In ordinary iOS Safari the top color strip only paints browser chrome; only standalone mode reserves a top content offset, preventing double top bands.
+- Never render a top overlay in ordinary mobile Safari; only standalone mode owns one persistent safe-area strip and content offset, unchanged by keyboard state.
