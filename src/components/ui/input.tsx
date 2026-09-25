@@ -12,6 +12,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       onPointerDown?.(e);
       if (e.defaultPrevented || (e.pointerType !== 'touch' && e.pointerType !== 'pen')) return;
       const element = e.currentTarget;
+      const keyboardTypes = new Set(['', 'email', 'number', 'password', 'search', 'tel', 'text', 'url']);
+      if (!keyboardTypes.has(element.type)) return;
       if (document.activeElement === element) return;
       e.preventDefault();
       element.focus({ preventScroll: true });
