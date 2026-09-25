@@ -89,6 +89,10 @@ export function useVisualViewportBounds() {
       closeTimer = window.setTimeout(apply, 180);
     };
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') apply();
+    };
+
     applyNow();
     vv.addEventListener('resize', apply);
     vv.addEventListener('scroll', apply);
@@ -96,6 +100,7 @@ export function useVisualViewportBounds() {
     window.addEventListener('focusin', revealFocusedField);
     window.addEventListener('focusout', handleFocusOut);
     window.addEventListener('pageshow', apply);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       vv.removeEventListener('resize', apply);
@@ -104,6 +109,7 @@ export function useVisualViewportBounds() {
       window.removeEventListener('focusin', revealFocusedField);
       window.removeEventListener('focusout', handleFocusOut);
       window.removeEventListener('pageshow', apply);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.cancelAnimationFrame(applyFrame);
       window.cancelAnimationFrame(revealFrame);
       window.clearTimeout(revealTimer);
