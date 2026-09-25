@@ -3,17 +3,20 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  /** Disable layout-driven growth for long mobile forms that must stay fixed while typing. */
+  autoResize?: boolean
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, onBlur, onChange, ...props }, ref) => {
+  ({ className, onBlur, onChange, autoResize = true, ...props }, ref) => {
     const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
 
     const autoResize = React.useCallback((el: HTMLTextAreaElement | null) => {
-      if (!el) return;
+      if (!el || !autoResize) return;
       el.style.height = 'auto';
       el.style.height = `${el.scrollHeight}px`;
-    }, []);
+    }, [autoResize]);
 
     // Sync ref
     const setRef = React.useCallback((node: HTMLTextAreaElement | null) => {
@@ -32,6 +35,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     // changes width. Measuring while hidden can otherwise leave a fixed,
     // internally scrolling textarea until its value changes again.
     React.useEffect(() => {
+      if (!autoResize) return;
       const element = internalRef.current;
       const container = element?.parentElement;
       if (!element || !container || typeof ResizeObserver === 'undefined') return;

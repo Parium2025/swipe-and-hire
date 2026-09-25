@@ -995,67 +995,6 @@ All colors MUST be HSL.
   :root {
     --chrome-strip-pad: 0px;
   }
-  @media (any-pointer: coarse), (hover: none), (any-hover: none) {
-    :root {
-      --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 68px);
-    }
-    /* Tablet i liggande läge: fodralets/ramens nederkant döljer mer
-       än på telefon. Lägg på extra andrum så inget kort/knapp klipps. */
-    @media (orientation: landscape) and (min-width: 768px) and (max-width: 1366px) {
-      :root {
-        --chrome-strip-pad: calc(env(safe-area-inset-bottom, 0px) + 120px);
-      }
-    }
-    body,
-    #root {
-      padding-bottom: var(--chrome-strip-pad) !important;
-    }
-    /* For internal scroll containers, browsers collapse padding-bottom when
-       content overflows (especially on flex containers). Use a sentinel
-       ::after spacer that participates in the scrollable content instead. */
-    .overflow-y-auto:not(.no-chrome-pad)::after,
-    .overflow-y-scroll:not(.no-chrome-pad)::after,
-    .overflow-auto:not(.no-chrome-pad)::after,
-    main[data-main-scroll-container="true"]:not(.no-chrome-pad)::after {
-      content: '';
-      display: block;
-      flex-shrink: 0;
-      width: 100%;
-      height: var(--chrome-strip-pad);
-      pointer-events: none;
-    }
-    .overflow-y-auto:not(.no-chrome-pad),
-    .overflow-y-scroll:not(.no-chrome-pad),
-    .overflow-auto:not(.no-chrome-pad),
-    main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
-      scroll-padding-bottom: var(--chrome-strip-pad) !important;
-    }
-    main[data-main-scroll-container="true"] .responsive-container-wide:not(.no-chrome-pad),
-    .jobview-container:not(.no-chrome-pad) {
-      padding-bottom: max(var(--chrome-strip-pad), calc(env(safe-area-inset-bottom, 0px) + 50px)) !important;
-    }
-  }
-
-  :root[data-touch-chrome="true"] body,
-  :root[data-touch-chrome="true"] #root {
-    padding-bottom: var(--chrome-strip-pad) !important;
-  }
-
-  :root[data-touch-chrome="true"] .overflow-y-auto:not(.no-chrome-pad)::after,
-  :root[data-touch-chrome="true"] .overflow-y-scroll:not(.no-chrome-pad)::after,
-  :root[data-touch-chrome="true"] .overflow-auto:not(.no-chrome-pad)::after,
-  :root[data-touch-chrome="true"] main[data-main-scroll-container="true"]:not(.no-chrome-pad)::after {
-    content: '';
-    display: block;
-    flex-shrink: 0;
-    width: 100%;
-    height: var(--chrome-strip-pad);
-    pointer-events: none;
-  }
-
-  :root[data-touch-chrome="true"] .overflow-y-auto:not(.no-chrome-pad),
-  :root[data-touch-chrome="true"] .overflow-y-scroll:not(.no-chrome-pad),
-  :root[data-touch-chrome="true"] .overflow-auto:not(.no-chrome-pad),
   :root[data-touch-chrome="true"] main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
     scroll-padding-bottom: var(--chrome-strip-pad) !important;
   }
@@ -1068,10 +1007,6 @@ All colors MUST be HSL.
   /* iOS tangentbord äger hela nederkanten. Den fasta Safari-remsan får då
      inte ligga ovanpå formuläret, och visualViewport-offseten ersätter det
      vanliga extra topputrymmet medan fältet är fokuserat. */
-  :root[data-keyboard-open="true"] {
-    --chrome-strip-pad: 0px !important;
-  }
-
   :root[data-keyboard-open="true"] :is(
     .overflow-y-auto,
     .overflow-y-scroll,
@@ -1082,6 +1017,10 @@ All colors MUST be HSL.
   }
 
   :root[data-keyboard-open="true"] [data-browser-chrome-strip="bottom"] {
+    display: none !important;
+  }
+
+  :root[data-keyboard-open="true"] [data-browser-chrome-strip="top"] {
     display: none !important;
   }
 

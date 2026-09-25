@@ -23,6 +23,8 @@ export function useVisualViewportBounds() {
     const layoutViewportHeight = () => Math.max(window.innerHeight, root.clientHeight);
     let revealFrame = 0;
     let revealTimer = 0;
+    let applyFrame = 0;
+    let closeTimer = 0;
     let lastRevealed: Element | null = null;
 
     const revealFocusedField = () => {
@@ -56,9 +58,13 @@ export function useVisualViewportBounds() {
       });
     };
 
-    const apply = () => {
+    const applyNow = () => {
       const keyboardOpen = layoutViewportHeight() - vv.height > 150;
       root.dataset.keyboardOpen = keyboardOpen ? 'true' : 'false';
+      root.style.setProperty(
+        '--keyboard-viewport-offset',
+        keyboardOpen ? `${Math.max(0, Math.round(vv.offsetTop))}px` : '0px'
+      );
       root.style.setProperty(
         '--keyboard-occlusion-height',
         `${Math.max(0, Math.round(layoutViewportHeight() - vv.height - vv.offsetTop))}px`
@@ -71,20 +77,39 @@ export function useVisualViewportBounds() {
       if (!keyboardOpen) lastRevealed = null;
     };
 
-    apply();
+    // visualViewport can emit several resize/scroll events for one keyboard
+    // animation. Coalesce them so React/layout work never competes with typing.
+    const apply = () => {
+      window.cancelAnimationFrame(applyFrame);
+      applyFrame = window.requestAnimationFrame(applyNow);
+    };
+
+    const handleFocusOut = () => {
+      window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(apply, 180);
+    };
+
+    applyNow();
     vv.addEventListener('resize', apply);
     vv.addEventListener('scroll', apply);
     window.addEventListener('orientationchange', apply);
     window.addEventListener('focusin', revealFocusedField);
+    window.addEventListener('focusout', handleFocusOut);
+    window.addEventListener('pageshow', apply);
 
     return () => {
       vv.removeEventListener('resize', apply);
       vv.removeEventListener('scroll', apply);
       window.removeEventListener('orientationchange', apply);
       window.removeEventListener('focusin', revealFocusedField);
+      window.removeEventListener('focusout', handleFocusOut);
+      window.removeEventListener('pageshow', apply);
+      window.cancelAnimationFrame(applyFrame);
       window.cancelAnimationFrame(revealFrame);
       window.clearTimeout(revealTimer);
+      window.clearTimeout(closeTimer);
       root.style.removeProperty('--keyboard-occlusion-height');
+      root.style.removeProperty('--keyboard-viewport-offset');
       delete root.dataset.keyboardOpen;
     };
   }, []);
