@@ -1070,7 +1070,6 @@ All colors MUST be HSL.
      vanliga extra topputrymmet medan fältet är fokuserat. */
   :root[data-keyboard-open="true"] {
     --chrome-strip-pad: 0px !important;
-    --top-chrome-content-offset: 0px !important;
   }
 
   :root[data-keyboard-open="true"] [data-browser-chrome-strip="bottom"] {

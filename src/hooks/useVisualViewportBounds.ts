@@ -39,7 +39,7 @@ export function useVisualViewportBounds() {
     // nedåtanimation redan har kört en stund — upp till flera hundra
     // millisekunder efter trycket på "Klar". Reagera därför direkt på blur:
     // när ett fält tappar fokus (utan att ett annat tar över) återställer vi
-    // måtten mot hela layout-viewporten omedelbart, så shellen glider ner
+    // måtten mot hela layout-viewporten omedelbart, så shellen följer med
     // i samma ögonblick som tangentbordet börjar stängas. Den riktiga
     // resize-händelsen korrigerar sedan om måtten skulle skilja något.
     const handleFocusOut = () => {
