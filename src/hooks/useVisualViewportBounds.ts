@@ -33,7 +33,7 @@ export function useVisualViewportBounds() {
           const active = document.activeElement;
           if (!(active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement)) return;
 
-           const viewportTop = Math.max(0, vv.offsetTop) + 12;
+          const viewportTop = Math.max(0, vv.offsetTop) + 12;
           const viewportBottom = Math.max(viewportTop, vv.offsetTop + vv.height - 12);
           const rect = active.getBoundingClientRect();
           const delta = rect.bottom > viewportBottom
@@ -42,12 +42,12 @@ export function useVisualViewportBounds() {
               ? rect.top - viewportTop
               : 0;
 
-           if (Math.abs(delta) < 1) return;
+          if (Math.abs(delta) < 1) return;
           let parent = active.parentElement;
           while (parent) {
             const style = window.getComputedStyle(parent);
             if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight) {
-               parent.scrollBy({ top: delta, behavior: 'instant' });
+              parent.scrollBy({ top: delta, behavior: 'instant' });
               return;
             }
             parent = parent.parentElement;
