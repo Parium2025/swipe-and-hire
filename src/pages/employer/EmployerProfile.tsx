@@ -347,7 +347,7 @@ const EmployerProfile = () => {
 
       toast({
         title: "Profilbild uppladdad!",
-        description: "Tryck på \"Spara ändringar\" för att spara din profilbild."
+        description: "Ändringen sparas automatiskt."
       });
     } catch (error) {
       console.error('Upload error:', error);
@@ -393,7 +393,7 @@ const EmployerProfile = () => {
     setHasUnsavedChanges(true);
     toast({
       title: "Profilbild borttagen",
-      description: "Tryck på \"Spara ändringar\" för att bekräfta."
+      description: "Ändringen sparas automatiskt."
     });
   };
 
@@ -406,7 +406,7 @@ const EmployerProfile = () => {
     setHasUnsavedChanges(true);
     toast({
       title: "Profilbild återställd",
-      description: "Tryck på \"Spara ändringar\" för att bekräfta."
+      description: "Ändringen sparas automatiskt."
     });
   };
 
