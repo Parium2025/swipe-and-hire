@@ -1087,6 +1087,7 @@ const SearchJobs = memo(() => {
                       job_image_desktop_url: job.job_image_desktop_url,
                       image_focus_position: job.image_focus_position,
                        image_focus_position_desktop: job.image_focus_position_desktop,
+                      start_date: job.start_date ?? null,
                       company_name: job.company_name,
                       workplace_name: job.workplace_name,
                       employer_id: job.employer_id,
