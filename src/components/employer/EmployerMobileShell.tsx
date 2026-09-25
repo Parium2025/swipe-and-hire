@@ -1,5 +1,5 @@
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useMessagesChrome } from '@/hooks/useMessagesChrome';
 import { useVisualViewportBounds } from '@/hooks/useVisualViewportBounds';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -29,9 +29,11 @@ const EmployerMobileShell = ({
   onJobCreated,
 }: EmployerMobileShellProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   // Chattsidan är en fullhöjdsvy — extra bottenutrymme skulle lämna en tom yta.
   // Flaggan släpps först när vybytet är klart, annars klipps chatten mitt i övergången.
   const isMessages = useMessagesChrome();
+  const hasIsolatedPageScroll = location.pathname === '/settings' || location.pathname === '/company-profile';
   useVisualViewportBounds();
 
   return (
@@ -94,7 +96,7 @@ const EmployerMobileShell = ({
             ref={mainScrollRef}
             data-main-scroll-container="true"
             data-scroll-managed="keepalive"
-            className={`flex-1 min-h-0 overflow-x-hidden p-3 flex flex-col ${isMessages ? 'no-chrome-pad overflow-y-hidden' : 'overflow-y-auto pb-8'}`}
+            className={`flex-1 min-h-0 overflow-x-hidden p-3 flex flex-col ${isMessages || hasIsolatedPageScroll ? 'no-chrome-pad overflow-y-hidden' : 'overflow-y-auto pb-8'}`}
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',
@@ -104,7 +106,7 @@ const EmployerMobileShell = ({
             } as CSSProperties}
           >
             {children}
-            <div aria-hidden="true" style={{ flexShrink: 0, height: isMessages ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
+            <div aria-hidden="true" style={{ flexShrink: 0, height: isMessages || hasIsolatedPageScroll ? '0px' : 'var(--chrome-strip-pad, calc(env(safe-area-inset-bottom, 0px) + 96px))' }} />
           </main>
         </div>
       </div>

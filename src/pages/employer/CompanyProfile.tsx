@@ -729,7 +729,7 @@ const CompanyProfile = () => {
   }
 
   return (
-     <div className="space-y-8 responsive-container [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+     <div className="flex-1 min-h-0 w-full space-y-8 responsive-container overflow-y-auto overscroll-contain [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Logo Section */}
       <CompanyLogoSection
         companyLogoUrl={displayLogoUrl}

@@ -10,3 +10,4 @@
 - [x] Stop mobile text fields moving neighboring content while typing and prevent repeated keyboard scroll jumps
 - [x] Simplify the per-channel template editor and remove the duplicate ordinary-Safari top band
 - [x] Eliminate iOS Safari form clipping, keyboard lag, duplicate chrome spacing and failed viewport restoration across employer forms
+- [x] Match employer form focus behavior to the proven mobile chat composer and prevent Safari input zoom

@@ -91,7 +91,6 @@ export function useVisualViewportBounds() {
     vv.addEventListener('resize', apply);
     vv.addEventListener('scroll', apply);
     window.addEventListener('orientationchange', apply);
-    window.addEventListener('focusin', revealFocusedField);
     window.addEventListener('focusout', handleFocusOut);
     window.addEventListener('pageshow', apply);
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -100,7 +99,6 @@ export function useVisualViewportBounds() {
       vv.removeEventListener('resize', apply);
       vv.removeEventListener('scroll', apply);
       window.removeEventListener('orientationchange', apply);
-      window.removeEventListener('focusin', revealFocusedField);
       window.removeEventListener('focusout', handleFocusOut);
       window.removeEventListener('pageshow', apply);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
