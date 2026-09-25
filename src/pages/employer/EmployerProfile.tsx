@@ -467,7 +467,8 @@ const EmployerProfile = () => {
       if (result?.error) {
         // updateProfile visar redan en svensk feltoast. Behåll utkastet
         // och osparat-läget så att ändringen inte går förlorad.
-        return;
+        setSaveError('Kunde inte spara ändringen. Försök igen.');
+        return false;
       }
 
       const updatedValues = { ...formData };
@@ -484,22 +485,74 @@ const EmployerProfile = () => {
         console.warn('Failed to clear draft:', e);
       }
 
-      toast({
-        title: "Profil uppdaterad",
-        description: "Din profil har uppdaterats.",
-        route: '/profile'
-      });
+      setSaveError(null);
+      if (!silent) {
+        toast({
+          title: "Profil uppdaterad",
+          description: "Din profil har uppdaterats.",
+          route: '/profile'
+        });
+      }
+      return true;
     } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte uppdatera profilen.",
-        variant: "destructive"
-      });
+      if (!silent) {
+        toast({
+          title: "Fel",
+          description: "Kunde inte uppdatera profilen.",
+          variant: "destructive"
+        });
+      }
+      setSaveError('Kunde inte spara ändringen. Försök igen.');
+      return false;
     } finally {
       savingRef.current = false;
       setLoading(false);
     }
   };
+
+  // 🔄 Autospar: profilen sparas direkt, precis som företagsprofilen.
+  // Ingen notis visas vid lyckad sparning — bara en diskret "Sparat"-indikator.
+  const saveRef = useRef(handleSave);
+  saveRef.current = handleSave;
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  // Skydd mot omförsöksloop: samma misslyckade data sparas inte om och om igen,
+  // men signaturen nollställs när användaren kommer online eller trycker "Försök igen".
+  const [failedSignature, setFailedSignature] = useState<string | null>(null);
+  // När nätet kommer tillbaka ska den blockerade ändringen sparas automatiskt.
+  useEffect(() => {
+    if (isOnline) setFailedSignature(null);
+  }, [isOnline]);
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    if (loading) return;
+    const signature = JSON.stringify(formData);
+    if (failedSignature === signature) return;
+    const t = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        const ok = await saveRef.current({ silent: true });
+        if (ok) {
+          setFailedSignature(null);
+          // "Sparat" ligger kvar tills användaren lämnar sidan — ingen
+          // automatisk dold, så bekräftelsen syns även när man står långt ner.
+          setSaveStatus('saved');
+        } else {
+          setFailedSignature(signature);
+          setSaveStatus('error');
+        }
+      } catch {
+        setFailedSignature(signature);
+        setSaveStatus('error');
+      }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [hasUnsavedChanges, loading, formData, failedSignature, isOnline]);
+
+  // Manuell återförsöksväg så en ändring aldrig kan gå förlorad tyst.
+  const retrySave = useCallback(() => {
+    setFailedSignature(null);
+    setSaveStatus('idle');
+  }, []);
 
   // Kallstart: visa innehållsformat skelett istället för tomma fält.
   if (authLoading && !profile) {
