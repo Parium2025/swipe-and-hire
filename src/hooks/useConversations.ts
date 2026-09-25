@@ -583,14 +583,8 @@ export function useConversations() {
 
       // Build final conversation objects
       const result = conversations
+        // Provutskick till sig själv visas i inkorgen som "Du (provutskick)".
         .filter((c) => !hiddenConversationIds.has(c.id))
-        .filter((c) => {
-          // Provutskick till sig själv (du är enda medlemmen) ska aldrig synas i inkorgen.
-          const memberIds = (allMembers || [])
-            .filter((m) => m.conversation_id === c.id)
-            .map((m) => m.user_id);
-          return memberIds.length === 0 || memberIds.some((id) => id !== user.id);
-        })
         .map((conv) => {
         const members = (allMembers || [])
           .filter((m) => m.conversation_id === conv.id)
