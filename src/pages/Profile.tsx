@@ -2197,27 +2197,6 @@ const Profile = () => {
             (Du kan ha upp till tre profiler)
           </p>
         )}
-        <div
-          className="mt-1 h-4 text-xs text-white"
-          aria-live="polite"
-          role="status"
-        >
-          <span
-            className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
-          >
-            {saveStatus === 'saving' ? (
-              <>
-                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                Sparar…
-              </>
-            ) : (
-              <>
-                <Check className="h-3 w-3" aria-hidden="true" />
-                Sparat
-              </>
-            )}
-          </span>
-        </div>
       </div>
 
 
@@ -2909,6 +2888,25 @@ const Profile = () => {
               )}
 
             </form>
+
+            {/* Sparstatus direkt under fälten — syns tydligt där man skriver. */}
+            <div className="mt-4 min-h-4 text-center text-xs text-white" aria-live="polite" role="status">
+              <span
+                className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+              >
+                {saveStatus === 'saving' ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Sparar…
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Sparat
+                  </>
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </div>

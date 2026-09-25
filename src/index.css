@@ -887,7 +887,10 @@ All colors MUST be HSL.
     -webkit-background-clip: text !important;
     background-clip: text !important;
     background-color: transparent !important;
-    box-shadow: none !important;
+    /* Inre skugga målar över webbläsarens autofyllnadsfärg med appens
+       bakgrundsfärg — fältet får aldrig iOS Safaris gula/grå fyllning. */
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
     transition: background-color 9999s ease-in-out 0s !important;
   }
 
@@ -915,7 +918,8 @@ All colors MUST be HSL.
     -webkit-background-clip: text !important;
     background-clip: text !important;
     background-color: transparent !important;
-    box-shadow: none !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
   }
 
 }
