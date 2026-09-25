@@ -1,9 +1,24 @@
-import { fireEvent, render } from '@testing-library/react';
+import { createEvent, fireEvent, render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 describe('mobile field focus gestures', () => {
+  const dispatchPointer = (
+    element: HTMLElement,
+    type: 'pointerDown' | 'pointerUp',
+    values: { pointerId: number; pointerType: string; clientX: number; clientY: number },
+  ) => {
+    const event = createEvent[type](element);
+    Object.defineProperties(event, {
+      pointerId: { value: values.pointerId },
+      pointerType: { value: values.pointerType },
+      clientX: { value: values.clientX },
+      clientY: { value: values.clientY },
+    });
+    fireEvent(element, event);
+  };
+
   it.each([
     ['input', <Input aria-label="Namn" />],
     ['textarea', <Textarea aria-label="Innehåll" autoResize={false} />],
@@ -12,9 +27,9 @@ describe('mobile field focus gestures', () => {
     const element = getByRole('textbox');
     const focus = vi.spyOn(element, 'focus');
 
-    fireEvent.pointerDown(element, { pointerId: 1, pointerType: 'touch', clientX: 20, clientY: 30 });
+    dispatchPointer(element, 'pointerDown', { pointerId: 1, pointerType: 'touch', clientX: 20, clientY: 30 });
     expect(focus).not.toHaveBeenCalled();
-    fireEvent.pointerUp(element, { pointerId: 1, pointerType: 'touch', clientX: 24, clientY: 34 });
+    dispatchPointer(element, 'pointerUp', { pointerId: 1, pointerType: 'touch', clientX: 24, clientY: 34 });
 
     expect(focus).toHaveBeenCalledWith({ preventScroll: true });
   });
@@ -27,8 +42,8 @@ describe('mobile field focus gestures', () => {
     const element = getByRole('textbox');
     const focus = vi.spyOn(element, 'focus');
 
-    fireEvent.pointerDown(element, { pointerId: 2, pointerType: 'touch', clientX: 20, clientY: 30 });
-    fireEvent.pointerUp(element, { pointerId: 2, pointerType: 'touch', clientX: 20, clientY: 65 });
+    dispatchPointer(element, 'pointerDown', { pointerId: 2, pointerType: 'touch', clientX: 20, clientY: 30 });
+    dispatchPointer(element, 'pointerUp', { pointerId: 2, pointerType: 'touch', clientX: 20, clientY: 65 });
 
     expect(focus).not.toHaveBeenCalled();
   });
