@@ -146,6 +146,10 @@ const EmployerProfile = () => {
     return hasChanges;
   }, [originalValues, formData, setHasUnsavedChanges]);
 
+  // Senaste formulärvärden — används efter asynkron sparning.
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+
   // Check for changes whenever form values change + auto-save to localStorage
   useEffect(() => {
     const hasChanges = checkForChanges();
