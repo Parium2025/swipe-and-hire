@@ -986,22 +986,14 @@ All colors MUST be HSL.
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
   .overflow-anchor-none { overflow-anchor: none; }
 
-  /* === Touch-only: extra scroll-utrymme för BottomChromeStrip ===
-     På telefoner/surfplattor täcker den fasta färgremsan (BottomChromeStrip,
-     14px + safe-area) botten av viewporten. Alla scrollytor (interna OCH
-     hela body) får därför extra utrymme så sista elementet alltid kan
-     scrollas förbi remsan. Påverkar inte desktop.
-     Opt-out på en specifik container: lägg till klassen `no-chrome-pad`. */
+  /* === Ett enda bottenutrymme för installerat app-läge ===
+     Mobilskalen renderar själva spacern. Vanlig Safari ska inte lägga samma
+     reserv på body, innehåll och nästlade scrollytor samtidigt. */
   :root {
     --chrome-strip-pad: 0px;
   }
   :root[data-touch-chrome="true"] main[data-main-scroll-container="true"]:not(.no-chrome-pad) {
     scroll-padding-bottom: var(--chrome-strip-pad) !important;
-  }
-
-  :root[data-touch-chrome="true"] main[data-main-scroll-container="true"] .responsive-container-wide:not(.no-chrome-pad),
-  :root[data-touch-chrome="true"] .jobview-container:not(.no-chrome-pad) {
-    padding-bottom: max(var(--chrome-strip-pad), calc(env(safe-area-inset-bottom, 0px) + 50px)) !important;
   }
 
   /* iOS tangentbord äger hela nederkanten. Den fasta Safari-remsan får då
@@ -1024,11 +1016,7 @@ All colors MUST be HSL.
     display: none !important;
   }
 
-  /* === Undantag: flytande overlays ska ALDRIG få chrome-strip-utrymme ===
-     Tooltips, popovers, dropdowns, select-listor och toasts renderas i portaler
-     ovanpå sidan – de ligger inte i sidans scrollflöde.
-     Utan detta får de ett osynligt 68px tomrum i botten (glapp under texten).
-     Gäller hela appen: arbetsgivar- och jobbsökarsidan. */
+  /* === Undantag: flytande overlays får aldrig få chrome-utrymme === */
   [data-radix-popper-content-wrapper] .overflow-y-auto::after,
   [data-radix-popper-content-wrapper] .overflow-auto::after,
   [data-radix-popper-content-wrapper] .overflow-y-scroll::after,
