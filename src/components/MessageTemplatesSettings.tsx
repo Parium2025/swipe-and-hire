@@ -1980,7 +1980,7 @@ export function MessageTemplatesSettings() {
               ) : (
                  <div className="space-y-5">
                   {CHANNEL_ORDER.filter((channel) => templateForm.channels.includes(channel)).map((channel) => (
-                     <section key={channel} className="space-y-3 border-t border-white/10 pt-4 first:border-t-0 first:pt-0">
+                     <section key={channel} className="space-y-3 pt-4 first:pt-0">
                       <div className="flex items-center justify-between gap-2">
                         <Label className="text-white">Kanal: {getOutreachChannelLabel(channel)}</Label>
                       </div>

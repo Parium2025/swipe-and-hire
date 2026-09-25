@@ -7,3 +7,5 @@
 - [x] Keep the mobile app shell visible while the iOS keyboard is open
 - [x] Keep the mobile shell stable while revealing focused fields above the iOS keyboard
 - [x] Show the mandatory interview invitation email as locked
+- [x] Stop mobile text fields moving neighboring content while typing and prevent repeated keyboard scroll jumps
+- [x] Simplify the per-channel template editor and remove the duplicate ordinary-Safari top band
