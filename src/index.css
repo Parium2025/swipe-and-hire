@@ -1085,6 +1085,12 @@ All colors MUST be HSL.
     display: none !important;
   }
 
+  /* Safari's top color anchor is for the browser bar only. When the keyboard
+     moves the visual viewport it must not paint over an editable field. */
+  :root[data-keyboard-open="true"] [data-browser-chrome-strip="top"] {
+    display: none !important;
+  }
+
   /* === Undantag: flytande overlays ska ALDRIG få chrome-strip-utrymme ===
      Tooltips, popovers, dropdowns, select-listor och toasts renderas i portaler
      ovanpå sidan – de ligger inte i sidans scrollflöde.

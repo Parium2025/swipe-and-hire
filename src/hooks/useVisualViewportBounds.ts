@@ -23,6 +23,7 @@ export function useVisualViewportBounds() {
     const layoutViewportHeight = () => Math.max(window.innerHeight, root.clientHeight);
     let revealFrame = 0;
     let revealTimer = 0;
+    let lastRevealed: Element | null = null;
 
     const revealFocusedField = () => {
       window.cancelAnimationFrame(revealFrame);
@@ -32,7 +33,7 @@ export function useVisualViewportBounds() {
           const active = document.activeElement;
           if (!(active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement)) return;
 
-          const viewportTop = Math.max(0, vv.offsetTop) + 12;
+           const viewportTop = Math.max(0, vv.offsetTop) + 12;
           const viewportBottom = Math.max(viewportTop, vv.offsetTop + vv.height - 12);
           const rect = active.getBoundingClientRect();
           const delta = rect.bottom > viewportBottom
@@ -41,12 +42,12 @@ export function useVisualViewportBounds() {
               ? rect.top - viewportTop
               : 0;
 
-          if (Math.abs(delta) < 1) return;
+           if (Math.abs(delta) < 1) return;
           let parent = active.parentElement;
           while (parent) {
             const style = window.getComputedStyle(parent);
             if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight) {
-              parent.scrollBy({ top: delta, behavior: 'auto' });
+               parent.scrollBy({ top: delta, behavior: 'instant' });
               return;
             }
             parent = parent.parentElement;
@@ -58,11 +59,19 @@ export function useVisualViewportBounds() {
     const apply = () => {
       const keyboardOpen = layoutViewportHeight() - vv.height > 150;
       root.dataset.keyboardOpen = keyboardOpen ? 'true' : 'false';
+      // Safari flyttar den synliga ytan relativt layout-viewporten när dess
+      // verktygsfält ändras. Flytta bara skalets position, aldrig dess höjd.
+      root.style.setProperty('--keyboard-viewport-offset', keyboardOpen ? `${Math.max(0, Math.round(vv.offsetTop))}px` : '0px');
       root.style.setProperty(
         '--keyboard-occlusion-height',
         `${Math.max(0, Math.round(layoutViewportHeight() - vv.height - vv.offsetTop))}px`
       );
-      if (keyboardOpen) revealFocusedField();
+      const active = document.activeElement;
+      if (keyboardOpen && active !== lastRevealed) {
+        lastRevealed = active;
+        revealFocusedField();
+      }
+      if (!keyboardOpen) lastRevealed = null;
     };
 
     apply();
@@ -79,6 +88,7 @@ export function useVisualViewportBounds() {
       window.cancelAnimationFrame(revealFrame);
       window.clearTimeout(revealTimer);
       root.style.removeProperty('--keyboard-occlusion-height');
+      root.style.removeProperty('--keyboard-viewport-offset');
       delete root.dataset.keyboardOpen;
     };
   }, []);
