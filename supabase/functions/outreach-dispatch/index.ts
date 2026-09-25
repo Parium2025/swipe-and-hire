@@ -423,6 +423,14 @@ async function dispatchLog(log: OutreachLog) {
       // 23505 = raden finns redan från ett tidigare försök: meddelandet är
       // levererat, så vi bokför det som skickat i stället för att skicka igen.
       if (error && error.code !== '23505') throw error;
+      // Provutskick till sig själv: egna meddelanden räknas aldrig som olästa,
+      // så markera chatten som oläst för att avsändaren ska se det i sidomenyn.
+      if (log.owner_user_id === log.recipient_user_id) {
+        await admin.from('conversation_members')
+          .update({ manually_unread: true })
+          .eq('conversation_id', conversationId)
+          .eq('user_id', log.recipient_user_id);
+      }
       await markSent(log.id, { status: 'sent', sent_at: new Date().toISOString(), conversation_id: conversationId, error_message: null });
       await maybeSyncInterviewCalendar(log, context);
       return { conversationId };
