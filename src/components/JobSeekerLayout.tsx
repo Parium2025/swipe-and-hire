@@ -177,13 +177,11 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
       />
       
       <div
-        className={isMessagesChrome ? "fixed left-0 right-0 flex w-full overflow-hidden" : "h-[100dvh] flex w-full overflow-hidden relative"}
+        className={isMessagesChrome ? "fixed inset-0 flex h-[100dvh] w-full overflow-hidden" : "h-[100dvh] flex w-full overflow-hidden relative"}
         style={isMessagesChrome
           ? {
               WebkitOverflowScrolling: 'touch',
-              top: 'var(--app-viewport-offset, 0px)',
-              height: 'var(--app-viewport-height, 100dvh)',
-              // Följ Safaris tangentbord utan en mellanbild där skalet täcks.
+              // Behåll full shellhöjd; tangentbordet får inte kapa layouten.
               transition: 'none',
             }
           : { WebkitOverflowScrolling: 'touch' }}

@@ -1072,6 +1072,15 @@ All colors MUST be HSL.
     --chrome-strip-pad: 0px !important;
   }
 
+  :root[data-keyboard-open="true"] :is(
+    .overflow-y-auto,
+    .overflow-y-scroll,
+    .overflow-auto,
+    main[data-main-scroll-container="true"]
+  ) {
+    scroll-padding-bottom: calc(var(--keyboard-occlusion-height, 0px) + 12px) !important;
+  }
+
   :root[data-keyboard-open="true"] [data-browser-chrome-strip="bottom"] {
     display: none !important;
   }

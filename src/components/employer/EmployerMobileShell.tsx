@@ -39,15 +39,11 @@ const EmployerMobileShell = ({
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
 
       <div
-        className="fixed left-0 right-0 flex w-full overflow-hidden"
+        className="fixed inset-0 flex h-[100dvh] w-full overflow-hidden"
         style={{
           WebkitOverflowScrolling: 'touch',
-          // Ankra mot den FAKTISKT synliga ytan på iOS. Annars kan Safari
-          // lämna toppraden ovanför skärmkanten utan att den kommer tillbaka.
-          top: 'var(--app-viewport-offset, 0px)',
-          height: 'var(--app-viewport-height, 100dvh)',
-          // Tangentbordet flyttar Safaris synliga yta direkt. En transition här
-          // gör att skalet ligger kvar på gamla mått och täcks i 300 ms.
+          // Håll skalet stabilt när iOS-tangentbordet öppnas. Det fokuserade
+          // fältet flyttas i den interna scrollytan av useVisualViewportBounds.
           transition: 'none',
         } as CSSProperties}
       >

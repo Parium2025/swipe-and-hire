@@ -7,10 +7,11 @@ import { useEffect } from 'react';
  * notiser, profil) klipps bort och kommer inte tillbaka när man scrollar upp,
  * eftersom dokumentet självt inte kan scrolla (body är fixed).
  *
- * Hooken speglar visualViewport till CSS-variabler så shellen alltid kan
- * ankras exakt mot den synliga ytan:
- *   --app-viewport-height  faktisk synlig höjd
- *   --app-viewport-offset  hur långt ned den synliga ytan börjar
+ * Appskalet ska INTE storleksändras till visualViewport när tangentbordet
+ * öppnas. På iOS är verktygsfälten transparenta och ligger ovanpå samma
+ * visualViewport; en krympt fixed-shell lämnar därför ett stort tomt fält.
+ * Vi använder i stället visualViewport enbart för att hålla det fokuserade
+ * fältet inom den faktiskt synliga delen av skalets egen scrollcontainer.
  */
 export function useVisualViewportBounds() {
   useEffect(() => {
@@ -20,46 +21,64 @@ export function useVisualViewportBounds() {
 
     const root = document.documentElement;
     const layoutViewportHeight = () => Math.max(window.innerHeight, root.clientHeight);
+    let revealFrame = 0;
+    let revealTimer = 0;
+
+    const revealFocusedField = () => {
+      window.cancelAnimationFrame(revealFrame);
+      window.clearTimeout(revealTimer);
+      revealFrame = window.requestAnimationFrame(() => {
+        revealTimer = window.setTimeout(() => {
+          const active = document.activeElement;
+          if (!(active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement)) return;
+
+          const viewportTop = Math.max(0, vv.offsetTop) + 12;
+          const viewportBottom = Math.max(viewportTop, vv.offsetTop + vv.height - 12);
+          const rect = active.getBoundingClientRect();
+          const delta = rect.bottom > viewportBottom
+            ? rect.bottom - viewportBottom
+            : rect.top < viewportTop
+              ? rect.top - viewportTop
+              : 0;
+
+          if (Math.abs(delta) < 1) return;
+          let parent = active.parentElement;
+          while (parent) {
+            const style = window.getComputedStyle(parent);
+            if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight) {
+              parent.scrollBy({ top: delta, behavior: 'auto' });
+              return;
+            }
+            parent = parent.parentElement;
+          }
+        }, 80);
+      });
+    };
+
     const apply = () => {
       const keyboardOpen = layoutViewportHeight() - vv.height > 150;
-      root.style.setProperty('--app-viewport-height', `${Math.round(vv.height)}px`);
-      root.style.setProperty('--app-viewport-offset', `${Math.max(0, Math.round(vv.offsetTop))}px`);
       root.dataset.keyboardOpen = keyboardOpen ? 'true' : 'false';
+      root.style.setProperty(
+        '--keyboard-occlusion-height',
+        `${Math.max(0, Math.round(layoutViewportHeight() - vv.height - vv.offsetTop))}px`
+      );
+      if (keyboardOpen) revealFocusedField();
     };
 
     apply();
-    // Uppdatera innan nästa paint. En requestAnimationFrame här lämnade exakt
-    // en synlig bildruta där Safari redan hade flyttat layout-viewporten vid
-    // tangentbordsfokus men appskalet fortfarande använde de gamla måtten.
     vv.addEventListener('resize', apply);
     vv.addEventListener('scroll', apply);
     window.addEventListener('orientationchange', apply);
-
-    // iOS Safari skickar visualViewport-resize först när tangentbordets
-    // nedåtanimation redan har kört en stund — upp till flera hundra
-    // millisekunder efter trycket på "Klar". Reagera därför direkt på blur:
-    // när ett fält tappar fokus (utan att ett annat tar över) återställer vi
-    // måtten mot hela layout-viewporten omedelbart, så shellen följer med
-    // i samma ögonblick som tangentbordet börjar stängas. Den riktiga
-    // resize-händelsen korrigerar sedan om måtten skulle skilja något.
-    const handleFocusOut = () => {
-      requestAnimationFrame(() => {
-        const active = document.activeElement;
-        if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
-        root.style.setProperty('--app-viewport-height', `${Math.round(window.innerHeight)}px`);
-        root.style.setProperty('--app-viewport-offset', '0px');
-        root.dataset.keyboardOpen = 'false';
-      });
-    };
-    window.addEventListener('focusout', handleFocusOut);
+    window.addEventListener('focusin', revealFocusedField);
 
     return () => {
       vv.removeEventListener('resize', apply);
       vv.removeEventListener('scroll', apply);
       window.removeEventListener('orientationchange', apply);
-      window.removeEventListener('focusout', handleFocusOut);
-      root.style.removeProperty('--app-viewport-height');
-      root.style.removeProperty('--app-viewport-offset');
+      window.removeEventListener('focusin', revealFocusedField);
+      window.cancelAnimationFrame(revealFrame);
+      window.clearTimeout(revealTimer);
+      root.style.removeProperty('--keyboard-occlusion-height');
       delete root.dataset.keyboardOpen;
     };
   }, []);
