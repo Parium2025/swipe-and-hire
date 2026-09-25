@@ -3,7 +3,9 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, onBlur, onPointerDown, ...props }, ref) => {
+  ({ className, type, onBlur, onPointerDown, onPointerUp, onPointerCancel, ...props }, ref) => {
+    const pointerStartRef = React.useRef<{ id: number; x: number; y: number } | null>(null);
+
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       onBlur?.(e);
     };
@@ -15,8 +17,23 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       const keyboardTypes = new Set(['', 'email', 'number', 'password', 'search', 'tel', 'text', 'url']);
       if (!keyboardTypes.has(element.type)) return;
       if (document.activeElement === element) return;
+      pointerStartRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLInputElement>) => {
+      onPointerUp?.(e);
+      const start = pointerStartRef.current;
+      pointerStartRef.current = null;
+      if (e.defaultPrevented || !start || start.id !== e.pointerId) return;
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return;
+      if (document.activeElement === e.currentTarget) return;
       e.preventDefault();
-      element.focus({ preventScroll: true });
+      e.currentTarget.focus({ preventScroll: true });
+    };
+
+    const handlePointerCancel = (e: React.PointerEvent<HTMLInputElement>) => {
+      pointerStartRef.current = null;
+      onPointerCancel?.(e);
     };
 
     return (
@@ -30,6 +47,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         ref={ref}
         onBlur={handleBlur}
         onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         {...props}
       />
     )

@@ -9,8 +9,9 @@ export interface TextareaProps
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, onBlur, onChange, onPointerDown, autoResize: autoResizeEnabled = true, ...props }, ref) => {
+  ({ className, onBlur, onChange, onPointerDown, onPointerUp, onPointerCancel, autoResize: autoResizeEnabled = true, ...props }, ref) => {
     const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
+    const pointerStartRef = React.useRef<{ id: number; x: number; y: number } | null>(null);
 
     const resizeToContent = React.useCallback((el: HTMLTextAreaElement | null) => {
       if (!el || !autoResizeEnabled) return;
@@ -62,16 +63,30 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       onBlur?.(e);
     };
 
-    // Match the proven chat composer behaviour on iOS: Safari must not first
-    // move the fixed page before visualViewport reveals the field inside the
-    // existing scroll container. Repeated taps remain native for caret moves.
+    // Let Safari distinguish a tap from a scroll gesture before focusing.
+    // Preventing pointerdown made every drag starting over a field reopen the
+    // keyboard. A still tap is focused with preventScroll on pointerup instead.
     const handlePointerDown = (e: React.PointerEvent<HTMLTextAreaElement>) => {
       onPointerDown?.(e);
       if (e.defaultPrevented || (e.pointerType !== 'touch' && e.pointerType !== 'pen')) return;
-      const element = e.currentTarget;
-      if (document.activeElement === element) return;
+      if (document.activeElement === e.currentTarget) return;
+      pointerStartRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLTextAreaElement>) => {
+      onPointerUp?.(e);
+      const start = pointerStartRef.current;
+      pointerStartRef.current = null;
+      if (e.defaultPrevented || !start || start.id !== e.pointerId) return;
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return;
+      if (document.activeElement === e.currentTarget) return;
       e.preventDefault();
-      element.focus({ preventScroll: true });
+      e.currentTarget.focus({ preventScroll: true });
+    };
+
+    const handlePointerCancel = (e: React.PointerEvent<HTMLTextAreaElement>) => {
+      pointerStartRef.current = null;
+      onPointerCancel?.(e);
     };
 
     return (
@@ -84,6 +99,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         onBlur={handleBlur}
         onChange={handleChange}
         onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         {...props}
       />
     )
