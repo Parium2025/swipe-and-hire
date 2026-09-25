@@ -10,6 +10,7 @@ class VisualViewportMock extends EventTarget {
 describe('useVisualViewportBounds', () => {
   afterEach(() => {
     document.documentElement.style.removeProperty('--keyboard-occlusion-height');
+    document.documentElement.style.removeProperty('--keyboard-viewport-offset');
     delete document.documentElement.dataset.keyboardOpen;
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
@@ -69,5 +70,28 @@ describe('useVisualViewportBounds', () => {
     expect(scrollBy).toHaveBeenCalledTimes(1);
     unmount();
     parent.remove();
+  });
+
+  it('släpper kvarhängande fältfokus när iOS-tangentbordet stängs', () => {
+    const viewport = new VisualViewportMock();
+    vi.stubGlobal('visualViewport', viewport);
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
+    vi.stubGlobal('innerHeight', 800);
+    const field = document.createElement('textarea');
+    document.body.append(field);
+    field.focus();
+
+    const { unmount } = renderHook(() => useVisualViewportBounds());
+    expect(document.activeElement).toBe(field);
+
+    act(() => {
+      viewport.height = 800;
+      viewport.dispatchEvent(new Event('resize'));
+    });
+
+    expect(document.activeElement).not.toBe(field);
+    expect(document.documentElement.dataset.keyboardOpen).toBe('false');
+    unmount();
+    field.remove();
   });
 });

@@ -25,6 +25,7 @@ export function useVisualViewportBounds() {
     let revealTimer = 0;
     let closeTimer = 0;
     let lastRevealed: Element | null = null;
+    let wasKeyboardOpen = false;
 
     const revealFocusedField = () => {
       window.cancelAnimationFrame(revealFrame);
@@ -59,6 +60,24 @@ export function useVisualViewportBounds() {
 
     const applyNow = () => {
       const keyboardOpen = layoutViewportHeight() - vv.height > 150;
+      const active = document.activeElement;
+
+      // iOS kan fälla ned tangentbordet utan att släppa DOM-fokus. Då räcker
+      // nästa fingerkontakt i samma textarea för att öppna tangentbordet igen,
+      // även när användaren egentligen påbörjar en vanlig scrollgest. Avsluta
+      // det kvarhängande fokuset först när en verklig öppen→stängd övergång
+      // har observerats; vanliga tryck och byte mellan fält påverkas inte.
+      if (
+        wasKeyboardOpen
+        && !keyboardOpen
+        && (active instanceof HTMLInputElement
+          || active instanceof HTMLTextAreaElement
+          || active instanceof HTMLSelectElement)
+      ) {
+        active.blur();
+      }
+      wasKeyboardOpen = keyboardOpen;
+
       root.dataset.keyboardOpen = keyboardOpen ? 'true' : 'false';
       root.style.setProperty(
         '--keyboard-viewport-offset',
@@ -68,7 +87,6 @@ export function useVisualViewportBounds() {
         '--keyboard-occlusion-height',
         `${Math.max(0, Math.round(layoutViewportHeight() - vv.height - vv.offsetTop))}px`
       );
-      const active = document.activeElement;
       if (keyboardOpen && active !== lastRevealed) {
         lastRevealed = active;
         revealFocusedField();
