@@ -997,17 +997,8 @@ All colors MUST be HSL.
   }
 
   /* iOS tangentbord äger hela nederkanten. Den fasta bottenremsan får då
-     inte ligga ovanpå formuläret. Installerat läges toppyta ska däremot vara
-     identisk med och utan tangentbord så sidhuvudet aldrig hoppar. */
-  :root[data-keyboard-open="true"] :is(
-    .overflow-y-auto,
-    .overflow-y-scroll,
-    .overflow-auto,
-    main[data-main-scroll-container="true"]
-  ) {
-    scroll-padding-bottom: calc(var(--keyboard-occlusion-height, 0px) + 12px) !important;
-  }
-
+     inte ligga ovanpå formuläret. Safari äger själv fältets scrollplacering;
+     globala tangentbordsmarginaler på nästlade scrollytor skapar dubbelhopp. */
   :root[data-keyboard-open="true"] [data-browser-chrome-strip="bottom"] {
     display: none !important;
   }
