@@ -19,9 +19,12 @@ export function useVisualViewportBounds() {
     if (!vv) return;
 
     const root = document.documentElement;
+    const layoutViewportHeight = () => Math.max(window.innerHeight, root.clientHeight);
     const apply = () => {
+      const keyboardOpen = layoutViewportHeight() - vv.height > 150;
       root.style.setProperty('--app-viewport-height', `${Math.round(vv.height)}px`);
       root.style.setProperty('--app-viewport-offset', `${Math.max(0, Math.round(vv.offsetTop))}px`);
+      root.dataset.keyboardOpen = keyboardOpen ? 'true' : 'false';
     };
 
     apply();
@@ -45,6 +48,7 @@ export function useVisualViewportBounds() {
         if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
         root.style.setProperty('--app-viewport-height', `${Math.round(window.innerHeight)}px`);
         root.style.setProperty('--app-viewport-offset', '0px');
+        root.dataset.keyboardOpen = 'false';
       });
     };
     window.addEventListener('focusout', handleFocusOut);
@@ -56,6 +60,7 @@ export function useVisualViewportBounds() {
       window.removeEventListener('focusout', handleFocusOut);
       root.style.removeProperty('--app-viewport-height');
       root.style.removeProperty('--app-viewport-offset');
+      delete root.dataset.keyboardOpen;
     };
   }, []);
 }

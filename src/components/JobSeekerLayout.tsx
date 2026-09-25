@@ -183,9 +183,8 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
               WebkitOverflowScrolling: 'touch',
               top: 'var(--app-viewport-offset, 0px)',
               height: 'var(--app-viewport-height, 100dvh)',
-              // Mjuk övergång när iOS-tangentbordet öppnas/stängs ("Klar") —
-              // utan denna ändras höjden tvärt och innehållet hoppar.
-              transition: 'top 0.3s cubic-bezier(0.32, 0.72, 0, 1), height 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+              // Följ Safaris tangentbord utan en mellanbild där skalet täcks.
+              transition: 'none',
             }
           : { WebkitOverflowScrolling: 'touch' }}
       >
