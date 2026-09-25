@@ -613,6 +613,9 @@ const CompanyProfile = () => {
       // användaren kan ha fortsatt skriva/radera medan sparningen pågick.
       // Endast jämförelsebasen flyttas; osparat-läget räknas om automatiskt.
       setOriginalValues(updatedValues);
+      // Normaliserade värden (t.ex. möteslänk) förs bara in om fältet är orört.
+      const startSnapshot = JSON.stringify(formData);
+      setFormData(prev => (JSON.stringify(prev) === startSnapshot ? updatedValues : prev));
       
       try {
         if (JSON.stringify(formDataRef.current) === JSON.stringify(updatedValues)) {
