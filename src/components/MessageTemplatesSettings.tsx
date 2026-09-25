@@ -655,7 +655,12 @@ export function MessageTemplatesSettings() {
       try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
       return;
     }
-    safeSetItem(templateDraftKey, JSON.stringify(templateForm));
+    // localStorage is synchronous on iOS. Debounce the write so a large draft
+    // cannot block the main thread on every keystroke.
+    const timer = window.setTimeout(() => {
+      safeSetItem(templateDraftKey, JSON.stringify(templateForm));
+    }, 400);
+    return () => window.clearTimeout(timer);
   }, [templateForm, templateDraftKey, draftHydrated]);
 
 
@@ -2021,10 +2026,11 @@ export function MessageTemplatesSettings() {
                           <RequiredMark filled={Boolean(templateForm.channelContent[channel].body.trim())} />
                         </div>
                         <Textarea
+                          autoResize={false}
                           value={templateForm.channelContent[channel].body}
                           onFocus={() => setActiveTemplateChannel(channel)}
                           onChange={(e) => setTemplateChannelContent(channel, 'body', e.target.value)}
-                          className="min-h-[120px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 text-white"
+                          className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 text-white"
                         />
                       </div>
 

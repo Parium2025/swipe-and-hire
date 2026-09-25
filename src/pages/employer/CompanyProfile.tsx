@@ -976,12 +976,13 @@ const CompanyProfile = () => {
               <Label htmlFor="company_description" className="text-white">Företagsbeskrivning<RequiredStar filled={!!formData.company_description.trim()} /></Label>
               <Textarea
                 id="company_description"
+                autoResize={false}
                 maxLength={TEXT_LIMITS.companyDescription}
                 value={formData.company_description}
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
             </div>
 

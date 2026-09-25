@@ -143,11 +143,12 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               </Label>
               <Textarea
                 id="interview_video_default_message"
+                autoResize={false}
                 value={formData.interview_video_default_message}
                 onChange={(e) => onFormDataChange({ interview_video_default_message: e.target.value })}
                 placeholder="Hej!&#10;&#10;Tack för din ansökan. Vi skulle gärna vilja träffa dig på en videointervju.&#10;&#10;Vänliga hälsningar"
                 rows={4}
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
               <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid videobokning.</p>
             </div>
@@ -182,11 +183,12 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               </Label>
               <Textarea
                 id="interview_office_instructions"
+                autoResize={false}
                 value={formData.interview_office_instructions}
                 onChange={(e) => onFormDataChange({ interview_office_instructions: e.target.value })}
                 placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
                 rows={2}
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                className="h-[120px] min-h-[120px] max-h-[120px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
             </div>
 
@@ -197,11 +199,12 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               </Label>
               <Textarea
                 id="interview_default_message"
+                autoResize={false}
                 value={formData.interview_default_message}
                 onChange={(e) => onFormDataChange({ interview_default_message: e.target.value })}
                 placeholder="Hej!&#10;&#10;Tack för din ansökan. Vi skulle gärna vilja träffa dig på en intervju.&#10;&#10;Vänliga hälsningar"
                 rows={4}
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
+                className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
               <p className="text-xs text-white">Detta meddelande skickas till kandidaten vid kontorsbokning.</p>
             </div>

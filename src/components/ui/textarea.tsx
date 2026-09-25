@@ -3,35 +3,39 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  /** Disable layout-driven growth for long mobile forms that must stay fixed while typing. */
+  autoResize?: boolean
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, onBlur, onChange, ...props }, ref) => {
+  ({ className, onBlur, onChange, autoResize: autoResizeEnabled = true, ...props }, ref) => {
     const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
 
-    const autoResize = React.useCallback((el: HTMLTextAreaElement | null) => {
-      if (!el) return;
+    const resizeToContent = React.useCallback((el: HTMLTextAreaElement | null) => {
+      if (!el || !autoResizeEnabled) return;
       el.style.height = 'auto';
       el.style.height = `${el.scrollHeight}px`;
-    }, []);
+    }, [autoResizeEnabled]);
 
     // Sync ref
     const setRef = React.useCallback((node: HTMLTextAreaElement | null) => {
       internalRef.current = node;
       if (typeof ref === 'function') ref(node);
       else if (ref) (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current = node;
-      autoResize(node);
-    }, [ref, autoResize]);
+      resizeToContent(node);
+    }, [ref, resizeToContent]);
 
     // Auto-resize on value changes (controlled components)
     React.useLayoutEffect(() => {
-      autoResize(internalRef.current);
-    }, [props.value, autoResize]);
+      resizeToContent(internalRef.current);
+    }, [props.value, resizeToContent]);
 
     // Recalculate when a previously hidden accordion/tab becomes visible or
     // changes width. Measuring while hidden can otherwise leave a fixed,
     // internally scrolling textarea until its value changes again.
     React.useEffect(() => {
+      if (!autoResizeEnabled) return;
       const element = internalRef.current;
       const container = element?.parentElement;
       if (!element || !container || typeof ResizeObserver === 'undefined') return;
@@ -39,7 +43,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       let frame: number | undefined;
       const observer = new ResizeObserver(() => {
         if (frame !== undefined) cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => autoResize(element));
+        frame = requestAnimationFrame(() => resizeToContent(element));
       });
       observer.observe(container);
 
@@ -47,15 +51,14 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         observer.disconnect();
         if (frame !== undefined) cancelAnimationFrame(frame);
       };
-    }, [autoResize]);
+    }, [autoResizeEnabled, resizeToContent]);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      autoResize(e.currentTarget);
+      resizeToContent(e.currentTarget);
       onChange?.(e);
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      e.currentTarget.blur();
       onBlur?.(e);
     };
 

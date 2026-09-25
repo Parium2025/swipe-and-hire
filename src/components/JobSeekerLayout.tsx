@@ -177,6 +177,7 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
       />
       
       <div
+        data-mobile-app-shell="true"
         className={isMessagesChrome ? "fixed inset-0 flex h-[100dvh] w-full overflow-hidden" : "h-[100dvh] flex w-full overflow-hidden relative"}
         style={isMessagesChrome
           ? {

@@ -39,6 +39,7 @@ const EmployerMobileShell = ({
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
 
       <div
+        data-mobile-app-shell="true"
         className="fixed inset-0 flex h-[100dvh] w-full overflow-hidden"
         style={{
           WebkitOverflowScrolling: 'touch',
@@ -85,7 +86,7 @@ const EmployerMobileShell = ({
             />
           </div>
 
-          <div className="absolute left-0 right-0 pointer-events-none z-20 top-14" style={{ height: 'calc(100vh - 3.5rem)' }}>
+          <div className="absolute left-0 right-0 pointer-events-none z-20 top-14" style={{ height: 'calc(100dvh - 3.5rem)' }}>
             <FloatingBubbles />
           </div>
 
