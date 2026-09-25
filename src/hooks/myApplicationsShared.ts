@@ -30,7 +30,8 @@ export const MY_APPLICATIONS_JOB_POSTINGS_SELECT = `
   image_focus_position_desktop,
   positions_count,
   company_logo_url,
-  overlay_text_color
+  overlay_text_color,
+  start_date
 ` as const;
 
 export const MY_APPLICATIONS_SELECT = `
@@ -63,6 +64,7 @@ export interface MyApplicationsJobPosting {
   positions_count: number | null;
   company_logo_url: string | null;
   overlay_text_color: string | null;
+  start_date: string | null;
 }
 
 export interface MyApplication {
