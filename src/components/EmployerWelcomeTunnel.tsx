@@ -841,17 +841,17 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
              <div className="flex gap-4 items-center">
-               <div className="w-[110px] shrink-0">
                {currentStep > 0 && (
-                <Button
-                  onClick={handlePrevious}
-                   className="w-full py-4 px-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Tillbaka
-                </Button>
-              )}
+                <div className="w-[110px] shrink-0">
+                 <Button
+                   onClick={handlePrevious}
+                    className="w-full py-4 px-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
+                 >
+                   <ArrowLeft className="h-4 w-4 mr-2" />
+                   Tillbaka
+                 </Button>
                </div>
+               )}
               
               <Button
                 onClick={handleNext}
