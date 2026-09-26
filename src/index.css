@@ -907,18 +907,10 @@ All colors MUST be HSL.
     color: white !important;
   }
 
-  /* Auth-sidor: alla fält har samma solida marinblå yta som autofyll-målningen
-     nedan, så ett fält ser identiskt ut oavsett om webbläsaren fyllde i det
-     eller användaren skrev själv. */
-  .auth-dark input,
-  .auth-dark textarea,
-  .auth-dark select {
-    background-color: hsl(216 73% 14%);
-  }
-
-  /* Auth pages force light text for autofill. Bakgrunden målas med sidans
-     mörka marinblå (inte --background, som är ljus i ljust tema) så fältet
-     aldrig blir vitt när webbläsaren fyller i lösenordet. */
+  /* Auth pages force light text for autofill. Bakgrunden målas med samma
+     ljusblå gråton som fältens vanliga bg-white/5-yta (uppmätt rgb(60 88 126)),
+     så ett autofyllt fält ser exakt ut som ett handskrivet — aldrig mörkare,
+     aldrig vitt. */
   .auth-dark input:-webkit-autofill,
   .auth-dark input:-webkit-autofill:hover,
   .auth-dark input:-webkit-autofill:focus,
@@ -932,8 +924,8 @@ All colors MUST be HSL.
     -webkit-background-clip: text !important;
     background-clip: text !important;
     background-color: transparent !important;
-    -webkit-box-shadow: 0 0 0 1000px hsl(216 73% 14%) inset !important;
-    box-shadow: 0 0 0 1000px hsl(216 73% 14%) inset !important;
+    -webkit-box-shadow: 0 0 0 1000px rgb(60 88 126) inset !important;
+    box-shadow: 0 0 0 1000px rgb(60 88 126) inset !important;
     transition: background-color 9999s ease-in-out 0s !important;
   }
 
