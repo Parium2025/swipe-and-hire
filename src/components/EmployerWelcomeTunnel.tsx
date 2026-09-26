@@ -41,6 +41,18 @@ const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel'
 const employerDraftKey = (uid?: string | null) =>
   `${EMPLOYER_WELCOME_DRAFT_PREFIX}:${uid ?? 'anon'}`;
 
+// Äldre profiler kan ha hela namnet i förnamnsfältet samtidigt som efternamnet
+// är ifyllt separat. Visa inte samma efternamn två gånger i guiden.
+const givenNameOnly = (firstName: string, lastName: string) => {
+  const first = firstName.trim();
+  const last = lastName.trim();
+  if (!last || first.length <= last.length) return first;
+  const prefix = first.slice(0, -last.length);
+  return first.toLocaleLowerCase('sv-SE').endsWith(last.toLocaleLowerCase('sv-SE')) && /\s$/.test(prefix)
+    ? prefix.trimEnd()
+    : first;
+};
+
 // Clear draft helper (exported for use elsewhere if needed)
 export const clearEmployerWelcomeDraft = (uid?: string | null) => {
   try {
@@ -96,7 +108,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     address: profile?.address || '',
     website: (profile as any)?.website || '',
     companyDescription: profile?.company_description || '',
-    firstName: isReplay ? (user?.user_metadata?.first_name || profile?.first_name || '') : (profile?.first_name || ''),
+    firstName: givenNameOnly(isReplay ? (user?.user_metadata?.first_name || profile?.first_name || '') : (profile?.first_name || ''), isReplay ? (user?.user_metadata?.last_name || profile?.last_name || '') : (profile?.last_name || '')),
     lastName: isReplay ? (user?.user_metadata?.last_name || profile?.last_name || '') : (profile?.last_name || ''),
     profileImageUrl: isReplay ? '' : (profile?.profile_image_url || ''),
   });
@@ -116,7 +128,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           // Äldre testutkast (innan testkontot startade tomt) ignoreras.
            if (isReplay && parsed.v !== 3) throw new Error('stale replay draft');
           if (parsed.formData) {
-            setFormData((prev) => ({ ...prev, ...parsed.formData, companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
+             setFormData((prev) => ({ ...prev, ...parsed.formData, firstName: givenNameOnly(parsed.formData.firstName ?? prev.firstName, parsed.formData.lastName ?? prev.lastName), companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
           if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
@@ -158,7 +170,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       address: prev.address || p.address || '',
       website: prev.website || p.website || '',
       companyDescription: prev.companyDescription || p.company_description || '',
-      firstName: prev.firstName || p.first_name || '',
+       firstName: givenNameOnly(prev.firstName || p.first_name || '', prev.lastName || p.last_name || ''),
       lastName: prev.lastName || p.last_name || '',
       profileImageUrl: prev.profileImageUrl || p.profile_image_url || '',
     }));
