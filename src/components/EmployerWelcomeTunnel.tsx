@@ -1045,6 +1045,19 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         onSave={handleLogoSave}
         aspectRatio={1}
       />
+
+      {/* Bildredigerare för profilbild – samma som på profilsidan */}
+      <ImageEditor
+        isOpen={profileEditorOpen}
+        onClose={() => {
+          setProfileEditorOpen(false);
+          if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
+          setProfileEditSrc('');
+        }}
+        imageSrc={profileEditSrc}
+        onSave={handleProfileImageSave}
+        aspectRatio={1}
+      />
     </div>
   );
 };
