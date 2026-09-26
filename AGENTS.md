@@ -9,3 +9,4 @@
 - Mobile browser-chrome spacing has one owner: only standalone mode reserves bottom space, and page shells provide the sole spacer; never add global body or nested-scroll pseudo-element reserves.
 - Never render a top overlay in ordinary mobile Safari; only standalone mode owns one persistent safe-area strip and content offset, unchanged by keyboard state.
 - When iOS closes its keyboard, release any residual form-field focus so a following scroll gesture cannot reopen it.
+- Employer welcome setup drafts company and personal details, meeting defaults and notification choices until final confirmation; replay-account trials never write real profile, preferences or media, and only validated meeting links become defaults.
