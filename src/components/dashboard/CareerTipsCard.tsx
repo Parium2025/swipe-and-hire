@@ -136,12 +136,12 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
               >
                 <TruncatedText
                   text={currentTip.title}
-                  className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 sm:mb-3 line-clamp-2"
+                  className="h-[40px] text-sm font-semibold text-white leading-5 mb-2 sm:mb-2.5 line-clamp-2"
                 />
                 <TruncatedText
                   text={currentTip.summary || currentTip.title}
                   lines={2}
-                  className="h-[36px] text-sm leading-[18px] text-white"
+                  className="h-[42px] text-sm leading-5 text-white"
                 />
               </motion.div>
             ) : (
