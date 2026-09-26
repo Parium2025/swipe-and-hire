@@ -11,6 +11,7 @@ import WeatherEffects from '@/components/WeatherEffects';
 import { JobSeekerDashboardGrid } from '@/components/JobSeekerDashboardGrid';
 import GpsPrompt from '@/components/GpsPrompt';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TruncatedText } from '@/components/TruncatedText';
 
 
 const DateTimeDisplay = memo(() => {

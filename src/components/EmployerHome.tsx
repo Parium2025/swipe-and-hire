@@ -14,6 +14,7 @@ import GpsPrompt from '@/components/GpsPrompt';
 import { useIsSystemAdmin } from '@/components/SystemHealthPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployerHomeSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { TruncatedText } from '@/components/TruncatedText';
 
 
 
