@@ -1843,13 +1843,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'cover_image_url')) {
-        const previousCoverImage = profile?.cover_image_url || null;
-        const nextCoverImage = typeof cleanedUpdates.cover_image_url === 'string'
-          ? cleanedUpdates.cover_image_url.trim() || null
-          : cleanedUpdates.cover_image_url ?? null;
+      const previousCoverImage = profile?.cover_image_url || null;
+      const nextCoverImage = typeof cleanedUpdates.cover_image_url === 'string'
+        ? cleanedUpdates.cover_image_url.trim() || null
+        : cleanedUpdates.cover_image_url ?? null;
 
-        if (previousCoverImage && previousCoverImage !== nextCoverImage) {
+      if (
+        Object.prototype.hasOwnProperty.call(cleanedUpdates, 'cover_image_url') &&
+        previousCoverImage !== nextCoverImage
+      ) {
+        if (previousCoverImage) {
           clearMediaUrlCache(previousCoverImage, 'cover-image');
         }
 
