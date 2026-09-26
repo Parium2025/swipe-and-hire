@@ -162,6 +162,12 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   const totalSteps = 8; // Intro, företag, logga, profil, möteslänk, meddelanden, aviseringar, klart
 
+  // Långa steg kan skrollas på mobil. Börja nästa steg från toppen, inte
+  // mitt i det nya formuläret där samma skrollposition råkade ligga kvar.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentStep]);
+
   const handleNext = () => {
     if (currentStep === 1 && !formData.companyName.trim()) {
       toast({ title: 'Ange företagets namn', variant: 'destructive' });
