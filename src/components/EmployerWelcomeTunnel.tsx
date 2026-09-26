@@ -323,7 +323,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   const { isOnline, showOfflineToast } = useOnline();
 
-  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Samma flöde som profilsidan: filval öppnar bildredigeraren först.
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
@@ -331,19 +332,46 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       toast({ title: 'Välj en bild under 10 MB i ett format som stöds', variant: 'destructive' });
       return;
     }
+    if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
+    setProfileEditSrc(URL.createObjectURL(file));
+    setProfileEditorOpen(true);
+  };
+
+  const handleEditProfileImage = async () => {
+    const current = profileImageSrc || existingProfileImage;
+    if (current) {
+      setProfileEditSrc(current);
+      setProfileEditorOpen(true);
+      return;
+    }
+    if (formData.profileImageUrl) {
+      const { getMediaUrl } = await import('@/lib/mediaManager');
+      const url = await getMediaUrl(formData.profileImageUrl, 'profile-image', 3600);
+      if (url) {
+        setProfileEditSrc(url);
+        setProfileEditorOpen(true);
+      }
+    }
+  };
+
+  const handleProfileImageSave = async (editedBlob: Blob) => {
+    setProfileEditorOpen(false);
+    if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
+    setProfileEditSrc('');
     if (isReplay) {
-      setProfileImageSrc(URL.createObjectURL(file));
+      setProfileImageSrc(URL.createObjectURL(editedBlob));
       return;
     }
     setIsUploadingLogo(true);
     try {
       if (!user?.id) throw new Error('Ingen användare');
-      const { uploadMedia } = await import('@/lib/mediaManager');
+      const file = new File([editedBlob], 'profile-image.png', { type: editedBlob.type || 'image/png' });
+      const { uploadMedia, getMediaUrl } = await import('@/lib/mediaManager');
       const { storagePath, error } = await uploadMedia(file, 'profile-image', user.id);
       if (error || !storagePath) throw error || new Error('Uppladdning misslyckades');
       setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
-      const { getMediaUrl } = await import('@/lib/mediaManager');
       setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
+      toast({ title: 'Profilbild uppladdad!' });
     } catch {
       toast({ title: 'Kunde inte ladda upp profilbilden', variant: 'destructive' });
     } finally {
