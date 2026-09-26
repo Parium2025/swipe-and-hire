@@ -564,9 +564,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </Button>
 
               <Button
-                variant="outline"
                 onClick={handlePrevious}
-                className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-6"
+                className="py-4 px-6 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka – ändra meddelanden
@@ -646,9 +645,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             <div className="flex gap-4">
               {currentStep > 0 && (
                 <Button
-                  variant="outline"
                   onClick={handlePrevious}
-                  className="py-3 rounded-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 text-sm px-4"
+                  className="py-4 px-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
