@@ -8,12 +8,27 @@ import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare, Sparkles } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare, Sparkles, Building2, UserRound, Bell } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { TEXT_LIMITS } from '@/lib/textLimits';
+import { EMPLOYEE_COUNT_OPTIONS } from '@/pages/employer/companyProfile/types';
+import { SWEDISH_INDUSTRIES } from '@/lib/industries';
+import { useNotificationPreferences, type NotificationChannel, type NotificationType } from '@/hooks/useNotificationPreferences';
+import NotificationPreferencesPanel, { type NotificationRow } from '@/components/notifications/NotificationPreferencesPanel';
+import { useEmailSubscription } from '@/hooks/useEmailSubscription';
+import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
+
+const notificationRows: NotificationRow[] = [
+  { type: 'new_application', label: 'Nya ansökningar', description: 'Mejl skickas högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_message', label: 'Meddelanden', description: 'Nya meddelanden från kandidater.', channels: ['in_app', 'push', 'email'] },
+  { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar och ändringar är alltid på.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
+  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej.', channels: ['in_app', 'push', 'email'] },
+];
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
 const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
@@ -43,6 +58,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
+  const { isEnabled: notificationEnabled, isLoading: notificationsLoading } = useNotificationPreferences();
+  const { subscribed: emailSubscribed, isKnown: emailKnown } = useEmailSubscription();
+  const isReplay = isTunnelReplayAccount(user?.email);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -53,6 +71,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [profileImageSrc, setProfileImageSrc] = useState('');
+  const [notificationDraft, setNotificationDraft] = useState<Partial<Record<`${NotificationType}:${NotificationChannel}`, boolean>>>({});
 
 
   // Form data
@@ -61,7 +81,16 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     interviewVideoLink: (profile as any)?.interview_video_link || '',
     interviewVideoDefaultMessage: (profile as any)?.interview_video_default_message || '',
     interviewOfficeDefaultMessage: (profile as any)?.interview_default_message || '',
+    companyName: profile?.company_name || '',
+    industry: profile?.industry || '',
+    employeeCount: profile?.employee_count || '',
+    address: profile?.address || '',
+    companyDescription: profile?.company_description || '',
+    firstName: profile?.first_name || '',
+    lastName: profile?.last_name || '',
+    profileImageUrl: profile?.profile_image_url || '',
   });
+  const existingProfileImage = useMediaUrl(formData.profileImageUrl, 'profile-image');
 
   const draftKey = employerDraftKey(user?.id);
 
@@ -75,10 +104,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.formData) {
-            setFormData((prev) => ({ ...prev, ...parsed.formData }));
+            setFormData((prev) => ({ ...prev, ...parsed.formData, companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
+          if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 4));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 7));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -87,7 +117,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       }
       setDraftRestored(true);
     }
-  }, [draftRestored, draftKey]);
+  }, [draftRestored, draftKey, isReplay]);
 
   // Ärv organisationens möteslänk – en inbjuden kollega får företagets
   // befintliga standardlänk förifylld (kan alltid ändras).
@@ -109,12 +139,14 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     // Check if there's any content to save
     const hasContent = formData.companyLogoUrl || formData.interviewVideoLink
       || formData.interviewVideoDefaultMessage || formData.interviewOfficeDefaultMessage
+      || formData.companyName || formData.firstName || Object.keys(notificationDraft).length > 0
       || currentStep > 0;
     
     if (hasContent) {
       try {
         sessionStorage.setItem(draftKey, JSON.stringify({
-          formData,
+          formData: isReplay ? { ...formData, companyLogoUrl: profile?.company_logo_url || '', profileImageUrl: profile?.profile_image_url || '' } : formData,
+          notificationDraft,
           currentStep,
           savedAt: Date.now()
         }));
@@ -122,13 +154,29 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         console.warn('Failed to save employer welcome tunnel draft');
       }
     }
-  }, [formData, currentStep, draftRestored, draftKey]);
+  }, [formData, notificationDraft, currentStep, draftRestored, draftKey, isReplay, profile?.company_logo_url, profile?.profile_image_url]);
+
+  useEffect(() => () => { if (profileImageSrc.startsWith('blob:')) URL.revokeObjectURL(profileImageSrc); }, [profileImageSrc]);
+  useEffect(() => () => { if (formData.companyLogoUrl.startsWith('blob:')) URL.revokeObjectURL(formData.companyLogoUrl); }, [formData.companyLogoUrl]);
 
 
-  const totalSteps = 5; // Välkomststart, Logga, Möteslänk, Standardmeddelanden, Slutför
-  const progress = (currentStep / (totalSteps - 1)) * 100;
+  const totalSteps = 8; // Intro, företag, logga, profil, möteslänk, meddelanden, aviseringar, klart
+
+  // Långa steg kan skrollas på mobil. Börja nästa steg från toppen, inte
+  // mitt i det nya formuläret där samma skrollposition råkade ligga kvar.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentStep]);
 
   const handleNext = () => {
+    if (currentStep === 1 && !formData.companyName.trim()) {
+      toast({ title: 'Ange företagets namn', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 4 && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
+      toast({ title: 'Kontrollera möteslänken eller lämna fältet tomt', variant: 'destructive' });
+      return;
+    }
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -178,6 +226,10 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
     setPendingImageSrc('');
     setUploadError(null);
+    if (isReplay) {
+      setFormData(prev => ({ ...prev, companyLogoUrl: URL.createObjectURL(editedBlob) }));
+      return;
+    }
     setIsUploadingLogo(true);
 
     
@@ -238,23 +290,93 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   const { isOnline, showOfflineToast } = useOnline();
 
-  const handleSubmit = async () => {
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!ALLOWED_LOGO_TYPES.includes(file.type) || file.size > MAX_LOGO_MB * 1024 * 1024) {
+      toast({ title: 'Välj en bild under 10 MB i ett format som stöds', variant: 'destructive' });
+      return;
+    }
+    if (isReplay) {
+      setProfileImageSrc(URL.createObjectURL(file));
+      return;
+    }
+    setIsUploadingLogo(true);
+    try {
+      if (!user?.id) throw new Error('Ingen användare');
+      const { uploadMedia } = await import('@/lib/mediaManager');
+      const { storagePath, error } = await uploadMedia(file, 'profile-image', user.id);
+      if (error || !storagePath) throw error || new Error('Uppladdning misslyckades');
+      setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
+      const { getMediaUrl } = await import('@/lib/mediaManager');
+      setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
+    } catch {
+      toast({ title: 'Kunde inte ladda upp profilbilden', variant: 'destructive' });
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
+  const notificationValue = (type: NotificationType, channel: NotificationChannel) =>
+    notificationDraft[`${type}:${channel}`] ?? notificationEnabled(type, channel);
+
+  const handleSubmit = async () => {
+    if (isReplay) {
+      clearEmployerWelcomeDraft(user?.id);
+      onComplete();
+      return;
+    }
     setIsSubmitting(true);
     try {
+      if (!formData.companyName.trim()) {
+        toast({ title: 'Ange företagets namn', variant: 'destructive' });
+        setCurrentStep(1);
+        return;
+      }
+      if (formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) throw new Error('Ogiltig möteslänk');
       const result = await updateProfile({
-        company_logo_url: formData.companyLogoUrl,
+        ...(formData.companyLogoUrl !== (profile?.company_logo_url || '') ? { company_logo_url: formData.companyLogoUrl } : {}),
         interview_video_link: formData.interviewVideoLink
           ? normalizeMeetingLink(formData.interviewVideoLink)
           : '',
         interview_video_default_message: formData.interviewVideoDefaultMessage.trim(),
         interview_default_message: formData.interviewOfficeDefaultMessage.trim(),
-        onboarding_completed: true
+        company_name: formData.companyName.trim(),
+        industry: formData.industry.trim(),
+        employee_count: formData.employeeCount,
+        address: formData.address.trim(),
+        company_description: formData.companyDescription.trim(),
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        ...(formData.profileImageUrl !== (profile?.profile_image_url || '') ? { profile_image_url: formData.profileImageUrl } : {}),
       } as any);
 
       if (result?.error) {
         throw result.error;
       }
+
+      if (user?.id && Object.keys(notificationDraft).length > 0) {
+        const { data: existing, error: readError } = await supabase.from('notification_preferences')
+          .select('notification_type, is_enabled, email_enabled, in_app_enabled').eq('user_id', user.id);
+        if (readError) throw readError;
+        const rows = notificationRows.filter(row => row.type !== 'interview_scheduled' && row.channels.some(channel => `${row.type}:${channel}` in notificationDraft)).map(row => {
+          const previous = existing?.find(item => item.notification_type === row.type);
+          return {
+            user_id: user.id, notification_type: row.type,
+            is_enabled: notificationDraft[`${row.type}:push`] ?? previous?.is_enabled ?? notificationEnabled(row.type, 'push'),
+            email_enabled: notificationDraft[`${row.type}:email`] ?? previous?.email_enabled ?? notificationEnabled(row.type, 'email'),
+            in_app_enabled: notificationDraft[`${row.type}:in_app`] ?? previous?.in_app_enabled ?? notificationEnabled(row.type, 'in_app'),
+            updated_at: new Date().toISOString(),
+          };
+        });
+        if (rows.length) {
+          const { error: prefsError } = await supabase.from('notification_preferences').upsert(rows, { onConflict: 'user_id,notification_type' });
+          if (prefsError) throw prefsError;
+        }
+      }
+      const completion = await updateProfile({ onboarding_completed: true });
+      if (completion?.error) throw completion.error;
 
       // Clear draft after successful submission
       clearEmployerWelcomeDraft(user?.id);
@@ -269,7 +391,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       console.error('Profile update error:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte spara profilen.",
+        description: "Kunde inte spara allt. Försök igen — guiden finns kvar.",
         variant: "destructive"
       });
     } finally {
@@ -289,17 +411,25 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Välkommen till Parium</h2>
                 <p className="text-lg text-white max-w-md mx-auto leading-relaxed break-words">
-                  Innan ni sätter igång behövs tre saker från er. Det tar under två minuter –
-                  sedan är allt klart och ni kan börja annonsera.
+                  Börja med ert företag och er profil. Välj sedan hur ni vill hantera intervjuer och aviseringar. Ni kan alltid ändra era val senare.
                 </p>
+                {isReplay && <p className="text-sm text-white">Testläge: det du fyller i här ändrar inte ditt riktiga konto.</p>}
               </div>
             </div>
 
             <div className="max-w-md mx-auto space-y-3 text-left">
               {[
                 {
+                  title: 'Företaget',
+                  desc: 'Namn, bransch och vad ni gör.',
+                },
+                {
                   title: 'Företagslogga',
-                  desc: 'Så kandidater känner igen ert företag direkt.',
+                  desc: 'Så kandidater känner igen er direkt.',
+                },
+                {
+                  title: 'Din profil',
+                  desc: 'Ditt namn och din profilbild.',
                 },
                 {
                   title: 'Möteslänk',
@@ -308,6 +438,10 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 {
                   title: 'Standardmeddelanden',
                   desc: 'Fylls i automatiskt när ni bokar intervjuer.',
+                },
+                {
+                  title: 'Aviseringar',
+                  desc: 'Välj hur du vill få uppdateringar.',
                 },
               ].map((item, index) => (
                 <div
@@ -328,6 +462,34 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
 
       case 1:
+        return (
+          <div className="space-y-6 max-w-md mx-auto">
+            <div className="text-center space-y-3">
+              <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><Building2 className="h-8 w-8 text-white" /></div>
+              <h2 className="text-2xl font-bold text-white">Berätta om ert företag</h2>
+              <p className="text-white">Uppgifterna hjälper kandidater förstå vilka ni är. Fyll i det ni kan nu och komplettera resten innan första annonsen publiceras.</p>
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="welcome-company-name" className="text-white">Företagsnamn *</Label>
+              <Input id="welcome-company-name" maxLength={120} value={formData.companyName} onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              <Label htmlFor="welcome-industry" className="text-white">Bransch</Label>
+              <Input id="welcome-industry" list="welcome-industries" maxLength={120} value={formData.industry} onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              <datalist id="welcome-industries">{SWEDISH_INDUSTRIES.map(option => <option key={option} value={option} />)}</datalist>
+              <Label htmlFor="welcome-employees" className="text-white">Antal anställda</Label>
+              <select id="welcome-employees" value={formData.employeeCount} onChange={e => setFormData(prev => ({ ...prev, employeeCount: e.target.value }))} className="w-full h-11 rounded-md bg-primary border border-white/20 text-white px-3 text-base">
+                <option value="">Välj antal</option>
+                {EMPLOYEE_COUNT_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+              <Label htmlFor="welcome-address" className="text-white">Huvudkontor</Label>
+              <Input id="welcome-address" maxLength={TEXT_LIMITS.address} value={formData.address} onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              <Label htmlFor="welcome-company-description" className="text-white">Företagsbeskrivning</Label>
+              <Textarea id="welcome-company-description" autoResize={false} maxLength={TEXT_LIMITS.companyDescription} value={formData.companyDescription} onChange={e => setFormData(prev => ({ ...prev, companyDescription: e.target.value }))} className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto bg-white/5 border-white/10 text-white text-base resize-none" />
+              <p className="text-sm text-white">Bransch, storlek, huvudkontor och beskrivning behövs innan första annonsen publiceras.</p>
+            </div>
+          </div>
+        );
+
+      case 2:
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
@@ -412,7 +574,27 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
 
 
-      case 2: {
+      case 3:
+        return (
+          <div className="space-y-6 max-w-md mx-auto">
+            <div className="text-center space-y-3">
+              <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><UserRound className="h-8 w-8 text-white" /></div>
+              <h2 className="text-2xl font-bold text-white">Din profil</h2>
+              <p className="text-white">Så vet kandidater och kollegor vem de pratar med.</p>
+            </div>
+            <div className="flex justify-center">
+              {(profileImageSrc || existingProfileImage) && <img src={profileImageSrc || existingProfileImage || ''} alt="Din profilbild" className="h-20 w-20 rounded-full object-cover" />}
+            </div>
+            <Label htmlFor="welcome-profile-image" className="text-white">Profilbild (valfritt)</Label>
+            <Input id="welcome-profile-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" onChange={handleProfileImageChange} disabled={isUploadingLogo} className="text-white text-base" />
+            <Label htmlFor="welcome-first-name" className="text-white">Förnamn</Label>
+            <Input id="welcome-first-name" maxLength={100} value={formData.firstName} onChange={e => setFormData(prev => ({ ...prev, firstName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+            <Label htmlFor="welcome-last-name" className="text-white">Efternamn</Label>
+            <Input id="welcome-last-name" maxLength={100} value={formData.lastName} onChange={e => setFormData(prev => ({ ...prev, lastName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+          </div>
+        );
+
+      case 4: {
         const link = formData.interviewVideoLink;
         const linkValid = !!link && isValidMeetingLink(link);
         return (
@@ -423,8 +605,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Er möteslänk för intervjuer</h2>
               <p className="text-white">
-                Klistra in er fasta Teams-, Zoom- eller Google Meet-länk en gång. Sedan fylls den i
-                automatiskt varje gång ni bjuder in en kandidat till videointervju.
+                 Ange en standardlänk för Teams, Zoom eller Google Meet. Den föreslås vid videointervjuer och kan bytas för varje bokning. För kontorsmöten används ingen videolänk.
               </p>
             </div>
 
@@ -451,17 +632,15 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <p className="text-sm text-amber-400 flex items-start gap-1.5">
                   <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <span className="break-words">
-                    Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex,
-                    Whereby eller liknande. Ni kan spara ändå och ändra senare.
+                     Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex
+                     eller Whereby. Ändra länken eller lämna fältet tomt.
                   </span>
                 </p>
               )}
 
               <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <p className="text-sm text-white break-words">
-                  <strong>Tips:</strong> Använd er personliga möteslänk (Teams: Kalender → Nytt möte,
-                  Google Meet: ”Skapa ett möte för senare”, Zoom: Personal Meeting ID). Ni kan alltid
-                  ändra den under Företag → Företagsprofil → Intervjuinställningar.
+                   <strong>Tips:</strong> Samma länk kan användas vid flera möten. Använd väntrum eller lösenord om ni väljer ett fast mötesrum. Ni kan ändra standardlänken senare under Företag → Företagsprofil → Intervjuinställningar.
                 </p>
               </div>
             </div>
@@ -469,7 +648,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
       }
 
-      case 3:
+      case 5:
         return (
           <div className="space-y-8 py-8">
             <div className="text-center space-y-4">
@@ -521,7 +700,22 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           </div>
         );
 
-      case 4:
+      case 6:
+        return (
+          <div className="space-y-6 max-w-2xl mx-auto">
+            <div className="text-center space-y-3">
+              <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><Bell className="h-8 w-8 text-white" /></div>
+              <h2 className="text-2xl font-bold text-white">Dina aviseringar</h2>
+              <p className="text-white">Välj vad du vill få i appen, som push eller via mejl. Du kan ändra valen i inställningarna senare.</p>
+            </div>
+            <NotificationPreferencesPanel rows={notificationRows} isEnabled={notificationValue}
+              toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
+              disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
+              intro={emailKnown && !emailSubscribed ? 'Din adress är avregistrerad från app-mejl. Aktivera mejlutskick igen under Inställningar om du vill få dem.' : undefined} />
+          </div>
+        );
+
+      case 7:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
@@ -532,7 +726,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Allt är klart!</h2>
                 <p className="text-xl text-white max-w-md mx-auto leading-relaxed">
-                  Din arbetsgivarprofil är nu komplett. Du kan nu börja skapa jobbannonser och hitta fantastiska kandidater.
+                   Dina val är klara. Företagsuppgifterna kan kompletteras senare, men måste vara fullständiga innan ni publicerar er första annons.
                 </p>
               </div>
             </div>
@@ -557,7 +751,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   </>
                 ) : (
                   <>
-                    <span>Nu kör vi!</span>
+                     <span>{isReplay ? 'Avsluta testet' : 'Spara och fortsätt'}</span>
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </>
                 )}
@@ -568,7 +762,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 className="py-4 px-6 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka – ändra meddelanden
+                 Tillbaka – ändra aviseringar
               </Button>
             </div>
           </div>
@@ -620,13 +814,13 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep > 0 && currentStep < totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto pt-8 px-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
-              <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
+               <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
+               <span className="text-sm text-white font-medium">{Math.round((currentStep / (totalSteps - 2)) * 100)}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
               <div 
                 className="h-full bg-white transition-all duration-300" 
-                style={{ width: `${progress}%` }}
+                 style={{ width: `${(currentStep / (totalSteps - 2)) * 100}%` }}
               />
             </div>
           </div>
@@ -642,20 +836,23 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {/* Navigation buttons */}
         {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
-            <div className="flex gap-4">
-              {currentStep > 0 && (
+             <div className="flex gap-4 items-center">
+               <div className="w-[110px] shrink-0">
+               {currentStep > 0 && (
                 <Button
                   onClick={handlePrevious}
-                  className="py-4 px-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
+                   className="w-full py-4 px-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
                 </Button>
               )}
+               </div>
               
               <Button
                 onClick={handleNext}
-                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
+                 disabled={isUploadingLogo}
+                 className="flex-1 py-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
