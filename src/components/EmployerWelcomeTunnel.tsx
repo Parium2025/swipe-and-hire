@@ -212,7 +212,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       toast({ title: 'Ange företagets namn', variant: 'destructive' });
       return;
     }
-    if (currentStep === 4 && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
+    if ((currentStep === 4 || currentStep === 5) && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
       toast({ title: 'Kontrollera möteslänken eller lämna fältet tomt', variant: 'destructive' });
       return;
     }
