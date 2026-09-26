@@ -85,6 +85,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     industry: profile?.industry || '',
     employeeCount: profile?.employee_count || '',
     address: profile?.address || '',
+    website: (profile as any)?.website || '',
     companyDescription: profile?.company_description || '',
     firstName: profile?.first_name || '',
     lastName: profile?.last_name || '',
@@ -118,6 +119,33 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       setDraftRestored(true);
     }
   }, [draftRestored, draftKey, isReplay]);
+
+  // Förifyll med uppgifterna från registreringen så fort profilen hinner
+  // laddas (den är asynkron och kommer ofta efter första renderingen).
+  // Bara tomma fält fylls – användarens egna ändringar och återställt
+  // utkast skrivs aldrig över.
+  const profilePrefillRef = useRef(false);
+  useEffect(() => {
+    if (!draftRestored || !profile || profilePrefillRef.current) return;
+    profilePrefillRef.current = true;
+    const p = profile as any;
+    setFormData((prev) => ({
+      ...prev,
+      companyLogoUrl: prev.companyLogoUrl || p.company_logo_url || '',
+      interviewVideoLink: prev.interviewVideoLink || p.interview_video_link || '',
+      interviewVideoDefaultMessage: prev.interviewVideoDefaultMessage || p.interview_video_default_message || '',
+      interviewOfficeDefaultMessage: prev.interviewOfficeDefaultMessage || p.interview_default_message || '',
+      companyName: prev.companyName || p.company_name || '',
+      industry: prev.industry || p.industry || '',
+      employeeCount: prev.employeeCount || p.employee_count || '',
+      address: prev.address || p.address || '',
+      website: prev.website || p.website || '',
+      companyDescription: prev.companyDescription || p.company_description || '',
+      firstName: prev.firstName || p.first_name || '',
+      lastName: prev.lastName || p.last_name || '',
+      profileImageUrl: prev.profileImageUrl || p.profile_image_url || '',
+    }));
+  }, [draftRestored, profile]);
 
   // Ärv organisationens möteslänk – en inbjuden kollega får företagets
   // befintliga standardlänk förifylld (kan alltid ändras).
@@ -346,6 +374,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         industry: formData.industry.trim(),
         employee_count: formData.employeeCount,
         address: formData.address.trim(),
+        website: formData.website.trim(),
         company_description: formData.companyDescription.trim(),
         first_name: formData.firstName.trim(),
         last_name: formData.lastName.trim(),
