@@ -85,6 +85,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     industry: profile?.industry || '',
     employeeCount: profile?.employee_count || '',
     address: profile?.address || '',
+    website: (profile as any)?.website || '',
     companyDescription: profile?.company_description || '',
     firstName: profile?.first_name || '',
     lastName: profile?.last_name || '',
@@ -118,6 +119,33 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       setDraftRestored(true);
     }
   }, [draftRestored, draftKey, isReplay]);
+
+  // Förifyll med uppgifterna från registreringen så fort profilen hinner
+  // laddas (den är asynkron och kommer ofta efter första renderingen).
+  // Bara tomma fält fylls – användarens egna ändringar och återställt
+  // utkast skrivs aldrig över.
+  const profilePrefillRef = useRef(false);
+  useEffect(() => {
+    if (!draftRestored || !profile || profilePrefillRef.current) return;
+    profilePrefillRef.current = true;
+    const p = profile as any;
+    setFormData((prev) => ({
+      ...prev,
+      companyLogoUrl: prev.companyLogoUrl || p.company_logo_url || '',
+      interviewVideoLink: prev.interviewVideoLink || p.interview_video_link || '',
+      interviewVideoDefaultMessage: prev.interviewVideoDefaultMessage || p.interview_video_default_message || '',
+      interviewOfficeDefaultMessage: prev.interviewOfficeDefaultMessage || p.interview_default_message || '',
+      companyName: prev.companyName || p.company_name || '',
+      industry: prev.industry || p.industry || '',
+      employeeCount: prev.employeeCount || p.employee_count || '',
+      address: prev.address || p.address || '',
+      website: prev.website || p.website || '',
+      companyDescription: prev.companyDescription || p.company_description || '',
+      firstName: prev.firstName || p.first_name || '',
+      lastName: prev.lastName || p.last_name || '',
+      profileImageUrl: prev.profileImageUrl || p.profile_image_url || '',
+    }));
+  }, [draftRestored, profile]);
 
   // Ärv organisationens möteslänk – en inbjuden kollega får företagets
   // befintliga standardlänk förifylld (kan alltid ändras).
@@ -346,6 +374,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         industry: formData.industry.trim(),
         employee_count: formData.employeeCount,
         address: formData.address.trim(),
+        website: formData.website.trim(),
         company_description: formData.companyDescription.trim(),
         first_name: formData.firstName.trim(),
         last_name: formData.lastName.trim(),
@@ -469,21 +498,35 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold text-white">Berätta om ert företag</h2>
               <p className="text-white">Uppgifterna hjälper kandidater förstå vilka ni är. Fyll i det ni kan nu och komplettera resten innan första annonsen publiceras.</p>
             </div>
-            <div className="space-y-3">
-              <Label htmlFor="welcome-company-name" className="text-white">Företagsnamn *</Label>
-              <Input id="welcome-company-name" maxLength={120} value={formData.companyName} onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
-              <Label htmlFor="welcome-industry" className="text-white">Bransch</Label>
-              <Input id="welcome-industry" list="welcome-industries" maxLength={120} value={formData.industry} onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
-              <datalist id="welcome-industries">{SWEDISH_INDUSTRIES.map(option => <option key={option} value={option} />)}</datalist>
-              <Label htmlFor="welcome-employees" className="text-white">Antal anställda</Label>
-              <select id="welcome-employees" value={formData.employeeCount} onChange={e => setFormData(prev => ({ ...prev, employeeCount: e.target.value }))} className="w-full h-11 rounded-md bg-primary border border-white/20 text-white px-3 text-base">
-                <option value="">Välj antal</option>
-                {EMPLOYEE_COUNT_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-              <Label htmlFor="welcome-address" className="text-white">Huvudkontor</Label>
-              <Input id="welcome-address" maxLength={TEXT_LIMITS.address} value={formData.address} onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
-              <Label htmlFor="welcome-company-description" className="text-white">Företagsbeskrivning</Label>
-              <Textarea id="welcome-company-description" autoResize={false} maxLength={TEXT_LIMITS.companyDescription} value={formData.companyDescription} onChange={e => setFormData(prev => ({ ...prev, companyDescription: e.target.value }))} className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto bg-white/5 border-white/10 text-white text-base resize-none" />
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-company-name" className="text-white">Företagsnamn *</Label>
+                <Input id="welcome-company-name" maxLength={120} value={formData.companyName} onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-industry" className="text-white">Bransch</Label>
+                <Input id="welcome-industry" list="welcome-industries" maxLength={120} value={formData.industry} onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+                <datalist id="welcome-industries">{SWEDISH_INDUSTRIES.map(option => <option key={option} value={option} />)}</datalist>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-employees" className="text-white">Antal anställda</Label>
+                <select id="welcome-employees" value={formData.employeeCount} onChange={e => setFormData(prev => ({ ...prev, employeeCount: e.target.value }))} className="w-full h-11 rounded-md bg-primary border border-white/20 text-white px-3 text-base">
+                  <option value="">Välj antal</option>
+                  {EMPLOYEE_COUNT_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-address" className="text-white">Huvudkontor</Label>
+                <Input id="welcome-address" maxLength={TEXT_LIMITS.address} value={formData.address} onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-website" className="text-white">Webbplats</Label>
+                <Input id="welcome-website" type="url" inputMode="url" placeholder="https://exempel.se" maxLength={200} value={formData.website} onChange={e => setFormData(prev => ({ ...prev, website: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base placeholder:text-white/40" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-company-description" className="text-white">Företagsbeskrivning</Label>
+                <Textarea id="welcome-company-description" autoResize={false} maxLength={TEXT_LIMITS.companyDescription} value={formData.companyDescription} onChange={e => setFormData(prev => ({ ...prev, companyDescription: e.target.value }))} className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto bg-white/5 border-white/10 text-white text-base resize-none" />
+              </div>
               <p className="text-sm text-white">Bransch, storlek, huvudkontor och beskrivning behövs innan första annonsen publiceras.</p>
             </div>
           </div>
