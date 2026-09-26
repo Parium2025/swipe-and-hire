@@ -916,8 +916,10 @@ All colors MUST be HSL.
   .auth-dark input:-webkit-autofill:focus,
   .auth-dark input:-webkit-autofill:active,
   .auth-dark input:-internal-autofill-selected,
+  .auth-dark input:-internal-autofill-previewed,
   .auth-dark input:autofill,
   .auth-dark textarea:-webkit-autofill,
+  .auth-dark textarea:-internal-autofill-previewed,
   .auth-dark select:-webkit-autofill {
     -webkit-text-fill-color: hsl(210 40% 98%) !important;
     caret-color: hsl(210 40% 98%) !important;
