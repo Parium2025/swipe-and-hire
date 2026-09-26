@@ -2142,6 +2142,12 @@ const Profile = () => {
   const submitRef = useRef(handleSubmit);
   submitRef.current = handleSubmit;
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
+  // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande
+  // när användaren kommer tillbaka.
+  useEffect(() => {
+    if (location.pathname !== '/profile') setSaveStatus('idle');
+  }, [location.pathname]);
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (loading || isUploadingMedia || isUploadingCover) return;
