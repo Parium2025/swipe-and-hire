@@ -387,7 +387,8 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     // Real-time GPS via watchPosition (browser only). GPS itself works offline,
     // but we only push updates to the server when we are online.
-    if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
+    const startWatch = () => {
+      if (watchId !== null) return;
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
           const newLat = position.coords.latitude;
