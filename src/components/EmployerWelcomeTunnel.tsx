@@ -833,6 +833,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       className="fixed inset-0 z-[60] h-[100dvh] bg-gradient-parium flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
+      {/* Persistent decoded image cache: keeps logo/profile image warm across step changes (no cold start) */}
+      <div aria-hidden="true" className="pointer-events-none fixed h-px w-px overflow-hidden opacity-0" style={{ left: -9999, top: -9999 }}>
+        {formData.companyLogoUrl && <img src={formData.companyLogoUrl} alt="" loading="eager" decoding="async" {...fetchPriority('high')} />}
+        {(profileImageSrc || existingProfileImage) && <img src={profileImageSrc || existingProfileImage || ''} alt="" loading="eager" decoding="async" />}
+      </div>
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
