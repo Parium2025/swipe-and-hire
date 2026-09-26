@@ -358,19 +358,28 @@ export function TruncatedText({
     return () => unregisterOpenTooltip(closeSelf);
   }, [isOpen, closeSelf]);
 
+  // The clamp cuts with overflow:hidden — without a small bottom pad the
+  // last visible line's descenders (g, j, @) and diacritics (å, ä, ö)
+  // get shaved off. 0.12em is invisible but saves the glyphs. Apply it
+  // whenever a clamp is active — via the `lines` prop OR a legacy
+  // `line-clamp-*` class in className.
+  const hasClampClass = !!className && /\bline-clamp-\d/.test(className);
+  const clampActive = !!lines || hasClampClass;
   const clampStyles: React.CSSProperties = lines
     ? {
         display: '-webkit-box',
         WebkitLineClamp: lines,
         WebkitBoxOrient: 'vertical',
         overflow: 'hidden',
-        // The clamp cuts with overflow:hidden — without a small bottom pad the
-        // last visible line's descenders (g, j, @) and diacritics (å, ä, ö)
-        // get shaved off. 0.12em is invisible but saves the glyphs.
         paddingBottom: '0.12em',
         marginBottom: '-0.12em',
       }
-    : {};
+    : hasClampClass
+      ? {
+          paddingBottom: '0.12em',
+          marginBottom: '-0.12em',
+        }
+      : {};
 
   const wordBreakStyles: React.CSSProperties = {
     wordBreak: 'break-word',
