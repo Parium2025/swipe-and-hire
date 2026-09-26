@@ -64,7 +64,7 @@ const CITY_LOOKUP_BUDGET_MS = 2000;
 
 // Nominatim's usage policy requires an identifying User-Agent; without it
 // requests are rate limited/403:ed at volume.
-const GEO_HEADERS = { 'User-Agent': 'Parium/1.0 (https://parium.se)' };
+const GEO_HEADERS = { 'User-Agent': 'Parium/1.0 (https://parium.se; pariumab@hotmail.com)', 'Accept-Language': 'sv' };
 
 // ─── Rate limiting (per-instance, token bucket) ──────────────────
 //
@@ -180,15 +180,16 @@ async function fetchCity(lat: number, lon: number): Promise<string> {
     /* Nominatim failed */
   }
 
-  // Fallback: BigDataCloud
+  // Fallback: Open-Meteo geocoding saknar reverse — använd Photon (OSM)
   try {
     const res = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=sv`,
+      `https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&lang=default&limit=1`,
       { signal: AbortSignal.timeout(5000) },
     );
     if (res.ok) {
       const data = await res.json();
-      return (data.city || data.locality || data.principalSubdivision || '').replace(/\s+kommun$/i, '').trim();
+      const p = data?.features?.[0]?.properties ?? {};
+      return (p.city || p.town || p.district || p.county || '').replace(/\s+kommun$/i, '').trim();
     }
   } catch {
     /* Both failed */

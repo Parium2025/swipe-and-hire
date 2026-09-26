@@ -264,7 +264,10 @@ export const fetchCurrentWeather = async (lat: number, lon: number): Promise<{
       if (res.ok) {
         const { weather, city } = await res.json();
         const parsed = parseWeatherResponse(weather as Record<string, unknown>);
-        return { ...parsed, cachedCity: city || undefined };
+        // Servern kan tillfälligt sakna stadsnamn (geokodning blockerad) —
+        // slå då upp staden i webbläsaren så vädret inte döljs.
+        const resolvedCity = city || (await getCityName(lat, lon).catch(() => ''));
+        return { ...parsed, cachedCity: resolvedCity || undefined };
       }
       console.warn(`Weather cache unavailable (${res.status}), falling back to direct API`);
     } catch (error) {
@@ -280,7 +283,9 @@ export const fetchCurrentWeather = async (lat: number, lon: number): Promise<{
     );
     if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
     const data = await res.json();
-    return parseWeatherResponse(data);
+    const parsed = parseWeatherResponse(data);
+    const directCity = await getCityName(lat, lon).catch(() => '');
+    return { ...parsed, cachedCity: directCity || undefined };
   } catch (error) {
     console.warn('Direct weather API unavailable, using neutral fallback', error);
     return parseWeatherResponse(fallbackWeatherResponse(lat, lon));
