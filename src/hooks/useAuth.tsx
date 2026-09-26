@@ -1809,13 +1809,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'profile_image_url')) {
-        const previousProfileImage = profile?.profile_image_url || null;
-        const nextProfileImage = typeof cleanedUpdates.profile_image_url === 'string'
-          ? cleanedUpdates.profile_image_url.trim() || null
-          : cleanedUpdates.profile_image_url ?? null;
+      const previousProfileImage = profile?.profile_image_url || null;
+      const nextProfileImage = typeof cleanedUpdates.profile_image_url === 'string'
+        ? cleanedUpdates.profile_image_url.trim() || null
+        : cleanedUpdates.profile_image_url ?? null;
 
-        if (previousProfileImage && previousProfileImage !== nextProfileImage) {
+      // Autospar skickar med oförändrad bild — rensa då INTE bildcachen,
+      // annars dör bilden som redan visas och avataren blir tom.
+      if (
+        Object.prototype.hasOwnProperty.call(cleanedUpdates, 'profile_image_url') &&
+        previousProfileImage !== nextProfileImage
+      ) {
+        if (previousProfileImage) {
           clearMediaUrlCache(previousProfileImage, 'profile-image');
         }
 
@@ -1838,13 +1843,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'cover_image_url')) {
-        const previousCoverImage = profile?.cover_image_url || null;
-        const nextCoverImage = typeof cleanedUpdates.cover_image_url === 'string'
-          ? cleanedUpdates.cover_image_url.trim() || null
-          : cleanedUpdates.cover_image_url ?? null;
+      const previousCoverImage = profile?.cover_image_url || null;
+      const nextCoverImage = typeof cleanedUpdates.cover_image_url === 'string'
+        ? cleanedUpdates.cover_image_url.trim() || null
+        : cleanedUpdates.cover_image_url ?? null;
 
-        if (previousCoverImage && previousCoverImage !== nextCoverImage) {
+      if (
+        Object.prototype.hasOwnProperty.call(cleanedUpdates, 'cover_image_url') &&
+        previousCoverImage !== nextCoverImage
+      ) {
+        if (previousCoverImage) {
           clearMediaUrlCache(previousCoverImage, 'cover-image');
         }
 
