@@ -423,6 +423,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         }
       );
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
+    };
+
+    if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
+      startWatch();
     }
 
     // Fallback: Check periodically. On slow connections we back off to avoid
