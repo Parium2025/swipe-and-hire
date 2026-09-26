@@ -31,7 +31,6 @@ const SUPPORTED_MEETING_HOSTS = [
   'whatsapp.com',
   'chat.whatsapp.com',
   'call.whatsapp.com',
-  'meet.jit.si',
   '8x8.vc',
   'tixeo.com',
   'starleaf.com',
