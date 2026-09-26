@@ -667,7 +667,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             <div className="text-center space-y-3">
               <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><UserRound className="h-8 w-8 text-white" /></div>
               <h2 className="text-2xl font-bold text-white">Din profil</h2>
-              <p className="text-white">Så vet kandidater och kollegor vem de pratar med.</p>
+              <p className="text-white">Ladda upp en profilbild så vet kandidater och kollegor vem du pratar med.</p>
             </div>
             {/* Profilbild-sektion - exakt samma struktur som profilsidan */}
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
@@ -678,8 +678,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 onChange={handleProfileImageChange}
                 className="hidden"
               />
-              <h3 className="text-base font-semibold text-white text-center">Profilbild</h3>
-              <p className="text-white text-center text-sm -mt-2">Ladda upp en profilbild som syns för kandidater.</p>
               <div className="relative">
                 <div className="cursor-pointer" onClick={() => profileFileInputRef.current?.click()}>
                   <Avatar key={formData.profileImageUrl || 'no-profile-image'} className="h-32 w-32 border-4 border-white/10">
