@@ -7,6 +7,7 @@ import { ProfileFormSkeleton } from '@/components/profile/ProfileFormSkeleton';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Trash2, Camera, Pencil, RotateCcw, WifiOff, AlertCircle, Check, Loader2 } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
@@ -519,6 +520,13 @@ const EmployerProfile = () => {
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
+  // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande
+  // när användaren kommer tillbaka.
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname !== '/employer-profile') setSaveStatus('idle');
+  }, [location.pathname]);
   // Skydd mot omförsöksloop: samma misslyckade data sparas inte om och om igen,
   // men signaturen nollställs när användaren kommer online eller trycker "Försök igen".
   const [failedSignature, setFailedSignature] = useState<string | null>(null);

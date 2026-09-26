@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { smartMatches } from '@/lib/seoSearch';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
@@ -654,6 +655,13 @@ const CompanyProfile = () => {
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
+  // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande
+  // när användaren kommer tillbaka.
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname !== '/company-profile') setSaveStatus('idle');
+  }, [location.pathname]);
   const savedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Skydd mot omförsöksloop: samma misslyckade data sparas inte om och om igen,
   // men signaturen nollställs när användaren kommer online eller trycker "Försök igen".
