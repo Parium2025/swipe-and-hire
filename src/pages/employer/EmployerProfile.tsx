@@ -665,6 +665,39 @@ const EmployerProfile = () => {
                     </button>
                   </div>
                 )}
+
+                {/* Sparstatus under "Anpassa din bild" */}
+                <div className="min-h-4 pt-1 text-center text-xs text-white" aria-live="polite" role="status">
+                  {saveStatus === 'error' ? (
+                    <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
+                      <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                      {saveError || 'Kunde inte spara ändringen.'}
+                      <button
+                        type="button"
+                        onClick={retrySave}
+                        className="underline underline-offset-2 text-white"
+                      >
+                        Försök igen
+                      </button>
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
+                    >
+                      {saveStatus === 'saving' ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                          Sparar…
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-3 w-3" aria-hidden="true" />
+                          Sparat
+                        </>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -710,39 +743,6 @@ const EmployerProfile = () => {
             </div>
 
           </form>
-
-          {/* Sparstatus direkt under fälten — syns tydligt där man skriver. */}
-          <div className="mt-4 min-h-4 text-center text-xs text-white" aria-live="polite" role="status">
-            {saveStatus === 'error' ? (
-              <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
-                <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                {saveError || 'Kunde inte spara ändringen.'}
-                <button
-                  type="button"
-                  onClick={retrySave}
-                  className="underline underline-offset-2 text-white"
-                >
-                  Försök igen
-                </button>
-              </span>
-            ) : (
-              <span
-                className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}
-              >
-                {saveStatus === 'saving' ? (
-                  <>
-                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                    Sparar…
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-3 w-3" aria-hidden="true" />
-                    Sparat
-                  </>
-                )}
-              </span>
-            )}
-          </div>
       </div>
 
 
