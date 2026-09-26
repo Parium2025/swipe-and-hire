@@ -4,7 +4,7 @@
  * som klar i sessionStorage så att man kan använda appen resten av sessionen.
  * Vid nästa inloggning (ny session) visas tunneln igen.
  */
-const TUNNEL_REPLAY_EMAILS: string[] = [];
+const TUNNEL_REPLAY_EMAILS: string[] = ['pariumab@hotmail.com'];
 
 /**
  * Testkonton som alltid ska landa på välkomstkortet vid varje inloggning.
