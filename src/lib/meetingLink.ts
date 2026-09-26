@@ -15,6 +15,9 @@ const SUPPORTED_MEETING_HOSTS = [
   'around.co',
   'daily.co',
   'huddle.team',
+  'discord.gg',
+  'discord.com',
+  'discordapp.com',
 ] as const;
 
 const stripTrailingPunctuation = (value: string): string => value.replace(/[),.;!?]+$/g, '');
