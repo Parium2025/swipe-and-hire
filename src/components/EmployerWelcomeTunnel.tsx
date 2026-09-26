@@ -856,7 +856,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                  disabled={isUploadingLogo}
-                 className="flex-1 py-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
+                 className={`flex-1 py-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0 ${currentStep === 0 ? 'ring-2 ring-white shadow-[0_0_24px_rgba(255,255,255,0.25)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)]' : ''}`}
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
