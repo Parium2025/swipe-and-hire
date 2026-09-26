@@ -1024,7 +1024,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 onMouseUp={(e) => e.currentTarget.blur()}
                 onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
                  disabled={isUploadingLogo}
-                 className={`rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${currentStep === 0 ? 'flex-1 text-lg font-semibold border border-white/20' : ''}`}
+                 className={`rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${currentStep === 0 ? 'flex-1 text-lg font-semibold border border-white/20 hover:border-primary/90 md:hover:border-primary/90' : ''}`}
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
