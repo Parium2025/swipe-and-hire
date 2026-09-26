@@ -1519,6 +1519,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isSigningOutRef.current) return;
     isSigningOutRef.current = true;
 
+    // Testkonton: nollställ "guiden klar i denna session" så att välkomstguiden
+    // visas igen vid nästa inloggning i samma flik.
+    try { sessionStorage.removeItem('tunnel_replay_done'); } catch { /* ignorera */ }
+
     // 🔕 Koppla bort DENNA enhets pushtoken så att nästa konto på samma
     // telefon aldrig får det förra kontots notiser. Andra enheter påverkas ej.
     const signingOutUserId = currentUserIdRef.current;

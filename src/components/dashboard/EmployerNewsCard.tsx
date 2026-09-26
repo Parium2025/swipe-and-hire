@@ -128,11 +128,11 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                     className="w-full"
                   >
                     <div className="w-full">
-                      <div className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 line-clamp-2">
+                      <div className="h-[40px] text-sm font-semibold text-white leading-5 mb-2 line-clamp-2">
                         {currentNews.title}
                       </div>
                       <div
-                        className="h-[36px] text-sm leading-[18px] text-white overflow-hidden"
+                        className="h-[42px] text-sm leading-5 text-white overflow-hidden"
                         style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
                       >
                         {currentNews.summary || currentNews.title}
@@ -143,12 +143,12 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                   <>
                     <TruncatedText
                       text={currentNews.title}
-                      className="h-[39px] text-sm font-semibold text-white leading-snug mb-2.5 line-clamp-2"
+                      className="h-[40px] text-sm font-semibold text-white leading-5 mb-2 line-clamp-2"
                     />
                     <TruncatedText
                       text={currentNews.summary || currentNews.title}
                       lines={2}
-                      className="h-[36px] text-sm leading-[18px] text-white"
+                      className="h-[42px] text-sm leading-5 text-white"
                     />
                   </>
                 )}
