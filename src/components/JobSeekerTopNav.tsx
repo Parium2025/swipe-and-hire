@@ -420,9 +420,15 @@ function JobSeekerTopNav() {
                     {getUserInitials()}
                   </div>
                 )}
-              <div>
-                <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
-                <p className="text-xs text-white">{user?.email}</p>
+              <div className="min-w-0">
+                <TruncatedText
+                  text={getUserDisplayName()}
+                  className="text-sm font-medium text-white truncate w-full min-w-0 block"
+                />
+                <TruncatedText
+                  text={user?.email || ''}
+                  className="text-xs text-white truncate w-full min-w-0 block"
+                />
               </div>
               </div>
               
