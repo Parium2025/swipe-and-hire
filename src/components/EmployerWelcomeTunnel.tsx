@@ -15,8 +15,8 @@ import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { TEXT_LIMITS } from '@/lib/textLimits';
-import { EMPLOYEE_COUNT_OPTIONS } from '@/pages/employer/companyProfile/types';
-import { SWEDISH_INDUSTRIES } from '@/lib/industries';
+import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
+import AuthSelectField from '@/components/auth/AuthSelectField';
 import { useNotificationPreferences, type NotificationChannel, type NotificationType } from '@/hooks/useNotificationPreferences';
 import NotificationPreferencesPanel, { type NotificationRow } from '@/components/notifications/NotificationPreferencesPanel';
 import { useEmailSubscription } from '@/hooks/useEmailSubscription';
@@ -504,16 +504,27 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <Input id="welcome-company-name" maxLength={120} value={formData.companyName} onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="welcome-industry" className="text-white">Bransch</Label>
-                <Input id="welcome-industry" list="welcome-industries" maxLength={120} value={formData.industry} onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
-                <datalist id="welcome-industries">{SWEDISH_INDUSTRIES.map(option => <option key={option} value={option} />)}</datalist>
+                <AuthSelectField
+                  id="welcome-industry"
+                  label="Bransch"
+                  placeholder="Välj bransch"
+                  value={formData.industry}
+                  options={SWEDISH_INDUSTRIES}
+                  onChange={(v) => setFormData(prev => ({ ...prev, industry: v }))}
+                  searchable
+                  searchPlaceholder="Sök bransch..."
+                  allowCustom
+                />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="welcome-employees" className="text-white">Antal anställda</Label>
-                <select id="welcome-employees" value={formData.employeeCount} onChange={e => setFormData(prev => ({ ...prev, employeeCount: e.target.value }))} className="w-full h-11 rounded-md bg-primary border border-white/20 text-white px-3 text-base">
-                  <option value="">Välj antal</option>
-                  {EMPLOYEE_COUNT_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </select>
+                <AuthSelectField
+                  id="welcome-employees"
+                  label="Antal anställda"
+                  placeholder="Antal"
+                  value={formData.employeeCount}
+                  options={EMPLOYEE_COUNT_OPTIONS}
+                  onChange={(v) => setFormData(prev => ({ ...prev, employeeCount: v }))}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="welcome-address" className="text-white">Huvudkontor</Label>
