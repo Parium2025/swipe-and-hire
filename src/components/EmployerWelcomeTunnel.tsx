@@ -96,8 +96,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     address: profile?.address || '',
     website: (profile as any)?.website || '',
     companyDescription: profile?.company_description || '',
-    firstName: isReplay ? '' : (profile?.first_name || ''),
-    lastName: isReplay ? '' : (profile?.last_name || ''),
+    firstName: isReplay ? (user?.user_metadata?.first_name || profile?.first_name || '') : (profile?.first_name || ''),
+    lastName: isReplay ? (user?.user_metadata?.last_name || profile?.last_name || '') : (profile?.last_name || ''),
     profileImageUrl: isReplay ? '' : (profile?.profile_image_url || ''),
   });
   const existingProfileImage = useMediaUrl(formData.profileImageUrl, 'profile-image');
@@ -114,7 +114,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         if (saved) {
           const parsed = JSON.parse(saved);
           // Äldre testutkast (innan testkontot startade tomt) ignoreras.
-          if (isReplay && parsed.v !== 2) throw new Error('stale replay draft');
+           if (isReplay && parsed.v !== 3) throw new Error('stale replay draft');
           if (parsed.formData) {
             setFormData((prev) => ({ ...prev, ...parsed.formData, companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
@@ -139,10 +139,10 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   useEffect(() => {
     if (!draftRestored || !profile || profilePrefillRef.current) return;
     profilePrefillRef.current = true;
-    // Testkontot visar guiden som för ett helt nytt konto: bara
-    // företagsuppgifterna från registreringen förifylls.
+     // Testkontot börjar utan tidigare ifyllda val, men behåller
+     // företagsuppgifter och personnamn från registreringen.
     const p = isReplay
-      ? { company_name: profile.company_name, industry: profile.industry, employee_count: profile.employee_count, address: profile.address, website: (profile as any).website, company_description: profile.company_description }
+       ? { company_name: profile.company_name, industry: profile.industry, employee_count: profile.employee_count, address: profile.address, website: (profile as any).website, company_description: profile.company_description, first_name: user?.user_metadata?.first_name || profile.first_name, last_name: user?.user_metadata?.last_name || profile.last_name }
       : (profile as any);
     setFormData((prev) => ({
       ...prev,
@@ -162,7 +162,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       lastName: prev.lastName || p.last_name || '',
       profileImageUrl: prev.profileImageUrl || p.profile_image_url || '',
     }));
-  }, [draftRestored, profile, isReplay]);
+   }, [draftRestored, profile, isReplay, user?.user_metadata?.first_name, user?.user_metadata?.last_name]);
 
   // Ärv organisationens möteslänk – en inbjuden kollega får företagets
   // befintliga standardlänk förifylld (kan alltid ändras).
@@ -193,7 +193,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           formData: isReplay ? { ...formData, companyLogoUrl: profile?.company_logo_url || '', profileImageUrl: profile?.profile_image_url || '' } : formData,
           notificationDraft,
           currentStep,
-          v: 2,
+           v: 3,
           savedAt: Date.now()
         }));
       } catch (e) {
@@ -695,9 +695,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               />
               <div className="relative">
                 <div className="cursor-pointer" onClick={() => profileFileInputRef.current?.click()}>
-                  <Avatar key={formData.profileImageUrl || 'no-profile-image'} className="h-32 w-32 border-4 border-white/10">
+                   <Avatar className="h-32 w-32 border-4 border-white/10">
                     <AvatarImage src={profileImageSrc || existingProfileImage || ''} alt="Profilbild" className="object-cover" />
-                    <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white" delayMs={150}>
+                     <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white" delayMs={0}>
                       {(formData.firstName?.trim()?.[0]?.toUpperCase() || '') + (formData.lastName?.trim()?.[0]?.toUpperCase() || '') || '?'}
                     </AvatarFallback>
                   </Avatar>
@@ -1021,7 +1021,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 onMouseUp={(e) => e.currentTarget.blur()}
                 onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
                  disabled={isUploadingLogo}
-                 className={`rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${currentStep === 0 ? 'flex-1 text-lg font-semibold border border-white/20 hover:border-primary/90 md:hover:border-primary/90' : ''}`}
+                  className={`rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${currentStep === 0 ? 'flex-1 text-lg font-semibold' : ''}`}
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
