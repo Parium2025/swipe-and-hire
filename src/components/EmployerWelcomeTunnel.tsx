@@ -894,23 +894,26 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {/* Navigation buttons */}
         {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
-             <div className="flex gap-4 items-center">
+             <div className="flex gap-3 items-center justify-center">
                {currentStep > 0 && (
-                <div className="w-[110px] shrink-0">
                  <Button
-                   onClick={handlePrevious}
-                    className="w-full py-4 px-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
+                   variant="outline"
+                   onMouseDown={(e) => { e.currentTarget.blur(); (document.activeElement as HTMLElement)?.blur?.(); }}
+                   onMouseUp={(e) => e.currentTarget.blur()}
+                   onClick={(e) => { e.currentTarget.blur(); handlePrevious(); }}
+                    className="rounded-full bg-white/5 backdrop-blur-sm border-white/20 text-white px-4 py-2 transition-colors duration-150 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                  >
                    <ArrowLeft className="h-4 w-4 mr-2" />
                    Tillbaka
                  </Button>
-               </div>
                )}
-              
+
               <Button
-                onClick={handleNext}
+                onMouseDown={(e) => { e.currentTarget.blur(); (document.activeElement as HTMLElement)?.blur?.(); }}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
                  disabled={isUploadingLogo}
-                 className={`flex-1 py-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0 ${currentStep === 0 ? 'border border-white/20' : ''}`}
+                 className={`rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${currentStep === 0 ? 'flex-1 text-lg font-semibold border border-white/20' : ''}`}
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
