@@ -161,7 +161,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
 
   const totalSteps = 8; // Intro, företag, logga, profil, möteslänk, meddelanden, aviseringar, klart
-  const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
     if (currentStep === 1 && !formData.companyName.trim()) {
@@ -324,10 +323,14 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     }
     setIsSubmitting(true);
     try {
-      if (!formData.companyName.trim()) throw new Error('Företagsnamn saknas');
+      if (!formData.companyName.trim()) {
+        toast({ title: 'Ange företagets namn', variant: 'destructive' });
+        setCurrentStep(1);
+        return;
+      }
       if (formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) throw new Error('Ogiltig möteslänk');
       const result = await updateProfile({
-        company_logo_url: formData.companyLogoUrl,
+        ...(formData.companyLogoUrl !== (profile?.company_logo_url || '') ? { company_logo_url: formData.companyLogoUrl } : {}),
         interview_video_link: formData.interviewVideoLink
           ? normalizeMeetingLink(formData.interviewVideoLink)
           : '',
