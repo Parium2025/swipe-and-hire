@@ -442,6 +442,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       if (online && mountedRef.current) {
         console.log('Network changed - checking location...');
         retryAttemptRef.current = 0;
+        // If the app started offline the GPS watcher was never started —
+        // start it now so movement is tracked live again.
+        if ('geolocation' in navigator && !isNativeApp()) startWatch();
         checkForLocationChange(true);
       }
     };
