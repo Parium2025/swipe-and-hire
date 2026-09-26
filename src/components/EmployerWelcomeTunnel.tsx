@@ -84,21 +84,21 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   // Form data
   const [formData, setFormData] = useState({
-    companyLogoUrl: (profile as any)?.company_logo_url || '',
-    interviewVideoLink: (profile as any)?.interview_video_link || '',
-    interviewVideoDefaultMessage: (profile as any)?.interview_video_default_message || '',
-    interviewOfficeDefaultMessage: (profile as any)?.interview_default_message || '',
-    interviewOfficeAddress: (profile as any)?.interview_office_address || '',
-    interviewOfficeInstructions: (profile as any)?.interview_office_instructions || '',
+    companyLogoUrl: isReplay ? '' : ((profile as any)?.company_logo_url || ''),
+    interviewVideoLink: isReplay ? '' : ((profile as any)?.interview_video_link || ''),
+    interviewVideoDefaultMessage: isReplay ? '' : ((profile as any)?.interview_video_default_message || ''),
+    interviewOfficeDefaultMessage: isReplay ? '' : ((profile as any)?.interview_default_message || ''),
+    interviewOfficeAddress: isReplay ? '' : ((profile as any)?.interview_office_address || ''),
+    interviewOfficeInstructions: isReplay ? '' : ((profile as any)?.interview_office_instructions || ''),
     companyName: profile?.company_name || '',
     industry: profile?.industry || '',
     employeeCount: profile?.employee_count || '',
     address: profile?.address || '',
     website: (profile as any)?.website || '',
     companyDescription: profile?.company_description || '',
-    firstName: profile?.first_name || '',
-    lastName: profile?.last_name || '',
-    profileImageUrl: profile?.profile_image_url || '',
+    firstName: isReplay ? '' : (profile?.first_name || ''),
+    lastName: isReplay ? '' : (profile?.last_name || ''),
+    profileImageUrl: isReplay ? '' : (profile?.profile_image_url || ''),
   });
   const existingProfileImage = useMediaUrl(formData.profileImageUrl, 'profile-image');
 
@@ -113,6 +113,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         const saved = sessionStorage.getItem(draftKey);
         if (saved) {
           const parsed = JSON.parse(saved);
+          // Äldre testutkast (innan testkontot startade tomt) ignoreras.
+          if (isReplay && parsed.v !== 2) throw new Error('stale replay draft');
           if (parsed.formData) {
             setFormData((prev) => ({ ...prev, ...parsed.formData, companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
@@ -137,7 +139,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   useEffect(() => {
     if (!draftRestored || !profile || profilePrefillRef.current) return;
     profilePrefillRef.current = true;
-    const p = profile as any;
+    // Testkontot visar guiden som för ett helt nytt konto: bara
+    // företagsuppgifterna från registreringen förifylls.
+    const p = isReplay
+      ? { company_name: profile.company_name, industry: profile.industry, employee_count: profile.employee_count, address: profile.address, website: (profile as any).website, company_description: profile.company_description }
+      : (profile as any);
     setFormData((prev) => ({
       ...prev,
       companyLogoUrl: prev.companyLogoUrl || p.company_logo_url || '',
@@ -156,20 +162,20 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       lastName: prev.lastName || p.last_name || '',
       profileImageUrl: prev.profileImageUrl || p.profile_image_url || '',
     }));
-  }, [draftRestored, profile]);
+  }, [draftRestored, profile, isReplay]);
 
   // Ärv organisationens möteslänk – en inbjuden kollega får företagets
   // befintliga standardlänk förifylld (kan alltid ändras).
   const orgLinkAppliedRef = useRef(false);
   useEffect(() => {
     if (!draftRestored || orgLinkAppliedRef.current) return;
-    if (!orgDefaultVideoLink) return;
+    if (!orgDefaultVideoLink || isReplay) return;
     setFormData((prev) => {
       if (prev.interviewVideoLink) return prev;
       orgLinkAppliedRef.current = true;
       return { ...prev, interviewVideoLink: orgDefaultVideoLink };
     });
-  }, [draftRestored, orgDefaultVideoLink]);
+  }, [draftRestored, orgDefaultVideoLink, isReplay]);
 
   // Auto-save draft
   useEffect(() => {
@@ -187,6 +193,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           formData: isReplay ? { ...formData, companyLogoUrl: profile?.company_logo_url || '', profileImageUrl: profile?.profile_image_url || '' } : formData,
           notificationDraft,
           currentStep,
+          v: 2,
           savedAt: Date.now()
         }));
       } catch (e) {
