@@ -14,6 +14,7 @@ import GpsPrompt from '@/components/GpsPrompt';
 import { useIsSystemAdmin } from '@/components/SystemHealthPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployerHomeSkeleton } from '@/components/employer/EmployerPageSkeleton';
+import { TruncatedText } from '@/components/TruncatedText';
 
 
 
@@ -203,8 +204,8 @@ const EmployerHome = memo(() => {
           className="text-center md:text-left flex flex-col gap-1 sm:gap-2"
         >
           <div className="flex items-center gap-2 justify-center md:justify-start">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-              {greetingText}, {firstName} 👋
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight min-w-0">
+              <TruncatedText text={`${greetingText}, ${firstName} 👋`} lines={2} className="break-words" />
             </h1>
           </div>
           <DateTimeDisplay />
