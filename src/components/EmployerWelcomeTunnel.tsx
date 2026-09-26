@@ -8,12 +8,26 @@ import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare, Sparkles } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare, Sparkles, Building2, UserRound, Bell } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
 import { fetchPriority } from '@/lib/fetchPriority';
+import { TEXT_LIMITS } from '@/lib/textLimits';
+import { EMPLOYEE_COUNT_OPTIONS } from '@/pages/employer/companyProfile/types';
+import { SWEDISH_INDUSTRIES } from '@/lib/industries';
+import { useNotificationPreferences, type NotificationChannel, type NotificationType } from '@/hooks/useNotificationPreferences';
+import NotificationPreferencesPanel, { type NotificationRow } from '@/components/notifications/NotificationPreferencesPanel';
+import { useEmailSubscription } from '@/hooks/useEmailSubscription';
+import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
+
+const notificationRows: NotificationRow[] = [
+  { type: 'new_application', label: 'Nya ansökningar', description: 'Mejl skickas högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_message', label: 'Meddelanden', description: 'Nya meddelanden från kandidater.', channels: ['in_app', 'push', 'email'] },
+  { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar och ändringar är alltid på.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
+  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej.', channels: ['in_app', 'push', 'email'] },
+];
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
 const LEGACY_EMPLOYER_WELCOME_DRAFT_KEY = 'parium_draft_employer-welcome-tunnel';
@@ -43,6 +57,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
+  const { isEnabled: notificationEnabled, isLoading: notificationsLoading } = useNotificationPreferences();
+  const { subscribed: emailSubscribed, isKnown: emailKnown } = useEmailSubscription();
+  const isReplay = isTunnelReplayAccount(user?.email);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -53,6 +70,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [profileImageSrc, setProfileImageSrc] = useState('');
+  const [notificationDraft, setNotificationDraft] = useState<Partial<Record<`${NotificationType}:${NotificationChannel}`, boolean>>>({});
 
 
   // Form data
@@ -61,6 +80,14 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     interviewVideoLink: (profile as any)?.interview_video_link || '',
     interviewVideoDefaultMessage: (profile as any)?.interview_video_default_message || '',
     interviewOfficeDefaultMessage: (profile as any)?.interview_default_message || '',
+    companyName: profile?.company_name || '',
+    industry: profile?.industry || '',
+    employeeCount: profile?.employee_count || '',
+    address: profile?.address || '',
+    companyDescription: profile?.company_description || '',
+    firstName: profile?.first_name || '',
+    lastName: profile?.last_name || '',
+    profileImageUrl: profile?.profile_image_url || '',
   });
 
   const draftKey = employerDraftKey(user?.id);
@@ -75,10 +102,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.formData) {
-            setFormData((prev) => ({ ...prev, ...parsed.formData }));
+            setFormData((prev) => ({ ...prev, ...parsed.formData, companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
+          if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 4));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 7));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -87,7 +115,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       }
       setDraftRestored(true);
     }
-  }, [draftRestored, draftKey]);
+  }, [draftRestored, draftKey, isReplay]);
 
   // Ärv organisationens möteslänk – en inbjuden kollega får företagets
   // befintliga standardlänk förifylld (kan alltid ändras).
@@ -109,12 +137,14 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     // Check if there's any content to save
     const hasContent = formData.companyLogoUrl || formData.interviewVideoLink
       || formData.interviewVideoDefaultMessage || formData.interviewOfficeDefaultMessage
+      || formData.companyName || formData.firstName || Object.keys(notificationDraft).length > 0
       || currentStep > 0;
     
     if (hasContent) {
       try {
         sessionStorage.setItem(draftKey, JSON.stringify({
-          formData,
+          formData: isReplay ? { ...formData, companyLogoUrl: profile?.company_logo_url || '', profileImageUrl: profile?.profile_image_url || '' } : formData,
+          notificationDraft,
           currentStep,
           savedAt: Date.now()
         }));
@@ -122,13 +152,23 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         console.warn('Failed to save employer welcome tunnel draft');
       }
     }
-  }, [formData, currentStep, draftRestored, draftKey]);
+  }, [formData, notificationDraft, currentStep, draftRestored, draftKey, isReplay, profile?.company_logo_url, profile?.profile_image_url]);
+
+  useEffect(() => () => { if (profileImageSrc.startsWith('blob:')) URL.revokeObjectURL(profileImageSrc); }, [profileImageSrc]);
 
 
-  const totalSteps = 5; // Välkomststart, Logga, Möteslänk, Standardmeddelanden, Slutför
+  const totalSteps = 8; // Intro, företag, logga, profil, möteslänk, meddelanden, aviseringar, klart
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
+    if (currentStep === 1 && !formData.companyName.trim()) {
+      toast({ title: 'Ange företagets namn', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 4 && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
+      toast({ title: 'Kontrollera möteslänken eller lämna fältet tomt', variant: 'destructive' });
+      return;
+    }
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -178,6 +218,10 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
     setPendingImageSrc('');
     setUploadError(null);
+    if (isReplay) {
+      setFormData(prev => ({ ...prev, companyLogoUrl: URL.createObjectURL(editedBlob) }));
+      return;
+    }
     setIsUploadingLogo(true);
 
     
@@ -238,10 +282,47 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   const { isOnline, showOfflineToast } = useOnline();
 
-  const handleSubmit = async () => {
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!ALLOWED_LOGO_TYPES.includes(file.type) || file.size > MAX_LOGO_MB * 1024 * 1024) {
+      toast({ title: 'Välj en bild under 10 MB i ett format som stöds', variant: 'destructive' });
+      return;
+    }
+    if (isReplay) {
+      setProfileImageSrc(URL.createObjectURL(file));
+      return;
+    }
+    setIsUploadingLogo(true);
+    try {
+      if (!user?.id) throw new Error('Ingen användare');
+      const { uploadMedia } = await import('@/lib/mediaManager');
+      const { storagePath, error } = await uploadMedia(file, 'profile-image', user.id);
+      if (error || !storagePath) throw error || new Error('Uppladdning misslyckades');
+      setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
+      const { getMediaUrl } = await import('@/lib/mediaManager');
+      setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
+    } catch {
+      toast({ title: 'Kunde inte ladda upp profilbilden', variant: 'destructive' });
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
+  const notificationValue = (type: NotificationType, channel: NotificationChannel) =>
+    notificationDraft[`${type}:${channel}`] ?? notificationEnabled(type, channel);
+
+  const handleSubmit = async () => {
+    if (isReplay) {
+      clearEmployerWelcomeDraft(user?.id);
+      onComplete();
+      return;
+    }
     setIsSubmitting(true);
     try {
+      if (!formData.companyName.trim()) throw new Error('Företagsnamn saknas');
+      if (formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) throw new Error('Ogiltig möteslänk');
       const result = await updateProfile({
         company_logo_url: formData.companyLogoUrl,
         interview_video_link: formData.interviewVideoLink
@@ -249,12 +330,41 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           : '',
         interview_video_default_message: formData.interviewVideoDefaultMessage.trim(),
         interview_default_message: formData.interviewOfficeDefaultMessage.trim(),
-        onboarding_completed: true
+        company_name: formData.companyName.trim(),
+        industry: formData.industry.trim(),
+        employee_count: formData.employeeCount,
+        address: formData.address.trim(),
+        company_description: formData.companyDescription.trim(),
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        ...(formData.profileImageUrl !== (profile?.profile_image_url || '') ? { profile_image_url: formData.profileImageUrl } : {}),
       } as any);
 
       if (result?.error) {
         throw result.error;
       }
+
+      if (user?.id && Object.keys(notificationDraft).length > 0) {
+        const { data: existing, error: readError } = await supabase.from('notification_preferences')
+          .select('notification_type, is_enabled, email_enabled, in_app_enabled').eq('user_id', user.id);
+        if (readError) throw readError;
+        const rows = notificationRows.filter(row => row.type !== 'interview_scheduled' && row.channels.some(channel => `${row.type}:${channel}` in notificationDraft)).map(row => {
+          const previous = existing?.find(item => item.notification_type === row.type);
+          return {
+            user_id: user.id, notification_type: row.type,
+            is_enabled: notificationDraft[`${row.type}:push`] ?? previous?.is_enabled ?? notificationEnabled(row.type, 'push'),
+            email_enabled: notificationDraft[`${row.type}:email`] ?? previous?.email_enabled ?? notificationEnabled(row.type, 'email'),
+            in_app_enabled: notificationDraft[`${row.type}:in_app`] ?? previous?.in_app_enabled ?? notificationEnabled(row.type, 'in_app'),
+            updated_at: new Date().toISOString(),
+          };
+        });
+        if (rows.length) {
+          const { error: prefsError } = await supabase.from('notification_preferences').upsert(rows, { onConflict: 'user_id,notification_type' });
+          if (prefsError) throw prefsError;
+        }
+      }
+      const completion = await updateProfile({ onboarding_completed: true });
+      if (completion?.error) throw completion.error;
 
       // Clear draft after successful submission
       clearEmployerWelcomeDraft(user?.id);
@@ -269,7 +379,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       console.error('Profile update error:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte spara profilen.",
+        description: "Kunde inte spara allt. Försök igen — guiden finns kvar.",
         variant: "destructive"
       });
     } finally {
