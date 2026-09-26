@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
 import { smartMatches } from '@/lib/seoSearch';
+import { matchesIndustry } from '@/lib/industries';
 
 interface AuthSelectFieldProps {
   id: string;
@@ -52,7 +53,7 @@ const AuthSelectField = ({
   // Samma smarta sökning som i jobbflödet: tål stavfel och ordföljd.
   const filtered =
     searchable && search.trim().length >= 2
-      ? options.filter((o) => smartMatches(search.trim(), [o]))
+      ? options.filter((o) => matchesIndustry(search.trim(), o, smartMatches))
       : options;
 
   const select = (next: string) => {

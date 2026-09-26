@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
 import { ChevronDown, Search, Check, Loader2, AlertCircle } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
-import { SWEDISH_INDUSTRIES } from '@/lib/industries';
+import { SWEDISH_INDUSTRIES, matchesIndustry } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { useOrgDefaultVideoLink } from '@/hooks/useOrgDefaultVideoLink';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,7 +90,7 @@ const CompanyProfile = () => {
   const matchedIndustries = useMemo(() => {
     const term = searchTerm.trim();
     if (term.length < 2) return SWEDISH_INDUSTRIES;
-    return SWEDISH_INDUSTRIES.filter((option) => smartMatches(term, [option]));
+    return SWEDISH_INDUSTRIES.filter((option) => matchesIndustry(term, option, smartMatches));
   }, [searchTerm]);
 
 

@@ -72,7 +72,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               
               {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
                 <p className="text-amber-400 text-xs">
-                  Länken ser inte ut som en giltig möteslänk från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Skype, GoToMeeting eller BlueJeans.
+                  Länken ser inte ut som en giltig möteslänk från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Discord, Slack, Skype, GoToMeeting eller BlueJeans.
                 </p>
               )}
               
