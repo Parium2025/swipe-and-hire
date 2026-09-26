@@ -387,7 +387,8 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
 
     // Real-time GPS via watchPosition (browser only). GPS itself works offline,
     // but we only push updates to the server when we are online.
-    if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
+    const startWatch = () => {
+      if (watchId !== null) return;
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
           const newLat = position.coords.latitude;
@@ -422,6 +423,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
         }
       );
       console.log('🛰️ Real-time GPS tracking started via watchPosition');
+    };
+
+    if ('geolocation' in navigator && !isNativeApp() && !isOffline) {
+      startWatch();
     }
 
     // Fallback: Check periodically. On slow connections we back off to avoid
@@ -437,6 +442,9 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
       if (online && mountedRef.current) {
         console.log('Network changed - checking location...');
         retryAttemptRef.current = 0;
+        // If the app started offline the GPS watcher was never started —
+        // start it now so movement is tracked live again.
+        if ('geolocation' in navigator && !isNativeApp()) startWatch();
         checkForLocationChange(true);
       }
     };
