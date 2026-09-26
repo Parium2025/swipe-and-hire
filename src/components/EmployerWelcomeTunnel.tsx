@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare, Sparkles } from 'lucide-react';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
@@ -78,7 +78,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             setFormData((prev) => ({ ...prev, ...parsed.formData }));
           }
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 3));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 4));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -125,7 +125,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   }, [formData, currentStep, draftRestored, draftKey]);
 
 
-  const totalSteps = 4; // Logga, Möteslänk, Standardmeddelanden, Slutför
+  const totalSteps = 5; // Välkomststart, Logga, Möteslänk, Standardmeddelanden, Slutför
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   const handleNext = () => {
@@ -281,6 +281,54 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     switch (currentStep) {
       case 0:
         return (
+          <div className="text-center space-y-8 py-4">
+            <div className="space-y-6">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
+                <Sparkles className="h-10 w-10 text-white" />
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-3xl font-bold text-white">Välkommen till Parium</h2>
+                <p className="text-lg text-white max-w-md mx-auto leading-relaxed break-words">
+                  Innan ni sätter igång behövs tre saker från er. Det tar under två minuter –
+                  sedan är allt klart och ni kan börja annonsera.
+                </p>
+              </div>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-3 text-left">
+              {[
+                {
+                  title: 'Företagslogga',
+                  desc: 'Så kandidater känner igen ert företag direkt.',
+                },
+                {
+                  title: 'Möteslänk',
+                  desc: 'Er fasta länk för videointervjuer. Helt valfritt.',
+                },
+                {
+                  title: 'Standardmeddelanden',
+                  desc: 'Fylls i automatiskt när ni bokar intervjuer.',
+                },
+              ].map((item, index) => (
+                <div
+                  key={item.title}
+                  className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20"
+                >
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-semibold text-white">{index + 1}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-white">{item.title}</p>
+                    <p className="text-sm text-white break-words">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 1:
+        return (
           <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
@@ -364,7 +412,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
 
 
-      case 1: {
+      case 2: {
         const link = formData.interviewVideoLink;
         const linkValid = !!link && isValidMeetingLink(link);
         return (
@@ -421,7 +469,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
       }
 
-      case 2:
+      case 3:
         return (
           <div className="space-y-8 py-8">
             <div className="text-center space-y-4">
@@ -473,7 +521,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
@@ -573,7 +621,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep > 0 && currentStep < totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto pt-8 px-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-white font-medium">Steg {currentStep + 1} av {totalSteps - 1}</span>
+              <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
               <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
@@ -611,7 +659,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 onClick={handleNext}
                 className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
               >
-                Nästa
+                {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
