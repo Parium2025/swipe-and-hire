@@ -34,6 +34,7 @@ import {
   Lightbulb
 } from "lucide-react";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
+import { TruncatedText } from "@/components/TruncatedText";
 import NotificationCenter from "@/components/NotificationCenter";
 import { resetPageCoachMarks } from "@/components/onboarding/PageIntroCoach";
 import { replayWelcomeCard } from "@/components/AppOnboardingTour";
