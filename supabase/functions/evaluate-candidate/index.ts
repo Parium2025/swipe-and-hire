@@ -298,6 +298,19 @@ serve(async (req) => {
     const criteria = criteriaResult.data || [];
     const questions = questionsResult.data || [];
     const application = applicationResult.data;
+
+    // 🔒 En arbetsgivare får bara utvärdera någon som faktiskt sökt jobbet.
+    // Annars skulle valfri inloggad arbetsgivare kunna läsa valfri persons
+    // profil via denna funktion. (Kandidaten själv och interna service-anrop
+    // passerar — de hanteras av auth-blocket ovan.)
+    if (callerId !== null && callerId !== applicant_id && !application) {
+      console.warn(`evaluate-candidate blocked: applicant=${applicant_id} has no application for job=${job_id}`);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const profile = profileResult.data;
     const cvSummary = cvSummaryResult.data;
     const profileCv = profileCvResult.data;
