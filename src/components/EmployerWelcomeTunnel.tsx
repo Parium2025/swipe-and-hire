@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import ImageEditor from '@/components/ImageEditor';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, CheckCircle, ArrowRight, ArrowLeft, Trash2, Video, AlertCircle, CheckCircle2, MessageSquare, Sparkles, Building2, UserRound, Bell } from 'lucide-react';
@@ -69,6 +71,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [profileEditorOpen, setProfileEditorOpen] = useState(false);
+  const [profileEditSrc, setProfileEditSrc] = useState('');
+  const profileFileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [profileImageSrc, setProfileImageSrc] = useState('');
@@ -318,7 +323,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   const { isOnline, showOfflineToast } = useOnline();
 
-  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Samma flöde som profilsidan: filval öppnar bildredigeraren först.
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
@@ -326,19 +332,46 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       toast({ title: 'Välj en bild under 10 MB i ett format som stöds', variant: 'destructive' });
       return;
     }
+    if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
+    setProfileEditSrc(URL.createObjectURL(file));
+    setProfileEditorOpen(true);
+  };
+
+  const handleEditProfileImage = async () => {
+    const current = profileImageSrc || existingProfileImage;
+    if (current) {
+      setProfileEditSrc(current);
+      setProfileEditorOpen(true);
+      return;
+    }
+    if (formData.profileImageUrl) {
+      const { getMediaUrl } = await import('@/lib/mediaManager');
+      const url = await getMediaUrl(formData.profileImageUrl, 'profile-image', 3600);
+      if (url) {
+        setProfileEditSrc(url);
+        setProfileEditorOpen(true);
+      }
+    }
+  };
+
+  const handleProfileImageSave = async (editedBlob: Blob) => {
+    setProfileEditorOpen(false);
+    if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
+    setProfileEditSrc('');
     if (isReplay) {
-      setProfileImageSrc(URL.createObjectURL(file));
+      setProfileImageSrc(URL.createObjectURL(editedBlob));
       return;
     }
     setIsUploadingLogo(true);
     try {
       if (!user?.id) throw new Error('Ingen användare');
-      const { uploadMedia } = await import('@/lib/mediaManager');
+      const file = new File([editedBlob], 'profile-image.png', { type: editedBlob.type || 'image/png' });
+      const { uploadMedia, getMediaUrl } = await import('@/lib/mediaManager');
       const { storagePath, error } = await uploadMedia(file, 'profile-image', user.id);
       if (error || !storagePath) throw error || new Error('Uppladdning misslyckades');
       setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
-      const { getMediaUrl } = await import('@/lib/mediaManager');
       setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
+      toast({ title: 'Profilbild uppladdad!' });
     } catch {
       toast({ title: 'Kunde inte ladda upp profilbilden', variant: 'destructive' });
     } finally {
@@ -636,15 +669,88 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold text-white">Din profil</h2>
               <p className="text-white">Så vet kandidater och kollegor vem de pratar med.</p>
             </div>
-            <div className="flex justify-center">
-              {(profileImageSrc || existingProfileImage) && <img src={profileImageSrc || existingProfileImage || ''} alt="Din profilbild" className="h-20 w-20 rounded-full object-cover" />}
+            {/* Profilbild-sektion - exakt samma struktur som profilsidan */}
+            <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
+              <input
+                ref={profileFileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
+                onChange={handleProfileImageChange}
+                className="hidden"
+              />
+              <h3 className="text-base font-semibold text-white text-center">Profilbild</h3>
+              <p className="text-white text-center text-sm -mt-2">Ladda upp en profilbild som syns för kandidater.</p>
+              <div className="relative">
+                <div className="cursor-pointer" onClick={() => profileFileInputRef.current?.click()}>
+                  <Avatar key={formData.profileImageUrl || 'no-profile-image'} className="h-32 w-32 border-4 border-white/10">
+                    <AvatarImage src={profileImageSrc || existingProfileImage || ''} alt="Profilbild" className="object-cover" />
+                    <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white" delayMs={150}>
+                      {(formData.firstName?.trim()?.[0]?.toUpperCase() || '') + (formData.lastName?.trim()?.[0]?.toUpperCase() || '') || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                {(profileImageSrc || existingProfileImage) && (
+                  <button
+                    type="button"
+                    aria-label="Ta bort profilbild"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setFormData(prev => ({ ...prev, profileImageUrl: '' }));
+                      setProfileImageSrc('');
+                    }}
+                    className="absolute -top-3 -right-3 z-20 pointer-events-auto rounded-full border border-0 bg-red-500/80 p-2 text-white shadow-lg transition-colors md:hover:!bg-red-500 md:hover:!text-white"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="space-y-2 text-center">
+                <label
+                  className="text-white cursor-pointer hover:text-white transition-colors text-center text-sm"
+                  onClick={() => profileFileInputRef.current?.click()}
+                >
+                  Klicka för att ladda upp • Max 10 MB
+                </label>
+                {(profileImageSrc || existingProfileImage) && (
+                  <div className="flex flex-col items-center space-y-2">
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-full">
+                      Bild uppladdad!
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={handleEditProfileImage}
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+                    >
+                      Anpassa din bild
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-            <Label htmlFor="welcome-profile-image" className="text-white">Profilbild (valfritt)</Label>
-            <Input id="welcome-profile-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" onChange={handleProfileImageChange} disabled={isUploadingLogo} className="text-white text-base" />
-            <Label htmlFor="welcome-first-name" className="text-white">Förnamn</Label>
-            <Input id="welcome-first-name" maxLength={100} value={formData.firstName} onChange={e => setFormData(prev => ({ ...prev, firstName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
-            <Label htmlFor="welcome-last-name" className="text-white">Efternamn</Label>
-            <Input id="welcome-last-name" maxLength={100} value={formData.lastName} onChange={e => setFormData(prev => ({ ...prev, lastName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-first-name" className="text-sm text-white">Förnamn</Label>
+                <Input
+                  id="welcome-first-name"
+                  maxLength={100}
+                  value={formData.firstName}
+                  onChange={e => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="welcome-last-name" className="text-sm text-white">Efternamn</Label>
+                <Input
+                  id="welcome-last-name"
+                  maxLength={100}
+                  value={formData.lastName}
+                  onChange={e => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 text-sm"
+                />
+              </div>
+            </div>
           </div>
         );
 
@@ -937,6 +1043,19 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleLogoSave}
+        aspectRatio={1}
+      />
+
+      {/* Bildredigerare för profilbild – samma som på profilsidan */}
+      <ImageEditor
+        isOpen={profileEditorOpen}
+        onClose={() => {
+          setProfileEditorOpen(false);
+          if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
+          setProfileEditSrc('');
+        }}
+        imageSrc={profileEditSrc}
+        onSave={handleProfileImageSave}
         aspectRatio={1}
       />
     </div>
