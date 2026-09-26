@@ -113,6 +113,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         const saved = sessionStorage.getItem(draftKey);
         if (saved) {
           const parsed = JSON.parse(saved);
+          // Äldre testutkast (innan testkontot startade tomt) ignoreras.
+          if (isReplay && parsed.v !== 2) throw new Error('stale replay draft');
           if (parsed.formData) {
             setFormData((prev) => ({ ...prev, ...parsed.formData, companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
@@ -191,6 +193,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           formData: isReplay ? { ...formData, companyLogoUrl: profile?.company_logo_url || '', profileImageUrl: profile?.profile_image_url || '' } : formData,
           notificationDraft,
           currentStep,
+          v: 2,
           savedAt: Date.now()
         }));
       } catch (e) {
