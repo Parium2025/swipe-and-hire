@@ -774,7 +774,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex flex-col relative overflow-x-hidden">
+    <div
+      data-welcome-tunnel-scroll="true"
+      className="fixed inset-0 z-[60] h-[100dvh] bg-gradient-parium flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
