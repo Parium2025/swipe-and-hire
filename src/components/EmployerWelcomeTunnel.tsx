@@ -21,6 +21,7 @@ import { useNotificationPreferences, type NotificationChannel, type Notification
 import NotificationPreferencesPanel, { type NotificationRow } from '@/components/notifications/NotificationPreferencesPanel';
 import { useEmailSubscription } from '@/hooks/useEmailSubscription';
 import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 const notificationRows: NotificationRow[] = [
   { type: 'new_application', label: 'Nya ansökningar', description: 'Mejl skickas högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
@@ -89,6 +90,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     lastName: profile?.last_name || '',
     profileImageUrl: profile?.profile_image_url || '',
   });
+  const existingProfileImage = useMediaUrl(formData.profileImageUrl, 'profile-image');
 
   const draftKey = employerDraftKey(user?.id);
 
@@ -155,6 +157,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   }, [formData, notificationDraft, currentStep, draftRestored, draftKey, isReplay, profile?.company_logo_url, profile?.profile_image_url]);
 
   useEffect(() => () => { if (profileImageSrc.startsWith('blob:')) URL.revokeObjectURL(profileImageSrc); }, [profileImageSrc]);
+  useEffect(() => () => { if (formData.companyLogoUrl.startsWith('blob:')) URL.revokeObjectURL(formData.companyLogoUrl); }, [formData.companyLogoUrl]);
 
 
   const totalSteps = 8; // Intro, företag, logga, profil, möteslänk, meddelanden, aviseringar, klart
@@ -399,17 +402,25 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Välkommen till Parium</h2>
                 <p className="text-lg text-white max-w-md mx-auto leading-relaxed break-words">
-                  Innan ni sätter igång behövs tre saker från er. Det tar under två minuter –
-                  sedan är allt klart och ni kan börja annonsera.
+                  Börja med ert företag och er profil. Välj sedan hur ni vill hantera intervjuer och aviseringar. Ni kan alltid ändra era val senare.
                 </p>
+                {isReplay && <p className="text-sm text-white">Testläge: det du fyller i här ändrar inte ditt riktiga konto.</p>}
               </div>
             </div>
 
             <div className="max-w-md mx-auto space-y-3 text-left">
               {[
                 {
+                  title: 'Företaget',
+                  desc: 'Namn, bransch och vad ni gör.',
+                },
+                {
                   title: 'Företagslogga',
-                  desc: 'Så kandidater känner igen ert företag direkt.',
+                  desc: 'Så kandidater känner igen er direkt.',
+                },
+                {
+                  title: 'Din profil',
+                  desc: 'Ditt namn och din profilbild.',
                 },
                 {
                   title: 'Möteslänk',
@@ -418,6 +429,10 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 {
                   title: 'Standardmeddelanden',
                   desc: 'Fylls i automatiskt när ni bokar intervjuer.',
+                },
+                {
+                  title: 'Aviseringar',
+                  desc: 'Välj hur du vill få uppdateringar.',
                 },
               ].map((item, index) => (
                 <div
@@ -438,6 +453,34 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
 
       case 1:
+        return (
+          <div className="space-y-6 max-w-md mx-auto">
+            <div className="text-center space-y-3">
+              <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><Building2 className="h-8 w-8 text-white" /></div>
+              <h2 className="text-2xl font-bold text-white">Berätta om ert företag</h2>
+              <p className="text-white">Uppgifterna hjälper kandidater förstå vilka ni är. Fyll i det ni kan nu och komplettera resten innan första annonsen publiceras.</p>
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="welcome-company-name" className="text-white">Företagsnamn *</Label>
+              <Input id="welcome-company-name" maxLength={120} value={formData.companyName} onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              <Label htmlFor="welcome-industry" className="text-white">Bransch</Label>
+              <Input id="welcome-industry" list="welcome-industries" maxLength={120} value={formData.industry} onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              <datalist id="welcome-industries">{SWEDISH_INDUSTRIES.map(option => <option key={option} value={option} />)}</datalist>
+              <Label htmlFor="welcome-employees" className="text-white">Antal anställda</Label>
+              <select id="welcome-employees" value={formData.employeeCount} onChange={e => setFormData(prev => ({ ...prev, employeeCount: e.target.value }))} className="w-full h-11 rounded-md bg-primary border border-white/20 text-white px-3 text-base">
+                <option value="">Välj antal</option>
+                {EMPLOYEE_COUNT_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+              <Label htmlFor="welcome-address" className="text-white">Huvudkontor</Label>
+              <Input id="welcome-address" maxLength={TEXT_LIMITS.address} value={formData.address} onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+              <Label htmlFor="welcome-company-description" className="text-white">Företagsbeskrivning</Label>
+              <Textarea id="welcome-company-description" autoResize={false} maxLength={TEXT_LIMITS.companyDescription} value={formData.companyDescription} onChange={e => setFormData(prev => ({ ...prev, companyDescription: e.target.value }))} className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto bg-white/5 border-white/10 text-white text-base resize-none" />
+              <p className="text-sm text-white">Bransch, storlek, huvudkontor och beskrivning behövs innan första annonsen publiceras.</p>
+            </div>
+          </div>
+        );
+
+      case 2:
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
@@ -522,7 +565,27 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
 
 
-      case 2: {
+      case 3:
+        return (
+          <div className="space-y-6 max-w-md mx-auto">
+            <div className="text-center space-y-3">
+              <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><UserRound className="h-8 w-8 text-white" /></div>
+              <h2 className="text-2xl font-bold text-white">Din profil</h2>
+              <p className="text-white">Så vet kandidater och kollegor vem de pratar med.</p>
+            </div>
+            <div className="flex justify-center">
+              {(profileImageSrc || existingProfileImage) && <img src={profileImageSrc || existingProfileImage || ''} alt="Din profilbild" className="h-20 w-20 rounded-full object-cover" />}
+            </div>
+            <Label htmlFor="welcome-profile-image" className="text-white">Profilbild (valfritt)</Label>
+            <Input id="welcome-profile-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" onChange={handleProfileImageChange} disabled={isUploadingLogo} className="text-white text-base" />
+            <Label htmlFor="welcome-first-name" className="text-white">Förnamn</Label>
+            <Input id="welcome-first-name" maxLength={100} value={formData.firstName} onChange={e => setFormData(prev => ({ ...prev, firstName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+            <Label htmlFor="welcome-last-name" className="text-white">Efternamn</Label>
+            <Input id="welcome-last-name" maxLength={100} value={formData.lastName} onChange={e => setFormData(prev => ({ ...prev, lastName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
+          </div>
+        );
+
+      case 4: {
         const link = formData.interviewVideoLink;
         const linkValid = !!link && isValidMeetingLink(link);
         return (
@@ -533,8 +596,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Er möteslänk för intervjuer</h2>
               <p className="text-white">
-                Klistra in er fasta Teams-, Zoom- eller Google Meet-länk en gång. Sedan fylls den i
-                automatiskt varje gång ni bjuder in en kandidat till videointervju.
+                 Ange en standardlänk för Teams, Zoom eller Google Meet. Den föreslås vid videointervjuer och kan bytas för varje bokning. För kontorsmöten används ingen videolänk.
               </p>
             </div>
 
@@ -561,17 +623,15 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <p className="text-sm text-amber-400 flex items-start gap-1.5">
                   <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <span className="break-words">
-                    Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex,
-                    Whereby eller liknande. Ni kan spara ändå och ändra senare.
+                     Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex
+                     eller Whereby. Ändra länken eller lämna fältet tomt.
                   </span>
                 </p>
               )}
 
               <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <p className="text-sm text-white break-words">
-                  <strong>Tips:</strong> Använd er personliga möteslänk (Teams: Kalender → Nytt möte,
-                  Google Meet: ”Skapa ett möte för senare”, Zoom: Personal Meeting ID). Ni kan alltid
-                  ändra den under Företag → Företagsprofil → Intervjuinställningar.
+                   <strong>Tips:</strong> Samma länk kan användas vid flera möten. Använd väntrum eller lösenord om ni väljer ett fast mötesrum. Ni kan ändra standardlänken senare under Företag → Företagsprofil → Intervjuinställningar.
                 </p>
               </div>
             </div>
@@ -579,7 +639,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         );
       }
 
-      case 3:
+      case 5:
         return (
           <div className="space-y-8 py-8">
             <div className="text-center space-y-4">
@@ -631,7 +691,22 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           </div>
         );
 
-      case 4:
+      case 6:
+        return (
+          <div className="space-y-6 max-w-2xl mx-auto">
+            <div className="text-center space-y-3">
+              <div className="bg-white/20 p-4 rounded-full w-fit mx-auto"><Bell className="h-8 w-8 text-white" /></div>
+              <h2 className="text-2xl font-bold text-white">Dina aviseringar</h2>
+              <p className="text-white">Välj vad du vill få i appen, som push eller via mejl. Du kan ändra valen i inställningarna senare.</p>
+            </div>
+            <NotificationPreferencesPanel rows={notificationRows} isEnabled={notificationValue}
+              toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
+              disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
+              intro={emailKnown && !emailSubscribed ? 'Din adress är avregistrerad från app-mejl. Aktivera mejlutskick igen under Inställningar om du vill få dem.' : undefined} />
+          </div>
+        );
+
+      case 7:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
@@ -642,7 +717,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Allt är klart!</h2>
                 <p className="text-xl text-white max-w-md mx-auto leading-relaxed">
-                  Din arbetsgivarprofil är nu komplett. Du kan nu börja skapa jobbannonser och hitta fantastiska kandidater.
+                   Dina val är klara. Företagsuppgifterna kan kompletteras senare, men måste vara fullständiga innan ni publicerar er första annons.
                 </p>
               </div>
             </div>
@@ -667,7 +742,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   </>
                 ) : (
                   <>
-                    <span>Nu kör vi!</span>
+                     <span>{isReplay ? 'Avsluta testet' : 'Spara och fortsätt'}</span>
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </>
                 )}
@@ -678,7 +753,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 className="py-4 px-6 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka – ändra meddelanden
+                 Tillbaka – ändra aviseringar
               </Button>
             </div>
           </div>
@@ -730,13 +805,13 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep > 0 && currentStep < totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto pt-8 px-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
-              <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
+               <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
+               <span className="text-sm text-white font-medium">{Math.round((currentStep / (totalSteps - 2)) * 100)}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
               <div 
                 className="h-full bg-white transition-all duration-300" 
-                style={{ width: `${progress}%` }}
+                 style={{ width: `${(currentStep / (totalSteps - 2)) * 100}%` }}
               />
             </div>
           </div>
@@ -752,20 +827,23 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {/* Navigation buttons */}
         {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
-            <div className="flex gap-4">
-              {currentStep > 0 && (
+             <div className="flex gap-4 items-center">
+               <div className="w-[110px] shrink-0">
+               {currentStep > 0 && (
                 <Button
                   onClick={handlePrevious}
-                  className="py-4 px-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
+                   className="w-full py-4 px-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold rounded-full focus:outline-none focus:ring-0"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
                 </Button>
               )}
+               </div>
               
               <Button
                 onClick={handleNext}
-                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
+                 disabled={isUploadingLogo}
+                 className="flex-1 py-4 bg-primary hover:bg-primary/90 transition-colors duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
