@@ -17,6 +17,8 @@ import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { TEXT_LIMITS } from '@/lib/textLimits';
+import { CompanyInterviewSettings } from '@/pages/employer/companyProfile/CompanyInterviewSettings';
+import type { CompanyFormData } from '@/pages/employer/companyProfile/types';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import AuthSelectField from '@/components/auth/AuthSelectField';
 import { useNotificationPreferences, type NotificationChannel, type NotificationType } from '@/hooks/useNotificationPreferences';
@@ -86,6 +88,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     interviewVideoLink: (profile as any)?.interview_video_link || '',
     interviewVideoDefaultMessage: (profile as any)?.interview_video_default_message || '',
     interviewOfficeDefaultMessage: (profile as any)?.interview_default_message || '',
+    interviewOfficeAddress: (profile as any)?.interview_office_address || '',
+    interviewOfficeInstructions: (profile as any)?.interview_office_instructions || '',
     companyName: profile?.company_name || '',
     industry: profile?.industry || '',
     employeeCount: profile?.employee_count || '',
@@ -140,6 +144,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       interviewVideoLink: prev.interviewVideoLink || p.interview_video_link || '',
       interviewVideoDefaultMessage: prev.interviewVideoDefaultMessage || p.interview_video_default_message || '',
       interviewOfficeDefaultMessage: prev.interviewOfficeDefaultMessage || p.interview_default_message || '',
+      interviewOfficeAddress: prev.interviewOfficeAddress || p.interview_office_address || '',
+      interviewOfficeInstructions: prev.interviewOfficeInstructions || p.interview_office_instructions || '',
       companyName: prev.companyName || p.company_name || '',
       industry: prev.industry || p.industry || '',
       employeeCount: prev.employeeCount || p.employee_count || '',
@@ -403,6 +409,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           : '',
         interview_video_default_message: formData.interviewVideoDefaultMessage.trim(),
         interview_default_message: formData.interviewOfficeDefaultMessage.trim(),
+        interview_office_address: formData.interviewOfficeAddress.trim(),
+        interview_office_instructions: formData.interviewOfficeInstructions.trim(),
         company_name: formData.companyName.trim(),
         industry: formData.industry.trim(),
         employee_count: formData.employeeCount,
@@ -819,41 +827,25 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </p>
             </div>
 
-            <div className="max-w-md mx-auto space-y-6">
-              <div className="space-y-2">
-                <label htmlFor="welcome-video-message" className="text-white font-medium block">
-                  Videointervju
-                </label>
-                <Textarea
-                  id="welcome-video-message"
-                  value={formData.interviewVideoDefaultMessage}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, interviewVideoDefaultMessage: e.target.value }))}
-                  placeholder={'Hej!\n\nTack för din ansökan. Vi vill gärna träffa dig på en videointervju.\n\nVänliga hälsningar'}
-                  rows={4}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/70 resize-none"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="welcome-office-message" className="text-white font-medium block">
-                  Intervju på kontoret
-                </label>
-                <Textarea
-                  id="welcome-office-message"
-                  value={formData.interviewOfficeDefaultMessage}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, interviewOfficeDefaultMessage: e.target.value }))}
-                  placeholder={'Hej!\n\nTack för din ansökan. Vi vill gärna träffa dig på vårt kontor.\n\nVänliga hälsningar'}
-                  rows={4}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/70 resize-none"
-                />
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <p className="text-sm text-white break-words">
-                  <strong>Tips:</strong> Ni kan hoppa över det här och fylla i senare under
-                  Företag → Företagsprofil → Intervjuinställningar.
-                </p>
-              </div>
+            <div className="max-w-2xl mx-auto">
+              <CompanyInterviewSettings
+                formData={{
+                  interview_video_link: formData.interviewVideoLink,
+                  interview_video_default_message: formData.interviewVideoDefaultMessage,
+                  interview_default_message: formData.interviewOfficeDefaultMessage,
+                  interview_office_address: formData.interviewOfficeAddress,
+                  interview_office_instructions: formData.interviewOfficeInstructions,
+                } as CompanyFormData}
+                onFormDataChange={(u) => setFormData((prev) => ({
+                  ...prev,
+                  ...(u.interview_video_link !== undefined ? { interviewVideoLink: u.interview_video_link } : {}),
+                  ...(u.interview_video_default_message !== undefined ? { interviewVideoDefaultMessage: u.interview_video_default_message } : {}),
+                  ...(u.interview_default_message !== undefined ? { interviewOfficeDefaultMessage: u.interview_default_message } : {}),
+                  ...(u.interview_office_address !== undefined ? { interviewOfficeAddress: u.interview_office_address } : {}),
+                  ...(u.interview_office_instructions !== undefined ? { interviewOfficeInstructions: u.interview_office_instructions } : {}),
+                }))}
+                orgDefaultVideoLink={orgDefaultVideoLink}
+              />
             </div>
           </div>
         );
