@@ -403,8 +403,10 @@ export const useWeather = (options: UseWeatherOptions = {}): WeatherData => {
             console.log(`📍 GPS watchPosition: moved ${distance.toFixed(2)}km - updating!`);
           }
 
+          // Only reuse the old city name for tiny moves; a larger move can
+          // cross a municipality border (e.g. Haninge -> Tyresö is < 10 km).
           const stillNearby =
-            cached && getDistanceKm(cached.lat, cached.lon, newLat, newLon) < 10;
+            cached && getDistanceKm(cached.lat, cached.lon, newLat, newLon) < 2;
           const cityHint = stillNearby ? cached?.city || '' : '';
           await updateLocation(newLat, newLon, cityHint || null, 'gps');
         },
