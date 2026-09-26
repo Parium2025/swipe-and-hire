@@ -275,7 +275,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             </div>
 
             {/* Job title - stor och framträdande */}
-            <h1 className="text-white text-3xl font-bold mb-4 leading-tight">
+            <h1 className="text-white text-3xl font-bold mb-4 leading-tight break-words [overflow-wrap:anywhere]">
               {jobData.title}
             </h1>
 
