@@ -364,6 +364,11 @@ export function TruncatedText({
         WebkitLineClamp: lines,
         WebkitBoxOrient: 'vertical',
         overflow: 'hidden',
+        // The clamp cuts with overflow:hidden — without a small bottom pad the
+        // last visible line's descenders (g, j, @) and diacritics (å, ä, ö)
+        // get shaved off. 0.12em is invisible but saves the glyphs.
+        paddingBottom: '0.12em',
+        marginBottom: '-0.12em',
       }
     : {};
 
