@@ -907,6 +907,15 @@ All colors MUST be HSL.
     color: white !important;
   }
 
+  /* Auth-sidor: alla fält har samma solida marinblå yta som autofyll-målningen
+     nedan, så ett fält ser identiskt ut oavsett om webbläsaren fyllde i det
+     eller användaren skrev själv. */
+  .auth-dark input,
+  .auth-dark textarea,
+  .auth-dark select {
+    background-color: hsl(216 73% 14%);
+  }
+
   /* Auth pages force light text for autofill. Bakgrunden målas med sidans
      mörka marinblå (inte --background, som är ljus i ljust tema) så fältet
      aldrig blir vitt när webbläsaren fyller i lösenordet. */
