@@ -842,6 +842,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   ...(u.interview_office_instructions !== undefined ? { interviewOfficeInstructions: u.interview_office_instructions } : {}),
                 }))}
                 orgDefaultVideoLink={orgDefaultVideoLink}
+                hideTopDivider
               />
             </div>
           </div>
