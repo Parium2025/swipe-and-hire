@@ -16,7 +16,6 @@ const TeamInvite = () => {
 
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string>("");
-  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const attempted = useRef(false);
 
@@ -35,7 +34,6 @@ const TeamInvite = () => {
           try {
             const body = await context.json();
             if (typeof body?.error === "string") serverMessage = body.error;
-            if (typeof body?.code === "string") setErrorCode(body.code);
           } catch {
             // Fall back to the generic message.
           }
@@ -76,17 +74,6 @@ const TeamInvite = () => {
     attempted.current = true;
     void accept();
   }, [accept, authLoading, navigate, token, user]);
-
-  const switchAccount = useCallback(async () => {
-    const destination = `/team-invite?token=${encodeURIComponent(token)}`;
-    try {
-      sessionStorage.setItem("parium-auth-return-to", destination);
-    } catch {
-      // Auth-sidans navigation state bevarar också destinationen i denna flik.
-    }
-    await supabase.auth.signOut({ scope: "local" });
-    navigate("/auth", { state: { returnTo: destination }, replace: true });
-  }, [navigate, token]);
 
   return (
     <main className="min-h-screen bg-parium-gradient flex items-center justify-center px-4 py-8 text-primary-foreground">
@@ -136,18 +123,16 @@ const TeamInvite = () => {
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-red-500/80">
                 <AlertTriangle className="h-[18px] w-[18px] text-white" />
               </span>
-              <h1 className="min-w-0 text-2xl font-semibold text-white">
-                {errorCode === "invite_email_mismatch" ? "Fel konto är inloggat" : "Inbjudan kunde inte användas"}
-              </h1>
+              <h1 className="min-w-0 text-2xl font-semibold text-white">Inbjudan kunde inte användas</h1>
             </div>
             <p className="mb-7 break-words text-sm leading-6 text-white sm:text-base">{message}</p>
             <Button
               type="button"
               variant="secondary"
               className="w-full rounded-full text-white [&_svg]:text-white"
-              onClick={errorCode === "invite_email_mismatch" ? switchAccount : () => navigate("/")}
+              onClick={() => navigate("/")}
             >
-              {errorCode === "invite_email_mismatch" ? "Byt konto" : "Till startsidan"}
+              Till startsidan
             </Button>
           </>
         )}
