@@ -437,7 +437,6 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
  * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
  */
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
-  const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   const isDesktop = useDevice() === 'desktop';
   const { user } = useAuth();
   const activeListId = getActiveCandidateListId(user?.id);
@@ -446,6 +445,9 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
   // Fyra är produktens riktiga grundlayout innan ett kontos egen cache finns.
   const cachedLayout = layoutKey ? readCachedLayout(layoutKey) : null;
   const stageCount = cachedLayout?.length ?? 4;
+  const candidateCount = cachedLayout
+    ? cachedLayout.reduce((sum, count) => sum + count, 0)
+    : readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   const cardsForStage = (i: number) =>
     cachedLayout ? Math.min(8, cachedLayout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
