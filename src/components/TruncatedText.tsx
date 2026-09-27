@@ -139,6 +139,7 @@ export function TruncatedText({
       const originalDisplay = element.style.display;
       const originalMaxHeight = element.style.maxHeight;
       const originalOverflow = element.style.overflow;
+      const originalWhiteSpace = element.style.whiteSpace;
 
       const currentHeight = element.clientHeight;
 
@@ -147,16 +148,21 @@ export function TruncatedText({
       element.style.display = "block";
       element.style.maxHeight = "none";
       element.style.overflow = "visible";
+      // A one-line clamp can hide horizontal overflow without increasing its
+      // natural height. Measure the unwrapped width as well for its tooltip.
+      if (webkitLineClamp === "1") element.style.whiteSpace = "nowrap";
 
       const naturalHeight = element.scrollHeight;
+      const naturalWidth = element.scrollWidth;
 
       // @ts-ignore - vendor property
       element.style.webkitLineClamp = originalLineClamp;
       element.style.display = originalDisplay;
       element.style.maxHeight = originalMaxHeight;
       element.style.overflow = originalOverflow;
+      element.style.whiteSpace = originalWhiteSpace;
 
-      truncated = naturalHeight > currentHeight + 1;
+      truncated = naturalHeight > currentHeight + 1 || (webkitLineClamp === "1" && naturalWidth > element.clientWidth + 1);
     } else {
       truncated =
         Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||

@@ -130,7 +130,7 @@ export const EmployerInterviewsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height max-md:!h-[232px]`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
         <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-4 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -146,7 +146,7 @@ export const EmployerInterviewsCard = memo(() => {
   return (
     <>
     <Card
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height max-md:!h-[232px] touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -227,7 +227,7 @@ export const EmployerInterviewsCard = memo(() => {
                       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                       className={cn(
                         'rounded-lg cursor-pointer transition-colors',
-                        useTouchCarousel ? 'absolute inset-0 h-full min-h-[108px] px-3 py-2.5' : 'p-2',
+                         useTouchCarousel ? 'absolute inset-0 h-full min-h-0 px-3 py-1.5' : 'p-2',
                         canDismiss ? 'bg-white/5 hover:bg-white/10' : 'bg-white/10 hover:bg-white/15',
                       )}
                       onClick={() => {
@@ -245,17 +245,17 @@ export const EmployerInterviewsCard = memo(() => {
                       {useTouchCarousel ? (
                         <div className="flex h-full flex-col">
                           <div className="flex items-start justify-between gap-2">
-                            <TruncatedText text={interview.candidate_name} className="min-w-0 flex-1 font-semibold text-sm text-white" insideInteractive />
+                             <div className="min-w-0 flex-1"><TruncatedText text={interview.candidate_name} className="truncate font-semibold text-sm leading-5 text-white" side="top" /></div>
                             <span className={cn(
                               'flex shrink-0 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white',
-                              'h-7 px-2 text-xs',
+                               'h-5 px-2 text-xs',
                             )}>
                               {!canDismiss && <Clock3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
                               {timeUntil}
                             </span>
                           </div>
-                          <TruncatedText text={interview.job_title} className="mt-0.5 text-xs text-white" insideInteractive />
-                          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white">
+                           <TruncatedText text={interview.job_title} className="mt-0.5 truncate text-xs leading-4 text-white" side="top" />
+                           <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-white">
                             <span className="leading-none whitespace-nowrap">{formatInterviewDate(interview.scheduled_at)}</span>
                             <span className="leading-none whitespace-nowrap">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
                             <span className="flex items-center gap-1 leading-none whitespace-nowrap">
@@ -266,7 +266,7 @@ export const EmployerInterviewsCard = memo(() => {
                               <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
                             )}
                           </div>
-                          <div className="mt-auto flex items-stretch gap-1.5 pt-1.5">
+                           <div className="mt-auto flex items-stretch gap-1.5 pt-0.5">
                             {canDismiss ? (
                               <button
                                 type="button"
@@ -275,14 +275,14 @@ export const EmployerInterviewsCard = memo(() => {
                                   if (isAccidentalTap()) return;
                                   setPendingDismiss(interview);
                                 }}
-                                className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-7 px-2 text-xs"
+                                 className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-6 px-2 text-xs"
                                 aria-label="Ta bort från översikten"
                               >
                                 <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 <span className="leading-none">Ta bort</span>
                               </button>
                             ) : (
-                              <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-7 px-2 text-xs">
+                               <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-6 px-2 text-xs">
                                 {isConfirmed ? (
                                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 ) : (
@@ -292,7 +292,7 @@ export const EmployerInterviewsCard = memo(() => {
                               </span>
                             )}
                             {canDismiss ? (
-                              <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-7 px-2 text-xs">
+                               <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-6 px-2 text-xs">
                                 {isConfirmed ? (
                                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 ) : (
@@ -307,7 +307,7 @@ export const EmployerInterviewsCard = memo(() => {
                                   event.stopPropagation();
                                   void downloadInterviewIcs(interview.id);
                                 }}
-                                className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-7 px-2 text-xs"
+                                 className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-6 px-2 text-xs"
                                 aria-label="Lägg till i kalender"
                               >
                                 <CalendarPlus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
