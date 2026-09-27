@@ -68,7 +68,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
-import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { writeCachedCount, writeCachedLayout, SKELETON_COUNT_KEYS, MY_CANDIDATES_LAYOUT_KEY } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {

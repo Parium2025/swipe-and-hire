@@ -52,3 +52,28 @@ export function writeCachedCount(key: string, n: number): void {
     /* noop */
   }
 }
+
+/** Kolumnlayout för Mina kandidater: antal kort per steg i visningsordning. */
+export const MY_CANDIDATES_LAYOUT_KEY = 'parium:myCandidates:stageLayout';
+
+export function readCachedLayout(key: string): number[] | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr) || arr.length === 0 || arr.length > 30) return null;
+    return arr.map((n) => (Number.isFinite(n) && n > 0 ? Math.floor(n) : 0));
+  } catch {
+    return null;
+  }
+}
+
+export function writeCachedLayout(key: string, counts: number[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(counts.map((n) => Math.max(0, Math.floor(n)))));
+  } catch {
+    /* noop */
+  }
+}
