@@ -1001,13 +1001,13 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep > 0 && currentStep < totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto pt-8 px-6">
             <div className="flex justify-between items-center mb-2">
-               <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
-               <span className="text-sm text-white font-medium">{Math.round((currentStep / (totalSteps - 2)) * 100)}%</span>
+               <span className="text-sm text-white font-medium">Steg {displayStep} av {workSteps}</span>
+               <span className="text-sm text-white font-medium">{Math.round((displayStep / workSteps) * 100)}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
               <div 
                 className="h-full bg-white transition-all duration-300" 
-                 style={{ width: `${(currentStep / (totalSteps - 2)) * 100}%` }}
+                 style={{ width: `${(displayStep / workSteps) * 100}%` }}
               />
             </div>
           </div>
