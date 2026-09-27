@@ -294,6 +294,12 @@ const MyCandidates = () => {
   }, [displayedCandidates, activeStageOrder]);
 
 
+  // Cacha kolumnlayouten (kort per steg) så skeleton matchar exakt nästa cold-load.
+  useEffect(() => {
+    if (isLoading || isViewingColleague || activeStageOrder.length === 0) return;
+    writeCachedLayout(MY_CANDIDATES_LAYOUT_KEY, activeStageOrder.map(k => candidatesByStage[k]?.length || 0));
+  }, [isLoading, isViewingColleague, activeStageOrder, candidatesByStage]);
+
   // Stats
   const stats = useMemo(() => {
     const stageStats: Record<string, number> = {};
