@@ -26,7 +26,10 @@ const EmployerDesktopShell = ({
         }}
       />
 
-      <div className="h-screen flex flex-col w-full overflow-hidden relative">
+      <div
+        className="employer-dark h-screen flex flex-col w-full overflow-hidden relative"
+        style={{ '--employer-autofill-surface': '215 35% 36%' } as CSSProperties}
+      >
         <AnimatedBackground showBubbles={false} />
 
         <header className="sticky top-0 z-40">

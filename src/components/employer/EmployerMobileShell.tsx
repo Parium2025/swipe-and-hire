@@ -37,6 +37,10 @@ const EmployerMobileShell = ({
   useVisualViewportBounds();
 
   return (
+    <div
+      className="employer-dark contents"
+      style={{ '--employer-autofill-surface': '215 35% 36%' } as CSSProperties}
+    >
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
 
@@ -111,6 +115,7 @@ const EmployerMobileShell = ({
         </div>
       </div>
     </SidebarProvider>
+    </div>
   );
 };
 

@@ -931,6 +931,30 @@ All colors MUST be HSL.
     transition: background-color 600000s 0s, color 600000s 0s !important;
   }
 
+  /* Employer surfaces always keep their dark field treatment when Chrome,
+     Safari or password managers preview or commit autofill values. */
+  .employer-dark input:-webkit-autofill,
+  .employer-dark input:-webkit-autofill:hover,
+  .employer-dark input:-webkit-autofill:focus,
+  .employer-dark input:-webkit-autofill:active,
+  .employer-dark input:-internal-autofill-selected,
+  .employer-dark input:-internal-autofill-previewed,
+  .employer-dark input:autofill,
+  .employer-dark textarea:-webkit-autofill,
+  .employer-dark textarea:-internal-autofill-selected,
+  .employer-dark textarea:-internal-autofill-previewed,
+  .employer-dark textarea:autofill,
+  .employer-dark select:-webkit-autofill {
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    caret-color: hsl(var(--foreground)) !important;
+    background-color: transparent !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--employer-autofill-surface)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--employer-autofill-surface)) inset !important;
+    transition: background-color 600000s 0s, color 600000s 0s !important;
+  }
+
 }
 
 @layer utilities {
