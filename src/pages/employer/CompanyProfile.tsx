@@ -769,7 +769,7 @@ const CompanyProfile = () => {
         ? `Fyll i alla obligatoriska fält innan du lämnar sidan: ${missing.join(', ')}.`
         : null;
     });
-  }, [registerLeaveBlocker]);
+  }, [registerLeaveBlocker, isAdmin]);
 
 
 
@@ -790,6 +790,59 @@ const CompanyProfile = () => {
 
   if (authLoading && !profile) {
     return <EmployerCompanyProfileSkeleton />;
+  }
+
+  // Rekryterare ser bara sina egna intervjuinställningar — företagsprofilen
+  // i övrigt är låst och ändras bara av en admin.
+  if (!isAdmin) {
+    return (
+      <div className="flex-1 min-h-0 w-full space-y-8 responsive-container overflow-y-auto overscroll-contain [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
+          <p className="text-white">Företagsprofilen ändras av en admin. Dina egna intervjuinställningar kan du ändra här.</p>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-4">
+          <Lock className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+          <p className="text-sm text-white">Företagsuppgifter, logga och beskrivning är låsta för dig. Be en admin om du behöver ändra dem.</p>
+        </div>
+
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+          <CompanyInterviewSettings
+            formData={formData}
+            onFormDataChange={handleFormDataChange}
+            orgDefaultVideoLink={orgDefaultVideoLink}
+            hideTopDivider
+          />
+
+          <div className="mt-4 min-h-4 text-center text-xs text-white" aria-live="polite" role="status">
+            {saveStatus === 'error' ? (
+              <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                {saveError || 'Kunde inte spara ändringen.'}
+                <button type="button" onClick={retrySave} className="underline underline-offset-2 text-white">
+                  Försök igen
+                </button>
+              </span>
+            ) : (
+              <span className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}>
+                {saveStatus === 'saving' ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Sparar…
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Sparat
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
