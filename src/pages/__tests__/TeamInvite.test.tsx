@@ -77,6 +77,42 @@ describe('TeamInvite', () => {
     expect(screen.queryAllByRole('link', { name: 'Till startsidan' })).toHaveLength(0);
   });
 
+  it('stoppar ett jobbsökarkonto med serverns tydliga meddelande', async () => {
+    mocks.auth.user = { id: 'job-seeker-user' };
+    mocks.invoke.mockResolvedValue({
+      data: null,
+      error: {
+        context: new Response(
+          JSON.stringify({ error: 'Den här adressen har redan ett jobbsökarkonto. Be om en inbjudan till din företagsmejl.' }),
+          { status: 409, headers: { 'Content-Type': 'application/json' } },
+        ),
+      },
+    });
+
+    renderInvite(`/team-invite?token=${'d'.repeat(64)}`);
+
+    expect(await screen.findByText('Den här adressen har redan ett jobbsökarkonto. Be om en inbjudan till din företagsmejl.')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Till startsidan' })).toHaveLength(1);
+  });
+
+  it('visar att en redan använd inbjudan inte kan användas igen', async () => {
+    mocks.auth.user = { id: 'invited-employer' };
+    mocks.invoke.mockResolvedValue({
+      data: null,
+      error: {
+        context: new Response(
+          JSON.stringify({ error: 'Inbjudan har redan använts.' }),
+          { status: 409, headers: { 'Content-Type': 'application/json' } },
+        ),
+      },
+    });
+
+    renderInvite(`/team-invite?token=${'e'.repeat(64)}`);
+
+    expect(await screen.findByText('Inbjudan har redan använts.')).toBeInTheDocument();
+    expect(mocks.refreshProfile).not.toHaveBeenCalled();
+  });
+
   it('visar ett tydligt fel och en enda knapp när token saknas', async () => {
     mocks.auth.user = { id: 'employer-user' };
     renderInvite('/team-invite');
