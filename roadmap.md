@@ -18,4 +18,4 @@
 - [x] Preserve the uncropped employer profile photo through welcome setup and later profile edits
 - [x] Audit employer welcome guide, preserve intentionally emptied draft fields, and detect failed original-photo uploads
 - [x] Remove competing pointer focus, delayed field scrolling and global keyboard scroll padding on mobile forms
-- [x] Match candidate loading skeletons to exact board widths, account, list and desktop table
+- [x] Match candidate loading skeletons to exact board widths, account, list and desktop table without substituting unresolved default stages on cold start

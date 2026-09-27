@@ -301,10 +301,8 @@ const MyCandidates = () => {
     if (isLoading || isViewingColleague || activeStageOrder.length === 0) return;
     const key = myCandidatesLayoutKey(user?.id, activeListId);
     if (!key) return;
-    writeCachedLayout(
-      key,
-      activeStageOrder.map(k => stageCounts?.[k] ?? candidatesByStage[k]?.length ?? 0),
-    );
+    if (!stageCounts) return;
+    writeCachedLayout(key, activeStageOrder.map(k => stageCounts[k] ?? 0));
   }, [isLoading, isViewingColleague, activeStageOrder, candidatesByStage, stageCounts, user?.id, activeListId]);
 
   // Stats
