@@ -5,7 +5,7 @@
 - Mobile shells stay `100dvh`; keyboard-heavy pages scroll internally and browser chrome never covers content.
 - Long employer text areas have bounded height and internal scrolling.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed field scrolling.
-- Only standalone mode owns one persistent safe-area strip and offset; ordinary Safari has no top overlay.
+- Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
 - Release residual field focus when the iOS keyboard closes.
 - Employer welcome drafts until confirmation; replay trials write nothing; only valid meeting links become defaults.
 - Store uncropped originals with crops and always reopen originals for edits.
