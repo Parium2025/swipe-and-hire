@@ -870,9 +870,11 @@ All colors MUST be HSL.
     opacity: 1;
   }
 
-  /* Browser autofill styling — retain each field's own surface everywhere.
-     Never repaint autofilled fields with the page background: some app shells
-     intentionally use light page tokens behind dark translucent controls. */
+  /* Browser autofill styling — retain each field's authored surface everywhere.
+     Do not use background-clip:text or a transparent autofill background here:
+     either removes translucent field fills such as bg-white/5 and exposes the
+     darker panel behind the control. Delaying the browser's colour override
+     leaves the exact same field surface as manually entered text. */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -884,12 +886,7 @@ All colors MUST be HSL.
   select:-webkit-autofill {
     -webkit-text-fill-color: white !important;
     caret-color: white !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    background-color: transparent !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important;
-    transition: background-color 9999s ease-in-out 0s !important;
+    transition: background-color 600000s 0s, color 600000s 0s !important;
   }
 
 
@@ -905,10 +902,7 @@ All colors MUST be HSL.
     color: white !important;
   }
 
-  /* Auth pages force light text for autofill. Bakgrunden målas med samma
-     ljusblå gråton som fältens vanliga bg-white/5-yta (uppmätt rgb(60 88 126)),
-     så ett autofyllt fält ser exakt ut som ett handskrivet — aldrig mörkare,
-     aldrig vitt. */
+  /* Auth pages keep the same authored field surface and force light text. */
   .auth-dark input:-webkit-autofill,
   .auth-dark input:-webkit-autofill:hover,
   .auth-dark input:-webkit-autofill:focus,
@@ -921,11 +915,6 @@ All colors MUST be HSL.
   .auth-dark select:-webkit-autofill {
     -webkit-text-fill-color: hsl(210 40% 98%) !important;
     caret-color: hsl(210 40% 98%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    background-color: transparent !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important;
     transition: background-color 600000s 0s, color 600000s 0s !important;
   }
 
