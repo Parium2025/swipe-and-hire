@@ -63,6 +63,14 @@ export const getTabAuthUserId = (): string | null => {
   return null;
 };
 
+export const isAuthEventFromAnotherTab = (
+  previousUserId: string | null,
+  eventUserId: string | null,
+): boolean => {
+  if (!previousUserId || eventUserId === previousUserId) return false;
+  return getTabAuthUserId() === previousUserId;
+};
+
 /**
  * Skyddsnät mot trasiga sessionsvärden (avbruten skrivning, korsad kopiering,
  * full lagring). Ett halvskrivet värde skickas annars vidare till GoTrue som

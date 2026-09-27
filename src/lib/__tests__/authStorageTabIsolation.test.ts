@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { getTabAuthUserId } from '@/lib/authStorage';
+import { getTabAuthUserId, isAuthEventFromAnotherTab } from '@/lib/authStorage';
 
 const AUTH_KEY = 'sb-example-auth-token';
 
@@ -23,5 +23,20 @@ describe('authStorage tab isolation', () => {
     sessionStorage.setItem(AUTH_KEY, '{broken');
     sessionStorage.setItem('unrelated', JSON.stringify({ user: { id: 'wrong' } }));
     expect(getTabAuthUserId()).toBeNull();
+  });
+
+  it('identifierar ett annat kontos inloggning som en främmande flikhändelse', () => {
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify({ user: { id: 'account-a' } }));
+    expect(isAuthEventFromAnotherTab('account-a', 'account-b')).toBe(true);
+  });
+
+  it('identifierar en annan fliks utloggning utan att logga ut den aktuella fliken', () => {
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify({ user: { id: 'account-a' } }));
+    expect(isAuthEventFromAnotherTab('account-a', null)).toBe(true);
+  });
+
+  it('släpper igenom den aktuella flikens riktiga kontoändring', () => {
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify({ user: { id: 'account-b' } }));
+    expect(isAuthEventFromAnotherTab('account-a', 'account-b')).toBe(false);
   });
 });

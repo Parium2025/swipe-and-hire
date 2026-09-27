@@ -12,7 +12,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
-import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership, getTabAuthUserId } from '@/lib/authStorage';
+import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership, isAuthEventFromAnotherTab } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches, cancelPendingCacheClear } from '@/hooks/useEagerRatingsPreload';
@@ -527,13 +527,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // GoTrue kan skicka en annan fliks auth-händelse via BroadcastChannel
         // trots att varje Parium-flik avsiktligt har sin egen sessionStorage.
         // Flikens lokala konto är då sanningen och händelsen ska ignoreras.
-        const tabAuthUserId = previousUserId !== null ? getTabAuthUserId() : null;
-        const isForeignTabAuthEvent =
-          previousUserId !== null &&
-          tabAuthUserId === previousUserId &&
-          newUserId !== previousUserId;
-
-        if (isForeignTabAuthEvent) {
+        if (isAuthEventFromAnotherTab(previousUserId, newUserId)) {
           console.log('🛡️ Ignoring auth change from another tab; this tab keeps its own account');
           return;
         }
