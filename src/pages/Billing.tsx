@@ -12,7 +12,9 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { supabase } from '@/integrations/supabase/client';
+import { Lock } from 'lucide-react';
 
 type PurchaseRow = {
   id: string;
@@ -39,6 +41,7 @@ type MonthGroup = {
 
 const Billing = () => {
   const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const [expandedMonths, setExpandedMonths] = useState<{ [key: string]: boolean }>({});
 
   // Riktiga köp från databasen. Betalningar är ännu inte aktiverade, så för de
@@ -126,6 +129,21 @@ const Billing = () => {
 
   const getTotalForMonth = (payments: MonthGroup['payments']) =>
     payments.reduce((sum, payment) => (payment.status === 'paid' ? sum + payment.amount : sum), 0);
+
+  // Fakturering är bolagsinformation — bara admins får se den.
+  if (!adminLoading && !isAdmin) {
+    return (
+      <div className="responsive-container-wide space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+        <div className="text-center mb-6">
+          <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Betalningar</h1>
+        </div>
+        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-4">
+          <Lock className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+          <p className="text-sm text-white">Betalningar och fakturering kan bara ses av en admin.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="responsive-container-wide space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
