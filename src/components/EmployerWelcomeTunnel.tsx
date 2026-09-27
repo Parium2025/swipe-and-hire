@@ -28,11 +28,12 @@ import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
 
+// Samma texter som på inställningssidan (EmployerNotificationsPanel) — håll dessa i synk.
 const notificationRows: NotificationRow[] = [
-  { type: 'new_application', label: 'Nya ansökningar', description: 'Samlat mejl med dygnets nya ansökningar, högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
-  { type: 'new_message', label: 'Meddelanden', description: 'Nya meddelanden från kandidater.', channels: ['in_app', 'push', 'email'] },
-  { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar och ändringar är alltid på.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
-  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej till intervjun.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_application', label: 'Nya ansökningar', description: 'När någon söker dina jobb. Mejlet är alltid en samlad sammanfattning, aldrig ett mejl per ansökan. Det skickas bara när det finns nya ansökningar du inte öppnat — som mest ett mejl per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_message', label: 'Meddelanden', description: 'Nya chattmeddelanden. Meddelandet hamnar alltid i inkorgen — mejl skickas bara som en samlad påminnelse om olästa meddelanden, som mest ett mejl per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar, av- och ombokningar samt påminnelsen strax före intervjun. Alltid på — det här är tider i din kalender.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
+  { type: 'interview_response', label: 'Kandidatens svar', description: 'Kandidaten tackar ja eller nej till kallelsen. I appen betyder att svaret också landar som ett meddelande från kandidaten i chatten.', channels: ['in_app', 'push', 'email'] },
 ];
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
@@ -852,10 +853,20 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold text-white">Dina aviseringar</h2>
               <p className="text-white">Välj vad du vill få i appen, som push eller via mejl. Du kan ändra valen i inställningarna senare.</p>
             </div>
-            <NotificationPreferencesPanel title="" rows={notificationRows} isEnabled={notificationValue}
-              toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
-              disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
-              intro={emailKnown && !emailSubscribed ? 'Din adress är avregistrerad från app-mejl. Aktivera mejlutskick igen under Inställningar om du vill få dem.' : undefined} />
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-left">
+              <NotificationPreferencesPanel title="" rows={notificationRows} isEnabled={notificationValue}
+                toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
+                disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
+                intro={
+                  <>
+                    <span className="font-medium">I appen</span> är notisklockan i menyn,{' '}
+                    <span className="font-medium">Push</span> är skärmnotisen i mobilen och{' '}
+                    <span className="font-medium">Mejl</span> går till din e-post. Inställningarna gäller bara
+                    dig — dina kollegor styr sina egna.
+                    {emailKnown && !emailSubscribed ? ' Din adress är avregistrerad från app-mejl — aktivera mejlutskick igen under Inställningar om du vill få dem.' : ''}
+                  </>
+                } />
+            </div>
           </div>
         );
 
