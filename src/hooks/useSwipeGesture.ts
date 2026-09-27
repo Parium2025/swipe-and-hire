@@ -1,4 +1,5 @@
 import { useCallback, useRef, TouchEvent } from 'react';
+import { hapticSwipeTick } from '@/lib/haptics';
 
 interface UseSwipeGestureOptions {
   onSwipeLeft?: () => void;
@@ -40,6 +41,9 @@ export function useSwipeGesture({
 
     // Only trigger swipe if horizontal movement is dominant (at least 1.5x vertical)
     if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if ((dx > 0 && onSwipeLeft) || (dx < 0 && onSwipeRight)) {
+        hapticSwipeTick();
+      }
       if (dx > 0 && onSwipeLeft) {
         onSwipeLeft();
       }
