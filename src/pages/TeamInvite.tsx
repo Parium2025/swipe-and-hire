@@ -11,7 +11,7 @@ type Status = "idle" | "working" | "success" | "error";
 const TeamInvite = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshProfile } = useAuth();
   const token = searchParams.get("token") || "";
 
   const [status, setStatus] = useState<Status>("idle");
@@ -43,13 +43,15 @@ const TeamInvite = () => {
         return;
       }
 
+      // Läs om profilen så välkomstguiden direkt vet att bolagets uppgifter är ärvda.
+      await refreshProfile().catch(() => undefined);
       setOrganizationName((data as { organizationName?: string | null })?.organizationName ?? null);
       setStatus("success");
     } catch {
       setStatus("error");
       setMessage("Något gick fel. Försök igen om en stund.");
     }
-  }, [token]);
+  }, [token, refreshProfile]);
 
   useEffect(() => {
     if (authLoading || attempted.current) return;
