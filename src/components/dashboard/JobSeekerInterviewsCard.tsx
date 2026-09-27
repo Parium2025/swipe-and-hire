@@ -137,7 +137,7 @@ export const JobSeekerInterviewsCard = memo(() => {
   return (
     <Card
       ref={swipeLockRef}
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y [contain:layout_paint] [transform:translateZ(0)] [backface-visibility:hidden]`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

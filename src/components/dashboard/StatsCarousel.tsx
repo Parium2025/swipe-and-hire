@@ -61,7 +61,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
   return (
     <Card
       ref={swipeLockRef}
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y [contain:layout_paint] [transform:translateZ(0)] [backface-visibility:hidden]`}
       onMouseEnter={pauseNow}
       onMouseLeave={resumeNow}
       onTouchStart={(e) => { pauseNow(); swipeHandlers.onTouchStart(e); }}
