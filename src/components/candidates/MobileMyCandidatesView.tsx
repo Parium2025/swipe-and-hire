@@ -1,5 +1,5 @@
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -386,6 +386,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
     if (idx > 0) setActiveTab(stages[idx - 1]);
   }, [activeTab, stages]);
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
+  const stageSwipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
 
   /** Ett tryck = byt steg direkt. Inga dubbeltryck, ingen fördröjning. */
   const handleStageClick = useCallback((stage: string) => {
@@ -644,7 +645,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
 
         {/* Candidate list — swipe here switches stages step by step */}
         <div
-          ref={listScrollRef}
+          ref={(node) => { listScrollRef.current = node; stageSwipeLockRef(node); }}
           className="flex-1 min-h-[40vh]"
           onTouchStart={stageSwipeHandlers.onTouchStart}
           onTouchMove={stageSwipeHandlers.onTouchMove}

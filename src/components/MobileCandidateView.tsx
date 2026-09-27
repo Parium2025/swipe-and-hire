@@ -1,5 +1,5 @@
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
@@ -376,6 +376,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
     if (idx > 0) setActiveTab(stages[idx - 1]);
   }, [activeTab, stages]);
   const stageSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextStage, onSwipeRight: swipeToPrevStage, threshold: 50 });
+  const stageSwipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
 
   const handleStagePointerDown = useCallback((stage: string, pointerType: string) => {
     // Mouse: handled by onClick. Touch/pen: only track double-tap for settings menu.
@@ -522,6 +523,7 @@ export const MobileCandidateView = memo(function MobileCandidateView({
 
       {/* Candidate list — swipe here switches stages step by step */}
       <div
+        ref={stageSwipeLockRef}
         className="relative flex-1 min-h-[50vh] rounded-lg border border-white/20 bg-white/5"
         onTouchStart={stageSwipeHandlers.onTouchStart}
         onTouchMove={stageSwipeHandlers.onTouchMove}
