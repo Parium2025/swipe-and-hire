@@ -74,9 +74,12 @@ serve(async (req) => {
 
   // The invitation is bound to the invited address — no one else can claim it.
   const callerEmail = (caller.email || "").toLowerCase();
-  if (!callerEmail || callerEmail !== invitation.email.toLowerCase()) {
+  if (!callerEmail || callerEmail.trim() !== invitation.email.trim().toLowerCase()) {
     return json(
-      { error: "Inbjudan gäller en annan e-postadress. Logga in med den adressen." },
+      {
+        error: "Du är inloggad med en annan e-postadress än den som inbjudan skickades till.",
+        code: "invite_email_mismatch",
+      },
       403,
     );
   }
