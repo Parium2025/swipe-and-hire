@@ -97,7 +97,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                   >
                     Använd företagets standardlänk
                   </Button>
-                  <p className="truncate text-xs text-white" title={orgDefaultVideoLink}>{orgDefaultVideoLink.replace(/^https?:\/\//, '')}</p>
+                  <p className="break-all text-xs leading-5 text-white">{orgDefaultVideoLink.replace(/^https?:\/\//, '')}</p>
                 </div>
               )}
               
