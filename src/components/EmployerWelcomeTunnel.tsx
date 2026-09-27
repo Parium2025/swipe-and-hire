@@ -139,7 +139,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           }
           if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 6));
+            const savedStep = Math.min(Math.max(parsed.currentStep, 0), 6);
+            setCurrentStep((profile as any)?.joined_via_invite === true && (savedStep === 1 || savedStep === 2) ? 3 : savedStep);
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -148,7 +149,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       }
       setDraftRestored(true);
     }
-  }, [draftRestored, draftKey, isReplay]);
+  }, [draftRestored, draftKey, isReplay, profile]);
 
   // Förifyll med uppgifterna från registreringen så fort profilen hinner
   // laddas (den är asynkron och kommer ofta efter första renderingen).

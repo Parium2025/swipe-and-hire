@@ -88,14 +88,17 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               )}
 
               {!formData.interview_video_link.trim() && orgDefaultVideoLink && (
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={() => onFormDataChange({ interview_video_link: orgDefaultVideoLink })}
-                  className="h-auto max-w-full justify-start whitespace-normal break-all px-0 py-1 text-left text-xs leading-5 text-white underline underline-offset-2 hover:text-white"
-                >
-                  Använd företagets standardlänk ({orgDefaultVideoLink.replace(/^https?:\/\//, '')})
-                </Button>
+                <div className="min-w-0 space-y-0.5">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => onFormDataChange({ interview_video_link: orgDefaultVideoLink })}
+                    className="h-auto max-w-full justify-start whitespace-normal px-0 py-1 text-left text-xs leading-5 text-white underline underline-offset-2 hover:text-white"
+                  >
+                    Använd företagets standardlänk
+                  </Button>
+                  <p className="truncate text-xs text-white" title={orgDefaultVideoLink}>{orgDefaultVideoLink.replace(/^https?:\/\//, '')}</p>
+                </div>
               )}
               
               <Collapsible>
