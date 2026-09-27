@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
+import { readPendingTeamInvite } from '@/lib/pendingTeamInvite';
 import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
 // Delad bakgrund för hela /auth (inklusive status- och felsidor)
@@ -707,7 +708,9 @@ const Auth = () => {
         const storedReturnTo = typeof window !== 'undefined'
           ? sessionStorage.getItem('parium-auth-return-to')
           : null;
-        const requestedReturnTo = typeof initialReturnTo === 'string' ? initialReturnTo : storedReturnTo;
+        const requestedReturnTo = typeof initialReturnTo === 'string'
+          ? initialReturnTo
+          : storedReturnTo ?? readPendingTeamInvite();
         const allowedReturnTo = requestedReturnTo === '/profile#notifications' || requestedReturnTo === '/settings#notifications';
         const teamInviteReturnTo = typeof requestedReturnTo === 'string' && /^\/team-invite\?token=[a-f0-9]{20,200}$/i.test(requestedReturnTo);
         if (teamInviteReturnTo) {

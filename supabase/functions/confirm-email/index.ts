@@ -36,6 +36,22 @@ const provisionEmployerWorkspace = async (userId: string): Promise<void> => {
       .maybeSingle();
     if (existingRole) return;
 
+    // Inbjuden kollega: ingen egen organisation — kontot kopplas till
+    // bolaget när inbjudan accepteras.
+    const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+    const email = (authUser?.user?.email || '').toLowerCase();
+    if (email) {
+      const { data: pendingInvite } = await supabase
+        .from('organization_invitations')
+        .select('id')
+        .ilike('email', email)
+        .eq('status', 'pending')
+        .gt('expires_at', new Date().toISOString())
+        .limit(1)
+        .maybeSingle();
+      if (pendingInvite) return;
+    }
+
     const orgName = (profile.company_name || '').trim() || 'Min organisation';
     const { data: org, error: orgError } = await supabase
       .from('organizations')

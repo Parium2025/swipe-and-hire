@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -7,7 +7,8 @@ import TeamInvite from '../TeamInvite';
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
   refreshProfile: vi.fn(),
-  auth: { user: null as { id: string } | null, loading: false },
+  signOut: vi.fn(),
+  auth: { user: null as { id: string; email?: string } | null, loading: false },
 }));
 
 vi.mock('@/integrations/supabase/client', () => ({
@@ -19,6 +20,7 @@ vi.mock('@/hooks/useAuth', () => ({
     user: mocks.auth.user,
     loading: mocks.auth.loading,
     refreshProfile: mocks.refreshProfile,
+    signOut: mocks.signOut,
   }),
 }));
 
@@ -38,29 +40,59 @@ const renderInvite = (entry: string) => render(
   </HelmetProvider>,
 );
 
+const PREVIEW = { data: { email: 'ny@firma.se', organizationName: 'Firma AB', accountExists: true }, error: null };
+
 describe('TeamInvite', () => {
   beforeEach(() => {
     mocks.auth.user = null;
     mocks.auth.loading = false;
     mocks.invoke.mockReset();
     mocks.refreshProfile.mockReset();
+    mocks.signOut.mockReset();
     sessionStorage.clear();
+    localStorage.clear();
   });
 
   afterEach(cleanup);
 
-  it('bevarar länken och skickar en utloggad mottagare till inloggningen', async () => {
+  it('förklarar inbjudan för en utloggad mottagare och bevarar länken vid inloggning', async () => {
     const token = 'a'.repeat(64);
+    mocks.invoke.mockResolvedValue({ data: { email: 'ny@firma.se', organizationName: 'Firma AB', accountExists: true }, error: null });
     renderInvite(`/team-invite?token=${token}`);
 
+    expect(await screen.findByText('Logga in med ny@firma.se för att gå med i teamet.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Logga in' }));
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/auth'));
     expect(sessionStorage.getItem('parium-auth-return-to')).toBe(`/team-invite?token=${token}`);
-    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(localStorage.getItem('parium-pending-team-invite')).toContain(token);
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('skickar en mottagare utan konto till registrering som arbetsgivare', async () => {
+    mocks.invoke.mockResolvedValue({ data: { email: 'ny@firma.se', organizationName: 'Firma AB', accountExists: false }, error: null });
+    renderInvite(`/team-invite?token=${'f'.repeat(64)}`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Skapa konto' }));
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/auth?mode=register&role=employer'));
+  });
+
+  it('erbjuder en enda knapp för att byta konto när fel konto är inloggat', async () => {
+    mocks.auth.user = { id: 'inviter', email: 'chef@firma.se' };
+    mocks.signOut.mockResolvedValue(undefined);
+    mocks.invoke.mockResolvedValue({ data: { email: 'ny@firma.se', organizationName: 'Firma AB', accountExists: true }, error: null });
+    renderInvite(`/team-invite?token=${'9'.repeat(64)}`);
+
+    const button = await screen.findByRole('button', { name: 'Logga ut och fortsätt' });
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    fireEvent.click(button);
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/auth'));
+    expect(mocks.signOut).toHaveBeenCalledTimes(1);
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
   });
 
   it('visar serverns kontomeddelande och exakt en startsidesknapp', async () => {
-    mocks.auth.user = { id: 'admin-user' };
-    mocks.invoke.mockResolvedValue({
+    mocks.auth.user = { id: 'admin-user', email: 'ny@firma.se' };
+    mocks.invoke.mockResolvedValueOnce(PREVIEW).mockResolvedValue({
       data: null,
       error: {
         context: new Response(
@@ -78,8 +110,8 @@ describe('TeamInvite', () => {
   });
 
   it('stoppar ett jobbsökarkonto med serverns tydliga meddelande', async () => {
-    mocks.auth.user = { id: 'job-seeker-user' };
-    mocks.invoke.mockResolvedValue({
+    mocks.auth.user = { id: 'job-seeker-user', email: 'ny@firma.se' };
+    mocks.invoke.mockResolvedValueOnce(PREVIEW).mockResolvedValue({
       data: null,
       error: {
         context: new Response(
@@ -123,14 +155,14 @@ describe('TeamInvite', () => {
   });
 
   it('läser om profilen och går till välkomstflödet efter godkänd inbjudan', async () => {
-    mocks.auth.user = { id: 'invited-employer' };
-    mocks.invoke.mockResolvedValue({ data: { success: true }, error: null });
+    mocks.auth.user = { id: 'invited-employer', email: 'ny@firma.se' };
+    mocks.invoke.mockResolvedValueOnce(PREVIEW).mockResolvedValue({ data: { success: true }, error: null });
     mocks.refreshProfile.mockResolvedValue(undefined);
 
     renderInvite(`/team-invite?token=${'c'.repeat(64)}`);
 
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/home'));
-    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+    expect(mocks.invoke).toHaveBeenCalledTimes(2);
     expect(mocks.refreshProfile).toHaveBeenCalledTimes(1);
   });
 });

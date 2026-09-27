@@ -169,7 +169,7 @@ export const EmployerInterviewsCard = memo(() => {
     <>
     <Card
       ref={swipeLockRef}
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y [contain:layout_paint] [transform:translateZ(0)] [backface-visibility:hidden]`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -233,11 +233,10 @@ export const EmployerInterviewsCard = memo(() => {
                       + (interview.duration_minutes ?? 0) * 60_000;
                     const remainingMs = endMs + 24 * 3_600_000 - now;
                     if (remainingMs <= 0) return 'Tas bort inom kort';
+                    // Hela timmar räcker; sista timmen räknas i minuter.
                     const totalMinutes = Math.ceil(remainingMs / 60_000);
-                    const hours = Math.floor(totalMinutes / 60);
-                    const minutes = totalMinutes % 60;
-                    if (hours <= 0) return `Tas automatiskt bort om ${minutes} min`;
-                    return `Tas automatiskt bort om ${hours} h ${minutes} min`;
+                    if (totalMinutes < 60) return `Tas automatiskt bort om ${totalMinutes} min`;
+                    return `Tas automatiskt bort om ${Math.floor(totalMinutes / 60)} h`;
                   })();
 
                   return (
@@ -286,7 +285,7 @@ export const EmployerInterviewsCard = memo(() => {
                               <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                             </span>
                             {autoRemoveLabel && (
-                              <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                              <span className="leading-none whitespace-nowrap text-white">{autoRemoveLabel}</span>
                             )}
                           </div>
                            <div className="mt-auto flex items-stretch gap-1.5 pt-0.5">
@@ -391,7 +390,7 @@ export const EmployerInterviewsCard = memo(() => {
                             <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                           </span>
                           {autoRemoveLabel && (
-                            <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                            <span className="leading-none whitespace-nowrap text-white">{autoRemoveLabel}</span>
                           )}
                           {canDismiss ? (
                             <span className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white whitespace-nowrap">

@@ -102,7 +102,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   return (
     <Card
       ref={swipeLockRef} 
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y [contain:layout_paint] [transform:translateZ(0)] [backface-visibility:hidden]`}
       onMouseEnter={pauseNow}
       onMouseLeave={resumeNow}
       onTouchStart={(e) => { pauseNow(); swipeHandlers.onTouchStart(e); }}

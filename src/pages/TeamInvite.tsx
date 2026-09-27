@@ -4,20 +4,37 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { forgetInvite, rememberInvite } from "@/lib/pendingTeamInvite";
 import { AlertTriangle, CheckCircle2, Loader2, Users } from "lucide-react";
 
-type Status = "idle" | "working" | "success" | "error";
+type Status = "idle" | "working" | "success" | "error" | "needs-auth" | "wrong-account";
+
+interface InvitePreview { email: string; organizationName: string | null; accountExists: boolean }
+
+const readServerError = async (error: unknown, fallback: string) => {
+  const context = (error as { context?: Response }).context;
+  if (context && typeof context.json === "function") {
+    try {
+      const body = await context.json();
+      if (typeof body?.error === "string") return body.error as string;
+    } catch { /* fallback */ }
+  }
+  return fallback;
+};
 
 const TeamInvite = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading, refreshProfile } = useAuth();
+  const { user, loading: authLoading, refreshProfile, signOut } = useAuth();
   const token = searchParams.get("token") || "";
 
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string>("");
   const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const [preview, setPreview] = useState<InvitePreview | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const attempted = useRef(false);
+  const destination = `/team-invite?token=${encodeURIComponent(token)}`;
 
   const accept = useCallback(async () => {
     setStatus("working");
@@ -27,22 +44,14 @@ const TeamInvite = () => {
       });
 
       if (error) {
-        // Edge errors carry the server message in the response body.
-        let serverMessage = "Inbjudan kunde inte accepteras.";
-        const context = (error as { context?: Response }).context;
-        if (context && typeof context.json === "function") {
-          try {
-            const body = await context.json();
-            if (typeof body?.error === "string") serverMessage = body.error;
-          } catch {
-            // Fall back to the generic message.
-          }
-        }
+        const serverMessage = await readServerError(error, "Inbjudan kunde inte accepteras.");
+        if ((error as { context?: Response }).context?.status !== 403) forgetInvite();
         setStatus("error");
         setMessage(serverMessage);
         return;
       }
 
+      forgetInvite();
       // Läs om profilen så välkomstguiden direkt vet att bolagets uppgifter är ärvda.
       await refreshProfile();
       navigate('/home', { replace: true });
@@ -54,26 +63,55 @@ const TeamInvite = () => {
 
   useEffect(() => {
     if (authLoading || attempted.current) return;
+    attempted.current = true;
     if (!token) {
-      attempted.current = true;
       setStatus("error");
       setMessage("Länken saknar en giltig inbjudningskod.");
       return;
     }
-    if (!user) {
-      attempted.current = true;
-      const destination = `/team-invite?token=${encodeURIComponent(token)}`;
-      try {
-        sessionStorage.setItem("parium-auth-return-to", destination);
-      } catch {
-        // Navigation state below still carries the destination in this tab.
+    void (async () => {
+      const { data, error } = await supabase.functions.invoke("team-invite-accept", {
+        body: { token, preview: true },
+      });
+      if (error || !data?.email) {
+        forgetInvite();
+        setStatus("error");
+        setMessage(await readServerError(error, "Inbjudan kunde inte hittas."));
+        return;
       }
-      navigate("/auth", { state: { returnTo: destination }, replace: true });
-      return;
+      const info = data as InvitePreview;
+      setPreview(info);
+      setOrganizationName(info.organizationName);
+      if (!user) {
+        setStatus("needs-auth");
+        return;
+      }
+      if ((user.email || "").toLowerCase() !== info.email.toLowerCase()) {
+        setStatus("wrong-account");
+        return;
+      }
+      void accept();
+    })();
+  }, [accept, authLoading, destination, token, user]);
+
+  const goToAuth = useCallback(() => {
+    rememberInvite(destination);
+    try { sessionStorage.setItem("parium-auth-return-to", destination); } catch { /* localStorage covers it */ }
+    const register = preview ? !preview.accountExists : false;
+    navigate(register ? "/auth?mode=register&role=employer" : "/auth", {
+      state: { returnTo: destination, ...(register ? { mode: "register", role: "employer" } : {}) },
+      replace: true,
+    });
+  }, [destination, navigate, preview]);
+
+  const switchAccount = useCallback(async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      goToAuth();
     }
-    attempted.current = true;
-    void accept();
-  }, [accept, authLoading, navigate, token, user]);
+  }, [goToAuth, signOut]);
 
   return (
     <main className="min-h-screen bg-parium-gradient flex items-center justify-center px-4 py-8 text-primary-foreground">
@@ -92,6 +130,37 @@ const TeamInvite = () => {
             <Loader2 className="h-6 w-6 animate-spin text-white" />
             <p className="text-sm text-white">Kontrollerar din inbjudan…</p>
           </div>
+        )}
+
+        {(status === "needs-auth" || status === "wrong-account") && preview && (
+          <>
+            <div className="mb-3 flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10">
+                <Users className="h-[18px] w-[18px] text-secondary" />
+              </span>
+              <h1 className="min-w-0 break-words text-2xl font-semibold text-white">
+                Inbjudan till {preview.organizationName || "teamet"}
+              </h1>
+            </div>
+            <p className="mb-7 break-words text-sm leading-6 text-white sm:text-base">
+              {status === "wrong-account"
+                ? `Du är inloggad som ${user?.email ?? "ett annat konto"}. Inbjudan gäller ${preview.email}. Logga ut och fortsätt med rätt adress.`
+                : preview.accountExists
+                  ? `Logga in med ${preview.email} för att gå med i teamet.`
+                  : `Skapa ett konto med ${preview.email} för att gå med i teamet. Företagsuppgifterna hämtas från bolaget.`}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={signingOut}
+              className="w-full rounded-full text-white [&_svg]:text-white"
+              onClick={status === "wrong-account" ? () => void switchAccount() : goToAuth}
+            >
+              {status === "wrong-account"
+                ? "Logga ut och fortsätt"
+                : preview.accountExists ? "Logga in" : "Skapa konto"}
+            </Button>
+          </>
         )}
 
         {status === "success" && (
