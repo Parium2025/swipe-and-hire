@@ -1,4 +1,5 @@
 import { useCallback, useRef, TouchEvent } from 'react';
+import { hapticSwipeTick } from '@/lib/haptics';
 
 interface UseSwipeGestureOptions {
   onSwipeLeft?: () => void;
