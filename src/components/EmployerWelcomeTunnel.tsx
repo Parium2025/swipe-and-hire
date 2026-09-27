@@ -192,7 +192,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     if (!draftRestored || orgLinkAppliedRef.current) return;
     if (!orgDefaultVideoLink || isReplay) return;
     setFormData((prev) => {
-      if (prev.interviewVideoLink) return prev;
+       if (prev.interviewVideoLink || restoredFieldsRef.current.has('interviewVideoLink')) return prev;
       orgLinkAppliedRef.current = true;
       return { ...prev, interviewVideoLink: orgDefaultVideoLink };
     });
