@@ -190,7 +190,7 @@ export function ActiveSessionsSettings() {
         </div>
 
         <p className="text-xs text-white">
-          Du kan ha max 3 aktiva sessioner samtidigt. Om du loggar in på en fjärde enhet avslutas den äldsta sessionen automatiskt. Listan uppdateras automatiskt var 30:e sekund.
+          Du kan ha max 2 aktiva sessioner samtidigt. Om du loggar in på en tredje enhet avslutas den äldsta sessionen automatiskt. Listan uppdateras automatiskt var 30:e sekund.
         </p>
 
         {loading && sessions.length === 0 ? (
