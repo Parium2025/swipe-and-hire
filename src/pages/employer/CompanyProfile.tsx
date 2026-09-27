@@ -5,13 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { smartMatches } from '@/lib/seoSearch';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { ChevronDown, Search, Check, Loader2, AlertCircle } from 'lucide-react';
+import { ChevronDown, Search, Check, Loader2, AlertCircle, Lock } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES, matchesIndustry } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
@@ -49,6 +50,7 @@ const RequiredStar = ({ filled }: { filled: boolean }) => (
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
+  const { isAdmin } = useIsOrgAdmin();
   const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
@@ -477,6 +479,54 @@ const CompanyProfile = () => {
 
   const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
     const silent = !!opts?.silent;
+
+    // Rekryterare får bara ändra sina egna intervjuinställningar — resten av
+    // företagsprofilen är låst för admins. Då sparas bara intervjufälten och
+    // de obligatoriska företagsfälten valideras inte (de äger admin).
+    if (!isAdmin) {
+      const link = normalizeMeetingLink(formData.interview_video_link || '');
+      if (link && !isValidMeetingLink(link)) {
+        if (!silent) {
+          toast({ title: "Ogiltig möteslänk", description: "Kontrollera länken innan du sparar.", variant: "destructive" });
+        }
+        setSaveError('Möteslänken är ogiltig. Kontrollera länken.');
+        return false;
+      }
+      if (!isOnline) {
+        if (!silent) showOfflineToast();
+        setSaveError('Ingen anslutning. Ändringen sparas när du är online igen.');
+        return false;
+      }
+      try {
+        setLoading(true);
+        const { error: updateError } = await updateProfile({
+          interview_default_message: formData.interview_default_message,
+          interview_video_default_message: formData.interview_video_default_message,
+          interview_video_link: link,
+          interview_office_address: formData.interview_office_address,
+          interview_office_instructions: formData.interview_office_instructions,
+        } as any);
+        if (updateError) {
+          setSaveError('Kunde inte spara ändringen. Försök igen.');
+          return false;
+        }
+        setOriginalValues({ ...formData, interview_video_link: link });
+        setSaveError(null);
+        if (!silent) {
+          toast({ title: "Intervjuinställningar uppdaterade", description: "Dina intervjuinställningar har sparats." });
+        }
+        return true;
+      } catch {
+        if (!silent) {
+          toast({ title: "Fel", description: "Kunde inte spara intervjuinställningarna.", variant: "destructive" });
+        }
+        setSaveError('Kunde inte spara ändringen. Försök igen.');
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    }
+
     const sanitizedFormData: CompanyFormData = {
       ...formData,
       interview_video_link: normalizeMeetingLink(formData.interview_video_link || ''),
@@ -710,6 +760,7 @@ const CompanyProfile = () => {
   const formDataRef = useRef(formData);
   formDataRef.current = formData;
   useEffect(() => {
+    if (!isAdmin) return;
     return registerLeaveBlocker(() => {
       const missing = REQUIRED_FIELDS
         .filter(({ key }) => !String(formDataRef.current[key] ?? '').trim())
@@ -718,7 +769,7 @@ const CompanyProfile = () => {
         ? `Fyll i alla obligatoriska fält innan du lämnar sidan: ${missing.join(', ')}.`
         : null;
     });
-  }, [registerLeaveBlocker]);
+  }, [registerLeaveBlocker, isAdmin]);
 
 
 
@@ -739,6 +790,59 @@ const CompanyProfile = () => {
 
   if (authLoading && !profile) {
     return <EmployerCompanyProfileSkeleton />;
+  }
+
+  // Rekryterare ser bara sina egna intervjuinställningar — företagsprofilen
+  // i övrigt är låst och ändras bara av en admin.
+  if (!isAdmin) {
+    return (
+      <div className="flex-1 min-h-0 w-full space-y-8 responsive-container overflow-y-auto overscroll-contain [scroll-behavior:auto] [-webkit-overflow-scrolling:touch] [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
+          <p className="text-white">Företagsprofilen ändras av en admin. Dina egna intervjuinställningar kan du ändra här.</p>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-4">
+          <Lock className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+          <p className="text-sm text-white">Företagsuppgifter, logga och beskrivning är låsta för dig. Be en admin om du behöver ändra dem.</p>
+        </div>
+
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+          <CompanyInterviewSettings
+            formData={formData}
+            onFormDataChange={handleFormDataChange}
+            orgDefaultVideoLink={orgDefaultVideoLink}
+            hideTopDivider
+          />
+
+          <div className="mt-4 min-h-4 text-center text-xs text-white" aria-live="polite" role="status">
+            {saveStatus === 'error' ? (
+              <span className="inline-flex flex-wrap items-center justify-center gap-1.5 text-destructive">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                {saveError || 'Kunde inte spara ändringen.'}
+                <button type="button" onClick={retrySave} className="underline underline-offset-2 text-white">
+                  Försök igen
+                </button>
+              </span>
+            ) : (
+              <span className={`inline-flex items-center gap-1.5 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'}`}>
+                {saveStatus === 'saving' ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Sparar…
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                    Sparat
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

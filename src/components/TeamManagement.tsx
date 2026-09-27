@@ -65,14 +65,12 @@ const writeTeamCache = (userId: string, organizationId: string, members: TeamMem
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',
-  recruiter: 'Rekryterare',
-  viewer: 'Läsare'
+  recruiter: 'Rekryterare'
 };
 
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  recruiter: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  viewer: 'bg-white/10 text-white/70 border-white/20'
+  recruiter: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
 };
 
 const TeamManagement = () => {
@@ -381,10 +379,9 @@ const TeamManagement = () => {
             <SelectContent className="glass-panel">
               <SelectItem value="admin" className="text-white hover:bg-white/20">Admin</SelectItem>
               <SelectItem value="recruiter" className="text-white hover:bg-white/20">Rekryterare</SelectItem>
-              <SelectItem value="viewer" className="text-white hover:bg-white/20">Läsare</SelectItem>
             </SelectContent>
           </Select>
-          <Button 
+          <Button
             onClick={handleInvite}
             disabled={inviting || !inviteEmail.trim()}
             variant="glass"
@@ -493,7 +490,6 @@ const TeamManagement = () => {
                       <SelectContent className="glass-panel">
                         <SelectItem value="admin" className="text-white hover:bg-white/20">Admin</SelectItem>
                         <SelectItem value="recruiter" className="text-white hover:bg-white/20">Rekryterare</SelectItem>
-                        <SelectItem value="viewer" className="text-white hover:bg-white/20">Läsare</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
@@ -524,7 +520,6 @@ const TeamManagement = () => {
         <ul className="text-sm text-white space-y-1">
           <li><span className="text-amber-300">Admin</span> - Full åtkomst, kan hantera team och inställningar</li>
           <li><span className="text-blue-300">Rekryterare</span> - Kan skapa annonser och hantera kandidater</li>
-          <li><span className="text-white/70">Läsare</span> - Kan endast se annonser och kandidater</li>
         </ul>
       </div>
     </div>
