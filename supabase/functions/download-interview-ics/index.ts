@@ -98,7 +98,7 @@ serve(async (req) => {
   // Avbokad intervju får aldrig hamna i någons kalender. En nekad intervju
   // ligger kvar – historik och statistik ska inte försvinna – men märks upp.
   if (interview.status === "cancelled") {
-    return new Response("Interview cancelled", { status: 410 });
+    return new Response("Interview cancelled", { status: 410, headers: corsHeaders });
   }
 
   // job_id saknas för manuellt tillagda kandidater – fråga bara när det finns.
@@ -158,6 +158,7 @@ serve(async (req) => {
   return new Response(ics, {
     status: 200,
     headers: {
+      ...corsHeaders,
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": `attachment; filename="intervju-${interview.id.slice(0, 8)}.ics"`,
       "Cache-Control": "no-store",
