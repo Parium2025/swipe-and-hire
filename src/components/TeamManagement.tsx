@@ -48,6 +48,7 @@ interface TeamCache {
   userId: string;
   organizationId: string;
   members: TeamMember[];
+  invitations?: PendingInvitation[];
 }
 
 const TEAM_CACHE_PREFIX = 'parium-team-cache:';
@@ -66,11 +67,13 @@ const readTeamCache = (userId?: string): TeamCache | null => {
   }
 };
 
-const writeTeamCache = (userId: string, organizationId: string, members: TeamMember[]) => {
+const writeTeamCache = (userId: string, organizationId: string, patch: Partial<Pick<TeamCache, 'members' | 'invitations'>>) => {
   try {
+    const prev = readTeamCache(userId);
+    const base = prev && prev.organizationId === organizationId ? prev : { userId, organizationId, members: [] as TeamMember[] };
     localStorage.setItem(
       `${TEAM_CACHE_PREFIX}${userId}`,
-      JSON.stringify({ userId, organizationId, members } satisfies TeamCache),
+      JSON.stringify({ ...base, ...patch, userId, organizationId } satisfies TeamCache),
     );
   } catch {
     // Cache is only a fast path; the database remains the source of truth.
@@ -96,7 +99,7 @@ const TeamManagement = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('recruiter');
   const [inviting, setInviting] = useState(false);
-  const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
+  const [invitations, setInvitations] = useState<PendingInvitation[]>(Array.isArray(initialCache?.invitations) ? initialCache!.invitations! : []);
   const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
   const [busyMemberId, setBusyMemberId] = useState<string | null>(null);
   const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
@@ -138,7 +141,7 @@ const TeamManagement = () => {
         email: row.email || null,
       }));
       setTeamMembers(members);
-      writeTeamCache(user.id, orgData, members);
+      writeTeamCache(user.id, orgData, { members });
     } catch (error) {
       console.error('Error fetching team:', error);
       toast({
@@ -157,6 +160,7 @@ const TeamManagement = () => {
     if (cached) {
       setTeamMembers(cached.members);
       setOrganizationId(cached.organizationId);
+      if (Array.isArray(cached.invitations)) setInvitations(cached.invitations);
       setLoading(false);
     }
     void fetchTeamMembers(Boolean(cached));
@@ -176,7 +180,8 @@ const TeamManagement = () => {
       return;
     }
     setInvitations(data ?? []);
-  }, [organizationId]);
+    if (user?.id) writeTeamCache(user.id, organizationId, { invitations: data ?? [] });
+  }, [organizationId, user?.id]);
 
   useEffect(() => {
     void fetchInvitations();
