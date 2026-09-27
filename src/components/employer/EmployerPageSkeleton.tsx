@@ -505,9 +505,13 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                 </div>
               </>
             ) : (
-              <div className="flex h-[calc(100vh-300px)] gap-3 overflow-hidden pb-4 pt-2">
+              <div className="flex h-[calc(100vh-300px)] w-full gap-3 overflow-hidden pb-4 pt-2">
                 {Array.from({ length: stageCount }).map((_, stageIndex) => (
-                  <div key={stageIndex} className="flex min-w-0 flex-1 flex-col">
+                  <div
+                    key={stageIndex}
+                    className="flex h-full min-w-0 flex-none flex-col"
+                    style={{ width: `calc((100% - ${(stageCount - 1) * 0.75}rem) / ${stageCount})` }}
+                  >
                     <div className={`mb-2 h-8 w-full rounded-md ${SHAPE}`} />
                     <div className="h-full space-y-1.5 rounded-lg bg-white/5 p-2 ring-1 ring-inset ring-white/10">
                       {Array.from({ length: cardsForStage(stageIndex) }).map((_, rowIndex) => (
@@ -522,7 +526,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                     </div>
                   </div>
                 ))}
-                <div className={`h-8 min-w-0 flex-1 rounded-md ${SHAPE}`} />
+                <div className={`h-8 w-[calc((100%-3rem)/5)] min-w-0 flex-none rounded-md ${SHAPE}`} />
               </div>
             )}
           </div>
