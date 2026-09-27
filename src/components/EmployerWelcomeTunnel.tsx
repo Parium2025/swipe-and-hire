@@ -497,6 +497,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       // Clear draft after successful submission
       clearEmployerWelcomeDraft(user?.id);
 
+      // Samma firande som vid publicering av jobb
+      void celebrate();
+
       toast({
         title: "Välkommen till Parium!",
         description: "Din arbetsgivarprofil är nu klar."
