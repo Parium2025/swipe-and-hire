@@ -372,6 +372,13 @@
       "when": 1790503505745,
       "tag": "0052_preserve_interview_candidate_response",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1790505079021,
+      "tag": "0053_require_verified_email_for_org_admin_role",
+      "breakpoints": true
     }
   ]
 }
