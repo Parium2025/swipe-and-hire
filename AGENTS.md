@@ -15,4 +15,4 @@
 - Candidate skeletons use resolved server totals per user/list; never transient defaults.
 - Org roles are only admin and recruiter (viewer removed). Recruiters are locked out of company-wide settings in UI and DB: outreach_templates/outreach_automations writes require owner or org admin (is_org_admin), CompanyProfile renders only interview settings for non-admins, and Billing + EmployerSettings template/flow sections show a locked notice.
 - Company fields (name, logo, industry, size, address, website, description, socials, org number) belong to the organization: invitees inherit them on accept (`copy_org_company_fields_to_member`, `joined_via_invite`), admin edits sync to all members via trigger, and the welcome tunnel skips company steps for invitees; this keeps one company identity per org.
-- Employer shells own the shared `employer-dark` autofill scope so browser autofill never paints white over dark fields.
+- Browser autofill keeps each field's own surface globally; never repaint it with a page background token.

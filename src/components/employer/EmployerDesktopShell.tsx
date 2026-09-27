@@ -26,7 +26,7 @@ const EmployerDesktopShell = ({
         }}
       />
 
-      <div className="employer-dark h-screen flex flex-col w-full overflow-hidden relative">
+      <div className="h-screen flex flex-col w-full overflow-hidden relative">
         <AnimatedBackground showBubbles={false} />
 
         <header className="sticky top-0 z-40">

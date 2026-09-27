@@ -37,7 +37,6 @@ const EmployerMobileShell = ({
   useVisualViewportBounds();
 
   return (
-    <div className="employer-dark contents">
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
 
@@ -112,7 +111,6 @@ const EmployerMobileShell = ({
         </div>
       </div>
     </SidebarProvider>
-    </div>
   );
 };
 
