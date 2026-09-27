@@ -334,7 +334,9 @@ const EmployerProfile = () => {
             return response.blob();
           })
         : null);
-      if (originalSource) await uploadOriginalImage(storagePath, originalSource, 'profile-image');
+      if (originalSource && !await uploadOriginalImage(storagePath, originalSource, 'profile-image')) {
+        throw new Error('Originalbilden kunde inte sparas');
+      }
 
       // Upload original file if we have a new file (not already saved) - Job Wizard pattern
       if (originalProfileImageFile && !originalProfileImageStoragePath) {
