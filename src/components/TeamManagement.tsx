@@ -11,6 +11,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Users, UserPlus, Trash2, Crown, Loader2, Mail } from 'lucide-react';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+
+type DeleteTarget =
+  | { type: 'member'; id: string; label: string }
+  | { type: 'invitation'; id: string; label: string };
 
 interface TeamMember {
   user_id: string;
@@ -86,6 +100,7 @@ const TeamManagement = () => {
   const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
   const [busyMemberId, setBusyMemberId] = useState<string | null>(null);
   const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   
 
   const fetchTeamMembers = useCallback(async (silent = false) => {
@@ -419,9 +434,9 @@ const TeamManagement = () => {
                 variant="ghost"
                 size="icon"
                 aria-label="Återkalla inbjudan"
-                onClick={() => handleRevokeInvitation(invitation.id)}
+                onClick={() => setDeleteTarget({ type: 'invitation', id: invitation.id, label: invitation.email })}
                 disabled={busyInvitationId === invitation.id}
-                className="h-8 w-8 shrink-0 rounded-full border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
+                className="h-8 w-8 shrink-0 rounded-full border border-0 bg-red-500/80 text-white transition-none active:scale-100 active:bg-red-500/80 active:shadow-none md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
               >
                 {busyInvitationId === invitation.id ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -496,9 +511,18 @@ const TeamManagement = () => {
                       variant="ghost"
                       size="icon"
                       aria-label="Ta bort medlem"
-                      onClick={() => handleRemoveMember(member.user_id)}
+                      onClick={() =>
+                        setDeleteTarget({
+                          type: 'member',
+                          id: member.user_id,
+                          label:
+                            member.first_name && member.last_name
+                              ? `${member.first_name} ${member.last_name}`
+                              : member.email || 'den här personen',
+                        })
+                      }
                       disabled={busyMemberId === member.user_id}
-                      className="h-8 w-8 rounded-full border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
+                      className="h-8 w-8 rounded-full border border-0 bg-red-500/80 text-white transition-none active:scale-100 active:bg-red-500/80 active:shadow-none md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
                     >
                       {busyMemberId === member.user_id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -522,6 +546,48 @@ const TeamManagement = () => {
           <li><span className="text-blue-300">Rekryterare</span> - Kan skapa annonser och hantera kandidater</li>
         </ul>
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContentNoFocus className="mx-0 w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-white/10 p-4 text-white shadow-lg backdrop-blur-sm sm:w-[28rem] sm:max-w-md sm:p-6">
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="rounded-full bg-red-500/80 p-2">
+                <Trash2 className="h-4 w-4 text-white" />
+              </div>
+              <AlertDialogTitle className="text-base font-semibold text-white md:text-lg">
+                {deleteTarget?.type === 'member' ? 'Ta bort teammedlem' : 'Återkalla inbjudan'}
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-sm leading-relaxed text-white">
+              {deleteTarget?.type === 'member'
+                ? `Är du säker på att du vill ta bort ${deleteTarget.label} från teamet? Detta är permanent och går inte att ångra.`
+                : `Är du säker på att du vill återkalla inbjudan till ${deleteTarget?.label ?? ''}? Länken slutar fungera direkt och detta går inte att ångra.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex-row justify-center gap-2">
+            <AlertDialogCancel
+              onClick={() => setDeleteTarget(null)}
+              className="btn-dialog-action mt-0 rounded-full border-white/30 !bg-white/10 text-white md:hover:!bg-white/20 md:hover:!text-white"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!deleteTarget) return;
+                if (deleteTarget.type === 'member') {
+                  void handleRemoveMember(deleteTarget.id);
+                } else {
+                  void handleRevokeInvitation(deleteTarget.id);
+                }
+                setDeleteTarget(null);
+              }}
+              className="btn-dialog-action mt-0 rounded-full !bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContentNoFocus>
+      </AlertDialog>
     </div>
   );
 };
