@@ -12,4 +12,4 @@
 - Employer welcome setup drafts details and choices until confirmation; replay-account trials never write profile, preferences or media, and only valid meeting links become defaults.
 - Employer welcome and profile verify storage saved each uncropped original alongside its crop, then reopen that original for edits; this prevents double cropping.
 - Employer replies to reviews go only through the security-definer `reply_to_company_review` RPC (owner or same-org colleagues); reply lives in `company_reviews.employer_reply` and is exposed via `company_reviews_public` — never add a direct UPDATE policy for replies.
-- Cache candidate Kanban skeleton layouts per user and active list using server stage totals, never globally.
+- Candidate skeletons mirror board widths and cache server totals per user/list, never globally.

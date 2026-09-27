@@ -447,7 +447,9 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
   const stageCount = cachedLayout?.length ?? 4;
   const candidateCount = cachedLayout
     ? cachedLayout.reduce((sum, count) => sum + count, 0)
-    : readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
+    : layoutKey
+      ? readCachedCount(`${layoutKey}:total`, 5)
+      : 5;
   const cardsForStage = (i: number) =>
     cachedLayout ? Math.min(8, cachedLayout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
