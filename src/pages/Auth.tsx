@@ -707,7 +707,9 @@ const Auth = () => {
         const storedReturnTo = typeof window !== 'undefined'
           ? sessionStorage.getItem('parium-auth-return-to')
           : null;
-        const requestedReturnTo = typeof initialReturnTo === 'string' ? initialReturnTo : storedReturnTo;
+        const requestedReturnTo = typeof initialReturnTo === 'string'
+          ? initialReturnTo
+          : storedReturnTo ?? readPendingTeamInvite();
         const allowedReturnTo = requestedReturnTo === '/profile#notifications' || requestedReturnTo === '/settings#notifications';
         const teamInviteReturnTo = typeof requestedReturnTo === 'string' && /^\/team-invite\?token=[a-f0-9]{20,200}$/i.test(requestedReturnTo);
         if (teamInviteReturnTo) {
