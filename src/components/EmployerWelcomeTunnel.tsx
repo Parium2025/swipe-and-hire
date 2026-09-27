@@ -29,10 +29,10 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
 
 const notificationRows: NotificationRow[] = [
-  { type: 'new_application', label: 'Nya ansökningar', description: 'Mejl skickas högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_application', label: 'Nya ansökningar', description: 'Samlat mejl med dygnets nya ansökningar, högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
   { type: 'new_message', label: 'Meddelanden', description: 'Nya meddelanden från kandidater.', channels: ['in_app', 'push', 'email'] },
   { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar och ändringar är alltid på.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
-  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej.', channels: ['in_app', 'push', 'email'] },
+  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej till intervjun.', channels: ['in_app', 'push', 'email'] },
 ];
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
