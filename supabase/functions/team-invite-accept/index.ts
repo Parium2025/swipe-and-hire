@@ -112,8 +112,16 @@ serve(async (req) => {
 
   await supabaseAdmin
     .from("profiles")
-    .update({ organization_id: invitation.organization_id })
+    .update({ organization_id: invitation.organization_id, joined_via_invite: true })
     .eq("user_id", caller.userId);
+
+  // Bolagets uppgifter (namn, logga, bransch m.m.) ärvs från bolaget —
+  // medlemmen fyller bara i sina personliga uppgifter i välkomstguiden.
+  const { error: copyError } = await supabaseAdmin.rpc("copy_org_company_fields_to_member", {
+    p_user_id: caller.userId,
+    p_organization_id: invitation.organization_id,
+  });
+  if (copyError) console.error("company copy failed", copyError);
 
   await supabaseAdmin
     .from("organization_invitations")
