@@ -24,6 +24,10 @@ export const SKELETON_COUNT_KEYS = {
   myJobsActive: 'parium:myJobs:activeLastCount',
   myJobsExpired: 'parium:myJobs:expiredLastCount',
   myJobsDraft: 'parium:myJobs:draftLastCount',
+  // Företagets annonser (/dashboard) har egna antal — får aldrig dela nyckel
+  // med Mina annonser, annars skriver sidorna över varandras skelett.
+  orgJobsActive: 'parium:orgJobs:activeLastCount',
+  orgJobsExpired: 'parium:orgJobs:expiredLastCount',
   jobTemplates: 'parium:jobTemplates:lastCount',
   supportTickets: 'parium:supportTickets:lastCount',
 } as const;
