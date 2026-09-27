@@ -58,6 +58,8 @@ function redirectAuthTokensIfNeeded() {
     pathname === '/unsubscribe/' ||
     pathname === '/intervjusvar' ||
     pathname === '/intervjusvar/' ||
+    pathname === '/team-invite' ||
+    pathname === '/team-invite/' ||
     /^\/oauth\/(google_calendar|microsoft_outlook)\/return\/?$/.test(pathname)
   ) return false;
 
