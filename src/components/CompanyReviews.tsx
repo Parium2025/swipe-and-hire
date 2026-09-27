@@ -3,8 +3,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { 
   Building2, 
   Globe, 
@@ -17,7 +20,10 @@ import {
   Linkedin,
   Twitter,
   Instagram,
-  ExternalLink
+  ExternalLink,
+  Reply,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
@@ -50,6 +56,8 @@ interface CompanyReview {
   comment: string;
   is_anonymous: boolean;
   created_at: string;
+  employer_reply?: string | null;
+  employer_reply_at?: string | null;
   profiles?: {
     first_name?: string;
     last_name?: string;
