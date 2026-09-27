@@ -68,7 +68,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
-import { writeCachedCount, writeCachedLayout, SKELETON_COUNT_KEYS, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
+import { writeCachedCount, writeCachedLayout, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
@@ -214,10 +214,11 @@ const MyCandidates = () => {
     }
   }, [isLoading, showContent]);
 
-  // Cacha antalet så skeleton kan rendera exakt lika många kort nästa cold-load.
+  // Cacha antalet per konto och lista så en annan lista aldrig påverkar laddningsbilden.
   useEffect(() => {
-    if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.myCandidates, candidates.length);
-  }, [isLoading, candidates.length]);
+    const key = myCandidatesLayoutKey(user?.id, activeListId);
+    if (!isLoading && key) writeCachedCount(`${key}:total`, candidates.length);
+  }, [isLoading, candidates.length, user?.id, activeListId]);
 
   
   // Active candidates to display (hook already deduplicates by applicant_id)
@@ -851,7 +852,14 @@ const MyCandidates = () => {
   }, [selectedCandidate, mapCandidateToAppData]);
 
   if ((isViewingColleague ? loadingColleagueCandidates || isSwitchingColleague : isLoading) || !showContent) {
-    return <EmployerMyCandidatesSkeleton />;
+    return (
+      <EmployerMyCandidatesSkeleton
+        stageOrder={activeStageOrder}
+        stageCounts={stageCounts}
+        userId={user?.id}
+        activeListId={isViewingColleague ? viewingColleagueListId : activeListId}
+      />
+    );
   }
 
 

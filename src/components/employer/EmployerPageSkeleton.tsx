@@ -436,20 +436,39 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
 /**
  * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
  */
-export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
+interface EmployerMyCandidatesSkeletonProps {
+  stageOrder?: string[];
+  stageCounts?: Record<string, number>;
+  userId?: string | null;
+  activeListId?: string | null;
+}
+
+export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton({
+  stageOrder,
+  stageCounts,
+  userId,
+  activeListId: activeListIdProp,
+}: EmployerMyCandidatesSkeletonProps = {}) {
   const isDesktop = useDevice() === 'desktop';
   const { user } = useAuth();
-  const activeListId = getActiveCandidateListId(user?.id);
-  const layoutKey = myCandidatesLayoutKey(user?.id, activeListId);
+  const resolvedUserId = userId ?? user?.id;
+  const activeListId = activeListIdProp ?? getActiveCandidateListId(resolvedUserId);
+  const layoutKey = myCandidatesLayoutKey(resolvedUserId, activeListId);
   // Exakt samma kolumner och serverantal per kolumn som vid senaste visningen.
   // Fyra är produktens riktiga grundlayout innan ett kontos egen cache finns.
   const cachedLayout = layoutKey ? readCachedLayout(layoutKey) : null;
-  const stageCount = cachedLayout?.length ?? 4;
-  const candidateCount = cachedLayout
-    ? cachedLayout.reduce((sum, count) => sum + count, 0)
-    : readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
+  const liveLayout = stageOrder?.length
+    ? stageOrder.map((stage) => stageCounts?.[stage] ?? 0)
+    : null;
+  const layout = liveLayout ?? cachedLayout;
+  const stageCount = layout?.length ?? 4;
+  const candidateCount = layout
+    ? layout.reduce((sum, count) => sum + count, 0)
+    : layoutKey
+      ? readCachedCount(`${layoutKey}:total`, 5)
+      : 5;
   const cardsForStage = (i: number) =>
-    cachedLayout ? Math.min(8, cachedLayout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
+    layout ? Math.min(8, layout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
     <FullscreenSkeletonPortal activePaths={['/my-candidates']}>
       <motion.div
@@ -505,9 +524,13 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                 </div>
               </>
             ) : (
-              <div className="flex h-[calc(100vh-300px)] gap-3 overflow-hidden pb-4 pt-2">
+              <div className="flex h-[calc(100vh-300px)] w-full gap-3 overflow-hidden pb-4 pt-2">
                 {Array.from({ length: stageCount }).map((_, stageIndex) => (
-                  <div key={stageIndex} className="flex min-w-0 flex-1 flex-col">
+                  <div
+                    key={stageIndex}
+                    className="flex h-full min-w-0 flex-none flex-col"
+                    style={{ width: `calc((100% - ${(stageCount - 1) * 0.75}rem) / ${stageCount})` }}
+                  >
                     <div className={`mb-2 h-8 w-full rounded-md ${SHAPE}`} />
                     <div className="h-full space-y-1.5 rounded-lg bg-white/5 p-2 ring-1 ring-inset ring-white/10">
                       {Array.from({ length: cardsForStage(stageIndex) }).map((_, rowIndex) => (
@@ -522,7 +545,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                     </div>
                   </div>
                 ))}
-                <div className={`h-8 min-w-0 flex-1 rounded-md ${SHAPE}`} />
+                <div className={`h-8 w-[calc((100%-3rem)/5)] min-w-0 flex-none rounded-md ${SHAPE}`} />
               </div>
             )}
           </div>
