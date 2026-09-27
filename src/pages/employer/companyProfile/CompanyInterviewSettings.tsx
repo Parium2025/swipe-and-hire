@@ -15,13 +15,15 @@ interface CompanyInterviewSettingsProps {
   onFormDataChange: (updates: Partial<CompanyFormData>) => void;
   /** Företagets befintliga standardlänk (från en kollega i samma organisation). */
   orgDefaultVideoLink?: string;
+  /** Dölj den övre avgränsningslinjen (används när komponenten ligger i ett eget kort). */
+  hideTopDivider?: boolean;
 }
 
-export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaultVideoLink = '' }: CompanyInterviewSettingsProps) => {
+export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaultVideoLink = '', hideTopDivider = false }: CompanyInterviewSettingsProps) => {
   const [interviewType, setInterviewType] = useState<InterviewType>('video');
 
   return (
-    <div className="border-t border-white/10 pt-5 space-y-4">
+    <div className={hideTopDivider ? 'space-y-4' : 'border-t border-white/10 pt-5 space-y-4'}>
       <div>
         <div className="flex items-center gap-2 mb-1">
           <CalendarDays className="h-5 w-5 text-white" />
