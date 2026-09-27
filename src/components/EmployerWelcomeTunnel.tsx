@@ -233,6 +233,15 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
 
   const totalSteps = 7; // Intro, företag, logga, profil, meddelanden (inkl. möteslänk), aviseringar, klart
+  // Inbjudna teammedlemmar ärver bolagets uppgifter och hoppar över steg 1–2.
+  const isTeamMember = !isReplay && (profile as any)?.joined_via_invite === true;
+  const skippedSteps = isTeamMember ? 2 : 0;
+  const workSteps = totalSteps - 2 - skippedSteps;
+  const displayStep = currentStep - skippedSteps;
+
+  useEffect(() => {
+    if (isTeamMember && (currentStep === 1 || currentStep === 2)) setCurrentStep(3);
+  }, [isTeamMember, currentStep]);
 
   // Långa steg kan skrollas på mobil. Börja nästa steg från toppen, inte
   // mitt i det nya formuläret där samma skrollposition råkade ligga kvar.
@@ -254,13 +263,13 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       return;
     }
     if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(isTeamMember && currentStep === 0 ? 3 : currentStep + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(isTeamMember && currentStep === 3 ? 0 : currentStep - 1);
     }
   };
 
@@ -445,14 +454,24 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     }
     setIsSubmitting(true);
     try {
-      if (!formData.companyName.trim()) {
+      if (!isTeamMember && !formData.companyName.trim()) {
         toast({ title: 'Ange företagets namn', variant: 'destructive' });
         setCurrentStep(1);
         return;
       }
       if (formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) throw new Error('Ogiltig möteslänk');
-      const result = await updateProfile({
+      // Teammedlemmar ärver bolagets uppgifter och sparar bara sina personliga fält.
+      const companyFields = isTeamMember ? {} : {
         ...(formData.companyLogoUrl !== (profile?.company_logo_url || '') ? { company_logo_url: formData.companyLogoUrl } : {}),
+        company_name: formData.companyName.trim(),
+        industry: formData.industry.trim(),
+        employee_count: formData.employeeCount,
+        address: formData.address.trim(),
+        website: formData.website.trim(),
+        company_description: formData.companyDescription.trim(),
+      };
+      const result = await updateProfile({
+        ...companyFields,
         interview_video_link: formData.interviewVideoLink
           ? normalizeMeetingLink(formData.interviewVideoLink)
           : '',
@@ -460,12 +479,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         interview_default_message: formData.interviewOfficeDefaultMessage.trim(),
         interview_office_address: formData.interviewOfficeAddress.trim(),
         interview_office_instructions: formData.interviewOfficeInstructions.trim(),
-        company_name: formData.companyName.trim(),
-        industry: formData.industry.trim(),
-        employee_count: formData.employeeCount,
-        address: formData.address.trim(),
-        website: formData.website.trim(),
-        company_description: formData.companyDescription.trim(),
         first_name: formData.firstName.trim(),
         last_name: formData.lastName.trim(),
         ...(formData.profileImageUrl !== (profile?.profile_image_url || '') ? { profile_image_url: formData.profileImageUrl } : {}),
@@ -533,7 +546,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Välkommen till Parium</h2>
                 <p className="text-lg text-white max-w-md mx-auto leading-relaxed break-words">
-                  Börja med ert företag och er profil. Välj sedan hur ni vill hantera intervjuer och aviseringar. Ni kan alltid ändra era val senare.
+                  {isTeamMember
+                    ? 'Du har gått med i teamet. Företagets uppgifter är redan klara, så du fyller bara i det som är ditt eget. Du kan alltid ändra dina val senare.'
+                    : 'Börja med ert företag och er profil. Välj sedan hur ni vill hantera intervjuer och aviseringar. Ni kan alltid ändra era val senare.'}
                 </p>
                 {isReplay && <p className="text-sm text-white">Testläge: det du fyller i här ändrar inte ditt riktiga konto.</p>}
               </div>
@@ -544,10 +559,12 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 {
                   title: 'Företaget',
                   desc: 'Namn, bransch och vad ni gör.',
+                  company: true,
                 },
                 {
                   title: 'Företagslogga',
                   desc: 'Så kandidater känner igen er direkt.',
+                  company: true,
                 },
                 {
                   title: 'Din profil',
@@ -555,7 +572,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 },
                 {
                   title: 'Möteslänk',
-                  desc: 'Er fasta länk för videointervjuer. Helt valfritt.',
+                  desc: isTeamMember ? 'Din egen länk för videointervjuer. Helt valfritt.' : 'Er fasta länk för videointervjuer. Helt valfritt.',
                 },
                 {
                   title: 'Standardmeddelanden',
@@ -565,7 +582,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   title: 'Aviseringar',
                   desc: 'Välj hur du vill få uppdateringar.',
                 },
-              ].map((item, index) => (
+              ].filter(item => !(isTeamMember && item.company)).map((item, index) => (
                 <div
                   key={item.title}
                   className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20"
@@ -889,7 +906,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Allt är klart!</h2>
                 <p className="text-xl text-white max-w-md mx-auto leading-relaxed">
-                   Dina val är klara. Företagsuppgifterna kan ändras eller kompletteras senare.
+                   {isTeamMember
+                     ? 'Dina val är klara. Du kan ändra dem när som helst.'
+                     : 'Dina val är klara. Företagsuppgifterna kan ändras eller kompletteras senare.'}
                 </p>
               </div>
             </div>
