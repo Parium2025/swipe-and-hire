@@ -313,19 +313,22 @@ export async function uploadOriginalImage(
   croppedStoragePath: string,
   originalFile: File | Blob,
   mediaType: MediaType
-): Promise<void> {
+): Promise<boolean> {
   try {
     const path = getOriginalImagePath(croppedStoragePath);
-    if (!path) return;
+    if (!path) return false;
     const config = MEDIA_CONFIG[mediaType];
-    await supabase.storage.from(config.bucket).upload(path, originalFile, {
+    const { error } = await supabase.storage.from(config.bucket).upload(path, originalFile, {
       contentType: originalFile.type || 'image/jpeg',
       cacheControl: '31536000',
       upsert: true,
     });
+    if (error) throw error;
     clearMissingMedia(path);
+    return true;
   } catch (error) {
     console.warn('[mediaManager] originalbild kunde inte sparas', error);
+    return false;
   }
 }
 

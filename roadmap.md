@@ -16,4 +16,5 @@
 - [x] Review employer welcome setup, meeting-link coverage, profile and notification choices; stop the Back-button flash
 - [x] Match welcome start hover to Next, preserve thin outline, prefill registered names, and stabilize initials across steps
 - [x] Preserve the uncropped employer profile photo through welcome setup and later profile edits
+- [x] Audit employer welcome guide, preserve intentionally emptied draft fields, and detect failed original-photo uploads
 - [x] Remove competing pointer focus, delayed field scrolling and global keyboard scroll padding on mobile forms

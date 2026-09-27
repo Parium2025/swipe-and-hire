@@ -90,6 +90,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [profileEditSrc, setProfileEditSrc] = useState('');
   const profileOriginalFileRef = useRef<File | null>(null);
   const profileOriginalSrcRef = useRef('');
+  const restoredFieldsRef = useRef<Set<string>>(new Set());
   const profileFileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -131,6 +132,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           // Äldre testutkast (innan testkontot startade tomt) ignoreras.
            if (isReplay && parsed.v !== 3) throw new Error('stale replay draft');
           if (parsed.formData) {
+              restoredFieldsRef.current = new Set(Object.keys(parsed.formData));
              setFormData((prev) => ({ ...prev, ...parsed.formData, firstName: givenNameOnly(parsed.formData.firstName ?? prev.firstName, parsed.formData.lastName ?? prev.lastName), companyLogoUrl: isReplay ? prev.companyLogoUrl : parsed.formData.companyLogoUrl ?? prev.companyLogoUrl, profileImageUrl: isReplay ? prev.profileImageUrl : parsed.formData.profileImageUrl ?? prev.profileImageUrl }));
           }
           if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
@@ -159,23 +161,27 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     const p = isReplay
        ? { company_name: profile.company_name, industry: profile.industry, employee_count: profile.employee_count, address: profile.address, website: (profile as any).website, company_description: profile.company_description, first_name: user?.user_metadata?.first_name || profile.first_name, last_name: user?.user_metadata?.last_name || profile.last_name }
       : (profile as any);
+    // Ett återställt utkast innehåller även avsiktligt tömda fält. Fyll aldrig
+    // tillbaka gamla profilvärden över användarens egna val.
+    const prefill = (field: string, current: string, saved?: string | null) =>
+      restoredFieldsRef.current.has(field) ? current : current || saved || '';
     setFormData((prev) => ({
       ...prev,
-      companyLogoUrl: prev.companyLogoUrl || p.company_logo_url || '',
-      interviewVideoLink: prev.interviewVideoLink || p.interview_video_link || '',
-      interviewVideoDefaultMessage: prev.interviewVideoDefaultMessage || p.interview_video_default_message || '',
-      interviewOfficeDefaultMessage: prev.interviewOfficeDefaultMessage || p.interview_default_message || '',
-      interviewOfficeAddress: prev.interviewOfficeAddress || p.interview_office_address || '',
-      interviewOfficeInstructions: prev.interviewOfficeInstructions || p.interview_office_instructions || '',
-      companyName: prev.companyName || p.company_name || '',
-      industry: prev.industry || p.industry || '',
-      employeeCount: prev.employeeCount || p.employee_count || '',
-      address: prev.address || p.address || '',
-      website: prev.website || p.website || '',
-      companyDescription: prev.companyDescription || p.company_description || '',
-       firstName: givenNameOnly(prev.firstName || p.first_name || '', prev.lastName || p.last_name || ''),
-      lastName: prev.lastName || p.last_name || '',
-      profileImageUrl: prev.profileImageUrl || p.profile_image_url || '',
+      companyLogoUrl: prefill('companyLogoUrl', prev.companyLogoUrl, p.company_logo_url),
+      interviewVideoLink: prefill('interviewVideoLink', prev.interviewVideoLink, p.interview_video_link),
+      interviewVideoDefaultMessage: prefill('interviewVideoDefaultMessage', prev.interviewVideoDefaultMessage, p.interview_video_default_message),
+      interviewOfficeDefaultMessage: prefill('interviewOfficeDefaultMessage', prev.interviewOfficeDefaultMessage, p.interview_default_message),
+      interviewOfficeAddress: prefill('interviewOfficeAddress', prev.interviewOfficeAddress, p.interview_office_address),
+      interviewOfficeInstructions: prefill('interviewOfficeInstructions', prev.interviewOfficeInstructions, p.interview_office_instructions),
+      companyName: prefill('companyName', prev.companyName, p.company_name),
+      industry: prefill('industry', prev.industry, p.industry),
+      employeeCount: prefill('employeeCount', prev.employeeCount, p.employee_count),
+      address: prefill('address', prev.address, p.address),
+      website: prefill('website', prev.website, p.website),
+      companyDescription: prefill('companyDescription', prev.companyDescription, p.company_description),
+      firstName: givenNameOnly(prefill('firstName', prev.firstName, p.first_name), prefill('lastName', prev.lastName, p.last_name)),
+      lastName: prefill('lastName', prev.lastName, p.last_name),
+      profileImageUrl: prefill('profileImageUrl', prev.profileImageUrl, p.profile_image_url),
     }));
    }, [draftRestored, profile, isReplay, user?.user_metadata?.first_name, user?.user_metadata?.last_name]);
 
@@ -186,7 +192,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     if (!draftRestored || orgLinkAppliedRef.current) return;
     if (!orgDefaultVideoLink || isReplay) return;
     setFormData((prev) => {
-      if (prev.interviewVideoLink) return prev;
+       if (prev.interviewVideoLink || restoredFieldsRef.current.has('interviewVideoLink')) return prev;
       orgLinkAppliedRef.current = true;
       return { ...prev, interviewVideoLink: orgDefaultVideoLink };
     });
@@ -411,7 +417,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       const file = new File([editedBlob], 'profile-image.webp', { type: editedBlob.type || 'image/webp' });
       const { storagePath, error } = await uploadMedia(file, 'profile-image', user.id);
       if (error || !storagePath) throw error || new Error('Uppladdning misslyckades');
-      await uploadOriginalImage(storagePath, original, 'profile-image');
+       const originalSaved = await uploadOriginalImage(storagePath, original, 'profile-image');
+       if (!originalSaved) throw new Error('Originalbilden kunde inte sparas');
       setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
       setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
       setProfileEditorOpen(false);
