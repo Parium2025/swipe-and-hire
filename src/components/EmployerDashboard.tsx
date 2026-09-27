@@ -31,7 +31,7 @@ import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { VirtualJobGrid } from '@/components/dashboard/VirtualJobGrid';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { EmptyJobsCta } from '@/components/dashboard/EmptyJobsCta';
@@ -328,6 +328,7 @@ const EmployerDashboard = memo(() => {
   }, [activeTab, tabOrder, setActiveTab]);
 
   const tabSwipeHandlers = useSwipeGesture({ onSwipeLeft: swipeToNextTab, onSwipeRight: swipeToPrevTab, threshold: 50 });
+  const tabSwipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
 
   // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
@@ -968,7 +969,7 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Mobile: Card view — virtualiserad + DOM-persistent över tabbar */}
-      <div className="md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
+      <div ref={tabSwipeLockRef} className="md:hidden touch-pan-y" onTouchStart={tabSwipeHandlers.onTouchStart} onTouchMove={tabSwipeHandlers.onTouchMove} onTouchEnd={tabSwipeHandlers.onTouchEnd}>
         {loading ? (
           <div className="space-y-3 px-2">
             {Array.from({ length: 4 }).map((_, i) => (
