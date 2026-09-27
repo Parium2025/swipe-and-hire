@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useConversations } from '@/hooks/useConversations';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthContext } from '@/hooks/useAuth';
 
 type ConversationsContextValue = ReturnType<typeof useConversations> | null;
 
@@ -15,7 +15,11 @@ const ConversationsContext = createContext<ConversationsContextValue>(null);
  * useConversations and propagate to all consumers via context.
  */
 export function ConversationsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  // Preview/HMR can briefly re-evaluate the provider module while keeping a
+  // child tree from the previous module instance. Reading defensively avoids
+  // turning that transient frame into a fatal boot error and reload cycle.
+  const auth = useContext(AuthContext);
+  const user = auth?.user ?? null;
   // Only mount the hook when authenticated to avoid wasted subscriptions
   if (!user) {
     return (

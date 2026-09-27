@@ -70,4 +70,15 @@ describe('browserChrome', () => {
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
     ).toBe('#062B5E');
   });
+
+  it('laddar aldrig om dokumentet när en route byter chrome-färg', () => {
+    vi.useFakeTimers();
+    const reload = vi.spyOn(window.location, 'reload');
+
+    syncBrowserChrome('/auth');
+    syncBrowserChrome('/home');
+    vi.advanceTimersByTime(20);
+
+    expect(reload).not.toHaveBeenCalled();
+  });
 });
