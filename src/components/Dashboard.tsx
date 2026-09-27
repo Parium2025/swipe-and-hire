@@ -147,11 +147,12 @@ const Dashboard = memo(() => {
 
   // Spara senast kända antal per tab så nästa kall-laddning renderar EXAKT
   // lika många kortskelett — 0 annonser ⇒ inget kortskelett alls.
+  // Serverantal först — listan är paginerad och kan vara ofullständig.
   useEffect(() => {
     if (isLoading) return;
-    writeCachedCount(SKELETON_COUNT_KEYS.myJobsActive, activeJobs.length);
-    writeCachedCount(SKELETON_COUNT_KEYS.myJobsExpired, expiredJobs.length);
-  }, [isLoading, activeJobs.length, expiredJobs.length]);
+    writeCachedCount(SKELETON_COUNT_KEYS.orgJobsActive, serverCounts?.active ?? activeJobs.length);
+    writeCachedCount(SKELETON_COUNT_KEYS.orgJobsExpired, serverCounts?.expired ?? expiredJobs.length);
+  }, [isLoading, activeJobs.length, expiredJobs.length, serverCounts?.active, serverCounts?.expired]);
 
 
   // Fallback när server-siffrorna inte hunnit fram: summera ALLA annonser

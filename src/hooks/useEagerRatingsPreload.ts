@@ -101,6 +101,17 @@ const clearAllAppCachesSync = () => {
     JOB_TEMPLATES_CACHE_KEY,
     'parium_candidate_counts_v1_',
     'parium:myCandidates:',
+    // Skelettantal är kontobundna — nästa konto på enheten ska inte ärva dem.
+    'parium:searchJobs:',
+    'parium:myApplications:',
+    'parium:savedJobs:',
+    'parium:skippedJobs:',
+    'parium:allCandidates:',
+    'parium:messages:',
+    'parium:myJobs:',
+    'parium:orgJobs:',
+    'parium:jobTemplates:',
+    'parium:supportTickets:',
     'candidate-profile-',
     // 🔒 Kandidat-PII (namn, e-post, telefon, CV-länk) låg kvar i 24 h efter
     // utloggning på delade datorer. Måste rensas som allt annat kontodata.

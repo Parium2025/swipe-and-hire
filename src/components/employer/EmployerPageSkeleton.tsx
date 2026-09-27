@@ -183,8 +183,10 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
     const t = params.get('tab');
     if (t === 'expired' || t === 'draft') tab = t;
   }
-  const countKey =
-    tab === 'expired' ? SKELETON_COUNT_KEYS.myJobsExpired
+  const isOrgView = typeof window !== 'undefined' && window.location.pathname === '/dashboard';
+  const countKey = isOrgView
+    ? (tab === 'expired' ? SKELETON_COUNT_KEYS.orgJobsExpired : SKELETON_COUNT_KEYS.orgJobsActive)
+    : tab === 'expired' ? SKELETON_COUNT_KEYS.myJobsExpired
     : tab === 'draft' ? SKELETON_COUNT_KEYS.myJobsDraft
     : SKELETON_COUNT_KEYS.myJobsActive;
   // Sidan paginerar med pageSize=18 — clampa så vi aldrig renderar fler placeholders
