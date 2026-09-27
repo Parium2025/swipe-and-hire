@@ -663,6 +663,16 @@ export function MessageTemplatesSettings() {
     return () => window.clearTimeout(timer);
   }, [templateForm, templateDraftKey, draftHydrated]);
 
+  // Lämnar man sektionen nollställs allt ifyllt: det lokala utkastet tas bort
+  // så nästa besök börjar tomt. Autosparandet skyddar bara mot omladdning
+  // medan sektionen är öppen.
+  useEffect(() => {
+    return () => {
+      if (!templateDraftKey) return;
+      try { localStorage.removeItem(templateDraftKey); } catch { /* ignore */ }
+    };
+  }, [templateDraftKey]);
+
 
 
   const activeTemplatesByChannel = useMemo(() => ({
