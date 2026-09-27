@@ -467,6 +467,89 @@ const CompanyReviews = () => {
                       />
                     </div>
                   )}
+
+                  {/* Företagets svar */}
+                  {review.employer_reply && editingReplyId !== review.id && (
+                    <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-white">Ditt svar</p>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => startReply(review)}
+                            className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors"
+                            aria-label="Ändra svar"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveReply(review.id, '')}
+                            disabled={savingReplyId === review.id}
+                            className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors disabled:opacity-60"
+                            aria-label="Ta bort svar"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
+                        {review.employer_reply}
+                      </p>
+                      {review.employer_reply_at && (
+                        <p className="text-xs text-white/60">
+                          {new Date(review.employer_reply_at).toLocaleDateString("sv-SE")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Svara / redigera svar */}
+                  {editingReplyId === review.id ? (
+                    <div className="mt-3 space-y-2">
+                      <Textarea
+                        value={replyDraft}
+                        onChange={(e) => setReplyDraft(e.target.value)}
+                        placeholder="Skriv ett svar till jobbsökaren…"
+                        maxLength={1000}
+                        autoResize={false}
+                        className="h-[100px] min-h-[100px] max-h-[100px] overflow-y-auto bg-white/5 border-white/10 text-white text-sm resize-none placeholder:text-white/40"
+                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setEditingReplyId(null); setReplyDraft(''); }}
+                          disabled={savingReplyId === review.id}
+                          className="text-white"
+                        >
+                          Avbryt
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => saveReply(review.id, replyDraft)}
+                          disabled={savingReplyId === review.id || !replyDraft.trim()}
+                          className="bg-white/10 hover:bg-white/15 border border-white/10 text-white"
+                        >
+                          {savingReplyId === review.id && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                          Spara svar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : !review.employer_reply && (
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => startReply(review)}
+                        className="inline-flex items-center gap-1.5 text-sm text-white hover:underline"
+                      >
+                        <Reply className="h-3.5 w-3.5" />
+                        Svara
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
