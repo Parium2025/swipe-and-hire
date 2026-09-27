@@ -81,6 +81,19 @@ serve(async (req) => {
     );
   }
 
+  // En adress kan inte vara både jobbsökare och teammedlem.
+  const { data: callerProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("user_id", caller.userId)
+    .maybeSingle();
+  if (callerProfile?.role === "job_seeker") {
+    return json(
+      { error: "Den här adressen har redan ett jobbsökarkonto. Be om en inbjudan till din företagsmejl." },
+      409,
+    );
+  }
+
   const { data: existingRole } = await supabaseAdmin
     .from("user_roles")
     .select("id, is_active")

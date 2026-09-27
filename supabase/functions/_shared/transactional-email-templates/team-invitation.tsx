@@ -1,7 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Button, Container, Head, Heading, Html, Preview, Section, Text, Hr,
+  Body, Button, Container, Head, Html, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -29,27 +29,24 @@ const TeamInvitationEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
-          <Text style={brand}>Parium</Text>
+          <Text style={brand}>{company_name}</Text>
+          <Section style={accentBar} />
         </Section>
-        <Heading style={h1}>Du är inbjuden till {company_name} 🎉</Heading>
-        <Text style={paragraph}>
-          {inviter_name} har bjudit in dig att gå med i {company_name} på Parium som{' '}
-          <strong>{role_label}</strong>.
-        </Text>
-        <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
-          <Button style={button} href={accept_url}>Acceptera inbjudan</Button>
+        <Text style={subjectLine}>Teaminbjudan · {role_label}</Text>
+        <Section style={card}>
+          <Text style={text}>
+            {inviter_name} har bjudit in dig att gå med i {company_name} på Parium som{' '}
+            <strong>{role_label}</strong>.
+          </Text>
+          {expires_at ? <Text style={row}><strong>Gäller till:</strong> {expires_at}</Text> : null}
         </Section>
-        <Text style={small}>
-          Fungerar inte knappen? Kopiera och klistra in den här länken i webbläsaren:
-        </Text>
+        <Section style={{ textAlign: 'center' as const, margin: '28px 0 20px' }}>
+          <Button style={button} href={accept_url}>Gå med i teamet</Button>
+        </Section>
+        <Text style={small}>Fungerar inte knappen? Kopiera och klistra in länken i webbläsaren:</Text>
         <Text style={link}>{accept_url}</Text>
-        {expires_at ? (
-          <Text style={small}>Inbjudan gäller till {expires_at}.</Text>
-        ) : null}
-        <Hr style={hr} />
         <Text style={footer}>
-          Om du inte känner igen den här inbjudan kan du ignorera mejlet — inget händer förrän
-          du klickar på länken och loggar in.
+          Känner du inte igen inbjudan kan du ignorera mejlet. Inget händer förrän du klickar på länken och loggar in.
         </Text>
         <Text style={noReply}>
           Svara inte på detta mejl — det är skickat från en automatisk utgående adress.
@@ -59,18 +56,20 @@ const TeamInvitationEmail = ({
   </Html>
 )
 
-const main = { backgroundColor: '#0f172a', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }
-const container = { margin: '0 auto', padding: '32px 24px', maxWidth: '560px' }
-const brandSection = { marginBottom: '16px' }
-const brand = { color: '#93c5fd', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, margin: 0 }
-const h1 = { color: '#ffffff', fontSize: '24px', lineHeight: '1.3', margin: '0 0 16px' }
-const paragraph = { color: '#ffffff', fontSize: '16px', lineHeight: '1.6', margin: '0 0 12px' }
-const button = { backgroundColor: '#2563eb', color: '#ffffff', borderRadius: '10px', padding: '14px 28px', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'inline-block' }
-const small = { color: '#cbd5e1', fontSize: '13px', lineHeight: '1.5', margin: '8px 0 0' }
-const link = { color: '#93c5fd', fontSize: '13px', wordBreak: 'break-all' as const, margin: '4px 0 0' }
-const hr = { borderColor: '#1e293b', margin: '24px 0' }
-const footer = { color: '#cbd5e1', fontSize: '13px', lineHeight: '1.6', margin: 0 }
-const noReply = { color: '#64748b', fontSize: '12px', margin: '12px 0 0' }
+const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
+const container = { padding: '32px 28px', maxWidth: '560px' }
+const brandSection = { margin: '0 0 24px' }
+const brand = { fontSize: '22px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
+const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', borderRadius: '2px', margin: '10px 0 0' }
+const subjectLine = { fontSize: '15px', fontWeight: 600 as const, color: '#1E4B8A', margin: '14px 0 20px' }
+const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0' }
+const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0 0 12px' }
+const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
+const button = { backgroundColor: '#001F3D', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, borderRadius: '10px', padding: '14px 28px', textDecoration: 'none', display: 'inline-block' }
+const small = { fontSize: '12px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const }
+const link = { fontSize: '12px', color: '#001F3D', wordBreak: 'break-all' as const, margin: '4px 0 0', textAlign: 'center' as const }
+const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', paddingTop: '20px', textAlign: 'center' as const }
+const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
 
 export const template = {
   component: TeamInvitationEmail,
