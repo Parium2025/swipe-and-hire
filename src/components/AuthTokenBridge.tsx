@@ -12,6 +12,8 @@ const OWN_TOKEN_ROUTES = new Set([
   '/unsubscribe/',
   '/intervjusvar',
   '/intervjusvar/',
+  '/team-invite',
+  '/team-invite/',
 ]);
 
 const isOwnCallbackRoute = (pathname: string) =>

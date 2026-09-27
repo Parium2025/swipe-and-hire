@@ -139,7 +139,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           }
           if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 6));
+            const savedStep = Math.min(Math.max(parsed.currentStep, 0), 6);
+            setCurrentStep((profile as any)?.joined_via_invite === true && (savedStep === 1 || savedStep === 2) ? 3 : savedStep);
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -148,7 +149,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       }
       setDraftRestored(true);
     }
-  }, [draftRestored, draftKey, isReplay]);
+  }, [draftRestored, draftKey, isReplay, profile]);
 
   // Förifyll med uppgifterna från registreringen så fort profilen hinner
   // laddas (den är asynkron och kommer ofta efter första renderingen).
@@ -1024,7 +1025,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
              <div className="flex gap-3 items-center justify-center">
-               {currentStep > 0 && (
+                {currentStep > 0 && (
                  <Button
                    variant="outline"
                    onMouseDown={(e) => { e.currentTarget.blur(); (document.activeElement as HTMLElement)?.blur?.(); }}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 import { CalendarDays, Video, MapPin, MessageSquare, HelpCircle, ChevronDown, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -46,15 +47,15 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
             className="space-y-3"
           >
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="interview_video_link" className="text-white flex items-center gap-1.5">
+              <div>
+                <Label htmlFor="interview_video_link" className="text-white flex flex-wrap items-center gap-x-1.5 gap-y-1">
                   <Video className="h-3.5 w-3.5" />
                   Videolänk
-                  <span className="text-white font-normal">(Din Teams, Zoom eller Google Meet-länk som visas för kandidater)</span>
                 </Label>
+                <p className="mt-1 text-xs leading-5 text-white">Din Teams-, Zoom- eller Google Meet-länk som visas för kandidater.</p>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <Input
                   id="interview_video_link"
                   name="interview-video-link-noautofill"
@@ -65,7 +66,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                   onChange={(e) => onFormDataChange({ interview_video_link: e.target.value })}
                   onBlur={(e) => onFormDataChange({ interview_video_link: normalizeMeetingLink(e.target.value) })}
                   placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white flex-1"
+                   className="min-w-0 flex-1 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                 />
                 
                 {formData.interview_video_link && isValidMeetingLink(formData.interview_video_link) && (
@@ -87,13 +88,17 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               )}
 
               {!formData.interview_video_link.trim() && orgDefaultVideoLink && (
-                <button
-                  type="button"
-                  onClick={() => onFormDataChange({ interview_video_link: orgDefaultVideoLink })}
-                  className="text-xs text-white underline underline-offset-2 hover:text-white/80 transition-colors text-left break-all"
-                >
-                  Använd företagets standardlänk ({orgDefaultVideoLink.replace(/^https?:\/\//, '')})
-                </button>
+                <div className="min-w-0 space-y-0.5">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => onFormDataChange({ interview_video_link: orgDefaultVideoLink })}
+                    className="h-auto max-w-full justify-start whitespace-normal px-0 py-1 text-left text-xs leading-5 text-white underline underline-offset-2 hover:text-white"
+                  >
+                    Använd företagets standardlänk
+                  </Button>
+                  <p className="break-all text-xs leading-5 text-white">{orgDefaultVideoLink.replace(/^https?:\/\//, '')}</p>
+                </div>
               )}
               
               <Collapsible>

@@ -709,6 +709,11 @@ const Auth = () => {
           : null;
         const requestedReturnTo = typeof initialReturnTo === 'string' ? initialReturnTo : storedReturnTo;
         const allowedReturnTo = requestedReturnTo === '/profile#notifications' || requestedReturnTo === '/settings#notifications';
+        const teamInviteReturnTo = typeof requestedReturnTo === 'string' && /^\/team-invite\?token=[a-f0-9]{20,200}$/i.test(requestedReturnTo);
+        if (teamInviteReturnTo) {
+          sessionStorage.removeItem('parium-auth-return-to');
+          return <Navigate to={requestedReturnTo} replace />;
+        }
         if (allowedReturnTo) {
           sessionStorage.removeItem('parium-auth-return-to');
           const roleDestination = role === 'employer' ? '/settings#notifications' : '/profile#notifications';
