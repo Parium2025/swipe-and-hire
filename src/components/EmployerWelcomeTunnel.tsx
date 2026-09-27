@@ -26,6 +26,7 @@ import NotificationPreferencesPanel, { type NotificationRow } from '@/components
 import { useEmailSubscription } from '@/hooks/useEmailSubscription';
 import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
 
 const notificationRows: NotificationRow[] = [
   { type: 'new_application', label: 'Nya ansökningar', description: 'Mejl skickas högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
@@ -87,6 +88,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
   const [profileEditSrc, setProfileEditSrc] = useState('');
+  const profileOriginalFileRef = useRef<File | null>(null);
+  const profileOriginalSrcRef = useRef('');
   const profileFileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -215,6 +218,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   }, [formData, notificationDraft, currentStep, draftRestored, draftKey, isReplay, profile?.company_logo_url, profile?.profile_image_url]);
 
   useEffect(() => () => { if (profileImageSrc.startsWith('blob:')) URL.revokeObjectURL(profileImageSrc); }, [profileImageSrc]);
+  useEffect(() => () => {
+    if (profileOriginalSrcRef.current.startsWith('blob:')) URL.revokeObjectURL(profileOriginalSrcRef.current);
+  }, []);
   useEffect(() => () => { if (formData.companyLogoUrl.startsWith('blob:')) URL.revokeObjectURL(formData.companyLogoUrl); }, [formData.companyLogoUrl]);
 
 
@@ -357,49 +363,58 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!ALLOWED_LOGO_TYPES.includes(file.type) || file.size > MAX_LOGO_MB * 1024 * 1024) {
-      toast({ title: 'Välj en bild under 10 MB i ett format som stöds', variant: 'destructive' });
+    if (!ALLOWED_LOGO_TYPES.includes(file.type) || file.size > 50 * 1024 * 1024) {
+      toast({ title: 'Välj en bild under 50 MB i ett format som stöds', variant: 'destructive' });
       return;
     }
-    if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
-    setProfileEditSrc(URL.createObjectURL(file));
+    if (profileOriginalSrcRef.current.startsWith('blob:')) URL.revokeObjectURL(profileOriginalSrcRef.current);
+    const originalSrc = URL.createObjectURL(file);
+    profileOriginalFileRef.current = file;
+    profileOriginalSrcRef.current = originalSrc;
+    setProfileEditSrc(originalSrc);
     setProfileEditorOpen(true);
   };
 
   const handleEditProfileImage = async () => {
-    const current = profileImageSrc || existingProfileImage;
-    if (current) {
-      setProfileEditSrc(current);
+    if (profileOriginalSrcRef.current.startsWith('blob:')) {
+      setProfileEditSrc(profileOriginalSrcRef.current);
       setProfileEditorOpen(true);
       return;
     }
     if (formData.profileImageUrl) {
-      const { getMediaUrl } = await import('@/lib/mediaManager');
-      const url = await getMediaUrl(formData.profileImageUrl, 'profile-image', 3600);
+      const url = await getOriginalImageUrl(formData.profileImageUrl, 'profile-image', 3600)
+        ?? await getMediaUrl(formData.profileImageUrl, 'profile-image', 3600);
       if (url) {
+        profileOriginalSrcRef.current = url;
         setProfileEditSrc(url);
         setProfileEditorOpen(true);
+        return;
       }
     }
+    toast({ title: 'Kunde inte ladda bilden', description: 'Försök ladda upp en ny bild istället.', variant: 'destructive' });
   };
 
   const handleProfileImageSave = async (editedBlob: Blob) => {
-    setProfileEditorOpen(false);
-    if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
-    setProfileEditSrc('');
     if (isReplay) {
       setProfileImageSrc(URL.createObjectURL(editedBlob));
+      setProfileEditorOpen(false);
       return;
     }
     setIsUploadingLogo(true);
     try {
       if (!user?.id) throw new Error('Ingen användare');
-      const file = new File([editedBlob], 'profile-image.png', { type: editedBlob.type || 'image/png' });
-      const { uploadMedia, getMediaUrl } = await import('@/lib/mediaManager');
+      // Spara originalet tillsammans med varje ny beskärning, även efter att guiden stängts.
+      const original = profileOriginalFileRef.current ?? await fetch(profileEditSrc).then(response => {
+        if (!response.ok) throw new Error('Originalbilden kunde inte hämtas');
+        return response.blob();
+      });
+      const file = new File([editedBlob], 'profile-image.webp', { type: editedBlob.type || 'image/webp' });
       const { storagePath, error } = await uploadMedia(file, 'profile-image', user.id);
       if (error || !storagePath) throw error || new Error('Uppladdning misslyckades');
+      await uploadOriginalImage(storagePath, original, 'profile-image');
       setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
       setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
+      setProfileEditorOpen(false);
       toast({ title: 'Profilbild uppladdad!' });
     } catch {
       toast({ title: 'Kunde inte ladda upp profilbilden', variant: 'destructive' });
@@ -727,6 +742,9 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                       e.stopPropagation();
                       setFormData(prev => ({ ...prev, profileImageUrl: '' }));
                       setProfileImageSrc('');
+                      if (profileOriginalSrcRef.current.startsWith('blob:')) URL.revokeObjectURL(profileOriginalSrcRef.current);
+                      profileOriginalSrcRef.current = '';
+                      profileOriginalFileRef.current = null;
                     }}
                     className="absolute -top-3 -right-3 z-20 pointer-events-auto rounded-full border border-0 bg-red-500/80 p-2 text-white shadow-lg transition-colors md:hover:!bg-red-500 md:hover:!text-white"
                   >
@@ -1011,7 +1029,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         isOpen={profileEditorOpen}
         onClose={() => {
           setProfileEditorOpen(false);
-          if (profileEditSrc.startsWith('blob:')) URL.revokeObjectURL(profileEditSrc);
           setProfileEditSrc('');
         }}
         imageSrc={profileEditSrc}

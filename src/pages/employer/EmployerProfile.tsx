@@ -14,7 +14,7 @@ import { useOnline } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ImageEditor from '@/components/ImageEditor';
-import { uploadMedia, getMediaUrl } from '@/lib/mediaManager';
+import { uploadMedia, getMediaUrl, getOriginalImageUrl, uploadOriginalImage } from '@/lib/mediaManager';
 
 // localStorage key för draft
 // Utkastet måste vara låst till kontot, annars kan nästa inloggade
@@ -238,6 +238,26 @@ const EmployerProfile = () => {
     const cachedIsUsable =
       originalProfileImageUrl.startsWith('blob:') ||
       (!!originalProfileImageUrl && Date.now() < signedOriginalExpiresAtRef.current);
+    if (cachedIsUsable && originalProfileImageFile) {
+      setPendingImageSrc(originalProfileImageUrl);
+      setIsEditingExistingProfileImage(true);
+      setImageEditorOpen(true);
+      return;
+    }
+
+    // Guidens och profilsidans nya beskärningar har originalet bredvid visningsbilden.
+    if (formData.profile_image_url) {
+      const pairedOriginal = await getOriginalImageUrl(formData.profile_image_url, 'profile-image', 3600);
+      if (pairedOriginal) {
+        signedOriginalExpiresAtRef.current = Date.now() + 55 * 60 * 1000;
+        setOriginalProfileImageUrl(pairedOriginal);
+        setPendingImageSrc(pairedOriginal);
+        setIsEditingExistingProfileImage(true);
+        setImageEditorOpen(true);
+        return;
+      }
+    }
+
     if (cachedIsUsable) {
       setPendingImageSrc(originalProfileImageUrl);
       setIsEditingExistingProfileImage(true);
@@ -306,6 +326,15 @@ const EmployerProfile = () => {
       );
 
       if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+
+      // Behåll samma obeskurna källa per bild även när guiden redan är avslutad.
+      const originalSource = originalProfileImageFile ?? (pendingImageSrc
+        ? await fetch(pendingImageSrc).then(response => {
+            if (!response.ok) throw new Error('Originalbilden kunde inte hämtas');
+            return response.blob();
+          })
+        : null);
+      if (originalSource) await uploadOriginalImage(storagePath, originalSource, 'profile-image');
 
       // Upload original file if we have a new file (not already saved) - Job Wizard pattern
       if (originalProfileImageFile && !originalProfileImageStoragePath) {
