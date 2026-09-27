@@ -67,6 +67,42 @@ interface CompanyReview {
 const CompanyReviews = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
+  const [savingReplyId, setSavingReplyId] = useState<string | null>(null);
+
+  const startReply = (review: CompanyReview) => {
+    setEditingReplyId(review.id);
+    setReplyDraft(review.employer_reply ?? '');
+  };
+
+  const saveReply = async (reviewId: string, reply: string) => {
+    setSavingReplyId(reviewId);
+    try {
+      const { error } = await supabase.rpc('reply_to_company_review', {
+        _review_id: reviewId,
+        _reply: reply,
+      });
+      if (error) throw error;
+      setEditingReplyId(null);
+      setReplyDraft('');
+      queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', user?.id] });
+      toast({
+        title: reply.trim() ? "Svar sparat" : "Svar borttaget",
+        description: reply.trim() ? "Ditt svar visas nu under recensionen." : "Svaret har tagits bort.",
+      });
+    } catch (e) {
+      console.error('Error saving review reply:', e);
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara svaret. Försök igen.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingReplyId(null);
+    }
+  };
 
   // Fetch company data with React Query
   const { data: company, isLoading: companyLoading } = useQuery({
