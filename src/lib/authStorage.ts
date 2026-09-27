@@ -38,11 +38,37 @@ const snapshotKey = (key: string) => `${SNAPSHOT_PREFIX}${key}`;
 /** Plockar ut user id ur ett serialiserat GoTrue-sessionsvärde. */
 const extractUserId = (value: string): string | null => {
   try {
-    const parsed = JSON.parse(value);
+    const serialized = value.startsWith('base64-') ? atob(value.slice(7)) : value;
+    const parsed = JSON.parse(serialized);
     return parsed?.user?.id ?? parsed?.currentSession?.user?.id ?? null;
   } catch {
     return null;
   }
+};
+
+/** Returnerar kontot som faktiskt är lagrat i den här fliken. */
+export const getTabAuthUserId = (): string | null => {
+  try {
+    for (let index = 0; index < sessionStorage.length; index += 1) {
+      const key = sessionStorage.key(index);
+      if (!key || !isAuthStorageKey(key)) continue;
+      const value = sessionStorage.getItem(key);
+      if (!value) continue;
+      const userId = extractUserId(value);
+      if (userId) return userId;
+    }
+  } catch {
+    // Safari private mode can reject storage access; auth recovery handles it.
+  }
+  return null;
+};
+
+export const isAuthEventFromAnotherTab = (
+  previousUserId: string | null,
+  eventUserId: string | null,
+): boolean => {
+  if (!previousUserId || eventUserId === previousUserId) return false;
+  return getTabAuthUserId() === previousUserId;
 };
 
 /**

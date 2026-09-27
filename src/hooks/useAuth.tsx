@@ -12,7 +12,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
-import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership } from '@/lib/authStorage';
+import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership, isAuthEventFromAnotherTab } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches, cancelPendingCacheClear } from '@/hooks/useEagerRatingsPreload';
@@ -523,6 +523,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const newUserId = session?.user?.id ?? null;
         const previousUserId = currentUserIdRef.current;
+
+        // GoTrue kan skicka en annan fliks auth-händelse via BroadcastChannel
+        // trots att varje Parium-flik avsiktligt har sin egen sessionStorage.
+        // Flikens lokala konto är då sanningen och händelsen ska ignoreras.
+        if (isAuthEventFromAnotherTab(previousUserId, newUserId)) {
+          console.log('🛡️ Ignoring auth change from another tab; this tab keeps its own account');
+          return;
+        }
 
         if (
           previousUserId !== null &&
@@ -2712,7 +2720,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Track user activity for 24-hour inactivity timeout
   useInactivityTimeout(!!user);
 
-  // Session limiter: max 2 concurrent sessions per user
+  // Session limiter: max 3 concurrent devices per user
   const handleSessionKicked = useCallback(async () => {
     // Flag to prevent onAuthStateChange from showing a duplicate toast
     isSessionKickRef.current = true;

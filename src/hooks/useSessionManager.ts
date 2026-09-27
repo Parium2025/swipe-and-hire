@@ -177,7 +177,7 @@ function getDeviceLabel(): string {
 }
 
 /**
- * Hook that manages max 2 concurrent sessions per user.
+ * Hook that manages max 3 concurrent devices per user.
  * - Registers session on login
  * - Sends heartbeat every 10 min
  * - Listens for session deletion (kicked by another device)
@@ -449,7 +449,7 @@ export function useSessionManager(
           }
 
           if (result?.status === 'rejected') {
-            // 2+ other sessions exist → genuinely kicked
+            // 3 other sessions exist → genuinely kicked
             alreadyKickedRef.current = true;
             registeredRef.current = false;
             console.log('🚫 Genuinely kicked — re-registration rejected');

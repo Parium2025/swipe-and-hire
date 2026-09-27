@@ -393,6 +393,13 @@
       "when": 1790506793281,
       "tag": "0055_team_member_company_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1790529792419,
+      "tag": "0056_raise_user_session_limit_to_three",
+      "breakpoints": true
     }
   ]
 }
