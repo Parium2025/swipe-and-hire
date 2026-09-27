@@ -99,7 +99,7 @@ const TeamInvite = () => {
     try { sessionStorage.setItem("parium-auth-return-to", destination); } catch { /* localStorage covers it */ }
     const register = preview ? !preview.accountExists : false;
     navigate(register ? "/auth?mode=register&role=employer" : "/auth", {
-      state: { returnTo: destination, ...(register ? { mode: "register", role: "employer" } : {}) },
+      state: { returnTo: destination, ...(preview ? { email: preview.email } : {}), ...(register ? { mode: "register", role: "employer" } : {}) },
       replace: true,
     });
   }, [destination, navigate, preview]);

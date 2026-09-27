@@ -91,6 +91,7 @@ const Auth = () => {
   const initialRole = (location.state as any)?.role ?? searchParams.get('role');
   const initialPlan = (location.state as any)?.plan;
   const initialSavedSearchIntent = (location.state as any)?.savedSearchIntent;
+  const initialEmail = (location.state as { email?: unknown } | null)?.email;
   const initialReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
 
   // Persistera "Bevaka denna sökning"-intent från SEO-sidor så den överlever
@@ -829,6 +830,7 @@ const Auth = () => {
             onAuthModeChange={setIsLoginMode}
             initialMode={initialMode}
             initialRole={initialRole}
+            initialEmail={typeof initialEmail === 'string' ? initialEmail : undefined}
           />
         </div>
       </div>
@@ -866,6 +868,7 @@ const Auth = () => {
           onAuthModeChange={setIsLoginMode}
           initialMode={initialMode}
           initialRole={initialRole}
+          initialEmail={typeof initialEmail === 'string' ? initialEmail : undefined}
         />
       </div>
     </div>

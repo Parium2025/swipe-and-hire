@@ -62,10 +62,24 @@ serve(async (req) => {
     if (new Date(inv.expires_at).getTime() < Date.now()) {
       return json({ error: "Inbjudan har gått ut." }, 410);
     }
-    const [{ data: org }, { data: registered }] = await Promise.all([
+    const [{ data: org }, { data: registered }, { data: authRows }] = await Promise.all([
       supabaseAdmin.from("organizations").select("name").eq("id", inv.organization_id).maybeSingle(),
       supabaseAdmin.rpc("auth_email_registered", { _email: inv.email }),
+      supabaseAdmin.rpc("lookup_auth_email_for_resend", { _email: inv.email }),
     ]);
+    // Visa direkt om adressen redan är ett jobbsökarkonto, i stället för
+    // att låta personen logga in först och sedan få beskedet.
+    const authRow = Array.isArray(authRows) ? authRows[0] : authRows;
+    if (authRow?.user_id) {
+      const { data: prof } = await supabaseAdmin
+        .from("profiles").select("role").eq("user_id", authRow.user_id).maybeSingle();
+      if ((prof?.role ?? authRow.account_role) === "job_seeker") {
+        return json(
+          { error: "Den här adressen har redan ett jobbsökarkonto. Be om en inbjudan till din företagsmejl." },
+          409,
+        );
+      }
+    }
     return json({
       email: inv.email,
       organizationName: org?.name ?? null,
@@ -136,6 +150,23 @@ serve(async (req) => {
     );
   }
 
+  // Lås inbjudan atomiskt: bara ett klick/en flik kan använda den, även om
+  // "Gå med" trycks två gånger eller länken öppnas på två enheter samtidigt.
+  const { data: claimed } = await supabaseAdmin
+    .from("organization_invitations")
+    .update({ status: "accepted", accepted_at: new Date().toISOString(), accepted_by: caller.userId })
+    .eq("id", invitation.id)
+    .eq("status", "pending")
+    .select("id");
+  if (!claimed || claimed.length === 0) {
+    return json({ error: "Inbjudan är redan använd." }, 409);
+  }
+  const releaseClaim = () =>
+    supabaseAdmin
+      .from("organization_invitations")
+      .update({ status: "pending", accepted_at: null, accepted_by: null })
+      .eq("id", invitation.id);
+
   const { data: existingRole } = await supabaseAdmin
     .from("user_roles")
     .select("id, is_active, role")
@@ -145,10 +176,6 @@ serve(async (req) => {
 
   // Aktiv medlem redan: rör aldrig rollen (en admin får aldrig nedgraderas).
   if (existingRole?.is_active) {
-    await supabaseAdmin
-      .from("organization_invitations")
-      .update({ status: "accepted", accepted_at: new Date().toISOString(), accepted_by: caller.userId })
-      .eq("id", invitation.id);
     return json({ success: true, alreadyMember: true });
   }
 
@@ -159,6 +186,7 @@ serve(async (req) => {
       .eq("id", existingRole.id);
     if (updateRoleError) {
       console.error("role update failed", updateRoleError);
+      await releaseClaim();
       return json({ error: "Kunde inte koppla dig till teamet." }, 500);
     }
   } else {
@@ -170,6 +198,7 @@ serve(async (req) => {
     });
     if (insertRoleError) {
       console.error("role insert failed", insertRoleError);
+      await releaseClaim();
       return json({ error: "Kunde inte koppla dig till teamet." }, 500);
     }
   }
@@ -186,15 +215,6 @@ serve(async (req) => {
     p_organization_id: invitation.organization_id,
   });
   if (copyError) console.error("company copy failed", copyError);
-
-  await supabaseAdmin
-    .from("organization_invitations")
-    .update({
-      status: "accepted",
-      accepted_at: new Date().toISOString(),
-      accepted_by: caller.userId,
-    })
-    .eq("id", invitation.id);
 
   const { data: org } = await supabaseAdmin
     .from("organizations")

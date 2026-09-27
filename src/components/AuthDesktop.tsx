@@ -42,6 +42,8 @@ interface AuthDesktopProps {
   onAuthModeChange?: (isLogin: boolean) => void;
   initialMode?: string;
   initialRole?: string;
+  /** Inbjuden adress förifylls så kontot skapas/loggas in med rätt mejl. */
+  initialEmail?: string;
 }
 
 const AuthDesktop = ({ 
@@ -54,7 +56,8 @@ const AuthDesktop = ({
   onBackToLogin,
   onAuthModeChange,
   initialMode,
-  initialRole
+  initialRole,
+  initialEmail
 }: AuthDesktopProps) => {
   
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
@@ -67,7 +70,7 @@ const AuthDesktop = ({
   const savedDraft = useRef(loadAuthDraft()).current;
   // Inloggning har helt eget state – delar aldrig fält med registreringen
   const [loginData, setLoginData] = useState(() => ({
-    email: savedDraft.login?.email ?? '',
+    email: initialEmail ?? savedDraft.login?.email ?? '',
     password: '',
   }));
   const [jobSeekerData, setJobSeekerData] = useState(() => mergeDraft({
@@ -79,7 +82,7 @@ const AuthDesktop = ({
     password: '',
     confirmPassword: ''
   }, savedDraft.jobSeeker));
-  const [employerData, setEmployerData] = useState(() => mergeDraft({
+  const [employerData, setEmployerData] = useState(() => ({ ...mergeDraft({
     firstName: '',
     lastName: '',
     companyName: '',
@@ -92,7 +95,7 @@ const AuthDesktop = ({
     email: '',
     password: '',
     confirmPassword: ''
-  }, savedDraft.employer));
+  }, savedDraft.employer), ...(initialEmail ? { email: initialEmail } : {}) }));
   const [role, setRole] = useState<'job_seeker' | 'employer'>(
     initialRole === 'employer' ? 'employer' : savedDraft.role ?? 'job_seeker'
   );
