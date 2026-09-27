@@ -81,9 +81,17 @@ serve(async (req) => {
   // Already a member of this organization?
   const { data: existingProfile } = await supabaseAdmin
     .from("profiles")
-    .select("user_id")
+    .select("user_id, role")
     .ilike("email", email)
     .maybeSingle();
+
+  // En adress kan inte vara både jobbsökare och teammedlem.
+  if (existingProfile?.role === "job_seeker") {
+    return json(
+      { error: "Den här adressen har redan ett jobbsökarkonto. Be personen använda sin företagsmejl." },
+      409,
+    );
+  }
 
   if (existingProfile?.user_id) {
     const { data: existingRole } = await supabaseAdmin
@@ -158,7 +166,8 @@ serve(async (req) => {
     .filter(Boolean)
     .join(" ") || "En kollega";
 
-  const baseUrl = parsed.data.origin?.replace(/\/+$/, "") || "https://parium.se";
+  // Mejllänkar pekar alltid på Pariums egen domän, aldrig på förhandsvisningen.
+  const baseUrl = "https://parium.se";
   const acceptUrl = `${baseUrl}/team-invite?token=${token}`;
 
   try {
