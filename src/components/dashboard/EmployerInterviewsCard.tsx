@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +18,7 @@ import {
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
+import { fetchCalendarStatus, getCachedCalendarStatus } from '@/lib/calendarConnection';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +59,26 @@ export const EmployerInterviewsCard = memo(() => {
   // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
   const lastOpenRef = useRef(0);
   const lastSwipeRef = useRef(0);
+  // Är en kalender kopplad synkas intervjuerna dit automatiskt — då visar
+  // kortet "Redan i kalendern" i stället för nerladdningsknappen.
+  const [calendarConnected, setCalendarConnected] = useState(() => {
+    const cached = getCachedCalendarStatus();
+    return Boolean(cached?.google_calendar.connected || cached?.microsoft_outlook.connected);
+  });
+  useEffect(() => {
+    let cancelled = false;
+    fetchCalendarStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setCalendarConnected(Boolean(status.google_calendar.connected || status.microsoft_outlook.connected));
+      })
+      .catch(() => {
+        // Kunde status inte hämtas behåller vi knappen som vanligt.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   // Mobil: en intervju per kortyta, prickar växlar mellan dem.
   const [mobileIndex, setMobileIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(1);
@@ -300,20 +321,25 @@ export const EmployerInterviewsCard = memo(() => {
                                 )}
                                 <span className="leading-none">{responseLabel}</span>
                               </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  void downloadInterviewIcs(interview.id);
-                                }}
-                                 className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-6 px-2 text-xs"
-                                aria-label="Lägg till i kalender"
-                              >
-                                <CalendarPlus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                <span className="leading-none">Kalender</span>
-                              </button>
-                            )}
+                             ) : calendarConnected ? (
+                               <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-6 px-2 text-xs">
+                                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                 <span className="leading-none">Redan i kalendern</span>
+                               </span>
+                             ) : (
+                               <button
+                                 type="button"
+                                 onClick={(event) => {
+                                   event.stopPropagation();
+                                   void downloadInterviewIcs(interview.id);
+                                 }}
+                                  className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-6 px-2 text-xs"
+                                 aria-label="Lägg till i kalender"
+                               >
+                                 <CalendarPlus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                 <span className="leading-none">Kalender</span>
+                               </button>
+                             )}
                           </div>
                         </div>
                       ) : (
@@ -374,20 +400,25 @@ export const EmployerInterviewsCard = memo(() => {
                               )}
                               <span className="leading-none">{responseLabel}</span>
                             </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                void downloadInterviewIcs(interview.id);
-                              }}
-                              className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white hover:bg-white/15"
-                              aria-label="Lägg till i kalender"
-                            >
-                              <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                              <span className="leading-none">Kalender</span>
-                            </button>
-                          )}
+                           ) : calendarConnected ? (
+                             <span className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white whitespace-nowrap">
+                               <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                               <span className="leading-none">I kalendern</span>
+                             </span>
+                           ) : (
+                             <button
+                               type="button"
+                               onClick={(event) => {
+                                 event.stopPropagation();
+                                 void downloadInterviewIcs(interview.id);
+                               }}
+                               className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white hover:bg-white/15"
+                               aria-label="Lägg till i kalender"
+                             >
+                               <CalendarPlus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                               <span className="leading-none">Kalender</span>
+                             </button>
+                           )}
                         </div>
                       )}
                     </motion.div>
