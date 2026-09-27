@@ -17,12 +17,11 @@ const supabaseAdmin = createClient(
 const ROLE_LABELS: Record<string, string> = {
   admin: "Admin",
   recruiter: "Rekryterare",
-  viewer: "Läsare",
 };
 
 const RequestSchema = z.object({
   email: z.string().email().max(320),
-  role: z.enum(["admin", "recruiter", "viewer"]),
+  role: z.enum(["admin", "recruiter"]),
   origin: z.string().url().max(300).optional(),
 });
 

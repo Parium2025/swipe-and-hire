@@ -379,6 +379,13 @@
       "when": 1790505079021,
       "tag": "0053_require_verified_email_for_org_admin_role",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1790506266606,
+      "tag": "0054_restrict_outreach_writes_to_org_admins",
+      "breakpoints": true
     }
   ]
 }
