@@ -569,7 +569,7 @@ const TeamManagement = () => {
                 : `Är du säker på att du vill återkalla inbjudan till ${deleteTarget?.label ?? ''}? Länken slutar fungera direkt och detta går inte att ångra.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-row gap-2 sm:justify-center">
+          <AlertDialogFooter className="mt-4 flex-row justify-center gap-2">
             <AlertDialogCancel
               onClick={() => setDeleteTarget(null)}
               className="btn-dialog-action mt-0 rounded-full border-white/30 !bg-white/10 text-white md:hover:!bg-white/20 md:hover:!text-white"
