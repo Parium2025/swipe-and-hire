@@ -877,7 +877,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto">
-                <CheckCircle className="h-10 w-10 text-white" />
+                <CheckCircle className="h-10 w-10 text-green-500" />
               </div>
               
               <div className="space-y-4">
@@ -899,7 +899,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="py-4 px-8 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0"
+                className={`py-4 px-8 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0 ${isReplay ? 'bg-primary hover:bg-primary/90' : 'bg-green-500 hover:bg-green-600'}`}
               >
                 {isSubmitting ? (
                   <>
@@ -908,7 +908,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   </>
                 ) : (
                   <>
-                     <span>{isReplay ? 'Avsluta testet' : 'Spara och fortsätt'}</span>
+                     <span>{isReplay ? 'Avsluta testet' : 'Spara'}</span>
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </>
                 )}
