@@ -28,6 +28,8 @@ export const SKELETON_COUNT_KEYS = {
   supportTickets: 'parium:supportTickets:lastCount',
 } as const;
 
+const MY_CANDIDATES_COLD_LAYOUT_KEY = 'parium:myCandidates:coldLayout';
+
 export function readCachedCount(key: string, fallback = 6, max = 9): number {
   if (typeof window === 'undefined') return fallback;
   try {
@@ -86,4 +88,18 @@ export function writeCachedLayout(key: string, counts: number[]): void {
   } catch {
     /* noop */
   }
+}
+
+/**
+ * The auth shell renders before the session user is available. Keep one
+ * short-lived pointer to the last fully resolved employer board so that this
+ * first frame can mirror it. Logout clears the whole `parium:myCandidates:`
+ * namespace, so another account never inherits the snapshot.
+ */
+export function readMyCandidatesColdLayout(): number[] | null {
+  return readCachedLayout(MY_CANDIDATES_COLD_LAYOUT_KEY);
+}
+
+export function writeMyCandidatesColdLayout(counts: number[]): void {
+  writeCachedLayout(MY_CANDIDATES_COLD_LAYOUT_KEY, counts);
 }
