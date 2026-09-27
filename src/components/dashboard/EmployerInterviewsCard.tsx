@@ -130,7 +130,7 @@ export const EmployerInterviewsCard = memo(() => {
 
   if (isLoading) {
     return (
-      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height`}>
+      <Card className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height max-md:!h-[232px]`}>
         <div className="absolute inset-0 bg-white/5" />
         <CardContent className="relative p-4 h-full">
           <div className="flex items-center gap-2 mb-4">
@@ -146,7 +146,7 @@ export const EmployerInterviewsCard = memo(() => {
   return (
     <>
     <Card
-      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
+      className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height max-md:!h-[232px] touch-pan-y`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

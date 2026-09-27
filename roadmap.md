@@ -23,4 +23,4 @@
 - [ ] End-to-end test a real team invitation with a separate invited employer account (blocked until that second account is available)
 - [x] Stabilize per-account two-device sessions, eliminate Safari account-switch reload loops, and cover invite states with automated tests
 - [x] Stop the boot watchdog, preview auth provider and browser-chrome paths from creating repeated reload loops
-- [ ] Restyle the mobile interview carousel card: status pill in the corner, meta row moved up, full-width job title — keep every existing info element and action
+- [x] Restyle the mobile interview carousel card: status pill in the corner, meta row moved up, full-width job title — keep every existing info element and action
