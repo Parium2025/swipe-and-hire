@@ -48,7 +48,10 @@ export const useIsOrgAdmin = () => {
   const cached = user && organizationId ? readCache(user.id, organizationId) : null;
   // Only trust a fresh positive cache as initial value to avoid showing the menu
   // to non-admins from stale data, and to ensure newly-granted admins see it on next load.
-  const trustedInitial = cached && isFresh(cached) && cached.isAdmin ? true : undefined;
+  // Positive cache (any age) is used as a placeholder so admin sections don't
+  // vanish and pop back in; the server check still runs on every mount and
+  // all permissions are enforced in the database regardless.
+  const trustedInitial = cached && cached.isAdmin ? true : undefined;
 
   const { data: isAdmin = false, isLoading: queryLoading } = useQuery({
     queryKey: ['is-org-admin', user?.id, organizationId],
@@ -74,7 +77,7 @@ export const useIsOrgAdmin = () => {
     gcTime: CACHE_TTL_MS,
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,
-    initialData: trustedInitial,
+    placeholderData: trustedInitial,
   });
 
   const loading = queryLoading && trustedInitial === undefined;
