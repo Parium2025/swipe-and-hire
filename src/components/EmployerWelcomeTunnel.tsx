@@ -950,7 +950,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     <div
       ref={scrollContainerRef}
       data-welcome-tunnel-scroll="true"
-      className="fixed inset-0 z-[60] h-[100dvh] bg-gradient-parium flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain"
+      className="auth-dark fixed inset-0 z-[60] h-[100dvh] bg-gradient-parium flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       {/* Persistent decoded image cache: keeps logo/profile image warm across step changes (no cold start) */}
