@@ -18,6 +18,7 @@ import {
 } from '@/lib/interviewTime';
 import { GRADIENTS } from './dashboardConstants';
 import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
+import { fetchCalendarStatus, getCachedCalendarStatus } from '@/lib/calendarConnection';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +59,26 @@ export const EmployerInterviewsCard = memo(() => {
   // Dubbeltryck (vanligt på mobil) ska inte öppna två mötesflikar.
   const lastOpenRef = useRef(0);
   const lastSwipeRef = useRef(0);
+  // Är en kalender kopplad synkas intervjuerna dit automatiskt — då visar
+  // kortet "Redan i kalendern" i stället för nerladdningsknappen.
+  const [calendarConnected, setCalendarConnected] = useState(() => {
+    const cached = getCachedCalendarStatus();
+    return Boolean(cached?.google_calendar.connected || cached?.microsoft_outlook.connected);
+  });
+  useEffect(() => {
+    let cancelled = false;
+    fetchCalendarStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setCalendarConnected(Boolean(status.google_calendar.connected || status.microsoft_outlook.connected));
+      })
+      .catch(() => {
+        // Kunde status inte hämtas behåller vi knappen som vanligt.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   // Mobil: en intervju per kortyta, prickar växlar mellan dem.
   const [mobileIndex, setMobileIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(1);
