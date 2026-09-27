@@ -238,7 +238,7 @@ const EmployerProfile = () => {
     const cachedIsUsable =
       originalProfileImageUrl.startsWith('blob:') ||
       (!!originalProfileImageUrl && Date.now() < signedOriginalExpiresAtRef.current);
-    if (cachedIsUsable) {
+    if (cachedIsUsable && originalProfileImageFile) {
       setPendingImageSrc(originalProfileImageUrl);
       setIsEditingExistingProfileImage(true);
       setImageEditorOpen(true);
@@ -256,6 +256,13 @@ const EmployerProfile = () => {
         setImageEditorOpen(true);
         return;
       }
+    }
+
+    if (cachedIsUsable) {
+      setPendingImageSrc(originalProfileImageUrl);
+      setIsEditingExistingProfileImage(true);
+      setImageEditorOpen(true);
+      return;
     }
 
     // Priority 2: Fetch from stored original storage path
