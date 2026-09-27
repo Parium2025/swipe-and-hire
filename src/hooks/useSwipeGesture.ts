@@ -60,3 +60,52 @@ export function useSwipeGesture({
     onTouchEnd,
   };
 }
+
+/**
+ * Apple-style direction lock for horizontal swipe cards.
+ * Once a touch is clearly horizontal the page is held still (no vertical
+ * nudge/rubber-band); a clearly vertical drag scrolls the page as usual.
+ * Uses a native non-passive listener because React touch handlers are passive.
+ */
+export function useHorizontalSwipeLock<T extends HTMLElement>(enabled = true) {
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  return useCallback((node: T | null) => {
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    if (!node || !enabled) return;
+
+    let startX = 0;
+    let startY = 0;
+    let axis: 'x' | 'y' | null = null;
+
+    const onStart = (e: globalThis.TouchEvent) => {
+      if (e.touches.length !== 1) { axis = 'y'; return; }
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      axis = null;
+    };
+    const onMove = (e: globalThis.TouchEvent) => {
+      if (axis === 'y' || e.touches.length !== 1) return;
+      if (axis === null) {
+        const dx = Math.abs(e.touches[0].clientX - startX);
+        const dy = Math.abs(e.touches[0].clientY - startY);
+        if (dx < 6 && dy < 6) return;
+        axis = dx > dy ? 'x' : 'y';
+      }
+      if (axis === 'x' && e.cancelable) e.preventDefault();
+    };
+    const onEnd = () => { axis = null; };
+
+    node.addEventListener('touchstart', onStart, { passive: true });
+    node.addEventListener('touchmove', onMove, { passive: false });
+    node.addEventListener('touchend', onEnd, { passive: true });
+    node.addEventListener('touchcancel', onEnd, { passive: true });
+    cleanupRef.current = () => {
+      node.removeEventListener('touchstart', onStart);
+      node.removeEventListener('touchmove', onMove);
+      node.removeEventListener('touchend', onEnd);
+      node.removeEventListener('touchcancel', onEnd);
+    };
+  }, [enabled]);
+}

@@ -1,6 +1,6 @@
 import { memo, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Newspaper, Clock, ExternalLink } from 'lucide-react';
@@ -66,6 +66,8 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
     onTick: goNext,
   });
 
+  const swipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
+
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
   if (isLoading) {
@@ -90,6 +92,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
 
   return (
     <Card
+      ref={swipeLockRef}
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={pauseNow}
       onMouseLeave={resumeNow}

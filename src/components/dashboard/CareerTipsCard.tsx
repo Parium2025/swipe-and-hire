@@ -1,6 +1,6 @@
 import { memo, useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Lightbulb, Newspaper, Clock, ExternalLink, Sparkles } from 'lucide-react';
@@ -48,6 +48,8 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
     offsetMs: 0,
     onTick: goNext,
   });
+
+  const swipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
 
   const swipeHandlers = useSwipeGesture({
     onSwipeLeft: goNext,
@@ -98,7 +100,8 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
   const currentTip = tipsItems[currentIndex];
 
   return (
-    <Card 
+    <Card
+      ref={swipeLockRef} 
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.tips} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={pauseNow}
       onMouseLeave={resumeNow}
