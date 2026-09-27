@@ -73,11 +73,14 @@ describe('browserChrome', () => {
     ).toBe('#062B5E');
   });
 
-  it('tillåter högst en chrome-omladdning per tidsfönster så den aldrig loopar', () => {
+  it('tillåter högst två chrome-omladdningar per tidsfönster så den aldrig loopar', () => {
     sessionStorage.clear();
     expect(claimChromeReload(1_000)).toBe(true);
-    expect(claimChromeReload(2_000)).toBe(false);
+    expect(claimChromeReload(2_000)).toBe(true);
+    expect(claimChromeReload(3_000)).toBe(false);
     expect(claimChromeReload(9_000)).toBe(false);
-    expect(claimChromeReload(12_000)).toBe(true);
+    expect(claimChromeReload(11_500)).toBe(true);
+    expect(claimChromeReload(11_600)).toBe(false);
+    expect(claimChromeReload(22_000)).toBe(true);
   });
 });
