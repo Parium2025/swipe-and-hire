@@ -1,4 +1,4 @@
-const LANDING_CHROME_COLOR = '#2a2a2a';
+const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#00193D';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
 // Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.

@@ -23,7 +23,7 @@ describe('browserChrome', () => {
 
     const landingTags = themeColorTags();
     expect(landingTags).toHaveLength(1);
-    expect(landingTags[0]?.content).toBe('#2a2a2a');
+    expect(landingTags[0]?.content).toBe('#626262');
 
     syncBrowserChrome('/auth');
     vi.advanceTimersByTime(20);
@@ -59,10 +59,10 @@ describe('browserChrome', () => {
     vi.advanceTimersByTime(20);
 
     expect(themeColorTags()).toHaveLength(1);
-    expect(themeColorTags().every((tag) => tag.content === '#2a2a2a')).toBe(true);
+    expect(themeColorTags().every((tag) => tag.content === '#626262')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
-    ).toBe('#2a2a2a');
+    ).toBe('#626262');
 
     syncBrowserChrome('/auth');
     vi.advanceTimersByTime(20);

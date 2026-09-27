@@ -53,7 +53,7 @@
           var isAudienceLandingRoute = path === '/jobbsokare' || path === '/arbetsgivare';
           var isAuthRoute = path === '/auth';
           var chromeColor = isLandingVideoRoute
-            ? '#2a2a2a'
+            ? '#626262'
             : (isAudienceLandingRoute ? '#001F3D' : (isAuthRoute ? '#062B5E' : '#00193D'));
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
@@ -476,7 +476,7 @@
 
   <style>
     /* Body-färgen sätts INLINE av syncBrowserChrome() vid varje route-byte:
-       - På "/" → #2a2a2a (matchar landningssidans video + topp-URL-bar)
+       - På "/" → #626262 (matchar landningssidans video + topp-URL-bar)
        - Överallt annat → #00193D (matchar Parium-blå topp-URL-bar)
        iOS Safaris bottenverktygsfält samplar body's computed background-color,
        så inline-style på body ändrar bottenfältet automatiskt vid SPA-nav.
