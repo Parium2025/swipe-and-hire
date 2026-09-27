@@ -132,7 +132,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           }
           if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 7));
+            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 6));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -218,7 +218,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   useEffect(() => () => { if (formData.companyLogoUrl.startsWith('blob:')) URL.revokeObjectURL(formData.companyLogoUrl); }, [formData.companyLogoUrl]);
 
 
-  const totalSteps = 8; // Intro, företag, logga, profil, möteslänk, meddelanden, aviseringar, klart
+  const totalSteps = 7; // Intro, företag, logga, profil, meddelanden (inkl. möteslänk), aviseringar, klart
 
   // Långa steg kan skrollas på mobil. Börja nästa steg från toppen, inte
   // mitt i det nya formuläret där samma skrollposition råkade ligga kvar.
@@ -235,7 +235,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       toast({ title: 'Ange företagets namn', variant: 'destructive' });
       return;
     }
-    if ((currentStep === 4 || currentStep === 5) && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
+    if (currentStep === 4 && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
       toast({ title: 'Kontrollera möteslänken eller lämna fältet tomt', variant: 'destructive' });
       return;
     }
@@ -783,61 +783,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           </div>
         );
 
-      case 4: {
-        const link = formData.interviewVideoLink;
-        const linkValid = !!link && isValidMeetingLink(link);
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
-                <Video className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Er möteslänk för intervjuer</h2>
-              <p className="text-white">
-                 Ange en standardlänk för Teams, Zoom eller Google Meet. Den föreslås vid videointervjuer och kan bytas för varje bokning. För kontorsmöten används ingen videolänk.
-              </p>
-            </div>
-
-            <div className="space-y-3 max-w-md mx-auto">
-              <Label htmlFor="welcome-video-link" className="block text-sm font-medium text-white">
-                Möteslänk (valfritt)
-              </Label>
-              <Input
-                id="welcome-video-link"
-                value={link}
-                onChange={(e) => setFormData(prev => ({ ...prev, interviewVideoLink: e.target.value }))}
-                onBlur={(e) => setFormData(prev => ({ ...prev, interviewVideoLink: normalizeMeetingLink(e.target.value) }))}
-                placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/60 h-12 text-base md:hover:border-white/50"
-              />
-
-              {link && linkValid && (
-                <p className="text-sm text-green-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-                  Giltig möteslänk — den fylls i automatiskt vid videointervjuer.
-                </p>
-              )}
-              {link && !linkValid && (
-                <p className="text-sm text-amber-400 flex items-start gap-1.5">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                  <span className="break-words">
-                     Länken ser inte ut som en möteslänk från Teams, Zoom, Google Meet, Webex
-                     eller Whereby. Ändra länken eller lämna fältet tomt.
-                  </span>
-                </p>
-              )}
-
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <p className="text-sm text-white break-words">
-                   <strong>Tips:</strong> Samma länk kan användas vid flera möten. Använd väntrum eller lösenord om ni väljer ett fast mötesrum. Ni kan ändra standardlänken senare under Företag → Företagsprofil → Intervjuinställningar.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      case 5:
+      case 4:
         return (
           <div className="space-y-8 py-8">
             <div className="text-center space-y-4">
@@ -873,7 +819,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           </div>
         );
 
-      case 6:
+      case 5:
         return (
           <div className="space-y-6 max-w-2xl mx-auto">
             <div className="text-center space-y-3">
@@ -888,7 +834,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           </div>
         );
 
-      case 7:
+      case 6:
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
