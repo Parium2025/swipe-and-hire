@@ -13,3 +13,4 @@
 - Employer welcome and profile verify storage saved each uncropped original alongside its crop, then reopen that original for edits; this prevents double cropping.
 - Employer replies to reviews go only through the security-definer `reply_to_company_review` RPC (owner or same-org colleagues); reply lives in `company_reviews.employer_reply` and is exposed via `company_reviews_public` — never add a direct UPDATE policy for replies.
 - Candidate skeletons use resolved server totals per user/list; never transient defaults.
+- Org roles are only admin and recruiter (viewer removed). Recruiters are locked out of company-wide settings in UI and DB: outreach_templates/outreach_automations writes require owner or org admin (is_org_admin), CompanyProfile renders only interview settings for non-admins, and Billing + EmployerSettings template/flow sections show a locked notice.
