@@ -40,7 +40,9 @@ export function readCachedCount(key: string, fallback = 6, max = 9): number {
     // Prefer localStorage (persists across app restarts) but fall back to
     // sessionStorage for backwards compat with earlier writes this session.
     const raw = localStorage.getItem(key) ?? sessionStorage.getItem(key);
-    if (!raw) return fallback;
+    // Inget sparat antal (första besöket): visa inga påhittade kort alls —
+    // bara sidans ram tills riktig data finns. Aldrig ett gissat antal.
+    if (!raw) return 0;
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n) || n < 0) return fallback;
     if (n === 0) return 0;

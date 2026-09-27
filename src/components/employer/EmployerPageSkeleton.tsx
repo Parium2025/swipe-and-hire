@@ -474,7 +474,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
       ? readCachedCount(`${layoutKey}:total`, 5)
       : 5;
   const cardsForStage = (i: number) =>
-    layout ? Math.min(8, layout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
+    layout ? Math.min(8, layout[i] ?? 0) : candidateCount === 0 ? 0 : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
     <FullscreenSkeletonPortal activePaths={['/my-candidates']}>
       <motion.div
