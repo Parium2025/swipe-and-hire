@@ -242,23 +242,85 @@ export const EmployerInterviewsCard = memo(() => {
                         }
                       }}
                     >
-                      <div className={cn('flex items-stretch justify-between gap-2', useTouchCarousel && 'h-full')}>
-                        <div className="flex flex-1 min-w-0 flex-col">
-                          <TruncatedText text={interview.candidate_name} className={cn('font-semibold text-white', useTouchCarousel ? 'text-sm' : 'text-xs')} insideInteractive />
-                          <TruncatedText text={interview.job_title} className={cn('text-white', useTouchCarousel ? 'text-xs' : 'text-[10px]')} insideInteractive />
-                          {useTouchCarousel && (
-                            <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white">
-                              <span className="leading-none whitespace-nowrap">{formatInterviewDate(interview.scheduled_at)}</span>
-                              <span className="leading-none whitespace-nowrap">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
-                              <span className="flex items-center gap-1 leading-none whitespace-nowrap">
-                                <LocationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
+                      {useTouchCarousel ? (
+                        <div className="flex h-full flex-col">
+                          <div className="flex items-start justify-between gap-2">
+                            <TruncatedText text={interview.candidate_name} className="min-w-0 flex-1 font-semibold text-sm text-white" insideInteractive />
+                            <span className={cn(
+                              'flex shrink-0 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white',
+                              'h-7 px-2 text-xs',
+                            )}>
+                              {!canDismiss && <Clock3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                              {timeUntil}
+                            </span>
+                          </div>
+                          <TruncatedText text={interview.job_title} className="mt-0.5 text-xs text-white" insideInteractive />
+                          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white">
+                            <span className="leading-none whitespace-nowrap">{formatInterviewDate(interview.scheduled_at)}</span>
+                            <span className="leading-none whitespace-nowrap">kl {formatInterviewTimeWithZone(interview.scheduled_at)}</span>
+                            <span className="flex items-center gap-1 leading-none whitespace-nowrap">
+                              <LocationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                              <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
+                            </span>
+                            {autoRemoveLabel && (
+                              <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                            )}
+                          </div>
+                          <div className="mt-auto flex items-stretch gap-1.5 pt-1.5">
+                            {canDismiss ? (
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  if (isAccidentalTap()) return;
+                                  setPendingDismiss(interview);
+                                }}
+                                className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-7 px-2 text-xs"
+                                aria-label="Ta bort från översikten"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span className="leading-none">Ta bort</span>
+                              </button>
+                            ) : (
+                              <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-7 px-2 text-xs">
+                                {isConfirmed ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                ) : (
+                                  <Hourglass className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                )}
+                                {isConfirmed ? 'Bekräftad' : 'Inväntar svar'}
                               </span>
-                              {autoRemoveLabel && (
-                                <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
-                              )}
-                            </div>
-                          )}
+                            )}
+                            {canDismiss ? (
+                              <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-7 px-2 text-xs">
+                                {isConfirmed ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                ) : (
+                                  <Hourglass className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                )}
+                                <span className="leading-none">{responseLabel}</span>
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  void downloadInterviewIcs(interview.id);
+                                }}
+                                className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-7 px-2 text-xs"
+                                aria-label="Lägg till i kalender"
+                              >
+                                <CalendarPlus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span className="leading-none">Kalender</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                      <div className="flex items-stretch justify-between gap-2">
+                        <div className="flex flex-1 min-w-0 flex-col">
+                          <TruncatedText text={interview.candidate_name} className="font-semibold text-xs text-white" insideInteractive />
+                          <TruncatedText text={interview.job_title} className="text-[10px] text-white" insideInteractive />
                         </div>
                         <div className={cn('flex shrink-0 flex-col items-center', useTouchCarousel ? 'w-[112px] gap-1.5' : 'w-[88px] gap-1')}>
                           <span className={cn(
