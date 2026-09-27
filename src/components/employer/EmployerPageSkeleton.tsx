@@ -436,22 +436,39 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
 /**
  * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
  */
-export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
+interface EmployerMyCandidatesSkeletonProps {
+  stageOrder?: string[];
+  stageCounts?: Record<string, number>;
+  userId?: string | null;
+  activeListId?: string | null;
+}
+
+export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton({
+  stageOrder,
+  stageCounts,
+  userId,
+  activeListId: activeListIdProp,
+}: EmployerMyCandidatesSkeletonProps = {}) {
   const isDesktop = useDevice() === 'desktop';
   const { user } = useAuth();
-  const activeListId = getActiveCandidateListId(user?.id);
-  const layoutKey = myCandidatesLayoutKey(user?.id, activeListId);
+  const resolvedUserId = userId ?? user?.id;
+  const activeListId = activeListIdProp ?? getActiveCandidateListId(resolvedUserId);
+  const layoutKey = myCandidatesLayoutKey(resolvedUserId, activeListId);
   // Exakt samma kolumner och serverantal per kolumn som vid senaste visningen.
   // Fyra är produktens riktiga grundlayout innan ett kontos egen cache finns.
   const cachedLayout = layoutKey ? readCachedLayout(layoutKey) : null;
-  const stageCount = cachedLayout?.length ?? 4;
-  const candidateCount = cachedLayout
-    ? cachedLayout.reduce((sum, count) => sum + count, 0)
+  const liveLayout = stageOrder?.length
+    ? stageOrder.map((stage) => stageCounts?.[stage] ?? 0)
+    : null;
+  const layout = liveLayout ?? cachedLayout;
+  const stageCount = layout?.length ?? 4;
+  const candidateCount = layout
+    ? layout.reduce((sum, count) => sum + count, 0)
     : layoutKey
       ? readCachedCount(`${layoutKey}:total`, 5)
       : 5;
   const cardsForStage = (i: number) =>
-    cachedLayout ? Math.min(8, cachedLayout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
+    layout ? Math.min(8, layout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
     <FullscreenSkeletonPortal activePaths={['/my-candidates']}>
       <motion.div

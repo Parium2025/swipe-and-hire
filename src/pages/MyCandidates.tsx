@@ -68,7 +68,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
-import { writeCachedCount, writeCachedLayout, SKELETON_COUNT_KEYS, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
+import { writeCachedCount, writeCachedLayout, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
@@ -852,7 +852,14 @@ const MyCandidates = () => {
   }, [selectedCandidate, mapCandidateToAppData]);
 
   if ((isViewingColleague ? loadingColleagueCandidates || isSwitchingColleague : isLoading) || !showContent) {
-    return <EmployerMyCandidatesSkeleton />;
+    return (
+      <EmployerMyCandidatesSkeleton
+        stageOrder={activeStageOrder}
+        stageCounts={stageCounts}
+        userId={user?.id}
+        activeListId={isViewingColleague ? viewingColleagueListId : activeListId}
+      />
+    );
   }
 
 
