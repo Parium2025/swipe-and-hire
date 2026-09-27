@@ -15,6 +15,7 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import { isValidMeetingLink } from '@/pages/employer/companyProfile/meetingLinkValidation';
+import { celebrate } from '@/lib/celebrate';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { TEXT_LIMITS } from '@/lib/textLimits';
 import { CompanyInterviewSettings } from '@/pages/employer/companyProfile/CompanyInterviewSettings';
