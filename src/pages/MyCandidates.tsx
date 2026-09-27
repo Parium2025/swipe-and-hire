@@ -68,7 +68,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
-import { writeCachedCount, writeCachedLayout, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
+import { writeCachedCount, writeCachedLayout, writeMyCandidatesColdLayout, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
@@ -301,10 +301,10 @@ const MyCandidates = () => {
     if (isLoading || isViewingColleague || activeStageOrder.length === 0) return;
     const key = myCandidatesLayoutKey(user?.id, activeListId);
     if (!key) return;
-    writeCachedLayout(
-      key,
-      activeStageOrder.map(k => stageCounts?.[k] ?? candidatesByStage[k]?.length ?? 0),
-    );
+    if (!stageCounts) return;
+    const resolvedLayout = activeStageOrder.map(k => stageCounts[k] ?? 0);
+    writeCachedLayout(key, resolvedLayout);
+    writeMyCandidatesColdLayout(resolvedLayout);
   }, [isLoading, isViewingColleague, activeStageOrder, candidatesByStage, stageCounts, user?.id, activeListId]);
 
   // Stats

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { readCachedCount, readCachedLayout, SKELETON_COUNT_KEYS, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
+import { readCachedCount, readCachedLayout, readMyCandidatesColdLayout, SKELETON_COUNT_KEYS, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
 import { useDevice } from '@/hooks/use-device';
@@ -456,10 +456,14 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
   const layoutKey = myCandidatesLayoutKey(resolvedUserId, activeListId);
   // Exakt samma kolumner och serverantal per kolumn som vid senaste visningen.
   // Fyra är produktens riktiga grundlayout innan ett kontos egen cache finns.
-  const cachedLayout = layoutKey ? readCachedLayout(layoutKey) : null;
-  const liveLayout = stageOrder?.length
-    ? stageOrder.map((stage) => stageCounts?.[stage] ?? 0)
+  const cachedLayout = layoutKey ? readCachedLayout(layoutKey) : readMyCandidatesColdLayout();
+  const hasResolvedLiveLayout = !!stageOrder?.length && !!stageCounts;
+  const liveLayout = hasResolvedLiveLayout
+    ? stageOrder.map((stage) => stageCounts[stage] ?? 0)
     : null;
+  // Under a cold start use the last fully resolved board. `useStageSettings`
+  // temporarily exposes four defaults before custom stages and counts load;
+  // those defaults caused the 4-column flash visible in the recording.
   const layout = liveLayout ?? cachedLayout;
   const stageCount = layout?.length ?? 4;
   const candidateCount = layout
