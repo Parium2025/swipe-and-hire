@@ -853,10 +853,20 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold text-white">Dina aviseringar</h2>
               <p className="text-white">Välj vad du vill få i appen, som push eller via mejl. Du kan ändra valen i inställningarna senare.</p>
             </div>
-            <NotificationPreferencesPanel title="" rows={notificationRows} isEnabled={notificationValue}
-              toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
-              disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
-              intro={emailKnown && !emailSubscribed ? 'Din adress är avregistrerad från app-mejl. Aktivera mejlutskick igen under Inställningar om du vill få dem.' : undefined} />
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-left">
+              <NotificationPreferencesPanel title="" rows={notificationRows} isEnabled={notificationValue}
+                toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
+                disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
+                intro={
+                  <>
+                    <span className="font-medium">I appen</span> är notisklockan i menyn,{' '}
+                    <span className="font-medium">Push</span> är skärmnotisen i mobilen och{' '}
+                    <span className="font-medium">Mejl</span> går till din e-post. Inställningarna gäller bara
+                    dig — dina kollegor styr sina egna.
+                    {emailKnown && !emailSubscribed ? ' Din adress är avregistrerad från app-mejl — aktivera mejlutskick igen under Inställningar om du vill få dem.' : ''}
+                  </>
+                } />
+            </div>
           </div>
         );
 
