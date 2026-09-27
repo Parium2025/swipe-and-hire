@@ -35,6 +35,7 @@ interface CandidateInterviewCardProps {
     subject: string | null;
     message: string | null;
     status: string;
+    candidate_response?: string | null;
     job_postings?: {
       title: string;
       employer_id: string;
