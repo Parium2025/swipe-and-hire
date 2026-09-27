@@ -321,20 +321,25 @@ export const EmployerInterviewsCard = memo(() => {
                                 )}
                                 <span className="leading-none">{responseLabel}</span>
                               </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  void downloadInterviewIcs(interview.id);
-                                }}
-                                 className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-6 px-2 text-xs"
-                                aria-label="Lägg till i kalender"
-                              >
-                                <CalendarPlus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                <span className="leading-none">Kalender</span>
-                              </button>
-                            )}
+                             ) : calendarConnected ? (
+                               <span className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white h-6 px-2 text-xs">
+                                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                 <span className="leading-none">Redan i kalendern</span>
+                               </span>
+                             ) : (
+                               <button
+                                 type="button"
+                                 onClick={(event) => {
+                                   event.stopPropagation();
+                                   void downloadInterviewIcs(interview.id);
+                                 }}
+                                  className="flex flex-1 items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none text-white hover:bg-white/15 h-6 px-2 text-xs"
+                                 aria-label="Lägg till i kalender"
+                               >
+                                 <CalendarPlus className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                 <span className="leading-none">Kalender</span>
+                               </button>
+                             )}
                           </div>
                         </div>
                       ) : (
