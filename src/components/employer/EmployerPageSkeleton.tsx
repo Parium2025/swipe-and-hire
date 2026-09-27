@@ -515,7 +515,8 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                   ))}
                 </div>
                 <div className="space-y-2">
-                  {Array.from({ length: Math.min(8, candidateCount) }).map((_, i) => (
+                  {/* Mobilvyn öppnar första steget — visa bara dess antal. */}
+                  {Array.from({ length: Math.min(8, layout ? (layout[0] ?? 0) : candidateCount) }).map((_, i) => (
                     <div key={i} className="flex min-h-touch items-center gap-3 rounded-lg bg-white/5 px-3 py-2.5 ring-1 ring-inset ring-white/10">
                       <div className={`h-10 w-10 shrink-0 rounded-full ${SHAPE}`} />
                       <div className="min-w-0 flex-1 space-y-1.5">
