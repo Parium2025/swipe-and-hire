@@ -43,6 +43,8 @@ interface AuthMobileProps {
   onAuthModeChange?: (isLogin: boolean) => void;
   initialMode?: string;
   initialRole?: string;
+  /** Inbjuden adress förifylls så kontot skapas/loggas in med rätt mejl. */
+  initialEmail?: string;
 }
 
 const AuthMobile = ({ 
@@ -55,7 +57,8 @@ const AuthMobile = ({
   onBackToLogin,
   onAuthModeChange,
   initialMode,
-  initialRole
+  initialRole,
+  initialEmail
 }: AuthMobileProps) => {
   
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
@@ -68,7 +71,7 @@ const AuthMobile = ({
   const savedDraft = useRef(loadAuthDraft()).current;
   // Inloggning har helt eget state – delar aldrig fält med registreringen
   const [loginData, setLoginData] = useState(() => ({
-    email: savedDraft.login?.email ?? '',
+    email: initialEmail ?? savedDraft.login?.email ?? '',
     password: '',
   }));
   const [jobSeekerData, setJobSeekerData] = useState(() => mergeDraft({
@@ -80,7 +83,7 @@ const AuthMobile = ({
     password: '',
     confirmPassword: ''
   }, savedDraft.jobSeeker));
-  const [employerData, setEmployerData] = useState(() => mergeDraft({
+  const [employerData, setEmployerData] = useState(() => ({ ...mergeDraft({
     firstName: '',
     lastName: '',
     companyName: '',
@@ -93,7 +96,7 @@ const AuthMobile = ({
     email: '',
     password: '',
     confirmPassword: ''
-  }, savedDraft.employer));
+  }, savedDraft.employer), ...(initialEmail ? { email: initialEmail } : {}) }));
   const [role, setRole] = useState<'job_seeker' | 'employer'>(
     initialRole === 'employer' ? 'employer' : savedDraft.role ?? 'job_seeker'
   );
