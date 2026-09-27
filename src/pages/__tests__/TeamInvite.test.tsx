@@ -91,7 +91,7 @@ describe('TeamInvite', () => {
   });
 
   it('visar serverns kontomeddelande och exakt en startsidesknapp', async () => {
-    mocks.auth.user = { id: 'admin-user' };
+    mocks.auth.user = { id: 'admin-user', email: 'ny@firma.se' };
     mocks.invoke.mockResolvedValueOnce(PREVIEW).mockResolvedValue({
       data: null,
       error: {
