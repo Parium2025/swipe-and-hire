@@ -585,7 +585,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold text-white">Berätta om ert företag</h2>
               <p className="text-white">Uppgifterna hjälper kandidater förstå vilka ni är. Fyll i det ni kan nu och komplettera resten innan första annonsen publiceras.</p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-left">
               <div className="space-y-1.5">
                 <Label htmlFor="welcome-company-name" className="text-white">Företagsnamn *</Label>
                 <Input id="welcome-company-name" maxLength={120} value={formData.companyName} onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))} className="bg-white/5 border-white/10 text-white text-base" />
@@ -643,7 +643,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-4 max-w-md mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-left">
               {formData.companyLogoUrl ? (
                 <div className="text-center space-y-4">
                   <div className="relative w-fit mx-auto">
@@ -724,6 +724,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <p className="text-white">Ladda upp en profilbild så vet kandidater och kollegor vem du pratar med.</p>
             </div>
             {/* Profilbild-sektion - exakt samma struktur som profilsidan */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-left space-y-4">
             <div className="flex flex-col items-center gap-4 pb-5 border-b border-white/10">
               <input
                 ref={profileFileInputRef}
@@ -806,6 +807,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 />
               </div>
             </div>
+            </div>
           </div>
         );
 
@@ -822,7 +824,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </p>
             </div>
 
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-left">
               <CompanyInterviewSettings
                 formData={{
                   interview_video_link: formData.interviewVideoLink,
