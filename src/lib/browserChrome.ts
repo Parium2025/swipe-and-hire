@@ -71,15 +71,21 @@ let pendingThemeFrame: number | null = null;
 let pendingSyncTimers: number[] = [];
 let committedDocumentColor: string | null = null;
 
-// Loopspärr: högst en chrome-omladdning per 10 s per flik. Studsar routen
-// (t.ex. /auth ⇄ /home under osäker inloggning) byts bara färgen utan reload.
+// Loopspärr: högst två chrome-omladdningar per 10 s per flik (t.ex. mejllänk
+// → videosidan → /home). Därefter byts bara färgen utan reload — aldrig loop.
 const CHROME_RELOAD_KEY = 'parium-chrome-reload-at';
 const CHROME_RELOAD_WINDOW_MS = 10_000;
+const CHROME_MAX_RELOADS_PER_WINDOW = 2;
 export const claimChromeReload = (now = Date.now()) => {
   try {
-    const last = Number(sessionStorage.getItem(CHROME_RELOAD_KEY) || '0');
-    if (last && now - last < CHROME_RELOAD_WINDOW_MS) return false;
-    sessionStorage.setItem(CHROME_RELOAD_KEY, String(now));
+    const raw = sessionStorage.getItem(CHROME_RELOAD_KEY) || '';
+    const recent = raw
+      .split(',')
+      .map(Number)
+      .filter((t) => Number.isFinite(t) && t > 0 && now - t >= 0 && now - t < CHROME_RELOAD_WINDOW_MS);
+    if (recent.length >= CHROME_MAX_RELOADS_PER_WINDOW) return false;
+    recent.push(now);
+    sessionStorage.setItem(CHROME_RELOAD_KEY, recent.join(','));
     return true;
   } catch {
     return false;
