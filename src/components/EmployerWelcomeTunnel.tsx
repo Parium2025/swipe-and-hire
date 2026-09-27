@@ -222,7 +222,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   // Långa steg kan skrollas på mobil. Börja nästa steg från toppen, inte
   // mitt i det nya formuläret där samma skrollposition råkade ligga kvar.
+  // Guiden scrollar i sin egen fasta behållare (inte dokumentet), så det är
+  // behållarens scrollTop som måste nollställas — window.scrollTo räcker inte.
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [currentStep]);
 
@@ -944,6 +948,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
   return (
     <div
+      ref={scrollContainerRef}
       data-welcome-tunnel-scroll="true"
       className="fixed inset-0 z-[60] h-[100dvh] bg-gradient-parium flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain"
       style={{ WebkitOverflowScrolling: 'touch' }}

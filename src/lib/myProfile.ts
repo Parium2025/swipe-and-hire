@@ -20,6 +20,22 @@ let inFlight: Promise<ProfileRpcResult> | null = null;
 let cached: { at: number; result: ProfileRpcResult } | null = null;
 
 async function rawFetch() {
+  // Säkerställ en färsk session innan anropet. getSession() förnyar en
+  // utgången token automatiskt; utan session skickas anropet som anon och
+  // databasen svarar "permission denied" (42501) i stället för ett
+  // begripligt autentiseringsfel.
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) {
+    return {
+      data: null,
+      error: {
+        message: 'Ingen aktiv inloggningssession',
+        code: 'PGRST_NO_SESSION',
+        details: null,
+        hint: null,
+      },
+    } as unknown as Awaited<ReturnType<typeof supabase.rpc>>;
+  }
   return await supabase.rpc('get_my_profile');
 }
 
