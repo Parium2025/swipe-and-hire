@@ -376,7 +376,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   };
 
   const handleEditProfileImage = async () => {
-    if (profileOriginalSrcRef.current) {
+    if (profileOriginalSrcRef.current.startsWith('blob:')) {
       setProfileEditSrc(profileOriginalSrcRef.current);
       setProfileEditorOpen(true);
       return;
