@@ -4,34 +4,10 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { forgetInvite, rememberInvite } from "@/lib/pendingTeamInvite";
 import { AlertTriangle, CheckCircle2, Loader2, Users } from "lucide-react";
 
 type Status = "idle" | "working" | "success" | "error" | "needs-auth" | "wrong-account";
-
-// Inbjudan överlever utloggning, ny flik och mejlbekräftelse — auth-sidan
-// skickar tillbaka hit så fort rätt konto är inloggat.
-export const PENDING_TEAM_INVITE_KEY = "parium-pending-team-invite";
-const PENDING_TTL_MS = 7 * 24 * 3_600_000;
-const rememberInvite = (path: string) => {
-  try { localStorage.setItem(PENDING_TEAM_INVITE_KEY, JSON.stringify({ path, at: Date.now() })); } catch { /* ignore */ }
-};
-const forgetInvite = () => {
-  try { localStorage.removeItem(PENDING_TEAM_INVITE_KEY); } catch { /* ignore */ }
-};
-export const readPendingTeamInvite = (): string | null => {
-  try {
-    const raw = localStorage.getItem(PENDING_TEAM_INVITE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { path?: unknown; at?: unknown };
-    if (typeof parsed.path !== "string" || typeof parsed.at !== "number" || Date.now() - parsed.at > PENDING_TTL_MS) {
-      localStorage.removeItem(PENDING_TEAM_INVITE_KEY);
-      return null;
-    }
-    return parsed.path;
-  } catch {
-    return null;
-  }
-};
 
 interface InvitePreview { email: string; organizationName: string | null; accountExists: boolean }
 
@@ -120,6 +96,7 @@ const TeamInvite = () => {
   }, [accept, authLoading, destination, token, user]);
 
   const goToAuth = useCallback(() => {
+    rememberInvite(destination);
     try { sessionStorage.setItem("parium-auth-return-to", destination); } catch { /* localStorage covers it */ }
     const register = preview ? !preview.accountExists : false;
     navigate(register ? "/auth?mode=register&role=employer" : "/auth", {

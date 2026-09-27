@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { consumePendingJobPath } from '@/lib/pendingJobIntent';
+import { readPendingTeamInvite } from '@/lib/pendingTeamInvite';
 import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
 // Delad bakgrund för hela /auth (inklusive status- och felsidor)
