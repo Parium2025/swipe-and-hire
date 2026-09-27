@@ -682,6 +682,9 @@ export type Database = {
           comment: string | null
           company_id: string
           created_at: string
+          employer_reply: string | null
+          employer_reply_at: string | null
+          employer_reply_by: string | null
           hidden_author_id: string | null
           id: string
           is_anonymous: boolean | null
@@ -694,6 +697,9 @@ export type Database = {
           comment?: string | null
           company_id: string
           created_at?: string
+          employer_reply?: string | null
+          employer_reply_at?: string | null
+          employer_reply_by?: string | null
           hidden_author_id?: string | null
           id?: string
           is_anonymous?: boolean | null
@@ -706,6 +712,9 @@ export type Database = {
           comment?: string | null
           company_id?: string
           created_at?: string
+          employer_reply?: string | null
+          employer_reply_at?: string | null
+          employer_reply_by?: string | null
           hidden_author_id?: string | null
           id?: string
           is_anonymous?: boolean | null
@@ -4139,6 +4148,8 @@ export type Database = {
           comment: string | null
           company_id: string | null
           created_at: string | null
+          employer_reply: string | null
+          employer_reply_at: string | null
           id: string | null
           is_anonymous: boolean | null
           rating: number | null
@@ -4149,6 +4160,8 @@ export type Database = {
           comment?: string | null
           company_id?: string | null
           created_at?: string | null
+          employer_reply?: string | null
+          employer_reply_at?: string | null
           id?: string | null
           is_anonymous?: boolean | null
           rating?: number | null
@@ -4159,6 +4172,8 @@ export type Database = {
           comment?: string | null
           company_id?: string | null
           created_at?: string | null
+          employer_reply?: string | null
+          employer_reply_at?: string | null
           id?: string | null
           is_anonymous?: boolean | null
           rating?: number | null
@@ -5012,6 +5027,10 @@ export type Database = {
       reorder_job_stages: {
         Args: { p_job_id: string; p_stage_keys: string[] }
         Returns: undefined
+      }
+      reply_to_company_review: {
+        Args: { _reply: string; _review_id: string }
+        Returns: boolean
       }
       republish_job: {
         Args: { _days?: number; _job_id: string }

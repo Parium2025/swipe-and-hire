@@ -11,3 +11,4 @@
 - When iOS closes its keyboard, release any residual form-field focus so a following scroll gesture cannot reopen it.
 - Employer welcome setup drafts company and personal details, meeting defaults and notification choices until final confirmation (media uploads are earlier for ordinary accounts); replay-account trials never write real profile, preferences or media, and only validated meeting links become defaults.
 - Employer welcome and profile verify storage saved each uncropped original alongside its crop, then reopen that original for edits; this prevents double cropping.
+- Employer replies to reviews go only through the security-definer `reply_to_company_review` RPC (owner or same-org colleagues); reply lives in `company_reviews.employer_reply` and is exposed via `company_reviews_public` — never add a direct UPDATE policy for replies.

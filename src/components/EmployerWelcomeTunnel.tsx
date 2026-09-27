@@ -625,7 +625,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <Label htmlFor="welcome-company-description" className="text-white">Företagsbeskrivning</Label>
                 <Textarea id="welcome-company-description" autoResize={false} maxLength={TEXT_LIMITS.companyDescription} value={formData.companyDescription} onChange={e => setFormData(prev => ({ ...prev, companyDescription: e.target.value }))} className="h-[160px] min-h-[160px] max-h-[160px] overflow-y-auto bg-white/5 border-white/10 text-white text-base resize-none" />
               </div>
-              <p className="text-sm text-white">Bransch, storlek, huvudkontor och beskrivning behövs innan första annonsen publiceras.</p>
             </div>
           </div>
         );

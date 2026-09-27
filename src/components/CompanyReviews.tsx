@@ -3,8 +3,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { 
   Building2, 
   Globe, 
@@ -17,7 +20,10 @@ import {
   Linkedin,
   Twitter,
   Instagram,
-  ExternalLink
+  ExternalLink,
+  Reply,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
@@ -50,6 +56,8 @@ interface CompanyReview {
   comment: string;
   is_anonymous: boolean;
   created_at: string;
+  employer_reply?: string | null;
+  employer_reply_at?: string | null;
   profiles?: {
     first_name?: string;
     last_name?: string;
@@ -59,6 +67,42 @@ interface CompanyReview {
 const CompanyReviews = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
+  const [savingReplyId, setSavingReplyId] = useState<string | null>(null);
+
+  const startReply = (review: CompanyReview) => {
+    setEditingReplyId(review.id);
+    setReplyDraft(review.employer_reply ?? '');
+  };
+
+  const saveReply = async (reviewId: string, reply: string) => {
+    setSavingReplyId(reviewId);
+    try {
+      const { error } = await supabase.rpc('reply_to_company_review', {
+        _review_id: reviewId,
+        _reply: reply,
+      });
+      if (error) throw error;
+      setEditingReplyId(null);
+      setReplyDraft('');
+      queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', user?.id] });
+      toast({
+        title: reply.trim() ? "Svar sparat" : "Svar borttaget",
+        description: reply.trim() ? "Ditt svar visas nu under recensionen." : "Svaret har tagits bort.",
+      });
+    } catch (e) {
+      console.error('Error saving review reply:', e);
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara svaret. Försök igen.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingReplyId(null);
+    }
+  };
 
   // Fetch company data with React Query
   const { data: company, isLoading: companyLoading } = useQuery({
@@ -421,6 +465,89 @@ const CompanyReviews = () => {
                           overflow: 'hidden',
                         }}
                       />
+                    </div>
+                  )}
+
+                  {/* Företagets svar */}
+                  {review.employer_reply && editingReplyId !== review.id && (
+                    <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-white">Ditt svar</p>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => startReply(review)}
+                            className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors"
+                            aria-label="Ändra svar"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveReply(review.id, '')}
+                            disabled={savingReplyId === review.id}
+                            className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors disabled:opacity-60"
+                            aria-label="Ta bort svar"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
+                        {review.employer_reply}
+                      </p>
+                      {review.employer_reply_at && (
+                        <p className="text-xs text-white/60">
+                          {new Date(review.employer_reply_at).toLocaleDateString("sv-SE")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Svara / redigera svar */}
+                  {editingReplyId === review.id ? (
+                    <div className="mt-3 space-y-2">
+                      <Textarea
+                        value={replyDraft}
+                        onChange={(e) => setReplyDraft(e.target.value)}
+                        placeholder="Skriv ett svar till jobbsökaren…"
+                        maxLength={1000}
+                        autoResize={false}
+                        className="h-[100px] min-h-[100px] max-h-[100px] overflow-y-auto bg-white/5 border-white/10 text-white text-sm resize-none placeholder:text-white/40"
+                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setEditingReplyId(null); setReplyDraft(''); }}
+                          disabled={savingReplyId === review.id}
+                          className="text-white"
+                        >
+                          Avbryt
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => saveReply(review.id, replyDraft)}
+                          disabled={savingReplyId === review.id || !replyDraft.trim()}
+                          className="bg-white/10 hover:bg-white/15 border border-white/10 text-white"
+                        >
+                          {savingReplyId === review.id && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                          Spara svar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : !review.employer_reply && (
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => startReply(review)}
+                        className="inline-flex items-center gap-1.5 text-sm text-white hover:underline"
+                      >
+                        <Reply className="h-3.5 w-3.5" />
+                        Svara
+                      </button>
                     </div>
                   )}
                 </div>
