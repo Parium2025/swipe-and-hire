@@ -870,9 +870,9 @@ All colors MUST be HSL.
     opacity: 1;
   }
 
-  /* Browser autofill styling — fältet ska se exakt ut som alla andra fält.
-     background-clip: text gör att webbläsarens autofyllnadsyta bara målar
-     bakom texten, så fältets egen bakgrund, ram och radie behålls oförändrade. */
+  /* Browser autofill styling — retain each field's own surface everywhere.
+     Never repaint autofilled fields with the page background: some app shells
+     intentionally use light page tokens behind dark translucent controls. */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -887,10 +887,8 @@ All colors MUST be HSL.
     -webkit-background-clip: text !important;
     background-clip: text !important;
     background-color: transparent !important;
-    /* Inre skugga målar över webbläsarens autofyllnadsfärg med appens
-       bakgrundsfärg — fältet får aldrig iOS Safaris gula/grå fyllning. */
-    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
-    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
     transition: background-color 9999s ease-in-out 0s !important;
   }
 
@@ -930,6 +928,7 @@ All colors MUST be HSL.
     box-shadow: none !important;
     transition: background-color 600000s 0s, color 600000s 0s !important;
   }
+
 
 }
 
