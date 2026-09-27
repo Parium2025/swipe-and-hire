@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
 
@@ -73,12 +75,13 @@ describe('browserChrome', () => {
 
   it('laddar aldrig om dokumentet när en route byter chrome-färg', () => {
     vi.useFakeTimers();
-    const reload = vi.spyOn(window.location, 'reload');
 
     syncBrowserChrome('/auth');
     syncBrowserChrome('/home');
     vi.advanceTimersByTime(20);
 
-    expect(reload).not.toHaveBeenCalled();
+    expect(themeColorTags()[0]?.content).toBe('#00193D');
+    const source = readFileSync(resolve(process.cwd(), 'src/lib/browserChrome.ts'), 'utf8');
+    expect(source).not.toContain('window.location.reload()');
   });
 });
