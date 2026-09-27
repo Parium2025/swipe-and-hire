@@ -254,6 +254,9 @@ export const EmployerInterviewsCard = memo(() => {
                                 <LocationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                               </span>
+                              {autoRemoveLabel && (
+                                <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -323,6 +326,9 @@ export const EmployerInterviewsCard = memo(() => {
                             <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                             <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                           </span>
+                          {autoRemoveLabel && (
+                            <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                          )}
                           {canDismiss ? (
                             <span className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white whitespace-nowrap">
                               {isConfirmed ? (
