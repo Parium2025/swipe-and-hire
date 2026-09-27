@@ -192,7 +192,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 autoResize={false}
                 value={formData.interview_office_instructions}
                 onChange={(e) => onFormDataChange({ interview_office_instructions: e.target.value })}
-                placeholder="T.ex. parkering, ingång, vem de ska fråga efter..."
+                placeholder="T.ex. parkering, ingång, vem hen ska fråga efter..."
                 rows={2}
                 className="h-[120px] min-h-[120px] max-h-[120px] overflow-y-auto overscroll-contain bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white resize-none [&]:text-white"
               />
