@@ -434,9 +434,9 @@ const TeamManagement = () => {
                 variant="ghost"
                 size="icon"
                 aria-label="Återkalla inbjudan"
-                onClick={() => handleRevokeInvitation(invitation.id)}
+                onClick={() => setDeleteTarget({ type: 'invitation', id: invitation.id, label: invitation.email })}
                 disabled={busyInvitationId === invitation.id}
-                className="h-8 w-8 shrink-0 rounded-full border border-0 bg-red-500/80 text-white md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
+                className="h-8 w-8 shrink-0 rounded-full border border-0 bg-red-500/80 text-white transition-none active:scale-100 active:bg-red-500/80 active:shadow-none md:hover:!bg-red-500 md:hover:!text-white disabled:opacity-50"
               >
                 {busyInvitationId === invitation.id ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
