@@ -11,6 +11,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Users, UserPlus, Trash2, Crown, Loader2, Mail } from 'lucide-react';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+
+type DeleteTarget =
+  | { type: 'member'; id: string; label: string }
+  | { type: 'invitation'; id: string; label: string };
 
 interface TeamMember {
   user_id: string;
@@ -86,6 +100,7 @@ const TeamManagement = () => {
   const [organizationId, setOrganizationId] = useState<string | null>(initialCache?.organizationId ?? null);
   const [busyMemberId, setBusyMemberId] = useState<string | null>(null);
   const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   
 
   const fetchTeamMembers = useCallback(async (silent = false) => {
