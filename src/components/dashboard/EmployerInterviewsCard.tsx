@@ -208,7 +208,7 @@ export const EmployerInterviewsCard = memo(() => {
                     if (!canDismiss) return null;
                     const endMs = new Date(interview.scheduled_at).getTime()
                       + (interview.duration_minutes ?? 0) * 60_000;
-                    const remainingMs = endMs + 24 * 3_600_000 - now.getTime();
+                    const remainingMs = endMs + 24 * 3_600_000 - now;
                     if (remainingMs <= 0) return 'Tas bort inom kort';
                     const totalMinutes = Math.ceil(remainingMs / 60_000);
                     const hours = Math.floor(totalMinutes / 60);
