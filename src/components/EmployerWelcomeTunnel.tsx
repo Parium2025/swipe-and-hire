@@ -883,16 +883,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white">Allt är klart!</h2>
                 <p className="text-xl text-white max-w-md mx-auto leading-relaxed">
-                   Dina val är klara. Företagsuppgifterna kan kompletteras senare, men måste vara fullständiga innan ni publicerar er första annons.
+                   Dina val är klara. Företagsuppgifterna kan ändras eller kompletteras senare.
                 </p>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 max-w-md mx-auto">
-              <p className="text-sm text-white">
-                <strong className="text-white">Tips:</strong> Börja med att skapa din första jobbannons för att locka kvalificerade kandidater till ditt företag.
-              </p>
-            </div>
+
 
             {/* Nu kör vi knapp */}
             <div className="pt-4 flex flex-col items-center gap-4">
