@@ -700,7 +700,7 @@ const Index = () => {
 
   // For employers, show EmployerWelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'employer') {
-    return <EmployerWelcomeTunnel startAtInterview={location.state?.teamInviteAccepted === true} onComplete={async () => {
+    return <EmployerWelcomeTunnel onComplete={async () => {
       // EmployerWelcomeTunnel persists onboarding_completed before calling onComplete.
       if (tunnelReplay) {
         markTunnelCompletedThisSession();

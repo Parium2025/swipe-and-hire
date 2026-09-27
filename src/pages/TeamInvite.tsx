@@ -45,7 +45,7 @@ const TeamInvite = () => {
 
       // Läs om profilen så välkomstguiden direkt vet att bolagets uppgifter är ärvda.
       await refreshProfile();
-      navigate('/home', { replace: true, state: { teamInviteAccepted: true } });
+      navigate('/home', { replace: true });
     } catch {
       setStatus("error");
       setMessage("Något gick fel. Försök igen om en stund.");
