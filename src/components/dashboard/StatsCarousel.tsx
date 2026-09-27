@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { useCardInteractionPause } from '@/hooks/useCardInteractionPause';
 import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,6 +42,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
 
   const goNext = useCallback(() => { setCurrentIndex(prev => (prev + 1) % stats.length); }, [stats.length]);
   const goPrev = useCallback(() => { setCurrentIndex(prev => (prev - 1 + stats.length) % stats.length); }, [stats.length]);
+  const swipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: goNext, onSwipeRight: goPrev });
 
   // Aligned rotation: stats switches on the +5s beat between news/tips switches
@@ -59,6 +60,7 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
 
   return (
     <Card
+      ref={swipeLockRef}
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.stats} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onMouseEnter={pauseNow}
       onMouseLeave={resumeNow}

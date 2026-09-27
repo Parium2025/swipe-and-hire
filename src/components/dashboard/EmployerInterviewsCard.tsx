@@ -31,7 +31,7 @@ import {
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 
 const getLocationIcon = (type: Interview['location_type']) => {
   switch (type) {
@@ -117,6 +117,7 @@ export const EmployerInterviewsCard = memo(() => {
     setSwipeDirection(-1);
     setMobileIndex(current => (current - 1 + liveInterviews.length) % liveInterviews.length);
   }, [liveInterviews.length]);
+  const swipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: showNext, onSwipeRight: showPrevious, threshold: 32 });
   const touchStartPointRef = useRef<{ x: number; y: number } | null>(null);
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
@@ -167,6 +168,7 @@ export const EmployerInterviewsCard = memo(() => {
   return (
     <>
     <Card
+      ref={swipeLockRef}
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}

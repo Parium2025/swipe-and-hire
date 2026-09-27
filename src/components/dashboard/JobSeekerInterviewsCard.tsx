@@ -20,7 +20,7 @@ import { GRADIENTS } from './dashboardConstants';
 import { downloadInterviewIcs } from '@/lib/downloadInterviewIcs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouchCapable } from '@/hooks/useInputCapability';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 
 type LocationType = 'video' | 'office';
 
@@ -82,6 +82,7 @@ export const JobSeekerInterviewsCard = memo(() => {
     setSwipeDirection(-1);
     setMobileIndex(c => (c - 1 + liveInterviews.length) % liveInterviews.length);
   }, [liveInterviews.length]);
+  const swipeLockRef = useHorizontalSwipeLock<HTMLDivElement>();
   const swipeHandlers = useSwipeGesture({ onSwipeLeft: showNext, onSwipeRight: showPrevious, threshold: 32 });
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     touchMovedRef.current = false;
@@ -135,6 +136,7 @@ export const JobSeekerInterviewsCard = memo(() => {
 
   return (
     <Card
+      ref={swipeLockRef}
       className={`relative overflow-hidden bg-gradient-to-br ${GRADIENTS.interviews} border-0 shadow-lg dashboard-card-height touch-pan-y`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
