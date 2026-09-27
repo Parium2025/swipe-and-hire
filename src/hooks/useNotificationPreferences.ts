@@ -135,14 +135,28 @@ const FIELD_BY_CHANNEL: Record<NotificationChannel, 'is_enabled' | 'email_enable
 
       const updateField = FIELD_BY_CHANNEL[channel];
 
-      // Upsert på unik constraint (user_id, notification_type) gör ändringen
-      // atomär. Tidigare select → insert/update kunde ge race vid snabba toggles.
+      // Kallstart: skickas bara ett fält skapar databasen raden med sina egna
+      // standardvärden (alltid på), vilket kunde slå på mejl som ska vara av
+      // från början. Därför skickas alla tre kanaler — ändringen plus de värden
+      // användaren faktiskt ser (optimistisk cache eller appens standard).
+      const current = queryClient
+        .getQueryData<NotificationPreference[]>(['notification-preferences', user.id])
+        ?.find(p => p.notification_type === type);
+      const valueFor = (ch: NotificationChannel) => {
+        if (ch === channel) return enabled;
+        const v = current?.[FIELD_BY_CHANNEL[ch]];
+        return typeof v === 'boolean' ? v : defaultFor(type, ch);
+      };
+
       const { error } = await supabase
         .from('notification_preferences')
         .upsert(
           {
             user_id: user.id,
             notification_type: type,
+            is_enabled: valueFor('push'),
+            email_enabled: valueFor('email'),
+            in_app_enabled: valueFor('in_app'),
             [updateField]: enabled,
             updated_at: new Date().toISOString(),
           } as never,
