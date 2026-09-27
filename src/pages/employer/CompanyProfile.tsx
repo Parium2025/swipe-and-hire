@@ -5,13 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { smartMatches } from '@/lib/seoSearch';
 import { toast } from '@/hooks/use-toast';
 import ImageEditor from '@/components/ImageEditor';
-import { ChevronDown, Search, Check, Loader2, AlertCircle } from 'lucide-react';
+import { ChevronDown, Search, Check, Loader2, AlertCircle, Lock } from 'lucide-react';
 import { useOnline } from '@/hooks/useOnlineStatus';
 import { SWEDISH_INDUSTRIES, matchesIndustry } from '@/lib/industries';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
@@ -49,6 +50,7 @@ const RequiredStar = ({ filled }: { filled: boolean }) => (
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
+  const { isAdmin } = useIsOrgAdmin();
   const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
