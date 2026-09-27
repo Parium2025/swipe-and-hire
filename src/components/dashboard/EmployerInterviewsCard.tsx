@@ -202,6 +202,20 @@ export const EmployerInterviewsCard = memo(() => {
                       : 'Inget svar';
                   const isUrgent = !canDismiss && isInterviewUrgent(interview.scheduled_at, now);
                   const meetingUrl = getMeetingUrl(interview.location_details);
+                  // Avslutade/avböjda möten rensas automatiskt ett dygn efter sluttid —
+                  // visa kvarvarande tid så att inget försvinner utan förvarning.
+                  const autoRemoveLabel = (() => {
+                    if (!canDismiss) return null;
+                    const endMs = new Date(interview.scheduled_at).getTime()
+                      + (interview.duration_minutes ?? 0) * 60_000;
+                    const remainingMs = endMs + 24 * 3_600_000 - now;
+                    if (remainingMs <= 0) return 'Tas bort inom kort';
+                    const totalMinutes = Math.ceil(remainingMs / 60_000);
+                    const hours = Math.floor(totalMinutes / 60);
+                    const minutes = totalMinutes % 60;
+                    if (hours <= 0) return `Tas automatiskt bort om ${minutes} min`;
+                    return `Tas automatiskt bort om ${hours} h ${minutes} min`;
+                  })();
 
                   return (
                     <motion.div
@@ -240,6 +254,9 @@ export const EmployerInterviewsCard = memo(() => {
                                 <LocationIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                               </span>
+                              {autoRemoveLabel && (
+                                <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -309,6 +326,9 @@ export const EmployerInterviewsCard = memo(() => {
                             <LocationIcon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                             <span className="leading-none">{getLocationLabel(interview.location_type)}</span>
                           </span>
+                          {autoRemoveLabel && (
+                            <span className="leading-none whitespace-nowrap text-white/80">{autoRemoveLabel}</span>
+                          )}
                           {canDismiss ? (
                             <span className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white whitespace-nowrap">
                               {isConfirmed ? (
