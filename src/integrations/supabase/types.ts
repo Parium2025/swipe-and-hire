@@ -3334,6 +3334,7 @@ export type Database = {
           interview_video_link: string | null
           is_premium: boolean
           is_profile_video: boolean | null
+          joined_via_invite: boolean
           last_active_at: string | null
           last_name: string | null
           location: string | null
@@ -3387,6 +3388,7 @@ export type Database = {
           interview_video_link?: string | null
           is_premium?: boolean
           is_profile_video?: boolean | null
+          joined_via_invite?: boolean
           last_active_at?: string | null
           last_name?: string | null
           location?: string | null
@@ -3440,6 +3442,7 @@ export type Database = {
           interview_video_link?: string | null
           is_premium?: boolean
           is_profile_video?: boolean | null
+          joined_via_invite?: boolean
           last_active_at?: string | null
           last_name?: string | null
           location?: string | null
@@ -4371,6 +4374,10 @@ export type Database = {
         Args: { _key: string; _limit: number; _window_seconds: number }
         Returns: boolean
       }
+      copy_org_company_fields_to_member: {
+        Args: { p_organization_id: string; p_user_id: string }
+        Returns: undefined
+      }
       count_distinct_candidates: {
         Args: { p_job_ids: string[] }
         Returns: number
@@ -4771,6 +4778,7 @@ export type Database = {
           interview_video_link: string | null
           is_premium: boolean
           is_profile_video: boolean | null
+          joined_via_invite: boolean
           last_active_at: string | null
           last_name: string | null
           location: string | null
