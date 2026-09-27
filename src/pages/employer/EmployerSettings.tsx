@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -12,6 +13,7 @@ import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
 import CalendarConnectionCard from '@/components/settings/CalendarConnectionCard';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Switch } from '@/components/ui/switch';
+import { Lock } from 'lucide-react';
 
 
 import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAccountEmailPanel';
@@ -36,6 +38,7 @@ const readSavedSection = (): string => {
 
 const EmployerSettings = () => {
   const { user, profile, updateProfile, updatePassword, loading: authLoading } = useAuth();
+  const { isAdmin } = useIsOrgAdmin();
   const location = useLocation();
   const notificationSettingsRef = useRef<HTMLDivElement>(null);
   const [passwordData, setPasswordData] = useState({
@@ -224,6 +227,15 @@ const EmployerSettings = () => {
     }
   };
 
+  // Bolagsgemensamma flöden (mallar, regler, utskick) är låsta för rekryterare —
+  // bara admins får ändra dem, så att kandidater alltid möter samma röst.
+  const adminOnlyContent = (
+    <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-4">
+      <Lock className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
+      <p className="text-sm text-white">Den här inställningen är gemensam för hela företaget och kan bara ändras av en admin.</p>
+    </div>
+  );
+
   const sections: { value: string; label: string; content: React.ReactNode }[] = [
     {
       value: 'konto',
@@ -262,7 +274,7 @@ const EmployerSettings = () => {
     {
       value: 'automatiska-floden',
       label: 'Automatiska flöden',
-      content: (
+      content: !isAdmin ? adminOnlyContent : (
         <div className="space-y-6">
           <AutoMessagesPanel />
           <div className="space-y-3">
@@ -285,7 +297,7 @@ const EmployerSettings = () => {
     {
       value: 'manuella-besked',
       label: 'Mallar, regler & utskick',
-      content: <MessageTemplatesSettings />,
+      content: !isAdmin ? adminOnlyContent : <MessageTemplatesSettings />,
     },
 
     {
