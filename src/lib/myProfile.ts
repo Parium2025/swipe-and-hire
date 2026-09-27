@@ -19,7 +19,9 @@ const MICRO_CACHE_MS = 3000;
 let inFlight: Promise<ProfileRpcResult> | null = null;
 let cached: { at: number; result: ProfileRpcResult } | null = null;
 
-async function rawFetch() {
+type GetMyProfileResult = Awaited<ReturnType<typeof supabase.rpc<'get_my_profile'>>>;
+
+async function rawFetch(): Promise<GetMyProfileResult> {
   // Säkerställ en färsk session innan anropet. getSession() förnyar en
   // utgången token automatiskt; utan session skickas anropet som anon och
   // databasen svarar "permission denied" (42501) i stället för ett
@@ -34,7 +36,7 @@ async function rawFetch() {
         details: null,
         hint: null,
       },
-    } as unknown as Awaited<ReturnType<typeof supabase.rpc>>;
+    } as unknown as GetMyProfileResult;
   }
   return await supabase.rpc('get_my_profile');
 }
