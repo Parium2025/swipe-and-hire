@@ -14,4 +14,4 @@
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
 - Company identity belongs to the organization; invitees inherit it and skip company welcome steps.
 - Browser autofill keeps each field's own surface; never repaint it globally.
-- Auth is isolated per tab; device limits are per account with three devices. Cross-tab auth events never replace another tab's account or reload it.
+- Auth is isolated per tab; device limits are per account with two devices. Cross-tab auth events never replace another tab's account or reload it.

@@ -2720,7 +2720,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Track user activity for 24-hour inactivity timeout
   useInactivityTimeout(!!user);
 
-  // Session limiter: max 3 concurrent devices per user
+  // Session limiter: max 2 concurrent devices per user
   const handleSessionKicked = useCallback(async () => {
     // Flag to prevent onAuthStateChange from showing a duplicate toast
     isSessionKickRef.current = true;
