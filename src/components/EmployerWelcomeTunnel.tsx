@@ -71,16 +71,17 @@ export const clearEmployerWelcomeDraft = (uid?: string | null) => {
 
 interface EmployerWelcomeTunnelProps {
   onComplete: () => void;
+  startAtInterview?: boolean;
 }
 
-const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
+const EmployerWelcomeTunnel = ({ onComplete, startAtInterview = false }: EmployerWelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
   const { isEnabled: notificationEnabled, isLoading: notificationsLoading } = useNotificationPreferences();
   const { subscribed: emailSubscribed, isKnown: emailKnown } = useEmailSubscription();
   const isReplay = isTunnelReplayAccount(user?.email);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(startAtInterview ? 4 : 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoProgress, setLogoProgress] = useState(0);
@@ -139,7 +140,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
           }
           if (parsed.notificationDraft) setNotificationDraft(parsed.notificationDraft);
           if (typeof parsed.currentStep === 'number') {
-            setCurrentStep(Math.min(Math.max(parsed.currentStep, 0), 6));
+            setCurrentStep(startAtInterview ? 4 : Math.min(Math.max(parsed.currentStep, 0), 6));
           }
           console.log('💾 Employer welcome tunnel draft restored');
         }
@@ -148,7 +149,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       }
       setDraftRestored(true);
     }
-  }, [draftRestored, draftKey, isReplay]);
+  }, [draftRestored, draftKey, isReplay, startAtInterview]);
 
   // Förifyll med uppgifterna från registreringen så fort profilen hinner
   // laddas (den är asynkron och kommer ofta efter första renderingen).
@@ -268,6 +269,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   };
 
   const handlePrevious = () => {
+    if (isTeamMember && startAtInterview && currentStep === 4) return;
     if (currentStep > 0) {
       setCurrentStep(isTeamMember && currentStep === 3 ? 0 : currentStep - 1);
     }
@@ -1024,7 +1026,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
              <div className="flex gap-3 items-center justify-center">
-               {currentStep > 0 && (
+                {currentStep > 0 && !(isTeamMember && startAtInterview && currentStep === 4) && (
                  <Button
                    variant="outline"
                    onMouseDown={(e) => { e.currentTarget.blur(); (document.activeElement as HTMLElement)?.blur?.(); }}
