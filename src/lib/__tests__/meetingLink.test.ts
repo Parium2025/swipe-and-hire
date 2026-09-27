@@ -29,7 +29,7 @@ describe("normalizeMeetingLink", () => {
 
 describe("isSupportedMeetingLink", () => {
   it("godtar kända mötesplattformar", () => {
-    expect(isSupportedMeetingLink("https://meet.google.com/abc-def-ghi")).toBe(true);
+    expect(isSupportedMeetingLink("https://meet.google.com/abc-defg-hij")).toBe(true);
     expect(isSupportedMeetingLink("https://teams.microsoft.com/l/meetup-join/x")).toBe(true);
     expect(isSupportedMeetingLink("https://us05web.zoom.us/j/123")).toBe(true);
     expect(isSupportedMeetingLink("https://whereby.com/parium")).toBe(true);
@@ -43,6 +43,7 @@ describe("isSupportedMeetingLink", () => {
   it("avvisar skräp och tomma strängar", () => {
     expect(isSupportedMeetingLink("")).toBe(false);
     expect(isSupportedMeetingLink("not a url")).toBe(false);
+    expect(isSupportedMeetingLink("https://meet.google.com/abc-defg-hi")).toBe(false);
   });
 
   it("avvisar javascript-URL även om värdden ser snäll ut", () => {
