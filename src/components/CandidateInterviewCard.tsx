@@ -35,6 +35,7 @@ interface CandidateInterviewCardProps {
     subject: string | null;
     message: string | null;
     status: string;
+    candidate_response?: string | null;
     job_postings?: {
       title: string;
       employer_id: string;
@@ -54,7 +55,7 @@ export const CandidateInterviewCard = ({ interview }: CandidateInterviewCardProp
   const minutesUntil = differenceInMinutes(scheduledDate, now);
   const isLive = minutesUntil <= 15 && minutesUntil >= -interview.duration_minutes;
   const isPending = interview.status === 'pending';
-  const isConfirmed = interview.status === 'confirmed';
+  const isConfirmed = interview.status === 'confirmed' || interview.candidate_response === 'confirmed';
   // Tiden visas i kandidatens egen tidszon — ingen tidszonstext läggs till.
 
   // Format date nicely

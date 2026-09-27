@@ -184,7 +184,9 @@ export const EmployerInterviewsCard = memo(() => {
                 {visibleInterviews.map((interview) => {
                   const LocationIcon = getLocationIcon(interview.location_type);
                   const isOver = isInterviewOver(interview.scheduled_at, interview.duration_minutes, now);
+                  const response = interview.candidate_response ?? (interview.status === 'confirmed' || interview.status === 'declined' ? interview.status : null);
                   const isDeclined = interview.status === 'declined';
+                  const isConfirmed = response === 'confirmed';
                   // Avböjda och avslutade möten får rensas bort manuellt.
                   const canDismiss = isDeclined || isOver;
                   const timeUntil = isDeclined
@@ -193,9 +195,9 @@ export const EmployerInterviewsCard = memo(() => {
                       ? 'Avslutad'
                       : getTimeUntil(interview.scheduled_at, now);
                   // Kandidatens svar följer alltid med, även när mötet är avslutat.
-                  const responseLabel = isDeclined
+                  const responseLabel = response === 'declined'
                     ? 'Tackade nej'
-                    : interview.status === 'confirmed'
+                    : isConfirmed
                       ? 'Tackade ja'
                       : 'Inget svar';
                   const isUrgent = !canDismiss && isInterviewUrgent(interview.scheduled_at, now);
@@ -266,17 +268,17 @@ export const EmployerInterviewsCard = memo(() => {
 
                           ) : (
                             <span className={cn('flex w-full items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white', useTouchCarousel ? 'h-7 px-2 text-xs' : 'h-5 px-1.5 text-[10px]')}>
-                              {interview.status === 'confirmed' ? (
+                              {isConfirmed ? (
                                 <CheckCircle2 className={cn('shrink-0', useTouchCarousel ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5')} aria-hidden="true" />
                               ) : (
                                 <Hourglass className={cn('shrink-0', useTouchCarousel ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5')} aria-hidden="true" />
                               )}
-                              {interview.status === 'confirmed' ? 'Bekräftad' : 'Inväntar svar'}
+                              {isConfirmed ? 'Bekräftad' : 'Inväntar svar'}
                             </span>
                           )}
                           {useTouchCarousel && (canDismiss ? (
                             <span className={cn('flex w-full items-center justify-center gap-1 rounded bg-white/10 font-medium leading-none whitespace-nowrap text-white', useTouchCarousel ? 'h-7 px-2 text-xs' : 'h-5 px-1.5 text-[10px]')}>
-                              {interview.status === 'confirmed' ? (
+                              {isConfirmed ? (
                                 <CheckCircle2 className={cn('shrink-0', useTouchCarousel ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5')} aria-hidden="true" />
                               ) : (
                                 <Hourglass className={cn('shrink-0', useTouchCarousel ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5')} aria-hidden="true" />
@@ -309,7 +311,7 @@ export const EmployerInterviewsCard = memo(() => {
                           </span>
                           {canDismiss ? (
                             <span className="ml-auto flex h-5 w-[88px] shrink-0 items-center justify-center gap-1 rounded bg-white/10 px-1.5 font-medium leading-none text-white whitespace-nowrap">
-                              {interview.status === 'confirmed' ? (
+                              {isConfirmed ? (
                                 <CheckCircle2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
                               ) : (
                                 <Hourglass className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />

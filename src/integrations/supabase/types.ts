@@ -1711,6 +1711,7 @@ export type Database = {
         Row: {
           applicant_id: string
           application_id: string | null
+          candidate_response: string | null
           created_at: string
           duration_minutes: number
           employer_dismissed_at: string | null
@@ -1732,6 +1733,7 @@ export type Database = {
         Insert: {
           applicant_id: string
           application_id?: string | null
+          candidate_response?: string | null
           created_at?: string
           duration_minutes?: number
           employer_dismissed_at?: string | null
@@ -1753,6 +1755,7 @@ export type Database = {
         Update: {
           applicant_id?: string
           application_id?: string | null
+          candidate_response?: string | null
           created_at?: string
           duration_minutes?: number
           employer_dismissed_at?: string | null

@@ -19,6 +19,8 @@ export interface Interview {
   subject: string | null;
   message: string | null;
   status: 'pending' | 'confirmed' | 'declined' | 'cancelled' | 'completed';
+  /** Kandidatens senaste svar — finns kvar även när mötet markerats avslutat. */
+  candidate_response?: 'confirmed' | 'declined' | null;
   created_at: string;
   updated_at: string;
   // Joined data

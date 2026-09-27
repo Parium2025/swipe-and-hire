@@ -438,6 +438,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const handleSubmit = async () => {
     if (isReplay) {
       clearEmployerWelcomeDraft(user?.id);
+      // Testläget firar exakt som riktiga konton, men sparar ingenting.
+      void celebrate({ intensity: 'big' });
       onComplete();
       return;
     }
@@ -499,7 +501,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       clearEmployerWelcomeDraft(user?.id);
 
       // Samma firande som vid publicering av jobb
-      void celebrate();
+      void celebrate({ intensity: 'big' });
 
       toast({
         title: "Välkommen till Parium!",

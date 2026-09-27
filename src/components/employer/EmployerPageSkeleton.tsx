@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { readCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { readCachedCount, readCachedLayout, SKELETON_COUNT_KEYS, MY_CANDIDATES_LAYOUT_KEY } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
 import { useDevice } from '@/hooks/use-device';
@@ -437,7 +437,11 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
   const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   const isDesktop = useDevice() === 'desktop';
-  const stageCount = 5;
+  // Exakt samma kolumner och kort per kolumn som vid senaste visningen.
+  const cachedLayout = readCachedLayout(MY_CANDIDATES_LAYOUT_KEY);
+  const stageCount = cachedLayout?.length ?? 5;
+  const cardsForStage = (i: number) =>
+    cachedLayout ? Math.min(8, cachedLayout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
     <FullscreenSkeletonPortal activePaths={['/my-candidates']}>
       <motion.div
@@ -498,7 +502,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
                   <div key={stageIndex} className="flex min-w-0 flex-1 flex-col">
                     <div className={`mb-2 h-8 w-full rounded-md ${SHAPE}`} />
                     <div className="h-full space-y-1.5 rounded-lg bg-white/5 p-2 ring-1 ring-inset ring-white/10">
-                      {Array.from({ length: Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount))) }).map((_, rowIndex) => (
+                      {Array.from({ length: cardsForStage(stageIndex) }).map((_, rowIndex) => (
                         <div key={rowIndex} className="flex min-h-14 items-center gap-2 rounded-md bg-white/5 px-2 py-1.5">
                           <div className={`h-9 w-9 shrink-0 rounded-full ${SHAPE}`} />
                           <div className="min-w-0 flex-1 space-y-1.5">

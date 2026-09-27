@@ -68,7 +68,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
-import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { writeCachedCount, writeCachedLayout, SKELETON_COUNT_KEYS, MY_CANDIDATES_LAYOUT_KEY } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
@@ -293,6 +293,12 @@ const MyCandidates = () => {
     return grouped;
   }, [displayedCandidates, activeStageOrder]);
 
+
+  // Cacha kolumnlayouten (kort per steg) så skeleton matchar exakt nästa cold-load.
+  useEffect(() => {
+    if (isLoading || isViewingColleague || activeStageOrder.length === 0) return;
+    writeCachedLayout(MY_CANDIDATES_LAYOUT_KEY, activeStageOrder.map(k => candidatesByStage[k]?.length || 0));
+  }, [isLoading, isViewingColleague, activeStageOrder, candidatesByStage]);
 
   // Stats
   const stats = useMemo(() => {
