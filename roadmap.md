@@ -21,3 +21,4 @@
 - [x] Match candidate loading skeletons to exact board widths, account, list and desktop table without substituting unresolved default stages on cold start
 - [x] Route team invitations past unsubscribe handling, start invited recruiters at their personal welcome without company steps, and clean up the mobile meeting-link field
 - [ ] End-to-end test team invitations for logged-out, wrong-account, invited-account, accepted and reused-link states
+- [ ] Stabilize per-account three-device sessions, eliminate Safari account-switch reload loops, and verify team invites end to end
