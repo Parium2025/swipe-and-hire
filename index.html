@@ -776,6 +776,7 @@
           var recovering = false;  // en återhämtning pågår just nu
           var messageShown = false;
           var mainStartedWaits = 0; // hur länge vi väntat på en bundle som "startat"
+          var maxAutomaticReloads = 1;
 
           var clearAttempts = function() {
             try { sessionStorage.removeItem(ATTEMPT_KEY); } catch (e) {}
@@ -873,7 +874,7 @@
             if (navigator.onLine === false) return Promise.resolve(false);
             try {
               return fetch('/favicon-parium.png?_probe=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
-                .then(function(r) { return !!r; })
+                .then(function(r) { return r.ok; })
                 .catch(function() { return false; });
             } catch (e) {
               return Promise.resolve(false);
@@ -921,12 +922,11 @@
               attempts += 1;
               try { sessionStorage.setItem(ATTEMPT_KEY, String(attempts)); } catch (e) {}
 
-              if (attempts > 5) {
-                // Sista utvägen: visa knapp — men automatiken fortsätter ändå,
-                // nu i lugnare takt (var 30:e sekund) så vi aldrig loopar hårt.
+              if (attempts > maxAutomaticReloads) {
+                // Ett automatiskt försök räcker. Ett bestående kodfel får
+                // aldrig döljas av en omladdningsloop; visa ett stabilt felläge.
                 showManualFallback();
                 recovering = false;
-                setTimeout(function() { if (!isBooted()) hardReload(); }, 30000);
                 return;
               }
 

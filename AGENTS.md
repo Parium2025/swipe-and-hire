@@ -15,3 +15,4 @@
 - Company identity belongs to the organization; invitees inherit it and skip company welcome steps.
 - Browser autofill keeps each field's own surface; never repaint it globally.
 - Auth is isolated per tab; device limits are per account with two devices. Cross-tab auth events never replace another tab's account or reload it.
+- Automatic boot recovery may reload once only; persistent failures must settle on a stable error state instead of looping.

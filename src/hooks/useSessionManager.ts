@@ -257,6 +257,10 @@ export function useSessionManager(
           p_user_agent: navigator.userAgent.substring(0, 200),
         });
 
+        // Logout/kick may have started while the RPC was in flight. Never let
+        // a late response revive or continue session management afterwards.
+        if (signOutInProgress || alreadyKickedRef.current) return;
+
         if (error) {
           console.warn('Session registration failed:', error.message);
           return;
@@ -316,6 +320,8 @@ export function useSessionManager(
         p_session_token: token,
       });
 
+      if (signOutInProgress || alreadyKickedRef.current) return;
+
       if (isValid === false) {
         console.log('⚠️ Heartbeat: session expired — attempting re-registration…');
 
@@ -331,6 +337,8 @@ export function useSessionManager(
             p_device_label: getDeviceLabel(),
             p_user_agent: navigator.userAgent.substring(0, 200),
           });
+
+          if (signOutInProgress || alreadyKickedRef.current) return;
 
           const result = data as Record<string, unknown> | null;
 
@@ -408,6 +416,8 @@ export function useSessionManager(
         p_session_token: token,
       });
 
+      if (signOutInProgress || alreadyKickedRef.current) return;
+
       // Network error — don't kick, just count failures
       if (error) {
         consecutiveNetworkFailsRef.current++;
@@ -433,6 +443,8 @@ export function useSessionManager(
             p_device_label: getDeviceLabel(),
             p_user_agent: navigator.userAgent.substring(0, 200),
           });
+
+          if (signOutInProgress || alreadyKickedRef.current) return;
 
           const result = data as Record<string, unknown> | null;
 

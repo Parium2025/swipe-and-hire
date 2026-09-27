@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
 
@@ -69,5 +71,17 @@ describe('browserChrome', () => {
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
     ).toBe('#062B5E');
+  });
+
+  it('laddar aldrig om dokumentet när en route byter chrome-färg', () => {
+    vi.useFakeTimers();
+
+    syncBrowserChrome('/auth');
+    syncBrowserChrome('/home');
+    vi.advanceTimersByTime(20);
+
+    expect(themeColorTags()[0]?.content).toBe('#00193D');
+    const source = readFileSync(resolve(process.cwd(), 'src/lib/browserChrome.ts'), 'utf8');
+    expect(source).not.toContain('window.location.reload()');
   });
 });

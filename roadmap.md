@@ -21,4 +21,5 @@
 - [x] Match candidate loading skeletons to exact board widths, account, list and desktop table without substituting unresolved default stages on cold start
 - [x] Route team invitations past unsubscribe handling, start invited recruiters at their personal welcome without company steps, and clean up the mobile meeting-link field
 - [ ] End-to-end test a real team invitation with a separate invited employer account (blocked until that second account is available)
-- [x] Stabilize per-account three-device sessions, eliminate Safari account-switch reload loops, and cover invite states with automated tests
+- [x] Stabilize per-account two-device sessions, eliminate Safari account-switch reload loops, and cover invite states with automated tests
+- [x] Stop the boot watchdog, preview auth provider and browser-chrome paths from creating repeated reload loops

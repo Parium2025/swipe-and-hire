@@ -407,6 +407,13 @@
       "when": 1790530197526,
       "tag": "0057_restore_user_session_limit_to_two",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1790531311824,
+      "tag": "0058_prevent_logged_out_session_reregistration",
+      "breakpoints": true
     }
   ]
 }
