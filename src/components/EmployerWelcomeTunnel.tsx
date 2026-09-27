@@ -28,11 +28,12 @@ import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
 
+// Samma texter som på inställningssidan (EmployerNotificationsPanel) — håll dessa i synk.
 const notificationRows: NotificationRow[] = [
-  { type: 'new_application', label: 'Nya ansökningar', description: 'Samlat mejl med dygnets nya ansökningar, högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
-  { type: 'new_message', label: 'Meddelanden', description: 'Nya meddelanden från kandidater.', channels: ['in_app', 'push', 'email'] },
-  { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar och ändringar är alltid på.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
-  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej till intervjun.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_application', label: 'Nya ansökningar', description: 'När någon söker dina jobb. Mejlet är alltid en samlad sammanfattning, aldrig ett mejl per ansökan. Det skickas bara när det finns nya ansökningar du inte öppnat — som mest ett mejl per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_message', label: 'Meddelanden', description: 'Nya chattmeddelanden. Meddelandet hamnar alltid i inkorgen — mejl skickas bara som en samlad påminnelse om olästa meddelanden, som mest ett mejl per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar, av- och ombokningar samt påminnelsen strax före intervjun. Alltid på — det här är tider i din kalender.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
+  { type: 'interview_response', label: 'Kandidatens svar', description: 'Kandidaten tackar ja eller nej till kallelsen. I appen betyder att svaret också landar som ett meddelande från kandidaten i chatten.', channels: ['in_app', 'push', 'email'] },
 ];
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
