@@ -12,6 +12,8 @@ export interface CachedReview {
   comment: string | null;
   is_anonymous: boolean;
   created_at: string;
+  employer_reply?: string | null;
+  employer_reply_at?: string | null;
   profiles?: {
     first_name?: string;
     last_name?: string;

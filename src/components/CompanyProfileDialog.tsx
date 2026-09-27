@@ -62,6 +62,8 @@ interface CompanyReview {
   comment: string;
   is_anonymous: boolean;
   created_at: string;
+  employer_reply?: string | null;
+  employer_reply_at?: string | null;
   profiles?: {
     first_name?: string;
     last_name?: string;
@@ -626,6 +628,14 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                 overflow: 'hidden',
                               }}
                             />
+                          </div>
+                        )}
+                        {review.employer_reply && (
+                          <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
+                            <p className="text-sm font-medium text-white">Svar från företaget</p>
+                            <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
+                              {review.employer_reply}
+                            </p>
                           </div>
                         )}
                       </div>
