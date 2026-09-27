@@ -515,6 +515,11 @@ const CompanyReviews = () => {
                         autoResize={false}
                         className="h-[100px] min-h-[100px] max-h-[100px] overflow-y-auto bg-white/5 border-white/10 text-white text-sm resize-none placeholder:text-white/40"
                       />
+                      <div className="flex justify-end">
+                        <span className="text-[11px] tabular-nums text-white">
+                          {replyDraft.length.toLocaleString('sv-SE')} / 1 000 tecken
+                        </span>
+                      </div>
                       <div className="flex items-center justify-end gap-2">
                         <Button
                           type="button"
