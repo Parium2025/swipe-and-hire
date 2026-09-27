@@ -69,7 +69,6 @@ const TeamInvite = () => {
       setMessage("Länken saknar en giltig inbjudningskod.");
       return;
     }
-    rememberInvite(destination);
     void (async () => {
       const { data, error } = await supabase.functions.invoke("team-invite-accept", {
         body: { token, preview: true },
