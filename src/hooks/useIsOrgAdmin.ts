@@ -31,9 +31,6 @@ function writeCache(userId: string, organizationId: string, isAdmin: boolean): v
   } catch { /* storage full */ }
 }
 
-function isFresh(entry: CachedEntry | null): boolean {
-  return !!entry && Date.now() - entry.timestamp < CACHE_TTL_MS;
-}
 
 /**
  * Hook to check if the current user is an admin of their organization.
