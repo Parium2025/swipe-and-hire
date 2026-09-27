@@ -17,3 +17,4 @@
 - Auth is isolated per tab; device limits are per account with two devices. Cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures must settle on a stable error state instead of looping.
 - The landing-video route alone owns browser chrome color `#626262`; preserve its one-reload loop guards and never change other routes with it.
+- Never weaken or remove existing loop guards, reload limits or boot protections when fixing a bug; a fix must keep every guard intact and add tests for the regression it repairs.
