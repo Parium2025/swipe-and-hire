@@ -479,6 +479,54 @@ const CompanyProfile = () => {
 
   const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
     const silent = !!opts?.silent;
+
+    // Rekryterare får bara ändra sina egna intervjuinställningar — resten av
+    // företagsprofilen är låst för admins. Då sparas bara intervjufälten och
+    // de obligatoriska företagsfälten valideras inte (de äger admin).
+    if (!isAdmin) {
+      const link = normalizeMeetingLink(formData.interview_video_link || '');
+      if (link && !isValidMeetingLink(link)) {
+        if (!silent) {
+          toast({ title: "Ogiltig möteslänk", description: "Kontrollera länken innan du sparar.", variant: "destructive" });
+        }
+        setSaveError('Möteslänken är ogiltig. Kontrollera länken.');
+        return false;
+      }
+      if (!isOnline) {
+        if (!silent) showOfflineToast();
+        setSaveError('Ingen anslutning. Ändringen sparas när du är online igen.');
+        return false;
+      }
+      try {
+        setLoading(true);
+        const { error: updateError } = await updateProfile({
+          interview_default_message: formData.interview_default_message,
+          interview_video_default_message: formData.interview_video_default_message,
+          interview_video_link: link,
+          interview_office_address: formData.interview_office_address,
+          interview_office_instructions: formData.interview_office_instructions,
+        } as any);
+        if (updateError) {
+          setSaveError('Kunde inte spara ändringen. Försök igen.');
+          return false;
+        }
+        setOriginalValues({ ...formData, interview_video_link: link });
+        setSaveError(null);
+        if (!silent) {
+          toast({ title: "Intervjuinställningar uppdaterade", description: "Dina intervjuinställningar har sparats." });
+        }
+        return true;
+      } catch {
+        if (!silent) {
+          toast({ title: "Fel", description: "Kunde inte spara intervjuinställningarna.", variant: "destructive" });
+        }
+        setSaveError('Kunde inte spara ändringen. Försök igen.');
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    }
+
     const sanitizedFormData: CompanyFormData = {
       ...formData,
       interview_video_link: normalizeMeetingLink(formData.interview_video_link || ''),
@@ -712,6 +760,7 @@ const CompanyProfile = () => {
   const formDataRef = useRef(formData);
   formDataRef.current = formData;
   useEffect(() => {
+    if (!isAdmin) return;
     return registerLeaveBlocker(() => {
       const missing = REQUIRED_FIELDS
         .filter(({ key }) => !String(formDataRef.current[key] ?? '').trim())
