@@ -43,7 +43,7 @@ describe('TopChromeStrip', () => {
     expect(strip?.getAttribute('aria-hidden')).toBe('true');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
-    ).toBe('');
+    ).toBe('0px');
   });
 
   it('renderar ingen överliggande remsa på övriga sidor i vanlig mobil-Safari', () => {
