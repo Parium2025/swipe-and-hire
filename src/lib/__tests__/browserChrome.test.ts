@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
+import { claimChromeReload, needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
 
 const themeColorTags = () =>
   Array.from(document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'));
@@ -73,15 +73,11 @@ describe('browserChrome', () => {
     ).toBe('#062B5E');
   });
 
-  it('laddar aldrig om dokumentet när en route byter chrome-färg', () => {
-    vi.useFakeTimers();
-
-    syncBrowserChrome('/auth');
-    syncBrowserChrome('/home');
-    vi.advanceTimersByTime(20);
-
-    expect(themeColorTags()[0]?.content).toBe('#00193D');
-    const source = readFileSync(resolve(process.cwd(), 'src/lib/browserChrome.ts'), 'utf8');
-    expect(source).not.toContain('window.location.reload()');
+  it('tillåter högst en chrome-omladdning per tidsfönster så den aldrig loopar', () => {
+    sessionStorage.clear();
+    expect(claimChromeReload(1_000)).toBe(true);
+    expect(claimChromeReload(2_000)).toBe(false);
+    expect(claimChromeReload(9_000)).toBe(false);
+    expect(claimChromeReload(12_000)).toBe(true);
   });
 });

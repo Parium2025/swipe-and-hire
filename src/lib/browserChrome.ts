@@ -69,6 +69,22 @@ const nudgeColor = (color: string) => {
 
 let pendingThemeFrame: number | null = null;
 let pendingSyncTimers: number[] = [];
+let committedDocumentColor: string | null = null;
+
+// Loopspärr: högst en chrome-omladdning per 10 s per flik. Studsar routen
+// (t.ex. /auth ⇄ /home under osäker inloggning) byts bara färgen utan reload.
+const CHROME_RELOAD_KEY = 'parium-chrome-reload-at';
+const CHROME_RELOAD_WINDOW_MS = 10_000;
+export const claimChromeReload = (now = Date.now()) => {
+  try {
+    const last = Number(sessionStorage.getItem(CHROME_RELOAD_KEY) || '0');
+    if (last && now - last < CHROME_RELOAD_WINDOW_MS) return false;
+    sessionStorage.setItem(CHROME_RELOAD_KEY, String(now));
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const setThemeColor = (color: string) => {
   if (pendingThemeFrame !== null && typeof cancelAnimationFrame === 'function') {
@@ -141,6 +157,20 @@ const setChromeCssColor = (color: string) => {
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
   const color = getChromeColor(pathname);
+
+  // Vanlig iOS Safari samplar sina egna topp-/bottenfält per dokument. När
+  // färgen byts (t.ex. inloggning → landningssidan) krävs ett nytt dokument.
+  // claimChromeReload() gör att detta aldrig kan bli en omladdningsloop.
+  if (
+    committedDocumentColor !== null &&
+    committedDocumentColor !== color &&
+    needsFullPageChromeNavigation() &&
+    claimChromeReload()
+  ) {
+    window.location.reload();
+    return;
+  }
+  committedDocumentColor = color;
 
   removeLegacySentinels();
 
