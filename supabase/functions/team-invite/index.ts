@@ -78,12 +78,29 @@ serve(async (req) => {
     return json({ error: "Endast administratörer kan bjuda in kollegor." }, 403);
   }
 
-  // Already a member of this organization?
-  const { data: existingProfile } = await supabaseAdmin
-    .from("profiles")
-    .select("user_id, role")
-    .ilike("email", email)
-    .maybeSingle();
+  // Resolve the existing account by its real login address. profiles.email is
+  // often empty, so it must never be the lookup key for this safety check.
+  const { data: authRows, error: lookupError } = await supabaseAdmin.rpc(
+    "lookup_auth_email_for_resend",
+    { _email: email },
+  );
+  if (lookupError) {
+    console.error("account lookup failed", lookupError.code);
+    return json({ error: "Kunde inte kontrollera adressen. Försök igen." }, 500);
+  }
+  const authRow = Array.isArray(authRows) ? authRows[0] : authRows;
+
+  let existingProfile: { user_id: string; role: string | null } | null = null;
+  if (authRow?.user_id) {
+    const { data } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, role")
+      .eq("user_id", authRow.user_id)
+      .maybeSingle();
+    existingProfile = data
+      ? data
+      : { user_id: authRow.user_id, role: authRow.account_role ?? null };
+  }
 
   // En adress kan inte vara både jobbsökare och teammedlem.
   if (existingProfile?.role === "job_seeker") {
@@ -92,6 +109,7 @@ serve(async (req) => {
       409,
     );
   }
+
 
   if (existingProfile?.user_id) {
     const { data: existingRole } = await supabaseAdmin
