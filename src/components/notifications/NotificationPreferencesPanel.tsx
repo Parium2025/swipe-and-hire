@@ -48,10 +48,12 @@ const NotificationPreferencesPanel = ({
   return (
     <TooltipProvider delayDuration={200}>
       <div className="space-y-5">
-        <div className="flex items-center gap-2">
-          <Bell className="h-4 w-4 text-white" />
-          <h3 className="text-sm font-medium text-white">{title}</h3>
-        </div>
+        {title && (
+          <div className="flex items-center gap-2">
+            <Bell className="h-4 w-4 text-white" />
+            <h3 className="text-sm font-medium text-white">{title}</h3>
+          </div>
+        )}
 
         {intro && <div className="text-sm leading-relaxed text-white">{intro}</div>}
         {banner}

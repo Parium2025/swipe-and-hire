@@ -29,10 +29,10 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
 
 const notificationRows: NotificationRow[] = [
-  { type: 'new_application', label: 'Nya ansökningar', description: 'Mejl skickas högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
+  { type: 'new_application', label: 'Nya ansökningar', description: 'Samlat mejl med dygnets nya ansökningar, högst en gång per dag.', channels: ['in_app', 'push', 'email'] },
   { type: 'new_message', label: 'Meddelanden', description: 'Nya meddelanden från kandidater.', channels: ['in_app', 'push', 'email'] },
   { type: 'interview_scheduled', label: 'Intervjuer', description: 'Bokningar och ändringar är alltid på.', channels: ['in_app', 'push', 'email'], locked: ['in_app', 'push', 'email'] },
-  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej.', channels: ['in_app', 'push', 'email'] },
+  { type: 'interview_response', label: 'Kandidatens svar', description: 'När kandidaten tackar ja eller nej till intervjun.', channels: ['in_app', 'push', 'email'] },
 ];
 
 const EMPLOYER_WELCOME_DRAFT_PREFIX = 'parium_draft_employer-welcome-tunnel';
@@ -852,7 +852,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold text-white">Dina aviseringar</h2>
               <p className="text-white">Välj vad du vill få i appen, som push eller via mejl. Du kan ändra valen i inställningarna senare.</p>
             </div>
-            <NotificationPreferencesPanel rows={notificationRows} isEnabled={notificationValue}
+            <NotificationPreferencesPanel title="" rows={notificationRows} isEnabled={notificationValue}
               toggle={(type, enabled, channel) => setNotificationDraft(prev => ({ ...prev, [`${type}:${channel}`]: enabled }))}
               disabled={notificationsLoading} emailBlocked={emailKnown && !emailSubscribed}
               intro={emailKnown && !emailSubscribed ? 'Din adress är avregistrerad från app-mejl. Aktivera mejlutskick igen under Inställningar om du vill få dem.' : undefined} />
