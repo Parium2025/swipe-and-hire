@@ -55,6 +55,10 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               <div className="flex items-center gap-2">
                 <Input
                   id="interview_video_link"
+                  name="interview-video-link-noautofill"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore
                   value={formData.interview_video_link}
                   onChange={(e) => onFormDataChange({ interview_video_link: e.target.value })}
                   onBlur={(e) => onFormDataChange({ interview_video_link: normalizeMeetingLink(e.target.value) })}

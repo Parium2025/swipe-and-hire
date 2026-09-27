@@ -67,9 +67,19 @@ export const isSupportedMeetingLink = (url: string): boolean => {
   try {
     const parsed = new URL(url);
     const hostname = parsed.hostname.toLowerCase();
-    return SUPPORTED_MEETING_HOSTS.some(
+    const hostOk = SUPPORTED_MEETING_HOSTS.some(
       (supportedHost) => hostname === supportedHost || hostname.endsWith(`.${supportedHost}`)
     );
+    if (!hostOk) return false;
+    // Enbart domänen (t.ex. https://meet.google.com/) är ingen möteslänk —
+    // ett specifikt mötesrum/kod måste finnas.
+    const path = parsed.pathname.replace(/\/+$/, '');
+    if (!path && !parsed.search) return false;
+    // Google Meet-koder har exakt formatet abc-defg-hij.
+    if (hostname === 'meet.google.com') {
+      return /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/i.test(path) || /^\/lookup\/[\w-]+$/i.test(path);
+    }
+    return true;
   } catch {
     return false;
   }
