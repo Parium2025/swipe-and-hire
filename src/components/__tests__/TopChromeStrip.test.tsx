@@ -40,7 +40,7 @@ describe('TopChromeStrip', () => {
     const { container } = renderStrip();
     const strip = container.querySelector<HTMLElement>('[data-browser-chrome-strip="top"]');
     expect(strip).not.toBeNull();
-    expect(strip?.style.backgroundColor).toContain('--active-browser-chrome-color');
+    expect(strip?.getAttribute('aria-hidden')).toBe('true');
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
     ).toBe('');
