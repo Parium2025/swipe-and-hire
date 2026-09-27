@@ -21,9 +21,9 @@ const mockMatchMedia = (standalone: boolean, coarse: boolean) => {
   );
 };
 
-const renderStrip = () =>
+const renderStrip = (path = '/') =>
   render(
-    <MemoryRouter initialEntries={['/']}>
+    <MemoryRouter initialEntries={[path]}>
       <TopChromeStrip />
     </MemoryRouter>
   );
@@ -35,9 +35,20 @@ describe('TopChromeStrip', () => {
     document.documentElement.style.removeProperty('--top-chrome-content-offset');
   });
 
-  it('renderar ingen överliggande remsa i vanlig mobil-Safari', () => {
+  it('renderar videosidans överlappande färgankare utan layoutförskjutning i vanlig mobil-Safari', () => {
     mockMatchMedia(false, true);
     const { container } = renderStrip();
+    const strip = container.querySelector<HTMLElement>('[data-browser-chrome-strip="top"]');
+    expect(strip).not.toBeNull();
+    expect(strip?.style.height).toContain('safe-area-inset-top');
+    expect(
+      document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
+    ).toBe('');
+  });
+
+  it('renderar ingen överliggande remsa på övriga sidor i vanlig mobil-Safari', () => {
+    mockMatchMedia(false, true);
+    const { container } = renderStrip('/jobbsokare');
     expect(container.firstChild).toBeNull();
     expect(
       document.documentElement.style.getPropertyValue('--top-chrome-content-offset')
