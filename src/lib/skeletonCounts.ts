@@ -53,8 +53,18 @@ export function writeCachedCount(key: string, n: number): void {
   }
 }
 
-/** Kolumnlayout för Mina kandidater: antal kort per steg i visningsordning. */
-export const MY_CANDIDATES_LAYOUT_KEY = 'parium:myCandidates:stageLayout';
+/**
+ * Kolumnlayout för Mina kandidater: antal kort per steg i visningsordning.
+ * Nyckeln måste vara unik per konto och lista — annars kan en annan lista eller
+ * en tidigare inloggad användare ge fel antal kolumner vid nästa kallstart.
+ */
+export function myCandidatesLayoutKey(
+  userId: string | undefined | null,
+  listId: string | undefined | null,
+): string | null {
+  if (!userId) return null;
+  return `parium:myCandidates:stageLayout:${userId}:${listId ?? 'default'}`;
+}
 
 export function readCachedLayout(key: string): number[] | null {
   if (typeof window === 'undefined') return null;

@@ -68,7 +68,7 @@ import { MyCandidatesMobileActionBar } from '@/pages/myCandidates/MyCandidatesMo
 import { RemoveCandidateDialog, BulkDeleteDialog } from '@/pages/myCandidates/MyCandidatesDialogs';
 
 import { EmployerMyCandidatesSkeleton } from '@/components/employer/EmployerPageSkeleton';
-import { writeCachedCount, writeCachedLayout, SKELETON_COUNT_KEYS, MY_CANDIDATES_LAYOUT_KEY } from '@/lib/skeletonCounts';
+import { writeCachedCount, writeCachedLayout, SKELETON_COUNT_KEYS, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
 
 
 const MyCandidates = () => {
@@ -294,11 +294,17 @@ const MyCandidates = () => {
   }, [displayedCandidates, activeStageOrder]);
 
 
-  // Cacha kolumnlayouten (kort per steg) så skeleton matchar exakt nästa cold-load.
+  // Cacha den riktiga kolumnlayouten per konto och lista så skeleton matchar
+  // exakt nästa cold-load. Serverantal används framför nedladdade rader.
   useEffect(() => {
     if (isLoading || isViewingColleague || activeStageOrder.length === 0) return;
-    writeCachedLayout(MY_CANDIDATES_LAYOUT_KEY, activeStageOrder.map(k => candidatesByStage[k]?.length || 0));
-  }, [isLoading, isViewingColleague, activeStageOrder, candidatesByStage]);
+    const key = myCandidatesLayoutKey(user?.id, activeListId);
+    if (!key) return;
+    writeCachedLayout(
+      key,
+      activeStageOrder.map(k => stageCounts?.[k] ?? candidatesByStage[k]?.length ?? 0),
+    );
+  }, [isLoading, isViewingColleague, activeStageOrder, candidatesByStage, stageCounts, user?.id, activeListId]);
 
   // Stats
   const stats = useMemo(() => {

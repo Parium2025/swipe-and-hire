@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { readCachedCount, readCachedLayout, SKELETON_COUNT_KEYS, MY_CANDIDATES_LAYOUT_KEY } from '@/lib/skeletonCounts';
+import { readCachedCount, readCachedLayout, SKELETON_COUNT_KEYS, myCandidatesLayoutKey } from '@/lib/skeletonCounts';
 import { useLiveSkeletonCount, viewportRowCap } from '@/lib/useLiveSkeletonCount';
 import { isEmployerJobActive, isEmployerJobExpired, isEmployerJobDraft } from '@/lib/jobStatus';
 import { useDevice } from '@/hooks/use-device';
 import { getKeepAliveScrollSnapshot } from '@/components/KeepAlive';
+import { useAuth } from '@/hooks/useAuth';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 
 /**
  * Hybrid skeleton count: read live from React Query cache first (accurate
@@ -435,11 +437,17 @@ export const EmployerHomeSkeleton = memo(function EmployerHomeSkeleton() {
  * Skeleton for /my-candidates — mirrors MyCandidatesHeader + mobile list.
  */
 export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSkeleton() {
-  const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   const isDesktop = useDevice() === 'desktop';
-  // Exakt samma kolumner och kort per kolumn som vid senaste visningen.
-  const cachedLayout = readCachedLayout(MY_CANDIDATES_LAYOUT_KEY);
-  const stageCount = cachedLayout?.length ?? 5;
+  const { user } = useAuth();
+  const activeListId = getActiveCandidateListId(user?.id);
+  const layoutKey = myCandidatesLayoutKey(user?.id, activeListId);
+  // Exakt samma kolumner och serverantal per kolumn som vid senaste visningen.
+  // Fyra är produktens riktiga grundlayout innan ett kontos egen cache finns.
+  const cachedLayout = layoutKey ? readCachedLayout(layoutKey) : null;
+  const stageCount = cachedLayout?.length ?? 4;
+  const candidateCount = cachedLayout
+    ? cachedLayout.reduce((sum, count) => sum + count, 0)
+    : readCachedCount(SKELETON_COUNT_KEYS.myCandidates, 5);
   const cardsForStage = (i: number) =>
     cachedLayout ? Math.min(8, cachedLayout[i] ?? 0) : Math.max(1, Math.min(3, Math.ceil(candidateCount / stageCount)));
   return (
@@ -529,6 +537,7 @@ export const EmployerMyCandidatesSkeleton = memo(function EmployerMyCandidatesSk
  */
 export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkeleton() {
   const candidateCount = readCachedCount(SKELETON_COUNT_KEYS.allCandidates, 5, 8);
+  const isDesktop = useDevice() === 'desktop';
   return (
     <FullscreenSkeletonPortal activePaths={['/candidates']}>
       <motion.div
@@ -556,19 +565,45 @@ export const EmployerCandidatesSkeleton = memo(function EmployerCandidatesSkelet
                 <div className={`h-9 w-36 rounded-full ${SHAPE}`} />
               </div>
             </div>
-            <div className="space-y-3">
-              {Array.from({ length: candidateCount }).map((_, index) => (
-                <div key={index} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
-                  <div className={`h-12 w-12 flex-shrink-0 rounded-full ${SHAPE}`} />
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className={`h-4 w-40 max-w-full rounded ${SHAPE}`} />
-                    <div className={`h-3 w-24 rounded ${SHAPE}`} />
-                    <div className={`h-3 w-56 max-w-full rounded ${SHAPE}`} />
-                  </div>
-                  <div className={`h-8 w-8 flex-shrink-0 rounded-full ${SHAPE}`} />
+            {isDesktop ? (
+              <div className="overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                <div className="grid h-12 grid-cols-[minmax(220px,1.5fr)_120px_minmax(160px,1fr)_120px_120px_48px] items-center gap-3 border-b border-white/10 px-4">
+                  {[144, 64, 96, 72, 80, 24].map((width, index) => (
+                    <div key={index} className={`h-3 rounded ${SHAPE}`} style={{ width }} />
+                  ))}
                 </div>
-              ))}
-            </div>
+                {Array.from({ length: candidateCount }).map((_, index) => (
+                  <div key={index} className="grid min-h-[72px] grid-cols-[minmax(220px,1.5fr)_120px_minmax(160px,1fr)_120px_120px_48px] items-center gap-3 border-b border-white/10 px-4 last:border-b-0">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className={`h-10 w-10 shrink-0 rounded-full ${SHAPE}`} />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className={`h-3.5 w-32 rounded ${SHAPE}`} />
+                        <div className={`h-3 w-24 rounded ${SHAPE}`} />
+                      </div>
+                    </div>
+                    <div className={`h-3 w-20 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-28 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-16 rounded ${SHAPE}`} />
+                    <div className={`h-3 w-20 rounded ${SHAPE}`} />
+                    <div className={`h-8 w-8 rounded-full ${SHAPE}`} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {Array.from({ length: candidateCount }).map((_, index) => (
+                  <div key={index} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className={`h-12 w-12 flex-shrink-0 rounded-full ${SHAPE}`} />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className={`h-4 w-40 max-w-full rounded ${SHAPE}`} />
+                      <div className={`h-3 w-24 rounded ${SHAPE}`} />
+                      <div className={`h-3 w-56 max-w-full rounded ${SHAPE}`} />
+                    </div>
+                    <div className={`h-8 w-8 flex-shrink-0 rounded-full ${SHAPE}`} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
