@@ -122,6 +122,22 @@ serve(async (req) => {
     if (existingRole) {
       return json({ error: "Personen är redan medlem i teamet." }, 409);
     }
+    // En person tillhör bara ett företag åt gången — annars blir kontots
+    // företag slumpmässigt och data kan visas för fel team.
+    const { data: otherOrgRole } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", existingProfile.user_id)
+      .eq("is_active", true)
+      .neq("organization_id", organizationId)
+      .limit(1)
+      .maybeSingle();
+    if (otherOrgRole) {
+      return json(
+        { error: "Adressen tillhör redan ett annat företag på Parium. Be personen använda en annan jobbmejl." },
+        409,
+      );
+    }
   }
 
   // Expire stale pending invitations before checking for duplicates.

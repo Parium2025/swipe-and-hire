@@ -35,10 +35,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const caller = await verifyCaller(req, corsHeaders);
-  if (caller instanceof Response) return caller;
-  if (!caller.userId) return json({ error: "Unauthorized" }, 401);
-
   let payload: unknown;
   try {
     payload = await req.json();
@@ -50,6 +46,36 @@ serve(async (req) => {
   if (!parsed.success) return json({ error: "Ogiltig inbjudningslänk." }, 400);
 
   const tokenHash = await sha256Hex(parsed.data.token);
+
+  // Förhandsvisning utan inloggning: länkens innehavare får veta vilket
+  // företag och vilken adress inbjudan gäller, och om adressen redan har ett
+  // konto — så sidan kan visa rätt nästa steg (logga in eller skapa konto).
+  if ((payload as { preview?: unknown })?.preview === true) {
+    const { data: inv } = await supabaseAdmin
+      .from("organization_invitations")
+      .select("organization_id, email, status, expires_at")
+      .eq("token_hash", tokenHash)
+      .maybeSingle();
+    if (!inv) return json({ error: "Inbjudan hittades inte." }, 404);
+    if (inv.status === "accepted") return json({ error: "Inbjudan är redan använd." }, 409);
+    if (inv.status !== "pending") return json({ error: "Inbjudan är återkallad." }, 409);
+    if (new Date(inv.expires_at).getTime() < Date.now()) {
+      return json({ error: "Inbjudan har gått ut." }, 410);
+    }
+    const [{ data: org }, { data: registered }] = await Promise.all([
+      supabaseAdmin.from("organizations").select("name").eq("id", inv.organization_id).maybeSingle(),
+      supabaseAdmin.rpc("auth_email_registered", { _email: inv.email }),
+    ]);
+    return json({
+      email: inv.email,
+      organizationName: org?.name ?? null,
+      accountExists: registered === true,
+    });
+  }
+
+  const caller = await verifyCaller(req, corsHeaders);
+  if (caller instanceof Response) return caller;
+  if (!caller.userId) return json({ error: "Unauthorized" }, 401);
 
   const { data: invitation, error } = await supabaseAdmin
     .from("organization_invitations")
@@ -94,12 +120,37 @@ serve(async (req) => {
     );
   }
 
+  // En person tillhör bara ett företag åt gången.
+  const { data: otherOrgRole } = await supabaseAdmin
+    .from("user_roles")
+    .select("id")
+    .eq("user_id", caller.userId)
+    .eq("is_active", true)
+    .neq("organization_id", invitation.organization_id)
+    .limit(1)
+    .maybeSingle();
+  if (otherOrgRole) {
+    return json(
+      { error: "Ditt konto tillhör redan ett annat företag på Parium. Be om en inbjudan till en annan jobbmejl." },
+      409,
+    );
+  }
+
   const { data: existingRole } = await supabaseAdmin
     .from("user_roles")
-    .select("id, is_active")
+    .select("id, is_active, role")
     .eq("user_id", caller.userId)
     .eq("organization_id", invitation.organization_id)
     .maybeSingle();
+
+  // Aktiv medlem redan: rör aldrig rollen (en admin får aldrig nedgraderas).
+  if (existingRole?.is_active) {
+    await supabaseAdmin
+      .from("organization_invitations")
+      .update({ status: "accepted", accepted_at: new Date().toISOString(), accepted_by: caller.userId })
+      .eq("id", invitation.id);
+    return json({ success: true, alreadyMember: true });
+  }
 
   if (existingRole) {
     const { error: updateRoleError } = await supabaseAdmin
