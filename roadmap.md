@@ -20,3 +20,4 @@
 - [x] Remove competing pointer focus, delayed field scrolling and global keyboard scroll padding on mobile forms
 - [x] Match candidate loading skeletons to exact board widths, account, list and desktop table without substituting unresolved default stages on cold start
 - [x] Route team invitations past unsubscribe handling, start invited recruiters at their personal welcome without company steps, and clean up the mobile meeting-link field
+- [x] Replace the team-invite wrong-account dead end with a preserved-token account switch and one clear action
