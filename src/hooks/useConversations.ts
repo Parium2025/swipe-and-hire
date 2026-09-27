@@ -380,6 +380,11 @@ export function useConversations() {
     queryFn: async () => {
       if (!user) return [];
 
+      // Förnya en utgången session innan anropen — annars går de som anon
+      // och databasen svarar "permission denied" i stället för ett auth-fel.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) return queryClient.getQueryData<Conversation[]>(['conversations', user.id]) ?? [];
+
       // 🚨 Tidigare hämtades ALLA medlemsrader först och därefter
       // `conversations` med `.in(<alla id>)`. PostgREST kapar tyst vid 1000
       // rader — en arbetsgivare med >1000 chattar tappade konversationer, och

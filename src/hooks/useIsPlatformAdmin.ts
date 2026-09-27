@@ -14,6 +14,10 @@ export const useIsPlatformAdmin = () => {
     queryKey: ['is-platform-admin', user?.id],
     queryFn: async () => {
       if (!user?.id) return false;
+      // Förnya en utgången session innan anropet — annars går det som anon
+      // och databasen svarar "permission denied" i stället för ett auth-fel.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) return false;
       const { data, error } = await supabase.rpc('is_platform_admin', { _user_id: user.id });
       if (error) {
         console.error('is_platform_admin check failed:', error);
