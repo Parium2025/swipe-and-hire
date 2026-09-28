@@ -718,7 +718,7 @@ const CompanyProfile = () => {
   // Registreras bara medan sidan faktiskt visas — sidan ligger kvar i minnet
   // (KeepAlive) och får aldrig ta över en annan sidas sparning.
   const flushPathname = useLocation().pathname;
-  const flushActive = flushPathname === FLUSH_ROUTE;
+  const flushActive = flushPathname === '/company-profile';
   useEffect(() => {
     if (!flushActive) return;
     return registerAutosaveFlush(() => {
