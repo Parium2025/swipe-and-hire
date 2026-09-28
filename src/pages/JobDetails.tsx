@@ -434,10 +434,26 @@ const JobDetails = () => {
   }, [resolveStageForApplication, markApplicationAsViewed]);
 
 
+  // Swipe-läget visar alla kandidater i annonsens steg, i stegordning.
+  // (Tidigare fylldes listan aldrig i efter en omskrivning → "0 / 0".)
+  const allStageApps = useMemo(() => {
+    const seen = new Set<string>();
+    const out: JobApplication[] = [];
+    for (const stageKey of activeStages) {
+      for (const app of applicationsByStatus[stageKey] || []) {
+        if (seen.has(app.id)) continue;
+        seen.add(app.id);
+        out.push(app);
+      }
+    }
+    return out;
+  }, [activeStages, applicationsByStatus]);
+
   const swipeApplicationsAsData = useMemo(() => {
     if (swipeFilteredApps) return swipeFilteredApps;
-    return swipeStageApps.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));
-  }, [swipeFilteredApps, swipeStageApps, jobId, job?.title]);
+    const source = swipeStageApps.length > 0 ? swipeStageApps : allStageApps;
+    return source.map(app => mapToApplicationData(app, jobId || '', job?.title || ''));
+  }, [swipeFilteredApps, swipeStageApps, allStageApps, jobId, job?.title]);
 
   const allApplicationsAsData = useMemo(
     () => applications.map(app => mapToApplicationData(app, jobId || '', job?.title || '')),
