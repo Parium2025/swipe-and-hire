@@ -597,6 +597,29 @@ const JobDetails = () => {
     }
   }, [rejectTargetIds, updateApplicationLocally, isSelectionMode, exitSelectionMode, refetch]);
 
+  const rejectApplicationFromProfile = useCallback(async (applicationId: string): Promise<boolean> => {
+    const rejectedAt = new Date().toISOString();
+    updateApplicationLocally(applicationId, { rejected_at: rejectedAt });
+    try {
+      const { data, error } = await supabase
+        .from('job_applications')
+        .update({ rejected_at: rejectedAt })
+        .eq('id', applicationId)
+        .select('id')
+        .maybeSingle();
+      if (error || !data) throw error ?? new Error('Ingen ansökan uppdaterades');
+      setSelectedApplication((current) => current?.id === applicationId
+        ? { ...current, rejected_at: rejectedAt }
+        : current);
+      toast.success('Avslag registrerat för den här ansökan');
+      return true;
+    } catch {
+      refetch();
+      toast.error('Kunde inte registrera avslaget');
+      return false;
+    }
+  }, [refetch, updateApplicationLocally]);
+
 
   const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
     // Uppdatera de inlästa korten direkt (känns omedelbart) …
@@ -884,6 +907,7 @@ const JobDetails = () => {
           }}
           fromSwipe={returnToSwipe}
           enableJobRejection
+          onRejectApplication={rejectApplicationFromProfile}
           onAddToList={
             selectedApplication
               ? () => setSwipeSaveCandidate(mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb'))
