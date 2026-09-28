@@ -27,6 +27,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { setRememberMe as setRememberMePersistence, shouldRememberUser } from '@/lib/authStorage';
 import { hasPendingVerification, markPendingVerification, clearPendingVerification, getPendingVerificationEmail } from '@/lib/pendingVerification';
+import { readPendingTeamInvite } from '@/lib/pendingTeamInvite';
 import { AuthFieldNotice } from '@/components/auth/AuthFieldNotice';
 import { loadAuthDraft, saveAuthDraft, clearAuthDraft, mergeDraft } from '@/lib/authFormDraft';
 import { AuthLogoInline } from '@/assets/authLogoInline';
@@ -130,6 +131,8 @@ const AuthMobile = ({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
+  // Inbjudna kollegor ärver bolagets uppgifter — företagsfälten döljs helt.
+  const hasPendingInvite = readPendingTeamInvite() !== null;
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -434,6 +437,7 @@ const AuthMobile = ({
             return;
           }
 
+          if (!hasPendingInvite) {
           if (!employerData.companyName.trim()) {
             toast({
               title: "Företagsnamn krävs",
@@ -482,6 +486,7 @@ const AuthMobile = ({
             });
             setLoading(false);
             return;
+          }
           }
         }
 
@@ -548,7 +553,7 @@ const AuthMobile = ({
           first_name: currentData.firstName,
           last_name: currentData.lastName,
           ...(role === 'job_seeker' && { phone: jobSeekerData.phone }),
-          ...(role === 'employer' && {
+          ...(role === 'employer' && !hasPendingInvite && {
             company_name: employerData.companyName,
             org_number: employerData.orgNumber,
             industry: employerData.industry,
@@ -1047,9 +1052,9 @@ const AuthMobile = ({
                        </div>
 
                        {/* Employer-specific fields */}
-                       {role === 'employer' && (
-                         <>
-                            <div className="space-y-3 md:space-y-4 border-t border-white/20 pt-4">
+                        {role === 'employer' && !hasPendingInvite && (
+                          <>
+                             <div className="space-y-3 md:space-y-4 border-t border-white/20 pt-4">
                              <div className="flex items-center gap-2 mb-2">
                                <Building2 className="h-4 w-4 text-white" />
                                <Label className="text-white font-medium">Företagsinformation</Label>
