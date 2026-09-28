@@ -381,7 +381,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                 {profile ? (
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={resolvedProfileImageUrl || ''} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-white/20 text-white" delayMs={150}>{getUserInitials()}</AvatarFallback>
+                    <AvatarFallback className="bg-white/20 text-white text-[10px] font-medium" delayMs={resolvedProfileImageUrl ? 150 : 0}>{getUserInitials()}</AvatarFallback>
                   </Avatar>
                 ) : (
                   <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse" />
@@ -396,7 +396,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
                   {profile ? (
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={resolvedProfileImageUrl || ''} alt={getUserDisplayName()} />
-                      <AvatarFallback className="bg-white/20 text-white" delayMs={150}>{getUserInitials()}</AvatarFallback>
+                      <AvatarFallback className="bg-white/20 text-white" delayMs={resolvedProfileImageUrl ? 150 : 0}>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                   ) : (
                     <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
