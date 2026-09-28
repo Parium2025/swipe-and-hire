@@ -567,10 +567,17 @@ const EmployerProfile = () => {
   // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
   const hasUnsavedFlushRef = useRef(hasUnsavedChanges);
   hasUnsavedFlushRef.current = hasUnsavedChanges;
-  useEffect(() => registerAutosaveFlush(() => {
-    if (!hasUnsavedFlushRef.current) return;
-    void saveRef.current({ silent: true });
-  }), [registerAutosaveFlush]);
+  // Registreras bara medan sidan faktiskt visas — sidan ligger kvar i minnet
+  // (KeepAlive) och får aldrig ta över en annan sidas sparning.
+  const flushPathname = useLocation().pathname;
+  const flushActive = flushPathname === FLUSH_ROUTE;
+  useEffect(() => {
+    if (!flushActive) return;
+    return registerAutosaveFlush(() => {
+      if (!hasUnsavedFlushRef.current) return;
+      void saveRef.current({ silent: true });
+    });
+  }, [registerAutosaveFlush, flushActive]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
   // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande
