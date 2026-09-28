@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { CandidateSwipeViewer } from '../CandidateSwipeViewer';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 
@@ -53,13 +54,15 @@ describe('CandidateSwipeViewer', () => {
   it('behåller den enda kandidaten i stället för att lämna en tom vy', () => {
     vi.useFakeTimers();
     render(
-      <CandidateSwipeViewer
-        applications={[application]}
-        initialIndex={0}
-        open
-        onClose={vi.fn()}
-        onOpenFullProfile={vi.fn()}
-      />,
+      <MemoryRouter>
+        <CandidateSwipeViewer
+          applications={[application]}
+          initialIndex={0}
+          open
+          onClose={vi.fn()}
+          onOpenFullProfile={vi.fn()}
+        />
+      </MemoryRouter>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Hoppa över Anna' }));
