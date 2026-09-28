@@ -224,19 +224,8 @@ const CompanyProfile = () => {
     checkForChanges();
   }, [checkForChanges]);
 
-  // Prevent leaving page with unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  // Ingen egen lämna-varning: sidan autosparar och sparar direkt vid avfärd
+  // (utkastet ligger dessutom kvar lokalt om fliken stängs mitt i).
 
   // Reset form to original values when user confirms leaving without saving
   useEffect(() => {

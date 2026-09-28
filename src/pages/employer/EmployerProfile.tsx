@@ -184,21 +184,8 @@ const EmployerProfile = () => {
     }
   }, [checkForChanges, formData, draftKey]);
 
-  // Prevent leaving page with unsaved changes (browser/tab close)
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [hasUnsavedChanges]);
+  // Ingen egen lämna-varning: sidan autosparar och sparar direkt vid avfärd
+  // (utkastet ligger dessutom kvar lokalt om fliken stängs mitt i).
 
   // Hantera bildval och öppna editor
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
