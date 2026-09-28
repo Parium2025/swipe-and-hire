@@ -177,7 +177,11 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, []);
 
   const handleReject = useCallback((index: number, applicationId: string) => {
-    if (visibleApplications.length <= 1) return;
+    // Även sista kandidaten får nekas: kortet har redan animerats bort, så
+    // att stoppa här lämnade en tom yta med 1/1 och en död ångraknapp.
+    // Nu visas "Inga fler kandidater just nu", 0/0 och Ångra.
+    if (visibleApplications.length === 0) return;
+    if (rejectedStackRef.current.some((entry) => entry.id === applicationId)) return;
     rejectedStackRef.current = [...rejectedStackRef.current, { id: applicationId, index }];
     setRejectedStackSize(rejectedStackRef.current.length);
     setRejectedIds((previous) => new Set(previous).add(applicationId));
