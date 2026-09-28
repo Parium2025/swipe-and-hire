@@ -27,7 +27,9 @@ const OutreachMessageEmail = ({
       <meta charSet="utf-8" />
       <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
     </Head>
-    <Preview>{subject || `Meddelande från ${company_name}`}</Preview>
+    {/* Förhandstexten i inkorgen visar början av meddelandet — inte rubriken,
+        så att mejlet inte ser dubbelt ut i mejlklienten. */}
+    <Preview>{(body || `Meddelande från ${company_name}`).replace(/\s+/g, ' ').trim().slice(0, 140)}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={brandSection}>
