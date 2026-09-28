@@ -626,11 +626,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         coverImageUrl: newCoverUrl,
         cvUrl: formData.cvUrl
       });
-      
-      toast({
-        title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
-        description: `Din profil${isVideo ? 'video' : 'bild'} har laddats upp.`
-      });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
