@@ -50,7 +50,7 @@ const RequiredStar = ({ filled }: { filled: boolean }) => (
 const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
-  const { isAdmin } = useIsOrgAdmin();
+  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
@@ -480,6 +480,10 @@ const CompanyProfile = () => {
   const handleSave = async (opts?: { silent?: boolean }): Promise<boolean> => {
     const silent = !!opts?.silent;
 
+    // Spara aldrig medan admin-kontrollen pågår — annars kan en admin
+    // råka spara via rekryterarens begränsade sparväg.
+    if (adminLoading) return false;
+
     // Rekryterare får bara ändra sina egna intervjuinställningar — resten av
     // företagsprofilen är låst för admins. Då sparas bara intervjufälten och
     // de obligatoriska företagsfälten valideras inte (de äger admin).
@@ -788,7 +792,7 @@ const CompanyProfile = () => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  if (authLoading && !profile) {
+  if ((authLoading && !profile) || adminLoading) {
     return <EmployerCompanyProfileSkeleton />;
   }
 
