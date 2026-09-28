@@ -626,11 +626,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         coverImageUrl: newCoverUrl,
         cvUrl: formData.cvUrl
       });
-      
-      toast({
-        title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
-        description: `Din profil${isVideo ? 'video' : 'bild'} har laddats upp.`
-      });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
@@ -1019,13 +1014,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       cvUrl: formData.cvUrl
     });
 
-    if (isVideoWithCover) {
-    } else {
-      toast({
-        title: "Media borttagen",
-        description: "Din profilvideo har tagits bort."
-      });
-    }
 
     // Reset the file input to allow new uploads
     const fileInput = document.getElementById('profileMedia') as HTMLInputElement;
@@ -1056,10 +1044,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     // Clear undo data
     setDeletedProfileMedia(null);
 
-    toast({
-      title: "Återställd!",
-      description: "Din profilvideo har återställts."
-    });
   };
 
   const deleteCoverImage = () => {
@@ -1095,10 +1079,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     // Clear undo data
     setDeletedCoverImage(null);
 
-    toast({
-      title: "Återställd!",
-      description: "Din cover-bild har återställts."
-    });
   };
 
   const handleSubmit = async () => {

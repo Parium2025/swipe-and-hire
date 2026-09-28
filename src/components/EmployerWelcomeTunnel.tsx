@@ -430,7 +430,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       setFormData(prev => ({ ...prev, profileImageUrl: storagePath }));
       setProfileImageSrc((await getMediaUrl(storagePath, 'profile-image')) || '');
       setProfileEditorOpen(false);
-      toast({ title: 'Profilbild uppladdad!' });
     } catch {
       toast({ title: 'Kunde inte ladda upp profilbilden', variant: 'destructive' });
     } finally {
