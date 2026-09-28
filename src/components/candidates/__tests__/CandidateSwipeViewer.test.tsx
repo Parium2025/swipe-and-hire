@@ -98,4 +98,28 @@ describe('CandidateSwipeViewer', () => {
     expect(screen.getByRole('button', { name: 'Hoppa över Anna' })).toBeTruthy();
     expect(screen.queryByText('Inga fler kandidater just nu')).toBeNull();
   });
+
+  it('nekad sista av två flyttar scrollen till kvarvarande kandidat (ingen tom yta)', () => {
+    vi.useFakeTimers();
+    const second = { ...application, id: 'application-2', first_name: 'Bo' };
+    const { container } = render(
+      <MemoryRouter>
+        <CandidateSwipeViewer
+          applications={[application, second]}
+          initialIndex={1}
+          open
+          onClose={vi.fn()}
+          onOpenFullProfile={vi.fn()}
+          getDisplayRating={() => 0}
+        />
+      </MemoryRouter>,
+    );
+    const scroller = document.body.querySelector('.overflow-y-auto') as HTMLDivElement;
+    scroller.scrollTop = 800;
+    fireEvent.click(screen.getByRole('button', { name: 'Hoppa över Bo' }));
+    act(() => vi.runAllTimers());
+    expect(scroller.scrollTop).toBe(0);
+    expect(screen.getByRole('button', { name: 'Hoppa över Anna' })).toBeTruthy();
+    expect(container).toBeTruthy();
+  });
 });
