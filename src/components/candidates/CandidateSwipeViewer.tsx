@@ -10,7 +10,9 @@ import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { Undo2 } from 'lucide-react';
-import { markViewedInSession } from '@/lib/viewedApplicationsSession';
+import { markViewedInSession, wasViewedInSession } from '@/lib/viewedApplicationsSession';
+import { markApplicationViewedForMe } from '@/lib/applicationViews';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface CandidateSwipeFilter {
   question: string;
@@ -56,6 +58,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   activeQuestionFilters = [],
 }: CandidateSwipeViewerProps) {
 
+  const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
   const rejectedStackRef = useRef<Array<{ id: string; index: number }>>([]);
@@ -132,8 +135,18 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (!open || behind) return;
     const application = visibleApplications[currentIndex];
     if (!application) return;
+    // Spara visningen på servern också, så att annonskortets "X nya" sjunker
+    // live — tidigare markerades den bara lokalt i fliken.
+    const alreadyMarked = wasViewedInSession(application.id) && Boolean(application.viewed_at);
     markViewedInSession(application.id);
-  }, [open, behind, currentIndex, visibleApplications]);
+    if (alreadyMarked) return;
+    markApplicationViewedForMe(application.id)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['employer-unviewed-applications'] });
+        queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
+      })
+      .catch(() => undefined);
+  }, [open, behind, currentIndex, visibleApplications, queryClient]);
 
 
   // Track current candidate via scroll position — simple & reliable
