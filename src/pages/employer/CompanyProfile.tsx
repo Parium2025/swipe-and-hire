@@ -25,7 +25,7 @@ import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { CompanyLogoSection } from './companyProfile/CompanyLogoSection';
 import { CompanySocialMediaSection, getPlatformLabel, validateUrl } from './companyProfile/CompanySocialMediaSection';
 import { CompanyInterviewSettings } from './companyProfile/CompanyInterviewSettings';
-import { DeleteSocialLinkDialog, DeleteLogoDialog } from './companyProfile/CompanyProfileDialogs';
+import { DeleteSocialLinkDialog } from './companyProfile/CompanyProfileDialogs';
 import { isValidMeetingLink } from './companyProfile/meetingLinkValidation';
 import { EMPLOYEE_COUNT_OPTIONS } from './companyProfile/types';
 import type { SocialMediaLink, CompanyFormData } from './companyProfile/types';
@@ -61,7 +61,6 @@ const CompanyProfile = () => {
   const [originalValues, setOriginalValues] = useState<any>({});
   const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [logoDeleteDialogOpen, setLogoDeleteDialogOpen] = useState(false);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -428,15 +427,31 @@ const CompanyProfile = () => {
     }
   };
 
-  const handleLogoDelete = () => {
-    setLogoDeleteDialogOpen(true);
-  };
+  // Ångra i stället för fråga — samma mönster som profilbilden.
+  // Ref-spegeln gör att snabba tryck aldrig läser ett gammalt värde.
+  const [deletedLogoUrl, setDeletedLogoUrl] = useState<string | null>(null);
+  const logoUrlRef = useRef(formData.company_logo_url);
+  logoUrlRef.current = formData.company_logo_url;
+  const deletedLogoRef = useRef<string | null>(null);
 
-  const confirmLogoDelete = () => {
+  const handleLogoDelete = () => {
+    const current = logoUrlRef.current;
+    if (!current) return;
+    logoUrlRef.current = '';
+    deletedLogoRef.current = current;
+    setDeletedLogoUrl(current);
     setFormData(prev => ({ ...prev, company_logo_url: '' }));
     setHasUnsavedChanges(true);
-    setLogoDeleteDialogOpen(false);
-    
+  };
+
+  const handleLogoRestore = () => {
+    const deleted = deletedLogoRef.current;
+    if (!deleted || logoUrlRef.current) return;
+    logoUrlRef.current = deleted;
+    deletedLogoRef.current = null;
+    setDeletedLogoUrl(null);
+    setFormData(prev => ({ ...prev, company_logo_url: deleted }));
+    setHasUnsavedChanges(true);
   };
 
   const handleRemoveLinkClick = (index: number) => {
@@ -848,6 +863,8 @@ const CompanyProfile = () => {
         onUploadClick={() => document.getElementById('logo-upload')?.click()}
         onEditExistingLogo={handleEditExistingLogo}
         onLogoDelete={handleLogoDelete}
+        canRestoreLogo={!!deletedLogoUrl && !formData.company_logo_url}
+        onLogoRestore={handleLogoRestore}
         onFileChange={handleLogoChange}
       />
 
@@ -1153,13 +1170,6 @@ const CompanyProfile = () => {
         }}
       />
 
-      {/* Delete Logo Dialog */}
-      <DeleteLogoDialog
-        open={logoDeleteDialogOpen}
-        onOpenChange={setLogoDeleteDialogOpen}
-        onConfirm={confirmLogoDelete}
-        onCancel={() => setLogoDeleteDialogOpen(false)}
-      />
     </div>
   );
 };

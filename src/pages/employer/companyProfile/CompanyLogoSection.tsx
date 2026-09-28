@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trash2 } from 'lucide-react';
+import { Trash2, RotateCcw } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { UploadInlineProgress } from '@/components/ui/upload-inline-progress';
 
@@ -12,6 +12,8 @@ interface CompanyLogoSectionProps {
   onUploadClick: () => void;
   onEditExistingLogo: () => void;
   onLogoDelete: () => void;
+  canRestoreLogo?: boolean;
+  onLogoRestore?: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -24,6 +26,8 @@ export const CompanyLogoSection = ({
   onUploadClick,
   onEditExistingLogo,
   onLogoDelete,
+  canRestoreLogo = false,
+  onLogoRestore,
   onFileChange,
 }: CompanyLogoSectionProps) => {
   return (
@@ -56,7 +60,21 @@ export const CompanyLogoSection = ({
             </Avatar>
           </div>
 
-          {companyLogoUrl && !isUploadingLogo && (
+          {canRestoreLogo && !isUploadingLogo ? (
+            <button
+              type="button"
+              aria-label="Återställ företagslogga"
+              title="Återställ företagslogga"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onLogoRestore?.();
+              }}
+              className="absolute -top-3 -right-3 z-20 pointer-events-auto bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          ) : companyLogoUrl && !isUploadingLogo && (
             <button
               type="button"
               aria-label="Ta bort företagslogga"
