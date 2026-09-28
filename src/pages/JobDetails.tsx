@@ -609,7 +609,7 @@ const JobDetails = () => {
         .maybeSingle();
       if (error || !data) throw error ?? new Error('Ingen ansökan uppdaterades');
       setSelectedApplication((current) => current?.id === applicationId
-        ? ({ ...current, rejected_at: rejectedAt } as ApplicationData)
+        ? { ...current, rejected_at: rejectedAt }
         : current);
       toast.success('Avslag registrerat för den här ansökan');
       return true;
