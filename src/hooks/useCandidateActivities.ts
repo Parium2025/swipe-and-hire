@@ -16,7 +16,8 @@ export type ActivityType =
   | 'interview_rescheduled'
   | 'interview_cancelled'
   | 'application_submitted'
-  | 'candidate_contacted';
+  | 'candidate_contacted'
+  | 'application_rejected';
 
 export interface CandidateActivity {
   id: string;
