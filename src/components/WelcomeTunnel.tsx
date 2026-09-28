@@ -679,10 +679,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         cvUrl: formData.cvUrl
       });
       
-      toast({
-        title: "Cover-bild uppladdad!",
-        description: "Din cover-bild har laddats upp."
-      });
     } catch (error) {
       console.error('Cover upload error:', error);
       toast({
@@ -1024,10 +1020,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     });
 
     if (isVideoWithCover) {
-      toast({
-        title: "Video borttagen",
-        description: "Din cover-bild är nu din profilbild."
-      });
     } else {
       toast({
         title: "Media borttagen",
@@ -1084,10 +1076,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       cvUrl: formData.cvUrl
     });
 
-    toast({
-      title: "Cover-bild borttagen", 
-      description: "Din cover-bild har tagits bort."
-    });
   };
 
   const restoreCoverImage = () => {

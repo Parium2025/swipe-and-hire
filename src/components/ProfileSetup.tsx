@@ -70,10 +70,6 @@ const ProfileSetup = () => {
       // Spara endast storage-path i state/databasen — visning sker via signerad URL.
       setProfileImageUrl(storagePath);
 
-      toast({
-        title: "Profilbild uppladdad!",
-        description: "Din profilbild har uppdaterats."
-      });
     } catch (error) {
       console.error('Upload error:', error);
       toast({

@@ -355,10 +355,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       
       setFormData(prev => ({ ...prev, companyLogoUrl: logoUrl }));
       
-      toast({
-        title: "Logga uppladdad!",
-        description: "Din företagslogga har uppdaterats."
-      });
     } catch (error) {
       console.error('Logo upload error:', error);
       setUploadError('Kunde inte ladda upp loggan. Kontrollera din anslutning och försök igen.');

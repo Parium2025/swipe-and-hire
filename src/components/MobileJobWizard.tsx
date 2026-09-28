@@ -1219,10 +1219,6 @@ const MobileJobWizard = ({
       
       console.log('MobileJobWizard handleImageEdit: Done, showing toast');
       
-      toast({
-        title: "Bild justerad",
-        description: editingImageType === 'desktop' ? "Bilden i annonsen har sparats." : "Annonsbilden har sparats.",
-      });
       
       console.log('MobileJobWizard handleImageEdit: Function complete');
     } catch (error) {
@@ -1258,10 +1254,6 @@ const MobileJobWizard = ({
       setImageTimestamp(Date.now());
     }
     
-    toast({
-      title: "Bild återställd",
-      description: "Originalbilden har återställts",
-    });
   };
 
   // Öppna editor med ALLTID originalbildens URL (inte den redigerade versionen)
