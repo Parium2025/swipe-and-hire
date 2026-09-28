@@ -26,7 +26,7 @@ const draftKeyFor = (userId?: string | null) =>
 
 const EmployerProfile = () => {
   const { profile, updateProfile, user, userRole, loading: authLoading } = useAuth();
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerAutosaveFlush } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
@@ -563,6 +563,14 @@ const EmployerProfile = () => {
   // Ingen notis visas vid lyckad sparning — bara en diskret "Sparat"-indikator.
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
+  // Autosparande sida: lämnar man före debounce-fönstret skrivs ändringen
+  // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
+  const hasUnsavedFlushRef = useRef(hasUnsavedChanges);
+  hasUnsavedFlushRef.current = hasUnsavedChanges;
+  useEffect(() => registerAutosaveFlush(() => {
+    if (!hasUnsavedFlushRef.current) return;
+    void saveRef.current({ silent: true });
+  }), [registerAutosaveFlush]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
   // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande

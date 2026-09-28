@@ -51,7 +51,7 @@ const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
-  const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker, registerAutosaveFlush } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -711,6 +711,14 @@ const CompanyProfile = () => {
   // vid lyckad sparning — bara en diskret "Sparat"-indikator.
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
+  // Autosparande sida: lämnar man före debounce-fönstret skrivs ändringen
+  // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
+  const hasUnsavedFlushRef = useRef(hasUnsavedChanges);
+  hasUnsavedFlushRef.current = hasUnsavedChanges;
+  useEffect(() => registerAutosaveFlush(() => {
+    if (!hasUnsavedFlushRef.current) return;
+    void saveRef.current({ silent: true });
+  }), [registerAutosaveFlush]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
   // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande
