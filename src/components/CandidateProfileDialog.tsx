@@ -96,6 +96,7 @@ interface CandidateProfileDialogProps {
   onAddToList?: () => void;
   /** Avslag får bara erbjudas när profilen öppnats från en specifik annons. */
   enableJobRejection?: boolean;
+  onRejectApplication?: (applicationId: string) => Promise<boolean>;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   candidateIndex?: number;
@@ -138,6 +139,7 @@ export const CandidateProfileDialog = ({
   fromSwipe = false,
   onAddToList,
   enableJobRejection = false,
+  onRejectApplication,
   onNavigatePrev,
   onNavigateNext,
   candidateIndex,
@@ -632,20 +634,28 @@ export const CandidateProfileDialog = ({
   const rejectDisplayedApplication = async () => {
     if (rejecting || isRejectedForDisplayedJob) return;
     setRejecting(true);
-    const { data, error } = await supabase
-      .from('job_applications')
-      .update({ rejected_at: new Date().toISOString() })
-      .eq('id', displayApp.id)
-      .select('id')
-      .maybeSingle();
-    setRejecting(false);
-    if (error || !data) {
-      toast.error('Kunde inte registrera avslaget');
-      return;
+    try {
+      if (onRejectApplication) {
+        const saved = await onRejectApplication(displayApp.id);
+        if (!saved) return;
+      } else {
+        const { data, error } = await supabase
+          .from('job_applications')
+          .update({ rejected_at: new Date().toISOString() })
+          .eq('id', displayApp.id)
+          .select('id')
+          .maybeSingle();
+        if (error || !data) {
+          toast.error('Kunde inte registrera avslaget');
+          return;
+        }
+        toast.success('Avslag registrerat för den här ansökan');
+        onStatusUpdate();
+      }
+      setRejectConfirmOpen(false);
+    } finally {
+      setRejecting(false);
     }
-    setRejectConfirmOpen(false);
-    toast.success('Avslag registrerat för den här ansökan');
-    onStatusUpdate();
   };
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
@@ -985,7 +995,7 @@ export const CandidateProfileDialog = ({
 
     {/* CV Dialog */}
     <AlertDialog open={rejectConfirmOpen} onOpenChange={setRejectConfirmOpen}>
-      <AlertDialogContent>
+      <AlertDialogContent elevated>
         <AlertDialogHeader>
           <AlertDialogTitle>Ge avslag för detta jobb</AlertDialogTitle>
           <AlertDialogDescription>

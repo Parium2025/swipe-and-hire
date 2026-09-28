@@ -10,6 +10,7 @@ import { useCandidateMediaPreloader } from '@/hooks/useCandidateMediaPreloader';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { TruncatedText } from '@/components/ui/truncated-text';
 import { Undo2 } from 'lucide-react';
+import { markViewedInSession } from '@/lib/viewedApplicationsSession';
 
 export interface CandidateSwipeFilter {
   question: string;
@@ -125,6 +126,15 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     requestAnimationFrame(() => virtualizer.scrollToIndex(initialIndex, { align: 'start' }));
   }, [open, behind, initialIndex, visibleApplications, virtualizer]);
 
+  // Att kandidaten visas i Swipe-läget är en riktig visning. Markera den direkt
+  // så att listans oläst-dutt försvinner även om profilen aldrig öppnas.
+  useEffect(() => {
+    if (!open || behind) return;
+    const application = visibleApplications[currentIndex];
+    if (!application) return;
+    markViewedInSession(application.id);
+  }, [open, behind, currentIndex, visibleApplications]);
+
 
   // Track current candidate via scroll position — simple & reliable
   const handleScroll = useCallback(() => {
@@ -167,6 +177,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   }, []);
 
   const handleReject = useCallback((index: number, applicationId: string) => {
+    if (visibleApplications.length <= 1) return;
     rejectedStackRef.current = [...rejectedStackRef.current, { id: applicationId, index }];
     setRejectedStackSize(rejectedStackRef.current.length);
     setRejectedIds((previous) => new Set(previous).add(applicationId));

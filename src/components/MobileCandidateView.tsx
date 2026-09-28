@@ -128,9 +128,9 @@ const CandidateRow = memo(function CandidateRow({
         ${isSelectionMode ? 'cursor-pointer' : ''}`}
       onClick={handleTap}
     >
-      {/* Unread dot — top-left corner */}
+      {/* Unread dot — top-right corner */}
       {!isSelectionMode && isUnread && (
-        <div className="absolute left-1.5 top-1.5">
+        <div className="absolute right-1.5 top-1.5">
           <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
         </div>
       )}
