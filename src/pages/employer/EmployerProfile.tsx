@@ -82,13 +82,19 @@ const EmployerProfile = () => {
   }, []);
 
 
+  // Osparat-läget läses via ref: effekten får bara köras när profilen själv
+  // ändras. Tidigare kördes den även när en autosparning nollade osparat-läget
+  // och skrev då tillbaka en äldre profil — ångrad bild försvann igen.
+  const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
+  hasUnsavedChangesRef.current = hasUnsavedChanges;
+
   // Update form data when profile changes OR restore from localStorage draft
   useEffect(() => {
     if (!profile) return;
 
     // Viktigt: skriv inte över lokala (osparade) ändringar, annars "kommer bilden tillbaka"
     // om profilen råkar uppdateras i bakgrunden.
-    if (didInitRef.current && (hasUnsavedChanges || localChangesRef.current)) return;
+    if (didInitRef.current && (hasUnsavedChangesRef.current || localChangesRef.current || savingRef.current)) return;
 
     // Check for saved draft in localStorage
     const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -140,7 +146,7 @@ const EmployerProfile = () => {
     localChangesRef.current = false;
     setHasUnsavedChanges(false);
     didInitRef.current = true;
-  }, [profile, hasUnsavedChanges, setHasUnsavedChanges, draftKey]);
+  }, [profile, setHasUnsavedChanges, draftKey]);
 
   const checkForChanges = useCallback(() => {
     // Vänta tills profilen är inläst. Tidigare krävdes ett namn i profilen,
