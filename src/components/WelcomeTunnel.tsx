@@ -223,6 +223,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   
   // Undo state for deleted cover image
   const [deletedCoverImage, setDeletedCoverImage] = useState<string | null>(null);
+  // Synkrona speglar: snabba mobiltryck hinner före nästa render, så
+  // ta bort/ångra får aldrig läsa ett gammalt läge.
+  const deletedProfileMediaRef = useRef<typeof deletedProfileMedia>(null);
+  deletedProfileMediaRef.current = deletedProfileMedia;
+  const deletedCoverImageRef = useRef<string | null>(null);
+  deletedCoverImageRef.current = deletedCoverImage;
+  const mediaStateRef = useRef<{ profileImageUrl: string; coverImageUrl: string; profileMediaType: string } | null>(null);
   
   // Track dropdown open states for arrow rotation animation
   const [employmentStatusOpen, setEmploymentStatusOpen] = useState(false);
@@ -978,6 +985,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const deleteProfileMedia = () => {
+    if (!mediaStateRef.current?.profileImageUrl) return;
     // Save current values for undo so we can restore exakt samma läge
     setDeletedProfileMedia({
       profileImageUrl: formData.profileImageUrl,
@@ -986,6 +994,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     });
 
     const isVideoWithCover = formData.profileMediaType === 'video' && !!formData.coverImageUrl;
+    deletedProfileMediaRef.current = {
+      profileImageUrl: formData.profileImageUrl,
+      coverImageUrl: formData.coverImageUrl,
+      profileMediaType: formData.profileMediaType
+    } as any;
 
     // Uppdatera all media i ett enda state-anrop för att undvika visuella "blixtrar"
     let newProfileImageUrl = '';
@@ -999,6 +1012,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       newCoverImageUrl = '';
     }
     
+    mediaStateRef.current = { profileImageUrl: newProfileImageUrl, coverImageUrl: newCoverImageUrl, profileMediaType: newProfileMediaType };
     setFormData(prev => ({
       ...prev,
       profileImageUrl: newProfileImageUrl,
@@ -1023,7 +1037,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const restoreProfileMedia = () => {
+    const deletedProfileMedia = deletedProfileMediaRef.current;
     if (!deletedProfileMedia) return;
+    deletedProfileMediaRef.current = null;
+    mediaStateRef.current = {
+      profileImageUrl: deletedProfileMedia.profileImageUrl,
+      coverImageUrl: deletedProfileMedia.coverImageUrl,
+      profileMediaType: deletedProfileMedia.profileMediaType,
+    };
 
     // Återställ alla värden i ett enda state-anrop för mjukare övergång
     setFormData(prev => ({
@@ -1047,8 +1068,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const deleteCoverImage = () => {
+    const currentCover = mediaStateRef.current?.coverImageUrl;
+    if (!currentCover) return;
+    mediaStateRef.current = { ...mediaStateRef.current!, coverImageUrl: '' };
+    deletedCoverImageRef.current = currentCover;
     // Save current cover image for undo
-    setDeletedCoverImage(formData.coverImageUrl);
+    setDeletedCoverImage(currentCover);
 
     handleInputChange('coverImageUrl', '');
 
@@ -1063,7 +1088,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const restoreCoverImage = () => {
-    if (!deletedCoverImage) return;
+    const deletedCoverImage = deletedCoverImageRef.current;
+    if (!deletedCoverImage || mediaStateRef.current?.coverImageUrl) return;
+    deletedCoverImageRef.current = null;
+    mediaStateRef.current = { ...mediaStateRef.current!, coverImageUrl: deletedCoverImage };
 
     // Restore cover image
     handleInputChange('coverImageUrl', deletedCoverImage);
