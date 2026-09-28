@@ -232,6 +232,13 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
               <span className="text-xs font-semibold text-white">{unviewedCount} nya</span>
             </span>
           )}
+          <span
+            className="flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15"
+            aria-label={`${job.applications_count || 0} ansökningar`}
+          >
+            <Users className="h-3.5 w-3.5 text-white" />
+            <span className="text-xs font-medium text-white">{job.applications_count || 0}</span>
+          </span>
           <span className="flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-1 border border-white/15">
             <Eye className="h-3.5 w-3.5 text-white" />
             <span className="text-xs font-medium text-white">{job.views_count || 0}</span>

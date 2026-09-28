@@ -414,6 +414,13 @@
       "when": 1790531311824,
       "tag": "0058_prevent_logged_out_session_reregistration",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1790629600668,
+      "tag": "0059_fix_mark_application_viewed",
+      "breakpoints": true
     }
   ]
 }
