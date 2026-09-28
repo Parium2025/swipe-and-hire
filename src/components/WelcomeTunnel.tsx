@@ -984,6 +984,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     }
   };
 
+  mediaStateRef.current = {
+    profileImageUrl: formData.profileImageUrl,
+    coverImageUrl: formData.coverImageUrl,
+    profileMediaType: formData.profileMediaType,
+  };
+
   const deleteProfileMedia = () => {
     if (!mediaStateRef.current?.profileImageUrl) return;
     // Save current values for undo so we can restore exakt samma läge
