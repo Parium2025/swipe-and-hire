@@ -438,6 +438,7 @@ const EmployerProfile = () => {
     if (!deletedProfileImage) return;
     
     setFormData(prev => ({ ...prev, profile_image_url: deletedProfileImage }));
+    setOriginalProfileImageStoragePath(prev => prev || deletedProfileImage);
     setDeletedProfileImage(null);
     setHasUnsavedChanges(true);
     toast({
@@ -648,8 +649,10 @@ const EmployerProfile = () => {
                   </Avatar>
                 </div>
 
-                {/* Soptunna/Undo-knapp som på jobbsökarsidan */}
-                {deletedProfileImage && !profileImageUrl ? (
+                {/* Soptunna/Undo-knapp som på jobbsökarsidan.
+                    Styrs av det sparade värdet (inte av att bilden hunnit laddas),
+                    så att man kan växla fram och tillbaka hur snabbt som helst. */}
+                {deletedProfileImage && !formData.profile_image_url ? (
                   <button
                     type="button"
                     aria-label="Återställ profilbild"
@@ -663,7 +666,7 @@ const EmployerProfile = () => {
                   >
                     <RotateCcw className="h-4 w-4" />
                   </button>
-                ) : profileImageUrl ? (
+                ) : formData.profile_image_url ? (
                   <button
                     type="button"
                     aria-label="Ta bort profilbild"
