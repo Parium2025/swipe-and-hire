@@ -1412,9 +1412,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
  
       // 🔧 KRITISK FIX: Vänta på att fetchUserData faktiskt har laddat profilen
-      // Nu använder vi profileLoadedRef för att veta när profilen är redo
+      // Nu använder vi profileLoadedRef för att veta när profilen är redo.
+      // Taket måste vara generöst: släpps loading innan profilen finns visar
+      // /auth inloggningsformuläret en stund innan omdirigeringen till /home.
+      // profileLoadedRef sätts även vid fel/saknad profil, så taket nås bara
+      // om backend hänger.
       const profileCheckStart = Date.now();
-      const maxWaitMs = 1200;
+      const maxWaitMs = 10000;
       
       await new Promise<void>((resolve) => {
         const checkProfile = () => {
