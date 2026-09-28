@@ -536,7 +536,7 @@ export const CandidateProfileDialog = ({
   const handleGestureStart = useCallback((e: React.TouchEvent) => {
     if (window.innerWidth >= 768 || isDismissing) return;
     const target = e.target as HTMLElement;
-    if (target.closest('input, textarea, [contenteditable="true"]')) {
+    if (target.closest('button, a, input, textarea, select, [role="button"], [contenteditable="true"]')) {
       touchGestureRef.current = null;
       pullTrackingRef.current = null;
       return;
