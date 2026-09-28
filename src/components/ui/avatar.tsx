@@ -23,9 +23,13 @@ const Avatar = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const [imageLoaded, setImageLoaded] = React.useState(false);
+  // Stabilt kontextvärde: ett nytt objekt vid varje rendering fick bildens
+  // effekter att köras om i en ping-pong-loop, som kunde fastna med bilden
+  // dold OCH initialerna dolda (tom cirkel).
+  const contextValue = React.useMemo(() => ({ imageLoaded, setImageLoaded }), [imageLoaded]);
   
   return (
-    <AvatarContext.Provider value={{ imageLoaded, setImageLoaded }}>
+    <AvatarContext.Provider value={contextValue}>
       <div
         ref={ref}
         className={cn(
@@ -48,60 +52,53 @@ interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
   ({ className, src, alt, onLoadingStatusChange, ...props }, ref) => {
     const context = React.useContext(AvatarContext);
-    
-    // Check if image is already in browser cache (synchronous check on mount)
-    const isCached = React.useMemo(() => {
-      if (!src || typeof document === 'undefined') return false;
-      const img = new Image();
-      img.src = src;
-      return img.complete && img.naturalWidth > 0;
-    }, [src]);
-    
-    const [status, setStatus] = React.useState<'loading' | 'loaded' | 'error'>(
-      isCached ? 'loaded' : 'loading'
-    );
-    
-    // Notify context immediately if cached
-    React.useLayoutEffect(() => {
-      if (isCached && context) {
-        context.setImageLoaded(true);
-      }
-    }, [isCached, context]);
-    
-    // Reset state when src changes
-    React.useEffect(() => {
-      if (!src) {
-        setStatus('error');
-        context?.setImageLoaded(false);
-        onLoadingStatusChange?.('error');
-        return;
-      }
-      
-      // Re-check cache on src change
-      const img = new Image();
-      img.src = src;
-      if (img.complete && img.naturalWidth > 0) {
-        setStatus('loaded');
-        context?.setImageLoaded(true);
-        onLoadingStatusChange?.('loaded');
-      } else {
-        setStatus('loading');
-        context?.setImageLoaded(false);
-        onLoadingStatusChange?.('loading');
-      }
-    }, [src, context, onLoadingStatusChange]);
+    const setImageLoaded = context?.setImageLoaded;
+    const imgRef = React.useRef<HTMLImageElement | null>(null);
+    const statusCbRef = React.useRef(onLoadingStatusChange);
+    statusCbRef.current = onLoadingStatusChange;
 
-    const handleLoad = React.useCallback(() => {
-      setStatus('loaded');
-      context?.setImageLoaded(true);
-      onLoadingStatusChange?.('loaded');
-    }, [context, onLoadingStatusChange]);
-    
-    const handleError = React.useCallback(() => {
-      setStatus('error');
-      context?.setImageLoaded(false);
-      onLoadingStatusChange?.('error');
-    }, [context, onLoadingStatusChange]);
+    const isCachedSrc = (value?: string) => {
+      if (!value || typeof document === 'undefined') return false;
+      const probe = new Image();
+      probe.src = value;
+      return probe.complete && probe.naturalWidth > 0;
+    };
+
+    const [status, setStatus] = React.useState<'loading' | 'loaded' | 'error'>(() =>
+      !src ? 'error' : isCachedSrc(src) ? 'loaded' : 'loading',
+    );
+
+    // Återställ endast när källan faktiskt byts.
+    React.useLayoutEffect(() => {
+      if (!src) { setStatus('error'); return; }
+      const el = imgRef.current;
+      if ((el && el.complete && el.naturalWidth > 0) || isCachedSrc(src)) setStatus('loaded');
+      else setStatus('loading');
+    }, [src]);
+
+    // Bildens status är enda sanningen för om initialerna ska döljas.
+    React.useLayoutEffect(() => {
+      setImageLoaded?.(status === 'loaded');
+      statusCbRef.current?.(status);
+    }, [status, setImageLoaded]);
+
+    React.useEffect(() => () => setImageLoaded?.(false), [setImageLoaded]);
+
+    // Fångar en load-händelse som hann ske innan React lyssnade.
+    React.useEffect(() => {
+      if (status !== 'loading') return;
+      const el = imgRef.current;
+      if (el && el.complete) setStatus(el.naturalWidth > 0 ? 'loaded' : 'error');
+    }, [status, src]);
+
+    const handleLoad = React.useCallback(() => setStatus('loaded'), []);
+    const handleError = React.useCallback(() => setStatus('error'), []);
+
+    const setRefs = React.useCallback((node: HTMLImageElement | null) => {
+      imgRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) (ref as React.MutableRefObject<HTMLImageElement | null>).current = node;
+    }, [ref]);
 
     if (!src || status === 'error') {
       return null;
@@ -109,7 +106,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
 
     return (
       <img
-        ref={ref}
+        ref={setRefs}
         src={src}
         alt={alt || ''}
         onLoad={handleLoad}
