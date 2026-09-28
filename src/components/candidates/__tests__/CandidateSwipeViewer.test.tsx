@@ -61,6 +61,7 @@ describe('CandidateSwipeViewer', () => {
           open
           onClose={vi.fn()}
           onOpenFullProfile={vi.fn()}
+          getDisplayRating={() => 0}
         />
       </MemoryRouter>,
     );
