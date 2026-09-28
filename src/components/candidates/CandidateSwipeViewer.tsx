@@ -63,6 +63,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
   const activeCardSwipeRef = useRef<((direction: 'left' | 'right') => void) | null>(null);
   const rejectedStackRef = useRef<Array<{ id: string; index: number }>>([]);
   const pendingUndoIndexRef = useRef<number | null>(null);
+  const pendingRejectIndexRef = useRef<number | null>(null);
   const undoEntryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [rejectedStackSize, setRejectedStackSize] = useState(0);
   const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => new Set());
@@ -198,8 +199,31 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     rejectedStackRef.current = [...rejectedStackRef.current, { id: applicationId, index }];
     setRejectedStackSize(rejectedStackRef.current.length);
     setRejectedIds((previous) => new Set(previous).add(applicationId));
-    setCurrentIndex(Math.min(index, Math.max(0, visibleApplications.length - 2)));
+    const nextIndex = Math.min(index, Math.max(0, visibleApplications.length - 2));
+    pendingRejectIndexRef.current = nextIndex;
+    setCurrentIndex(nextIndex);
   }, [visibleApplications.length]);
+
+  // Efter ett nekande krymper listan. iOS Safari klämmer inte alltid
+  // scrollpositionen direkt (scroll-snap + momentum), så nästa kandidat kunde
+  // hamna utanför bild: "1 / 1" med tom yta tills sidan laddades om. Lås
+  // därför scrollpositionen explicit till nästa kandidat direkt efter
+  // borttagningen.
+  useEffect(() => {
+    const pendingIndex = pendingRejectIndexRef.current;
+    if (pendingIndex === null) return;
+    pendingRejectIndexRef.current = null;
+    const container = scrollRef.current;
+    if (!container || visibleApplications.length === 0) return;
+    const target = Math.min(pendingIndex, visibleApplications.length - 1);
+    const snap = () => {
+      const top = target * slideHeight;
+      if (Math.abs(container.scrollTop - top) > 1) container.scrollTop = top;
+      virtualizer.measure();
+    };
+    snap();
+    requestAnimationFrame(snap);
+  }, [visibleApplications.length, virtualizer, slideHeight]);
 
   const handleUndo = useCallback(() => {
     const previous = rejectedStackRef.current.at(-1);
@@ -227,7 +251,7 @@ export const CandidateSwipeViewer = memo(function CandidateSwipeViewer({
     if (pendingIndex === null || pendingIndex >= visibleApplications.length) return;
     pendingUndoIndexRef.current = null;
     setCurrentIndex(pendingIndex);
-    requestAnimationFrame(() => virtualizer.scrollToIndex(pendingIndex, { align: 'start', behavior: 'smooth' }));
+    requestAnimationFrame(() => virtualizer.scrollToIndex(pendingIndex, { align: 'start' }));
   }, [visibleApplications.length, virtualizer]);
 
   const handleActionReject = useCallback(() => {
