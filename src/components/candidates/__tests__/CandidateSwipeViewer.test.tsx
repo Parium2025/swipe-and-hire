@@ -15,8 +15,8 @@ vi.mock('@tanstack/react-virtual', () => ({
 vi.mock('@/hooks/useMediaPreloader', () => ({ useMediaPreloader: vi.fn() }));
 vi.mock('@/lib/viewedApplicationsSession', () => ({ markViewedInSession: vi.fn() }));
 vi.mock('../CandidateSlide', () => ({
-  CandidateSlide: ({ application, onSkip }: { application: ApplicationData; onSkip: () => void }) => (
-    <button onClick={onSkip}>Hoppa över {application.first_name}</button>
+  CandidateSlide: ({ application, onSwipeLeft }: { application: ApplicationData; onSwipeLeft: () => void }) => (
+    <button onClick={onSwipeLeft}>Hoppa över {application.first_name}</button>
   ),
 }));
 vi.mock('../CandidateSlideActions', () => ({
@@ -51,7 +51,7 @@ const application: ApplicationData = {
 describe('CandidateSwipeViewer', () => {
   afterEach(() => vi.useRealTimers());
 
-  it('behåller den enda kandidaten i stället för att lämna en tom vy', () => {
+  it('sista kandidaten ger "Inga fler kandidater", 0/0 och fungerande Ångra', () => {
     vi.useFakeTimers();
     render(
       <MemoryRouter>
@@ -67,6 +67,12 @@ describe('CandidateSwipeViewer', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Hoppa över Anna' }));
+    act(() => vi.runAllTimers());
+
+    expect(screen.queryByRole('button', { name: 'Hoppa över Anna' })).toBeNull();
+    expect(screen.getByText('Inga fler kandidater just nu')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ångra senaste nekandet' }));
     act(() => vi.runAllTimers());
 
     expect(screen.getByRole('button', { name: 'Hoppa över Anna' })).toBeTruthy();
