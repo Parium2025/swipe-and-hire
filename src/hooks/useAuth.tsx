@@ -472,11 +472,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('🔄 Session recovery failed — proceeding with logout');
         if (!mounted) return;
         finishInitialization();
-        toast({
-          title: 'Du har loggats ut',
-          description: 'Sessionen avslutades.',
-          duration: 4000,
-        });
         setTimeout(() => {
           clearAllAppCaches();
           clearSessionToken();
@@ -1508,10 +1503,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-      toast({
-        title: "Inloggad!",
-        description: "Du är nu inloggad via telefon."
-      });
 
       return { data };
     } catch (error) {

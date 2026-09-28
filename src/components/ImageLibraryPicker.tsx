@@ -39,7 +39,6 @@ export function ImageLibraryPicker({ onSelect }: ImageLibraryPickerProps) {
     if (!target) return;
     try {
       await removeFromLibrary(target.id);
-      toast({ title: 'Bild borttagen', description: 'Bilden är borttagen från bildbiblioteket.' });
     } catch {
       toast({ title: 'Kunde inte ta bort bilden', description: 'Försök igen.', variant: 'destructive' });
     }

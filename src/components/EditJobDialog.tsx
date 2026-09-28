@@ -3764,10 +3764,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
               setShowImageEditor(false);
               setEditingImageUrl(null);
               
-              toast({
-                title: "Bild justerad",
-                description: editingImageType === 'desktop' ? "Bilden i annonsen har sparats." : "Annonsbilden har sparats.",
-              });
             } catch (error) {
               console.error('Error saving edited image:', error);
               toast({

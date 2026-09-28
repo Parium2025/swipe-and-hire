@@ -399,10 +399,6 @@ const EmployerProfile = () => {
       }
       setPendingImageSrc('');
 
-      toast({
-        title: "Profilbild uppladdad!",
-        description: "Ändringen sparas automatiskt."
-      });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
@@ -424,10 +420,6 @@ const EmployerProfile = () => {
     if (originalProfileImageStoragePath) {
       setFormData(prev => ({ ...prev, profile_image_url: originalProfileImageStoragePath }));
       setProfileImageIsEdited(false);
-      toast({
-        title: "Bild återställd",
-        description: "Originalbilden har återställts",
-      });
     }
   };
 

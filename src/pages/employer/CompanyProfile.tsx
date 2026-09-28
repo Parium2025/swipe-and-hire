@@ -352,10 +352,6 @@ const CompanyProfile = () => {
       setLogoIsEdited(true);
       setHasUnsavedChanges(true);
       
-      toast({
-        title: "Logga uppladdad!",
-        description: "Din företagslogga sparas automatiskt."
-      });
     } catch (error) {
       console.error('Logo upload error:', error);
       toast({
@@ -429,10 +425,6 @@ const CompanyProfile = () => {
         company_logo_url: originalPublicUrl,
       }));
       setLogoIsEdited(false);
-      toast({
-        title: "Bild återställd",
-        description: "Originalbilden har återställts",
-      });
     }
   };
 
@@ -445,10 +437,6 @@ const CompanyProfile = () => {
     setHasUnsavedChanges(true);
     setLogoDeleteDialogOpen(false);
     
-    toast({
-      title: "Logga borttagen",
-      description: "Borttagningen sparas automatiskt."
-    });
   };
 
   const handleRemoveLinkClick = (index: number) => {
