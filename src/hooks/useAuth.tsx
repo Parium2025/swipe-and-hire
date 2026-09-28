@@ -1508,7 +1508,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-
       toast({
         title: "Inloggad!",
         description: "Du är nu inloggad via telefon."
