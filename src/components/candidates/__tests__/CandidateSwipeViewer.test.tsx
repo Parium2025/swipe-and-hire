@@ -13,7 +13,7 @@ vi.mock('@tanstack/react-virtual', () => ({
   }),
 }));
 vi.mock('@/hooks/useMediaPreloader', () => ({ useMediaPreloader: vi.fn() }));
-const markServer = vi.fn(() => Promise.resolve());
+const markServer = vi.fn((_id: string) => Promise.resolve());
 vi.mock('@/lib/viewedApplicationsSession', () => ({ markViewedInSession: vi.fn(), wasViewedInSession: vi.fn(() => false) }));
 vi.mock('@/lib/applicationViews', () => ({ markApplicationViewedForMe: (id: string) => markServer(id) }));
 vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }));
