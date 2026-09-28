@@ -51,7 +51,7 @@ const CompanyProfile = () => {
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { profile, updateProfile, user, preloadedCompanyLogoUrl, loading: authLoading } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
-  const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerLeaveBlocker, registerAutosaveFlush } = useUnsavedChanges();
   const { isOnline, showOfflineToast } = useOnline();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -224,19 +224,8 @@ const CompanyProfile = () => {
     checkForChanges();
   }, [checkForChanges]);
 
-  // Prevent leaving page with unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  // Ingen egen lämna-varning: sidan autosparar och sparar direkt vid avfärd
+  // (utkastet ligger dessutom kvar lokalt om fliken stängs mitt i).
 
   // Reset form to original values when user confirms leaving without saving
   useEffect(() => {
@@ -711,6 +700,21 @@ const CompanyProfile = () => {
   // vid lyckad sparning — bara en diskret "Sparat"-indikator.
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
+  // Autosparande sida: lämnar man före debounce-fönstret skrivs ändringen
+  // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
+  const hasUnsavedFlushRef = useRef(hasUnsavedChanges);
+  hasUnsavedFlushRef.current = hasUnsavedChanges;
+  // Registreras bara medan sidan faktiskt visas — sidan ligger kvar i minnet
+  // (KeepAlive) och får aldrig ta över en annan sidas sparning.
+  const flushPathname = useLocation().pathname;
+  const flushActive = flushPathname === '/company-profile';
+  useEffect(() => {
+    if (!flushActive) return;
+    return registerAutosaveFlush(() => {
+      if (!hasUnsavedFlushRef.current) return;
+      void saveRef.current({ silent: true });
+    });
+  }, [registerAutosaveFlush, flushActive]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
   // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande

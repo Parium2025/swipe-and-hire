@@ -26,7 +26,7 @@ const draftKeyFor = (userId?: string | null) =>
 
 const EmployerProfile = () => {
   const { profile, updateProfile, user, userRole, loading: authLoading } = useAuth();
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges, registerAutosaveFlush } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
@@ -184,21 +184,8 @@ const EmployerProfile = () => {
     }
   }, [checkForChanges, formData, draftKey]);
 
-  // Prevent leaving page with unsaved changes (browser/tab close)
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [hasUnsavedChanges]);
+  // Ingen egen lämna-varning: sidan autosparar och sparar direkt vid avfärd
+  // (utkastet ligger dessutom kvar lokalt om fliken stängs mitt i).
 
   // Hantera bildval och öppna editor
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -563,6 +550,21 @@ const EmployerProfile = () => {
   // Ingen notis visas vid lyckad sparning — bara en diskret "Sparat"-indikator.
   const saveRef = useRef(handleSave);
   saveRef.current = handleSave;
+  // Autosparande sida: lämnar man före debounce-fönstret skrivs ändringen
+  // ned direkt — därför visas aldrig någon "Osparade ändringar"-dialog här.
+  const hasUnsavedFlushRef = useRef(hasUnsavedChanges);
+  hasUnsavedFlushRef.current = hasUnsavedChanges;
+  // Registreras bara medan sidan faktiskt visas — sidan ligger kvar i minnet
+  // (KeepAlive) och får aldrig ta över en annan sidas sparning.
+  const flushPathname = useLocation().pathname;
+  const flushActive = flushPathname === '/employer-profile';
+  useEffect(() => {
+    if (!flushActive) return;
+    return registerAutosaveFlush(() => {
+      if (!hasUnsavedFlushRef.current) return;
+      void saveRef.current({ silent: true });
+    });
+  }, [registerAutosaveFlush, flushActive]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   // Sidan ligger kvar i minnet (KeepAlive) när man navigerar bort — nollställ
   // "Sparat" vid avnavigering så bekräftelsen aldrig ligger kvar missvisande
