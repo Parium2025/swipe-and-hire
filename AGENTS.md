@@ -8,7 +8,7 @@
 - Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
 - Release residual field focus when the iOS keyboard closes.
 - Employer welcome drafts until confirmation; replay trials write nothing; only valid meeting links become defaults.
-- Store uncropped originals with crops and always reopen originals for edits.
+- Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Candidate skeletons use resolved server totals per user/list.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.

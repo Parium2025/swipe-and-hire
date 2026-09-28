@@ -59,6 +59,13 @@ const EmployerProfile = () => {
     last_name: profile?.last_name || '',
     profile_image_url: profile?.profile_image_url || '',
   });
+  // Synkron spegel för snabba mobiltryck. React hinner inte alltid rendera om
+  // mellan två touch-events, så eventhanterarna får aldrig arbeta på ett gammalt bildvärde.
+  const profileImagePathRef = useRef(formData.profile_image_url);
+  profileImagePathRef.current = formData.profile_image_url;
+  // Sätts före state-uppdateringen så en bakgrundsuppdatering av profilen inte
+  // kan lägga tillbaka bilden mellan trycket och autosparningen.
+  const localChangesRef = useRef(false);
 
   // Konvertera storage path till signerad URL för visning
   const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
@@ -81,7 +88,7 @@ const EmployerProfile = () => {
 
     // Viktigt: skriv inte över lokala (osparade) ändringar, annars "kommer bilden tillbaka"
     // om profilen råkar uppdateras i bakgrunden.
-    if (didInitRef.current && hasUnsavedChanges) return;
+    if (didInitRef.current && (hasUnsavedChanges || localChangesRef.current)) return;
 
     // Check for saved draft in localStorage
     const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -128,7 +135,9 @@ const EmployerProfile = () => {
     }
 
     setFormData(values);
+    profileImagePathRef.current = values.profile_image_url;
     setOriginalValues(values);
+    localChangesRef.current = false;
     setHasUnsavedChanges(false);
     didInitRef.current = true;
   }, [profile, hasUnsavedChanges, setHasUnsavedChanges, draftKey]);
@@ -143,6 +152,7 @@ const EmployerProfile = () => {
       return formData[key] !== originalValues[key];
     });
 
+    localChangesRef.current = hasChanges;
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, formData, setHasUnsavedChanges]);
@@ -367,6 +377,8 @@ const EmployerProfile = () => {
       }
 
       // Uppdatera formData
+      profileImagePathRef.current = storagePath;
+      localChangesRef.current = true;
       setFormData(prev => ({ ...prev, profile_image_url: storagePath }));
       setDeletedProfileImage(null); // Rensa undo-state
       setHasUnsavedChanges(true);
@@ -415,11 +427,13 @@ const EmployerProfile = () => {
 
   // Ta bort profilbild
   const handleRemoveProfileImage = () => {
-    // Spara nuvarande bild för undo
-    const currentImage = formData.profile_image_url || originalValues.profile_image_url;
-    if (currentImage) {
-      setDeletedProfileImage(currentImage);
-    }
+    // Ignorera ett andra touch-event som hann köas före nästa render.
+    const currentImage = profileImagePathRef.current;
+    if (!currentImage) return;
+
+    profileImagePathRef.current = '';
+    localChangesRef.current = true;
+    setDeletedProfileImage(currentImage);
     
     setFormData(prev => ({ ...prev, profile_image_url: '' }));
     setOriginalProfileImageFile(null);
@@ -435,8 +449,10 @@ const EmployerProfile = () => {
 
   // Återställ borttagen profilbild
   const restoreProfileImage = () => {
-    if (!deletedProfileImage) return;
+    if (!deletedProfileImage || profileImagePathRef.current) return;
     
+    profileImagePathRef.current = deletedProfileImage;
+    localChangesRef.current = true;
     setFormData(prev => ({ ...prev, profile_image_url: deletedProfileImage }));
     setOriginalProfileImageStoragePath(prev => prev || deletedProfileImage);
     setDeletedProfileImage(null);
@@ -452,6 +468,8 @@ const EmployerProfile = () => {
     const onUnsavedConfirm = () => {
       if (!originalValues) return;
       setFormData({ ...originalValues });
+      profileImagePathRef.current = originalValues.profile_image_url || '';
+      localChangesRef.current = false;
       // IMPORTANT: user chose to discard changes -> clear local draft as well
       try {
         draftKey && localStorage.removeItem(draftKey);
@@ -500,7 +518,10 @@ const EmployerProfile = () => {
       // updateProfile kastar inte vid DB-fel — den returnerar { error }.
       // Utan den här kontrollen visades "Profil uppdaterad" och utkastet
       // rensades även när databasen nekade skrivningen.
-      const result = await updateProfile(formData as any);
+      // Läs det senaste formulärläget när sparningen faktiskt startar. Det gör
+      // att ett snabbt ta bort/ångra/ta bort aldrig kan spara ett äldre mellanläge.
+      const valuesToSave = { ...formDataRef.current };
+      const result = await updateProfile(valuesToSave as any);
       if (result?.error) {
         // updateProfile visar redan en svensk feltoast. Behåll utkastet
         // och osparat-läget så att ändringen inte går förlorad.
@@ -508,7 +529,7 @@ const EmployerProfile = () => {
         return false;
       }
 
-      const updatedValues = { ...formData };
+      const updatedValues = valuesToSave;
 
       // Skriv aldrig tillbaka den sparade ögonblicksbilden i formuläret —
       // användaren kan ha fortsatt skriva/radera medan sparningen pågick.
@@ -517,6 +538,7 @@ const EmployerProfile = () => {
       
       try {
         const stillSame = JSON.stringify(formDataRef.current) === JSON.stringify(updatedValues);
+        localChangesRef.current = !stillSame;
         if (stillSame && draftKey) localStorage.removeItem(draftKey);
       } catch (e) {
         console.warn('Failed to clear draft:', e);
