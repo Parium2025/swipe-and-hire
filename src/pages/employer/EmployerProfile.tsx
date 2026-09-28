@@ -123,15 +123,18 @@ const EmployerProfile = () => {
     };
 
     // If we have a saved draft with different content, use it
+    // Profilbilden autosparas och ägs ALLTID av servern. Ett kvarlämnat lokalt
+    // utkast (t.ex. mitt i ta bort/ångra) fick tidigare skriva över den sparade
+    // bilden när sidan öppnades igen — och autosparningen raderade då bilden.
     if (savedDraft && !didInitRef.current) {
-      const hasDraftContent = Object.keys(savedDraft).some(key => {
-        return savedDraft[key] !== values[key as keyof typeof values];
-      });
+      const draftFirst = typeof savedDraft.first_name === 'string' ? savedDraft.first_name : values.first_name;
+      const draftLast = typeof savedDraft.last_name === 'string' ? savedDraft.last_name : values.last_name;
+      const hasDraftContent = draftFirst !== values.first_name || draftLast !== values.last_name;
 
       if (hasDraftContent) {
-        // Plocka bara kända nycklar — gamla drafts kan innehålla borttagna fält (bio/location/phone)
-        const { first_name = '', last_name = '', profile_image_url = '' } = savedDraft;
-        setFormData({ first_name, last_name, profile_image_url });
+        const profile_image_url = values.profile_image_url;
+        setFormData({ first_name: draftFirst, last_name: draftLast, profile_image_url });
+        profileImagePathRef.current = profile_image_url;
         setOriginalValues(values);
         setHasUnsavedChanges(true);
         didInitRef.current = true;

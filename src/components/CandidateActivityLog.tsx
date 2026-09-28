@@ -1,7 +1,7 @@
 import { useCandidateActivities, CandidateActivity } from '@/hooks/useCandidateActivities';
 import { formatDistanceToNow, format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX, MoveRight, FileText, MessageSquare } from 'lucide-react';
+import { Star, StickyNote, Edit3, Activity, UserPlus, CalendarPlus, CalendarClock, CalendarX, MoveRight, FileText, MessageSquare, XCircle } from 'lucide-react';
 import { STAGE_CONFIG } from '@/hooks/useMyCandidatesData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
@@ -33,6 +33,8 @@ const getActivityIcon = (type: string) => {
       return FileText;
     case 'candidate_contacted':
       return MessageSquare;
+    case 'application_rejected':
+      return XCircle;
     default:
       return Activity;
   }
@@ -143,6 +145,14 @@ const getActivityDescription = (activity: CandidateActivity) => {
         <span>
           <span className="font-medium text-white">{name}</span>
           <span className="text-white"> avbokade intervjun {formatInterviewTime(activity.old_value)}</span>
+        </span>
+      );
+    case 'application_rejected':
+      return (
+        <span>
+          <span className="font-medium text-white">{name}</span>
+          <span className="text-white"> gav avslag för tjänsten </span>
+          <span className="text-white">{activity.new_value || 'ett jobb'}</span>
         </span>
       );
     default:

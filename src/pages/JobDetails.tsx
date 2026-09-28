@@ -573,6 +573,27 @@ const JobDetails = () => {
   // sitt steg med en "Avslagen"-etikett, kan fortfarande flyttas/swipas och
   // påverkar inte kandidatens andra ansökningar. Avslagna utesluts från de
   // automatiska utskicken när annonsen stängs (rejected_at i stängningstriggern).
+  // Skriv avslaget i kandidatens aktivitetslogg så att hela teamet ser vem
+  // som gav avslag och när. Loggfel får aldrig stoppa själva avslaget.
+  const logRejectionActivities = useCallback(async (ids: string[]) => {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    const rows = ids
+      .map(id => applications.find(a => a.id === id))
+      .filter((a): a is NonNullable<typeof a> => Boolean(a?.applicant_id))
+      .map(a => ({
+        applicant_id: a.applicant_id as string,
+        user_id: uid,
+        activity_type: 'application_rejected',
+        new_value: job?.title || null,
+        metadata: { job_id: jobId, application_id: a.id },
+      }));
+    if (rows.length === 0) return;
+    const { error } = await supabase.from('candidate_activities').insert(rows);
+    if (!error) rows.forEach(r => queryClient.invalidateQueries({ queryKey: ['candidate-activities', r.applicant_id] }));
+  }, [applications, job?.title, jobId, queryClient]);
+
   const confirmReject = useCallback(async () => {
     const ids = rejectTargetIds ?? [];
     setRejectTargetIds(null);
@@ -590,12 +611,13 @@ const JobDetails = () => {
         .select('id');
       if (error) throw error;
       if (!data || data.length !== ids.length) throw new Error('Alla avslag kunde inte registreras');
+      void logRejectionActivities(ids).catch(() => undefined);
       toast.success(ids.length === 1 ? 'Avslag registrerat' : `${ids.length} kandidater fick avslag`);
     } catch {
       refetch();
       toast.error('Kunde inte registrera avslaget');
     }
-  }, [rejectTargetIds, updateApplicationLocally, isSelectionMode, exitSelectionMode, refetch]);
+  }, [rejectTargetIds, updateApplicationLocally, isSelectionMode, exitSelectionMode, refetch, logRejectionActivities]);
 
   const rejectApplicationFromProfile = useCallback(async (applicationId: string): Promise<boolean> => {
     const rejectedAt = new Date().toISOString();
@@ -611,6 +633,7 @@ const JobDetails = () => {
       setSelectedApplication((current) => current?.id === applicationId
         ? { ...current, rejected_at: rejectedAt }
         : current);
+      void logRejectionActivities([applicationId]).catch(() => undefined);
       toast.success('Avslag registrerat för den här ansökan');
       return true;
     } catch {
@@ -618,7 +641,7 @@ const JobDetails = () => {
       toast.error('Kunde inte registrera avslaget');
       return false;
     }
-  }, [refetch, updateApplicationLocally]);
+  }, [refetch, updateApplicationLocally, logRejectionActivities]);
 
 
   const handleMoveCandidatesForStage = useCallback(async (stageKey: string, targetKey: string) => {
