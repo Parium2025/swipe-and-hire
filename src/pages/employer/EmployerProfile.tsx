@@ -447,10 +447,6 @@ const EmployerProfile = () => {
     setOriginalProfileImageStoragePath('');
     setProfileImageIsEdited(false);
     setHasUnsavedChanges(true);
-    toast({
-      title: "Profilbild borttagen",
-      description: "Ändringen sparas automatiskt."
-    });
   };
 
   // Återställ borttagen profilbild
@@ -463,10 +459,6 @@ const EmployerProfile = () => {
     setOriginalProfileImageStoragePath(prev => prev || deletedProfileImage);
     setDeletedProfileImage(null);
     setHasUnsavedChanges(true);
-    toast({
-      title: "Profilbild återställd",
-      description: "Ändringen sparas automatiskt."
-    });
   };
 
   // Reset form to original values when user confirms leaving without saving
