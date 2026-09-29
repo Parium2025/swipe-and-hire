@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS trg_emit_profile_change_signal ON public.profiles;

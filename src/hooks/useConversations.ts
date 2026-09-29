@@ -5,7 +5,8 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { getIsOnline } from '@/lib/connectivityManager';
-import { fetchCachedProfile, fetchCachedProfiles, rateLimited } from '@/lib/performanceGuards';
+import { fetchCachedProfile, fetchCachedProfiles, invalidateCachedProfile, rateLimited } from '@/lib/performanceGuards';
+import { patchConversationProfileCaches } from '@/lib/conversationProfileCache';
 import { measurePerformance } from '@/lib/realtimePerformance';
 import { useAuth } from './useAuth';
 import { prefetchMediaUrl } from './useMediaUrl';
@@ -885,6 +886,38 @@ export function useConversations() {
       supabase.removeChannel(channel);
     };
   }, [user, queryClient, conversationIdsKey]);
+
+  // Säker profilsignal: RLS släpper bara fram personer som användaren redan
+  // får se. Hämta en ny liten visningsprofil och byt alla monterade chattobjekt.
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = createRealtimeChannel('conversation-profile-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profile_change_signals' },
+        async (payload) => {
+          const row = (payload.new || payload.old) as { profile_user_id?: string };
+          const changedUserId = row?.profile_user_id;
+          if (!changedUserId) return;
+
+          invalidateCachedProfile(changedUserId);
+          const freshProfile = await fetchCachedProfile(changedUserId).catch(() => null);
+          if (!freshProfile) {
+            await queryClient.invalidateQueries({ queryKey: ['conversations', user.id] });
+            await queryClient.invalidateQueries({ queryKey: ['conversation-messages'] });
+            return;
+          }
+
+          patchConversationProfileCaches(queryClient, changedUserId, freshProfile);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
 
   // Total unread count across all conversations

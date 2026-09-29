@@ -24,3 +24,4 @@
 - [x] Stabilize per-account two-device sessions, eliminate Safari account-switch reload loops, and cover invite states with automated tests
 - [x] Stop the boot watchdog, preview auth provider and browser-chrome paths from creating repeated reload loops
 - [x] Restore the employer mobile interview card to the shared dashboard height; truncate long names and titles with full-text tooltips, keeping all details and actions visible
+- [x] Synchronize changed personal avatars and company logos across mounted chats, tabs and authorized devices

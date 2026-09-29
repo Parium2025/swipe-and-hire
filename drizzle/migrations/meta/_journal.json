@@ -421,6 +421,20 @@
       "when": 1790629600668,
       "tag": "0059_fix_mark_application_viewed",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1790707278797,
+      "tag": "0060_activate_profile_change_signals",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1790707344877,
+      "tag": "0061_remove_duplicate_profile_signal_trigger",
+      "breakpoints": true
     }
   ]
 }
