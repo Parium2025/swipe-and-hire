@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { writeUnreadBadgeCache } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
