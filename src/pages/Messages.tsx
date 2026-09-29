@@ -489,8 +489,12 @@ export default function Messages() {
               </div>
             ) : (
               <ScrollArea className="h-full w-full min-w-0 max-w-full overflow-x-hidden no-chrome-pad [&_[data-radix-scroll-area-viewport]]:overflow-x-hidden [&_[data-radix-scroll-area-viewport]>div]:!block [&_[data-radix-scroll-area-viewport]>div]:!w-full [&_[data-radix-scroll-area-viewport]>div]:!min-w-0 [&_[data-radix-scroll-area-viewport]>div]:!max-w-full">
-                <div className="w-full min-w-0 overflow-hidden p-2 pb-[max(var(--chrome-strip-pad),0.5rem)]">
-                  {filteredConversations.map((conv, index) => {
+                <div ref={listInnerRef} className="w-full min-w-0 overflow-hidden px-2 pb-[max(var(--chrome-strip-pad),0.5rem)]">
+                  <div className="relative w-full" style={{ height: conversationVirtualizer.getTotalSize() }}>
+                  {conversationVirtualizer.getVirtualItems().map((vItem) => {
+                    const index = vItem.index;
+                    const conv = filteredConversations[index];
+                    if (!conv) return null;
                     const isLast = index === filteredConversations.length - 1;
                     const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
 
@@ -506,11 +510,11 @@ export default function Messages() {
 
                     return (
                       <div
-                        key={conv.id}
-                        className="w-full min-w-0 max-w-full overflow-hidden"
-                        // Rader utanför bild ritas inte alls förrän de närmar sig —
-                        // samma utseende, men scrollen slipper måla hela listan.
-                        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 76px' }}
+                        key={vItem.key}
+                        data-index={index}
+                        ref={conversationVirtualizer.measureElement}
+                        className="absolute left-0 top-0 w-full min-w-0 max-w-full overflow-hidden"
+                        style={{ transform: `translateY(${vItem.start}px)` }}
                         onPointerEnter={() => {
                           // Hover-avsikt: förvärm först när pekaren stannar på raden,
                           // inte för varje rad som glider förbi under scroll.
@@ -557,6 +561,7 @@ export default function Messages() {
                       </div>
                     );
                   })}
+                  </div>
 
                   {/* Oändlig lista: laddar nästa 300 innan användaren nått botten */}
                   {hasMoreConversations && !searchQuery.trim() && (
