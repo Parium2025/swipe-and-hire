@@ -220,12 +220,12 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
 
           {/* StatsGrid — mobile shape mirrors the real dashboard exactly */}
           <div className="md:hidden space-y-2">
-            <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.06]">
               <div className="flex h-[62px]">
                 {Array.from({ length: resolvedShowDrafts ? 3 : 2 }).map((_, index) => (
                   <div
                     key={index}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${index > 0 ? 'border-l border-white/20' : ''}`}
+                    className={`flex-1 flex flex-col items-center justify-center gap-1.5 ${index > 0 ? 'border-l border-white/10' : ''}`}
                   >
                     <div className={`h-3 w-14 rounded ${SHAPE}`} />
                     <div className={`h-4 w-6 rounded ${SHAPE}`} />
@@ -237,7 +237,7 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
               {[1, 2, 3].map(i => (
                 <div
                   key={i}
-                  className="rounded-lg h-[62px] flex flex-col items-center justify-center gap-1.5 border border-white/20 bg-white/5"
+                  className="rounded-2xl h-[62px] flex flex-col items-center justify-center gap-1.5 border border-white/10 bg-white/[0.06]"
                 >
                   <div className={`h-3 w-14 rounded ${SHAPE}`} />
                   <div className={`h-4 w-6 rounded ${SHAPE}`} />
