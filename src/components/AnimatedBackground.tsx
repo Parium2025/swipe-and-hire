@@ -71,7 +71,7 @@ export const AnimatedBackground = memo(({ showBubbles = true, showGlow = true, v
       {showGlow && (
         // Eget, cachat grafiklager: de stora oskärpefiltren målas en gång och
         // räknas inte om varje bildruta när innehållet ovanpå scrollar.
-        <div className="absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow" style={{ transform: 'translateZ(0)', contain: 'strict' }}>
+        <div className="absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow" style={{ transform: 'translateZ(0)' }}>
           <div className="absolute inset-0 bg-primary-glow/40 rounded-full hidden md:block blur-[120px]"></div>
           <div className="absolute inset-4 bg-primary-glow/30 rounded-full hidden md:block blur-[100px]"></div>
           <div className="absolute inset-8 hidden bg-primary-glow/25 rounded-full blur-[40px] md:block md:blur-[80px]"></div>
