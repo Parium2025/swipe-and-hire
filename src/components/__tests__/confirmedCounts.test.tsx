@@ -25,4 +25,12 @@ describe('bekräftade siffror vid kallstart', () => {
     expect(screen.getAllByText('2').length).toBeGreaterThan(0);
     expect(container.textContent).not.toContain('31');
   });
+
+  it('uppdaterar laddningsläget även när siffran är oförändrad', () => {
+    const stats = [{ icon: Briefcase, title: 'Annonser', value: 0, isLoading: true, cacheKey: 'emp_total_jobs' }];
+    const { container, rerender } = render(<StatsGrid stats={stats} />);
+    expect(container.textContent).not.toContain('0');
+    rerender(<StatsGrid stats={[{ ...stats[0], isLoading: false }]} />);
+    expect(screen.getByText('0')).toBeTruthy();
+  });
 });
