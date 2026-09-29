@@ -155,16 +155,16 @@ function JobSeekerTopNav() {
   };
 
   // Visa aldrig tidigare inloggnings eller annat kontos preliminära siffror.
-  const stickyCount = (key: string, value: number | null | undefined): number => {
-    if (!countsReady) return 0;
-    return typeof value === 'number' ? value : 0;
+  const stickyCount = (value: number | null | undefined): number => {
+    return countsReady && typeof value === 'number' ? value : 0;
   };
 
-  const totalJobsCount = stickyCount('total_jobs', preloadedTotalJobs);
-  const savedJobsCount = stickyCount('saved_jobs', preloadedSavedJobs);
-  const myApplicationsCount = stickyCount('my_applications', preloadedMyApplications);
+  const totalJobsCount = stickyCount(preloadedTotalJobs);
+  const savedJobsCount = stickyCount(preloadedSavedJobs);
+  const myApplicationsCount = stickyCount(preloadedMyApplications);
 
   const getJobCount = (url: string) => {
+    if (!countsReady) return null;
     switch (url) {
       case '/search-jobs': return totalJobsCount;
       case '/saved-jobs': return savedJobsCount;

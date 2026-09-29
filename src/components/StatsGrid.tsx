@@ -181,6 +181,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
       stat.value === nextStat.value &&
       stat.title === nextStat.title &&
       stat.loading === nextStat.loading &&
+      stat.isLoading === nextStat.isLoading &&
       stat.onClick === nextStat.onClick &&
       stat.ariaLabel === nextStat.ariaLabel &&
       subItemsEqual
