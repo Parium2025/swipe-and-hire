@@ -1240,17 +1240,25 @@ export function useConversationMessages(
             if (alreadyExists) return;
           }
 
-          // Fetch sender profile through shared cache to avoid one profile read per realtime event burst
-          const senderProfile = await fetchCachedProfile(newMessage.sender_id);
+          // Visa meddelandet direkt — vänta aldrig på en profilhämtning innan
+          // bubblan syns (den kunde tidigare fördröja tråden i många sekunder).
+          appendIncomingMessageToThread(queryClient, newMessage as never, user.id);
 
-          // Add message directly to cache - instant update!
+          // Komplettera avsändarprofilen i bakgrunden; ett fel får aldrig tappa meddelandet.
+          const senderProfile = await fetchCachedProfile(newMessage.sender_id).catch(() => null);
+
           queryClient.setQueryData<ConversationMessage[]>(
             ['conversation-messages', conversationId],
             (old) => {
               if (!old) return [{ ...newMessage, sender_profile: senderProfile || undefined }];
-              
-              // Check if message already exists by real ID
-              if (old.some(m => m.id === newMessage.id)) return old;
+
+              const existingIdx = old.findIndex(m => m.id === newMessage.id);
+              if (existingIdx !== -1) {
+                if (!senderProfile || old[existingIdx].sender_profile) return old;
+                const updated = [...old];
+                updated[existingIdx] = { ...updated[existingIdx], sender_profile: senderProfile };
+                return updated;
+              }
 
               // For own messages: replace temp placeholder if it exists
               if (newMessage.sender_id === user.id) {
@@ -1261,7 +1269,7 @@ export function useConversationMessages(
                   return updated;
                 }
               }
-              
+
               return [...old, { ...newMessage, sender_profile: senderProfile || undefined }];
             }
           );
