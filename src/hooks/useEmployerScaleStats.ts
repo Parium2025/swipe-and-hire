@@ -173,25 +173,19 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
       if (user) writeCache(COUNTS_CACHE_KEY, user.id, scope, orgId, result);
       return result;
     },
-    enabled: !!user,
+    enabled: !!user && !!profile,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     // Live: fokus + tyst intervall fångar tidsbaserade statusbyten (utgångna annonser)
     refetchOnWindowFocus: true,
     refetchInterval: 60_000,
     refetchIntervalInBackground: false,
-    // 🔥 SWR-seed: visa senast kända counts direkt utan blink
-    placeholderData: () => {
-      if (!user) return undefined;
-      return readCache<EmployerJobsCounts>(COUNTS_CACHE_KEY, user.id, scope, orgId);
-    },
   });
 
-  // 🛡️ Vid nätverksglapp/fel blir query.data undefined och sidorna föll då
-  // tillbaka på den lokalt laddade listan — siffrorna kunde plötsligt visa 0.
-  // Senast kända servervärde är alltid sannare än ingenting.
-  const fallback = user ? readCache<EmployerJobsCounts>(COUNTS_CACHE_KEY, user.id, scope, orgId) : undefined;
-  return { ...query, data: query.data ?? fallback } as typeof query;
+  // Sparade värden får inte exponeras vid kallstart: de kan höra till gårdagens
+  // annonsläge eller ett annat organisationsscope. React Query behåller redan
+  // bekräftade värden under tyst omhämtning inom samma session.
+  return query;
 };
 
 /**
@@ -212,20 +206,14 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
       if (user) writeCache(STATS_CACHE_KEY, user.id, scope, orgId, result);
       return result;
     },
-    enabled: !!user,
+    enabled: !!user && !!profile,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     // Live: fokus + tyst intervall fångar tidsbaserade statusbyten (utgångna annonser)
     refetchOnWindowFocus: true,
     refetchInterval: 60_000,
     refetchIntervalInBackground: false,
-    // 🔥 SWR-seed: visa senast kända stats direkt utan blink
-    placeholderData: () => {
-      if (!user) return undefined;
-      return readCache<EmployerDashboardStats>(STATS_CACHE_KEY, user.id, scope, orgId);
-    },
   });
 
-  const fallback = user ? readCache<EmployerDashboardStats>(STATS_CACHE_KEY, user.id, scope, orgId) : undefined;
-  return { ...query, data: query.data ?? fallback } as typeof query;
+  return query;
 };
