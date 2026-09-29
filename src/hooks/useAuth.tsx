@@ -1565,6 +1565,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const clearLocalState = () => {
       currentUserIdRef.current = null;
       setUser(null);
+      setSeekerCountsReadyUserId(null);
+      setEmployerCountsReadyUserId(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
@@ -2321,9 +2323,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase.rpc('get_employer_dashboard_stats', { p_scope: 'organization' }),
         supabase.rpc('count_distinct_candidates_scoped', { p_scope: 'organization' }),
       ]);
-      if (!personalCountsRes.error && !orgCountsRes.error && !candidatesRes.error) {
-        setEmployerCountsReadyUserId(user.id);
-      }
 
       // ♻️ Dela svaret med React Query. Utan detta hämtade kallstartsvärmningen
       // och dashboardens egna hookar exakt samma tre RPC:er en gång till direkt
@@ -2428,6 +2427,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPreloadedMyCandidates(myCandidates);
         try { sessionStorage.setItem(MY_CANDIDATES_CACHE_KEY, String(myCandidates)); } catch {}
         writeEmployerCountsMirrorEntry(user.id, MY_CANDIDATES_CACHE_KEY, myCandidates);
+      }
+      if (!personalCountsRes.error && personalCountsRes.data && !orgCountsRes.error && orgCountsRes.data &&
+          !candidatesRes.error && candidatesRes.data !== null && !myCandidatesError && myCandidatesDistinct !== null) {
+        setEmployerCountsReadyUserId(user.id);
       }
     } catch (err) {
       console.error('Error refreshing employer stats:', err);
