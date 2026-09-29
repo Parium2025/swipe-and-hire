@@ -86,5 +86,11 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(conversations).toContain('repairedResult.slice(0, 12).forEach');
     expect(conversations).toContain('if (conv.is_muted === isMuted && conv.unread_count === unread) return conv;');
     expect(media).not.toContain('await decodeFully');
+    const swipeRow = source('src/components/messages/SwipeableConversationItem.tsx');
+    expect(swipeRow).not.toContain("style={{ transform: 'translate3d(0,0,0)' }}");
+    expect(swipeRow).toContain("contentRef.current.style.willChange = 'transform';");
+    expect(swipeRow).toContain("content.style.transform = '';");
+    expect(swipeRow).toContain("revealedSide === 'delete' &&");
+    expect(swipeRow).toContain("revealedSide === 'unread' &&");
   });
 });

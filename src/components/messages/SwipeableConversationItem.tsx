@@ -137,6 +137,7 @@ export function SwipeableConversationItem({
         if (gestureId !== gestureIdRef.current) return;
         if (contentRef.current) {
           contentRef.current.style.transition = '';
+          contentRef.current.style.transform = '';
           contentRef.current.style.willChange = 'auto';
         }
       }, contentMs + 20);
@@ -165,6 +166,14 @@ export function SwipeableConversationItem({
     currentXRef.current = 0;
   }, [scheduleTimer]);
 
+  const releaseIdleLayer = useCallback(() => {
+    const content = contentRef.current;
+    if (!content) return;
+    content.style.transition = '';
+    content.style.transform = '';
+    content.style.willChange = 'auto';
+  }, []);
+
 
 
   useEffect(() => {
@@ -173,8 +182,8 @@ export function SwipeableConversationItem({
     pendingXRef.current = 0;
     currentXRef.current = 0;
     setRevealedSide(null);
-    if (contentRef.current) contentRef.current.style.transform = 'translate3d(0,0,0)';
-  }, [conversationName]);
+    releaseIdleLayer();
+  }, [conversationName, releaseIdleLayer]);
 
   const beginDrag = useCallback((clientX: number, clientY: number) => {
     gestureIdRef.current += 1; // ogiltigförklarar timers från ev. pågående animation
@@ -191,9 +200,6 @@ export function SwipeableConversationItem({
     lastTRef.current = performance.now();
     if (contentRef.current) {
       contentRef.current.style.transition = '';
-      // Skapa grafiklagret först när raden faktiskt dras. Ett permanent
-      // will-change på hundratals rader belastar GPU/minne och gör scrollen hackig.
-      contentRef.current.style.willChange = 'transform';
     }
 
   }, []);
@@ -207,6 +213,11 @@ export function SwipeableConversationItem({
         directionLockedRef.current = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
         // Starta rörelsen från noll — annars hoppar kortet 8 px direkt (kändes "tvärnitande").
         lockOffsetRef.current = deltaX;
+        if (directionLockedRef.current === 'horizontal' && contentRef.current) {
+          // Skapa grafiklagret först efter att riktningen verkligen är vågrät.
+          // Vanlig vertikal scroll ska aldrig lämna lager efter sig.
+          contentRef.current.style.willChange = 'transform';
+        }
       }
       return;
     }
@@ -255,7 +266,12 @@ export function SwipeableConversationItem({
 
 
   const endDrag = useCallback(() => {
-    if (!isSwipingRef.current) return;
+    if (!isSwipingRef.current) {
+      releaseIdleLayer();
+      directionLockedRef.current = null;
+      lockOffsetRef.current = 0;
+      return;
+    }
 
     const offset = currentXRef.current;
     // Endast en medveten dragning förbi tröskeln utlöser åtgärden.
@@ -286,7 +302,7 @@ export function SwipeableConversationItem({
     // Blockera klicket som annars öppnar konversationen direkt efter dragningen.
     suppressClickRef.current = true;
     window.setTimeout(() => { suppressClickRef.current = false; }, 250);
-  }, [animateBack, onMarkUnread, canMarkUnread]);
+  }, [animateBack, onMarkUnread, canMarkUnread, releaseIdleLayer]);
 
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -378,11 +394,16 @@ export function SwipeableConversationItem({
         onMouseDown={handleMouseDown}
         onMouseEnter={handleMouseEnter}
         onClickCapture={handleClickCapture}
-        onTouchCancel={() => animateBack(false)}
+        onTouchCancel={() => {
+          if (isSwipingRef.current) animateBack(false);
+          else releaseIdleLayer();
+          isSwipingRef.current = false;
+          directionLockedRef.current = null;
+        }}
       >
         {/* Markera som oläst — visas vid drag åt höger */}
-        {onMarkUnread && canMarkUnread && (
-          <div className={cn("absolute inset-y-0 left-0 z-0 flex items-center pl-3", revealedSide === 'unread' ? 'visible' : 'invisible')}>
+        {onMarkUnread && canMarkUnread && revealedSide === 'unread' && (
+          <div className="absolute inset-y-0 left-0 z-0 flex items-center pl-3">
             <div
               ref={unreadRef}
               style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
@@ -404,31 +425,32 @@ export function SwipeableConversationItem({
         )}
 
         {/* Delete button on the RIGHT side */}
-        <div className={cn("absolute inset-y-0 right-0 z-0 flex items-center pr-3", revealedSide === 'delete' ? 'visible' : 'invisible')}>
-          <div
-            ref={deleteRef}
-            style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
-          >
-            <button
-              className="rounded-full flex items-center gap-1 px-3 py-2 bg-red-500/80 border-0 text-white font-medium text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                animateBack();
-                setShowConfirm(true);
-              }}
-              tabIndex={-1}
+        {revealedSide === 'delete' && (
+          <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
+            <div
+              ref={deleteRef}
+              style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
             >
-              <Trash2 className="h-3.5 w-3.5 text-white" />
-              <span>Ta bort</span>
-            </button>
+              <button
+                className="rounded-full flex items-center gap-1 px-3 py-2 bg-red-500/80 border-0 text-white font-medium text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  animateBack();
+                  setShowConfirm(true);
+                }}
+                tabIndex={-1}
+              >
+                <Trash2 className="h-3.5 w-3.5 text-white" />
+                <span>Ta bort</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Content layer – slides LEFT to reveal delete on right */}
         <div
           ref={contentRef}
           className="relative z-10 block w-full min-w-0 max-w-full overflow-hidden"
-          style={{ transform: 'translate3d(0,0,0)' }}
         >
           {children}
         </div>
