@@ -151,6 +151,10 @@ interface AuthContextType {
   preloadedCompanyReviewsCount: number;
   preloadedMyApplications: number;
   preloadedMyCandidates: number;
+  /** Kontot vars tre jobbsökarsiffror har bekräftats av servern denna inloggning */
+  seekerCountsReadyUserId: string | null;
+  /** Kontot vars menyräknare har bekräftats av servern denna inloggning */
+  employerCountsReadyUserId: string | null;
   refreshSidebarCounts: () => Promise<void>;
   refreshEmployerStats: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
@@ -213,6 +217,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [seekerCountsReadyUserId, setSeekerCountsReadyUserId] = useState<string | null>(null);
+  const [employerCountsReadyUserId, setEmployerCountsReadyUserId] = useState<string | null>(null);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
   const [mediaPreloadComplete, setMediaPreloadComplete] = useState(false); // 🎯 Ny state för att tracka media-laddning
   // Initialisera från sessionStorage för omedelbar visning (som arbetsgivarsidan)
@@ -2174,6 +2180,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Funktion för att uppdatera sidebar-räknare (används av realtime + initial load)
   const refreshSidebarCounts = useCallback(async () => {
     try {
+      let marketConfirmed = false;
+      let savedConfirmed = false;
+      let applicationsConfirmed = false;
       // 🔒 SKALA: tidigare laddades ALLA aktiva annonser ner till webbläsaren och
       // räknades i JS. PostgREST kapar svaret vid 1 000 rader, så siffrorna frös
       // vid 1 000 så fort marknaden växte — och payloaden blev onödigt tung.
@@ -2184,6 +2193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // siffror — annars nollställs "Sök Jobb" i sidomenyn vid nätbortfall och
       // 0:an fastnar i cache:n tills nästa lyckade hämtning.
       if (!marketError && marketCounts) {
+        marketConfirmed = true;
         const market = marketCounts as {
           total_jobs?: number;
           unique_companies?: number;
@@ -2214,6 +2224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id);
 
         if (!savedJobsError) {
+          savedConfirmed = true;
           const newSavedJobs = savedJobsCount || 0;
           setPreloadedSavedJobs(newSavedJobs);
           try { sessionStorage.setItem(SAVED_JOBS_CACHE_KEY, String(newSavedJobs)); } catch {}
@@ -2247,9 +2258,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .is('hidden_by_applicant_at', null);
 
         if (!myApplicationsError) {
+          applicationsConfirmed = true;
           const appCount = myApplications || 0;
           setPreloadedMyApplications(appCount);
           writeMyApplicationsCache(appCount);
+        }
+        if (marketConfirmed && savedConfirmed && applicationsConfirmed) {
+          setSeekerCountsReadyUserId(user.id);
         }
       }
     } catch (err) {
@@ -2306,6 +2321,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase.rpc('get_employer_dashboard_stats', { p_scope: 'organization' }),
         supabase.rpc('count_distinct_candidates_scoped', { p_scope: 'organization' }),
       ]);
+      if (!personalCountsRes.error && !orgCountsRes.error && !candidatesRes.error) {
+        setEmployerCountsReadyUserId(user.id);
+      }
 
       // ♻️ Dela svaret med React Query. Utan detta hämtade kallstartsvärmningen
       // och dashboardens egna hookar exakt samma tre RPC:er en gång till direkt
@@ -2718,6 +2736,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     preloadedEmployerTotalViews,
     preloadedEmployerTotalApplications,
     preloadedEmployerCandidates,
+    seekerCountsReadyUserId,
+    employerCountsReadyUserId,
     preloadedUnreadMessages,
     preloadedJobSeekerUnreadMessages,
     preloadedCompanyReviewsCount,
