@@ -46,7 +46,9 @@ export const AnimatedCounter = memo(({
   
   // If we have a cached value, use it as initial display value
   // This prevents showing 0 briefly before data loads
-  const initialValue = hasCachedValue ? cachedInitial : value;
+  // Med explicit datastatus kommer första synliga siffran från bekräftat data,
+  // aldrig en gammal, okontoskopad counter_-cache.
+  const initialValue = isLoading !== undefined ? value : (hasCachedValue ? cachedInitial : value);
   
   const [displayValue, setDisplayValue] = useState(initialValue);
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
@@ -102,7 +104,7 @@ export const AnimatedCounter = memo(({
     // 1. We had a cached value before
     // 2. This is not the first time we're seeing real data
     // 3. The value actually changed from what we last showed
-    const shouldShowArrow = hasCachedValue && !isFirstRealData && actualChange;
+  const shouldShowArrow = (isLoading !== undefined || hasCachedValue) && !isFirstRealData && actualChange;
     
     if (shouldShowArrow) {
       if (endValue > startValue) {
@@ -160,18 +162,18 @@ export const AnimatedCounter = memo(({
       }
       clearTimeout(directionTimeout);
     };
-  }, [value, duration, cacheKey, hasCachedValue, zeroConfirmed]);
+  }, [value, duration, cacheKey, hasCachedValue, zeroConfirmed, isLoading]);
 
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>
-      <span className="tabular-nums">{displayValue}</span>
-      {direction === 'up' && (
+      <span className="tabular-nums">{isLoading ? '\u00a0' : displayValue}</span>
+      {!isLoading && direction === 'up' && (
         <ArrowUp 
           className="h-3 w-3 md:h-4 md:w-4 text-green-400 animate-fade-in" 
           strokeWidth={3}
         />
       )}
-      {direction === 'down' && (
+      {!isLoading && direction === 'down' && (
         <ArrowDown 
           className="h-3 w-3 md:h-4 md:w-4 text-red-400 animate-fade-in" 
           strokeWidth={3}

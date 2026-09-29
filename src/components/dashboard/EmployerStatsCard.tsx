@@ -43,7 +43,6 @@ interface EmployerStatsCardProps {
 export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const cachedStats = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
 
   // 🔒 Serverns räknare är sanning. Tidigare räknades aktiva annonser på den
   // lokalt laddade listan – med 5 000 annonser visade kortet först 200 och
@@ -76,14 +75,14 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   });
 
 
-  const newApplicationsCount = dashStats?.new_applications ?? cachedStats['new_applications'] ?? 0;
-  const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
+  const newApplicationsCount = dashStats?.new_applications ?? 0;
+  const savedFavoritesCount = dashStats?.saved_favorites ?? 0;
   // Olästa meddelanden läses från den enda globala chattkanalen i stället för
   // en egen prenumeration på conversation_messages – annars skulle varje
   // meddelande på hela plattformen trigga en RPC per öppen hemvy.
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
-    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
+    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? 0;
   useEffect(() => {
     writeEmployerCachedStat(user?.id, 'unread_messages', unreadMessagesCount);
   }, [unreadMessagesCount, user?.id]);
@@ -120,7 +119,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     }
   }, [serverCounts, countsLoading, user?.id]);
 
-  const displayActiveJobs = serverCounts ? activeJobsCount : (cachedStats['active_jobs'] ?? 0);
+  const displayActiveJobs = serverCounts ? activeJobsCount : 0;
 
 
   const statsArray: StatData[] = useMemo(() => [
@@ -135,8 +134,9 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       stats={statsArray}
       isPaused={isPaused}
       setIsPaused={setIsPaused}
-      dataReady={isSuccess}
-      hasCachedData={Object.keys(cachedStats).length > 0}
+      dataReady={isSuccess && !!serverCounts}
+      hasCachedData={false}
+      countsReady={isSuccess && !!serverCounts}
     />
   );
 });

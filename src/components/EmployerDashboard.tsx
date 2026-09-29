@@ -81,8 +81,8 @@ const EmployerDashboard = memo(() => {
   // Ett misslyckat anrop får aldrig se ut som ett tomt konto.
   const showJobsError = !!jobsError && jobs.length === 0 && !loading;
   // Server-side truth — exakta totaler även vid 10k+ jobb
-  const { data: serverCounts } = useEmployerJobsCounts('personal');
-  const { data: serverStats } = useEmployerDashboardStats('personal');
+  const { data: serverCounts, isPending: countsPending } = useEmployerJobsCounts('personal');
+  const { data: serverStats, isPending: statsPending } = useEmployerDashboardStats('personal');
   // Osedda ansökningar per annons — pricken försvinner när kandidaten öppnats.
   const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const queryClient = useQueryClient();
@@ -184,7 +184,7 @@ const EmployerDashboard = memo(() => {
   // klient-buckets. Skrivs endast när data är klar för att undvika flimmer.
   const cachedCountsRef = useRef({ active: -1, expired: -1, draft: -1 });
   useEffect(() => {
-    if (loading) return;
+    if (loading || !serverCounts) return;
     const active = serverCounts?.active ?? jobs.filter(j => isEmployerJobActive(j)).length;
     const expired = serverCounts?.expired ?? jobs.filter(j => isEmployerJobExpired(j)).length;
     const draft = serverCounts?.draft ?? jobs.filter(j => isEmployerJobDraft(j)).length;
@@ -684,13 +684,13 @@ const EmployerDashboard = memo(() => {
   }, [setActiveTab, setPage]);
 
   const statsCards = useMemo(() => {
-    const totalJobs = serverCounts?.total ?? jobs.length;
-    const activeCount = serverCounts?.active ?? activeJobs.length;
-    const expiredCount = serverCounts?.expired ?? expiredJobsCount;
-    const draftCount = serverCounts?.draft ?? draftJobsCount;
+    const totalJobs = serverCounts?.total ?? 0;
+    const activeCount = serverCounts?.active ?? 0;
+    const expiredCount = serverCounts?.expired ?? 0;
+    const draftCount = serverCounts?.draft ?? 0;
     // Fallback = livstidstotal över ALLA annonser, samma definition som servern.
-    const totalViews = serverStats?.total_views ?? jobs.reduce((s, j) => s + (j.views_count || 0), 0);
-    const totalApps = serverStats?.total_applications ?? jobs.reduce((s, j) => s + (j.applications_count || 0), 0);
+    const totalViews = serverStats?.total_views ?? 0;
+    const totalApps = serverStats?.total_applications ?? 0;
 
     // ⚠️ De förladdade sessionStorage-siffrorna är ORGANISATIONS-scopade
     // (aktiva/visningar/ansökningar för hela företaget). Den här sidan visar
@@ -700,11 +700,11 @@ const EmployerDashboard = memo(() => {
     const seeded = !!serverCounts;
     const seededStats = !!serverStats;
     return [
-      { icon: Briefcase, title: 'Annonser', value: loading && !seeded ? preloadedEmployerMyJobs : totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
+      { icon: Briefcase, title: 'Annonser', value: totalJobs, loading: false, isLoading: loading, cacheKey: 'emp_total_jobs' },
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: loading && !seeded ? preloadedEmployerActiveJobs : activeCount,
+        value: activeCount,
         loading: false,
         isLoading: loading,
         cacheKey: 'emp_active_jobs',
@@ -715,14 +715,14 @@ const EmployerDashboard = memo(() => {
           { label: 'Utkast', value: draftCount, cacheKey: 'emp_draft_jobs', onClick: () => goToTab('draft'), ariaLabel: 'Visa utkast' },
         ],
       },
-      { icon: Eye, title: 'Visningar', value: loading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
-      { icon: Users, title: 'Ansökningar', value: loading && !seededStats ? preloadedEmployerTotalApplications : totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: totalViews, loading: false, isLoading: loading, cacheKey: 'emp_total_views' },
+      { icon: Users, title: 'Ansökningar', value: totalApps, loading: false, isLoading: loading, cacheKey: 'emp_total_apps', onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
   }, [jobs.length, activeJobs, expiredJobsCount, draftJobsCount, loading, serverCounts, serverStats, preloadedEmployerMyJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
   // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
   // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
-  if (!initialLoadDone) {
+  if (!initialLoadDone || countsPending || statsPending || !serverCounts || !serverStats) {
     return <EmployerDashboardSkeleton showDrafts titleWidthClass="w-48" />;
   }
   // Sidebar-navigering (varm cache) → osynlig placeholder under fade-in delay.

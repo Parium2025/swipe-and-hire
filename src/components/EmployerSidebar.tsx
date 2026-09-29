@@ -146,7 +146,8 @@ export function EmployerSidebar() {
 
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
-  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates } = useAuth();
+  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates, employerCountsReadyUserId } = useAuth();
+  const countsReady = !!user && employerCountsReadyUserId === user.id;
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt).
   // När context är mountad (även med värde 0) ska live alltid vinna över det cachade
   // värdet, annars står en gammal siffra kvar efter att olästa nollställts.
@@ -423,16 +424,16 @@ export function EmployerSidebar() {
                       {!collapsed && (
                         <span className="font-medium flex-1 text-left">
                           {item.title}
-                          {item.url === '/dashboard' && preloadedEmployerDashboardJobs > 0 && (
+                          {countsReady && item.url === '/dashboard' && preloadedEmployerDashboardJobs > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedEmployerDashboardJobs})</span>
                           )}
-                          {item.url === '/my-jobs' && preloadedEmployerMyJobs > 0 && (
+                          {countsReady && item.url === '/my-jobs' && preloadedEmployerMyJobs > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedEmployerMyJobs})</span>
                           )}
-                          {item.url === '/candidates' && preloadedEmployerCandidates > 0 && (
+                          {countsReady && item.url === '/candidates' && preloadedEmployerCandidates > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedEmployerCandidates})</span>
                           )}
-                          {item.url === '/my-candidates' && preloadedMyCandidates > 0 && (
+                          {countsReady && item.url === '/my-candidates' && preloadedMyCandidates > 0 && (
                             <span className="text-white font-normal ml-1">({preloadedMyCandidates})</span>
                           )}
                           {item.url === '/messages' && unreadMessages > 0 && (

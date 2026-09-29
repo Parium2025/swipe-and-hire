@@ -46,8 +46,8 @@ const Dashboard = memo(() => {
     enableRealtime: true 
   });
   // Server-side truth — skalar till 10k+ jobb utan klient-belastning
-  const { data: serverCounts } = useEmployerJobsCounts('organization');
-  const { data: serverStats } = useEmployerDashboardStats('organization');
+  const { data: serverCounts, isPending: countsPending } = useEmployerJobsCounts('organization');
+  const { data: serverStats, isPending: statsPending } = useEmployerDashboardStats('organization');
   const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
@@ -150,7 +150,7 @@ const Dashboard = memo(() => {
   // lika många kortskelett — 0 annonser ⇒ inget kortskelett alls.
   // Serverantal först — listan är paginerad och kan vara ofullständig.
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !serverCounts) return;
     writeCachedCount(SKELETON_COUNT_KEYS.orgJobsActive, serverCounts?.active ?? activeJobs.length);
     writeCachedCount(SKELETON_COUNT_KEYS.orgJobsExpired, serverCounts?.expired ?? expiredJobs.length);
   }, [isLoading, activeJobs.length, expiredJobs.length, serverCounts?.active, serverCounts?.expired]);
@@ -265,40 +265,40 @@ const Dashboard = memo(() => {
   const statsCards = useMemo(() => {
     // Föredra server-counts/stats (exakta även vid 10k+ jobb).
     // Dashboard (företagsvy): exkludera utkast — visa endast publicerade (Aktiva + Utgångna)
-    const activeFromServer = serverCounts?.active ?? filteredStats.activeJobs;
-    const expiredFromServer = serverCounts?.expired ?? expiredJobs.length;
+    const activeFromServer = serverCounts?.active ?? 0;
+    const expiredFromServer = serverCounts?.expired ?? 0;
     const totalJobs = activeFromServer + expiredFromServer;
-    const activeCount = serverCounts?.active ?? filteredStats.activeJobs;
-    const expiredCount = serverCounts?.expired ?? expiredJobs.length;
+    const activeCount = serverCounts?.active ?? 0;
+    const expiredCount = serverCounts?.expired ?? 0;
     // Visningar/Ansökningar: server-siffran exkluderar den egna organisationens
     // interna aktivitet. Faller vi tillbaka på råsummorna i annonsraderna hoppar
     // talet när serversvaret landar — använd därför i första hand den senast
     // kända server-siffran (sessionStorage) och råsumman bara som sista utväg.
-    const totalViews = serverStats?.total_views ?? (preloadedEmployerTotalViews || filteredStats.totalViews);
-    const totalApplications = serverStats?.total_applications ?? (preloadedEmployerTotalApplications || filteredStats.totalApplications);
+    const totalViews = serverStats?.total_views ?? 0;
+    const totalApplications = serverStats?.total_applications ?? 0;
     // Under laddning: server-siffrorna (SWR-seedade från localStorage) är alltid
     // sannare än sessionStorage-fallbacken. "Annonser" = aktiva + utgångna, så
     // fallbacken måste vara dashboard-totalen — inte antalet aktiva.
     const seeded = !!serverCounts;
     const seededStats = !!serverStats;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading && !seeded ? preloadedEmployerDashboardJobs : totalJobs, loading: false, isLoading },
+      { icon: Briefcase, title: 'Annonser', value: totalJobs, loading: false, isLoading },
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: isLoading && !seeded ? preloadedEmployerActiveJobs : activeCount,
+        value: activeCount,
         loading: false,
         isLoading,
         onClick: () => goToTab('active'),
         ariaLabel: 'Visa aktiva annonser',
         subItems: [{ label: 'Utgångna', value: expiredCount, onClick: () => goToTab('expired'), ariaLabel: 'Visa utgångna annonser' }],
       },
-      { icon: Eye, title: 'Visningar', value: isLoading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
-      { icon: Users, title: 'Ansökningar', value: isLoading && !seededStats ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: totalViews, loading: false, isLoading },
+      { icon: Users, title: 'Ansökningar', value: totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
-  if (!initialLoadDone) {
+  if (!initialLoadDone || countsPending || statsPending || !serverCounts || !serverStats) {
     return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" />;
   }
   if (isLoading || !showContent) {
