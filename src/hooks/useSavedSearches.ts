@@ -106,19 +106,25 @@ export const useSavedSearches = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalNewMatches, setTotalNewMatches] = useState(0);
   const hasFetchedRef = useRef(false);
+  const activeUserIdRef = useRef<string | null>(user?.id ?? null);
 
   // Hydrerar state från cache vid user-ändring
   useEffect(() => {
-    if (user) {
-      const cached = getCachedSearches(user.id);
-      if (cached && cached.length > 0) {
-        setSavedSearches(cached);
-        const total = cached.reduce((sum, s) => sum + (s.new_matches_count || 0), 0);
-        setTotalNewMatches(total);
-        setIsLoading(false);
-      }
+    const userId = user?.id ?? null;
+    activeUserIdRef.current = userId;
+    hasFetchedRef.current = false;
+    if (!userId) {
+      setSavedSearches([]);
+      setTotalNewMatches(0);
+      setIsLoading(false);
+      return;
     }
-  }, [user]);
+
+    const cached = getCachedSearches(userId);
+    setSavedSearches(cached ?? []);
+    setTotalNewMatches((cached ?? []).reduce((sum, s) => sum + (s.new_matches_count || 0), 0));
+    setIsLoading(cached === null);
+  }, [user?.id]);
 
   const fetchSavedSearches = useCallback(async () => {
     if (!user) {
@@ -127,6 +133,7 @@ export const useSavedSearches = () => {
       setIsLoading(false);
       return;
     }
+    const requestedUserId = user.id;
 
     try {
       const { data, error } = await supabase
@@ -190,10 +197,12 @@ export const useSavedSearches = () => {
         })
       );
 
+      // Ett långsamt svar från föregående konto får aldrig skriva över det nya.
+      if (activeUserIdRef.current !== requestedUserId) return;
       setSavedSearches(searchesWithStaleCheck);
       
       // Spara till cache för instant-load vid nästa navigation
-      setCachedSearches(user.id, searchesWithStaleCheck);
+      setCachedSearches(requestedUserId, searchesWithStaleCheck);
       
       // Calculate total new matches
       const total = searchesWithStaleCheck.reduce((sum, s) => sum + (s.new_matches_count || 0), 0);
@@ -201,8 +210,10 @@ export const useSavedSearches = () => {
     } catch (err) {
       console.error('Error fetching saved searches:', err);
     } finally {
-      setIsLoading(false);
-      hasFetchedRef.current = true;
+      if (activeUserIdRef.current === requestedUserId) {
+        setIsLoading(false);
+        hasFetchedRef.current = true;
+      }
     }
   }, [user]);
 

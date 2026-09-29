@@ -85,13 +85,13 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
             onClick={handleClick}
             disabled={disabled}
             className={cn(
-              "flex-shrink-0 flex items-center justify-center rounded-xl caret-transparent",
+              "flex-shrink-0 flex items-center justify-center aspect-square rounded-full border border-transparent caret-transparent",
               "transition-[background-color,box-shadow,transform] duration-150",
               large ? "w-9 h-9" : compact ? "p-1" : "w-8 h-8",
               "bg-transparent md:hover:bg-white/20",
               "active:scale-90",
               "disabled:opacity-30 disabled:cursor-not-allowed",
-              isActive ? "bg-white/30 ring-1 ring-white/40 shadow-sm" : "border border-transparent"
+              isActive && "bg-white/30 ring-1 ring-white/40 shadow-sm"
             )}
           >
             <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4 w-4" : "h-4 w-4", "text-pure-white")} />
