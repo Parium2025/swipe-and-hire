@@ -173,6 +173,8 @@ const clearAllAppCachesSync = () => {
     'parium_employer_candidates',
     'parium_my_candidates',
     'parium_company_reviews_count',
+    'counter_emp_',
+    'counter_search_',
   ];
   
   try {
