@@ -354,12 +354,24 @@ const Dashboard = memo(() => {
         )}
       </div>
 
-      {/* Antalsindikator: visar alltid hur många av totalen som syns på sidan */}
-      {!searchTerm && tabFilteredJobs.length > 0 && (
-        <div className="mt-2 text-center text-xs sm:text-sm text-white">
-          Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
-        </div>
-      )}
+      {/* Antalsindikator + Visa detaljer: knappen ligger på samma rad som antalet */}
+      <div className="relative mt-2 flex items-center justify-center">
+        {!searchTerm && tabFilteredJobs.length > 0 && (
+          <div className="text-center text-xs sm:text-sm text-white">
+            Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={toggleExpandAll}
+          aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+          title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+          className="absolute right-0 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+        >
+          {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
+          <span className="hidden sm:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+        </button>
+      </div>
 
       {/* Desktop: Card grid */}
       <div className="hidden md:block">

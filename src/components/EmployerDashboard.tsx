@@ -765,6 +765,20 @@ const EmployerDashboard = memo(() => {
           draftCount={serverCounts?.draft ?? draftJobsCount}
           showDrafts
         />
+        {totalPages > 1 && (
+          <span className="hidden xl:inline absolute right-40 text-sm text-white">
+            Sida {page} av {totalPages}
+          </span>
+        )}
+      </div>
+
+      {/* Antalsindikator + Visa detaljer: knappen ligger på samma rad som antalet */}
+      <div className="relative mt-2 flex items-center justify-center">
+        {!searchTerm && tabFilteredJobs.length > 0 && (
+          <div className="text-center text-xs sm:text-sm text-white">
+            Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
+          </div>
+        )}
         <button
           type="button"
           onClick={toggleExpandAll}
@@ -775,19 +789,7 @@ const EmployerDashboard = memo(() => {
           {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
         </button>
-        {totalPages > 1 && (
-          <span className="hidden xl:inline absolute right-40 text-sm text-white">
-            Sida {page} av {totalPages}
-          </span>
-        )}
       </div>
-
-      {/* Antalsindikator: visar alltid hur många av totalen som syns på sidan */}
-      {!searchTerm && tabFilteredJobs.length > 0 && (
-        <div className="mt-2 text-center text-xs sm:text-sm text-white">
-          Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
-        </div>
-      )}
 
       {/* 🗑️ Massradering — endast utgångna/utkast */}
       {bulkSelectable && tabFilteredJobs.length > 0 && (
