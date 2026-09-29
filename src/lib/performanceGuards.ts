@@ -201,3 +201,13 @@ export async function fetchCachedProfile(userId: string): Promise<ProfileLite | 
   const profiles = await fetchCachedProfiles([userId]);
   return profiles.get(userId) ?? null;
 }
+
+/**
+ * Ogiltigförklarar den cachade chattprofilen för en användare. Måste anropas
+ * när den egna profilen sparas (bild, logga, namn) — annars visar chatten
+ * den gamla bilden i upp till 15 minuter trots att toppmenyn redan är ny.
+ */
+export function invalidateCachedProfile(userId: string | null | undefined): void {
+  if (!userId) return;
+  clearPersistentCacheByPrefix(`parium_profile_lite_v2_${userId}`);
+}
