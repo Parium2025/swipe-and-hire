@@ -35,4 +35,4 @@
 - [x] Remove permanent per-row GPU layers and release swipe layers after vertical scrolling
 - [x] Keep normal chat inboxes on native continuous scrolling; virtualize only genuinely large lists
 - [x] Page thousands of conversations incrementally without refetching all earlier pages
-- [ ] Show live typing in visible inbox rows for both account types, without subscribing to the entire inbox; verify transitions and cleanup
+- [x] Show live typing in visible inbox rows for both account types, without subscribing to the entire inbox; verify transitions and cleanup in tests
