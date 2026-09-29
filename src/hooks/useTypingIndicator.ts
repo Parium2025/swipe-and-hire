@@ -18,7 +18,7 @@ interface TypingPayload {
 const TYPING_IDLE_MS = 3000;
 const TYPING_HEARTBEAT_MS = 1500;
 
-export function useTypingIndicator(conversationId: string | null) {
+export function useTypingIndicator(conversationId: string | null, receiveOnly = false) {
   const { user } = useAuth();
   const userId = user?.id;
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
@@ -62,7 +62,7 @@ export function useTypingIndicator(conversationId: string | null) {
 
   const sendTypingState = useCallback((isTyping: boolean, name: string) => {
     const channel = channelRef.current;
-    if (!channel || !userId) return;
+    if (!channel || !userId || receiveOnly) return;
 
     const payload: TypingPayload = {
       user_id: userId,
@@ -79,7 +79,7 @@ export function useTypingIndicator(conversationId: string | null) {
     if (channelReadyRef.current) {
       void channel.track(payload).catch(() => undefined);
     }
-  }, [broadcastTyping, userId]);
+  }, [broadcastTyping, receiveOnly, userId]);
 
   const setRemoteTyping = useCallback((remoteUser: TypingUser, isTyping: boolean) => {
     const existingTimeout = remoteTypingTimeoutsRef.current.get(remoteUser.id);
@@ -134,7 +134,7 @@ export function useTypingIndicator(conversationId: string | null) {
           is_typing?: boolean;
           name?: string;
         };
-        if (!remote.user_id || remote.session_id === sessionIdRef.current) return;
+        if (!remote.user_id || remote.user_id === userId || remote.session_id === sessionIdRef.current) return;
         // Older published clients do not include session_id. Continue to
         // understand those events while new clients remain device-specific.
         const remoteId = remote.session_id || remote.user_id;
@@ -158,7 +158,7 @@ export function useTypingIndicator(conversationId: string | null) {
           // passiv session (is_typing=false). Kolla ALLA metas, annars missas
           // skrivandet när en passiv flik råkar ligga först.
           const typingMeta = (presences as { user_id?: string; session_id?: string; is_typing?: boolean; name?: string }[])
-            .find(p => p.is_typing);
+            .find(p => p.is_typing && p.user_id !== userId);
           // A stale passive presence must not cancel a newer broadcast. Active
           // presence can restore the indicator; broadcast/timeout clears it.
           if (typingMeta) {
@@ -175,16 +175,18 @@ export function useTypingIndicator(conversationId: string | null) {
         channelReadyRef.current = status === 'SUBSCRIBED';
         if (status === 'SUBSCRIBED') {
           const localTyping = localTypingRef.current;
-          await channel.track({
-            user_id: userId,
-            session_id: sessionIdRef.current,
-            sequence: localSequenceRef.current,
-            is_typing: localTyping.isTyping,
-            name: localTyping.name,
-          });
+          if (!receiveOnly) {
+            await channel.track({
+              user_id: userId,
+              session_id: sessionIdRef.current,
+              sequence: localSequenceRef.current,
+              is_typing: localTyping.isTyping,
+              name: localTyping.name,
+            });
+          }
           // Typing can begin during a cold connection. Re-send the current
           // state as soon as the channel is ready so the first keystrokes count.
-          if (localTyping.isTyping) {
+          if (!receiveOnly && localTyping.isTyping) {
             await broadcastTyping(channel, {
               user_id: userId,
               session_id: sessionIdRef.current,
@@ -216,7 +218,7 @@ export function useTypingIndicator(conversationId: string | null) {
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [broadcastTyping, conversationId, setRemoteTyping, userId]);
+  }, [broadcastTyping, conversationId, receiveOnly, setRemoteTyping, userId]);
 
   // Start typing indicator
   const startTyping = useCallback((userName: string) => {

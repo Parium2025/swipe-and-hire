@@ -17,4 +17,4 @@
 - Auth is isolated per tab; device limits are per account with two devices. Cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures must settle on a stable error state instead of looping.
 - The landing-video route alone owns browser chrome color `#626262`; preserve its bounded chrome-reload guard (max two reloads per 10 s per tab) and never change other routes with it.
-- Preserve loop/reload/boot guards and add tests. Native-scroll normal chat lists; paginate/virtualize large lists in 300/80 thresholds.
+- Preserve loop/reload/boot guards and tests. Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows to keep large inboxes fast.

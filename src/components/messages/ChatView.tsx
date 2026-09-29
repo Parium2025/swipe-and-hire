@@ -176,9 +176,19 @@ export function ChatView({
     if (viewport) viewport.scrollTop = viewport.scrollHeight;
   }, [getViewportEl]);
 
+  // Get current user's display name for typing indicator
+  const getCurrentUserName = () => {
+    const currentMember = (conversation.members || []).find(m => m.user_id === currentUserId);
+    if (!currentMember?.profile) return 'Någon';
+    const p = currentMember.profile;
+    if (p.role === 'employer' && p.company_name) return p.company_name;
+    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
+  };
+
   const handleComposerBlur = useCallback(() => {
     composerFocusedRef.current = false;
-  }, []);
+    stopTyping(getCurrentUserName());
+  }, [stopTyping, getCurrentUserName]);
 
   const pinMessagesToBottom = useCallback(() => {
     const viewport = getViewportEl();
@@ -194,15 +204,6 @@ export function ChatView({
   const snapshot = conversation.applicationSnapshot;
 
   const candidateUserId = conversation.candidate_id;
-
-  // Get current user's display name for typing indicator
-  const getCurrentUserName = () => {
-    const currentMember = (conversation.members || []).find(m => m.user_id === currentUserId);
-    if (!currentMember?.profile) return 'Någon';
-    const p = currentMember.profile;
-    if (p.role === 'employer' && p.company_name) return p.company_name;
-    return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Någon';
-  };
 
   const avatarProfile = getConversationAvatarProfile(
     snapshot,
