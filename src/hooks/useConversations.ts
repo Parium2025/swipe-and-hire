@@ -290,6 +290,16 @@ export function appendIncomingMessageToThread(
     if (!old || old.some((m) => m.id === msg.id)) return old;
     return [...old, { ...(msg as unknown as ConversationMessage), sender_profile: known }];
   });
+  // Ny avsändare i tråden: komplettera namn/bild i bakgrunden så bubblan
+  // aldrig blir kvar utan identitet.
+  if (!known) {
+    void fetchCachedProfile(msg.sender_id).then((profile) => {
+      if (!profile) return;
+      queryClient.setQueryData<ConversationMessage[]>(key, (old) =>
+        old?.map((m) => (m.id === msg.id && !m.sender_profile ? { ...m, sender_profile: profile } : m)),
+      );
+    }).catch(() => undefined);
+  }
   return true;
 }
 
