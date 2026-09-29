@@ -52,4 +52,19 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(editor).toContain('aspect-square rounded-full caret-transparent');
     expect(editor).not.toContain('justify-center rounded-xl caret-transparent');
   });
+
+  it('visar inte föregående kontos olästa antal i webbläsarfliken', () => {
+    const title = source('src/hooks/useDocumentTitle.ts');
+    const auth = source('src/hooks/useAuth.tsx');
+
+    expect(title).toContain('employerCountsReadyUserId === user.id');
+    expect(title).toContain('seekerCountsReadyUserId === user.id');
+    expect(title).toContain('countsReady && preloadedUnreadMessages > 0');
+    expect(title).toContain('countsReady && preloadedJobSeekerUnreadMessages > 0');
+    const accountSwitch = auth.slice(auth.indexOf('if (cachedBelongsToOther) {'), auth.indexOf('// 🧹 Reset transient flags'));
+    expect(accountSwitch).toContain('setPreloadedUnreadMessages(0);');
+    expect(accountSwitch).toContain('setPreloadedJobSeekerUnreadMessages(0);');
+    expect(accountSwitch).toContain('localStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);');
+    expect(accountSwitch).toContain('localStorage.removeItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);');
+  });
 });

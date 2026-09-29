@@ -631,6 +631,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (cachedBelongsToOther) {
             setUserRole(null);
             setOrganization(null);
+            setSeekerCountsReadyUserId(null);
+            setEmployerCountsReadyUserId(null);
+            setPreloadedUnreadMessages(0);
+            setPreloadedJobSeekerUnreadMessages(0);
             profileLoadedRef.current = false;
             // Föregående kontos profilbild/omslag/video får inte ligga kvar
             // och visas för det nya kontot på samma dator.
@@ -642,6 +646,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               sessionStorage.removeItem(AVATAR_CACHE_KEY);
               sessionStorage.removeItem(COVER_CACHE_KEY);
               sessionStorage.removeItem(VIDEO_CACHE_KEY);
+              sessionStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);
+              sessionStorage.removeItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);
+              localStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);
+              localStorage.removeItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);
             } catch { /* ignorera */ }
           }
         }

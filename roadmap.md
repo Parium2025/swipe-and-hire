@@ -28,3 +28,4 @@
 - [x] Hide provisional employer counts on cold login until scoped server totals are confirmed
 - [x] Isolate remaining badges, notification counts and animated statistics across cold start and account switch
 - [x] Reset saved-search and saved-job state synchronously on account switch; keep the active notes control perfectly circular
+- [x] Prevent stale unread-message counts from appearing in the browser title during account resolution
