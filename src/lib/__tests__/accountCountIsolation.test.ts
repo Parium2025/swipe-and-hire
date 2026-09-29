@@ -52,6 +52,8 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(editor).toContain('aspect-square rounded-full border border-transparent caret-transparent');
     expect(editor).not.toContain('justify-center rounded-xl caret-transparent');
     expect(editor).not.toContain(': "border border-transparent"');
+    expect(editor).toContain('isActive && "bg-white/20"');
+    expect(editor).not.toContain('isActive && "bg-white/30 ring-1 ring-white/40 shadow-sm"');
   });
 
   it('visar inte föregående kontos olästa antal i webbläsarfliken', () => {

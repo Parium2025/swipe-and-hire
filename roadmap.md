@@ -29,3 +29,4 @@
 - [x] Isolate remaining badges, notification counts and animated statistics across cold start and account switch
 - [x] Reset saved-search and saved-job state synchronously on account switch; keep the active notes control perfectly circular
 - [x] Prevent stale unread-message counts from appearing in the browser title during account resolution
+- [x] Match every active notes-format control to the same perfectly circular filled hover state
