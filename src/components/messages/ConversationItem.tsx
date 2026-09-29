@@ -12,6 +12,7 @@ import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { Conversation } from '@/hooks/useConversations';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { observeChatRow } from '@/lib/visibleChatRows';
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -33,9 +34,7 @@ export const ConversationItem = memo(function ConversationItem({
   useEffect(() => {
     const row = rowRef.current;
     if (!row) return;
-    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting));
-    observer.observe(row);
-    return () => observer.disconnect();
+    return observeChatRow(row, setIsVisible);
   }, []);
   // Enbart synliga rader prenumererar. Stora inkorgar får därmed inte en
   // separat anslutning för varje konversation, och osynliga rader släpper sin.

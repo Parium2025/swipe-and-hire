@@ -108,7 +108,8 @@ describe('kontosiffror vid kallstart och byte', () => {
     const row = source('src/components/messages/ConversationItem.tsx');
     const hook = source('src/hooks/useTypingIndicator.ts');
     const chat = source('src/components/messages/ChatView.tsx');
-    expect(row).toContain('observer.observe(row)');
+    expect(row).toContain('observeChatRow(row, setIsVisible)');
+    expect(source('src/lib/visibleChatRows.ts')).toContain('observer?.disconnect()');
     expect(row).toContain('isVisible ? conversation.id : null, true');
     expect(row).toContain('Skriver…');
     expect(row).toContain('lastMessagePreview');
