@@ -91,7 +91,7 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
               "bg-transparent md:hover:bg-white/20",
               "active:scale-90",
               "disabled:opacity-30 disabled:cursor-not-allowed",
-              isActive && "bg-white/30 ring-1 ring-white/40 shadow-sm"
+              isActive && "bg-white/20"
             )}
           >
             <Icon className={cn(large ? "h-5 w-5" : compact ? "h-4 w-4" : "h-4 w-4", "text-pure-white")} />
