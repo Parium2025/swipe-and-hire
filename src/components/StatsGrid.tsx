@@ -74,7 +74,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             className={`flex-1 flex flex-col min-w-0 ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
           >
             <div className="flex items-center justify-center p-1 sm:p-1.5 md:p-3 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-              <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white/70 whitespace-nowrap truncate">
+              <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
                 {stat.title}
               </span>
             </div>
@@ -99,7 +99,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 className={`flex-1 flex flex-col border-l border-white/10 min-w-0 ${props.className ?? ''}`}
               >
                 <div className="flex items-center justify-center p-1 sm:p-1.5 md:p-3 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-                  <span className="text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate text-white/70">
+                  <span className="text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate text-white">
                     {item.label}
                   </span>
                 </div>
@@ -118,8 +118,8 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           className={`h-full ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
         >
           <CardHeader className="flex flex-row items-center justify-center gap-1 md:gap-2 space-y-0 p-1.5 sm:p-2 md:p-3 min-w-0 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-            <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white/70 flex-shrink-0" />
-            <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white/70 whitespace-nowrap truncate">
+            <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white flex-shrink-0" />
+            <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
               {stat.title}
             </span>
           </CardHeader>
