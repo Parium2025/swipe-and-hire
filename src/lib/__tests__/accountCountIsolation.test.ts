@@ -24,7 +24,9 @@ describe('kontosiffror vid kallstart och byte', () => {
     for (const key of ['parium_total_jobs', 'parium_my_applications_persist', 'parium_employer_my_jobs', 'parium_employer_candidates', 'parium_my_candidates']) {
       expect(cleanup).toContain(`'${key}'`);
     }
-    expect(auth).toMatch(/const clearLocalState = \(\) => \{[\s\S]*?setPreloadedEmployerMyJobs\(0\);[\s\S]*?setPreloadedMyApplications\(0\);/);
+    const clearState = auth.slice(auth.indexOf('const clearLocalState = () => {'), auth.indexOf('    try {\n      setAuthAction(\'logout\');'));
+    expect(clearState).toContain('setPreloadedEmployerMyJobs(0);');
+    expect(clearState).toContain('setPreloadedMyApplications(0);');
   });
 
   it('skriver personliga annonsräknare bara under aktuell användares nyckel', () => {
