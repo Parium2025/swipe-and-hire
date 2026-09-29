@@ -491,6 +491,9 @@ export default function Messages() {
                       <div
                         key={conv.id}
                         className="w-full min-w-0 max-w-full overflow-hidden"
+                        // Rader utanför bild ritas inte alls förrän de närmar sig —
+                        // samma utseende, men scrollen slipper måla hela listan.
+                        style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 76px' }}
                         onPointerEnter={() => {
                           // Hover-avsikt: förvärm först när pekaren stannar på raden,
                           // inte för varje rad som glider förbi under scroll.

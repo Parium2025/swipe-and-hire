@@ -83,7 +83,7 @@ export const ConversationItem = memo(function ConversationItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full min-w-0 max-w-full overflow-hidden flex items-start gap-3 p-3 rounded-lg text-left transition-all focus:outline-none focus-visible:outline-none",
+        "w-full min-w-0 max-w-full overflow-hidden flex items-start gap-3 p-3 rounded-lg text-left transition-colors focus:outline-none focus-visible:outline-none",
         isSelected
           ? "bg-white/15 border border-white/20"
           : "md:hover:bg-white/10 border border-transparent"
