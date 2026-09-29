@@ -92,5 +92,10 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(swipeRow).toContain("content.style.transform = '';");
     expect(swipeRow).toContain("revealedSide === 'delete' &&");
     expect(swipeRow).toContain("revealedSide === 'unread' &&");
+
+    const messagesPage = source('src/pages/Messages.tsx');
+    expect(messagesPage).toContain('VIRTUALIZE_CONVERSATIONS_AFTER = 80');
+    expect(messagesPage).toContain('shouldVirtualizeConversations ? (');
+    expect(messagesPage).toContain('filteredConversations.map((conv, index)');
   });
 });
