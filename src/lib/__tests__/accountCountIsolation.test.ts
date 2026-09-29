@@ -99,7 +99,8 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(messagesPage).toContain('filteredConversations.map((conv, index)');
 
     expect(conversations).toContain('.range(offset, offset + CONVERSATIONS_PAGE_SIZE - 1)');
-    expect(conversations).toContain('listOffsetRef.current = conversationsQuery.data?.length ?? 0');
+    expect(conversations).toContain('listOffsetRef.current = nextListOffsetRef.current');
+    expect(conversations).toContain('nextListOffsetRef.current = offset + (conversations?.length ?? 0)');
     expect(conversations).not.toContain('listLimitRef.current += CONVERSATIONS_PAGE_SIZE');
   });
 });

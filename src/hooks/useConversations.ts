@@ -412,11 +412,13 @@ export function useConversations() {
   // Sidvis hämtning: varje databasanrop stannar på 300 rader. Det undviker
   // både API:ets radtak och att sida 2 hämtar om sida 1 när inkorgen växer.
   const listOffsetRef = useRef(0);
+  const nextListOffsetRef = useRef(0);
   const hasLoadedOlderPagesRef = useRef(false);
   const paginationUserRef = useRef(user?.id);
   if (paginationUserRef.current !== user?.id) {
     paginationUserRef.current = user?.id;
     listOffsetRef.current = 0;
+    nextListOffsetRef.current = 0;
     hasLoadedOlderPagesRef.current = false;
   }
   const [hasMoreConversations, setHasMoreConversations] = useState(false);
@@ -451,6 +453,11 @@ export function useConversations() {
         .range(offset, offset + CONVERSATIONS_PAGE_SIZE - 1);
 
       setHasMoreConversations((conversations?.length ?? 0) >= CONVERSATIONS_PAGE_SIZE);
+      if (offset > 0) {
+        nextListOffsetRef.current = offset + (conversations?.length ?? 0);
+      } else if (!hasLoadedOlderPagesRef.current) {
+        nextListOffsetRef.current = conversations?.length ?? 0;
+      }
 
 
       if (convError) throw convError;
@@ -1018,7 +1025,7 @@ export function useConversations() {
   const loadMoreConversations = useCallback(async () => {
     if (!user || loadingMoreConversations || conversationsQuery.isFetching || !hasMoreConversations) return;
     setLoadingMoreConversations(true);
-    listOffsetRef.current = conversationsQuery.data?.length ?? 0;
+    listOffsetRef.current = nextListOffsetRef.current;
     hasLoadedOlderPagesRef.current = true;
     try {
       await refetchConversations();
