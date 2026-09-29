@@ -282,19 +282,19 @@ const Dashboard = memo(() => {
     const seeded = !!serverCounts;
     const seededStats = !!serverStats;
     return [
-      { icon: Briefcase, title: 'Annonser', value: isLoading && !seeded ? preloadedEmployerDashboardJobs : totalJobs, loading: false, isLoading },
+      { icon: Briefcase, title: 'Annonser', value: totalJobs, loading: false, isLoading },
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: isLoading && !seeded ? preloadedEmployerActiveJobs : activeCount,
+        value: activeCount,
         loading: false,
         isLoading,
         onClick: () => goToTab('active'),
         ariaLabel: 'Visa aktiva annonser',
         subItems: [{ label: 'Utgångna', value: expiredCount, onClick: () => goToTab('expired'), ariaLabel: 'Visa utgångna annonser' }],
       },
-      { icon: Eye, title: 'Visningar', value: isLoading && !seededStats ? preloadedEmployerTotalViews : totalViews, loading: false, isLoading },
-      { icon: Users, title: 'Ansökningar', value: isLoading && !seededStats ? preloadedEmployerTotalApplications : totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
+      { icon: Eye, title: 'Visningar', value: totalViews, loading: false, isLoading },
+      { icon: Users, title: 'Ansökningar', value: totalApplications, loading: false, isLoading, onClick: () => navigate('/candidates'), ariaLabel: 'Visa alla kandidater' },
     ];
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
