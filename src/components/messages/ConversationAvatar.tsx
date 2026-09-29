@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ interface ConversationAvatarProps {
  * Avatar component for conversations that properly resolves storage paths.
  * Handles both individual profiles and group conversations.
  */
-export function ConversationAvatar({
+export const ConversationAvatar = memo(function ConversationAvatar({
   profile,
   isGroup = false,
   groupName,
@@ -128,5 +128,5 @@ export function ConversationAvatar({
       )}
     </div>
   );
-}
+});
 
