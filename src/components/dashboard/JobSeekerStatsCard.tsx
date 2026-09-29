@@ -45,7 +45,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const queryClient = useQueryClient();
   const userId = user?.id;
   const cachedStats = useMemo(() => readCachedStats(userId), [userId]);
-  const { stats: viewStats } = useProfileViewStats();
+  const { stats: viewStats, isLoading: viewsLoading } = useProfileViewStats();
   const profileViewsCount = viewStats.unique_viewers_30d;
   useEffect(() => { writeCachedStats(userId, 'profile_views', profileViewsCount); }, [userId, profileViewsCount]);
 
@@ -73,16 +73,16 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     refetchOnMount: true,
   });
 
-  const applicationsCount = dashStats?.applications ?? cachedStats['applications'] ?? 0;
-  const interviewsCount = dashStats?.interviews ?? cachedStats['interviews'] ?? 0;
-  const savedJobsCount = dashStats?.saved_jobs ?? cachedStats['saved'] ?? 0;
+  const applicationsCount = dashStats?.applications ?? 0;
+  const interviewsCount = dashStats?.interviews ?? 0;
+  const savedJobsCount = dashStats?.saved_jobs ?? 0;
   // Olästa meddelanden kommer från den enda globala chattkanalen
   // (ConversationsProvider). Kortet prenumererar därför INTE själv på
   // conversation_messages – vid 100 000 inloggade skulle varje meddelande
   // på hela plattformen annars trigga en RPC per öppen hemvy.
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
-    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['messages'] ?? 0;
+    conversationsCtx && !conversationsCtx.isLoading ? conversationsCtx.totalUnreadCount : dashStats?.unread_messages ?? 0;
   useEffect(() => { writeCachedStats(userId, 'messages', unreadMessagesCount); }, [userId, unreadMessagesCount]);
 
   // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
@@ -134,7 +134,8 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       isPaused={isPaused}
       setIsPaused={setIsPaused}
       dataReady={isSuccess}
-      hasCachedData={Object.keys(cachedStats).length > 0}
+      hasCachedData={false}
+      countsReady={isSuccess && !viewsLoading}
     />
   );
 });
