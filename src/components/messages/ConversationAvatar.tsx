@@ -111,7 +111,7 @@ export function ConversationAvatar({
           src={resolvedUrl}
           alt=""
           aria-hidden="true"
-          decoding="sync"
+          decoding="async"
           className={cn(
             'absolute inset-0 h-full w-full object-cover',
             loaded ? 'opacity-100' : 'opacity-0',
