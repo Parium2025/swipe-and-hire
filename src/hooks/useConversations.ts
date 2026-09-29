@@ -256,10 +256,41 @@ export function clearAutoReadSuppression(conversationId: string) {
   autoReadSuppressed.delete(conversationId);
 }
 
+/**
+ * Som iMessage på Mac: ett meddelande är bara "sett" när fönstret både syns
+ * och är det användaren aktivt använder. En öppen chatt i en bakgrundsflik,
+ * ett annat fönster eller när fokus ligger i en annan app räknas som oläst.
+ */
+export function isDocumentActivelyUsed(): boolean {
+  if (typeof document === 'undefined') return true;
+  if (document.visibilityState !== 'visible') return false;
+  return typeof document.hasFocus === 'function' ? document.hasFocus() : true;
+}
+
 function isConversationActivelyViewed(id: string): boolean {
   if (id !== activeConversationId) return false;
-  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return false;
+  if (!isDocumentActivelyUsed()) return false;
   return activeConversationVisible ? activeConversationVisible() : true;
+}
+
+/** Lägger in ett inkommande meddelande i en redan laddad tråd direkt. */
+export function appendIncomingMessageToThread(
+  queryClient: QueryClient,
+  msg: { id: string; conversation_id: string; sender_id: string; created_at: string } & Record<string, unknown>,
+  currentUserId: string,
+): boolean {
+  const key = ['conversation-messages', msg.conversation_id];
+  const current = queryClient.getQueryData<ConversationMessage[]>(key);
+  if (!current) return false;
+  if (current.some((m) => m.id === msg.id)) return true;
+  if (msg.sender_id === currentUserId && current.some((m) => m.id === `temp-${msg.id}`)) return true;
+  // Återanvänd avsändarens redan kända profil så bubblan får rätt bild direkt.
+  const known = current.find((m) => m.sender_id === msg.sender_id && m.sender_profile)?.sender_profile;
+  queryClient.setQueryData<ConversationMessage[]>(key, (old) => {
+    if (!old || old.some((m) => m.id === msg.id)) return old;
+    return [...old, { ...(msg as unknown as ConversationMessage), sender_profile: known }];
+  });
+  return true;
 }
 
 
