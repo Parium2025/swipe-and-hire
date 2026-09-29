@@ -150,7 +150,7 @@ const Dashboard = memo(() => {
   // lika många kortskelett — 0 annonser ⇒ inget kortskelett alls.
   // Serverantal först — listan är paginerad och kan vara ofullständig.
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !serverCounts) return;
     writeCachedCount(SKELETON_COUNT_KEYS.orgJobsActive, serverCounts?.active ?? activeJobs.length);
     writeCachedCount(SKELETON_COUNT_KEYS.orgJobsExpired, serverCounts?.expired ?? expiredJobs.length);
   }, [isLoading, activeJobs.length, expiredJobs.length, serverCounts?.active, serverCounts?.expired]);

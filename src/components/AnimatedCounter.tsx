@@ -46,7 +46,9 @@ export const AnimatedCounter = memo(({
   
   // If we have a cached value, use it as initial display value
   // This prevents showing 0 briefly before data loads
-  const initialValue = hasCachedValue ? cachedInitial : value;
+  // Med explicit datastatus kommer första synliga siffran från bekräftat data,
+  // aldrig en gammal, okontoskopad counter_-cache.
+  const initialValue = isLoading === false ? value : (hasCachedValue ? cachedInitial : value);
   
   const [displayValue, setDisplayValue] = useState(initialValue);
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);

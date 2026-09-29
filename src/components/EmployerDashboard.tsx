@@ -184,7 +184,7 @@ const EmployerDashboard = memo(() => {
   // klient-buckets. Skrivs endast när data är klar för att undvika flimmer.
   const cachedCountsRef = useRef({ active: -1, expired: -1, draft: -1 });
   useEffect(() => {
-    if (loading) return;
+    if (loading || !serverCounts) return;
     const active = serverCounts?.active ?? jobs.filter(j => isEmployerJobActive(j)).length;
     const expired = serverCounts?.expired ?? jobs.filter(j => isEmployerJobExpired(j)).length;
     const draft = serverCounts?.draft ?? jobs.filter(j => isEmployerJobDraft(j)).length;
