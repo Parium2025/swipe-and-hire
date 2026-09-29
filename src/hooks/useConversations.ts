@@ -846,9 +846,11 @@ export function useConversations() {
                 : row.manually_unread
                   ? Math.max(1, conv.unread_count || 0)
                   : conv.unread_count;
+              const isMuted = !!row.muted_at;
+              if (conv.is_muted === isMuted && conv.unread_count === unread) return conv;
               return {
                 ...conv,
-                is_muted: !!row.muted_at,
+                is_muted: isMuted,
                 unread_count: unread,
               };
             });

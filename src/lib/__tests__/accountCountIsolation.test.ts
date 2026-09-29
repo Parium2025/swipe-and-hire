@@ -70,4 +70,21 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(accountSwitch).toContain('localStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);');
     expect(accountSwitch).toContain('localStorage.removeItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);');
   });
+
+  it('håller chattens bild- och meddelanderendering lätt under scroll', () => {
+    const avatars = source('src/components/messages/ConversationAvatar.tsx');
+    const bubbles = source('src/components/messages/MessageBubble.tsx');
+    const chat = source('src/components/messages/ChatView.tsx');
+    const conversations = source('src/hooks/useConversations.ts');
+    const media = source('src/hooks/useMediaUrl.ts');
+
+    expect(avatars).toContain('memo(function ConversationAvatar');
+    expect(avatars).toContain('MAX_LOADED_AVATAR_URLS');
+    expect(bubbles).toContain('memo(function MessageBubble');
+    expect(chat).toContain('const displayMessages = useMemo');
+    expect(chat).toContain('scrollFrameRef.current = requestAnimationFrame');
+    expect(conversations).toContain('repairedResult.slice(0, 12).forEach');
+    expect(conversations).toContain('if (conv.is_muted === isMuted && conv.unread_count === unread) return conv;');
+    expect(media).not.toContain('await decodeFully');
+  });
 });
