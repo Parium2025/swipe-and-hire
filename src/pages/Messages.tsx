@@ -291,6 +291,10 @@ export default function Messages() {
 
   // Chatten glider ut åt höger på mobil. Konversationen får därför inte
   // nollställas direkt — då hade panelen varit tom under utglidningen.
+  const hoverPrefetchTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
+  }, []);
   const backTimerRef = useRef<number | null>(null);
   useEffect(() => () => {
     if (backTimerRef.current) window.clearTimeout(backTimerRef.current);
@@ -487,7 +491,19 @@ export default function Messages() {
                       <div
                         key={conv.id}
                         className="w-full min-w-0 max-w-full overflow-hidden"
-                        onPointerEnter={() => prefetchConversationMessages(queryClient, conv.id)}
+                        onPointerEnter={() => {
+                          // Hover-avsikt: förvärm först när pekaren stannar på raden,
+                          // inte för varje rad som glider förbi under scroll.
+                          if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
+                          hoverPrefetchTimerRef.current = window.setTimeout(() => {
+                            hoverPrefetchTimerRef.current = null;
+                            prefetchConversationMessages(queryClient, conv.id);
+                          }, 150);
+                        }}
+                        onPointerLeave={() => {
+                          if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
+                          hoverPrefetchTimerRef.current = null;
+                        }}
                         onPointerDown={() => prefetchConversationMessages(queryClient, conv.id)}
                       >
                         <SwipeableConversationItem
