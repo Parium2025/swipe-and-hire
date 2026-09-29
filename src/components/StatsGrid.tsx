@@ -84,7 +84,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 style={{ opacity: stat.loading ? 0.5 : 1 }}
               >
                 {typeof stat.value === 'number' ? (
-                  <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
+                  <AnimatedCounter key={stat.cacheKey} value={stat.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
                 ) : stat.value}
               </div>
             </div>
@@ -105,7 +105,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
                 </div>
                 <div className="px-1 pb-1 sm:px-1.5 sm:pb-1.5 md:px-3 md:pb-3">
                   <div className={`text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums text-center flex justify-center ${colorClass}`}>
-                    <AnimatedCounter value={item.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={item.cacheKey} isLoading={stat.isLoading} />
+                    <AnimatedCounter key={item.cacheKey} value={item.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={item.cacheKey} isLoading={stat.isLoading} />
                   </div>
                 </div>
               </div>
@@ -129,7 +129,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
               style={{ opacity: stat.loading ? 0.5 : 1 }}
             >
               {typeof stat.value === 'number' ? (
-                <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
+                <AnimatedCounter key={stat.cacheKey} value={stat.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
               ) : stat.value}
             </div>
           </CardContent>
