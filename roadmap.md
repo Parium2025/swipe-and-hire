@@ -33,3 +33,4 @@
 - [x] Remove duplicate avatar decoding, cap chat-list image warmup, and avoid permanent GPU layers while scrolling
 - [x] Memoize message rendering and reaction grouping; stabilize avatar source changes and throttle chat scroll measurements
 - [x] Remove permanent per-row GPU layers and release swipe layers after vertical scrolling
+- [x] Keep normal chat inboxes on native continuous scrolling; virtualize only genuinely large lists

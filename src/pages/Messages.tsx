@@ -37,6 +37,10 @@ const TAB_STORAGE_KEY = 'parium:messages:tab';
 // Längden på chattens in-/utglidning på mobil (iOS-lik kurva nedan).
 const MOBILE_SLIDE_MS = 320;
 
+// Native scroll är stabilast för vanliga inkorgar. Virtualisering behövs först
+// för stora listor och kan annars flytta rader när höjder mäts under scroll.
+const VIRTUALIZE_CONVERSATIONS_AFTER = 80;
+
 function readStoredTab(): ConversationTab | null {
   try {
     const value = localStorage.getItem(TAB_STORAGE_KEY);
@@ -282,6 +286,54 @@ export default function Messages() {
     paddingStart: 8,
     getItemKey: (i) => filteredConversations[i]?.id ?? i,
   });
+  const shouldVirtualizeConversations = filteredConversations.length > VIRTUALIZE_CONVERSATIONS_AFTER;
+
+  const renderConversationRow = (conv: Conversation, index: number) => {
+    const isLast = index === filteredConversations.length - 1;
+    const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
+    const displayName = getConversationDisplayName({
+      isGroup: conv.is_group,
+      groupName: conv.name,
+      snapshot: conv.applicationSnapshot,
+      displayMember,
+      isSelf,
+      lastMessage: conv.last_message,
+      counterpartPersonSenderId: conv.counterpart_person_sender_id,
+    });
+
+    return (
+      <>
+        <SwipeableConversationItem
+          canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
+          onMarkUnread={() => {
+            markAsUnread(conv.id);
+            if (selectedConversationId === conv.id) {
+              setSelectedConversationId(null);
+              setShowMobileChat(false);
+            }
+          }}
+          onDelete={() => {
+            deleteConversation(conv.id);
+            if (selectedConversationId === conv.id) {
+              setSelectedConversationId(null);
+              setShowMobileChat(false);
+            }
+          }}
+          isDeleting={isDeleting}
+          conversationName={displayName}
+        >
+          <ConversationItem
+            conversation={conv}
+            isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
+            currentUserId={user?.id || ''}
+            onClick={() => handleSelectConversation(conv.id)}
+            category={categorizeConversation(conv)}
+          />
+        </SwipeableConversationItem>
+        {!isLast && <div aria-hidden="true" className="mx-3 h-px bg-white/20" />}
+      </>
+    );
+  };
 
   // Förvärm de översta trådarna när listan står stilla — då är chatten redan
   // målad när man klickar, i stället för att ladda in vid varje byte.
@@ -490,78 +542,48 @@ export default function Messages() {
             ) : (
               <ScrollArea className="h-full w-full min-w-0 max-w-full overflow-x-hidden no-chrome-pad [&_[data-radix-scroll-area-viewport]]:overflow-x-hidden [&_[data-radix-scroll-area-viewport]>div]:!block [&_[data-radix-scroll-area-viewport]>div]:!w-full [&_[data-radix-scroll-area-viewport]>div]:!min-w-0 [&_[data-radix-scroll-area-viewport]>div]:!max-w-full">
                 <div ref={listInnerRef} className="w-full min-w-0 overflow-hidden px-2 pb-[max(var(--chrome-strip-pad),0.5rem)]">
-                  <div className="relative w-full" style={{ height: conversationVirtualizer.getTotalSize() }}>
-                  {conversationVirtualizer.getVirtualItems().map((vItem) => {
-                    const index = vItem.index;
-                    const conv = filteredConversations[index];
-                    if (!conv) return null;
-                    const isLast = index === filteredConversations.length - 1;
-                    const { displayMember, isSelf } = resolveDisplayMember(conv.members, user?.id);
-
-                    const displayName = getConversationDisplayName({
-                      isGroup: conv.is_group,
-                      groupName: conv.name,
-                      snapshot: conv.applicationSnapshot,
-                      displayMember,
-                      isSelf,
-                      lastMessage: conv.last_message,
-                      counterpartPersonSenderId: conv.counterpart_person_sender_id,
-                    });
-
-                    return (
-                      <div
-                        key={vItem.key}
-                        data-index={index}
-                        ref={conversationVirtualizer.measureElement}
-                        className="absolute left-0 top-0 w-full min-w-0 max-w-full overflow-hidden"
-                        style={{ transform: `translateY(${vItem.start}px)` }}
-                        onPointerEnter={() => {
-                          // Hover-avsikt: förvärm först när pekaren stannar på raden,
-                          // inte för varje rad som glider förbi under scroll.
-                          if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
-                          hoverPrefetchTimerRef.current = window.setTimeout(() => {
+                  {shouldVirtualizeConversations ? (
+                    <div className="relative w-full" style={{ height: conversationVirtualizer.getTotalSize() }}>
+                      {conversationVirtualizer.getVirtualItems().map((vItem) => {
+                        const conv = filteredConversations[vItem.index];
+                        if (!conv) return null;
+                        return (
+                          <div
+                            key={vItem.key}
+                            data-index={vItem.index}
+                            ref={conversationVirtualizer.measureElement}
+                            className="absolute left-0 top-0 w-full min-w-0 max-w-full overflow-hidden"
+                            style={{ transform: `translateY(${vItem.start}px)` }}
+                          >
+                            {renderConversationRow(conv, vItem.index)}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="w-full">
+                      {filteredConversations.map((conv, index) => (
+                        <div
+                          key={conv.id}
+                          className="w-full min-w-0 max-w-full overflow-hidden"
+                          onPointerEnter={() => {
+                            if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
+                            hoverPrefetchTimerRef.current = window.setTimeout(() => {
+                              hoverPrefetchTimerRef.current = null;
+                              prefetchConversationMessages(queryClient, conv.id);
+                            }, 150);
+                          }}
+                          onPointerLeave={() => {
+                            if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
                             hoverPrefetchTimerRef.current = null;
-                            prefetchConversationMessages(queryClient, conv.id);
-                          }, 150);
-                        }}
-                        onPointerLeave={() => {
-                          if (hoverPrefetchTimerRef.current) window.clearTimeout(hoverPrefetchTimerRef.current);
-                          hoverPrefetchTimerRef.current = null;
-                        }}
-                        onPointerDown={() => prefetchConversationMessages(queryClient, conv.id)}
-                      >
-                        <SwipeableConversationItem
-                          canMarkUnread={conv.unread_count === 0 && !!conv.last_message}
-                          onMarkUnread={() => {
-                            markAsUnread(conv.id);
-                            if (selectedConversationId === conv.id) {
-                              setSelectedConversationId(null);
-                              setShowMobileChat(false);
-                            }
                           }}
-                          onDelete={() => {
-                            deleteConversation(conv.id);
-                            if (selectedConversationId === conv.id) {
-                              setSelectedConversationId(null);
-                              setShowMobileChat(false);
-                            }
-                          }}
-                          isDeleting={isDeleting}
-                          conversationName={displayName}
+                          onPointerDown={() => prefetchConversationMessages(queryClient, conv.id)}
                         >
-                          <ConversationItem
-                            conversation={conv}
-                            isSelected={selectedConversationId === conv.id && (!isMobile || showMobileChat)}
-                            currentUserId={user?.id || ''}
-                            onClick={() => handleSelectConversation(conv.id)}
-                            category={categorizeConversation(conv)}
-                          />
-                        </SwipeableConversationItem>
-                        {!isLast && <div aria-hidden="true" className="mx-3 h-px bg-white/20" />}
-                      </div>
-                    );
-                  })}
-                  </div>
+                          {renderConversationRow(conv, index)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Oändlig lista: laddar nästa 300 innan användaren nått botten */}
                   {hasMoreConversations && !searchQuery.trim() && (
