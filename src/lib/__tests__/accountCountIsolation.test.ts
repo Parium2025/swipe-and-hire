@@ -49,8 +49,9 @@ describe('kontosiffror vid kallstart och byte', () => {
 
   it('håller anteckningsverktygets aktiva markeringsring helt rund', () => {
     const editor = source('src/components/RichNotesEditor.tsx');
-    expect(editor).toContain('aspect-square rounded-full caret-transparent');
+    expect(editor).toContain('aspect-square rounded-full border border-transparent caret-transparent');
     expect(editor).not.toContain('justify-center rounded-xl caret-transparent');
+    expect(editor).not.toContain(': "border border-transparent"');
   });
 
   it('visar inte föregående kontos olästa antal i webbläsarfliken', () => {
