@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useResolvedAvatarUrl } from '@/hooks/useResolvedAvatarUrl';
 import { CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,17 @@ import type { ConversationProfileData as ProfileData } from '@/types/conversatio
 
 // Adresser som redan laddats i den här sessionen ritas direkt vid remount.
 const loadedAvatarUrls = new Set<string>();
+const MAX_LOADED_AVATAR_URLS = 300;
+
+function rememberLoadedAvatar(url: string) {
+  loadedAvatarUrls.delete(url);
+  loadedAvatarUrls.add(url);
+  while (loadedAvatarUrls.size > MAX_LOADED_AVATAR_URLS) {
+    const oldest = loadedAvatarUrls.values().next().value;
+    if (typeof oldest !== 'string') break;
+    loadedAvatarUrls.delete(oldest);
+  }
+}
 
 
 interface ConversationAvatarProps {
@@ -23,7 +34,7 @@ interface ConversationAvatarProps {
  * Avatar component for conversations that properly resolves storage paths.
  * Handles both individual profiles and group conversations.
  */
-export function ConversationAvatar({
+export const ConversationAvatar = memo(function ConversationAvatar({
   profile,
   isGroup = false,
   groupName,
@@ -45,19 +56,27 @@ export function ConversationAvatar({
   const isReady = hasImageUrl && (loadedAvatarUrls.has(resolvedUrl) || resolvedUrl.startsWith('blob:'));
   const [loaded, setLoaded] = useState(isReady);
   const [loadFailed, setLoadFailed] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const expectsImage = !isGroup && !!(
     profile?.profile_image_url ||
     (profile?.role === 'employer' && profile.company_logo_url)
   );
 
   useEffect(() => {
-    setLoaded(hasImageUrl && !!resolvedUrl && (loadedAvatarUrls.has(resolvedUrl) || resolvedUrl.startsWith('blob:')));
+    const image = imageRef.current;
+    const browserHasImage = !!image && image.complete && image.naturalWidth > 0;
+    const ready = hasImageUrl && !!resolvedUrl && (
+      browserHasImage || loadedAvatarUrls.has(resolvedUrl) || resolvedUrl.startsWith('blob:')
+    );
+    if (ready && resolvedUrl) rememberLoadedAvatar(resolvedUrl);
+    setLoaded(ready);
     setLoadFailed(false);
   }, [resolvedUrl, hasImageUrl]);
 
   const attachImage = useCallback((node: HTMLImageElement | null) => {
+    imageRef.current = node;
     if (!node || !resolvedUrl || !node.complete || node.naturalWidth <= 0) return;
-    loadedAvatarUrls.add(resolvedUrl);
+    rememberLoadedAvatar(resolvedUrl);
     setLoaded(true);
   }, [resolvedUrl]);
 
@@ -117,7 +136,7 @@ export function ConversationAvatar({
             loaded ? 'opacity-100' : 'opacity-0',
           )}
           onLoad={() => {
-            loadedAvatarUrls.add(resolvedUrl);
+            rememberLoadedAvatar(resolvedUrl);
             setLoaded(true);
           }}
           onError={() => {
@@ -128,5 +147,5 @@ export function ConversationAvatar({
       )}
     </div>
   );
-}
+});
 

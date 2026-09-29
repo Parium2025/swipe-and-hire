@@ -146,6 +146,7 @@ export function ChatView({
   const [searchingDb, setSearchingDb] = useState(false);
   const [olderMatchCount, setOlderMatchCount] = useState(0);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
 
   const getViewportEl = useCallback((): HTMLDivElement | null => {
     if (!scrollAreaRef.current) return null;
@@ -213,16 +214,27 @@ export function ChatView({
   // Use the exact same resolved candidate identity in message bubbles as in
   // the conversation header/list. This preserves frozen application media and
   // the legacy live-profile fallback instead of incorrectly showing initials.
-  const snapshotSenderProfile = snapshot && candidateUserId && avatarProfile?.role === 'job_seeker'
-    ? {
-        first_name: avatarProfile.first_name ?? null,
-        last_name: avatarProfile.last_name ?? null,
-        company_name: avatarProfile.company_name ?? null,
-        profile_image_url: avatarProfile.profile_image_url ?? null,
-        company_logo_url: avatarProfile.company_logo_url ?? null,
-        role: avatarProfile.role,
-      }
-    : null;
+  const snapshotSenderProfile = useMemo(() => (
+    snapshot && candidateUserId && avatarProfile?.role === 'job_seeker'
+      ? {
+          first_name: avatarProfile.first_name ?? null,
+          last_name: avatarProfile.last_name ?? null,
+          company_name: avatarProfile.company_name ?? null,
+          profile_image_url: avatarProfile.profile_image_url ?? null,
+          company_logo_url: avatarProfile.company_logo_url ?? null,
+          role: avatarProfile.role,
+        }
+      : null
+  ), [
+    snapshot,
+    candidateUserId,
+    avatarProfile?.first_name,
+    avatarProfile?.last_name,
+    avatarProfile?.company_name,
+    avatarProfile?.profile_image_url,
+    avatarProfile?.company_logo_url,
+    avatarProfile?.role,
+  ]);
 
   // Read receipts: determine the other member's last_read_at
   const otherMemberLastRead = otherMembers[0]?.last_read_at
@@ -282,14 +294,22 @@ export function ChatView({
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement | null;
     if (!target) return;
-    const threshold = 100;
-    isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
+    if (scrollFrameRef.current !== null) return;
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      const threshold = 100;
+      isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
 
-    // Hämta nästa sida i god tid innan toppen nås — scrollpositionen
-    // kompenseras redan i layout-effekten nedan, så vyn står stilla.
-    if (target.scrollTop < 400 && hasMoreRef.current && !loadingOlderRef.current) {
-      void fetchOlderRef.current();
-    }
+      // Hämta nästa sida i god tid innan toppen nås — scrollpositionen
+      // kompenseras redan i layout-effekten nedan, så vyn står stilla.
+      if (target.scrollTop < 400 && hasMoreRef.current && !loadingOlderRef.current) {
+        void fetchOlderRef.current();
+      }
+    });
+  }, []);
+
+  useEffect(() => () => {
+    if (scrollFrameRef.current !== null) cancelAnimationFrame(scrollFrameRef.current);
   }, []);
 
 
@@ -815,12 +835,18 @@ export function ChatView({
 
   // Memoiserad gruppering — annars räknas hela tråden om vid varje tangenttryck
   // i skrivrutan, vilket ger hack på svagare mobiler i långa konversationer.
-  const groupedMessages = useMemo(() => messages.reduce((groups, msg) => {
+  const displayMessages = useMemo(() => messages.map((message) => (
+    snapshotSenderProfile && candidateUserId && message.sender_id === candidateUserId
+      ? { ...message, sender_profile: snapshotSenderProfile }
+      : message
+  )), [messages, snapshotSenderProfile, candidateUserId]);
+
+  const groupedMessages = useMemo(() => displayMessages.reduce((groups, msg) => {
     const date = format(new Date(msg.created_at), 'yyyy-MM-dd');
     if (!groups[date]) groups[date] = [];
     groups[date].push(msg);
     return groups;
-  }, {} as Record<string, ConversationMessage[]>), [messages]);
+  }, {} as Record<string, ConversationMessage[]>), [displayMessages]);
 
   const formatDateHeader = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -1141,10 +1167,6 @@ export function ChatView({
 
                 <div className="space-y-3">
                   {msgs.map((msg, idx) => {
-                    const resolvedMessage = snapshotSenderProfile && candidateUserId && msg.sender_id === candidateUserId
-                      ? { ...msg, sender_profile: snapshotSenderProfile }
-                      : msg;
-
                     const isOwnMsg = msg.sender_id === currentUserId;
                     const isRead = isOwnMsg && otherMemberLastRead
                       ? otherMemberLastRead >= new Date(msg.created_at)
@@ -1163,7 +1185,7 @@ export function ChatView({
                       >
 
                         <MessageBubble
-                          message={resolvedMessage}
+                          message={msg}
                           isOwn={isOwnMsg}
                           showAvatar={
                             idx === 0 ||

@@ -135,7 +135,10 @@ export function SwipeableConversationItem({
       content.style.transform = 'translate3d(0,0,0)';
       scheduleTimer(() => {
         if (gestureId !== gestureIdRef.current) return;
-        if (contentRef.current) contentRef.current.style.transition = '';
+        if (contentRef.current) {
+          contentRef.current.style.transition = '';
+          contentRef.current.style.willChange = 'auto';
+        }
       }, contentMs + 20);
     }
     [deleteRef.current, unreadRef.current].forEach((el) => {
@@ -186,7 +189,12 @@ export function SwipeableConversationItem({
     velocityRef.current = 0;
     lastXRef.current = clientX;
     lastTRef.current = performance.now();
-    if (contentRef.current) contentRef.current.style.transition = '';
+    if (contentRef.current) {
+      contentRef.current.style.transition = '';
+      // Skapa grafiklagret först när raden faktiskt dras. Ett permanent
+      // will-change på hundratals rader belastar GPU/minne och gör scrollen hackig.
+      contentRef.current.style.willChange = 'transform';
+    }
 
   }, []);
 
@@ -420,7 +428,7 @@ export function SwipeableConversationItem({
         <div
           ref={contentRef}
           className="relative z-10 block w-full min-w-0 max-w-full overflow-hidden"
-          style={{ transform: 'translate3d(0,0,0)', willChange: 'transform' }}
+          style={{ transform: 'translate3d(0,0,0)' }}
         >
           {children}
         </div>

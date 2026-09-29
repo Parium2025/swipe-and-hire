@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from './useAuth';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 export interface MessageReaction {
   id: string;
@@ -26,8 +26,11 @@ export function useMessageReactions(conversationId: string | null) {
   // Fetch all reactions for messages in this conversation
   // We depend on the messages query being loaded first to get message IDs
   const messagesData = queryClient.getQueryData<any[]>(['conversation-messages', conversationId]);
-  const messageIds = messagesData?.map((m: any) => m.id).filter((id: string) => !id.startsWith('temp-')) || [];
-  const messageIdsKey = messageIds.join(',');
+  const messageIds = useMemo(
+    () => messagesData?.map((m: any) => m.id).filter((id: string) => !id.startsWith('temp-')) || [],
+    [messagesData],
+  );
+  const messageIdsKey = useMemo(() => messageIds.join(','), [messageIds]);
 
   const reactionsQuery = useQuery({
     queryKey: ['message-reactions', conversationId, messageIdsKey],
@@ -123,24 +126,32 @@ export function useMessageReactions(conversationId: string | null) {
   });
 
   // Group reactions by message ID
-  const getReactionsForMessage = (messageId: string): GroupedReaction[] => {
-    const reactions = reactionsQuery.data || [];
-    const messageReactions = reactions.filter(r => r.message_id === messageId);
-    
-    const grouped = new Map<string, { count: number; hasOwn: boolean }>();
-    messageReactions.forEach(r => {
-      const existing = grouped.get(r.emoji) || { count: 0, hasOwn: false };
-      existing.count++;
-      if (r.user_id === user?.id) existing.hasOwn = true;
-      grouped.set(r.emoji, existing);
-    });
+  const groupedReactions = useMemo(() => {
+    const byMessage = new Map<string, Map<string, { count: number; hasOwn: boolean }>>();
+    for (const reaction of reactionsQuery.data || []) {
+      let grouped = byMessage.get(reaction.message_id);
+      if (!grouped) {
+        grouped = new Map();
+        byMessage.set(reaction.message_id, grouped);
+      }
+      const current = grouped.get(reaction.emoji) || { count: 0, hasOwn: false };
+      grouped.set(reaction.emoji, {
+        count: current.count + 1,
+        hasOwn: current.hasOwn || reaction.user_id === user?.id,
+      });
+    }
+    return new Map(
+      Array.from(byMessage.entries()).map(([messageId, grouped]) => [
+        messageId,
+        Array.from(grouped.entries()).map(([emoji, data]) => ({ emoji, ...data })),
+      ]),
+    );
+  }, [reactionsQuery.data, user?.id]);
 
-    return Array.from(grouped.entries()).map(([emoji, data]) => ({
-      emoji,
-      count: data.count,
-      hasOwn: data.hasOwn,
-    }));
-  };
+  const getReactionsForMessage = useCallback(
+    (messageId: string): GroupedReaction[] => groupedReactions.get(messageId) ?? [],
+    [groupedReactions],
+  );
 
   return {
     getReactionsForMessage,

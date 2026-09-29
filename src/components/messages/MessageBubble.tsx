@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { memo, useState, useRef, useCallback } from 'react';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import { EmojiReactionPicker } from '@/components/messages/EmojiReactionPicker';
 import { AttachmentImageViewer } from '@/components/messages/AttachmentImageViewer';
@@ -33,7 +33,7 @@ function isEdited(message: ConversationMessage): boolean {
   return !!message.edited_at;
 }
 
-export function MessageBubble({
+export const MessageBubble = memo(function MessageBubble({
   message,
   isOwn,
   showAvatar,
@@ -366,4 +366,24 @@ export function MessageBubble({
       )}
     </>
   );
-}
+}, (previous, next) => {
+  if (
+    previous.message !== next.message
+    || previous.isOwn !== next.isOwn
+    || previous.showAvatar !== next.showAvatar
+    || previous.isGroup !== next.isGroup
+    || previous.currentUserRole !== next.currentUserRole
+    || previous.isRead !== next.isRead
+    || previous.onEdit !== next.onEdit
+  ) return false;
+
+  const previousReactions = previous.reactions ?? [];
+  const nextReactions = next.reactions ?? [];
+  return previousReactions.length === nextReactions.length
+    && previousReactions.every((reaction, index) => {
+      const nextReaction = nextReactions[index];
+      return nextReaction?.emoji === reaction.emoji
+        && nextReaction.count === reaction.count
+        && nextReaction.hasOwn === reaction.hasOwn;
+    });
+});

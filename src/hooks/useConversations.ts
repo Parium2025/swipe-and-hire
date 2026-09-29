@@ -662,8 +662,11 @@ export function useConversations() {
         writeConversationsCache(user.id, repairedResult);
       }
 
-      // 🔥 Prefetch avatars for all conversation members AND snapshots (eliminates flicker)
-      repairedResult.forEach((conv) => {
+      // Förvärm bara första skärmen. Att hämta och avkoda bilder för upp till
+      // 300 osynliga rader samtidigt konkurrerade med scroll och kunde låsa
+      // profilbilder på svagare datorer. Synliga rader längre ned prioriteras
+      // automatiskt av useMediaUrl när användaren når dem.
+      repairedResult.slice(0, 12).forEach((conv) => {
         // Prefetch snapshot image if available (frozen candidate profile photo)
         if (conv.applicationSnapshot?.profile_image_snapshot_url) {
           void prefetchMediaUrl(conv.applicationSnapshot.profile_image_snapshot_url, 'profile-image', MEDIA_URL_TTL, CHAT_AVATAR_TRANSFORM).catch(() => {});
@@ -843,9 +846,11 @@ export function useConversations() {
                 : row.manually_unread
                   ? Math.max(1, conv.unread_count || 0)
                   : conv.unread_count;
+              const isMuted = !!row.muted_at;
+              if (conv.is_muted === isMuted && conv.unread_count === unread) return conv;
               return {
                 ...conv,
-                is_muted: !!row.muted_at,
+                is_muted: isMuted,
                 unread_count: unread,
               };
             });

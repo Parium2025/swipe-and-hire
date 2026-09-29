@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import {
@@ -19,7 +20,7 @@ interface ConversationItemProps {
   category: 'candidates' | 'colleagues';
 }
 
-export function ConversationItem({
+export const ConversationItem = memo(function ConversationItem({
   conversation,
   isSelected,
   currentUserId,
@@ -152,4 +153,9 @@ export function ConversationItem({
       </div>
     </button>
   );
-}
+}, (previous, next) => (
+  previous.conversation === next.conversation
+  && previous.isSelected === next.isSelected
+  && previous.currentUserId === next.currentUserId
+  && previous.category === next.category
+));
