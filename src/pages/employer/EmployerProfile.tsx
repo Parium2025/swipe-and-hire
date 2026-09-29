@@ -605,7 +605,9 @@ const EmployerProfile = () => {
         setFailedSignature(signature);
         setSaveStatus('error');
       }
-    }, 900);
+    // Bildbyten sparas direkt så toppmenyn byter bild utan väntan;
+    // textfält väntar kvar på skrivpausen.
+    }, (originalValues?.profile_image_url ?? '') !== (formData.profile_image_url ?? '') ? 0 : 900);
     return () => clearTimeout(t);
   }, [hasUnsavedChanges, loading, formData, failedSignature, isOnline]);
 
