@@ -40,6 +40,15 @@ describe('patchConversationProfileCaches', () => {
     const oldProfile = sampleProfile('user-123');
     const conversation = {
       id: 'conversation-1',
+      name: null,
+      is_group: false,
+      job_id: null,
+      application_id: null,
+      candidate_id: null,
+      created_by: 'viewer-1',
+      created_at: new Date().toISOString(),
+      last_message_at: new Date().toISOString(),
+      unread_count: 0,
       members: [{ user_id: 'user-123', is_admin: false, last_read_at: null, profile: oldProfile }],
       last_message: {
         id: 'message-1', conversation_id: 'conversation-1', sender_id: 'user-123', content: 'Hej',

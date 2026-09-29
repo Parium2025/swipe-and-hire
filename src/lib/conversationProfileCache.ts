@@ -1,21 +1,21 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { Conversation, ConversationMessage } from '@/hooks/useConversations';
-import type { ConversationProfileData } from '@/types/conversation';
-
-type ProfilePatch = ConversationProfileData & { user_id?: string };
+type ChatProfile = NonNullable<ConversationMessage['sender_profile']>;
+type ProfilePatch = Partial<ChatProfile> & { user_id?: string };
 
 function mergeProfile(
-  current: ConversationProfileData | undefined,
+  current: ChatProfile | undefined,
   profile: ProfilePatch,
-): ConversationProfileData {
+): ChatProfile | undefined {
+  const role = profile.role ?? current?.role;
+  if (!role) return current;
   return {
-    ...current,
-    role: profile.role ?? current?.role,
-    first_name: profile.first_name ?? null,
-    last_name: profile.last_name ?? null,
-    company_name: profile.company_name ?? null,
-    profile_image_url: profile.profile_image_url ?? null,
-    company_logo_url: profile.company_logo_url ?? null,
+    role,
+    first_name: profile.first_name !== undefined ? profile.first_name : current?.first_name ?? null,
+    last_name: profile.last_name !== undefined ? profile.last_name : current?.last_name ?? null,
+    company_name: profile.company_name !== undefined ? profile.company_name : current?.company_name ?? null,
+    profile_image_url: profile.profile_image_url !== undefined ? profile.profile_image_url : current?.profile_image_url ?? null,
+    company_logo_url: profile.company_logo_url !== undefined ? profile.company_logo_url : current?.company_logo_url ?? null,
   };
 }
 

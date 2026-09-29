@@ -1709,7 +1709,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       invalidateCachedProfile(user.id);
       patchConversationProfileCaches(queryClient, user.id, {
         user_id: user.id,
-        role: profile?.role,
         first_name: Object.prototype.hasOwnProperty.call(cleanedUpdates, 'first_name')
           ? cleanedUpdates.first_name
           : profile?.first_name,
