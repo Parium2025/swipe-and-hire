@@ -1,6 +1,7 @@
 import { TruncatedText } from '@/components/TruncatedText';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { looksLikeVideoFile } from '@/lib/videoInput';
+import { invalidateCachedProfile } from '@/lib/performanceGuards';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
