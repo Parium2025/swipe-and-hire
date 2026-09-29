@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { writeUnreadBadgeCache } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
@@ -256,10 +256,41 @@ export function clearAutoReadSuppression(conversationId: string) {
   autoReadSuppressed.delete(conversationId);
 }
 
+/**
+ * Som iMessage på Mac: ett meddelande är bara "sett" när fönstret både syns
+ * och är det användaren aktivt använder. En öppen chatt i en bakgrundsflik,
+ * ett annat fönster eller när fokus ligger i en annan app räknas som oläst.
+ */
+export function isDocumentActivelyUsed(): boolean {
+  if (typeof document === 'undefined') return true;
+  if (document.visibilityState !== 'visible') return false;
+  return typeof document.hasFocus === 'function' ? document.hasFocus() : true;
+}
+
 function isConversationActivelyViewed(id: string): boolean {
   if (id !== activeConversationId) return false;
-  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return false;
+  if (!isDocumentActivelyUsed()) return false;
   return activeConversationVisible ? activeConversationVisible() : true;
+}
+
+/** Lägger in ett inkommande meddelande i en redan laddad tråd direkt. */
+export function appendIncomingMessageToThread(
+  queryClient: QueryClient,
+  msg: { id: string; conversation_id: string; sender_id: string; created_at: string } & Record<string, unknown>,
+  currentUserId: string,
+): boolean {
+  const key = ['conversation-messages', msg.conversation_id];
+  const current = queryClient.getQueryData<ConversationMessage[]>(key);
+  if (!current) return false;
+  if (current.some((m) => m.id === msg.id)) return true;
+  if (msg.sender_id === currentUserId && current.some((m) => m.id === `temp-${msg.id}`)) return true;
+  // Återanvänd avsändarens redan kända profil så bubblan får rätt bild direkt.
+  const known = current.find((m) => m.sender_id === msg.sender_id && m.sender_profile)?.sender_profile;
+  queryClient.setQueryData<ConversationMessage[]>(key, (old) => {
+    if (!old || old.some((m) => m.id === msg.id)) return old;
+    return [...old, { ...(msg as unknown as ConversationMessage), sender_profile: known }];
+  });
+  return true;
 }
 
 
@@ -729,6 +760,10 @@ export function useConversations() {
           if (!messageFilter && knownIds.size > 0 && !knownIds.has(msg.conversation_id)) return;
 
 
+
+          // 0) Lägg in meddelandet i tråden direkt om den redan är laddad, så
+          //    konversationen aldrig släpar efter listan.
+          appendIncomingMessageToThread(queryClient, msg as never, user.id);
 
           // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
           //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
@@ -1205,17 +1240,25 @@ export function useConversationMessages(
             if (alreadyExists) return;
           }
 
-          // Fetch sender profile through shared cache to avoid one profile read per realtime event burst
-          const senderProfile = await fetchCachedProfile(newMessage.sender_id);
+          // Visa meddelandet direkt — vänta aldrig på en profilhämtning innan
+          // bubblan syns (den kunde tidigare fördröja tråden i många sekunder).
+          appendIncomingMessageToThread(queryClient, newMessage as never, user.id);
 
-          // Add message directly to cache - instant update!
+          // Komplettera avsändarprofilen i bakgrunden; ett fel får aldrig tappa meddelandet.
+          const senderProfile = await fetchCachedProfile(newMessage.sender_id).catch(() => null);
+
           queryClient.setQueryData<ConversationMessage[]>(
             ['conversation-messages', conversationId],
             (old) => {
               if (!old) return [{ ...newMessage, sender_profile: senderProfile || undefined }];
-              
-              // Check if message already exists by real ID
-              if (old.some(m => m.id === newMessage.id)) return old;
+
+              const existingIdx = old.findIndex(m => m.id === newMessage.id);
+              if (existingIdx !== -1) {
+                if (!senderProfile || old[existingIdx].sender_profile) return old;
+                const updated = [...old];
+                updated[existingIdx] = { ...updated[existingIdx], sender_profile: senderProfile };
+                return updated;
+              }
 
               // For own messages: replace temp placeholder if it exists
               if (newMessage.sender_id === user.id) {
@@ -1226,7 +1269,7 @@ export function useConversationMessages(
                   return updated;
                 }
               }
-              
+
               return [...old, { ...newMessage, sender_profile: senderProfile || undefined }];
             }
           );
