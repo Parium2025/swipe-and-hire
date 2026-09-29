@@ -34,4 +34,22 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(dashboard).toContain('`emp_total_jobs:${user.id}`');
     expect(dashboard).not.toContain("cacheKey: 'emp_total_jobs'");
   });
+
+  it('nollställer jobbsökarens sparade sökningar och jobb innan nästa konto är verifierat', () => {
+    const searches = source('src/hooks/useSavedSearches.ts');
+    const jobs = source('src/hooks/useSavedJobs.ts');
+
+    expect(searches).toContain('setSavedSearches(cached ?? []);');
+    expect(searches).toContain('setTotalNewMatches((cached ?? []).reduce');
+    expect(searches).toContain('activeUserIdRef.current !== requestedUserId');
+    expect(jobs).toContain('setSavedJobIds(cached ?? new Set());');
+    expect(jobs).toContain('activeUserIdRef.current !== requestedUserId');
+    expect(jobs).not.toContain('hasInitialized.current');
+  });
+
+  it('håller anteckningsverktygets aktiva markeringsring helt rund', () => {
+    const editor = source('src/components/RichNotesEditor.tsx');
+    expect(editor).toContain('aspect-square rounded-full caret-transparent');
+    expect(editor).not.toContain('justify-center rounded-xl caret-transparent');
+  });
 });

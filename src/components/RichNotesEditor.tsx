@@ -85,7 +85,7 @@ const ToolbarButton = memo(forwardRef<HTMLButtonElement, ToolbarButtonProps>(({
             onClick={handleClick}
             disabled={disabled}
             className={cn(
-              "flex-shrink-0 flex items-center justify-center rounded-xl caret-transparent",
+              "flex-shrink-0 flex items-center justify-center aspect-square rounded-full caret-transparent",
               "transition-[background-color,box-shadow,transform] duration-150",
               large ? "w-9 h-9" : compact ? "p-1" : "w-8 h-8",
               "bg-transparent md:hover:bg-white/20",

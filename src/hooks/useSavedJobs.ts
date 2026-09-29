@@ -62,7 +62,7 @@ function saveToCache(userId: string, jobIds: Set<string>): void {
 export const useSavedJobs = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const hasInitialized = useRef(false);
+  const activeUserIdRef = useRef<string | null>(user?.id ?? null);
   
   // Initialize from cache immediately to prevent "fill-in" effect
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(() => {
@@ -78,17 +78,17 @@ export const useSavedJobs = () => {
 
   // Re-initialize from cache when user changes
   useEffect(() => {
-    if (!user?.id) {
+    const userId = user?.id ?? null;
+    activeUserIdRef.current = userId;
+    if (!userId) {
       setSavedJobIds(new Set());
       setIsLoading(false);
       return;
     }
     
-    const cached = loadFromCache(user.id);
-    if (cached) {
-      setSavedJobIds(cached);
-      setIsLoading(false);
-    }
+    const cached = loadFromCache(userId);
+    setSavedJobIds(cached ?? new Set());
+    setIsLoading(cached === null);
   }, [user?.id]);
 
   // 🔔 Jobbet skippades i Swipe Mode → databasens exklusivitetstrigger har
@@ -117,6 +117,7 @@ export const useSavedJobs = () => {
       setIsLoading(false);
       return;
     }
+    const requestedUserId = user.id;
 
     try {
       const { data, error } = await supabase
@@ -127,21 +128,21 @@ export const useSavedJobs = () => {
       if (error) throw error;
 
       const newIds = new Set(data?.map(item => item.job_id) || []);
+      // Ignorera sena svar från kontot som nyss lämnades.
+      if (activeUserIdRef.current !== requestedUserId) return;
       setSavedJobIds(newIds);
       
       // Update cache with fresh data
-      saveToCache(user.id, newIds);
+      saveToCache(requestedUserId, newIds);
     } catch (err) {
       console.error('Error fetching saved jobs:', err);
     } finally {
-      setIsLoading(false);
+      if (activeUserIdRef.current === requestedUserId) setIsLoading(false);
     }
   }, [user]);
 
   // Fetch saved job IDs on mount (background hydration)
   useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
     fetchSavedJobs();
   }, [fetchSavedJobs]);
 
