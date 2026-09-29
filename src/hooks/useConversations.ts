@@ -761,6 +761,10 @@ export function useConversations() {
 
 
 
+          // 0) Lägg in meddelandet i tråden direkt om den redan är laddad, så
+          //    konversationen aldrig släpar efter listan.
+          appendIncomingMessageToThread(queryClient, msg as never, user.id);
+
           // 1) Snabbaste vägen: patcha listan i minnet (ingen nätverksrundtur).
           //    Vid bulkutskick (tusentals meddelanden) blir detta O(1) per event
           //    istället för en full omhämtning.
