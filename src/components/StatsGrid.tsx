@@ -66,7 +66,7 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
       : {};
 
   const renderCard = (stat: StatCard, index: number, spanClass = '') => (
-    <Card key={index} className={`bg-white/5 border-white/20 overflow-hidden ${spanClass}`}>
+    <Card key={index} className={`rounded-2xl border border-white/10 bg-white/[0.06] overflow-hidden ${spanClass}`}>
       {stat.subItems && stat.subItems.length > 0 ? (
         <div className="flex h-full">
           <div
@@ -74,17 +74,17 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
             className={`flex-1 flex flex-col min-w-0 ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
           >
             <div className="flex items-center justify-center p-1 sm:p-1.5 md:p-3 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-              <span className="text-[10px] sm:text-xs md:text-sm font-medium text-green-400 whitespace-nowrap truncate">
+              <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white/70 whitespace-nowrap truncate">
                 {stat.title}
               </span>
             </div>
             <div className="px-1 pb-1 sm:px-1.5 sm:pb-1.5 md:px-3 md:pb-3">
               <div 
-                className="text-sm sm:text-base md:text-xl font-bold text-center transition-opacity duration-500 flex justify-center text-green-400"
+                className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums text-center transition-opacity duration-500 flex justify-center text-green-400"
                 style={{ opacity: stat.loading ? 0.5 : 1 }}
               >
                 {typeof stat.value === 'number' ? (
-                  <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
+                  <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
                 ) : stat.value}
               </div>
             </div>
@@ -96,16 +96,16 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
               <div
                 key={idx}
                 {...props}
-                className={`flex-1 flex flex-col border-l border-white/30 min-w-0 ${props.className ?? ''}`}
+                className={`flex-1 flex flex-col border-l border-white/10 min-w-0 ${props.className ?? ''}`}
               >
                 <div className="flex items-center justify-center p-1 sm:p-1.5 md:p-3 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-                  <span className={`text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate ${colorClass}`}>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate text-white/70">
                     {item.label}
                   </span>
                 </div>
                 <div className="px-1 pb-1 sm:px-1.5 sm:pb-1.5 md:px-3 md:pb-3">
-                  <div className={`text-sm sm:text-base md:text-xl font-bold text-center flex justify-center ${colorClass}`}>
-                    <AnimatedCounter value={item.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={item.cacheKey} isLoading={stat.isLoading} />
+                  <div className={`text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums text-center flex justify-center ${colorClass}`}>
+                    <AnimatedCounter value={item.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={item.cacheKey} isLoading={stat.isLoading} />
                   </div>
                 </div>
               </div>
@@ -118,18 +118,18 @@ export const StatsGrid = memo(({ stats }: StatsGridProps) => {
           className={`h-full ${interactiveProps(stat.onClick, stat.ariaLabel).className ?? ''}`}
         >
           <CardHeader className="flex flex-row items-center justify-center gap-1 md:gap-2 space-y-0 p-1.5 sm:p-2 md:p-3 min-w-0 min-h-[28px] sm:min-h-[32px] md:min-h-[40px]">
-            <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white flex-shrink-0" />
-            <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
+            <stat.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-white/70 flex-shrink-0" />
+            <span className="text-[10px] sm:text-xs md:text-sm font-medium text-white/70 whitespace-nowrap truncate">
               {stat.title}
             </span>
           </CardHeader>
           <CardContent className="px-1.5 pb-1.5 sm:px-2 sm:pb-2 md:px-3 md:pb-3">
             <div 
-              className="text-sm sm:text-base md:text-xl font-bold text-white text-center transition-opacity duration-500 flex justify-center"
+              className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums text-white text-center transition-opacity duration-500 flex justify-center"
               style={{ opacity: stat.loading ? 0.5 : 1 }}
             >
               {typeof stat.value === 'number' ? (
-                <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-bold" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
+                <AnimatedCounter value={stat.value} className="text-sm sm:text-base md:text-xl font-semibold tracking-tight tabular-nums" cacheKey={stat.cacheKey} isLoading={stat.isLoading} />
               ) : stat.value}
             </div>
           </CardContent>
