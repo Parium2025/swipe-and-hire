@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams } from 'react-router-dom';
 import { clearAutoReadSuppression, type Conversation } from '@/hooks/useConversations';
 import { useConversationsContext } from '@/contexts/ConversationsContext';
@@ -265,6 +266,22 @@ export default function Messages() {
     setSelectedConversationId(convId);
     setShowMobileChat(true);
   };
+
+  // Virtualiserad lista: bara raderna som syns (plus marginal) finns i DOM:en,
+  // så scrollen kostar lika lite med 10 som med 1 000 chattar.
+  const [listScrollEl, setListScrollEl] = useState<HTMLElement | null>(null);
+  const listInnerRef = useCallback((el: HTMLDivElement | null) => {
+    const viewport = (el?.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null) ?? null;
+    setListScrollEl((prev) => (prev === viewport ? prev : viewport));
+  }, []);
+  const conversationVirtualizer = useVirtualizer({
+    count: filteredConversations.length,
+    getScrollElement: () => listScrollEl,
+    estimateSize: () => 77,
+    overscan: 8,
+    paddingStart: 8,
+    getItemKey: (i) => filteredConversations[i]?.id ?? i,
+  });
 
   // Förvärm de översta trådarna när listan står stilla — då är chatten redan
   // målad när man klickar, i stället för att ladda in vid varje byte.
