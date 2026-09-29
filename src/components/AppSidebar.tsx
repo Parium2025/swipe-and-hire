@@ -68,9 +68,9 @@ export function AppSidebar() {
   // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
   // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const jobSeekerUnreadMessages = conversationsCtx && !conversationsCtx.isLoading
+  const jobSeekerUnreadMessages = user && conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
-    : preloadedJobSeekerUnreadMessages;
+    : 0;
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();

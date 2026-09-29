@@ -152,9 +152,9 @@ export function EmployerSidebar() {
   // När context är mountad (även med värde 0) ska live alltid vinna över det cachade
   // värdet, annars står en gammal siffra kvar efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const unreadMessages = conversationsCtx && !conversationsCtx.isLoading
+  const unreadMessages = user && conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
-    : preloadedUnreadMessages;
+    : 0;
   const { isPlatformAdmin } = useIsPlatformAdmin();
   const navigate = useNavigate();
   const location = useLocation();
