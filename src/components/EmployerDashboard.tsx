@@ -81,8 +81,8 @@ const EmployerDashboard = memo(() => {
   // Ett misslyckat anrop får aldrig se ut som ett tomt konto.
   const showJobsError = !!jobsError && jobs.length === 0 && !loading;
   // Server-side truth — exakta totaler även vid 10k+ jobb
-  const { data: serverCounts } = useEmployerJobsCounts('personal');
-  const { data: serverStats } = useEmployerDashboardStats('personal');
+  const { data: serverCounts, isPending: countsPending } = useEmployerJobsCounts('personal');
+  const { data: serverStats, isPending: statsPending } = useEmployerDashboardStats('personal');
   // Osedda ansökningar per annons — pricken försvinner när kandidaten öppnats.
   const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const queryClient = useQueryClient();
@@ -722,7 +722,7 @@ const EmployerDashboard = memo(() => {
 
   // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
   // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
-  if (!initialLoadDone) {
+  if (!initialLoadDone || countsPending || statsPending || !serverCounts || !serverStats) {
     return <EmployerDashboardSkeleton showDrafts titleWidthClass="w-48" />;
   }
   // Sidebar-navigering (varm cache) → osynlig placeholder under fade-in delay.

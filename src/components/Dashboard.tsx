@@ -46,8 +46,8 @@ const Dashboard = memo(() => {
     enableRealtime: true 
   });
   // Server-side truth — skalar till 10k+ jobb utan klient-belastning
-  const { data: serverCounts } = useEmployerJobsCounts('organization');
-  const { data: serverStats } = useEmployerDashboardStats('organization');
+  const { data: serverCounts, isPending: countsPending } = useEmployerJobsCounts('organization');
+  const { data: serverStats, isPending: statsPending } = useEmployerDashboardStats('organization');
   const { countsByJob: unviewedByJob } = useUnviewedApplicationCounts();
   const { profile, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
   const navigate = useNavigate();
@@ -298,7 +298,7 @@ const Dashboard = memo(() => {
     ];
   }, [filteredStats, expiredJobs.length, isLoading, serverCounts, serverStats, preloadedEmployerDashboardJobs, preloadedEmployerActiveJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, goToTab, navigate]);
 
-  if (!initialLoadDone) {
+  if (!initialLoadDone || countsPending || statsPending || !serverCounts || !serverStats) {
     return <EmployerDashboardSkeleton showDrafts={false} titleWidthClass="w-28" />;
   }
   if (isLoading || !showContent) {

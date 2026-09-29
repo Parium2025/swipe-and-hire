@@ -120,7 +120,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     }
   }, [serverCounts, countsLoading, user?.id]);
 
-  const displayActiveJobs = serverCounts ? activeJobsCount : (cachedStats['active_jobs'] ?? 0);
+  const displayActiveJobs = serverCounts ? activeJobsCount : 0;
 
 
   const statsArray: StatData[] = useMemo(() => [
@@ -135,8 +135,9 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       stats={statsArray}
       isPaused={isPaused}
       setIsPaused={setIsPaused}
-      dataReady={isSuccess}
-      hasCachedData={Object.keys(cachedStats).length > 0}
+      dataReady={isSuccess && !!serverCounts}
+      hasCachedData={false}
+      countsReady={isSuccess && !!serverCounts}
     />
   );
 });

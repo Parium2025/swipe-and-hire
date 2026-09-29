@@ -26,9 +26,10 @@ interface StatsCarouselProps {
   dataReady?: boolean;
   /** Cached stats exist (enables emptyHint display as fallback) */
   hasCachedData?: boolean;
+  countsReady?: boolean;
 }
 
-export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false }: StatsCarouselProps) => {
+export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = false, hasCachedData = false, countsReady = true }: StatsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigate = useNavigate();
   const { pauseNow, resumeNow, resumeWithDelay } = useCardInteractionPause({ setIsPaused });
@@ -94,11 +95,11 @@ export const StatsCarousel = memo(({ stats, isPaused, setIsPaused, dataReady = f
               className="flex flex-col items-center"
             >
               <h3 className="text-sm sm:text-base font-semibold text-white leading-snug mb-1">{currentStat.label}</h3>
-              <div className="text-3xl font-bold text-white">{currentStat.value}</div>
+               <div className="text-3xl font-bold text-white">{countsReady ? currentStat.value : '\u00a0'}</div>
               {showEmptyHint && (
                 <p className="text-xs text-white mt-1">{currentStat.emptyHint}</p>
               )}
-              {currentStat.value === 0 && !currentStat.emptyHint && (
+               {countsReady && currentStat.value === 0 && !currentStat.emptyHint && (
                 <p className="text-xs text-white mt-1">{currentStat.description}</p>
               )}
             </motion.div>
