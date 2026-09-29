@@ -68,9 +68,9 @@ export function AppSidebar() {
   // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
   // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
   const conversationsCtx = useConversationsContext();
-  const jobSeekerUnreadMessages = conversationsCtx && !conversationsCtx.isLoading
+  const jobSeekerUnreadMessages = user && conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
-    : preloadedJobSeekerUnreadMessages;
+    : 0;
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -269,9 +269,9 @@ export function AppSidebar() {
             <SidebarMenu>
                {[
                  { title: 'Hem', url: '/home', icon: Home, count: undefined, showBadge: false },
-                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: countsReady ? preloadedTotalJobs : 0, showBadge: false },
-                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: countsReady ? preloadedSavedJobs : 0, showBadge: false },
-                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: countsReady ? preloadedMyApplications : 0, showBadge: false },
+                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: countsReady ? preloadedTotalJobs : undefined, showBadge: false },
+                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: countsReady ? preloadedSavedJobs : undefined, showBadge: false },
+                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: countsReady ? preloadedMyApplications : undefined, showBadge: false },
                  { title: 'Chattar', url: '/messages', icon: MessageCircle, count: jobSeekerUnreadMessages, showBadge: jobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>

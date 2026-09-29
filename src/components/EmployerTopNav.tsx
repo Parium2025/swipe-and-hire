@@ -87,9 +87,9 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   // Faller tillbaka på preloaded värde när context inte är mountad (t.ex. innan
   // första conversations-fetchen). Samma mönster som JobSeekerTopNav använder.
   const conversationsCtx = useConversationsContext();
-  const unreadMessages = conversationsCtx && !conversationsCtx.isLoading
+  const unreadMessages = user && conversationsCtx && !conversationsCtx.isLoading
     ? conversationsCtx.totalUnreadCount
-    : preloadedUnreadMessages;
+    : 0;
   
   const countsReady = !!user && employerCountsReadyUserId === user.id;
   // TopNav-avatar är alltid liten (~32-40px) → be om optimerad version (2x för retina automatiskt)

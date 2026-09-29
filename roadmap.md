@@ -26,3 +26,4 @@
 - [x] Restore the employer mobile interview card to the shared dashboard height; truncate long names and titles with full-text tooltips, keeping all details and actions visible
 - [x] Synchronize changed personal avatars and company logos across mounted chats, tabs and authorized devices
 - [x] Hide provisional employer counts on cold login until scoped server totals are confirmed
+- [x] Isolate remaining badges, notification counts and animated statistics across cold start and account switch
