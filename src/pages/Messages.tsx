@@ -471,7 +471,7 @@ export default function Messages() {
 
 
           {/* Conversation list */}
-          <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10">
+          <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10" style={{ contain: 'layout paint' }}>
             {showEmptyConversationList ? (
               <div className="h-full flex items-center justify-center">
                 <EmptyConversationList
