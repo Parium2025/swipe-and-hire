@@ -855,10 +855,10 @@ const SearchJobs = memo(() => {
   }, [filteredAndSortedJobs]);
 
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobCount, loading: false, cacheKey: 'search_active_jobs' },
-    { icon: Building, title: 'Unika företag', value: uniqueCompanyCount, loading: false, cacheKey: 'search_unique_companies' },
-    { icon: TrendingUp, title: 'Nya denna vecka', value: newThisWeekCount, loading: false, cacheKey: 'search_new_this_week' },
-  ], [activeJobCount, uniqueCompanyCount, newThisWeekCount]);
+    { icon: Briefcase, title: 'Aktiva jobb', value: activeJobCount, loading: false, isLoading: isSearchResultsLoading, cacheKey: 'search_active_jobs' },
+    { icon: Building, title: 'Unika företag', value: uniqueCompanyCount, loading: false, isLoading: isSearchResultsLoading, cacheKey: 'search_unique_companies' },
+    { icon: TrendingUp, title: 'Nya denna vecka', value: newThisWeekCount, loading: false, isLoading: isSearchResultsLoading, cacheKey: 'search_new_this_week' },
+  ], [activeJobCount, uniqueCompanyCount, newThisWeekCount, isSearchResultsLoading]);
 
   const handleClearAllFilters = useCallback(() => {
     setSelectedPostalCode('');

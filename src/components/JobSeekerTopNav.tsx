@@ -160,10 +160,6 @@ function JobSeekerTopNav() {
   const stickyCount = (key: string, value: number | null | undefined): number => {
     if (!countsReady) return 0;
     const storageKey = `parium_nav_count_${user.id}_${key}`;
-    if (typeof value === 'number' && value > 0) {
-      try { localStorage.setItem(storageKey, String(value)); } catch {}
-      return value;
-    }
     if (typeof value === 'number') return value;
     try {
       const cached = Number(localStorage.getItem(storageKey));

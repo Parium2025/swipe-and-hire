@@ -76,14 +76,14 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   });
 
 
-  const newApplicationsCount = dashStats?.new_applications ?? cachedStats['new_applications'] ?? 0;
-  const savedFavoritesCount = dashStats?.saved_favorites ?? cachedStats['saved_favorites'] ?? 0;
+  const newApplicationsCount = dashStats?.new_applications ?? 0;
+  const savedFavoritesCount = dashStats?.saved_favorites ?? 0;
   // Olästa meddelanden läses från den enda globala chattkanalen i stället för
   // en egen prenumeration på conversation_messages – annars skulle varje
   // meddelande på hela plattformen trigga en RPC per öppen hemvy.
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
-    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cachedStats['unread_messages'] ?? 0;
+    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? 0;
   useEffect(() => {
     writeEmployerCachedStat(user?.id, 'unread_messages', unreadMessagesCount);
   }, [unreadMessagesCount, user?.id]);
