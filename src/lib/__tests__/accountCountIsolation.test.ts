@@ -103,4 +103,18 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(conversations).toContain('nextListOffsetRef.current = offset + (conversations?.length ?? 0)');
     expect(conversations).not.toContain('listLimitRef.current += CONVERSATIONS_PAGE_SIZE');
   });
+
+  it('visar skrivstatus endast för synliga chattrader utan att markera läst', () => {
+    const row = source('src/components/messages/ConversationItem.tsx');
+    const hook = source('src/hooks/useTypingIndicator.ts');
+    const chat = source('src/components/messages/ChatView.tsx');
+    expect(row).toContain('observer.observe(row)');
+    expect(row).toContain('isVisible ? conversation.id : null, true');
+    expect(row).toContain('Skriver…');
+    expect(row).toContain('lastMessagePreview');
+    expect(hook).toContain('if (!receiveOnly) {');
+    expect(hook).toContain('remote.user_id === userId');
+    expect(hook).toContain('supabase.removeChannel(channel)');
+    expect(chat).toContain('stopTyping(getCurrentUserName());');
+  });
 });
