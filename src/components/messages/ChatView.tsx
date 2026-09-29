@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useEffect, useLayoutEffect, useCallback } fr
 import { looksLikeVideoFile, readVideoDurationFromBlob, MAX_VIDEO_SECONDS } from '@/lib/videoInput';
 import { prefetchAttachmentImages } from '@/lib/attachmentUrl';
 import { ATTACHMENT_ACCEPT, validateAttachment, resolveContentType, inspectFileContent } from '@/lib/chatFileTypes';
-import { useConversationMessages, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
+import { useConversationMessages, isDocumentActivelyUsed, type Conversation, type ConversationMessage } from '@/hooks/useConversations';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOfflineMessageQueue } from '@/hooks/useOfflineMessageQueue';
@@ -88,8 +88,9 @@ export function ChatView({
   // den med display:none). Då är den INTE sedd — läskvitton och notiser måste
   // därför styras av om vyn faktiskt syns på skärmen, inte av att den finns.
   const rootRef = useRef<HTMLDivElement>(null);
+  // Sedd = vyn syns OCH fönstret används aktivt (synlig flik med fokus).
   const isChatVisible = useCallback(
-    () => !!rootRef.current && rootRef.current.offsetParent !== null,
+    () => !!rootRef.current && rootRef.current.offsetParent !== null && isDocumentActivelyUsed(),
     [],
   );
 
@@ -101,7 +102,7 @@ export function ChatView({
     const el = rootRef.current;
     if (!el) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) void markAsRead({ auto: true });
+      if (entries.some((e) => e.isIntersecting) && isDocumentActivelyUsed()) void markAsRead({ auto: true });
     });
     observer.observe(el);
     return () => observer.disconnect();
