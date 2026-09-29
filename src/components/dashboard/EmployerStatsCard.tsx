@@ -43,7 +43,6 @@ interface EmployerStatsCardProps {
 export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsCardProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const cachedStats = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
 
   // 🔒 Serverns räknare är sanning. Tidigare räknades aktiva annonser på den
   // lokalt laddade listan – med 5 000 annonser visade kortet först 200 och

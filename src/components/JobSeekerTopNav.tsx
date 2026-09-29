@@ -154,19 +154,10 @@ function JobSeekerTopNav() {
     return 'Jobbsökare';
   };
 
-  // Räknarna kommer från en asynkron preload och kan vara null en kort stund vid
-  // navigering tillbaka. Vi minns senast kända värde så att "Jobb (9)"-rutan aldrig
-  // hoppar i bredd eller försvinner mellan sidbyten.
+  // Visa aldrig tidigare inloggnings eller annat kontos preliminära siffror.
   const stickyCount = (key: string, value: number | null | undefined): number => {
     if (!countsReady) return 0;
-    const storageKey = `parium_nav_count_${user.id}_${key}`;
-    if (typeof value === 'number') return value;
-    try {
-      const cached = Number(localStorage.getItem(storageKey));
-      return Number.isFinite(cached) ? cached : 0;
-    } catch {
-      return 0;
-    }
+    return typeof value === 'number' ? value : 0;
   };
 
   const totalJobsCount = stickyCount('total_jobs', preloadedTotalJobs);
