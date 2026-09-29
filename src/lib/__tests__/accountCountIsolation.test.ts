@@ -97,5 +97,9 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(messagesPage).toContain('VIRTUALIZE_CONVERSATIONS_AFTER = 80');
     expect(messagesPage).toContain('shouldVirtualizeConversations ? (');
     expect(messagesPage).toContain('filteredConversations.map((conv, index)');
+
+    expect(conversations).toContain('.range(offset, offset + CONVERSATIONS_PAGE_SIZE - 1)');
+    expect(conversations).toContain('listOffsetRef.current = conversationsQuery.data?.length ?? 0');
+    expect(conversations).not.toContain('listLimitRef.current += CONVERSATIONS_PAGE_SIZE');
   });
 });
