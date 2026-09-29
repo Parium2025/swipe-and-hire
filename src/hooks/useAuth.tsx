@@ -1,4 +1,5 @@
 import { fetchMyProfile, invalidateMyProfileCache } from '@/lib/myProfile';
+import { invalidateCachedProfile } from '@/lib/performanceGuards';
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { readUnreadBadgeCache, writeUnreadBadgeCache, UNREAD_MESSAGES_CACHE_KEY, JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
