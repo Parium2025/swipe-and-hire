@@ -1673,7 +1673,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_name');
       const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_logo_url');
-      
+
+      // Chattens profilcache (15 min) får aldrig visa en gammal bild/logga/namn
+      // efter att den egna profilen sparats — rensa den direkt.
+      invalidateCachedProfile(user.id);
+
       // Läs tillbaka raden: en nekad skrivning (RLS) ger inget fel men noll
       // rader — då får ändringen aldrig rapporteras som sparad.
       const { data: updatedRows, error } = await supabase
