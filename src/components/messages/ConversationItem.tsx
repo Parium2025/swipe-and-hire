@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationAvatar } from '@/components/messages/ConversationAvatar';
 import {
@@ -11,6 +11,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { Conversation } from '@/hooks/useConversations';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -27,6 +28,18 @@ export const ConversationItem = memo(function ConversationItem({
   onClick,
   category,
 }: ConversationItemProps) {
+  const rowRef = useRef<HTMLButtonElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting));
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, []);
+  // Enbart synliga rader prenumererar. Stora inkorgar får därmed inte en
+  // separat anslutning för varje konversation, och osynliga rader släpper sin.
+  const { typingUsers } = useTypingIndicator(isVisible ? conversation.id : null, true);
   const { displayMember, isSelf } = resolveDisplayMember(conversation.members, currentUserId);
 
   const snapshot = conversation.applicationSnapshot;
@@ -81,6 +94,7 @@ export const ConversationItem = memo(function ConversationItem({
 
   return (
     <button
+      ref={rowRef}
       onClick={onClick}
       className={cn(
         "w-full min-w-0 max-w-full overflow-hidden flex items-start gap-3 p-3 rounded-lg text-left transition-colors focus:outline-none focus-visible:outline-none",
@@ -147,8 +161,18 @@ export const ConversationItem = memo(function ConversationItem({
             "block w-full min-w-0 truncate text-sm",
             conversation.unread_count > 0 ? "text-pure-white font-medium" : "text-pure-white"
           )}
+          aria-live="off"
         >
-          {`${isOwnMessage ? 'Du: ' : ''}${lastMessagePreview}`}
+          {typingUsers.length > 0 ? (
+            <span className="inline-flex items-center gap-1.5 text-pure-white">
+              <span className="inline-flex items-center gap-0.5" aria-hidden="true">
+                <span className="h-1 w-1 rounded-full bg-current animate-pulse" />
+                <span className="h-1 w-1 rounded-full bg-current animate-pulse [animation-delay:150ms]" />
+                <span className="h-1 w-1 rounded-full bg-current animate-pulse [animation-delay:300ms]" />
+              </span>
+              <span>{typingUsers.length > 1 ? 'Flera skriver…' : 'Skriver…'}</span>
+            </span>
+          ) : `${isOwnMessage ? 'Du: ' : ''}${lastMessagePreview}`}
         </span>
       </div>
     </button>

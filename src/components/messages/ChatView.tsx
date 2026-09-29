@@ -178,7 +178,8 @@ export function ChatView({
 
   const handleComposerBlur = useCallback(() => {
     composerFocusedRef.current = false;
-  }, []);
+    stopTyping(getCurrentUserName());
+  }, [stopTyping, getCurrentUserName]);
 
   const pinMessagesToBottom = useCallback(() => {
     const viewport = getViewportEl();
