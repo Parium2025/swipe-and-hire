@@ -4,8 +4,6 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
-import { useQueryClient } from '@tanstack/react-query';
-import type { JobPosting } from '@/hooks/useJobsData';
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SystemHealthButton, SystemHealthPanelContent } from "@/components/SystemHealthPanel";
@@ -79,12 +77,11 @@ const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hov
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
-  const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl } = useAuth();
+  const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl, employerCountsReadyUserId } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const prefetchApplications = usePrefetchApplications();
-  const queryClient = useQueryClient();
 
   // Live oläst-räknare från delad ConversationsProvider (en enda subscription globalt).
   // Faller tillbaka på preloaded värde när context inte är mountad (t.ex. innan
@@ -94,17 +91,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     ? conversationsCtx.totalUnreadCount
     : preloadedUnreadMessages;
   
-  // Read live job count from react-query cache (updated optimistically on delete)
-  const liveJobCount = (() => {
-    const allQueries = queryClient.getQueriesData<JobPosting[]>({ queryKey: ['jobs'] });
-    // Find the personal scope query (used in Mina Annonser)
-    for (const [, data] of allQueries) {
-      if (Array.isArray(data) && data.length > 0) {
-        return data.length;
-      }
-    }
-    return null;
-  })();
+  const countsReady = !!user && employerCountsReadyUserId === user.id;
   // TopNav-avatar är alltid liten (~32-40px) → be om optimerad version (2x för retina automatiskt)
   const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
 
@@ -189,6 +176,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   const getCount = (url: string) => {
+    if (!countsReady) return null;
     switch (url) {
       case '/dashboard': return preloadedEmployerDashboardJobs > 0 ? preloadedEmployerDashboardJobs : null;
       case '/my-jobs': return preloadedEmployerMyJobs > 0 ? preloadedEmployerMyJobs : null;
@@ -199,14 +187,14 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   };
 
   const getDashboardCount = () => {
-    // Show whichever is larger: org dashboard jobs or personal jobs (covers both views)
-    const dashboardTotal = preloadedEmployerDashboardJobs || 0;
-    const myJobsTotal = liveJobCount ?? preloadedEmployerMyJobs ?? 0;
-    const total = Math.max(dashboardTotal, myJobsTotal);
+    if (!countsReady) return null;
+    // Företagets och de egna annonserna blandas aldrig med paginerade listor.
+    const total = preloadedEmployerDashboardJobs;
     return total > 0 ? total : null;
   };
 
   const getCandidatesCount = () => {
+    if (!countsReady) return null;
     // Show total unique candidates (allCandidates already covers everyone)
     const total = preloadedEmployerCandidates || 0;
     return total > 0 ? total : null;
