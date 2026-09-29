@@ -32,3 +32,4 @@
 - [x] Match every active notes-format control to the same perfectly circular filled hover state
 - [x] Remove duplicate avatar decoding, cap chat-list image warmup, and avoid permanent GPU layers while scrolling
 - [x] Memoize message rendering and reaction grouping; stabilize avatar source changes and throttle chat scroll measurements
+- [x] Remove permanent per-row GPU layers and release swipe layers after vertical scrolling
