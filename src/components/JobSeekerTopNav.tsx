@@ -83,8 +83,10 @@ function JobSeekerTopNav() {
     preloadedTotalJobs,
     preloadedSavedJobs,
     preloadedMyApplications,
+    seekerCountsReadyUserId,
     preloadedJobSeekerUnreadMessages
   } = useAuth();
+  const countsReady = !!user && seekerCountsReadyUserId === user.id;
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -156,7 +158,8 @@ function JobSeekerTopNav() {
   // navigering tillbaka. Vi minns senast kända värde så att "Jobb (9)"-rutan aldrig
   // hoppar i bredd eller försvinner mellan sidbyten.
   const stickyCount = (key: string, value: number | null | undefined): number => {
-    const storageKey = `parium_nav_count_${key}`;
+    if (!countsReady) return 0;
+    const storageKey = `parium_nav_count_${user.id}_${key}`;
     if (typeof value === 'number' && value > 0) {
       try { localStorage.setItem(storageKey, String(value)); } catch {}
       return value;

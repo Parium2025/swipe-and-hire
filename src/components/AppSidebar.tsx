@@ -62,7 +62,8 @@ export function AppSidebar() {
   // tidigare sparats som kollapsad i samma session.
   const collapsed = isMobile ? false : state === 'collapsed';
 
-  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications } = useAuth();
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications, seekerCountsReadyUserId } = useAuth();
+  const countsReady = !!user && seekerCountsReadyUserId === user.id;
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
   // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
   // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
@@ -268,9 +269,9 @@ export function AppSidebar() {
             <SidebarMenu>
                {[
                  { title: 'Hem', url: '/home', icon: Home, count: undefined, showBadge: false },
-                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: preloadedTotalJobs, showBadge: false },
-                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: preloadedSavedJobs, showBadge: false },
-                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: preloadedMyApplications, showBadge: false },
+                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: countsReady ? preloadedTotalJobs : 0, showBadge: false },
+                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: countsReady ? preloadedSavedJobs : 0, showBadge: false },
+                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: countsReady ? preloadedMyApplications : 0, showBadge: false },
                  { title: 'Chattar', url: '/messages', icon: MessageCircle, count: jobSeekerUnreadMessages, showBadge: jobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
