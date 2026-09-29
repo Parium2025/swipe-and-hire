@@ -1,5 +1,6 @@
 import { fetchMyProfile, invalidateMyProfileCache } from '@/lib/myProfile';
 import { invalidateCachedProfile } from '@/lib/performanceGuards';
+import { patchConversationProfileCaches } from '@/lib/conversationProfileCache';
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { readUnreadBadgeCache, writeUnreadBadgeCache, UNREAD_MESSAGES_CACHE_KEY, JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
@@ -1675,10 +1676,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_name');
       const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_logo_url');
 
-      // Chattens profilcache (15 min) får aldrig visa en gammal bild/logga/namn
-      // efter att den egna profilen sparats — rensa den direkt.
-      invalidateCachedProfile(user.id);
-
       // Läs tillbaka raden: en nekad skrivning (RLS) ger inget fel men noll
       // rader — då får ändringen aldrig rapporteras som sparad.
       const { data: updatedRows, error } = await supabase
@@ -1707,6 +1704,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         return { error: noRowError };
       }
+
+      // Byt profilen i redan renderad chattdata först efter bekräftad sparning.
+      invalidateCachedProfile(user.id);
+      patchConversationProfileCaches(queryClient, user.id, {
+        user_id: user.id,
+        role: profile?.role,
+        first_name: Object.prototype.hasOwnProperty.call(cleanedUpdates, 'first_name')
+          ? cleanedUpdates.first_name
+          : profile?.first_name,
+        last_name: Object.prototype.hasOwnProperty.call(cleanedUpdates, 'last_name')
+          ? cleanedUpdates.last_name
+          : profile?.last_name,
+        company_name: Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_name')
+          ? cleanedUpdates.company_name
+          : profile?.company_name,
+        profile_image_url: Object.prototype.hasOwnProperty.call(cleanedUpdates, 'profile_image_url')
+          ? cleanedUpdates.profile_image_url
+          : profile?.profile_image_url,
+        company_logo_url: Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_logo_url')
+          ? cleanedUpdates.company_logo_url
+          : profile?.company_logo_url,
+      });
 
       if (hasCompanyNameUpdate || hasCompanyLogoUpdate) {
         const jobPostingSyncUpdates: Record<string, string | null> = {};
