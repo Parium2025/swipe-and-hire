@@ -149,6 +149,8 @@ const clearAllAppCachesSync = () => {
     // Behörighetscache och annonsvy-layout är kontobundna.
     'parium_is_org_admin_',
     'parium:jobDetails:',
+    'counter_emp_',
+    'counter_search_',
   ];
   
   const exactKeysToRemove = [
@@ -173,8 +175,6 @@ const clearAllAppCachesSync = () => {
     'parium_employer_candidates',
     'parium_my_candidates',
     'parium_company_reviews_count',
-    'counter_emp_',
-    'counter_search_',
   ];
   
   try {
