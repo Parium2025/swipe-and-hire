@@ -90,5 +90,7 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(swipeRow).not.toContain("style={{ transform: 'translate3d(0,0,0)' }}");
     expect(swipeRow).toContain("contentRef.current.style.willChange = 'transform';");
     expect(swipeRow).toContain("content.style.transform = '';");
+    expect(swipeRow).toContain("revealedSide === 'delete' &&");
+    expect(swipeRow).toContain("revealedSide === 'unread' &&");
   });
 });

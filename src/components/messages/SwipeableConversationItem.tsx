@@ -402,8 +402,8 @@ export function SwipeableConversationItem({
         }}
       >
         {/* Markera som oläst — visas vid drag åt höger */}
-        {onMarkUnread && canMarkUnread && (
-          <div className={cn("absolute inset-y-0 left-0 z-0 flex items-center pl-3", revealedSide === 'unread' ? 'visible' : 'invisible')}>
+        {onMarkUnread && canMarkUnread && revealedSide === 'unread' && (
+          <div className="absolute inset-y-0 left-0 z-0 flex items-center pl-3">
             <div
               ref={unreadRef}
               style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
@@ -425,25 +425,27 @@ export function SwipeableConversationItem({
         )}
 
         {/* Delete button on the RIGHT side */}
-        <div className={cn("absolute inset-y-0 right-0 z-0 flex items-center pr-3", revealedSide === 'delete' ? 'visible' : 'invisible')}>
-          <div
-            ref={deleteRef}
-            style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
-          >
-            <button
-              className="rounded-full flex items-center gap-1 px-3 py-2 bg-red-500/80 border-0 text-white font-medium text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                animateBack();
-                setShowConfirm(true);
-              }}
-              tabIndex={-1}
+        {revealedSide === 'delete' && (
+          <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
+            <div
+              ref={deleteRef}
+              style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
             >
-              <Trash2 className="h-3.5 w-3.5 text-white" />
-              <span>Ta bort</span>
-            </button>
+              <button
+                className="rounded-full flex items-center gap-1 px-3 py-2 bg-red-500/80 border-0 text-white font-medium text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  animateBack();
+                  setShowConfirm(true);
+                }}
+                tabIndex={-1}
+              >
+                <Trash2 className="h-3.5 w-3.5 text-white" />
+                <span>Ta bort</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Content layer – slides LEFT to reveal delete on right */}
         <div
