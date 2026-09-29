@@ -409,10 +409,18 @@ export function useConversations() {
   const maxWaitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const identityRecoveryTriggeredRef = useRef(false);
 
-  // Växande fönster: queryKey hålls oförändrad (['conversations', userId])
-  // eftersom hela appen skriver direkt mot den nyckeln. Gränsen läses via ref
-  // så att queryFn alltid ser aktuellt värde.
-  const listLimitRef = useRef(CONVERSATIONS_PAGE_SIZE);
+  // Sidvis hämtning: varje databasanrop stannar på 300 rader. Det undviker
+  // både API:ets radtak och att sida 2 hämtar om sida 1 när inkorgen växer.
+  const listOffsetRef = useRef(0);
+  const nextListOffsetRef = useRef(0);
+  const hasLoadedOlderPagesRef = useRef(false);
+  const paginationUserRef = useRef(user?.id);
+  if (paginationUserRef.current !== user?.id) {
+    paginationUserRef.current = user?.id;
+    listOffsetRef.current = 0;
+    nextListOffsetRef.current = 0;
+    hasLoadedOlderPagesRef.current = false;
+  }
   const [hasMoreConversations, setHasMoreConversations] = useState(false);
   const [loadingMoreConversations, setLoadingMoreConversations] = useState(false);
 
@@ -434,7 +442,7 @@ export function useConversations() {
       // vilket gav "Okänd användare". Nu styr `conversations` urvalet:
       // RLS begränsar redan till chattar användaren är medlem i, så vi kan
       // sortera nyast först och hämta ett växande fönster.
-      const limit = listLimitRef.current;
+      const offset = listOffsetRef.current;
       const { data: conversations, error: convError } = await supabase
         .from('conversations')
         .select(`
@@ -442,9 +450,14 @@ export function useConversations() {
           job:job_id (title)
         `)
         .order('last_message_at', { ascending: false, nullsFirst: false })
-        .limit(limit);
+        .range(offset, offset + CONVERSATIONS_PAGE_SIZE - 1);
 
-      setHasMoreConversations((conversations?.length ?? 0) >= limit);
+      setHasMoreConversations((conversations?.length ?? 0) >= CONVERSATIONS_PAGE_SIZE);
+      if (offset > 0) {
+        nextListOffsetRef.current = offset + (conversations?.length ?? 0);
+      } else if (!hasLoadedOlderPagesRef.current) {
+        nextListOffsetRef.current = conversations?.length ?? 0;
+      }
 
 
       if (convError) throw convError;
@@ -655,7 +668,25 @@ export function useConversations() {
         } as Conversation;
       });
 
-      const repairedResult = mergeConversationsWithLastKnownIdentity(result, previousConversations, user.id);
+      const repairedPage = mergeConversationsWithLastKnownIdentity(result, previousConversations, user.id);
+      // Vid "ladda fler" läggs bara den nya sidan till. Efter att äldre sidor
+      // laddats får en vanlig bakgrundsuppdatering av de 300 nyaste inte kasta
+      // bort historiken som redan finns i minnet.
+      const shouldKeepLoadedHistory = offset > 0 || hasLoadedOlderPagesRef.current;
+      const repairedResult = shouldKeepLoadedHistory
+        ? Array.from(
+            new Map(
+              [
+                ...repairedPage,
+                ...previousConversations,
+              ].map((conversation) => [conversation.id, conversation]),
+            ).values(),
+          ).sort((a, b) => {
+            const aTime = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+            const bTime = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+            return bTime - aTime;
+          })
+        : repairedPage;
 
       // Never persist a payload that would render "Okänd användare"
       if (!hasUnknownConversationIdentity(repairedResult, user.id)) {
@@ -987,18 +1018,22 @@ export function useConversations() {
     writeUnreadBadgeCache(totalUnreadCount, badgeRole);
   }, [totalUnreadCount, conversationsQuery.data, conversationsQuery.isFetching]);
 
-  // Ladda nästa fönster (300 till). Anropas när listan scrollas mot slutet.
+  // Ladda exakt nästa sida (300 till). Tidigare ökades LIMIT och hela
+  // historiken hämtades om; vid tusentals chattar blev det både långsamt och
+  // känsligt för API:ets radtak.
   const refetchConversations = conversationsQuery.refetch;
   const loadMoreConversations = useCallback(async () => {
-    if (!user || loadingMoreConversations || !hasMoreConversations) return;
+    if (!user || loadingMoreConversations || conversationsQuery.isFetching || !hasMoreConversations) return;
     setLoadingMoreConversations(true);
-    listLimitRef.current += CONVERSATIONS_PAGE_SIZE;
+    listOffsetRef.current = nextListOffsetRef.current;
+    hasLoadedOlderPagesRef.current = true;
     try {
       await refetchConversations();
     } finally {
+      listOffsetRef.current = 0;
       setLoadingMoreConversations(false);
     }
-  }, [user, loadingMoreConversations, hasMoreConversations, refetchConversations]);
+  }, [user, loadingMoreConversations, conversationsQuery.isFetching, conversationsQuery.data?.length, hasMoreConversations, refetchConversations]);
 
   return {
     conversations: conversationsQuery.data || [],
