@@ -609,7 +609,7 @@ const EmployerProfile = () => {
     // textfält väntar kvar på skrivpausen.
     }, (originalValues?.profile_image_url ?? '') !== (formData.profile_image_url ?? '') ? 0 : 900);
     return () => clearTimeout(t);
-  }, [hasUnsavedChanges, loading, formData, failedSignature, isOnline]);
+  }, [hasUnsavedChanges, loading, formData, failedSignature, isOnline, originalValues]);
 
   // Manuell återförsöksväg så en ändring aldrig kan gå förlorad tyst.
   const retrySave = useCallback(() => {
