@@ -340,7 +340,7 @@ const Dashboard = memo(() => {
 
       <div ref={listTopRef} className="scroll-mt-4" />
       {/* Status tabs: Aktiva / Utgångna + sidindikator */}
-      <div className="relative flex justify-center items-center pr-11 sm:pr-0">
+      <div className="relative flex justify-center items-center">
         <JobStatusTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
