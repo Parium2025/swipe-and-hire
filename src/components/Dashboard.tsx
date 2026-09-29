@@ -265,17 +265,17 @@ const Dashboard = memo(() => {
   const statsCards = useMemo(() => {
     // Föredra server-counts/stats (exakta även vid 10k+ jobb).
     // Dashboard (företagsvy): exkludera utkast — visa endast publicerade (Aktiva + Utgångna)
-    const activeFromServer = serverCounts?.active ?? filteredStats.activeJobs;
-    const expiredFromServer = serverCounts?.expired ?? expiredJobs.length;
+    const activeFromServer = serverCounts?.active ?? 0;
+    const expiredFromServer = serverCounts?.expired ?? 0;
     const totalJobs = activeFromServer + expiredFromServer;
-    const activeCount = serverCounts?.active ?? filteredStats.activeJobs;
-    const expiredCount = serverCounts?.expired ?? expiredJobs.length;
+    const activeCount = serverCounts?.active ?? 0;
+    const expiredCount = serverCounts?.expired ?? 0;
     // Visningar/Ansökningar: server-siffran exkluderar den egna organisationens
     // interna aktivitet. Faller vi tillbaka på råsummorna i annonsraderna hoppar
     // talet när serversvaret landar — använd därför i första hand den senast
     // kända server-siffran (sessionStorage) och råsumman bara som sista utväg.
-    const totalViews = serverStats?.total_views ?? (preloadedEmployerTotalViews || filteredStats.totalViews);
-    const totalApplications = serverStats?.total_applications ?? (preloadedEmployerTotalApplications || filteredStats.totalApplications);
+    const totalViews = serverStats?.total_views ?? 0;
+    const totalApplications = serverStats?.total_applications ?? 0;
     // Under laddning: server-siffrorna (SWR-seedade från localStorage) är alltid
     // sannare än sessionStorage-fallbacken. "Annonser" = aktiva + utgångna, så
     // fallbacken måste vara dashboard-totalen — inte antalet aktiva.

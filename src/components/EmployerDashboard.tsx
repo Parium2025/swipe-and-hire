@@ -684,13 +684,13 @@ const EmployerDashboard = memo(() => {
   }, [setActiveTab, setPage]);
 
   const statsCards = useMemo(() => {
-    const totalJobs = serverCounts?.total ?? jobs.length;
-    const activeCount = serverCounts?.active ?? activeJobs.length;
-    const expiredCount = serverCounts?.expired ?? expiredJobsCount;
-    const draftCount = serverCounts?.draft ?? draftJobsCount;
+    const totalJobs = serverCounts?.total ?? 0;
+    const activeCount = serverCounts?.active ?? 0;
+    const expiredCount = serverCounts?.expired ?? 0;
+    const draftCount = serverCounts?.draft ?? 0;
     // Fallback = livstidstotal över ALLA annonser, samma definition som servern.
-    const totalViews = serverStats?.total_views ?? jobs.reduce((s, j) => s + (j.views_count || 0), 0);
-    const totalApps = serverStats?.total_applications ?? jobs.reduce((s, j) => s + (j.applications_count || 0), 0);
+    const totalViews = serverStats?.total_views ?? 0;
+    const totalApps = serverStats?.total_applications ?? 0;
 
     // ⚠️ De förladdade sessionStorage-siffrorna är ORGANISATIONS-scopade
     // (aktiva/visningar/ansökningar för hela företaget). Den här sidan visar
@@ -704,7 +704,7 @@ const EmployerDashboard = memo(() => {
       {
         icon: TrendingUp,
         title: 'Aktiva',
-        value: loading && !seeded ? preloadedEmployerActiveJobs : activeCount,
+        value: activeCount,
         loading: false,
         isLoading: loading,
         cacheKey: 'emp_active_jobs',

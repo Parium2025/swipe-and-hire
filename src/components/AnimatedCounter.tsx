@@ -48,7 +48,7 @@ export const AnimatedCounter = memo(({
   // This prevents showing 0 briefly before data loads
   // Med explicit datastatus kommer första synliga siffran från bekräftat data,
   // aldrig en gammal, okontoskopad counter_-cache.
-  const initialValue = isLoading === false ? value : (hasCachedValue ? cachedInitial : value);
+  const initialValue = isLoading !== undefined ? value : (hasCachedValue ? cachedInitial : value);
   
   const [displayValue, setDisplayValue] = useState(initialValue);
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
@@ -166,7 +166,7 @@ export const AnimatedCounter = memo(({
 
   return (
     <span className={`inline-flex items-center gap-1 ${className}`}>
-      <span className="tabular-nums">{displayValue}</span>
+      <span className="tabular-nums">{isLoading ? '\u00a0' : displayValue}</span>
       {direction === 'up' && (
         <ArrowUp 
           className="h-3 w-3 md:h-4 md:w-4 text-green-400 animate-fade-in" 
