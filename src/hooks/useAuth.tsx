@@ -1,4 +1,5 @@
 import { fetchMyProfile, invalidateMyProfileCache } from '@/lib/myProfile';
+import { invalidateCachedProfile } from '@/lib/performanceGuards';
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { readUnreadBadgeCache, writeUnreadBadgeCache, UNREAD_MESSAGES_CACHE_KEY, JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY } from '@/lib/unreadBadgeCache';
 import { safeSetItem } from '@/lib/safeStorage';
@@ -1673,7 +1674,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_name');
       const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(cleanedUpdates, 'company_logo_url');
-      
+
+      // Chattens profilcache (15 min) får aldrig visa en gammal bild/logga/namn
+      // efter att den egna profilen sparats — rensa den direkt.
+      invalidateCachedProfile(user.id);
+
       // Läs tillbaka raden: en nekad skrivning (RLS) ger inget fel men noll
       // rader — då får ändringen aldrig rapporteras som sparad.
       const { data: updatedRows, error } = await supabase
