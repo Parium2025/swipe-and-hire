@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { shouldApplyQueuedOp, notifySwOfPendingOps } from '@/lib/offlineSyncEngine';
+import { invalidateCachedProfile } from '@/lib/performanceGuards';
 import { safeSetItem } from '@/lib/safeStorage';
 
 /**
@@ -126,6 +127,10 @@ export function useOfflineProfileQueue(userId: string | undefined) {
         .eq('user_id', item.userId);
 
       if (error) throw error;
+
+      // Chattens profilcache (15 min) får aldrig visa en gammal bild/logga/namn
+      // efter att den egna profilen sparats — rensa den direkt.
+      invalidateCachedProfile(item.userId);
 
       const hasCompanyNameUpdate = Object.prototype.hasOwnProperty.call(item.updates, 'company_name');
       const hasCompanyLogoUpdate = Object.prototype.hasOwnProperty.call(item.updates, 'company_logo_url');

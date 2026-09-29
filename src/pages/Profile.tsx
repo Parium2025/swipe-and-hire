@@ -405,6 +405,8 @@ const Profile = () => {
         await supabase.from('candidate_profiles').update(patch).eq('id', targetProfileId);
       } else if (user?.id) {
         await supabase.from('profiles').update(patch).eq('id', user.id);
+        // Rensa chattens profilcache så den nya bilden syns direkt överallt.
+        invalidateCachedProfile(user.id);
       }
     } catch (error) {
       console.error('Background media persist failed:', error);
