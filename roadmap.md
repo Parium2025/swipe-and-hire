@@ -31,3 +31,4 @@
 - [x] Prevent stale unread-message counts from appearing in the browser title during account resolution
 - [x] Match every active notes-format control to the same perfectly circular filled hover state
 - [x] Remove duplicate avatar decoding, cap chat-list image warmup, and avoid permanent GPU layers while scrolling
+- [x] Memoize message rendering and reaction grouping; stabilize avatar source changes and throttle chat scroll measurements

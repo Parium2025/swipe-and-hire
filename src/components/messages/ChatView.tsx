@@ -146,6 +146,7 @@ export function ChatView({
   const [searchingDb, setSearchingDb] = useState(false);
   const [olderMatchCount, setOlderMatchCount] = useState(0);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
 
   const getViewportEl = useCallback((): HTMLDivElement | null => {
     if (!scrollAreaRef.current) return null;
@@ -282,14 +283,22 @@ export function ChatView({
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement | null;
     if (!target) return;
-    const threshold = 100;
-    isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
+    if (scrollFrameRef.current !== null) return;
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      const threshold = 100;
+      isNearBottomRef.current = target.scrollHeight - target.scrollTop - target.clientHeight < threshold;
 
-    // Hämta nästa sida i god tid innan toppen nås — scrollpositionen
-    // kompenseras redan i layout-effekten nedan, så vyn står stilla.
-    if (target.scrollTop < 400 && hasMoreRef.current && !loadingOlderRef.current) {
-      void fetchOlderRef.current();
-    }
+      // Hämta nästa sida i god tid innan toppen nås — scrollpositionen
+      // kompenseras redan i layout-effekten nedan, så vyn står stilla.
+      if (target.scrollTop < 400 && hasMoreRef.current && !loadingOlderRef.current) {
+        void fetchOlderRef.current();
+      }
+    });
+  }, []);
+
+  useEffect(() => () => {
+    if (scrollFrameRef.current !== null) cancelAnimationFrame(scrollFrameRef.current);
   }, []);
 
 
