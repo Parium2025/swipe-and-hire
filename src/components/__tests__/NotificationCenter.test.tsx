@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import NotificationCenter from '../NotificationCenter';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const emptyArchive: never[] = [];
 const notificationState = vi.hoisted(() => ({
@@ -89,7 +90,7 @@ describe('NotificationCenter', () => {
       is_read: false, metadata: {}, created_at: new Date().toISOString(),
     }];
     notificationState.unreadCount = 1;
-    render(<NotificationCenter />);
+    render(<TooltipProvider><NotificationCenter /></TooltipProvider>);
     fireEvent.click(screen.getByLabelText('Notifikationer'));
     fireEvent.click(screen.getByText('Fel'));
     expect(notificationState.markAsRead).toHaveBeenCalledExactlyOnceWith('notice-1');
@@ -101,7 +102,7 @@ describe('NotificationCenter', () => {
       id: 'notice-2', user_id: 'user-1', type: 'saved_search_match',
       title: 'Nytt jobb', body: null, is_read: false, metadata: {}, created_at: new Date().toISOString(),
     }];
-    render(<NotificationCenter />);
+    render(<TooltipProvider><NotificationCenter /></TooltipProvider>);
     fireEvent.click(screen.getByLabelText('Notifikationer'));
     fireEvent.click(screen.getByText('Nytt jobb'));
     expect(notificationState.markAsRead).toHaveBeenCalledExactlyOnceWith('notice-2');
