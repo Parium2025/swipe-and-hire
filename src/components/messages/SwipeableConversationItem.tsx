@@ -414,8 +414,7 @@ export function SwipeableConversationItem({
         )}
 
         {/* Delete button on the RIGHT side — alltid monterad, se kommentaren ovan. */}
-        {(
-          <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
             <div
               ref={deleteRef}
               style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
