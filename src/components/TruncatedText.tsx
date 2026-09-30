@@ -122,10 +122,13 @@ export function TruncatedText({
 
   // Lazy truncation measurement — runs only the first time the user
   // hovers/touches the element. Cheap on first paint, accurate on demand.
-  const measureTruncation = useCallback(() => {
-    if (hasMeasured) return;
+  // `force` mäter om även om ett tidigare värde finns. Används vid tryck och
+  // hovring: ett cachat "får plats" kan vara inaktuellt (mätt innan webbfonten
+  // laddats eller under en expanderande panel) och då öppnades aldrig rutan.
+  const measureTruncation = useCallback((force = false): boolean => {
+    if (hasMeasured && !force) return isTruncated;
     const element = textRef.current;
-    if (!element) return;
+    if (!element) return isTruncated;
 
     const styles = window.getComputedStyle(element);
     const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
@@ -171,7 +174,8 @@ export function TruncatedText({
 
     setIsTruncated(truncated);
     setHasMeasured(true);
-  }, [hasMeasured]);
+    return truncated;
+  }, [hasMeasured, isTruncated]);
 
   // If alwaysShowTooltip is set, we don't need to measure at all
   const tooltipForcedOn = alwaysShowTooltip === true || alwaysShowTooltip === 'desktop-only';
@@ -216,7 +220,7 @@ export function TruncatedText({
     if (!isTouch) return;
     if (hasMeasured) return;
     // Defer one frame so layout (clamp, fonts) is settled
-    const id = requestAnimationFrame(() => measureTruncation());
+    const id = requestAnimationFrame(() => { measureTruncation(); });
     return () => cancelAnimationFrame(id);
   }, [text, tooltipForcedOn, supportsHover, isTouch, hasMeasured, measureTruncation]);
 
@@ -300,7 +304,17 @@ export function TruncatedText({
 
   const handleTap = () => {
     if (!supportsHover && isTouch) {
-      measureTruncation();
+      // Mät alltid färskt vid tryck — annars kunde ett inaktuellt "får plats"
+      // göra att rutan aldrig visades trots att texten var kapad.
+      const truncatedNow = measureTruncation(true);
+      if (!truncatedNow && alwaysShowTooltip !== true) {
+        setIsOpen(false);
+        return;
+      }
+      if (truncatedNow !== isTruncated) {
+        // Innehållet renderas först efter att isTruncated uppdaterats.
+        flushSync(() => setIsTruncated(truncatedNow));
+      }
       setIsOpen((o) => !o);
     }
   };
@@ -310,7 +324,7 @@ export function TruncatedText({
     if (supportsHover) {
       clearCloseTimeout();
       setIsDesktopHovering(true);
-      measureTruncation();
+      measureTruncation(true);
     }
   };
 
@@ -445,7 +459,7 @@ export function TruncatedText({
             onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
+            onTouchStart={isTouch && !supportsHover ? () => { measureTruncation(); } : undefined}
             onMouseDown={(e) => e.stopPropagation()}
             // No native `title` attribute — it would render a second (gray) browser
             // tooltip on top of our custom one.
