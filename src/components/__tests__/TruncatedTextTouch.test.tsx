@@ -53,4 +53,31 @@ describe('TruncatedText på touchskärm', () => {
     });
     expect(trigger).toHaveAttribute('data-state', 'closed');
   });
+
+  // Regression: Safari skickar emulerade mus-rörelser efter ett tryck (t.ex.
+  // när en panel fälls ut under fingret). Radix öppnade då rutan i smyg och
+  // användarens tryck stängde den i stället — namnet syntes aldrig.
+  it('ignorerar emulerade musrörelser och öppnar på första riktiga trycket', async () => {
+    vi.resetModules();
+    vi.useFakeTimers();
+    const { TruncatedText } = await import('@/components/ui/truncated-text');
+    render(<TruncatedText text="Fredrik Andits Långnamn" />);
+    const trigger = screen.getByText('Fredrik Andits Långnamn');
+
+    await act(async () => {
+      fireEvent.pointerMove(trigger, { pointerType: 'mouse' });
+      vi.advanceTimersByTime(1000);
+    });
+    expect(trigger).toHaveAttribute('data-state', 'closed');
+    vi.useRealTimers();
+
+    await act(async () => {
+      fireEvent.touchStart(trigger);
+      fireEvent.pointerDown(trigger, { pointerType: 'touch' });
+      fireEvent.pointerUp(trigger, { pointerType: 'touch' });
+      fireEvent.click(trigger);
+    });
+    expect(trigger.getAttribute('data-state')).toMatch(/open/);
+  });
 });
+
