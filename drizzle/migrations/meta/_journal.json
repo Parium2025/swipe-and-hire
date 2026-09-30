@@ -435,6 +435,13 @@
       "when": 1790707344877,
       "tag": "0061_remove_duplicate_profile_signal_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1790800880566,
+      "tag": "0062_exclude_interviewed_candidates_from_job_closed_dispatch",
+      "breakpoints": true
     }
   ]
 }
