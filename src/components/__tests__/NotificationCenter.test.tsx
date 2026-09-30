@@ -119,7 +119,7 @@ describe('NotificationCenter', () => {
     expect(first?.textContent).toContain('9');
 
     notificationState.unreadCount = 10;
-    rerender(<TooltipProvider><NotificationCenter /></TooltipProvider>);
+    rerender(<TooltipProvider><NotificationCenter variant="rect" /></TooltipProvider>);
     const next = document.querySelector('.parium-badge-pop');
     expect(next?.textContent).toContain('9+');
     expect(next).not.toBe(first);
