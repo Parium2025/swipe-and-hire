@@ -93,7 +93,8 @@ describe('NotificationCenter', () => {
     render(<TooltipProvider><NotificationCenter /></TooltipProvider>);
     fireEvent.click(screen.getByLabelText('Notifikationer'));
     fireEvent.click(screen.getByText('Fel'));
-    expect(notificationState.markAsRead).toHaveBeenCalledExactlyOnceWith('notice-1');
+    expect(notificationState.markAsRead).toHaveBeenCalledTimes(1);
+    expect(notificationState.markAsRead).toHaveBeenCalledWith('notice-1');
     expect(notificationState.navigate).not.toHaveBeenCalled();
   });
 
@@ -105,7 +106,9 @@ describe('NotificationCenter', () => {
     render(<TooltipProvider><NotificationCenter /></TooltipProvider>);
     fireEvent.click(screen.getByLabelText('Notifikationer'));
     fireEvent.click(screen.getByText('Nytt jobb'));
-    expect(notificationState.markAsRead).toHaveBeenCalledExactlyOnceWith('notice-2');
-    expect(notificationState.navigate).toHaveBeenCalledExactlyOnceWith('/search-jobs');
+    expect(notificationState.markAsRead).toHaveBeenCalledTimes(1);
+    expect(notificationState.markAsRead).toHaveBeenCalledWith('notice-2');
+    expect(notificationState.navigate).toHaveBeenCalledTimes(1);
+    expect(notificationState.navigate).toHaveBeenCalledWith('/search-jobs');
   });
 });
