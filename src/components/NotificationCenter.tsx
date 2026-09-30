@@ -193,7 +193,14 @@ function ExpandableClamp({
 function resolveRoute(type: string, metadata?: Record<string, unknown> | null): string | undefined {
   const explicit = typeof metadata?.route === 'string' ? metadata.route : undefined;
   // Äldre återkopplingspåminnelser pekade på en sida som inte finns ("/employer").
-  if (type === 'followup_reminder') return '/my-candidates';
+  if (type === 'followup_reminder') {
+    // Öppnar just den kandidaten ovanpå sidan man står på (?-länk behåller sidan).
+    const appId = typeof metadata?.application_id === 'string' ? metadata.application_id : undefined;
+    const intId = typeof metadata?.interview_id === 'string' ? metadata.interview_id : undefined;
+    if (appId) return `?open_application=${appId}`;
+    if (intId) return `?open_interview=${intId}`;
+    return '/my-candidates';
+  }
   if (explicit) return explicit;
 
   const conversationId = metadata?.conversation_id;

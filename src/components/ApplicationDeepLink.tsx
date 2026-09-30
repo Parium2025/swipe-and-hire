@@ -2,12 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import CandidateProfileDialogImport from '@/components/CandidateProfileDialog';
+import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
 import { toast } from '@/hooks/use-toast';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CandidateProfileDialog = CandidateProfileDialogImport as any;
 
 const APP_PARAM = 'open_application';
 const INTERVIEW_PARAM = 'open_interview';
