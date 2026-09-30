@@ -398,6 +398,10 @@ export function TruncatedText({
   const handleClick = (e: React.MouseEvent) => {
     if (!supportsHover && isTouch) {
       e.stopPropagation();
+      // Radix TooltipTrigger stänger tooltipen i sitt eget onClick direkt efter
+      // vårt. Utan preventDefault öppnades bubblan och stängdes i samma tryck —
+      // på mobil syntes den därför aldrig.
+      e.preventDefault();
       handleTap();
     } else if (onClick) {
       onClick();
@@ -453,6 +457,12 @@ export function TruncatedText({
           <TooltipContent
             ref={tooltipContentRef}
             allowOutsidePointerEvents
+            // Ett nytt tryck på själva texten ska växla (stänga) bubblan — inte
+            // först stängas av "tryck utanför" och sedan öppnas igen av klicket.
+            onPointerDownOutside={(event) => {
+              const target = event.target;
+              if (target instanceof Node && textRef.current?.contains(target)) event.preventDefault();
+            }}
             side={tooltipSide}
             align="center"
             sideOffset={8}

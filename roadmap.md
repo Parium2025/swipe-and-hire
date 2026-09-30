@@ -37,3 +37,4 @@
 - [x] Page thousands of conversations incrementally without refetching all earlier pages
 - [x] Show live typing in visible inbox rows for both account types, without subscribing to the entire inbox; verify transitions and cleanup in tests
 - [x] Show full team member names only when clipped, mark any notification read on tap, and animate new bell counts
+- [x] Touch: tap opens/closes clipped team names; notification tap marks read without stale refetch/sync bringing it back; tap expands full text; spring panel and badge entrance

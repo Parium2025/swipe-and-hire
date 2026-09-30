@@ -111,8 +111,27 @@ export function useNotifications() {
   // Skyddar mot att en avstängd typ triggar oändliga omhämtningar.
   const mutedRetryRef = useRef(false);
 
+  // Skydd mot inaktuella svar: klockan hämtar färskt när den öppnas. Trycker
+  // man på en notis medan den hämtningen pågår får det gamla svaret ("oläst")
+  // aldrig skriva över det man just gjort — annars kommer pricken tillbaka.
+  const mutationSeqRef = useRef(0);
+  const inflightMutationsRef = useRef(0);
+  const refetchAfterMutationRef = useRef(false);
+  const beginMutation = () => {
+    mutationSeqRef.current += 1;
+    inflightMutationsRef.current += 1;
+  };
+  const endMutation = () => {
+    inflightMutationsRef.current = Math.max(0, inflightMutationsRef.current - 1);
+    if (inflightMutationsRef.current === 0 && refetchAfterMutationRef.current) {
+      refetchAfterMutationRef.current = false;
+      void fetchNotificationsRef.current?.();
+    }
+  };
+
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
+    const seqAtStart = mutationSeqRef.current;
     try {
       // Tidigare väntade vi på avstängda typer INNAN notiserna ens började
       // hämtas — ett extra serverhopp framför varje laddning. Nu körs alla tre
@@ -142,6 +161,16 @@ export function useNotifications() {
       ]);
 
       if (error) throw error;
+      // En läsmarkering/rensning hann ske under hämtningen → svaret är
+      // inaktuellt. Hämta en gång till när skrivningen är klar.
+      if (seqAtStart !== mutationSeqRef.current || inflightMutationsRef.current > 0) {
+        refetchAfterMutationRef.current = true;
+        if (inflightMutationsRef.current === 0) {
+          refetchAfterMutationRef.current = false;
+          void fetchNotificationsRef.current?.();
+        }
+        return;
+      }
       const items = (data || []) as AppNotification[];
       setNotifications(items);
       // Räknaren kommer från servern — den får aldrig begränsas av hur många
@@ -345,11 +374,17 @@ export function useNotifications() {
     });
     setUnreadCount(prev => Math.max(0, prev - 1));
 
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', notificationId)
-      .eq('user_id', user.id);
+    beginMutation();
+    let error: unknown = null;
+    try {
+      ({ error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+        .eq('user_id', user.id));
+    } finally {
+      endMutation();
+    }
 
     // Misslyckas skrivningen (offline/fel) får vyn inte ljuga om att notisen
     // är läst — återställ den optimistiska ändringen.
@@ -374,11 +409,17 @@ export function useNotifications() {
     });
     setUnreadCount(0);
 
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('user_id', user.id)
-      .eq('is_read', false);
+    beginMutation();
+    let error: unknown = null;
+    try {
+      ({ error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false));
+    } finally {
+      endMutation();
+    }
 
     // Gick skrivningen inte igenom ska listan hämtas om i stället för att
     // visa allt som läst och sprida det till andra enheter.
@@ -397,10 +438,16 @@ export function useNotifications() {
     setUnreadCount(0);
     setCache(user.id, []);
 
-    const { error } = await supabase
-      .from('notifications')
-      .delete()
-      .eq('user_id', user.id);
+    beginMutation();
+    let error: unknown = null;
+    try {
+      ({ error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', user.id));
+    } finally {
+      endMutation();
+    }
 
     // Rensningen får inte spridas till andra enheter om den aldrig gick igenom.
     if (error) {
