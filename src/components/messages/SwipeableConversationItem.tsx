@@ -150,15 +150,6 @@ export function SwipeableConversationItem({
         if (el) el.style.transition = '';
       }, fadeMs + 20);
     });
-    // Behåll pillret monterat tills det tonat klart.
-    if (committed) {
-      scheduleTimer(() => {
-        if (gestureId === gestureIdRef.current) setRevealedSide(null);
-      }, 200);
-    } else {
-      setRevealedSide(null);
-    }
-
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, [scheduleTimer]);
@@ -178,7 +169,6 @@ export function SwipeableConversationItem({
     rafRef.current = null;
     pendingXRef.current = 0;
     currentXRef.current = 0;
-    setRevealedSide(null);
     releaseIdleLayer();
   }, [conversationName, releaseIdleLayer]);
 
