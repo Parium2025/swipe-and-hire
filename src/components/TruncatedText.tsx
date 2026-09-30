@@ -406,6 +406,7 @@ export function TruncatedText({
 
   // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
+    console.log("TTDEBUG", text, supportsHover, isTouch, isTruncated, hasMeasured, isOpen);
     if (!supportsHover && isTouch) {
       e.stopPropagation();
       // Radix TooltipTrigger stänger tooltipen i sitt eget onClick direkt efter
