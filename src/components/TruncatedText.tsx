@@ -443,7 +443,7 @@ export function TruncatedText({
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip
         open={forceClosed ? false : isOpen}
-        onOpenChange={forceClosed ? undefined : setIsOpen}
+        onOpenChange={forceClosed ? undefined : (v) => { console.log("TTDEBUG onOpenChange", v, new Error().stack?.split("\n").slice(1,6).join(" / ")); setIsOpen(v); }}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
