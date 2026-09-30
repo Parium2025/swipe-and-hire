@@ -406,17 +406,35 @@ export function TruncatedText({
 
   // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
-    console.log("TTDEBUG", text, supportsHover, isTouch, isTruncated, hasMeasured, isOpen);
     if (!supportsHover && isTouch) {
       e.stopPropagation();
       // Radix TooltipTrigger stänger tooltipen i sitt eget onClick direkt efter
       // vårt. Utan preventDefault öppnades bubblan och stängdes i samma tryck —
       // på mobil syntes den därför aldrig.
       e.preventDefault();
+      releaseTriggerPress();
       handleTap();
     } else if (onClick) {
       onClick();
     }
+  };
+
+  // TOUCH: bara vårt eget tryck får öppna/stänga rutan. Safari skickar
+  // emulerade "mus"-rörelser efter tryck (t.ex. när en panel fälls ut under
+  // fingret) och Radix öppnade då rutan i smyg — nästa tryck stängde den i
+  // stället för att öppna. Radix stänger dessutom vid pointerdown på texten,
+  // vilket fick ett andra tryck att öppna igen i stället för att stänga.
+  const touchOnly = !supportsHover && isTouch;
+  const triggerPressRef = useRef(false);
+  const handleRadixOpenChange = (next: boolean) => {
+    if (touchOnly && (next || triggerPressRef.current)) return;
+    setIsOpen(next);
+  };
+  const handleTriggerPointerDown = () => {
+    if (touchOnly) triggerPressRef.current = true;
+  };
+  const releaseTriggerPress = () => {
+    triggerPressRef.current = false;
   };
 
   const stopTooltipPropagation = (event: React.SyntheticEvent) => {
@@ -443,7 +461,7 @@ export function TruncatedText({
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip
         open={forceClosed ? false : isOpen}
-        onOpenChange={forceClosed ? undefined : (v) => { console.log("TTDEBUG onOpenChange", v, new Error().stack?.split("\n").slice(1,6).join(" / ")); setIsOpen(v); }}
+        onOpenChange={forceClosed ? undefined : handleRadixOpenChange}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
@@ -452,6 +470,8 @@ export function TruncatedText({
             className={`${className ?? ""} cursor-pointer pointer-events-auto`}
             style={wordBreakStyles}
             onClick={handleClick}
+            onPointerDown={handleTriggerPointerDown}
+            onPointerCancel={releaseTriggerPress}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
