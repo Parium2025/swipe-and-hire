@@ -63,7 +63,6 @@ export function SwipeableConversationItem({
   // aldrig skriver över en ny dragning.
   const gestureIdRef = useRef(0);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [revealedSide, setRevealedSide] = useState<'delete' | 'unread' | null>(null);
 
   // Alla timers från animateBack samlas här så de kan rensas vid unmount —
   // annars kan en rad som raderas mitt i animationen sätta state efter unmount.
@@ -98,16 +97,14 @@ export function SwipeableConversationItem({
       const p = Math.min(Math.max(-x, 0) / (DELETE_THRESHOLD * 0.6), 1);
       del.style.opacity = `${p}`;
       del.style.transform = `scale(${0.82 + p * 0.18})`;
-      if (p > 0.02 && revealedSide !== 'delete') setRevealedSide('delete');
     }
     const un = unreadRef.current;
     if (un) {
       const p = Math.min(Math.max(x, 0) / (UNREAD_THRESHOLD * 0.6), 1);
       un.style.opacity = `${p}`;
       un.style.transform = `scale(${0.82 + p * 0.18})`;
-      if (p > 0.02 && revealedSide !== 'unread') setRevealedSide('unread');
     }
-  }, [revealedSide]);
+  }, []);
 
 
   const setX = useCallback((x: number) => {
@@ -153,15 +150,6 @@ export function SwipeableConversationItem({
         if (el) el.style.transition = '';
       }, fadeMs + 20);
     });
-    // Behåll pillret monterat tills det tonat klart.
-    if (committed) {
-      scheduleTimer(() => {
-        if (gestureId === gestureIdRef.current) setRevealedSide(null);
-      }, 200);
-    } else {
-      setRevealedSide(null);
-    }
-
     pendingXRef.current = 0;
     currentXRef.current = 0;
   }, [scheduleTimer]);
@@ -181,7 +169,6 @@ export function SwipeableConversationItem({
     rafRef.current = null;
     pendingXRef.current = 0;
     currentXRef.current = 0;
-    setRevealedSide(null);
     releaseIdleLayer();
   }, [conversationName, releaseIdleLayer]);
 
@@ -401,8 +388,10 @@ export function SwipeableConversationItem({
           directionLockedRef.current = null;
         }}
       >
-        {/* Markera som oläst — visas vid drag åt höger */}
-        {onMarkUnread && canMarkUnread && revealedSide === 'unread' && (
+        {/* Markera som oläst — visas vid drag åt höger.
+            Alltid monterad: synligheten styrs via opacity i paint()/animateBack(),
+            annars kan ref:en aldrig fästas och pillret dyker aldrig upp. */}
+        {onMarkUnread && canMarkUnread && (
           <div className="absolute inset-y-0 left-0 z-0 flex items-center pl-3">
             <div
               ref={unreadRef}
@@ -424,9 +413,8 @@ export function SwipeableConversationItem({
           </div>
         )}
 
-        {/* Delete button on the RIGHT side */}
-        {revealedSide === 'delete' && (
-          <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
+        {/* Delete button on the RIGHT side — alltid monterad, se kommentaren ovan. */}
+        <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
             <div
               ref={deleteRef}
               style={{ opacity: 0, transform: 'scale(0.82)', willChange: 'transform, opacity' }}
@@ -444,8 +432,7 @@ export function SwipeableConversationItem({
                 <span>Ta bort</span>
               </button>
             </div>
-          </div>
-        )}
+        </div>
 
         {/* Content layer – slides LEFT to reveal delete on right */}
         <div
