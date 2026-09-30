@@ -1,7 +1,7 @@
-import { memo, useState, useRef, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { memo, useState, useRef, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, animate } from 'framer-motion';
 import { CountBadge } from '@/components/ui/count-badge';
 import { Bell, Trash2, Briefcase, UserCheck, Calendar, MessageCircle, UserX, CheckCircle2, AlertTriangle, Info, XCircle, ThumbsUp } from 'lucide-react';
 import { toastArchive, type ArchivedToast } from '@/lib/toastArchive';
@@ -57,9 +57,18 @@ const typeColors: Record<string, string> = {
  * garanterat stabil, vilket gör detektionen 100 % tillförlitlig (till skillnad från
  * att mäta vid montering, där panelens öppningsanimation kan ge fel värde).
  */
+// På touch finns ingen hovring — där fäller ett tryck i stället ut hela texten
+// direkt i raden (se `expanded`), så tooltipen används bara med mus/styrplatta.
+const CAN_HOVER =
+  typeof window !== 'undefined' && 'matchMedia' in window
+    ? window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    : true;
+
 function ClampTooltip({ text, children }: { text: string; children: React.ReactNode }) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
+
+  if (!CAN_HOVER) return <>{children}</>;
 
   return (
     <Tooltip
@@ -79,6 +88,104 @@ function ClampTooltip({ text, children }: { text: string; children: React.ReactN
     </Tooltip>
   );
 }
+
+const EXPAND_SPRING = { type: 'spring' as const, stiffness: 420, damping: 40, mass: 0.9 };
+
+// Raden tonar mjukt ner till "läst" i stället för att hoppa.
+const ROW_TRANSITION = {
+  y: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
+  opacity: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const },
+};
+const ROW_CLASS =
+  'w-full flex items-start gap-5 px-5 py-5 text-left transition-colors duration-150 cursor-pointer select-none [-webkit-tap-highlight-color:transparent] active:bg-white/[0.06] pointer-fine:hover:bg-white/5';
+
+/** Röd oläst-prick som krymper bort mjukt när notisen läses. */
+function UnreadDot({ visible }: { visible: boolean }) {
+  return (
+    <AnimatePresence initial={false}>
+      {visible && (
+        <motion.span
+          key="dot"
+          aria-hidden="true"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 520, damping: 30 }}
+          className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30"
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+/**
+ * Två rader med ellips som mjukt fälls ut till hela texten när raden trycks —
+ * samma känsla som när en notis expanderas på iPhone. Höjden animeras mellan
+ * uppmätta värden; ellipsen ligger kvar tills texten är helt ihopfälld igen.
+ */
+function ExpandableClamp({
+  expanded,
+  className,
+  children,
+}: {
+  expanded: boolean;
+  className: string;
+  children: React.ReactNode;
+}) {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const firstRun = useRef(true);
+
+  useLayoutEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    const outer = outerRef.current;
+    const inner = innerRef.current;
+    if (!outer || !inner) return;
+
+    const unclamp = () => {
+      inner.style.setProperty('-webkit-line-clamp', 'unset');
+      inner.style.display = 'block';
+      inner.style.overflow = 'visible';
+    };
+    const clamp = () => {
+      inner.style.removeProperty('-webkit-line-clamp');
+      inner.style.display = '';
+      inner.style.overflow = '';
+    };
+
+    const from = outer.getBoundingClientRect().height;
+    let to: number;
+    if (expanded) {
+      unclamp();
+      to = inner.getBoundingClientRect().height;
+    } else {
+      clamp();
+      to = inner.getBoundingClientRect().height;
+      unclamp();
+    }
+    if (Math.abs(to - from) < 1) {
+      if (!expanded) clamp();
+      return;
+    }
+
+    outer.style.overflow = 'hidden';
+    outer.style.height = `${from}px`;
+    const controls = animate(outer, { height: [from, to] }, EXPAND_SPRING);
+    controls.then(() => {
+      outer.style.height = '';
+      outer.style.overflow = '';
+      if (!expanded) clamp();
+    });
+    return () => controls.stop();
+  }, [expanded]);
+
+  return (
+    <div ref={outerRef}>
+      <div ref={innerRef} className={`${className} line-clamp-2`}>{children}</div>
+    </div>
+  );
+}
+
 
 
 // Notiser saknar ofta en explicit route i metadata (t.ex. chattnotiser som bara
@@ -195,19 +302,23 @@ function NotificationItem({
   const reportable = isReportable(notificationLooksError(notification.type, notification.title, notification.body), notification.title, notification.body) && !route;
 
   // Även informationsnotiser utan destination ska kunna markeras som lästa.
+  // Saknas destination fäller trycket i stället ut hela texten i raden.
+  const [expanded, setExpanded] = useState(false);
   const activate = () => {
     if (!notification.is_read) onRead(notification.id);
     if (route) onNavigate(route);
+    else if (notification.body) setExpanded((value) => !value);
   };
 
   return (
     <motion.div
       role="button"
       tabIndex={0}
+      aria-expanded={!route && notification.body ? expanded : undefined}
       initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: notification.is_read ? 0.6 : 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.15 }}
+      transition={ROW_TRANSITION}
       onClick={activate}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -215,7 +326,7 @@ function NotificationItem({
           activate();
         }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer pointer-fine:hover:bg-white/5 ${notification.is_read ? 'opacity-60' : ''}`}
+      className={ROW_CLASS}
     >
       <div className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 ${colorClass}`}>
         <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
@@ -226,14 +337,14 @@ function NotificationItem({
           <ClampTooltip text={notification.title}>
             <span className="text-sm font-medium text-white break-words leading-snug line-clamp-2">{notification.title}</span>
           </ClampTooltip>
-          {!notification.is_read && (
-            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
-          )}
+          <UnreadDot visible={!notification.is_read} />
         </div>
         {notification.body && (
-          <ClampTooltip text={notification.body}>
-            <p className="text-xs text-white mt-3 break-words line-clamp-2">{notification.body}</p>
-          </ClampTooltip>
+          <div className="mt-3">
+            <ExpandableClamp expanded={expanded} className="text-xs text-white break-words">
+              {notification.body}
+            </ExpandableClamp>
+          </div>
         )}
 
         <div className="flex items-center gap-3 mt-4">
@@ -282,24 +393,27 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
   const route = item.route ?? resolveToastRoute(item.title, item.body);
   const reportable = isReportable(item.kind === 'error' || item.kind === 'warning', item.title, item.body) && !route;
 
+  const [expanded, setExpanded] = useState(false);
   const activate = () => {
     if (!item.is_read) onRead(item.id);
     if (route) onNavigate(route);
+    else if (item.body) setExpanded((value) => !value);
   };
 
   return (
     <motion.div
       role="button"
       tabIndex={0}
+      aria-expanded={!route && item.body ? expanded : undefined}
       initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: item.is_read ? 0.6 : 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.15 }}
+      transition={ROW_TRANSITION}
       onClick={activate}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       }}
-      className={`w-full flex items-start gap-5 px-5 py-5 text-left transition-colors cursor-pointer pointer-fine:hover:bg-white/5 ${item.is_read ? 'opacity-60' : ''}`}
+      className={ROW_CLASS}
     >
       <span className={`self-center flex h-6 w-6 shrink-0 aspect-square items-center justify-center rounded-full ring-1 ${toastTones[item.kind] ?? toastTones.info}`}>
         <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
@@ -315,14 +429,14 @@ function ArchivedToastItem({ item, onRead, onNavigate }: { item: ArchivedToast; 
               {item.count}×
             </span>
           )}
-          {!item.is_read && (
-            <span className="shrink-0 h-2 w-2 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm shadow-red-500/30" />
-          )}
+          <UnreadDot visible={!item.is_read} />
         </div>
         {item.body && (
-          <ClampTooltip text={item.body}>
-            <p className="text-xs text-white mt-3 break-words line-clamp-2">{item.body}</p>
-          </ClampTooltip>
+          <div className="mt-3">
+            <ExpandableClamp expanded={expanded} className="text-xs text-white break-words">
+              {item.body}
+            </ExpandableClamp>
+          </div>
         )}
 
         <div className="flex items-center gap-3 mt-4">
@@ -520,10 +634,19 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
       {open && (
         <motion.div
           ref={panelRef}
-          initial={{ opacity: 0, scale: 0.95, y: -8 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scaleY: 0.08, y: -14 }}
-          transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+          // Öppnar med en mjuk fjäder uppifrån (som iOS-menyer); stängningen
+          // behåller sin tidigare hopfällning.
+          initial={{ opacity: 0, scale: 0.9, y: -12 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            transition: {
+              opacity: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
+              default: { type: 'spring', stiffness: 460, damping: 34, mass: 0.8 },
+            },
+          }}
+          exit={{ opacity: 0, scaleY: 0.08, y: -14, transition: { duration: 0.24, ease: [0.4, 0, 0.2, 1] } }}
           className="fixed z-[10000] w-[min(340px,calc(100vw-24px))] max-h-[min(70vh,600px)] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl rounded-xl p-0 overflow-hidden flex flex-col"
           style={{
             top: '60px',

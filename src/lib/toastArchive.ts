@@ -84,6 +84,9 @@ async function flushToServer(key: string) {
 
   const local = items.find((n) => n.id === entry.localId);
   const count = local?.count ?? 1;
+  // Hann användaren trycka på notisen innan den synkades ska serverkopian
+  // också vara läst — annars dök den upp som oläst igen efter en sekund.
+  const alreadyRead = local?.is_read === true;
 
   try {
     const { data: auth } = await supabase.auth.getUser();
@@ -106,12 +109,19 @@ async function flushToServer(key: string) {
       .limit(1);
 
 
-    if (!existing || existing.length === 0) {
+    if (existing && existing.length > 0 && alreadyRead) {
+      await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .in("id", existing.map((row) => row.id))
+        .eq("user_id", userId);
+    } else if (!existing || existing.length === 0) {
       const { error } = await supabase.from("notifications").insert({
         user_id: userId,
         type: `toast_${entry.kind}`,
         title: entry.title,
         body: entry.body ?? null,
+        is_read: alreadyRead,
         metadata: { toast: true, count, ...(entry.route ? { route: entry.route } : {}) },
       });
       if (error) return; // behåll lokalt om synken misslyckas

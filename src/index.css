@@ -2387,12 +2387,16 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
 
 /* Klockans räknare: landar med en kort fjäder i stället för att bara dyka upp. */
 @keyframes parium-badge-pop {
-  0% { transform: scale(0.4); opacity: 0; }
-  55% { transform: scale(1.14); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.2); opacity: 0; filter: blur(2px); }
+  45% { transform: scale(1.18); opacity: 1; filter: blur(0); }
+  70% { transform: scale(0.94); }
+  88% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0); }
 }
 .parium-badge-pop {
-  animation: parium-badge-pop 420ms cubic-bezier(0.32, 1.5, 0.42, 1) both;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: parium-badge-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Mjuk ring som pulserar ut en gång när något nytt kommit in — syns även när
