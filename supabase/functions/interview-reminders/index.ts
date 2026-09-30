@@ -705,7 +705,7 @@ Deno.serve(async (req) => {
             metadata: {
               interview_id: interview.id,
               applicant_id: interview.applicant_id,
-              route: "/employer",
+              route: "/my-candidates",
             },
           });
 
@@ -732,7 +732,7 @@ Deno.serve(async (req) => {
                   type: "followup_reminder",
                   interview_id: interview.id,
                   applicant_id: interview.applicant_id,
-                  route: "/employer",
+                  route: "/my-candidates",
                 },
               }),
             });
