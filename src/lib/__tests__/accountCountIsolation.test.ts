@@ -90,8 +90,10 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(swipeRow).not.toContain("style={{ transform: 'translate3d(0,0,0)' }}");
     expect(swipeRow).toContain("contentRef.current.style.willChange = 'transform';");
     expect(swipeRow).toContain("content.style.transform = '';");
-    expect(swipeRow).toContain("revealedSide === 'delete' &&");
-    expect(swipeRow).toContain("revealedSide === 'unread' &&");
+    // Sveppillren måste vara alltid monterade — villkorlig montering gav en
+    // cirkel (ref:en fästes aldrig -> revealedSide sattes aldrig -> pillret
+    // monterades aldrig) så svepåtgärderna var osynliga.
+    expect(swipeRow).not.toContain('revealedSide');
 
     const messagesPage = source('src/pages/Messages.tsx');
     expect(messagesPage).toContain('VIRTUALIZE_CONVERSATIONS_AFTER = 80');
