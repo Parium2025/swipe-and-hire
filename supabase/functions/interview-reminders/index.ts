@@ -630,6 +630,8 @@ Deno.serve(async (req) => {
         applicant_id,
         employer_id,
         job_id,
+        application_id,
+        scheduled_at,
         job_postings(title)
       `)
       // Samma regel som ovan: en obekräftad men genomförd intervju ska också
@@ -667,10 +669,37 @@ Deno.serve(async (req) => {
         // Check if the recruiter has already taken action on this candidate
         // (changed status from pending/reviewed, or added to my_candidates with stage change)
         // maybeSingle: intervjun kan sakna koppling till en ansökan (manuellt tillagd kandidat).
+        // En påminnelse per kandidat och annons: finns ett senare bokat möte
+        // med samma kandidat för samma annons väntar vi på det i stället.
+        let newerQuery = supabase
+          .from("interviews")
+          .select("id")
+          .eq("employer_id", interview.employer_id)
+          .eq("applicant_id", interview.applicant_id)
+          .gt("scheduled_at", interview.scheduled_at)
+          .neq("status", "cancelled")
+          .limit(1);
+        newerQuery = interview.job_id ? newerQuery.eq("job_id", interview.job_id) : newerQuery.is("job_id", null);
+        const { data: newer } = await newerQuery;
+        if (newer && newer.length > 0) return;
+
+        // Och aldrig en ny om en oläst påminnelse om samma kandidat redan ligger i klockan.
+        let dupQuery = supabase
+          .from("notifications")
+          .select("id")
+          .eq("user_id", interview.employer_id)
+          .eq("type", "followup_reminder")
+          .eq("is_read", false)
+          .eq("metadata->>applicant_id", interview.applicant_id)
+          .limit(1);
+        if (interview.job_id) dupQuery = dupQuery.eq("metadata->>job_id", interview.job_id);
+        const { data: dup } = await dupQuery;
+        if (dup && dup.length > 0) return;
+
         const { data: application } = interview.job_id
           ? await supabase
               .from("job_applications")
-              .select("status")
+              .select("id, status")
               .eq("job_id", interview.job_id)
               .eq("applicant_id", interview.applicant_id)
               .limit(1)
@@ -679,6 +708,8 @@ Deno.serve(async (req) => {
 
         // If the candidate is still in "interview" status, the recruiter hasn't acted
         const needsReminder = application?.status === "interview" || application?.status === "pending" || application?.status === "reviewed";
+
+        const applicationId: string | null = interview.application_id ?? application?.id ?? null;
 
         if (needsReminder) {
           // Get candidate name for the reminder
@@ -705,7 +736,9 @@ Deno.serve(async (req) => {
             metadata: {
               interview_id: interview.id,
               applicant_id: interview.applicant_id,
-              route: "/my-candidates",
+              job_id: interview.job_id,
+              application_id: applicationId,
+              route: applicationId ? `/candidates?open_application=${applicationId}` : "/my-candidates",
             },
           });
 
@@ -732,7 +765,7 @@ Deno.serve(async (req) => {
                   type: "followup_reminder",
                   interview_id: interview.id,
                   applicant_id: interview.applicant_id,
-                  route: "/my-candidates",
+                  route: applicationId ? `/candidates?open_application=${applicationId}` : "/my-candidates",
                 },
               }),
             });
