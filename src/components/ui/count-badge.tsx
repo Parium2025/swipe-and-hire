@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CountBadgeProps {
@@ -19,15 +19,17 @@ interface CountBadgeProps {
  */
 export function CountBadge({ count, className }: CountBadgeProps) {
   const previous = useRef(count);
-  const pulse = useRef(0);
-  if (count > previous.current) pulse.current += 1;
-  previous.current = count;
+  const [pulse, setPulse] = useState(0);
+  useLayoutEffect(() => {
+    if (count > previous.current) setPulse((value) => value + 1);
+    previous.current = count;
+  }, [count]);
 
   if (!count || count <= 0) return null;
 
   return (
     <span
-      key={pulse.current}
+      key={pulse}
       aria-hidden="true"
       className={cn(
         'parium-badge-pop pointer-events-none select-none absolute -top-1 -right-1 z-20',
