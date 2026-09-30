@@ -125,6 +125,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { OnlineStatusProvider } from "@/components/OnlineStatusProvider";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { PushNotificationProvider } from "@/components/PushNotificationProvider";
+import { ApplicationDeepLink } from "@/components/ApplicationDeepLink";
 import { cleanupOldDrafts } from "@/lib/draftUtils";
 import { pruneStaleCaches } from "@/lib/safeStorage";
 
@@ -310,6 +311,7 @@ const AppShell = ({ showHeader }: { showHeader: boolean }) => {
       {!isLightweightRoute && <SystemHealthPanel />}
       <UnsavedChangesProvider>
         {!isLightweightRoute && <PushNotificationProvider />}
+        {!isLightweightRoute && <ApplicationDeepLink />}
         {!isLightweightRoute && <RealtimeKeepAlive />}
         {!isLightweightRoute && <OfflineQueueRunner />}
         <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
