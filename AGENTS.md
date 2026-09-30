@@ -18,3 +18,5 @@
 - Automatic boot recovery may reload once only; persistent failures must settle on a stable error state instead of looping.
 - The landing-video route alone owns browser chrome color `#626262`; preserve its bounded chrome-reload guard (max two reloads per 10 s per tab) and never change other routes with it.
 - Preserve loop/reload/boot guards and tests. Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows to keep large inboxes fast.
+- On touch-only devices TruncatedText opens/closes only from the user's own tap; Radix open requests are ignored — Safari's emulated mouse moves otherwise pre-open it and the tap closes it.
+- Synced local toasts stay (marked `syncedId`) until the bell has loaded the server copy — removing them first made the badge drop to 0 and pop in again.
