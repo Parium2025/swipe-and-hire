@@ -3,13 +3,19 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import NotificationCenter from '../NotificationCenter';
 
 const emptyArchive: never[] = [];
+const notificationState = vi.hoisted(() => ({
+  notifications: [] as Array<{ id: string; user_id: string; type: string; title: string; body: string | null; is_read: boolean; metadata: Record<string, unknown>; created_at: string }>,
+  unreadCount: 0,
+  markAsRead: vi.fn(),
+  navigate: vi.fn(),
+}));
 
-vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
+vi.mock('react-router-dom', () => ({ useNavigate: () => notificationState.navigate }));
 vi.mock('@/hooks/useNotifications', () => ({
   useNotifications: () => ({
-    notifications: [],
-    unreadCount: 0,
-    markAsRead: vi.fn(),
+    notifications: notificationState.notifications,
+    unreadCount: notificationState.unreadCount,
+    markAsRead: notificationState.markAsRead,
     markAllAsRead: vi.fn(),
     clearAll: vi.fn(),
     hasMore: false,
@@ -33,7 +39,13 @@ vi.mock('@/lib/toastArchive', () => ({
 }));
 
 describe('NotificationCenter', () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    notificationState.notifications = [];
+    notificationState.unreadCount = 0;
+    notificationState.markAsRead.mockClear();
+    notificationState.navigate.mockClear();
+  });
 
   it('öppnar panelen i document.body så arbetsgivarhuvudet inte kan klippa den', () => {
     const { container } = render(
@@ -68,5 +80,31 @@ describe('NotificationCenter', () => {
     await waitFor(() => {
       expect(screen.queryByText('Notifikationer', { selector: 'h3' })).toBeNull();
     });
+  });
+
+  it('markerar en informationsnotis utan destination som läst vid tryck, utan navigering', () => {
+    notificationState.notifications = [{
+      id: 'notice-1', user_id: 'user-1', type: 'invite_error',
+      title: 'Fel', body: 'Adressen tillhör redan ett annat företag på Parium.',
+      is_read: false, metadata: {}, created_at: new Date().toISOString(),
+    }];
+    notificationState.unreadCount = 1;
+    render(<NotificationCenter />);
+    fireEvent.click(screen.getByLabelText('Notifikationer'));
+    fireEvent.click(screen.getByText('Fel'));
+    expect(notificationState.markAsRead).toHaveBeenCalledExactlyOnceWith('notice-1');
+    expect(notificationState.navigate).not.toHaveBeenCalled();
+  });
+
+  it('navigerar fortfarande när en notis har destination', () => {
+    notificationState.notifications = [{
+      id: 'notice-2', user_id: 'user-1', type: 'saved_search_match',
+      title: 'Nytt jobb', body: null, is_read: false, metadata: {}, created_at: new Date().toISOString(),
+    }];
+    render(<NotificationCenter />);
+    fireEvent.click(screen.getByLabelText('Notifikationer'));
+    fireEvent.click(screen.getByText('Nytt jobb'));
+    expect(notificationState.markAsRead).toHaveBeenCalledExactlyOnceWith('notice-2');
+    expect(notificationState.navigate).toHaveBeenCalledExactlyOnceWith('/search-jobs');
   });
 });
