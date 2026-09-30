@@ -63,7 +63,6 @@ export function SwipeableConversationItem({
   // aldrig skriver över en ny dragning.
   const gestureIdRef = useRef(0);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [revealedSide, setRevealedSide] = useState<'delete' | 'unread' | null>(null);
 
   // Alla timers från animateBack samlas här så de kan rensas vid unmount —
   // annars kan en rad som raderas mitt i animationen sätta state efter unmount.
@@ -98,16 +97,14 @@ export function SwipeableConversationItem({
       const p = Math.min(Math.max(-x, 0) / (DELETE_THRESHOLD * 0.6), 1);
       del.style.opacity = `${p}`;
       del.style.transform = `scale(${0.82 + p * 0.18})`;
-      if (p > 0.02 && revealedSide !== 'delete') setRevealedSide('delete');
     }
     const un = unreadRef.current;
     if (un) {
       const p = Math.min(Math.max(x, 0) / (UNREAD_THRESHOLD * 0.6), 1);
       un.style.opacity = `${p}`;
       un.style.transform = `scale(${0.82 + p * 0.18})`;
-      if (p > 0.02 && revealedSide !== 'unread') setRevealedSide('unread');
     }
-  }, [revealedSide]);
+  }, []);
 
 
   const setX = useCallback((x: number) => {
