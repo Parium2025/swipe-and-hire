@@ -36,3 +36,4 @@
 - [x] Keep normal chat inboxes on native continuous scrolling; virtualize only genuinely large lists
 - [x] Page thousands of conversations incrementally without refetching all earlier pages
 - [x] Show live typing in visible inbox rows for both account types, without subscribing to the entire inbox; verify transitions and cleanup in tests
+- [ ] Show full team member names only when clipped, mark any notification read on tap, and animate new bell counts
