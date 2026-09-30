@@ -192,6 +192,8 @@ function ExpandableClamp({
 // bär conversation_id). Här härleds målet så att varje notis alltid går att klicka på.
 function resolveRoute(type: string, metadata?: Record<string, unknown> | null): string | undefined {
   const explicit = typeof metadata?.route === 'string' ? metadata.route : undefined;
+  // Äldre återkopplingspåminnelser pekade på en sida som inte finns ("/employer").
+  if (type === 'followup_reminder') return '/my-candidates';
   if (explicit) return explicit;
 
   const conversationId = metadata?.conversation_id;
