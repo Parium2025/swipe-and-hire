@@ -311,10 +311,6 @@ export function TruncatedText({
         setIsOpen(false);
         return;
       }
-      if (truncatedNow !== isTruncated) {
-        // Innehållet renderas först efter att isTruncated uppdaterats.
-        flushSync(() => setIsTruncated(truncatedNow));
-      }
       setIsOpen((o) => !o);
     }
   };
