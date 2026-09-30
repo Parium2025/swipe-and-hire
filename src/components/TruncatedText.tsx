@@ -151,12 +151,21 @@ export function TruncatedText({
       element.style.display = "block";
       element.style.maxHeight = "none";
       element.style.overflow = "visible";
-      // A one-line clamp can hide horizontal overflow without increasing its
-      // natural height. Measure the unwrapped width as well for its tooltip.
-      if (webkitLineClamp === "1") element.style.whiteSpace = "nowrap";
 
+      // Höjden mäts MED radbrytning: en klamrad rad med flera ord ("Fredrik
+      // Andits") bryts till rad två och döljs utan att bredden svämmar över.
+      // Tidigare sattes nowrap före höjdmätningen, så höjden blev lika och
+      // bredden bara 1 px för lång — rutan öppnades aldrig.
       const naturalHeight = element.scrollHeight;
-      const naturalWidth = element.scrollWidth;
+
+      // En enradsklamring kan också dölja horisontellt överflöde (ett långt
+      // ord) utan att höjden ökar — mät den obrutna bredden separat.
+      let naturalWidth = 0;
+      if (webkitLineClamp === "1") {
+        element.style.whiteSpace = "nowrap";
+        naturalWidth = element.scrollWidth;
+      }
+      const clientWidth = element.clientWidth;
 
       // @ts-ignore - vendor property
       element.style.webkitLineClamp = originalLineClamp;
@@ -165,7 +174,9 @@ export function TruncatedText({
       element.style.overflow = originalOverflow;
       element.style.whiteSpace = originalWhiteSpace;
 
-      truncated = naturalHeight > currentHeight + 1 || (webkitLineClamp === "1" && naturalWidth > element.clientWidth + 1);
+      truncated =
+        naturalHeight > currentHeight + 1 ||
+        (webkitLineClamp === "1" && naturalWidth > clientWidth);
     } else {
       truncated =
         Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
@@ -249,7 +260,7 @@ export function TruncatedText({
         if (Math.abs(width - lastWidth) < 1) return;
         lastWidth = width;
         setHasMeasured(false);
-        setIsTruncated(false);
+        // isTruncated behålls tills ny mätning — annars avmonteras en öppen ruta.
       });
     };
 
@@ -264,7 +275,7 @@ export function TruncatedText({
       fonts.ready.then(() => {
         if (cancelled) return;
         setHasMeasured(false);
-        setIsTruncated(false);
+        // isTruncated behålls tills ny mätning — annars avmonteras en öppen ruta.
       });
     }
 
@@ -427,7 +438,9 @@ export function TruncatedText({
   const touchOnly = !supportsHover && isTouch;
   const triggerPressRef = useRef(false);
   const handleRadixOpenChange = (next: boolean) => {
-    if (touchOnly && (next || triggerPressRef.current)) return;
+    // Touch: rutan styrs helt av eget tryck och eget "tryck utanför" — Radix
+    // stänger annars vid scroll-/fokushändelser som iOS skickar efter trycket.
+    if (touchOnly) return;
     setIsOpen(next);
   };
   const handleTriggerPointerDown = () => {

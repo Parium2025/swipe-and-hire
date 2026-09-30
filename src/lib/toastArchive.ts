@@ -150,6 +150,13 @@ async function flushToServer(key: string) {
       (n.kind === entry.kind && n.title === entry.title && (n.body || "") === (entry.body || ""));
     if (serverId) {
       const syncedId = serverId;
+      // Trycket kan ha kommit MEDAN inserten pågick (efter att alreadyRead
+      // lästes). Då måste kontots kopia också bli läst innan den lokala
+      // kopian släpps — annars kom notisen tillbaka som oläst.
+      const readNow = items.some((n) => isSame(n) && n.is_read);
+      if (readNow && !alreadyRead) {
+        await supabase.from("notifications").update({ is_read: true }).eq("id", syncedId).eq("user_id", userId);
+      }
       items = items.map((n) => (isSame(n) ? { ...n, syncedId } : n));
       // Reserv: laddas klockan aldrig om (t.ex. fliken stängs av) städas den
       // lokala kopian ändå bort efter en stund.

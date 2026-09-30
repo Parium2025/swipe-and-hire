@@ -296,12 +296,15 @@ export function useNotifications() {
           const newNotif = payload.new as AppNotification;
           if (mutedTypesRef.current.has(newNotif.type) || isHiddenType(newNotif.type)) return;
           setNotifications(prev => {
+            // Realtime kan komma sekunder efter att omhämtningen redan laddat
+            // (och du kanske redan läst) notisen. Då får räknaren inte öka —
+            // annars studsade ettan tillbaka efter ett tryck.
             if (prev.some((n) => n.id === newNotif.id)) return prev;
             const updated = [newNotif, ...prev];
             setCache(user.id, updated);
+            if (!newNotif.is_read) setUnreadCount(prev2 => prev2 + 1);
             return updated;
           });
-          setUnreadCount(prev => prev + 1);
         }
 
       )
