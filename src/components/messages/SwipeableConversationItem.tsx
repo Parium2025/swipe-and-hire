@@ -388,8 +388,10 @@ export function SwipeableConversationItem({
           directionLockedRef.current = null;
         }}
       >
-        {/* Markera som oläst — visas vid drag åt höger */}
-        {onMarkUnread && canMarkUnread && revealedSide === 'unread' && (
+        {/* Markera som oläst — visas vid drag åt höger.
+            Alltid monterad: synligheten styrs via opacity i paint()/animateBack(),
+            annars kan ref:en aldrig fästas och pillret dyker aldrig upp. */}
+        {onMarkUnread && canMarkUnread && (
           <div className="absolute inset-y-0 left-0 z-0 flex items-center pl-3">
             <div
               ref={unreadRef}
@@ -411,8 +413,8 @@ export function SwipeableConversationItem({
           </div>
         )}
 
-        {/* Delete button on the RIGHT side */}
-        {revealedSide === 'delete' && (
+        {/* Delete button on the RIGHT side — alltid monterad, se kommentaren ovan. */}
+        {(
           <div className="absolute inset-y-0 right-0 z-0 flex items-center pr-3">
             <div
               ref={deleteRef}
