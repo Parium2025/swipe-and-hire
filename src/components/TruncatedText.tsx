@@ -260,7 +260,7 @@ export function TruncatedText({
         if (Math.abs(width - lastWidth) < 1) return;
         lastWidth = width;
         setHasMeasured(false);
-        setIsTruncated(false);
+        // isTruncated behålls tills ny mätning — annars avmonteras en öppen ruta.
       });
     };
 
@@ -275,7 +275,7 @@ export function TruncatedText({
       fonts.ready.then(() => {
         if (cancelled) return;
         setHasMeasured(false);
-        setIsTruncated(false);
+        // isTruncated behålls tills ny mätning — annars avmonteras en öppen ruta.
       });
     }
 
@@ -438,7 +438,9 @@ export function TruncatedText({
   const touchOnly = !supportsHover && isTouch;
   const triggerPressRef = useRef(false);
   const handleRadixOpenChange = (next: boolean) => {
-    if (touchOnly && (next || triggerPressRef.current)) return;
+    // Touch: rutan styrs helt av eget tryck och eget "tryck utanför" — Radix
+    // stänger annars vid scroll-/fokushändelser som iOS skickar efter trycket.
+    if (touchOnly) return;
     setIsOpen(next);
   };
   const handleTriggerPointerDown = () => {
