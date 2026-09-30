@@ -18,12 +18,19 @@ export interface ArchivedToast {
   is_read: boolean;
   /** Valfri destination – gör notisen klickbar i notiscentret. */
   route?: string;
+  /**
+   * Id för kontots kopia när posten har synkats. Den lokala posten ligger kvar
+   * tills klockan faktiskt har laddat serverkopian — annars försvann siffran på
+   * klockan en kort stund och studsade sedan in igen.
+   */
+  syncedId?: string;
 }
 
 const BASE_KEY = "parium_toast_archive_v1";
 const MAX = 50;
 const MERGE_WINDOW = 60_000;
 const SYNC_DEBOUNCE = 1400;
+const SYNCED_FALLBACK_MS = 15_000;
 
 /**
  * Arkivet är kontospecifikt. Två flikar på samma enhet kan vara inloggade med
@@ -109,6 +116,7 @@ async function flushToServer(key: string) {
       .limit(1);
 
 
+    let serverId: string | null = existing && existing.length > 0 ? existing[0].id : null;
     if (existing && existing.length > 0 && alreadyRead) {
       await supabase
         .from("notifications")
@@ -116,25 +124,43 @@ async function flushToServer(key: string) {
         .in("id", existing.map((row) => row.id))
         .eq("user_id", userId);
     } else if (!existing || existing.length === 0) {
-      const { error } = await supabase.from("notifications").insert({
-        user_id: userId,
-        type: `toast_${entry.kind}`,
-        title: entry.title,
-        body: entry.body ?? null,
-        is_read: alreadyRead,
-        metadata: { toast: true, count, ...(entry.route ? { route: entry.route } : {}) },
-      });
-      if (error) return; // behåll lokalt om synken misslyckas
+      const { data: inserted, error } = await supabase
+        .from("notifications")
+        .insert({
+          user_id: userId,
+          type: `toast_${entry.kind}`,
+          title: entry.title,
+          body: entry.body ?? null,
+          is_read: alreadyRead,
+          metadata: { toast: true, count, ...(entry.route ? { route: entry.route } : {}) },
+        })
+        .select("id")
+        .single();
+      if (error || !inserted) return; // behåll lokalt om synken misslyckas
+      serverId = inserted.id;
     }
 
-    // Servern äger posten nu → ta bort den lokala dubbletten. Vi matchar både
-    // på id och på innehåll, så att inga lokala kopior blir kvar om samma notis
-    // hann arkiveras i flera steg (t.ex. två flikar eller snabb upprepning).
-    items = items.filter(
-      (n) =>
-        n.id !== entry.localId &&
-        !(n.kind === entry.kind && n.title === entry.title && (n.body || "") === (entry.body || ""))
-    );
+    // Servern äger posten nu. Den lokala kopian märks som synkad och tas bort
+    // först när klockan har laddat serverkopian (pruneSynced). Tas den bort
+    // direkt blir klockan tom under omhämtningen och siffran "1" försvinner
+    // och kommer tillbaka. Vi matchar både på id och innehåll, så att inga
+    // lokala kopior blir kvar om samma notis arkiverats i flera steg.
+    const isSame = (n: ArchivedToast) =>
+      n.id === entry.localId ||
+      (n.kind === entry.kind && n.title === entry.title && (n.body || "") === (entry.body || ""));
+    if (serverId) {
+      const syncedId = serverId;
+      items = items.map((n) => (isSame(n) ? { ...n, syncedId } : n));
+      // Reserv: laddas klockan aldrig om (t.ex. fliken stängs av) städas den
+      // lokala kopian ändå bort efter en stund.
+      window.setTimeout(() => {
+        const before = items.length;
+        items = items.filter((n) => n.syncedId !== syncedId);
+        if (items.length !== before) persist();
+      }, SYNCED_FALLBACK_MS);
+    } else {
+      items = items.filter((n) => !isSame(n));
+    }
     persist();
     notifyServerRefresh();
   } catch {
@@ -194,7 +220,27 @@ export const toastArchive = {
     scheduleSync(localId, kind, clean, body?.trim() || undefined, route);
   },
   markAsRead(id: string) {
+    const target = items.find((n) => n.id === id);
     items = items.map((n) => (n.id === id ? { ...n, is_read: true } : n));
+    persist();
+    // Redan synkad: kontots kopia måste också bli läst, annars kommer pricken
+    // tillbaka när klockan laddar serverkopian.
+    if (target?.syncedId) {
+      const syncedId = target.syncedId;
+      void (async () => {
+        try {
+          await supabase.from("notifications").update({ is_read: true }).eq("id", syncedId);
+        } finally {
+          notifyServerRefresh();
+        }
+      })();
+    }
+  },
+  /** Tar bort lokala kopior vars serverkopia nu finns i klockans lista. */
+  pruneSynced(serverIds: Set<string>) {
+    const next = items.filter((n) => !n.syncedId || !serverIds.has(n.syncedId));
+    if (next.length === items.length) return;
+    items = next;
     persist();
   },
   markAllAsRead() {
