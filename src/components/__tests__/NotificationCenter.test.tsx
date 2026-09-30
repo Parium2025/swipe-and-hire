@@ -141,7 +141,7 @@ describe('NotificationCenter', () => {
     expect(document.querySelectorAll('.parium-badge-pop')).toHaveLength(1);
 
     notificationState.unreadCount = 11;
-    rerender(<TooltipProvider><NotificationCenter variant="rect" /></TooltipProvider>);
+    rerender(<TooltipProvider><NotificationCenter variant="round" /></TooltipProvider>);
     const stillCapped = document.querySelector('.parium-badge-pop');
     expect(stillCapped?.textContent).toContain('9+');
     expect(stillCapped).not.toBe(next);
