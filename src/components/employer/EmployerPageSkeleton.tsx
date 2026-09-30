@@ -290,7 +290,11 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
                   style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}
                 >
                   <div className="absolute top-2.5 left-2.5 h-5 w-14 rounded-full bg-white/15" />
-                  <div className="absolute top-2.5 right-2.5 h-6 w-12 rounded-full bg-white/15" />
+                  {/* Sökande + visningar — samma två rutor som det riktiga kortet */}
+                  <div className="absolute top-2.5 right-2.5 flex gap-1.5">
+                    <div className="h-6 w-12 rounded-full bg-white/15" />
+                    <div className="h-6 w-12 rounded-full bg-white/15" />
+                  </div>
                 </div>
                 {/* Body */}
                 <div className="flex flex-col gap-2 py-2">
@@ -332,9 +336,15 @@ export const EmployerDashboardSkeleton = memo(function EmployerDashboardSkeleton
                 className="rounded-2xl overflow-hidden bg-white/5 border border-white/20"
               >
                 <div
-                  className={`w-full ${SHAPE}`}
+                  className={`relative w-full ${SHAPE}`}
                   style={{ aspectRatio: 'var(--job-media-aspect, 2 / 1)' }}
-                />
+                >
+                  <div className="absolute top-2.5 left-2.5 h-5 w-14 rounded-full bg-white/15" />
+                  <div className="absolute top-2.5 right-2.5 flex gap-1.5">
+                    <div className="h-6 w-12 rounded-full bg-white/15" />
+                    <div className="h-6 w-12 rounded-full bg-white/15" />
+                  </div>
+                </div>
                 <div className="flex flex-col gap-2 py-2">
                   <div className="flex justify-center mt-1">
                     <div className={`h-14 w-14 rounded-full ${SHAPE}`} />
