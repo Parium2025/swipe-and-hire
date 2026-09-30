@@ -432,8 +432,7 @@ export function SwipeableConversationItem({
                 <span>Ta bort</span>
               </button>
             </div>
-          </div>
-        )}
+        </div>
 
         {/* Content layer – slides LEFT to reveal delete on right */}
         <div
