@@ -75,14 +75,20 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
   });
 
 
-  const newApplicationsCount = dashStats?.new_applications ?? 0;
-  const savedFavoritesCount = dashStats?.saved_favorites ?? 0;
+  // Kontoskopad cache visar senaste kända siffror direkt vid inloggning
+  // medan servern svarar – inget tomt kort i väntan på nätverket.
+  const cached = useMemo(() => readEmployerCachedStats(user?.id), [user?.id]);
+  const hasCache = ['active_jobs', 'new_applications', 'saved_favorites', 'unread_messages']
+    .every((k) => typeof cached[k] === 'number');
+
+  const newApplicationsCount = dashStats?.new_applications ?? cached.new_applications ?? 0;
+  const savedFavoritesCount = dashStats?.saved_favorites ?? cached.saved_favorites ?? 0;
   // Olästa meddelanden läses från den enda globala chattkanalen i stället för
   // en egen prenumeration på conversation_messages – annars skulle varje
   // meddelande på hela plattformen trigga en RPC per öppen hemvy.
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
-    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? 0;
+    conversationsCtx?.totalUnreadCount ?? dashStats?.unread_messages ?? cached.unread_messages ?? 0;
   useEffect(() => {
     writeEmployerCachedStat(user?.id, 'unread_messages', unreadMessagesCount);
   }, [unreadMessagesCount, user?.id]);
@@ -119,7 +125,7 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
     }
   }, [serverCounts, countsLoading, user?.id]);
 
-  const displayActiveJobs = serverCounts ? activeJobsCount : 0;
+  const displayActiveJobs = serverCounts ? activeJobsCount : (cached.active_jobs ?? 0);
 
 
   const statsArray: StatData[] = useMemo(() => [
@@ -135,8 +141,8 @@ export const EmployerStatsCard = memo(({ isPaused, setIsPaused }: EmployerStatsC
       isPaused={isPaused}
       setIsPaused={setIsPaused}
       dataReady={isSuccess && !!serverCounts}
-      hasCachedData={false}
-      countsReady={isSuccess && !!serverCounts}
+      hasCachedData={hasCache}
+      countsReady={(isSuccess && !!serverCounts) || hasCache}
     />
   );
 });
