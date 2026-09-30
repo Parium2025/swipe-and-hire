@@ -122,10 +122,13 @@ export function TruncatedText({
 
   // Lazy truncation measurement — runs only the first time the user
   // hovers/touches the element. Cheap on first paint, accurate on demand.
-  const measureTruncation = useCallback(() => {
-    if (hasMeasured) return;
+  // `force` mäter om även om ett tidigare värde finns. Används vid tryck och
+  // hovring: ett cachat "får plats" kan vara inaktuellt (mätt innan webbfonten
+  // laddats eller under en expanderande panel) och då öppnades aldrig rutan.
+  const measureTruncation = useCallback((force = false): boolean => {
+    if (hasMeasured && !force) return isTruncated;
     const element = textRef.current;
-    if (!element) return;
+    if (!element) return isTruncated;
 
     const styles = window.getComputedStyle(element);
     const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
@@ -171,7 +174,8 @@ export function TruncatedText({
 
     setIsTruncated(truncated);
     setHasMeasured(true);
-  }, [hasMeasured]);
+    return truncated;
+  }, [hasMeasured, isTruncated]);
 
   // If alwaysShowTooltip is set, we don't need to measure at all
   const tooltipForcedOn = alwaysShowTooltip === true || alwaysShowTooltip === 'desktop-only';
@@ -216,7 +220,7 @@ export function TruncatedText({
     if (!isTouch) return;
     if (hasMeasured) return;
     // Defer one frame so layout (clamp, fonts) is settled
-    const id = requestAnimationFrame(() => measureTruncation());
+    const id = requestAnimationFrame(() => { measureTruncation(); });
     return () => cancelAnimationFrame(id);
   }, [text, tooltipForcedOn, supportsHover, isTouch, hasMeasured, measureTruncation]);
 
@@ -300,7 +304,13 @@ export function TruncatedText({
 
   const handleTap = () => {
     if (!supportsHover && isTouch) {
-      measureTruncation();
+      // Mät alltid färskt vid tryck — annars kunde ett inaktuellt "får plats"
+      // göra att rutan aldrig visades trots att texten var kapad.
+      const truncatedNow = measureTruncation(true);
+      if (!truncatedNow && alwaysShowTooltip !== true) {
+        setIsOpen(false);
+        return;
+      }
       setIsOpen((o) => !o);
     }
   };
@@ -310,7 +320,7 @@ export function TruncatedText({
     if (supportsHover) {
       clearCloseTimeout();
       setIsDesktopHovering(true);
-      measureTruncation();
+      measureTruncation(true);
     }
   };
 
@@ -402,10 +412,29 @@ export function TruncatedText({
       // vårt. Utan preventDefault öppnades bubblan och stängdes i samma tryck —
       // på mobil syntes den därför aldrig.
       e.preventDefault();
+      releaseTriggerPress();
       handleTap();
     } else if (onClick) {
       onClick();
     }
+  };
+
+  // TOUCH: bara vårt eget tryck får öppna/stänga rutan. Safari skickar
+  // emulerade "mus"-rörelser efter tryck (t.ex. när en panel fälls ut under
+  // fingret) och Radix öppnade då rutan i smyg — nästa tryck stängde den i
+  // stället för att öppna. Radix stänger dessutom vid pointerdown på texten,
+  // vilket fick ett andra tryck att öppna igen i stället för att stänga.
+  const touchOnly = !supportsHover && isTouch;
+  const triggerPressRef = useRef(false);
+  const handleRadixOpenChange = (next: boolean) => {
+    if (touchOnly && (next || triggerPressRef.current)) return;
+    setIsOpen(next);
+  };
+  const handleTriggerPointerDown = () => {
+    if (touchOnly) triggerPressRef.current = true;
+  };
+  const releaseTriggerPress = () => {
+    triggerPressRef.current = false;
   };
 
   const stopTooltipPropagation = (event: React.SyntheticEvent) => {
@@ -432,7 +461,7 @@ export function TruncatedText({
     <TooltipProvider delayDuration={200} skipDelayDuration={100} disableHoverableContent={false}>
       <Tooltip
         open={forceClosed ? false : isOpen}
-        onOpenChange={forceClosed ? undefined : setIsOpen}
+        onOpenChange={forceClosed ? undefined : handleRadixOpenChange}
         disableHoverableContent={false}
       >
         <TooltipTrigger asChild>
@@ -441,11 +470,13 @@ export function TruncatedText({
             className={`${className ?? ""} cursor-pointer pointer-events-auto`}
             style={wordBreakStyles}
             onClick={handleClick}
+            onPointerDown={handleTriggerPointerDown}
+            onPointerCancel={releaseTriggerPress}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            onTouchStart={isTouch && !supportsHover ? measureTruncation : undefined}
+            onTouchStart={isTouch && !supportsHover ? () => { measureTruncation(); } : undefined}
             onMouseDown={(e) => e.stopPropagation()}
             // No native `title` attribute — it would render a second (gray) browser
             // tooltip on top of our custom one.

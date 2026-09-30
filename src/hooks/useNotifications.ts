@@ -95,6 +95,13 @@ export function useNotifications() {
 
   useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
 
+  // Lokala notiser som synkats tas bort först när serverkopian finns i listan,
+  // så att klocksiffran aldrig blinkar till 0 under omhämtningen.
+  useEffect(() => {
+    if (!notifications.length) return;
+    toastArchive.pruneSynced(new Set(notifications.map((n) => n.id)));
+  }, [notifications]);
+
   const loadMutedTypes = useCallback(async (): Promise<Set<string>> => {
     if (!user) return mutedTypesRef.current;
     const { data } = await supabase

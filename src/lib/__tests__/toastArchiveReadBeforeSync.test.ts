@@ -18,7 +18,8 @@ vi.mock('@/integrations/supabase/client', () => {
         ...selectChain,
         insert: (row: any) => {
           inserted.push(row);
-          return Promise.resolve({ error: null });
+          const result = { data: { id: `srv-${inserted.length}` }, error: null };
+          return { select: () => ({ single: () => Promise.resolve(result) }) };
         },
       }),
     },
@@ -45,5 +46,26 @@ describe('toastArchive', () => {
 
     expect(inserted).toHaveLength(1);
     expect(inserted[0].is_read).toBe(true);
+  });
+
+  // Regression: den lokala kopian togs bort direkt efter synk, så klockan var
+  // tom tills omhämtningen var klar — siffran "1" försvann och studsade in igen.
+  it('behåller lokala kopian tills klockan laddat serverkopian', async () => {
+    const { toastArchive, setToastArchiveUser } = await import('@/lib/toastArchive');
+    setToastArchiveUser('u1');
+    toastArchive.clear();
+    toastArchive.add('error', 'Fel igen', 'Något gick snett.');
+
+    await vi.advanceTimersByTimeAsync(2000);
+    vi.useRealTimers();
+    await new Promise((r) => setTimeout(r, 0));
+
+    const [local] = toastArchive.getSnapshot();
+    expect(local).toBeDefined();
+    expect(local.is_read).toBe(false);
+    expect(local.syncedId).toBe(`srv-${inserted.length}`);
+
+    toastArchive.pruneSynced(new Set([local.syncedId!]));
+    expect(toastArchive.getSnapshot()).toHaveLength(0);
   });
 });
