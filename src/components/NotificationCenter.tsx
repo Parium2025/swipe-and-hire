@@ -453,14 +453,6 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
   const [pendingClear, setPendingClear] = useState(false);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const displayCount = pendingClear ? 0 : unreadCount;
-  const prevCountRef = useRef(displayCount);
-  const [popKey, setPopKey] = useState(0);
-
-  useEffect(() => {
-    // Poppa bara när siffran ökar. Vid minskning byts talet utan animation.
-    if (displayCount > prevCountRef.current) setPopKey((k) => k + 1);
-    prevCountRef.current = displayCount;
-  }, [displayCount]);
 
   useEffect(() => {
     if (!pendingClear) return;
@@ -520,7 +512,7 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
         aria-label="Notifikationer"
       >
         <Bell className="h-5 w-5" />
-        <CountBadge count={displayCount} popKey={popKey} />
+        <CountBadge count={displayCount} />
 
       </button>
 

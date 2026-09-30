@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CountBadgeProps {
   count: number;
-  /** Nyckel som triggar pop-animationen när siffran ökar. */
-  popKey?: number | string;
   className?: string;
 }
 
@@ -19,20 +16,12 @@ interface CountBadgeProps {
  * badgen en kort puls varje gång antalet ökar — man ser att något hänt
  * utan att siffran behöver ändras.
  */
-export function CountBadge({ count, popKey, className }: CountBadgeProps) {
-  const prevCountRef = useRef(count);
-  const [pulse, setPulse] = useState(0);
-
-  useEffect(() => {
-    if (count > prevCountRef.current) setPulse((p) => p + 1);
-    prevCountRef.current = count;
-  }, [count]);
-
+export function CountBadge({ count, className }: CountBadgeProps) {
   if (!count || count <= 0) return null;
 
   return (
     <span
-      key={popKey ?? pulse}
+      key={count}
       aria-hidden="true"
       className={cn(
         'parium-badge-pop pointer-events-none select-none absolute -top-1 -right-1 z-20',

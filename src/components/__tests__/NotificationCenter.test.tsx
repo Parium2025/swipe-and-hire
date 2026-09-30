@@ -111,4 +111,18 @@ describe('NotificationCenter', () => {
     expect(notificationState.navigate).toHaveBeenCalledTimes(1);
     expect(notificationState.navigate).toHaveBeenCalledWith('/search-jobs');
   });
+
+  it('visar den nya siffran med en enda animation även när 9+ redan visas', () => {
+    notificationState.unreadCount = 9;
+    const { rerender } = render(<TooltipProvider><NotificationCenter /></TooltipProvider>);
+    const first = document.querySelector('.parium-badge-pop');
+    expect(first?.textContent).toContain('9');
+
+    notificationState.unreadCount = 10;
+    rerender(<TooltipProvider><NotificationCenter /></TooltipProvider>);
+    const next = document.querySelector('.parium-badge-pop');
+    expect(next?.textContent).toContain('9+');
+    expect(next).not.toBe(first);
+    expect(document.querySelectorAll('.parium-badge-pop')).toHaveLength(1);
+  });
 });
