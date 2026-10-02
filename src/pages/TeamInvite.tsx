@@ -7,9 +7,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { forgetInvite, rememberInvite } from "@/lib/pendingTeamInvite";
 import { AlertTriangle, CheckCircle2, Loader2, Users } from "lucide-react";
 
-type Status = "idle" | "working" | "success" | "error" | "needs-auth" | "wrong-account";
+type Status = "idle" | "working" | "success" | "error" | "needs-auth" | "wrong-account" | "already-accepted";
 
-interface InvitePreview { email: string; organizationName: string | null; accountExists: boolean }
+interface InvitePreview { email: string; organizationName: string | null; accountExists: boolean; alreadyAccepted?: boolean }
 
 const readServerError = async (error: unknown, fallback: string) => {
   const context = (error as { context?: Response }).context;
