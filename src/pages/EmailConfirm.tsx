@@ -51,7 +51,7 @@ const EmailConfirm = () => {
 
       // Kom ihåg adressen så Logga in-fältet är förifyllt, och avsluta
       // "väntar på bekräftelse"-läget eftersom kontot nu är bekräftat.
-      if (typeof result?.email === 'string') setConfirmedEmail(result.email);
+      setConfirmedEmail(typeof result?.email === 'string' ? result.email : getPendingVerificationEmail());
       clearPendingVerification();
       const msg = result.message || '';
       const lowerMsg = msg.toLowerCase();
