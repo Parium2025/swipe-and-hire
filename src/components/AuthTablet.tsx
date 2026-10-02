@@ -63,7 +63,16 @@ const AuthTablet = ({
   
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [isLogin, setIsLogin] = useState(initialMode !== 'register');
+  // Väntar en nyss registrerad adress på bekräftelse (t.ex. efter att man
+  // lämnat sidan för att öppna mejlet)? Återställ då Logga in-läget med
+  // "Skicka ny länk"-rutan i stället för ett tomt registreringsformulär.
+  const [restoredPendingEmail] = useState<string>(() => {
+    const pending = getPendingVerificationEmail();
+    if (!pending) return '';
+    if (initialEmail && initialEmail.trim().toLowerCase() !== pending.toLowerCase()) return '';
+    return pending;
+  });
+  const [isLogin, setIsLogin] = useState(restoredPendingEmail ? true : initialMode !== 'register');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
@@ -71,7 +80,7 @@ const AuthTablet = ({
   const savedDraft = useRef(loadAuthDraft()).current;
   // Inloggning har helt eget state – delar aldrig fält med registreringen
   const [loginData, setLoginData] = useState(() => ({
-    email: initialEmail ?? savedDraft.login?.email ?? '',
+    email: restoredPendingEmail || (initialEmail ?? savedDraft.login?.email ?? ''),
     password: '',
   }));
   const [jobSeekerData, setJobSeekerData] = useState(() => mergeDraft({
@@ -109,8 +118,8 @@ const AuthTablet = ({
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
-  const [showResend, setShowResend] = useState(false);
-  const [resendEmail, setResendEmail] = useState('');
+  const [showResend, setShowResend] = useState(() => !!restoredPendingEmail);
+  const [resendEmail, setResendEmail] = useState(restoredPendingEmail);
   const [pendingVerification, setPendingVerification] = useState<boolean>(() => hasPendingVerification());
 
   // Låt användaren registrera sig igen när hen byter till Registrera-fliken
