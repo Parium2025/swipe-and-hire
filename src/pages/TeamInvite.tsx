@@ -61,38 +61,89 @@ const TeamInvite = () => {
     }
   }, [token, refreshProfile]);
 
+  // Förhandsvisningen kräver ingen inloggning. Den hämtas direkt med den
+  // publika nyckeln och en tidsgräns, så en gammal/trasig inloggning i
+  // webbläsaren aldrig kan få sidan att snurra i evighet.
+  const [previewState, setPreviewState] = useState<"loading" | "ready" | "failed">("loading");
+  const [authWaitExpired, setAuthWaitExpired] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+
   useEffect(() => {
-    if (authLoading || attempted.current) return;
-    attempted.current = true;
     if (!token) {
       setStatus("error");
       setMessage("Länken saknar en giltig inbjudningskod.");
+      setPreviewState("failed");
       return;
     }
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 12000);
+    setPreviewState("loading");
     void (async () => {
-      const { data, error } = await supabase.functions.invoke("team-invite-accept", {
-        body: { token, preview: true },
-      });
-      if (error || !data?.email) {
-        forgetInvite();
+      try {
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/team-invite-accept`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ token, preview: true }),
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (!res.ok || !data?.email) {
+          if (res.status !== 403) forgetInvite();
+          setStatus("error");
+          setMessage(typeof data?.error === "string" ? data.error : "Inbjudan kunde inte hittas.");
+          setPreviewState("failed");
+          return;
+        }
+        const info = data as InvitePreview;
+        setPreview(info);
+        setOrganizationName(info.organizationName);
+        setPreviewState("ready");
+      } catch {
+        if (cancelled) return;
         setStatus("error");
-        setMessage(await readServerError(error, "Inbjudan kunde inte hittas."));
-        return;
+        setMessage("Det tog för lång tid att kontrollera inbjudan. Kontrollera anslutningen och försök igen.");
+        setPreviewState("failed");
+      } finally {
+        window.clearTimeout(timer);
       }
-      const info = data as InvitePreview;
-      setPreview(info);
-      setOrganizationName(info.organizationName);
-      if (!user) {
-        setStatus("needs-auth");
-        return;
-      }
-      if ((user.email || "").toLowerCase() !== info.email.toLowerCase()) {
-        setStatus("wrong-account");
-        return;
-      }
-      void accept();
     })();
-  }, [accept, authLoading, destination, token, user]);
+    return () => { cancelled = true; controller.abort(); window.clearTimeout(timer); };
+  }, [token, retryKey]);
+
+  // Vänta högst 6 s på inloggningsstatus; därefter behandlas besökaren som utloggad.
+  useEffect(() => {
+    if (!authLoading) return;
+    const t = window.setTimeout(() => setAuthWaitExpired(true), 6000);
+    return () => window.clearTimeout(t);
+  }, [authLoading]);
+
+  useEffect(() => {
+    if (previewState !== "ready" || !preview || attempted.current) return;
+    if (authLoading && !authWaitExpired) return;
+    attempted.current = true;
+    if (!user) {
+      setStatus("needs-auth");
+      return;
+    }
+    if ((user.email || "").toLowerCase() !== preview.email.toLowerCase()) {
+      setStatus("wrong-account");
+      return;
+    }
+    void accept();
+  }, [accept, authLoading, authWaitExpired, preview, previewState, user]);
+
+  const retry = useCallback(() => {
+    attempted.current = false;
+    setStatus("idle");
+    setMessage("");
+    setRetryKey((k) => k + 1);
+  }, []);
 
   const goToAuth = useCallback(() => {
     rememberInvite(destination);
