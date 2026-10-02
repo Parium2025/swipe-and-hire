@@ -531,10 +531,16 @@ const Index = () => {
       const done = await isEmployerIntroTourDone().catch(() => false);
       if (cancelled || employerIntroTourHandledRef.current) return;
       employerIntroTourHandledRef.current = true;
-      if (done) {
+      // Kontrollera igen efter molnsvaret: kortet kan redan ha stängts under
+      // väntan (t.ex. om sidan monterats om), och det får bara visas en gång
+      // per konto och sidladdning.
+      let alreadyClosed = false;
+      try { alreadyClosed = !!localStorage.getItem(employerIntroTourKey(user.id)); } catch { /* ignorera */ }
+      if (done || alreadyClosed || employerIntroTourShownFor.has(user.id)) {
         try { localStorage.setItem(employerIntroTourKey(user.id), '1'); } catch { /* ignorera */ }
         return;
       }
+      employerIntroTourShownFor.add(user.id);
       setShowEmployerIntroTutorial(true);
     });
     return () => { cancelled = true; };
