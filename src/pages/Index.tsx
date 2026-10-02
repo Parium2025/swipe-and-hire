@@ -442,6 +442,8 @@ const CandidatesContent = () => {
 // Guiden ("Hjälp & tips") markeras som klar per konto, inte per webbläsare.
 const introTourKey = (userId: string) => `parium_intro_tour_done:${userId}`;
 const employerIntroTourKey = (userId: string) => `parium_emp_intro_tour_done:${userId}`;
+/** Konton som redan fått välkomstkortet automatiskt i denna sidladdning. */
+const employerIntroTourShownFor = new Set<string>();
 
 const Index = () => {
   const { user, profile, userRole, loading, authAction } = useAuth();
