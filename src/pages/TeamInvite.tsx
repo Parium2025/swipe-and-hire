@@ -104,6 +104,10 @@ const TeamInvite = () => {
         setPreview(info);
         setOrganizationName(info.organizationName);
         setPreviewState("ready");
+        if (info.alreadyAccepted) {
+          forgetInvite();
+          setStatus("already-accepted");
+        }
       } catch {
         if (cancelled) return;
         setStatus("error");
