@@ -218,6 +218,28 @@ const TeamInvite = () => {
           </>
         )}
 
+        {status === "already-accepted" && (
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <h1 className="break-words text-2xl font-semibold text-white">Redan aktiverat 🎉</h1>
+            <p className="mb-4 break-words text-sm leading-6 text-white sm:text-base">
+              Ditt konto är redan aktiverat och redo att användas.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full rounded-full text-white [&_svg]:text-white"
+              onClick={() =>
+                navigate("/auth", {
+                  state: preview?.email ? { email: preview.email } : undefined,
+                  replace: true,
+                })
+              }
+            >
+              Logga in
+            </Button>
+          </div>
+        )}
+
         {status === "success" && (
           <>
             <div className="mb-3 flex items-center gap-3">
