@@ -51,9 +51,20 @@ describe('TeamInvite', () => {
     mocks.signOut.mockReset();
     sessionStorage.clear();
     localStorage.clear();
+    // Förhandsvisningen hämtas med fetch (utan inloggningsberoende).
+    // Skicka den vidare till samma mock så testerna styr båda vägarna.
+    vi.stubGlobal('fetch', vi.fn(async (_url: string, init?: RequestInit) => {
+      const body = init?.body ? JSON.parse(String(init.body)) : {};
+      const { data, error } = await mocks.invoke('team-invite-accept', { body });
+      if (error) {
+        const ctx = (error as { context?: Response }).context;
+        return ctx ?? new Response(JSON.stringify({ error: 'fel' }), { status: 500 });
+      }
+      return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }));
   });
 
-  afterEach(cleanup);
+  afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
   it('förklarar inbjudan för en utloggad mottagare och bevarar länken vid inloggning', async () => {
     const token = 'a'.repeat(64);
