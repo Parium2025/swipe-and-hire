@@ -95,17 +95,18 @@ const handler = async (req: Request): Promise<Response> => {
             });
 
           } else {
-            // Användaren finns men är inte bekräftad - ta bort och skapa ny
-            console.log('Found existing unconfirmed signup, deleting first');
-            
-            // Ta bort från relaterade tabeller
-            await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
-            await supabase.from('profiles').delete().eq('user_id', existingUser.id);
-            await supabase.from('user_roles').delete().eq('user_id', existingUser.id);
-            
-            // Ta bort användaren
-            await supabase.auth.admin.deleteUser(existingUser.id);
-            console.log('Existing unconfirmed user deleted successfully');
+            // SÄKERHET: ett obekräftat konto raderas aldrig via den publika
+            // registreringen — då skulle vem som helst kunna ta bort en
+            // väntande registrering. Personen använder "Skicka ny länk".
+            console.log("Signup target exists but is unconfirmed — keeping account");
+            return new Response(JSON.stringify({
+              success: true,
+              message: "Om adressen är giltig har vi skickat ett mejl med nästa steg.",
+              needsConfirmation: true
+            }), {
+              status: 200,
+              headers: { "Content-Type": "application/json", ...corsHeaders },
+            });
           }
         }
       }
