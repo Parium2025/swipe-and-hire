@@ -7,9 +7,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { forgetInvite, rememberInvite } from "@/lib/pendingTeamInvite";
 import { AlertTriangle, CheckCircle2, Loader2, Users } from "lucide-react";
 
-type Status = "idle" | "working" | "success" | "error" | "needs-auth" | "wrong-account";
+type Status = "idle" | "working" | "success" | "error" | "needs-auth" | "wrong-account" | "already-accepted";
 
-interface InvitePreview { email: string; organizationName: string | null; accountExists: boolean }
+interface InvitePreview { email: string; organizationName: string | null; accountExists: boolean; alreadyAccepted?: boolean }
 
 const readServerError = async (error: unknown, fallback: string) => {
   const context = (error as { context?: Response }).context;
@@ -104,6 +104,10 @@ const TeamInvite = () => {
         setPreview(info);
         setOrganizationName(info.organizationName);
         setPreviewState("ready");
+        if (info.alreadyAccepted) {
+          forgetInvite();
+          setStatus("already-accepted");
+        }
       } catch {
         if (cancelled) return;
         setStatus("error");
@@ -124,7 +128,7 @@ const TeamInvite = () => {
   }, [authLoading]);
 
   useEffect(() => {
-    if (previewState !== "ready" || !preview || attempted.current) return;
+    if (previewState !== "ready" || !preview || preview.alreadyAccepted || attempted.current) return;
     if (authLoading && !authWaitExpired) return;
     attempted.current = true;
     if (!user) {
@@ -212,6 +216,28 @@ const TeamInvite = () => {
                 : preview.accountExists ? "Logga in" : "Skapa konto"}
             </Button>
           </>
+        )}
+
+        {status === "already-accepted" && (
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <h1 className="break-words text-2xl font-semibold text-white">Redan aktiverat 🎉</h1>
+            <p className="mb-4 break-words text-sm leading-6 text-white sm:text-base">
+              Ditt konto är redan aktiverat och redo att användas.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full rounded-full text-white [&_svg]:text-white"
+              onClick={() =>
+                navigate("/auth", {
+                  state: preview?.email ? { email: preview.email } : undefined,
+                  replace: true,
+                })
+              }
+            >
+              Logga in
+            </Button>
+          </div>
         )}
 
         {status === "success" && (

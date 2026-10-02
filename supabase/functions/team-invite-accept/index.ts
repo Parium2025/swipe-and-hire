@@ -57,7 +57,11 @@ serve(async (req) => {
       .eq("token_hash", tokenHash)
       .maybeSingle();
     if (!inv) return json({ error: "Inbjudan hittades inte." }, 404);
-    if (inv.status === "accepted") return json({ error: "Inbjudan är redan använd." }, 409);
+    if (inv.status === "accepted") {
+      const { data: org } = await supabaseAdmin
+        .from("organizations").select("name").eq("id", inv.organization_id).maybeSingle();
+      return json({ alreadyAccepted: true, email: inv.email, organizationName: org?.name ?? null });
+    }
     if (inv.status !== "pending") return json({ error: "Inbjudan är återkallad." }, 409);
     if (new Date(inv.expires_at).getTime() < Date.now()) {
       return json({ error: "Inbjudan har gått ut." }, 410);
