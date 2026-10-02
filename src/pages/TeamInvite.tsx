@@ -176,7 +176,7 @@ const TeamInvite = () => {
           <span className="font-semibold leading-none text-white">Parium</span>
         </div>
 
-        {(status === "idle" || status === "working" || authLoading) && (
+        {(status === "idle" || status === "working") && (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <Loader2 className="h-6 w-6 animate-spin text-white" />
             <p className="text-sm text-white">Kontrollerar din inbjudan…</p>
@@ -250,6 +250,14 @@ const TeamInvite = () => {
               type="button"
               variant="secondary"
               className="w-full rounded-full text-white [&_svg]:text-white"
+              onClick={retry}
+            >
+              Försök igen
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-2 w-full rounded-full text-white hover:text-white"
               onClick={() => navigate("/")}
             >
               Till startsidan
