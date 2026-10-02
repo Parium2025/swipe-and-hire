@@ -207,6 +207,33 @@ const handler = async (req: Request): Promise<Response> => {
           candidateEmail = boundApp.email;
         }
       }
+      // SÄKERHET: utan bunden ansökan används kandidatens ansökan på samma
+      // annons, annars kandidatens kontoadress — aldrig adressen i anropet.
+      if (!boundApplicationId || candidateEmail === parsed.data.candidateEmail) {
+        let resolved = '';
+        if (interview.job_id && applicantId) {
+          const { data: app } = await supabaseAdmin
+            .from('job_applications')
+            .select('email')
+            .eq('job_id', interview.job_id)
+            .eq('applicant_id', applicantId)
+            .order('applied_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          resolved = (app as { email?: string | null } | null)?.email ?? '';
+        }
+        if (!resolved && applicantId) {
+          const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(applicantId);
+          resolved = authUser?.user?.email ?? '';
+        }
+        if (!resolved) {
+          return new Response(
+            JSON.stringify({ error: 'Kandidatens e-post kunde inte hittas.' }),
+            { status: 422, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+        candidateEmail = resolved;
+      }
     }
 
 
