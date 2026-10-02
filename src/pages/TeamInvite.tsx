@@ -128,7 +128,7 @@ const TeamInvite = () => {
   }, [authLoading]);
 
   useEffect(() => {
-    if (previewState !== "ready" || !preview || attempted.current) return;
+    if (previewState !== "ready" || !preview || preview.alreadyAccepted || attempted.current) return;
     if (authLoading && !authWaitExpired) return;
     attempted.current = true;
     if (!user) {
