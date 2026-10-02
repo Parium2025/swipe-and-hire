@@ -1,3 +1,4 @@
+import { clearPendingVerification, getPendingVerificationEmail } from '@/lib/pendingVerification';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,12 +41,18 @@ const EmailConfirm = () => {
     handleEmailConfirmation(confirmToken);
   }, [searchParams]);
 
+  const [confirmedEmail, setConfirmedEmail] = useState('');
+
   const handleEmailConfirmation = async (token: string) => {
     try {
       console.log('Starting email confirmation with token:', token);
       const result = await confirmEmail(token);
       console.log('Email confirmation successful:', result);
 
+      // Kom ihåg adressen så Logga in-fältet är förifyllt, och avsluta
+      // "väntar på bekräftelse"-läget eftersom kontot nu är bekräftat.
+      if (typeof result?.email === 'string') setConfirmedEmail(result.email);
+      clearPendingVerification();
       const msg = result.message || '';
       const lowerMsg = msg.toLowerCase();
 
@@ -74,7 +81,8 @@ const EmailConfirm = () => {
   };
 
   const handleGoToLogin = () => {
-    navigate('/auth');
+    const email = confirmedEmail || getPendingVerificationEmail();
+    navigate('/auth', email ? { state: { email } } : undefined);
   };
 
   return (
