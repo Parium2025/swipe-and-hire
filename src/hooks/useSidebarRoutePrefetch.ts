@@ -172,7 +172,7 @@ export function useSidebarRoutePrefetch() {
       default:
         break;
     }
-  }, [queryClient, user, orgId]);
+  }, [queryClient, user, orgId, isAdmin]);
 
   return prefetchRoute;
 }
