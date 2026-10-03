@@ -107,6 +107,14 @@ function readJobsCache(userId: string, scope: string, orgId: string | null): Job
   return cached.jobs;
 }
 
+/** Endast den nuvarande användarens och organisationens validerade bildsnapshot. */
+export function readEmployerJobsMediaSnapshot(userId: string, orgId: string | null): JobPosting[] {
+  return [
+    ...(readJobsCache(userId, 'personal', orgId) ?? []),
+    ...(readJobsCache(userId, 'organization', orgId) ?? []),
+  ];
+}
+
 /**
  * 🔥 SCALE: cachen är ett FÖRSTA-SKÄRM-snapshot, inte hela datasetet.
  * Arkivet kan vara 100 000+ rader — de får aldrig skrivas till localStorage.
