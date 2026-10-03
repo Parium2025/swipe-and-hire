@@ -181,7 +181,7 @@ export function NewConversationDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         onOpenAutoFocus={(event) => event.preventDefault()}
-        className="bg-[hsl(var(--surface-blue))] border-pure-white/20 text-pure-white w-[calc(100%-2rem)] max-w-md max-h-[min(85dvh,680px)] flex flex-col gap-4 rounded-lg p-5 max-sm:top-[17dvh] max-sm:translate-y-0 sm:p-6"
+        className="bg-[hsl(var(--surface-blue))] border-pure-white/20 text-pure-white w-[calc(100%-2rem)] max-w-md max-h-[min(80dvh,680px)] flex flex-col gap-4 rounded-lg p-5 max-sm:top-[17dvh] max-sm:translate-y-0 sm:max-h-[min(85dvh,680px)] sm:p-6"
       >
         <DialogHeader className="text-left pr-8">
           <DialogTitle className="flex items-center gap-2 text-pure-white">
