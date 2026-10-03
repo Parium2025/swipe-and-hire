@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Building2, 
   Globe, 
@@ -29,7 +29,6 @@ import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
 import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
-import { fetchMyProfile } from '@/lib/myProfile';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -113,22 +112,33 @@ const CompanyReviews = () => {
   });
 
   // Read the organization owner's shared company fields rather than a recruiter's invite-time copy.
-  const { data: company, isLoading: companyLoading } = useQuery({
-    queryKey: ['company-profile', reviewOwnerId],
+  const { data: company, isLoading: companyLoading, isError: companyError, refetch: refetchCompany } = useQuery({
+    queryKey: ['company-public-profile', reviewOwnerId],
     queryFn: async () => {
-      const { data, error } = reviewOwnerId === user?.id
-        ? await fetchMyProfile()
-        : await supabase.from('profiles').select('*').eq('user_id', reviewOwnerId!).single();
+      if (!reviewOwnerId) return null;
+      const { data, error } = await supabase
+        .rpc('get_employer_public_profile', { target_user_id: reviewOwnerId })
+        .maybeSingle();
       if (error) throw error;
-      const owner = Array.isArray(data) ? data[0] : data;
-      return owner ? {
-        ...owner,
-        company_social_media_links: (owner.company_social_media_links as unknown as SocialMediaLink[]) || [],
+      return data ? {
+        ...data,
+        id: data.user_id,
+        company_social_media_links: Array.isArray(data.company_social_media_links)
+          ? data.company_social_media_links as unknown as SocialMediaLink[] : [],
       } as CompanyProfile : null;
     },
     enabled: !!reviewOwnerId,
     staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!reviewOwnerId) return;
+    const channel = supabase.channel(`reviews-branding-${reviewOwnerId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_change_signals', filter: `profile_user_id=eq.${reviewOwnerId}` }, () => {
+        void queryClient.invalidateQueries({ queryKey: ['company-public-profile', reviewOwnerId] });
+      }).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [reviewOwnerId, queryClient]);
 
   // Delad cache + realtime-synk (localStorage-instant load, bakgrundssynk)
   const {
@@ -240,8 +250,9 @@ const CompanyReviews = () => {
             Företagsinformation saknas
           </h3>
           <p className="text-white">
-            Fyll i din företagsprofil för att se recensioner.
+            {companyError ? 'Det gick inte att hämta företagsinformationen.' : 'Företagsinformation saknas.'}
           </p>
+          {companyError && <Button onClick={() => void refetchCompany()} className="mt-4">Försök igen</Button>}
         </div>
       </div>
     );

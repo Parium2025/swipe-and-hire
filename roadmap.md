@@ -39,5 +39,6 @@
 - [x] Show full team member names only when clipped, mark any notification read on tap, and animate new bell counts
 - [x] Touch: tap opens/closes clipped team names; notification tap marks read without stale refetch/sync bringing it back; tap expands full text; spring panel and badge entrance
 - [x] Restore organization-wide dashboard job lists and first-ever-job empty state without changing personal job lists
-- [ ] Live-test organization-scoped reviews and comments with an invited recruiter account (shared review key and reply permissions inspected; separate login required)
+- [x] Live-test organization-scoped reviews and comments with an invited recruiter account
 - [x] Hide billing and company-wide settings, privacy and team sections from recruiters while retaining personal calendar and account settings
+- [ ] Finish recruiter analytics freshness audit: cross-colleague live counts, expired-job status consistency, cache scope and first-login cold start; review identity, mobile rendering and white explanatory text checked

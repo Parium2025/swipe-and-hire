@@ -403,7 +403,7 @@ const DailySparkline = memo(({ data, hourly = false }: { data: DailyView[]; hour
             className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-white/15 bg-black/80 px-2.5 py-1.5 shadow-lg backdrop-blur-md"
             style={{ left: `${Math.min(Math.max((activePoint.x / width) * 100, 8), 92)}%` }}
           >
-            <div className="text-[10px] leading-none text-white/80">{active.date?.slice(5)}</div>
+            <div className="text-[10px] leading-none text-white">{active.date?.slice(5)}</div>
             <div className="mt-0.5 text-[13px] font-semibold leading-none text-white tabular-nums">
               {active.count} {active.count === 1 ? 'visning' : 'visningar'}
             </div>
@@ -469,7 +469,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: Math.min(i, 5) * 0.05 }}
-                className={`space-y-1 ${expired ? 'opacity-50' : ''}`}
+                className="space-y-1"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -639,6 +639,15 @@ const EmployerAnalytics = memo(() => {
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!user?.id || !organization?.id) return;
+    const channel = supabase.channel(`reports-team-profiles-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_change_signals' }, () => {
+        void queryClient.invalidateQueries({ queryKey: ['employer-team-insights', user.id] });
+      }).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [user?.id, organization?.id, queryClient]);
 
   useEffect(() => {
     if (teamData && user?.id) {

@@ -156,7 +156,7 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
               transition={{ delay: i * 0.03 }}
               className="flex items-center gap-2"
             >
-              <span className={`text-[11px] w-7 text-right shrink-0 tabular-nums ${day.isPeak ? 'text-white font-semibold' : 'text-white/70'}`}>
+              <span className={`text-[11px] w-7 text-right shrink-0 tabular-nums text-white ${day.isPeak ? 'font-semibold' : ''}`}>
                 {day.label}
               </span>
               <div className="flex-1 h-5 rounded bg-white/[0.04] overflow-hidden relative">
@@ -187,7 +187,7 @@ const ApplicationPatterns = memo(({ patterns }: { patterns: AppPattern[] }) => {
               transition={{ delay: i * 0.03 }}
               className="flex items-center gap-2"
             >
-              <span className={`text-[10px] w-10 text-right shrink-0 tabular-nums ${block.isPeak ? 'text-white font-semibold' : 'text-white/70'}`}>
+              <span className={`text-[10px] w-10 text-right shrink-0 tabular-nums text-white ${block.isPeak ? 'font-semibold' : ''}`}>
                 {block.label}
               </span>
               <div className="flex-1 h-5 rounded bg-white/[0.04] overflow-hidden relative">
@@ -345,7 +345,7 @@ const DropoffAnalysis = memo(({ jobs }: { jobs: DropoffJob[] }) => {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: Math.min(i, 5) * 0.04 }}
-                className={`space-y-1 ${expired ? 'opacity-50' : ''}`}
+                className="space-y-1"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
