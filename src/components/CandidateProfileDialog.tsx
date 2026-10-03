@@ -290,8 +290,11 @@ export const CandidateProfileDialog = ({
     setQuestionsLoading(true);
   }, [activeApplication?.id, activeApplication?.job_id]);
 
-  const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
+  const profileImageUrlRaw = useProfileImageUrl(activeApplication?.profile_image_url);
   const profileThumbUrl = useProfileThumbUrl(activeApplication?.profile_image_url);
+  // Byt från miniatyr till skarp version först när den skarpa är avkodad —
+  // annars hinner initialerna blinka fram mellan de två bilderna.
+  const profileImageUrl = useDecodedUpgrade(profileImageUrlRaw, profileThumbUrl);
   const coverImageUrl = useProfileImageUrl(activeApplication?.cover_image_url);
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
