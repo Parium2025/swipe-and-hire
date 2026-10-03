@@ -96,24 +96,12 @@ export function useCandidateRowMediaWarmup(rows: RowWithMedia[] | undefined, ena
       for (let i = 0; i < CONCURRENCY; i++) void runNext();
     };
 
-    let idleId: number | undefined;
-    let timeoutId: number | undefined;
-    const ric = (globalThis as unknown as {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-    }).requestIdleCallback;
-    if (typeof ric === 'function') {
-      idleId = ric(start, { timeout: 600 });
-    } else {
-      timeoutId = window.setTimeout(start, 200);
-    }
+    // Kandidatvyn kan öppnas direkt efter att listan visas. Idle/200 ms
+    // gjorde att omslag och porträtt började hämtas först efter trycket.
+    start();
 
     return () => {
       cancelled = true;
-      const w = globalThis as unknown as { cancelIdleCallback?: (id: number) => void };
-      if (idleId !== undefined && typeof w.cancelIdleCallback === 'function') {
-        w.cancelIdleCallback(idleId);
-      }
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
   }, [rows, enabled]);
 }
