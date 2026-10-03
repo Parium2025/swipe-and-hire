@@ -320,7 +320,7 @@ export async function prefetchEmployerJobsFirstPages(
 
   let employerIds: string[] = [userId];
   if (scope === 'organization' && orgId) {
-    const ids = await getOrganizationMemberIds();
+    const ids = await getOrganizationMemberIds(orgId);
     employerIds = ids.length > 0 ? ids : [userId];
   }
 
@@ -360,7 +360,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     queryFn: async () => {
       if (!user) return [];
       if (scope !== 'organization' || !profile?.organization_id) return [user.id];
-      const ids = await getOrganizationMemberIds();
+      const ids = await getOrganizationMemberIds(profile.organization_id);
       return ids.length > 0 ? ids : [user.id];
     },
     enabled: !!user && enableRealtime,
@@ -383,7 +383,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       // Resolve scope → user-id-set
       let employerIds: string[] = [user.id];
       if (scope === 'organization' && profile?.organization_id) {
-        const ids = await getOrganizationMemberIds();
+        const ids = await getOrganizationMemberIds(profile.organization_id);
         employerIds = ids.length > 0 ? ids : [user.id];
       }
 
@@ -607,7 +607,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     try {
       let employerIds: string[] = [user.id];
       if (scope === 'organization' && profile?.organization_id) {
-        const ids = await getOrganizationMemberIds();
+        const ids = await getOrganizationMemberIds(profile.organization_id);
         employerIds = ids.length > 0 ? ids : [user.id];
       }
 

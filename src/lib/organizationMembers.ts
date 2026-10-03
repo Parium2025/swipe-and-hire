@@ -1,10 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /** Member IDs come from an authenticated, organization-scoped RPC: user_roles SELECT only exposes the caller's own row. */
-export async function getOrganizationMemberIds(): Promise<string[]> {
+export async function getOrganizationMemberIds(organizationId: string): Promise<string[]> {
   const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
   if (error) throw error;
-  return Array.from(new Set((data ?? []).filter(member => member.is_active).map(member => member.user_id)));
+  return Array.from(new Set((data ?? []).filter(member => member.is_active && member.organization_id === organizationId).map(member => member.user_id)));
 }
 
 /** Reviews are historically keyed to the founding employer, not the organization's UUID. */

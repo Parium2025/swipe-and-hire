@@ -25,7 +25,7 @@ describe('organization member scope', () => {
   });
 
   it('loads active organization members through the authorized RPC, not user_roles RLS', async () => {
-    expect(await getOrganizationMemberIds()).toEqual(['owner', 'recruiter', 'other-org']);
+    expect(await getOrganizationMemberIds(org)).toEqual(['owner', 'recruiter']);
     expect(rpc).toHaveBeenCalledWith('get_my_organization_member_profiles');
   });
 
