@@ -379,6 +379,32 @@ const SearchJobs = memo(() => {
   // som inte finns i nuvarande resultat (t.ex. via sparad sökning) faller vi
   // tillbaka på namn-filtrering tills ids är kända.
   const companyNameToIdRef = useRef<Map<string, string>>(new Map());
+  const [companyMapVersion, setCompanyMapVersion] = useState(0);
+  // Företag som inte finns bland laddade sidor slås upp i databasen, så
+  // filtret alltid gäller hela träffmängden och inte bara inlästa sidor.
+  useEffect(() => {
+    const missing = selectedCompanies.filter((name) => !companyNameToIdRef.current.has(name));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    void supabase
+      .from('job_postings')
+      .select('company_name, employer_id')
+      .in('company_name', missing)
+      .eq('is_active', true)
+      .limit(500)
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        let added = false;
+        for (const row of data) {
+          if (row.company_name && row.employer_id && !companyNameToIdRef.current.has(row.company_name)) {
+            companyNameToIdRef.current.set(row.company_name, row.employer_id);
+            added = true;
+          }
+        }
+        if (added) setCompanyMapVersion((v) => v + 1);
+      });
+    return () => { cancelled = true; };
+  }, [selectedCompanies]);
   const selectedEmployerIds = useMemo(() => {
     if (selectedCompanies.length === 0) return undefined;
     const ids: string[] = [];
@@ -387,7 +413,8 @@ const SearchJobs = memo(() => {
       if (id) ids.push(id);
     }
     return ids.length > 0 ? ids : undefined;
-  }, [selectedCompanies]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompanies, companyMapVersion]);
 
   // 🔥 SCALE: Tidsfilter går nu till DB istället för klient-side .filter().
   const createdAfter = useMemo(() => {
