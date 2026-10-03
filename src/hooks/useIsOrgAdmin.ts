@@ -50,7 +50,7 @@ export const useIsOrgAdmin = () => {
   // all permissions are enforced in the database regardless.
   const trustedInitial = cached && cached.isAdmin ? true : undefined;
 
-  const { data: isAdmin = false, isLoading: queryLoading } = useQuery({
+  const { data: isAdmin = false, isLoading: queryLoading, isPlaceholderData, isFetched } = useQuery({
     queryKey: ['is-org-admin', user?.id, organizationId],
     queryFn: async () => {
       if (!user?.id || !organizationId) return false;
@@ -79,5 +79,9 @@ export const useIsOrgAdmin = () => {
 
   const loading = queryLoading && trustedInitial === undefined;
 
-  return { isAdmin, loading };
+  // `verified` = svaret kommer från servern, inte från sparad placeholder.
+  // Använd för känsliga vyer (t.ex. fakturering) som aldrig får blinka fram.
+  const verified = isFetched && !isPlaceholderData;
+
+  return { isAdmin, loading, verified };
 };
