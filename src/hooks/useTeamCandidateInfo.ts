@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,54 +22,64 @@ interface TeamCandidateInfo {
 export function useTeamCandidateInfo(applicationIds: string[]) {
   const { user } = useAuth();
   const { teamMembers } = useTeamMembers();
+  const memberNamesKey = useMemo(() => teamMembers.map(m => `${m.userId}:${m.firstName ?? ''}:${m.lastName ?? ''}`).sort().join('|'), [teamMembers]);
 
   const { data: teamCandidates, isLoading } = useQuery({
-    queryKey: ['team-candidate-info', user?.id, [...applicationIds].sort().join(',')],
+    queryKey: ['team-candidate-info', user?.id, [...applicationIds].sort().join(','), memberNamesKey],
     queryFn: async () => {
       if (!user || applicationIds.length === 0) return {};
 
       // Fetch all my_candidates entries for these applications from any team member
-      const { data: myCandidatesData, error: mcError } = await supabase
-        .from('my_candidates')
-        .select('applicant_id, application_id, recruiter_id, rating, stage, notes')
-        .in('application_id', applicationIds);
-
-      if (mcError) throw mcError;
+      const myCandidatesData: Array<{ applicant_id: string; application_id: string; recruiter_id: string; rating: number | null; stage: string; notes: string | null }> = [];
+      for (let i = 0; i < applicationIds.length; i += 100) {
+        const ids = applicationIds.slice(i, i + 100);
+        for (let offset = 0; ; offset += 1000) {
+          const { data, error } = await supabase
+            .from('my_candidates')
+            .select('applicant_id, application_id, recruiter_id, rating, stage, notes')
+            .in('application_id', ids)
+            .range(offset, offset + 999);
+          if (error) throw error;
+          myCandidatesData.push(...(data ?? []));
+          if (!data || data.length < 1000) break;
+        }
+      }
 
       // Get unique applicant IDs to fetch persistent ratings and notes
-      const applicantIds = [...new Set(myCandidatesData?.map(c => c.applicant_id) || [])];
+      const applicantIds = [...new Set(myCandidatesData.map(c => c.applicant_id))];
       if (applicantIds.length === 0) return {};
 
       // Fetch persistent ratings and notes in parallel
-      const [ratingsResult, notesResult] = await Promise.all([
-        supabase
-          .from('candidate_ratings')
-          .select('applicant_id, recruiter_id, rating')
-          .in('applicant_id', applicantIds),
-        supabase
-          .from('candidate_notes')
-          .select('applicant_id, employer_id, note')
-          .is('job_id', null) // Global notes only
-          .in('applicant_id', applicantIds)
-      ]);
-
       // Create a lookup map for persistent ratings: applicant_id -> recruiter_id -> rating
       const persistentRatingMap: Record<string, Record<string, number>> = {};
-      ratingsResult.data?.forEach(r => {
+      const persistentNotesMap: Record<string, Record<string, string>> = {};
+      for (let i = 0; i < applicantIds.length; i += 100) {
+        const ids = applicantIds.slice(i, i + 100);
+        for (let offset = 0; ; offset += 1000) {
+          const { data: ratings, error } = await supabase.from('candidate_ratings')
+            .select('applicant_id, recruiter_id, rating').in('applicant_id', ids).range(offset, offset + 999);
+          if (error) throw error;
+          ratings?.forEach(r => {
         if (!persistentRatingMap[r.applicant_id]) {
           persistentRatingMap[r.applicant_id] = {};
         }
         persistentRatingMap[r.applicant_id][r.recruiter_id] = r.rating;
       });
-
-      // Create a lookup map for persistent notes: applicant_id -> employer_id -> note
-      const persistentNotesMap: Record<string, Record<string, string>> = {};
-      notesResult.data?.forEach(n => {
+          if (!ratings || ratings.length < 1000) break;
+        }
+        for (let offset = 0; ; offset += 1000) {
+          const { data: notes, error } = await supabase.from('candidate_notes')
+            .select('applicant_id, employer_id, note').is('job_id', null).in('applicant_id', ids).range(offset, offset + 999);
+          if (error) throw error;
+          notes?.forEach(n => {
         if (!persistentNotesMap[n.applicant_id]) {
           persistentNotesMap[n.applicant_id] = {};
         }
         persistentNotesMap[n.applicant_id][n.employer_id] = n.note;
       });
+          if (!notes || notes.length < 1000) break;
+        }
+      }
 
       // Create a map of application_id -> array of team members who have added it
       const infoMap: Record<string, TeamCandidateInfo[]> = {};

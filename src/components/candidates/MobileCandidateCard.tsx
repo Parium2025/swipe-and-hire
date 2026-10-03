@@ -102,12 +102,17 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
               className="flex-1 min-w-0 font-medium text-white text-sm"
             />
             {teamInfo && teamInfo.colleagues.length > 0 && (
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
-                <Users className="h-2.5 w-2.5 text-purple-300" />
-                <span className="text-[9px] text-purple-300 font-medium">
-                  {teamInfo.colleagues.length}
-                </span>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor`} onClick={event => event.stopPropagation()} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
+                    <Users className="h-2.5 w-2.5 text-purple-300" />
+                    <span className="text-[9px] text-purple-300 font-medium">{teamInfo.colleagues.length}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[min(300px,calc(100vw-24px))]">
+                  <div className="text-xs"><p>Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
 
