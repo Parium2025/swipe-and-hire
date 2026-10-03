@@ -93,13 +93,21 @@ export function getConversationDisplayName(opts: {
   isSelf?: boolean;
   lastMessage?: LastMessageIdentity;
   counterpartPersonSenderId?: string | null;
+  /** Intern kollegachatt — motparten visas alltid som person, aldrig bolaget. */
+  isInternal?: boolean;
 }): string {
-  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage, counterpartPersonSenderId } = opts;
+  const { isGroup, groupName, snapshot, displayMember, isSelf, lastMessage, counterpartPersonSenderId, isInternal } = opts;
 
   if (isGroup && groupName) return groupName;
 
   // Provutskick till dig själv — konversationen har bara dig som medlem.
   if (isSelf) return 'Du (provutskick)';
+
+  if (isInternal) {
+    const p = displayMember?.profile;
+    const name = buildFullName(p?.first_name, p?.last_name);
+    if (hasText(name)) return name;
+  }
 
   // Snapshot is immutable per application context.
   // If snapshot exists, never leak updated live profile identity into conversation UI.
@@ -135,7 +143,12 @@ export function getConversationAvatarProfile(
   displayMember: ConversationMember | undefined,
   lastMessage?: LastMessageIdentity,
   counterpartPersonSenderId?: string | null,
+  isInternal?: boolean,
 ): ProfileLike | undefined {
+  // Intern kollegachatt: kollegans egen profilbild, aldrig företagsloggan.
+  if (isInternal && displayMember?.profile) {
+    return { ...displayMember.profile, company_name: null, company_logo_url: null };
+  }
   if (snapshotDescribesCounterpart(snapshot, displayMember)) {
     const liveProfile = displayMember?.profile;
     const liveImage =
