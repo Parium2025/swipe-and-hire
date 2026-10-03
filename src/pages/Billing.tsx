@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { Lock } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 
 type PurchaseRow = {
   id: string;
@@ -40,7 +41,8 @@ type MonthGroup = {
 };
 
 const Billing = () => {
-  const { user } = useAuth();
+  const { user, profile, userRole } = useAuth();
+  const isEmployer = ((profile as any)?.role || (userRole?.role as string)) === 'employer';
   const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const [expandedMonths, setExpandedMonths] = useState<{ [key: string]: boolean }>({});
 
@@ -131,6 +133,12 @@ const Billing = () => {
     payments.reduce((sum, payment) => (payment.status === 'paid' ? sum + payment.amount : sum), 0);
 
   // Fakturering är bolagsinformation — bara admins får se den.
+  // Rekryterare ska inte ens se att sidan finns — skicka hem direkt.
+  if (isEmployer && !isAdmin) {
+    if (adminLoading) return null;
+    return <Navigate to="/home" replace />;
+  }
+
   if (!adminLoading && !isAdmin) {
     return (
       <div className="responsive-container-wide space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
