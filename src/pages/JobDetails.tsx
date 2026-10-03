@@ -176,7 +176,8 @@ const JobDetails = () => {
     [applications, jobId]
   );
   useCandidatePageWarmup(warmupRows);
-  const organizationRatings = useOrganizationCandidateRatings(warmupRows.map((row) => row.applicant_id).filter((id): id is string => !!id));
+  const ratingApplicantIds = useMemo(() => applications.map((app) => app.applicant_id), [applications]);
+  const organizationRatings = useOrganizationCandidateRatings(ratingApplicantIds);
 
 
 
@@ -296,6 +297,7 @@ const JobDetails = () => {
         .maybeSingle();
       if (error) throw error;
       if (!data) throw new Error('Betyget kunde inte sparas');
+      queryClient.invalidateQueries({ queryKey: ['organization-candidate-ratings', user.id] });
 
       // Håll ev. listrader i synk så att kortet visar samma sak överallt.
       const myCandidateId = myCandidatesMap.get(applicantId);
@@ -313,7 +315,7 @@ const JobDetails = () => {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
-  }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
+  }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch, queryClient]);
 
 
   const markApplicationAsViewed = useCallback(async (applicationId: string) => {
