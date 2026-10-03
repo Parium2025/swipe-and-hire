@@ -179,7 +179,7 @@ export function NewConversationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-background border-border text-pure-white w-[calc(100%-2rem)] max-w-md max-h-[min(85dvh,680px)] flex flex-col gap-4 rounded-lg p-5 sm:p-6">
+      <DialogContent className="bg-[hsl(var(--surface-blue))] border-pure-white/20 text-pure-white w-[calc(100%-2rem)] max-w-md max-h-[min(85dvh,680px)] flex flex-col gap-4 rounded-lg p-5 sm:p-6">
         <DialogHeader className="text-left pr-8">
           <DialogTitle className="flex items-center gap-2 text-pure-white">
             <MessageSquare className="h-5 w-5" />
@@ -196,7 +196,7 @@ export function NewConversationDialog({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Sök personer..."
             aria-label="Sök personer"
-            className="pl-9 h-11 bg-card border-border text-pure-white placeholder:text-pure-white text-base"
+            className="pl-9 h-11 bg-pure-white/10 border-pure-white/20 text-pure-white placeholder:text-pure-white text-base"
           />
         </div>
         <ScrollArea className="flex-1 min-h-[96px] -mx-2 px-2">
@@ -227,7 +227,7 @@ export function NewConversationDialog({
                   {/* Colleagues section */}
                   {colleagueContacts.length > 0 && (
                     <div>
-                       <div className="flex items-center gap-2 mb-2 sticky top-0 bg-background py-1">
+                       <div className="flex items-center gap-2 mb-2 sticky top-0 bg-[hsl(var(--surface-blue))] py-1">
                          <Users className="h-4 w-4 text-pure-white" />
                          <span className="text-pure-white text-xs font-medium uppercase tracking-wider">
                           Kollegor ({colleagueContacts.length})
@@ -249,7 +249,7 @@ export function NewConversationDialog({
                   {/* Candidates section */}
                   {candidateContacts.length > 0 && (
                     <div>
-                       <div className="flex items-center gap-2 mb-2 sticky top-0 bg-background py-1">
+                       <div className="flex items-center gap-2 mb-2 sticky top-0 bg-[hsl(var(--surface-blue))] py-1">
                          <UserCheck className="h-4 w-4 text-pure-white" />
                          <span className="text-pure-white text-xs font-medium uppercase tracking-wider">
                           Kandidater ({candidateContacts.length})
@@ -271,7 +271,7 @@ export function NewConversationDialog({
               )}
         </ScrollArea>
         {selectedContactObjects.length > 0 && (
-          <div className="space-y-3 shrink-0 border-t border-border pt-3">
+           <div className="space-y-3 shrink-0 border-t border-pure-white/20 pt-3">
             <p className="text-sm text-pure-white break-words">
               {isGroup ? `${selectedContactObjects.length} valda` : getDisplayName(selectedContactObjects[0])}
             </p>
@@ -281,7 +281,7 @@ export function NewConversationDialog({
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="Gruppnamn (valfritt)"
                 aria-label="Gruppnamn (valfritt)"
-                className="h-10 bg-card border-border text-pure-white placeholder:text-pure-white text-base"
+                 className="h-10 bg-pure-white/10 border-pure-white/20 text-pure-white placeholder:text-pure-white text-base"
               />
             )}
             <Textarea
@@ -289,12 +289,12 @@ export function NewConversationDialog({
               onChange={(e) => setInitialMessage(e.target.value)}
               placeholder="Meddelande (valfritt)"
               aria-label="Meddelande (valfritt)"
-              className="min-h-11 max-h-24 bg-card border-border text-pure-white placeholder:text-pure-white text-base resize-none"
+               className="min-h-11 max-h-24 bg-pure-white/10 border-pure-white/20 text-pure-white placeholder:text-pure-white text-base resize-none"
             />
           </div>
         )}
-        <div className="flex justify-end gap-2 shrink-0 border-t border-border pt-3">
-          <Button variant="ghost" onClick={handleClose} className="text-pure-white">Avbryt</Button>
+         <div className="flex justify-end gap-2 shrink-0 border-t border-pure-white/20 pt-3">
+           <Button variant="outlineNeutral" onClick={handleClose} className="border-transparent text-pure-white md:hover:bg-pure-white/10 md:hover:text-pure-white">Avbryt</Button>
           <Button variant="glassBlue" onClick={handleCreate} disabled={selectedContactObjects.length === 0 || createConversation.isPending} className="text-pure-white">
             {createConversation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             {isGroup ? 'Skapa grupp' : 'Starta chatt'}
@@ -335,7 +335,7 @@ function ContactItem({
         "w-full h-auto min-h-14 min-w-0 whitespace-normal flex items-center justify-start gap-3 p-2.5 rounded-md text-left transition-colors text-pure-white",
         isSelected 
           ? "bg-primary/20 border-primary/40" 
-          : "border-transparent md:hover:bg-card"
+           : "border-transparent md:hover:bg-pure-white/10"
       )}
     >
       <span aria-hidden="true" className={cn("h-4 w-4 shrink-0 rounded-sm border border-pure-white flex items-center justify-center", isSelected && "bg-primary border-primary")}>
@@ -346,8 +346,8 @@ function ContactItem({
         src={contact.profileImageUrl}
         mediaType="profile-image"
         fallback={getInitials()}
-        className="h-9 w-9 shrink-0 border border-border"
-        fallbackClassName="bg-card text-pure-white text-sm"
+         className="h-9 w-9 shrink-0 border border-pure-white/20"
+         fallbackClassName="bg-pure-white/10 text-pure-white text-sm"
       />
 
       <div className="flex-1 min-w-0">
