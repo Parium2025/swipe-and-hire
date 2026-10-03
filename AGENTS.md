@@ -12,6 +12,7 @@
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Read shared review branding through the trimmed public-profile RPC under its own cache key; full profile rows are private and unavailable to colleagues.
 - Reports refresh team portraits on authorized profile-change signals; keep cached report data scoped to the signed-in account.
+- Scope report snapshots to both the user and organization; trust server job counts instead of locally adding application events already reflected by database triggers.
 - Resolve colleague-owned candidate application history through the authorized organization-member RPC; user_roles SELECT alone exposes only the caller.
 - Candidate skeletons use resolved server totals per user/list.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.

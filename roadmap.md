@@ -41,5 +41,7 @@
 - [x] Restore organization-wide dashboard job lists and first-ever-job empty state without changing personal job lists
 - [x] Live-test organization-scoped reviews and comments with an invited recruiter account
 - [x] Hide billing and company-wide settings, privacy and team sections from recruiters while retaining personal calendar and account settings
-- [ ] Finish recruiter analytics freshness audit: cross-colleague live counts, expired-job status consistency, cache scope and first-login cold start; review identity, mobile rendering and white explanatory text checked
-- [ ] Verify colleague candidate ratings, notes and organization-wide job history in the live recruiter account; check profile photo refresh and cold starts
+- [x] Align report expiry status with dashboard; scope report caches to organization; prevent application event double-counting; confirm recruiter dashboard/report cold starts
+- [x] Verify colleague candidate ratings, notes and organization-wide job history in the live recruiter account; inspect mobile layout and cold starts
+- [ ] Verify profile photo changes live across two simultaneously signed-in employer accounts (blocked: second authorized account/session unavailable)
+- [ ] Verify cross-colleague counts after a real application and assess report refresh timing (blocked: no safe live test application submitted in this audit)
