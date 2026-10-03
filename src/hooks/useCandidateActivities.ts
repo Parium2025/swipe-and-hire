@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { warmActivityAvatars } from '@/lib/warmTeamAvatars';
+import { clearMediaUrlCache } from '@/hooks/useMediaUrl';
 
 export type ActivityType =
   | 'rating_changed'
@@ -108,7 +109,7 @@ export function useCandidateActivities(applicantId: string | null) {
   const queryClient = useQueryClient();
 
   const { data: activities = [], isLoading, error } = useQuery({
-    queryKey: ['candidate-activities', applicantId],
+    queryKey: ['candidate-activities', user?.id, applicantId],
     queryFn: () => fetchActivitiesQueryFn(applicantId!, user?.id),
     enabled: !!applicantId && !!user,
     staleTime: 30 * 1000,
@@ -139,13 +140,29 @@ export function useCandidateActivities(applicantId: string | null) {
         },
         () => {
           // Invalidate and refetch when activities change
-          queryClient.invalidateQueries({ queryKey: ['candidate-activities', applicantId] });
+          queryClient.invalidateQueries({ queryKey: ['candidate-activities', user.id, applicantId] });
         }
       )
       .subscribe();
 
+    // Aktiviteter lagrar bara författarens id. En ny profilbild ska därför
+    // hämtas från den aktuella profilen, även om själva aktiviteten är gammal.
+    const profileChannel = createRealtimeChannel(`candidate-activity-profiles-${user.id}-${applicantId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_change_signals' }, (payload) => {
+        const changedId = (payload.new ?? payload.old) as { profile_user_id?: string };
+        const rows = queryClient.getQueryData<CandidateActivity[]>(['candidate-activities', user.id, applicantId]);
+        if (changedId.profile_user_id && rows?.some((row) => row.user_id === changedId.profile_user_id)) {
+          for (const path of new Set(rows.filter((row) => row.user_id === changedId.profile_user_id).map((row) => row.user_profile_image_url))) {
+            if (path) clearMediaUrlCache(path, 'profile-image');
+          }
+          queryClient.invalidateQueries({ queryKey: ['candidate-activities', user.id, applicantId] });
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(profileChannel);
     };
   }, [applicantId, user, queryClient]);
 
@@ -181,7 +198,7 @@ export function useCandidateActivities(applicantId: string | null) {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['candidate-activities', variables.applicantId] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-activities', user?.id, variables.applicantId] });
     },
   });
 
@@ -201,7 +218,7 @@ export function useCandidateActivities(applicantId: string | null) {
       if (error) throw error;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['candidate-activities', variables.applicantId] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-activities', user?.id, variables.applicantId] });
     },
   });
 
@@ -220,7 +237,7 @@ export function useCandidateActivities(applicantId: string | null) {
  */
 export function prefetchCandidateActivities(queryClient: ReturnType<typeof useQueryClient>, applicantId: string, _userId?: string) {
   queryClient.prefetchQuery({
-    queryKey: ['candidate-activities', applicantId],
+    queryKey: ['candidate-activities', _userId, applicantId],
     queryFn: () => fetchActivitiesQueryFn(applicantId, _userId),
     staleTime: 30 * 1000,
   });

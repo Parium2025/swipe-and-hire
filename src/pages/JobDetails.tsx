@@ -18,6 +18,7 @@ import { Layers, SlidersHorizontal } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
+import { useOrganizationCandidateRatings } from '@/hooks/useOrganizationCandidateRatings';
 
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
@@ -175,6 +176,8 @@ const JobDetails = () => {
     [applications, jobId]
   );
   useCandidatePageWarmup(warmupRows);
+  const ratingApplicantIds = useMemo(() => applications.map((app) => app.applicant_id), [applications]);
+  const organizationRatings = useOrganizationCandidateRatings(ratingApplicantIds);
 
 
 
@@ -294,6 +297,7 @@ const JobDetails = () => {
         .maybeSingle();
       if (error) throw error;
       if (!data) throw new Error('Betyget kunde inte sparas');
+      queryClient.invalidateQueries({ queryKey: ['organization-candidate-ratings', user.id] });
 
       // Håll ev. listrader i synk så att kortet visar samma sak överallt.
       const myCandidateId = myCandidatesMap.get(applicantId);
@@ -311,7 +315,7 @@ const JobDetails = () => {
       toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
       refetch();
     }
-  }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch]);
+  }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch, queryClient]);
 
 
   const markApplicationAsViewed = useCallback(async (applicationId: string) => {
@@ -539,8 +543,9 @@ const JobDetails = () => {
 
 
   const getDisplayRating = useCallback((app: ApplicationData) => {
-    return app.rating || 0;
-  }, []);
+    const rating = organizationRatings[app.applicant_id];
+    return rating?.own ?? rating?.colleague ?? app.rating ?? 0;
+  }, [organizationRatings]);
 
   const handlePrefetchCandidate = useCallback((app: JobApplication) => {
     if (!user || !app.applicant_id) return;
@@ -591,7 +596,7 @@ const JobDetails = () => {
       }));
     if (rows.length === 0) return;
     const { error } = await supabase.from('candidate_activities').insert(rows);
-    if (!error) rows.forEach(r => queryClient.invalidateQueries({ queryKey: ['candidate-activities', r.applicant_id] }));
+    if (!error) rows.forEach(r => queryClient.invalidateQueries({ queryKey: ['candidate-activities', uid, r.applicant_id] }));
   }, [applications, job?.title, jobId, queryClient]);
 
   const confirmReject = useCallback(async () => {
@@ -922,7 +927,7 @@ const JobDetails = () => {
           onStatusUpdate={() => {
             refetch();
           }}
-          candidateRating={selectedApplication?.rating}
+          candidateRating={selectedApplication ? getDisplayRating(mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb')) : undefined}
           onRatingChange={(rating) => {
             if (selectedApplication) {
               updateCandidateRating(selectedApplication.applicant_id, rating);
