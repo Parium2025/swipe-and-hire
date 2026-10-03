@@ -41,3 +41,4 @@
 - [x] Restore organization-wide dashboard job lists and first-ever-job empty state without changing personal job lists
 - [ ] Live-test organization-scoped reviews and comments with an invited recruiter account (shared review key and reply permissions inspected; separate login required)
 - [x] Hide billing and company-wide settings, privacy and team sections from recruiters while retaining personal calendar and account settings
+- [ ] Audit recruiter review identity, live avatars, organization dashboards and analytics freshness; make analytics explanatory text fully white and verify cold starts

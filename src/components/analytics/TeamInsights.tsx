@@ -72,7 +72,7 @@ const InfoTip = memo(({ content }: { content: string }) => (
       <button
         type="button"
         aria-label="Mer information"
-        className="inline-flex items-center justify-center h-6 w-6 rounded-full text-white/60 hover:text-white transition-colors"
+        className="inline-flex items-center justify-center h-6 w-6 rounded-full text-white transition-colors"
       >
         <Info className="h-3.5 w-3.5" />
       </button>
@@ -103,11 +103,11 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
     <Card className="bg-white/5 border-white/10">
       <CardContent className="p-4 sm:p-5">
         <div className="flex items-center gap-1.5 mb-1">
-          <Users className="h-4 w-4 text-white/70 shrink-0" />
+          <Users className="h-4 w-4 text-white shrink-0" />
           <h3 className="text-[15px] font-semibold text-white">Lär av varandra</h3>
           <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Intervjuer räknas på den kollega som bokat och håller intervjun, oavsett vem som äger annonsen. Chippet visar bokade intervjuer och hur många av dem som faktiskt hunnit genomföras (tiden har passerat och intervjun är varken avbokad eller nekad). Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
         </div>
-        <p className="text-[12px] text-white/70 mb-4">
+        <p className="text-[12px] text-white mb-4">
           Så presterar er organisations annonser – per kollega under vald period.
         </p>
 
@@ -130,9 +130,9 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                     <TruncatedText text={m.name} className="text-[13px] font-medium text-white" />
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-white">
                       <span className="whitespace-nowrap">{m.jobs_count} annonser</span>
-                      <span aria-hidden className="text-white/40">·</span>
+                      <span aria-hidden className="text-white">·</span>
                       <span className="whitespace-nowrap">{m.views} visningar</span>
-                      <span aria-hidden className="text-white/40">·</span>
+                      <span aria-hidden className="text-white">·</span>
                       <span className="whitespace-nowrap">{m.applications} ansökningar</span>
                       <span
                         className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.10] px-2 py-0.5 font-medium"
@@ -140,7 +140,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                       >
                         <CalendarCheck className="h-3 w-3 shrink-0" aria-hidden />
                         {m.interviews} bokade
-                        <span aria-hidden className="text-white/40">/</span>
+                        <span aria-hidden className="text-white">/</span>
                         {m.interviews_completed ?? 0} genomförda
                       </span>
                     </div>
@@ -173,7 +173,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
         {traits && traits.sample > 0 && (
           <div className="mt-4 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <Lightbulb className="h-3.5 w-3.5 text-white/70 shrink-0" />
+              <Lightbulb className="h-3.5 w-3.5 text-white shrink-0" />
               <p className="text-[13px] font-medium text-white">Vad era bästa annonser har gemensamt</p>
             </div>
             <p className="text-[12px] text-white leading-relaxed">
@@ -187,7 +187,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                   <li key={`${ex.title}-${idx}`} className="min-w-0">
                     <TruncatedText
                       text={`• ${ex.title} — ${ex.applications} ans. / ${ex.views} vis.`}
-                      className="text-[11px] text-white/80"
+                      className="text-[11px] text-white"
                     />
                   </li>
                 ))}
