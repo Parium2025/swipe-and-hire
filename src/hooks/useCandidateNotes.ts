@@ -112,7 +112,11 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
 
     if (!forceRefresh) {
       const cached = notesCache.get(notesKey(user.id, applicantId));
-      if (cached) { setNotes(cached); return; }
+      if (cached) {
+        setNotes(cached);
+        refreshInBackground(applicantId);
+        return;
+      }
 
       const persisted = getPersistedNotes(user.id, applicantId);
       if (persisted) {
