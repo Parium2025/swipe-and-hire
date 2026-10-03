@@ -971,10 +971,10 @@ export function CandidatesTable({
                           </Tooltip>
                         ) : (
                           <Button
-                            variant="ghost"
+                            variant="outlineNeutral"
                             size="sm"
                             aria-label="Lägg till i kandidatlista"
-                            className="h-8 w-8 p-0 text-white hover:text-white bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
+                            className="h-8 w-8 p-0 border-0 rounded-full text-white hover:text-white bg-transparent md:hover:!bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 [-webkit-tap-highlight-color:transparent]"
                             disabled={addCandidate.isPending}
                             onPointerDown={(e) => e.preventDefault()}
                             onClick={(e) => {
