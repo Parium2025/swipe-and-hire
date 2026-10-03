@@ -75,6 +75,28 @@ function useVideoUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-video');
 }
 
+/**
+ * Returnerar den skarpa bild-URL:en först när den är avkodad, så länge en
+ * miniatyr redan visas. Saknas miniatyr returneras den skarpa direkt (som förut).
+ */
+function useDecodedUpgrade(full: string | null, fallback: string | null): string | null {
+  const [decoded, setDecoded] = useState<string | null>(null);
+  useEffect(() => {
+    if (!full || decoded === full) return;
+    let cancelled = false;
+    const img = new Image();
+    img.src = full;
+    const done = () => { if (!cancelled) setDecoded(full); };
+    if (img.complete && img.naturalWidth > 0) done();
+    else if (typeof img.decode === 'function') img.decode().then(done, done);
+    else { img.onload = done; img.onerror = done; }
+    return () => { cancelled = true; };
+  }, [full, decoded]);
+  if (!full) return null;
+  if (!fallback || decoded === full) return full;
+  return null;
+}
+
 
 interface CandidateProfileDialogProps {
   application: ApplicationData | null;
