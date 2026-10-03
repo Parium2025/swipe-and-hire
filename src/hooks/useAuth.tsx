@@ -575,6 +575,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           setTimeout(() => {
             clearAllAppCaches();
+            // En annan fliks konto får aldrig lämna data i den här flikens
+            // React Query-cache medan vi går till inloggningen.
+            queryClient.clear();
             clearSessionToken();
             window.location.href = '/auth';
           }, 1500);
@@ -649,10 +652,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           if (cachedBelongsToOther) {
+            queryClient.clear();
             setUserRole(null);
             setOrganization(null);
             setSeekerCountsReadyUserId(null);
             setEmployerCountsReadyUserId(null);
+            setPreloadedTotalJobs(0);
+            setPreloadedSavedJobs(0);
+            setPreloadedUniqueCompanies(0);
+            setPreloadedNewThisWeek(0);
+            setPreloadedMyApplications(0);
+            setPreloadedEmployerMyJobs(0);
+            setPreloadedEmployerActiveJobs(0);
+            setPreloadedEmployerDashboardJobs(0);
+            setPreloadedEmployerTotalViews(0);
+            setPreloadedEmployerTotalApplications(0);
+            setPreloadedEmployerCandidates(0);
+            setPreloadedMyCandidates(0);
+            setPreloadedCompanyReviewsCount(0);
             setPreloadedUnreadMessages(0);
             setPreloadedJobSeekerUnreadMessages(0);
             profileLoadedRef.current = false;
