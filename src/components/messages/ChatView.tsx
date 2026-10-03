@@ -210,6 +210,7 @@ export function ChatView({
     displayMember,
     conversation.last_message,
     conversation.counterpart_person_sender_id,
+    conversation.kind === 'internal',
   );
 
   // Use the exact same resolved candidate identity in message bubbles as in
@@ -822,8 +823,7 @@ export function ChatView({
     displayMember,
     isSelf: isSelfConversation,
     lastMessage: conversation.last_message,
-    counterpartPersonSenderId: conversation.counterpart_person_sender_id,
-  });
+
 
   // Group messages by date
   // Förladda bildbilagor så snart meddelanden finns – bilder ska vara på plats direkt.
