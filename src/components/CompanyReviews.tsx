@@ -29,6 +29,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
+import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -65,7 +66,7 @@ interface CompanyReview {
 }
 
 const CompanyReviews = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
@@ -87,7 +88,7 @@ const CompanyReviews = () => {
       if (error) throw error;
       setEditingReplyId(null);
       setReplyDraft('');
-      queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', reviewOwnerId] });
       toast({
         title: reply.trim() ? "Svar sparat" : "Svar borttaget",
         description: reply.trim() ? "Ditt svar visas nu under recensionen." : "Svaret har tagits bort.",
@@ -134,6 +135,13 @@ const CompanyReviews = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: reviewOwnerId, isLoading: ownerLoading } = useQuery({
+    queryKey: ['organization-review-owner', user?.id, profile?.organization_id],
+    queryFn: () => getOrganizationReviewOwnerId(user?.id ?? '', profile?.organization_id),
+    enabled: !!user?.id && !!profile,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Delad cache + realtime-synk (localStorage-instant load, bakgrundssynk)
   const {
     reviews: cachedReviews,
@@ -143,10 +151,10 @@ const CompanyReviews = () => {
     hasMore,
     loadMore,
     isLoadingMore,
-  } = useCompanyReviewsCache(user?.id ?? null);
+  } = useCompanyReviewsCache(reviewOwnerId ?? null);
   const reviews = (cachedReviews ?? []) as unknown as CompanyReview[];
 
-  const loading = companyLoading || reviewsLoading;
+  const loading = companyLoading || ownerLoading || reviewsLoading;
 
   // Snitt + antal är serverräknade över ALLA recensioner, inte bara hämtade sidor.
   const averageRating = reviewCount > 0 ? (avgRating ?? 0).toFixed(1) : "0";
