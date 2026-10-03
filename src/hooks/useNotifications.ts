@@ -19,7 +19,7 @@ export interface AppNotification {
 const CACHE_KEY = 'parium_notifications_cache';
 // Behåll senast kända notiser även efter ett dygn. Servern uppdaterar alltid
 // läststatus/lista i bakgrunden, men en utgången cache får inte se ut som 0.
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 // Hur många notiser som hämtas per sida. Fler laddas automatiskt när
 // användaren scrollar ner i klockan.
@@ -32,7 +32,7 @@ const isHiddenType = (type: string) => HIDDEN_TYPES.has(type);
 
 
 const getCached = (userId: string): AppNotification[] | null => {
-  const cached = safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
+  const cached = safeReadArrayCache<AppNotification>(`${CACHE_KEY}:${userId}`, 'items', (env) => {
     return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < CACHE_TTL_MS;
   });
   return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
@@ -40,12 +40,14 @@ const getCached = (userId: string): AppNotification[] | null => {
 
 const setCache = (userId: string, items: AppNotification[]) => {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ userId, items, ts: Date.now() }));
+    localStorage.setItem(`${CACHE_KEY}:${userId}`, JSON.stringify({ userId, items, ts: Date.now() }));
   } catch {}
 };
 
 export function useNotifications() {
   const { user } = useAuth();
+  const activeUserIdRef = useRef(user?.id ?? null);
+  activeUserIdRef.current = user?.id ?? null;
   // Kontospecifikt lokalt notisarkiv — två flikar med olika konton på samma
   // enhet får aldrig dela lokala toaster.
   useEffect(() => {
@@ -171,6 +173,8 @@ export function useNotifications() {
       ]);
 
       if (error) throw error;
+      // A previous account's request may finish after a tab switches account.
+      if (activeUserIdRef.current !== user.id) return;
       // En läsmarkering/rensning hann ske under hämtningen → svaret är
       // inaktuellt. Hämta en gång till när skrivningen är klar.
       if (seqAtStart !== mutationSeqRef.current || inflightMutationsRef.current > 0) {
@@ -232,6 +236,7 @@ export function useNotifications() {
         .order('id', { ascending: false })
         .limit(PAGE_SIZE);
       if (error) throw error;
+      if (activeUserIdRef.current !== user.id) return;
 
       const page = (data || []) as AppNotification[];
       setNotifications(prev => {
@@ -296,6 +301,7 @@ export function useNotifications() {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          if (activeUserIdRef.current !== user.id) return;
           const newNotif = payload.new as AppNotification;
           if (mutedTypesRef.current.has(newNotif.type) || isHiddenType(newNotif.type)) return;
           setNotifications(prev => {
@@ -320,6 +326,7 @@ export function useNotifications() {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          if (activeUserIdRef.current !== user.id) return;
           const updatedNotif = payload.new as AppNotification;
           setNotifications(prev => {
             const before = prev.find(n => n.id === updatedNotif.id);
@@ -343,6 +350,7 @@ export function useNotifications() {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          if (activeUserIdRef.current !== user.id) return;
           const removed = payload.old as Partial<AppNotification>;
           if (!removed?.id) return;
           setNotifications(prev => {
