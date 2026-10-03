@@ -9,6 +9,7 @@ import { prefetchEmployerJobsFirstPages } from '@/hooks/useJobsData';
 import { prewarmJobTemplates } from '@/lib/jobTemplatesPrewarm';
 import { prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
 import { fetchMyProfile } from '@/lib/myProfile';
+import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
@@ -153,7 +154,8 @@ export function useSidebarRoutePrefetch() {
           }).catch(() => { prefetchedRef.current.delete(key); });
         }
         // Omdömeslistan hämtas bara när man faktiskt är på väg till /reviews.
-        if (url === '/reviews') void prewarmCompanyReviews(queryClient, user.id);
+        if (url === '/reviews') void getOrganizationReviewOwnerId(user.id, orgId)
+          .then(ownerId => prewarmCompanyReviews(queryClient, ownerId));
         break;
       }
       // /my-candidates och /messages varmhålls redan via
