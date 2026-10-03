@@ -39,7 +39,15 @@ export function MessagesTabs({
 
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
+    // Sidan kan monteras dold (KeepAlive) där bredden är 0. ResizeObserver
+    // mäter om så fort knapparna blir synliga, så markeringen finns direkt.
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateIndicator) : null;
+    if (candidatesRef.current) ro?.observe(candidatesRef.current);
+    if (colleaguesRef.current) ro?.observe(colleaguesRef.current);
+    return () => {
+      window.removeEventListener('resize', updateIndicator);
+      ro?.disconnect();
+    };
   }, [activeTab, candidateUnread, colleagueUnread]);
 
   return (
