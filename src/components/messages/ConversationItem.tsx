@@ -50,6 +50,9 @@ export const ConversationItem = memo(function ConversationItem({
     displayMember,
     isSelf,
     lastMessage: conversation.last_message,
+    counterpartPersonSenderId: conversation.counterpart_person_sender_id,
+    isInternal: conversation.kind === 'internal',
+  });
 
 
   const avatarProfile = getConversationAvatarProfile(

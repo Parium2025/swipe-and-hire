@@ -823,6 +823,9 @@ export function ChatView({
     displayMember,
     isSelf: isSelfConversation,
     lastMessage: conversation.last_message,
+    counterpartPersonSenderId: conversation.counterpart_person_sender_id,
+    isInternal: conversation.kind === 'internal',
+  });
 
 
   // Group messages by date
