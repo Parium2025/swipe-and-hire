@@ -12,6 +12,9 @@ export async function getOrganizationReviewOwnerId(userId: string, organizationI
   if (!organizationId) return userId;
   const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
   if (error) throw error;
-  const founder = data?.find(member => member.organization_id === organizationId && member.is_active && member.role === 'admin');
+  // The earliest active admin is the founding employer in the legacy review schema.
+  // Never use company names: unrelated organizations may share one.
+  const founder = data?.filter(member => member.organization_id === organizationId && member.is_active && member.role === 'admin')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
   return founder?.user_id ?? userId;
 }
