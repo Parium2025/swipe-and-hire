@@ -26,6 +26,7 @@ import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { unregisterCurrentDeviceToken } from '@/lib/pushNotificationService';
+import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -2429,18 +2430,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Tyst fel — behåller tidigare värde i state
       }
 
-      // Hämta antal company reviews för denna employer
-      const { count: reviewsCount, error: reviewsError } = await supabase
-        .from('company_reviews_public')
-        .select('id', { count: 'exact', head: true })
-        .eq('company_id', user.id);
-
-      if (!reviewsError) {
-        const reviews = reviewsCount || 0;
-        setPreloadedCompanyReviewsCount(reviews);
-        try { sessionStorage.setItem(COMPANY_REVIEWS_COUNT_CACHE_KEY, String(reviews)); } catch {}
-        writeEmployerCountsMirrorEntry(user.id, COMPANY_REVIEWS_COUNT_CACHE_KEY, reviews);
-      }
+      // Recensioner tillhör den delade företagsidentiteten, inte den inbjudnes konto.
+      try {
+        const ownerId = await getOrganizationReviewOwnerId(user.id, profile?.organization_id);
+        const { count: reviewsCount, error: reviewsError } = await supabase
+          .from('company_reviews_public')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', ownerId);
+        if (!reviewsError) {
+          const reviews = reviewsCount || 0;
+          setPreloadedCompanyReviewsCount(reviews);
+          try { sessionStorage.setItem(COMPANY_REVIEWS_COUNT_CACHE_KEY, String(reviews)); } catch {}
+          writeEmployerCountsMirrorEntry(user.id, COMPANY_REVIEWS_COUNT_CACHE_KEY, reviews);
+        }
+      } catch { /* behåll tidigare kända antal vid nätverksfel */ }
 
       // Hämta antal UNIKA kandidater i "Mina kandidater" (distinct applicant_id)
       const { data: myCandidatesDistinct, error: myCandidatesError } = await supabase.rpc('count_distinct_my_candidates', { p_recruiter_id: user.id });
