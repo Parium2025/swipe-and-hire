@@ -235,7 +235,7 @@ const Dashboard = memo(() => {
     };
     const version = getImageVersion(mediaJob);
     return [
-      buildCardImageUrl(mediaJob.job_image_url ?? mediaJob.job_image_desktop_url, 'job-images', version, { width: 600, height: 400, quality: 75, resize: 'cover' }),
+      buildCardImageUrl(mediaJob.job_image_url ?? mediaJob.job_image_desktop_url, 'job-images', version, { width: 600, quality: 75 }),
       buildCardImageUrl(mediaJob.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
     ];
   }, []);

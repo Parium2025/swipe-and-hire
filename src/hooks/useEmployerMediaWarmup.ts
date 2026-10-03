@@ -80,18 +80,19 @@ export function useEmployerMediaWarmup() {
       for (const page of data.pages) {
         if (!page?.items) continue;
         for (const item of page.items) {
+          if (imagePaths.length >= MAX_NEW_PER_UPDATE && coverPaths.length >= 24 && videoPaths.length >= 10) break;
           const img = item?.profile_image_url;
-          if (typeof img === 'string' && img.trim() !== '' && !warmed.has(`img:${img}`)) {
+          if (imagePaths.length < MAX_NEW_PER_UPDATE && typeof img === 'string' && img.trim() !== '' && !warmed.has(`img:${img}`)) {
             warmed.add(`img:${img}`);
             imagePaths.push(img);
           }
           const cover = item?.cover_image_url;
-          if (typeof cover === 'string' && cover.trim() !== '' && !warmed.has(`cover:${cover}`)) {
+          if (coverPaths.length < 24 && typeof cover === 'string' && cover.trim() !== '' && !warmed.has(`cover:${cover}`)) {
             warmed.add(`cover:${cover}`);
             coverPaths.push(cover);
           }
           const vid = item?.video_url;
-          if (typeof vid === 'string' && vid.trim() !== '' && !warmed.has(`vid:${vid}`)) {
+          if (videoPaths.length < 10 && typeof vid === 'string' && vid.trim() !== '' && !warmed.has(`vid:${vid}`)) {
             warmed.add(`vid:${vid}`);
             videoPaths.push(vid);
           }
@@ -101,9 +102,9 @@ export function useEmployerMediaWarmup() {
       if (imagePaths.length === 0 && coverPaths.length === 0 && videoPaths.length === 0) return;
 
       // Begränsa per update för att skydda mot megalistor
-      const limitedImages = imagePaths.slice(0, MAX_NEW_PER_UPDATE);
-      const limitedCovers = coverPaths.slice(0, 24);
-      const limitedVideos = videoPaths.slice(0, Math.min(10, videoPaths.length));
+      const limitedImages = imagePaths;
+      const limitedCovers = coverPaths;
+      const limitedVideos = videoPaths;
 
       // Microtask så vi aldrig blockerar render
       queueMicrotask(() => {
@@ -186,21 +187,21 @@ export function useEmployerMediaWarmup() {
         const imagePath = j.job_image_url ?? j.job_image_desktop_url;
         if (imagePath && typeof imagePath === 'string') {
           const path = imagePath.trim();
-          if (path && !warmed.has(`job-img:${path}`)) {
-            warmed.add(`job-img:${path}`);
+          if (path && !warmed.has(`job-img:${path}:${version ?? ''}`)) {
+            warmed.add(`job-img:${path}:${version ?? ''}`);
+            // EmployerJobCard/ReadOnlyMobileJobCard use width-only transforms.
+            // A different height creates a different URL and never warms the card.
             const url = buildCardImageUrl(path, 'job-images', version, {
               width: 600,
-              height: 400,
               quality: 75,
-              resize: 'cover',
             });
             if (url) urls.push(url);
           }
         }
         if (j.company_logo_url && typeof j.company_logo_url === 'string') {
           const path = j.company_logo_url.trim();
-          if (path && !warmed.has(`co-logo:${path}`)) {
-            warmed.add(`co-logo:${path}`);
+          if (path && !warmed.has(`co-logo:${path}:${version ?? ''}`)) {
+            warmed.add(`co-logo:${path}:${version ?? ''}`);
             const url = buildCardImageUrl(path, 'company-logos', version, {
               width: 64,
               height: 64,
@@ -219,7 +220,9 @@ export function useEmployerMediaWarmup() {
     };
 
     // Initial scan av jobs-cachen (alla matchande nycklar oavsett scope/orgId)
-    const allJobsQueries = queryClient.getQueryCache().findAll({ queryKey: ['jobs'] });
+    const allJobsQueries = queryClient.getQueryCache().findAll({
+      predicate: q => q.queryKey[0] === 'jobs' && q.queryKey[3] === userId,
+    });
     for (const q of allJobsQueries) {
       warmJobAdImages(q.state.data);
     }
@@ -291,7 +294,7 @@ export function useEmployerMediaWarmup() {
       const head = key[0];
 
       // Job ad images: ['jobs', scope, orgId, userId]
-      if (head === 'jobs') {
+      if (head === 'jobs' && key[3] === userId) {
         warmJobAdImages(event.query.state.data);
         return;
       }
