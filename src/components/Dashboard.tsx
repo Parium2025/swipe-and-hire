@@ -377,7 +377,7 @@ const Dashboard = memo(() => {
       {/* Desktop: Card grid */}
       <div className="hidden md:block">
         {tabFilteredJobs.length === 0 ? (
-          !searchTerm && activeTab === 'active' && serverCounts.active === 0 && serverCounts.expired === 0 && serverCounts.draft === 0
+          !searchTerm && !isLoading && serverCounts && activeTab === 'active' && serverCounts.total === 0
             ? <EmptyJobsCta />
             : <div className="text-center text-white py-12 font-medium text-sm">{getEmptyMessage(searchTerm, activeTab)}</div>
         ) : (
@@ -427,7 +427,7 @@ const Dashboard = memo(() => {
             ))}
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          !searchTerm && activeTab === 'active' && serverCounts.active === 0 && serverCounts.expired === 0 && serverCounts.draft === 0
+          !searchTerm && !isLoading && serverCounts && activeTab === 'active' && serverCounts.total === 0
             ? <EmptyJobsCta compact />
             : <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center"><span>{getEmptyMessage(searchTerm, activeTab)}</span></div>
         ) : (
