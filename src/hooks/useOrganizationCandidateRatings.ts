@@ -93,5 +93,5 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, queryClient]);
 
-  return isSuccess && data ? { ...persisted, ...data } : persisted;
+  return isSuccess && data ? data : persisted;
 }
