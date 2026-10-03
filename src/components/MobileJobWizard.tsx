@@ -210,6 +210,10 @@ const MobileJobWizard = ({
   const hasBeenOpenRef = useRef(false);
   // Guard: don't persist draft until restore has completed (prevents overwriting saved draft with empty data)
   const hasCompletedRestoreRef = useRef(false);
+  // Utkast på enheten tillhör ett visst konto: en kollega eller ett annat
+  // konto på samma dator får aldrig se eller fortsätta någon annans utkast.
+  const { user: draftOwner } = useAuth();
+  const draftOwnerId = draftOwner?.id ?? null;
   // Synkron spärr mot dubbelpublicering (setLoading hinner inte uppdateras).
   const isPublishingRef = useRef(false);
   // Synkron spärr mot dubbelsparade utkast (setIsSavingDraft hinner inte uppdateras).
@@ -241,6 +245,7 @@ const MobileJobWizard = ({
         try {
           const parsed = JSON.parse(rawDraft);
           if (!parsed?.formData) return null;
+          if (!draftOwnerId || parsed.ownerId !== draftOwnerId) return null;
 
           const savedAt = typeof parsed.savedAt === 'number' ? parsed.savedAt : 0;
           if (!savedAt || Date.now() - savedAt >= 24 * 60 * 60 * 1000) {
@@ -344,6 +349,7 @@ const MobileJobWizard = ({
           try {
             const parsed = JSON.parse(raw);
             if (expectedJobId && parsed?.jobId && parsed.jobId !== expectedJobId) return null;
+            if (parsed?.ownerId && parsed.ownerId !== draftOwnerId) return null;
             const savedAt = typeof parsed?.savedAt === 'number' ? parsed.savedAt : 0;
             const rawStep = Number(parsed?.currentStep);
             const restoredStep = Number.isFinite(rawStep) && rawStep >= 0 ? Math.floor(rawStep) : 0;
@@ -941,7 +947,7 @@ const MobileJobWizard = ({
   });
   
   const persistCreateDraftSnapshot = useCallback(() => {
-    if (!open || existingJob || !hasCompletedRestoreRef.current) return;
+    if (!open || existingJob || !hasCompletedRestoreRef.current || !draftOwnerId) return;
 
     // Persist as soon as the wizard is open — even on step 0 with only a title.
     // This guarantees we can restore the card on preview reload / crash.
@@ -952,6 +958,7 @@ const MobileJobWizard = ({
         currentStep,
         customQuestions,
         savedAt: Date.now(),
+        ownerId: draftOwnerId,
         // Stämpel på mallen som utkastet bygger på. Ändras mallen efteråt är
         // utkastet inaktuellt och får inte skriva över mallens nya värden.
         templateStamp: (selectedTemplate as any)?.updated_at ?? null,
@@ -966,7 +973,7 @@ const MobileJobWizard = ({
     } catch {
       console.warn('Failed to save job wizard state');
     }
-  }, [open, existingJob, selectedTemplate, currentStep, formData, customQuestions, jobTitle]);
+  }, [open, existingJob, selectedTemplate, currentStep, formData, customQuestions, jobTitle, draftOwnerId]);
 
   // Clear both the base slot and the current template slot so no stale draft
   // can resurface in a later run.
