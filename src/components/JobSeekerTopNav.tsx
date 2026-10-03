@@ -5,6 +5,7 @@ import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { useStableImageSrc } from "@/hooks/useStableImageSrc";
 import { CountBadge } from "@/components/ui/count-badge";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -109,7 +110,7 @@ function JobSeekerTopNav() {
     (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null, 
     'profile-image'
   );
-  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackProfileImageUrl || null;
+  const avatarUrl = useStableImageSrc(preloadedAvatarUrl || preloadedCoverUrl || fallbackProfileImageUrl || null);
   const videoUrl = preloadedVideoUrl ?? null;
   const coverUrl = preloadedCoverUrl || null;
   const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
