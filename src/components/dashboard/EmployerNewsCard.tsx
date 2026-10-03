@@ -122,7 +122,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={!IS_TOUCH_ONLY ? openArticle : undefined}
-                className={`w-full flex flex-col overflow-hidden ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
+                className={`w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
                 {IS_TOUCH_ONLY ? (
                   <TruncatedText
@@ -131,12 +131,11 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                     className="w-full"
                   >
                     <div className="w-full">
-                      <div className="h-[40px] text-sm font-semibold text-white leading-5 mb-2 line-clamp-2">
+                      <div className="text-sm font-semibold text-white leading-5 mb-2">
                         {currentNews.title}
                       </div>
                       <div
-                        className="h-[42px] text-sm leading-5 text-white overflow-hidden"
-                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                        className="text-sm leading-5 text-white"
                       >
                         {currentNews.summary || currentNews.title}
                       </div>
@@ -146,12 +145,11 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                   <>
                     <TruncatedText
                       text={currentNews.title}
-                      className="h-[40px] text-sm font-semibold text-white leading-5 mb-2 line-clamp-2"
+                      className="text-sm font-semibold text-white leading-5 mb-2"
                     />
                     <TruncatedText
                       text={currentNews.summary || currentNews.title}
-                      lines={2}
-                      className="h-[42px] text-sm leading-5 text-white"
+                      className="text-sm leading-5 text-white"
                     />
                   </>
                 )}

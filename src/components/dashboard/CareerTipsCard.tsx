@@ -135,16 +135,15 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
-                className={`w-full flex flex-col overflow-hidden ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
+                className={`w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
                 <TruncatedText
                   text={currentTip.title}
-                  className="h-[40px] text-sm font-semibold text-white leading-5 mb-2 sm:mb-2.5 line-clamp-2"
+                  className="text-sm font-semibold text-white leading-5 mb-2 sm:mb-2.5"
                 />
                 <TruncatedText
                   text={currentTip.summary || currentTip.title}
-                  lines={2}
-                  className="h-[42px] text-sm leading-5 text-white"
+                  className="text-sm leading-5 text-white"
                 />
               </motion.div>
             ) : (
