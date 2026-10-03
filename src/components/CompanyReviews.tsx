@@ -1,4 +1,3 @@
-import { fetchMyProfile } from '@/lib/myProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -105,40 +104,26 @@ const CompanyReviews = () => {
     }
   };
 
-  // Fetch company data with React Query
-  const { data: company, isLoading: companyLoading } = useQuery({
-    queryKey: ['company-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      
-      const { data: rows, error } = await fetchMyProfile();
-      const data = Array.isArray(rows) ? rows[0] ?? null : null;
-
-
-      if (error) {
-        console.error('Error fetching company data:', error);
-        toast({
-          title: "Fel",
-          description: "Kunde inte hämta företagsinformation.",
-          variant: "destructive"
-        });
-        return null;
-      }
-
-      return data ? {
-        ...data,
-        // Map the correct field names from profiles table
-        company_social_media_links: ((data as any).company_social_media_links as unknown as SocialMediaLink[]) || []
-      } as CompanyProfile : null;
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  });
-
   const { data: reviewOwnerId, isLoading: ownerLoading } = useQuery({
     queryKey: ['organization-review-owner', user?.id, profile?.organization_id],
     queryFn: () => getOrganizationReviewOwnerId(user?.id ?? '', profile?.organization_id),
     enabled: !!user?.id && !!profile,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Read the organization owner's shared company fields rather than a recruiter's invite-time copy.
+  const { data: company, isLoading: companyLoading } = useQuery({
+    queryKey: ['company-profile', reviewOwnerId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
+      if (error) throw error;
+      const owner = data?.find(member => member.user_id === reviewOwnerId);
+      return owner ? {
+        ...owner,
+        company_social_media_links: (owner.company_social_media_links as unknown as SocialMediaLink[]) || [],
+      } as CompanyProfile : null;
+    },
+    enabled: !!reviewOwnerId,
     staleTime: 5 * 60 * 1000,
   });
 
