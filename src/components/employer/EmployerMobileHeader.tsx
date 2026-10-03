@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from '@/hooks/useAuth';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useStableImageSrc } from '@/hooks/useStableImageSrc';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
@@ -77,7 +78,7 @@ export const EmployerMobileProfileAvatar = memo(() => {
     (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null,
     'profile-image'
   );
-  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null;
+  const avatarUrl = useStableImageSrc(preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null);
   
   const initials = (() => {
     const f = profile?.first_name || '';

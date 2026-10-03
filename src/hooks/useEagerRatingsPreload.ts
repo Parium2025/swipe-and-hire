@@ -93,6 +93,7 @@ export const cancelPendingCacheClear = () => {
 const clearAllAppCachesSync = () => {
   const prefixesToClear = [
     RATINGS_CACHE_PREFIX,
+    'parium_org_ratings_v1_',
     STAGE_SETTINGS_CACHE_KEY,
     APPLICATIONS_SNAPSHOT_PREFIX,
     JOBS_CACHE_KEY,
