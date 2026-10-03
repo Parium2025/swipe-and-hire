@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { CandidateActivity, ActivityType } from '@/hooks/useCandidateActivities';
+import { writeActivityCache, type CandidateActivity, type ActivityType } from '@/hooks/useCandidateActivities';
 import { primeCandidateNotesCache } from '@/hooks/useCandidateNotes';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
 import { prewarmExistingInterviews } from '@/lib/existingInterviewQuery';
@@ -79,8 +79,8 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
 
     let cancelled = false;
 
-    const run = async () => {
-      // 1) Anteckningar — en query för hela sidan
+    // Tre oberoende batchar körs parallellt — aktivitetsloggen ska inte vänta på anteckningarna.
+    const warmNotes = async () => {
       try {
         // Samma urval, join och sortering som useCandidateNotes använder —
         // annars stämmer inte den förvärmda listan med den dialogen visar.
@@ -112,15 +112,15 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
           primeCandidateNotesCache(user.id, id, notes);
         }
       } catch { /* cache-warmup får aldrig störa UI */ }
+    };
 
-      if (cancelled) return;
-
-      // 2) Aktivitetslogg — en query + en profil-query för hela sidan
+    const warmActivities = async () => {
       try {
         const { data: activities } = await supabase
           .from('candidate_activities')
           .select('*')
           .in('applicant_id', pending)
+          .neq('activity_type', 'stage_changed')
           .order('created_at', { ascending: false })
           .limit(pending.length * 50);
         if (cancelled) return;
@@ -155,12 +155,14 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
         warmActivityAvatars([...profileMap.values()].map((profile) => profile.profile_image_url));
         for (const [id, list] of byApplicant) {
           queryClient.setQueryData(['candidate-activities', id], list);
+          // Persistera kontoscopat så nästa kallstart visar loggen direkt.
+          writeActivityCache(user.id, id, list);
         }
       } catch { /* ignore */ }
+    };
 
-      if (cancelled) return;
-
-      // 3) Bokade möten — ETT anrop för hela sidan, så "Boka om intervju"
+    const warmInterviews = async () => {
+      // Bokade möten — ETT anrop för hela sidan, så "Boka om intervju"
       // öppnas färdigifyllt även när dialogen öppnas direkt via touch.
       try {
         const appIds = applicationIdsRef.current.filter((id) => !warmedInterviewsRef.current.has(id));
@@ -171,15 +173,17 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
       } catch { /* ignore */ }
     };
 
+    const run = () => Promise.all([warmNotes(), warmActivities(), warmInterviews()]);
+
     let idleId: number | undefined;
     let timeoutId: number | undefined;
     const ric = (globalThis as unknown as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
     }).requestIdleCallback;
     if (typeof ric === 'function') {
-      idleId = ric(() => void run(), { timeout: 800 });
+      idleId = ric(() => void run(), { timeout: 200 });
     } else {
-      timeoutId = window.setTimeout(() => void run(), 250);
+      timeoutId = window.setTimeout(() => void run(), 0);
     }
 
     return () => {
