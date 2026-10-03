@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 
 interface TeamCandidateInfo {
   applicant_id: string;
@@ -29,6 +30,13 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
     queryFn: async () => {
       if (!user || applicationIds.length === 0) return {};
 
+      const { data: role, error: roleError } = await supabase.from('user_roles')
+        .select('organization_id').eq('user_id', user.id).eq('is_active', true)
+        .not('organization_id', 'is', null).limit(1).maybeSingle();
+      if (roleError) throw roleError;
+      const memberIds = role?.organization_id ? await getOrganizationMemberIds(role.organization_id) : [user.id];
+      if (!memberIds.includes(user.id)) return {};
+
       // Fetch all my_candidates entries for these applications from any team member
       const myCandidatesData: Array<{ applicant_id: string; application_id: string; recruiter_id: string; rating: number | null; stage: string; notes: string | null }> = [];
       for (let i = 0; i < applicationIds.length; i += 100) {
@@ -38,6 +46,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
             .from('my_candidates')
             .select('applicant_id, application_id, recruiter_id, rating, stage, notes')
             .in('application_id', ids)
+            .in('recruiter_id', memberIds)
             .range(offset, offset + 999);
           if (error) throw error;
           myCandidatesData.push(...(data ?? []));
@@ -57,7 +66,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
         const ids = applicantIds.slice(i, i + 100);
         for (let offset = 0; ; offset += 1000) {
           const { data: ratings, error } = await supabase.from('candidate_ratings')
-            .select('applicant_id, recruiter_id, rating').in('applicant_id', ids).range(offset, offset + 999);
+            .select('applicant_id, recruiter_id, rating').in('applicant_id', ids).in('recruiter_id', memberIds).range(offset, offset + 999);
           if (error) throw error;
           ratings?.forEach(r => {
         if (!persistentRatingMap[r.applicant_id]) {
@@ -69,7 +78,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
         }
         for (let offset = 0; ; offset += 1000) {
           const { data: notes, error } = await supabase.from('candidate_notes')
-            .select('applicant_id, employer_id, note').is('job_id', null).in('applicant_id', ids).range(offset, offset + 999);
+            .select('applicant_id, employer_id, note').is('job_id', null).in('applicant_id', ids).in('employer_id', memberIds).range(offset, offset + 999);
           if (error) throw error;
           notes?.forEach(n => {
         if (!persistentNotesMap[n.applicant_id]) {
