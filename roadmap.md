@@ -41,4 +41,4 @@
 - [x] Restore organization-wide dashboard job lists and first-ever-job empty state without changing personal job lists
 - [x] Live-test organization-scoped reviews and comments with an invited recruiter account
 - [x] Hide billing and company-wide settings, privacy and team sections from recruiters while retaining personal calendar and account settings
-- [x] Audit recruiter review identity, live avatars, organization dashboards and analytics freshness; make analytics explanatory text fully white and verify cold starts
+- [ ] Finish recruiter analytics freshness audit: cross-colleague live counts, expired-job status consistency, cache scope and first-login cold start; review identity, mobile rendering and white explanatory text checked
