@@ -28,3 +28,4 @@
 - The landing-video route alone owns browser chrome color `#626262`; preserve its bounded chrome-reload guard (max two reloads per 10 s per tab) and never change other routes with it.
 - Preserve loop/reload/boot guards and tests. Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows to keep large inboxes fast.
 - Candidate activity queries and persistent cache are account-scoped (user+applicant key), warmed by the page, and refreshed for current author profiles; why: instant cold-start logs and live avatars without cross-account leaks or historical image snapshots.
+- The notification bell alone owns its account-scoped cache and refresh; keep its last-known state through ordinary daily returns and avoid a second silent preloader, because competing cache writes can hide older unread items until refetch.

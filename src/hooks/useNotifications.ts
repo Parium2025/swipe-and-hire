@@ -17,6 +17,9 @@ export interface AppNotification {
 }
 
 const CACHE_KEY = 'parium_notifications_cache';
+// Behåll senast kända notiser även efter ett dygn. Servern uppdaterar alltid
+// läststatus/lista i bakgrunden, men en utgången cache får inte se ut som 0.
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Hur många notiser som hämtas per sida. Fler laddas automatiskt när
 // användaren scrollar ner i klockan.
@@ -30,7 +33,7 @@ const isHiddenType = (type: string) => HIDDEN_TYPES.has(type);
 
 const getCached = (userId: string): AppNotification[] | null => {
   const cached = safeReadArrayCache<AppNotification>(CACHE_KEY, 'items', (env) => {
-    return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < 60 * 60 * 1000;
+    return env.userId === userId && typeof env.ts === 'number' && Date.now() - env.ts < CACHE_TTL_MS;
   });
   return cached?.filter((notification) => !isHiddenType(notification.type)) ?? null;
 };
