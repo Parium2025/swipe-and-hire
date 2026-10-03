@@ -322,7 +322,7 @@ const EmployerPageIntroCoach = () => {
     };
   }, [user?.id, authLoading]);
 
-  const tourPaths = useMemo(() => TOUR_PATHS.filter(path => isAdmin || (path !== '/billing' && path !== '/settings')), [isAdmin]);
+  const tourPaths = useMemo(() => TOUR_PATHS.filter(path => isAdmin || path !== '/billing'), [isAdmin]);
   const config = useMemo(() => {
     if (!isAdmin && location.pathname === '/billing') return undefined;
     if (!isAdmin && location.pathname === '/settings') return {
