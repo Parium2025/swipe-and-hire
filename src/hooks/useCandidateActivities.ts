@@ -34,10 +34,13 @@ export interface CandidateActivity {
   user_profile_image_url?: string | null;
 }
 
-const ACTIVITY_CACHE_KEY = 'parium_candidate_activities_';
+// Kontoscopad nyckel: en delad dator får aldrig visa ett annat kontos logg.
+const ACTIVITY_CACHE_KEY = 'parium_candidate_activities_v2_';
+const cacheKey = (userId: string, applicantId: string) => `${ACTIVITY_CACHE_KEY}${userId}_${applicantId}`;
 
-function readActivityCache(applicantId: string): CandidateActivity[] | null {
-  const key = ACTIVITY_CACHE_KEY + applicantId;
+function readActivityCache(userId: string | undefined, applicantId: string): CandidateActivity[] | null {
+  if (!userId) return null;
+  const key = cacheKey(userId, applicantId);
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
@@ -53,16 +56,17 @@ function readActivityCache(applicantId: string): CandidateActivity[] | null {
   }
 }
 
-function writeActivityCache(applicantId: string, data: CandidateActivity[]): void {
+export function writeActivityCache(userId: string | undefined, applicantId: string, data: CandidateActivity[]): void {
+  if (!userId) return;
   try {
-    safeSetItem(ACTIVITY_CACHE_KEY + applicantId, JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
+    safeSetItem(cacheKey(userId, applicantId), JSON.stringify({ data: data.slice(0, 50), timestamp: Date.now() }));
   } catch { /* storage full */ }
 }
 
 /**
  * Shared queryFn for candidate activities — used by both the hook and prefetch.
  */
-async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateActivity[]> {
+async function fetchActivitiesQueryFn(applicantId: string, userId?: string): Promise<CandidateActivity[]> {
   const { data: activitiesData, error: activitiesError } = await supabase
     .from('candidate_activities')
     .select('*')
@@ -93,7 +97,7 @@ async function fetchActivitiesQueryFn(applicantId: string): Promise<CandidateAct
     user_profile_image_url: profileMap.get(activity.user_id)?.profile_image_url || null,
   })) as CandidateActivity[];
 
-  writeActivityCache(applicantId, result);
+  writeActivityCache(userId, applicantId, result);
   // Signera + dekoda avatarerna direkt så de aldrig "poppar in" efter initialerna.
   warmActivityAvatars(result.map((a) => a.user_profile_image_url));
   return result;
@@ -105,18 +109,18 @@ export function useCandidateActivities(applicantId: string | null) {
 
   const { data: activities = [], isLoading, error } = useQuery({
     queryKey: ['candidate-activities', applicantId],
-    queryFn: () => fetchActivitiesQueryFn(applicantId!),
+    queryFn: () => fetchActivitiesQueryFn(applicantId!, user?.id),
     enabled: !!applicantId && !!user,
     staleTime: 30 * 1000,
     initialData: () => {
       if (!applicantId) return undefined;
-      const cached = readActivityCache(applicantId);
+      const cached = readActivityCache(user?.id, applicantId);
       if (cached) warmActivityAvatars(cached.map((a) => a.user_profile_image_url));
       return cached ?? undefined;
     },
     initialDataUpdatedAt: () => {
       if (!applicantId) return undefined;
-      return readActivityCache(applicantId) ? 0 : undefined;
+      return readActivityCache(user?.id, applicantId) ? 0 : undefined;
     },
   });
 
@@ -217,7 +221,7 @@ export function useCandidateActivities(applicantId: string | null) {
 export function prefetchCandidateActivities(queryClient: ReturnType<typeof useQueryClient>, applicantId: string, _userId?: string) {
   queryClient.prefetchQuery({
     queryKey: ['candidate-activities', applicantId],
-    queryFn: () => fetchActivitiesQueryFn(applicantId),
+    queryFn: () => fetchActivitiesQueryFn(applicantId, _userId),
     staleTime: 30 * 1000,
   });
 }
