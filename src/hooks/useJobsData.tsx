@@ -6,6 +6,7 @@ import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEmployerJobActive, getEmployerJobStatus } from '@/lib/jobStatus';
 import { UNVIEWED_APPLICATIONS_QUERY_KEY } from '@/hooks/useUnviewedApplicationCounts';
+import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 
 export interface JobPosting {
   id: string;
@@ -319,14 +320,8 @@ export async function prefetchEmployerJobsFirstPages(
 
   let employerIds: string[] = [userId];
   if (scope === 'organization' && orgId) {
-    const { data: orgUsers, error: orgError } = await supabase
-      .from('user_roles')
-      .select('user_id')
-      .eq('organization_id', orgId)
-      .eq('is_active', true);
-    if (orgError) throw orgError;
-    const ids = orgUsers?.map((u) => u.user_id) ?? [];
-    if (ids.length > 0) employerIds = ids;
+    const ids = await getOrganizationMemberIds();
+    employerIds = ids.length > 0 ? ids : [userId];
   }
 
   const [active, expired, draft] = await Promise.all([
@@ -365,13 +360,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     queryFn: async () => {
       if (!user) return [];
       if (scope !== 'organization' || !profile?.organization_id) return [user.id];
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('organization_id', profile.organization_id)
-        .eq('is_active', true);
-      if (error) throw error;
-      return data?.map((row) => row.user_id) ?? [user.id];
+      const ids = await getOrganizationMemberIds();
+      return ids.length > 0 ? ids : [user.id];
     },
     enabled: !!user && enableRealtime,
     staleTime: 5 * 60 * 1000,
@@ -393,14 +383,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       // Resolve scope → user-id-set
       let employerIds: string[] = [user.id];
       if (scope === 'organization' && profile?.organization_id) {
-        const { data: orgUsers, error: orgError } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('organization_id', profile.organization_id)
-          .eq('is_active', true);
-        if (orgError) throw orgError;
-        const ids = orgUsers?.map(u => u.user_id) ?? [];
-        if (ids.length > 0) employerIds = ids;
+        const ids = await getOrganizationMemberIds();
+        employerIds = ids.length > 0 ? ids : [user.id];
       }
 
       // Alla tre statusar hämtas parallellt → tabbarna är förvärmda direkt.
@@ -623,13 +607,8 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
     try {
       let employerIds: string[] = [user.id];
       if (scope === 'organization' && profile?.organization_id) {
-        const { data: orgUsers } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('organization_id', profile.organization_id)
-          .eq('is_active', true);
-        const ids = orgUsers?.map(u => u.user_id) ?? [];
-        if (ids.length > 0) employerIds = ids;
+        const ids = await getOrganizationMemberIds();
+        employerIds = ids.length > 0 ? ids : [user.id];
       }
 
       const rows = await fetchJobsPage({
