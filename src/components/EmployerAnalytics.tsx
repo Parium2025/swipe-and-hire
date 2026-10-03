@@ -469,7 +469,7 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: Math.min(i, 5) * 0.05 }}
-                className={`space-y-1 ${expired ? 'opacity-50' : ''}`}
+                className="space-y-1"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -639,6 +639,15 @@ const EmployerAnalytics = memo(() => {
     staleTime: 2 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!user?.id || !organization?.id) return;
+    const channel = supabase.channel(`reports-team-profiles-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_change_signals' }, () => {
+        void queryClient.invalidateQueries({ queryKey: ['employer-team-insights', user.id] });
+      }).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [user?.id, organization?.id, queryClient]);
 
   useEffect(() => {
     if (teamData && user?.id) {

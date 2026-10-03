@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Building2, 
   Globe, 
@@ -130,6 +130,15 @@ const CompanyReviews = () => {
     enabled: !!reviewOwnerId,
     staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!reviewOwnerId) return;
+    const channel = supabase.channel(`reviews-branding-${reviewOwnerId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_change_signals', filter: `profile_user_id=eq.${reviewOwnerId}` }, () => {
+        void queryClient.invalidateQueries({ queryKey: ['company-public-profile', reviewOwnerId] });
+      }).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [reviewOwnerId, queryClient]);
 
   // Delad cache + realtime-synk (localStorage-instant load, bakgrundssynk)
   const {
