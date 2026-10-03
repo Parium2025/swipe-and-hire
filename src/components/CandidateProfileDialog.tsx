@@ -805,7 +805,7 @@ export const CandidateProfileDialog = ({
               ) : (
                 <Avatar key={displayApp.id} className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
                   <AvatarImage src={profileImageUrl || profileThumbUrl || ''} alt={`${displayApp.first_name} ${displayApp.last_name}`} className="object-cover" />
-                  <AvatarFallback className="bg-white/10 text-white text-2xl md:text-5xl font-semibold" delayMs={displayApp.profile_image_url ? 1200 : 0}>{displayApp.profile_image_url ? null : initials}</AvatarFallback>
+                  <AvatarFallback className="bg-white/10 text-white text-2xl md:text-5xl font-semibold" delayMs={displayApp.profile_image_url ? 1200 : 0}>{initials}</AvatarFallback>
                 </Avatar>
 
               )}
