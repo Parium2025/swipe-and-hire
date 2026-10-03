@@ -27,7 +27,7 @@ export const EmptyJobsCta = ({ compact = false, hasPreviousJobs = false }: Empty
 
   return (
     <div className={`mx-auto w-full max-w-md text-center ${compact ? 'py-8' : 'py-12'}`}>
-      <div className="rounded-3xl border border-white/12 bg-white/[0.05] p-6 sm:p-8">
+      <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 sm:p-8">
         <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
           <Briefcase className="h-6 w-6 text-white" />
         </span>
