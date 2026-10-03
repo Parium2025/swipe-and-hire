@@ -29,6 +29,7 @@ import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
 import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
+import { fetchMyProfile } from '@/lib/myProfile';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -115,9 +116,11 @@ const CompanyReviews = () => {
   const { data: company, isLoading: companyLoading } = useQuery({
     queryKey: ['company-profile', reviewOwnerId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
+      const { data, error } = reviewOwnerId === user?.id
+        ? await fetchMyProfile()
+        : await supabase.from('profiles').select('*').eq('user_id', reviewOwnerId!).single();
       if (error) throw error;
-      const owner = data?.find(member => member.user_id === reviewOwnerId);
+      const owner = Array.isArray(data) ? data[0] : data;
       return owner ? {
         ...owner,
         company_social_media_links: (owner.company_social_media_links as unknown as SocialMediaLink[]) || [],
