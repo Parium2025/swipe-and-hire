@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useCreateConversation } from '@/hooks/useConversations';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -55,7 +54,6 @@ export function NewConversationDialog({
   onOpenChange,
   onConversationCreated,
 }: NewConversationDialogProps) {
-  const { user } = useAuth();
   const { teamMembers, isLoading: loadingTeam } = useTeamMembers();
   const { candidates, isLoading: loadingCandidates } = useMyCandidatesData();
   const createConversation = useCreateConversation();
