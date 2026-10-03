@@ -122,8 +122,11 @@ const clearAllAppCachesSync = () => {
     'parium_employer_jobs_v3_',
     'parium_employer_counts_v1_',
     'parium_employer_stats_v1_',
+    'parium_employer_counts_v2_',
+    'parium_employer_stats_v2_',
     'parium_profile_lite_v1_',
     'parium-employer-analytics:',
+    'candidate_apps_cache_v4_',
     // Inställningar och notifikationer (pass 11)
     'parium_notif_prefs_',
     'parium_auto_rules_cache',

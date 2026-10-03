@@ -449,6 +449,13 @@
       "when": 1790800913411,
       "tag": "0063_fix_interview_exclusion_status_column",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1791024816064,
+      "tag": "0064_align_report_job_activity_with_dashboard_expiry",
+      "breakpoints": true
     }
   ]
 }

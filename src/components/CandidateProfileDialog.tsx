@@ -9,7 +9,8 @@ import { SendMessageDialog } from '@/components/SendMessageDialog';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import { BookInterviewDialog } from '@/components/BookInterviewDialog';
 import { supabase } from '@/integrations/supabase/client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 import { prefetchExistingInterview } from '@/lib/existingInterviewQuery';
 import { toast } from 'sonner';
 import { useMediaUrl, prefetchMediaUrl } from '@/hooks/useMediaUrl';
@@ -150,6 +151,26 @@ export const CandidateProfileDialog = ({
 }: CandidateProfileDialogProps) => {
   const { user } = useAuth();
   const { hasTeam } = useTeamMembers();
+  const { data: colleagueRating } = useQuery({
+    queryKey: ['candidate-colleague-rating', user?.id, application?.applicant_id],
+    enabled: open && !!user?.id && !!application?.applicant_id,
+    staleTime: 30_000,
+    queryFn: async () => {
+      if (!user || !application?.applicant_id) return null;
+      const { data: role, error: roleError } = await supabase.from('user_roles')
+        .select('organization_id').eq('user_id', user.id).eq('is_active', true)
+        .not('organization_id', 'is', null).limit(1).maybeSingle();
+      if (roleError) throw roleError;
+      if (!role?.organization_id) return null;
+      const colleagues = (await getOrganizationMemberIds(role.organization_id)).filter(id => id !== user.id);
+      if (!colleagues.length) return null;
+      const { data, error } = await supabase.from('candidate_ratings')
+        .select('rating').eq('applicant_id', application.applicant_id)
+        .in('recruiter_id', colleagues).gt('rating', 0).order('updated_at', { ascending: false }).limit(1);
+      if (error) throw error;
+      return data?.[0]?.rating ?? null;
+    },
+  });
   const [questionsExpanded, setQuestionsExpanded] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'comments'>('activity');
   const [mobileTab, setMobileTab] = useState<'profile' | 'activity' | 'comments'>('profile');
@@ -803,7 +824,10 @@ export const CandidateProfileDialog = ({
 
               {onRatingChange && (
                 <div className="mt-2">
-                  <InteractiveStarRating rating={candidateRating} onChange={handleRatingChange} />
+                  {(!candidateRating && colleagueRating) && (
+                    <p className="text-xs text-white text-center mb-1">Tidigare betyg från kollega</p>
+                  )}
+                  <InteractiveStarRating rating={candidateRating || colleagueRating || 0} onChange={handleRatingChange} />
                 </div>
               )}
 

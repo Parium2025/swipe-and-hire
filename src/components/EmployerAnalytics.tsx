@@ -575,12 +575,12 @@ const EmployerAnalytics = memo(() => {
   const queryClient = useQueryClient();
   const [selectedDays, setSelectedDays] = useState<number | null>(() => readPersistedEmployerAnalyticsFilter());
   const overviewCacheKey = useMemo(
-    () => getEmployerAnalyticsCacheKey('overview', user?.id, selectedDays),
-    [user?.id, selectedDays],
+    () => getEmployerAnalyticsCacheKey('overview', user?.id, selectedDays, organization?.id),
+    [user?.id, selectedDays, organization?.id],
   );
   const advancedCacheKey = useMemo(
-    () => getEmployerAnalyticsCacheKey('advanced', user?.id, selectedDays),
-    [user?.id, selectedDays],
+    () => getEmployerAnalyticsCacheKey('advanced', user?.id, selectedDays, organization?.id),
+    [user?.id, selectedDays, organization?.id],
   );
   const cachedOverviewEntry = useMemo(
     () => readEmployerAnalyticsCacheEntry<AnalyticsData>(overviewCacheKey),
@@ -592,7 +592,7 @@ const EmployerAnalytics = memo(() => {
   );
 
   const { data: rawData, isLoading, isFetching, dataUpdatedAt, error: overviewError, refetch: refetchOverview } = useQuery({
-    queryKey: ['employer-analytics-v2', user?.id, selectedDays],
+    queryKey: ['employer-analytics-v2', user?.id, organization?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
       return fetchEmployerAnalyticsOverview(user.id, selectedDays);
@@ -605,7 +605,7 @@ const EmployerAnalytics = memo(() => {
   });
 
   const { data: advancedData } = useQuery({
-    queryKey: ['employer-advanced-analytics', user?.id, selectedDays],
+    queryKey: ['employer-advanced-analytics', user?.id, organization?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
       return fetchEmployerAnalyticsAdvanced(user.id, selectedDays);
@@ -619,8 +619,8 @@ const EmployerAnalytics = memo(() => {
 
 
   const teamCacheKey = useMemo(
-    () => getEmployerAnalyticsCacheKey('team', user?.id, selectedDays),
-    [user?.id, selectedDays],
+    () => getEmployerAnalyticsCacheKey('team', user?.id, selectedDays, organization?.id),
+    [user?.id, selectedDays, organization?.id],
   );
   const cachedTeamEntry = useMemo(
     () => readEmployerAnalyticsCacheEntry<TeamInsightsData>(teamCacheKey),
@@ -628,7 +628,7 @@ const EmployerAnalytics = memo(() => {
   );
 
   const { data: teamData } = useQuery({
-    queryKey: ['employer-team-insights', user?.id, selectedDays],
+    queryKey: ['employer-team-insights', user?.id, organization?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
       return fetchEmployerTeamInsights(user.id, selectedDays);

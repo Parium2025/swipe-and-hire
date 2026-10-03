@@ -24,7 +24,8 @@ export const getEmployerAnalyticsCacheKey = (
   scope: AnalyticsCacheScope,
   userId?: string,
   days?: number | null,
-) => `${EMPLOYER_ANALYTICS_CACHE_PREFIX}:${scope}:${userId ?? 'guest'}:${days ?? 'all'}`;
+  orgId?: string | null,
+) => `${EMPLOYER_ANALYTICS_CACHE_PREFIX}:${scope}:${userId ?? 'guest'}:${orgId ?? 'personal'}:${days ?? 'all'}`;
 
 /** Statistik äldre än detta kastas — vi visar hellre skelett än gamla siffror. */
 export const EMPLOYER_ANALYTICS_CACHE_TTL_MS = 6 * 60 * 60 * 1000;

@@ -136,7 +136,7 @@ export function useSecondaryPagesPrewarm() {
         rpc: string,
       ) => {
         try {
-          const key = getEmployerAnalyticsCacheKey(kind, userId, days);
+          const key = getEmployerAnalyticsCacheKey(kind, userId, days, profile?.organization_id);
           if (readEmployerAnalyticsCacheEntry(key)) return;
           const { data, error } = await supabase.rpc(rpc as never, params as never);
           if (!error && data) writeEmployerAnalyticsCache(key, data);
