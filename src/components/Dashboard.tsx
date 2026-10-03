@@ -25,6 +25,7 @@ import { saveScrollNow } from '@/lib/scrollRestoration';
 import { useJobPrefetch } from '@/hooks/useJobPrefetch';
 import { useAnimatedPageChange } from '@/hooks/useAnimatedPageChange';
 import { usePageImagePreparation } from '@/hooks/usePageImagePreparation';
+import { EmptyJobsCta } from '@/components/dashboard/EmptyJobsCta';
 
 type JobStatusTab = 'active' | 'expired' | 'draft';
 
@@ -376,9 +377,9 @@ const Dashboard = memo(() => {
       {/* Desktop: Card grid */}
       <div className="hidden md:block">
         {tabFilteredJobs.length === 0 ? (
-          <div className="text-center text-white py-12 font-medium text-sm">
-            {getEmptyMessage(searchTerm, activeTab)}
-          </div>
+          !searchTerm && activeTab === 'active' && serverCounts.active === 0 && serverCounts.expired === 0 && serverCounts.draft === 0
+            ? <EmptyJobsCta />
+            : <div className="text-center text-white py-12 font-medium text-sm">{getEmptyMessage(searchTerm, activeTab)}</div>
         ) : (
           <>
             <VirtualJobGrid
@@ -426,9 +427,9 @@ const Dashboard = memo(() => {
             ))}
           </div>
         ) : tabFilteredJobs.length === 0 ? (
-          <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center">
-            <span>{getEmptyMessage(searchTerm, activeTab)}</span>
-          </div>
+          !searchTerm && activeTab === 'active' && serverCounts.active === 0 && serverCounts.expired === 0 && serverCounts.draft === 0
+            ? <EmptyJobsCta compact />
+            : <div className="text-center text-white py-8 font-medium text-sm min-h-[40vh] flex items-center justify-center"><span>{getEmptyMessage(searchTerm, activeTab)}</span></div>
         ) : (
           <>
             <VirtualJobGrid
