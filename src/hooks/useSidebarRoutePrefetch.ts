@@ -10,6 +10,7 @@ import { prewarmJobTemplates } from '@/lib/jobTemplatesPrewarm';
 import { prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
 import { fetchMyProfile } from '@/lib/myProfile';
 import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 
 /**
  * Hover/touchstart-baserad route-prefetch för sidebar-länkar.
@@ -25,11 +26,13 @@ import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
 export function useSidebarRoutePrefetch() {
   const queryClient = useQueryClient();
   const { user, profile } = useAuth();
+  const { isAdmin } = useIsOrgAdmin();
   const orgId = (profile as any)?.organization_id ?? null;
   const prefetchedRef = useRef<Set<string>>(new Set());
 
   const prefetchRoute = useCallback((url: string) => {
     if (!user) return;
+    if (!isAdmin && (url === '/billing' || url === '/templates')) return;
 
     const key = `${user.id}::${url}`;
     if (prefetchedRef.current.has(key)) return;
