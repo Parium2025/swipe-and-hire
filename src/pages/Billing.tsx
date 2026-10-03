@@ -49,7 +49,7 @@ const Billing = () => {
   // för påhittade kort och fakturor.
   const { data: purchases = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['billing-purchases', user?.id],
-    enabled: !!user?.id,
+    enabled: !!user?.id && isAdmin,
     staleTime: 60_000,
     queryFn: async (): Promise<PurchaseRow[]> => {
       const { data, error } = await supabase

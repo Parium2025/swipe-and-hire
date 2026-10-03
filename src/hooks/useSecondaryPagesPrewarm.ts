@@ -7,6 +7,8 @@ import { prewarmEmployerSettings } from '@/lib/settingsPrewarm';
 import { prewarmJobTemplates } from '@/lib/jobTemplatesPrewarm';
 import { prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
 import { fetchMyProfile } from '@/lib/myProfile';
+import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import {
   getEmployerAnalyticsCacheKey,
   readEmployerAnalyticsCacheEntry,
@@ -31,8 +33,9 @@ import {
  */
 export function useSecondaryPagesPrewarm() {
   const queryClient = useQueryClient();
-  const { user, userRole } = useAuth();
+  const { user, userRole, profile } = useAuth();
   const isEmployer = userRole?.role === 'employer';
+  const { isAdmin } = useIsOrgAdmin();
   const userId = user?.id;
 
   useEffect(() => {
@@ -77,7 +80,7 @@ export function useSecondaryPagesPrewarm() {
           staleTime: 60_000,
         }).catch(() => { /* sidan hämtar själv */ });
       }
-      if (!queryClient.getQueryData(['billing-purchases', userId])) {
+      if (isEmployer && isAdmin && !queryClient.getQueryData(['billing-purchases', userId])) {
         void queryClient.prefetchQuery({
           queryKey: ['billing-purchases', userId],
           queryFn: async () => {
@@ -94,12 +97,14 @@ export function useSecondaryPagesPrewarm() {
 
       if (!isEmployer) return;
 
-      prewarmEmployerSettings(userId);
+      if (isAdmin) {
+        prewarmEmployerSettings(userId);
 
       // ── Mallar (/templates) ──
       // Listan låg tidigare helt utanför all förvärmning och gav skelett vid
       // varje kallstart. Samma query som sidan använder, samma cacheformat.
-      prewarmJobTemplates(userId);
+        prewarmJobTemplates(userId);
+      }
 
       // ── Omdömen (/reviews) ──
       // Sidan läser företagsprofilen (samma nyckel som dialogen) plus första
@@ -114,7 +119,8 @@ export function useSecondaryPagesPrewarm() {
           staleTime: 5 * 60 * 1000,
         }).catch(() => { /* sidan hämtar själv */ });
       }
-      await prewarmCompanyReviews(queryClient, userId);
+      const reviewOwnerId = await getOrganizationReviewOwnerId(userId, profile?.organization_id);
+      await prewarmCompanyReviews(queryClient, reviewOwnerId);
 
       // ── Statistik: fyll cachen om den är tom/utgången ──
       // Sidan har tre datakällor (översikt, avancerat, team). Tidigare värmdes
@@ -157,5 +163,5 @@ export function useSecondaryPagesPrewarm() {
 
     const id = window.setTimeout(() => { void run(); }, 600);
     return () => window.clearTimeout(id);
-  }, [userId, isEmployer, queryClient]);
+  }, [userId, isEmployer, isAdmin, queryClient, profile?.organization_id]);
 }

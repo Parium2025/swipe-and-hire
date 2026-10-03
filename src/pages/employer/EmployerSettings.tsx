@@ -13,7 +13,6 @@ import { PrivacyDataPanel } from '@/components/PrivacyDataPanel';
 import CalendarConnectionCard from '@/components/settings/CalendarConnectionCard';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Switch } from '@/components/ui/switch';
-import { Lock } from 'lucide-react';
 
 
 import EmployerAccountEmailPanel from '@/components/employer/settings/EmployerAccountEmailPanel';
@@ -126,8 +125,8 @@ const EmployerSettings = () => {
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
   // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
   useEffect(() => {
-    prewarmEmployerSettings(user?.id);
-  }, [user?.id]);
+    if (isAdmin) prewarmEmployerSettings(user?.id);
+  }, [user?.id, isAdmin]);
 
   useLayoutEffect(() => {
     if (location.pathname !== '/settings') {
@@ -227,15 +226,6 @@ const EmployerSettings = () => {
     }
   };
 
-  // Bolagsgemensamma flöden (mallar, regler, utskick) är låsta för rekryterare —
-  // bara admins får ändra dem, så att kandidater alltid möter samma röst.
-  const adminOnlyContent = (
-    <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-4">
-      <Lock className="h-4 w-4 shrink-0 text-white" aria-hidden="true" />
-      <p className="text-sm text-white">Den här inställningen är gemensam för hela företaget och kan bara ändras av en admin.</p>
-    </div>
-  );
-
   const sections: { value: string; label: string; content: React.ReactNode }[] = [
     {
       value: 'konto',
@@ -271,10 +261,10 @@ const EmployerSettings = () => {
         </div>
       ),
     },
-    {
+    ...(isAdmin ? [{
       value: 'automatiska-floden',
       label: 'Automatiska flöden',
-      content: !isAdmin ? adminOnlyContent : (
+      content: (
         <div className="space-y-6">
           <AutoMessagesPanel />
           <div className="space-y-3">
@@ -297,15 +287,15 @@ const EmployerSettings = () => {
     {
       value: 'manuella-besked',
       label: 'Mallar, regler & utskick',
-      content: !isAdmin ? adminOnlyContent : <MessageTemplatesSettings />,
-    },
+      content: <MessageTemplatesSettings />,
+    }] : []),
 
     {
       value: 'kalender',
       label: 'Kalender',
       content: <CalendarConnectionCard />,
     },
-    {
+    ...(isAdmin ? [{
       value: 'integritet',
       label: 'Dina uppgifter & integritet',
       content: <PrivacyDataPanel showDpaLink isEmployer />,
@@ -314,7 +304,7 @@ const EmployerSettings = () => {
       value: 'team',
       label: 'Teamet',
       content: <TeamManagement />,
-    },
+    }] : []),
   ];
 
   if (authLoading && !profile) {

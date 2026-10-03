@@ -5,6 +5,7 @@ import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrefetchApplications } from '@/hooks/usePrefetchApplications';
@@ -156,6 +157,7 @@ export function EmployerSidebar() {
     ? conversationsCtx.totalUnreadCount
     : 0;
   const { isPlatformAdmin } = useIsPlatformAdmin();
+  const { isAdmin } = useIsOrgAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -460,7 +462,7 @@ export function EmployerSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {businessNavItems.map((item) => (
+              {businessNavItems.filter(item => item.url !== '/billing' || isAdmin).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 

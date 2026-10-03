@@ -1,4 +1,3 @@
-import { fetchMyProfile } from '@/lib/myProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,6 +28,8 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
+import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
+import { fetchMyProfile } from '@/lib/myProfile';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -65,7 +66,7 @@ interface CompanyReview {
 }
 
 const CompanyReviews = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
@@ -87,7 +88,7 @@ const CompanyReviews = () => {
       if (error) throw error;
       setEditingReplyId(null);
       setReplyDraft('');
-      queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', reviewOwnerId] });
       toast({
         title: reply.trim() ? "Svar sparat" : "Svar borttaget",
         description: reply.trim() ? "Ditt svar visas nu under recensionen." : "Svaret har tagits bort.",
@@ -104,33 +105,28 @@ const CompanyReviews = () => {
     }
   };
 
-  // Fetch company data with React Query
+  const { data: reviewOwnerId, isLoading: ownerLoading } = useQuery({
+    queryKey: ['organization-review-owner', user?.id, profile?.organization_id],
+    queryFn: () => getOrganizationReviewOwnerId(user?.id ?? '', profile?.organization_id),
+    enabled: !!user?.id && !!profile,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Read the organization owner's shared company fields rather than a recruiter's invite-time copy.
   const { data: company, isLoading: companyLoading } = useQuery({
-    queryKey: ['company-profile', user?.id],
+    queryKey: ['company-profile', reviewOwnerId],
     queryFn: async () => {
-      if (!user?.id) return null;
-      
-      const { data: rows, error } = await fetchMyProfile();
-      const data = Array.isArray(rows) ? rows[0] ?? null : null;
-
-
-      if (error) {
-        console.error('Error fetching company data:', error);
-        toast({
-          title: "Fel",
-          description: "Kunde inte hämta företagsinformation.",
-          variant: "destructive"
-        });
-        return null;
-      }
-
-      return data ? {
-        ...data,
-        // Map the correct field names from profiles table
-        company_social_media_links: ((data as any).company_social_media_links as unknown as SocialMediaLink[]) || []
+      const { data, error } = reviewOwnerId === user?.id
+        ? await fetchMyProfile()
+        : await supabase.from('profiles').select('*').eq('user_id', reviewOwnerId!).single();
+      if (error) throw error;
+      const owner = Array.isArray(data) ? data[0] : data;
+      return owner ? {
+        ...owner,
+        company_social_media_links: (owner.company_social_media_links as unknown as SocialMediaLink[]) || [],
       } as CompanyProfile : null;
     },
-    enabled: !!user?.id,
+    enabled: !!reviewOwnerId,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -143,10 +139,10 @@ const CompanyReviews = () => {
     hasMore,
     loadMore,
     isLoadingMore,
-  } = useCompanyReviewsCache(user?.id ?? null);
+  } = useCompanyReviewsCache(reviewOwnerId ?? null);
   const reviews = (cachedReviews ?? []) as unknown as CompanyReview[];
 
-  const loading = companyLoading || reviewsLoading;
+  const loading = companyLoading || ownerLoading || reviewsLoading;
 
   // Snitt + antal är serverräknade över ALLA recensioner, inte bara hämtade sidor.
   const averageRating = reviewCount > 0 ? (avgRating ?? 0).toFixed(1) : "0";

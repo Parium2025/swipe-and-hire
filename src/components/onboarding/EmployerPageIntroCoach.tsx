@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { loadEmployerCoachState, saveEmployerCoachState, type CoachState } from '@/lib/onboardingState';
 
 /**
@@ -256,6 +257,7 @@ const EmployerPageIntroCoach = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useIsOrgAdmin();
   const isTouch = device !== 'desktop';
   const [replayToken, setReplayToken] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -320,7 +322,21 @@ const EmployerPageIntroCoach = () => {
     };
   }, [user?.id, authLoading]);
 
-  const config = useMemo(() => CONFIGS[location.pathname], [location.pathname]);
+  const tourPaths = useMemo(() => TOUR_PATHS.filter(path => isAdmin || path !== '/billing'), [isAdmin]);
+  const config = useMemo(() => {
+    if (!isAdmin && location.pathname === '/billing') return undefined;
+    if (!isAdmin && location.pathname === '/settings') return {
+      ...CONFIGS['/settings'],
+      title: 'Era personliga inställningar',
+      lines: () => ['Här finns era personliga aviseringar, kalender och kontoinställningar.'],
+      cta: { label: 'Öppna Support', path: '/support' },
+    };
+    if (!isAdmin && location.pathname === '/reports') return {
+      ...CONFIGS['/reports'],
+      cta: { label: 'Öppna Support', path: '/support' },
+    };
+    return CONFIGS[location.pathname];
+  }, [location.pathname, isAdmin]);
   const activeTourPath = useMemo(() => {
     try {
       return localStorage.getItem(ACTIVE_TOUR_KEY);
@@ -392,13 +408,13 @@ const EmployerPageIntroCoach = () => {
   }, []);
 
   const restartGuide = useCallback(() => {
-    startEmployerPageCoachTour(TOUR_PATHS[0]);
+    startEmployerPageCoachTour(tourPaths[0]);
     setVisible(false);
     window.setTimeout(() => {
       setReplayToken((t) => t + 1);
-      navigate(TOUR_PATHS[0]);
+      navigate(tourPaths[0]);
     }, 200);
-  }, [navigate]);
+  }, [navigate, tourPaths]);
 
   const backToOverview = useCallback(() => {
     markAllEmployerPageCoachesSeen();
@@ -423,8 +439,8 @@ const EmployerPageIntroCoach = () => {
   if (!config || alreadySeen) return null;
 
   const Icon = config.icon;
-  const currentTourIndex = TOUR_PATHS.indexOf(location.pathname as (typeof TOUR_PATHS)[number]);
-  const nextTourPath = currentTourIndex >= 0 ? TOUR_PATHS[currentTourIndex + 1] : undefined;
+  const currentTourIndex = tourPaths.indexOf(location.pathname as (typeof TOUR_PATHS)[number]);
+  const nextTourPath = currentTourIndex >= 0 ? tourPaths[currentTourIndex + 1] : undefined;
   const primaryPath = isGuidedTour ? nextTourPath : config.cta?.path;
   const primaryLabel = isGuidedTour
     ? nextTourPath
@@ -467,7 +483,7 @@ const EmployerPageIntroCoach = () => {
           {currentTourIndex >= 0 && (
             <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-white ring-1 ring-white/20">
               {currentTourIndex + 1}
-              <span className="font-normal text-white">av {TOUR_PATHS.length}</span>
+              <span className="font-normal text-white">av {tourPaths.length}</span>
             </span>
           )}
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">

@@ -38,6 +38,7 @@ import {
 import { resetEmployerPageCoachMarks } from "@/components/onboarding/EmployerPageIntroCoach";
 import { replayEmployerWelcomeCard } from "@/components/EmployerOnboardingTour";
 import { PariumLogoButton } from "@/components/PariumLogoButton";
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 
 import NotificationCenter from "@/components/NotificationCenter";
 import { TruncatedText } from "@/components/TruncatedText";
@@ -77,6 +78,7 @@ const dropdownItemClass = "flex items-center gap-2 cursor-pointer text-white hov
 const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
+  const { isAdmin } = useIsOrgAdmin();
   const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl, employerCountsReadyUserId } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -341,7 +343,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className={dropdownContentClass}>
-              {businessItems.map((item) => {
+              {businessItems.filter(item => item.url !== '/billing' || isAdmin).map((item) => {
                 const isActive = isActiveUrl(item.url);
                 return (
                   <DropdownMenuItem
