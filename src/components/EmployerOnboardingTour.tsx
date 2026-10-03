@@ -180,12 +180,12 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
         description:
           'Logga, beskrivning, bilder och recensioner. Det här är ert ansikte utåt i annonserna.',
       },
-      {
+      ...(isAdmin ? [{
         icon: CreditCard,
         title: 'Plan & fakturering',
         description:
           'Er plan, era kvitton och antal annonser. Ingen bindningstid — byt eller säg upp när ni vill.',
-      },
+      }] : []),
       {
         icon: HelpCircle,
         title: 'Support',
@@ -262,7 +262,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
                   <span className="font-semibold">Tips:</span> Parium-loggan längst upp till vänster
                   är er hem-knapp. På mobil och surfplatta öppnar ni hela menyn med ikonen bredvid
                   loggan — där finns Mina annonser, Kandidater, Meddelanden, Företagsprofil,
-                  Statistik, Fakturering och Inställningar. På dator ligger samma menyer i raden
+                  Statistik, {isAdmin ? 'Fakturering och ' : ''}Inställningar. På dator ligger samma menyer i raden
                   längst upp.
                 </p>
               </div>
@@ -298,7 +298,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
               </div>
 
               <div className="mt-6 space-y-3">
-                {shortcuts.map((item, index) => {
+                {shortcuts.filter(item => isAdmin || !['/billing', '/settings'].includes(item.path)).map((item, index) => {
                   const Icon = item.icon;
                   return (
                     <button
