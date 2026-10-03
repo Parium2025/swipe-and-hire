@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
+import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 
 export interface TeamMember {
   userId: string;
@@ -79,18 +80,10 @@ export function useTeamMembers() {
       if (!userRole?.organization_id) return [];
 
       // Get all active users in the same organization (excluding current user)
-      const { data: orgMembers, error: membersError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('organization_id', userRole.organization_id)
-        .eq('is_active', true)
-        .neq('user_id', user.id);
-
-      if (membersError) throw membersError;
-      if (!orgMembers || orgMembers.length === 0) return [];
+      const memberIds = (await getOrganizationMemberIds(userRole.organization_id)).filter(id => id !== user.id);
+      if (memberIds.length === 0) return [];
 
       // Get profile info for each team member
-      const memberIds = orgMembers.map(m => m.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('user_id, first_name, last_name, profile_image_url')
@@ -111,10 +104,10 @@ export function useTeamMembers() {
       return members;
     },
     enabled: !!user,
-    staleTime: Infinity, // Never refetch — realtime handles all updates
-    gcTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 60_000, // Revalidate membership even if a realtime event was missed.
+    gcTime: 5 * 60_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     // Instant load from localStorage cache
     initialData: () => {
       if (!user) return undefined;

@@ -1,6 +1,8 @@
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from '@/lib/utils';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { MEDIA_URL_TTL } from '@/lib/mediaPresets';
 
 type CompanyAvatarProps = {
   companyLogoUrl: string | null;
@@ -10,10 +12,13 @@ type CompanyAvatarProps = {
 };
 
 function CompanyAvatarBase({ companyLogoUrl, companyName, initials, className }: CompanyAvatarProps) {
+  // Företagsloggan går nu genom samma väg som profilbilder (cache + blob-cache)
+  const resolvedUrl = useMediaUrl(companyLogoUrl, 'company-logo', MEDIA_URL_TTL);
+
   return (
     <Avatar className={cn("h-10 w-10 ring-2 ring-white/20 transform-gpu", className)} style={{ contain: 'paint' }}>
       <AvatarImage
-        src={companyLogoUrl || ''}
+        src={resolvedUrl || companyLogoUrl || ''}
         alt={`${companyName || "Företag"} logotyp`}
       />
       <AvatarFallback fallbackType="company" className="bg-white/20 text-white font-semibold" delayMs={150}>

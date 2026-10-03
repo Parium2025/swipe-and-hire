@@ -110,10 +110,12 @@ export { SUMMARY_STORAGE_KEY, QUESTIONS_STORAGE_KEY, NOTES_STORAGE_KEY };
 
 // ─── Notes-specific helpers ─────────────────────────────────────────
 
-export const getPersistedNotes = (applicantId: string): CandidateNote[] | null => {
-  return getPersistedCacheValue<CandidateNote[]>(NOTES_STORAGE_KEY, applicantId);
+export const notesKey = (userId: string, applicantId: string) => `${userId}:${applicantId}`;
+
+export const getPersistedNotes = (userId: string, applicantId: string): CandidateNote[] | null => {
+  return getPersistedCacheValue<CandidateNote[]>(NOTES_STORAGE_KEY, notesKey(userId, applicantId));
 };
 
-export const setPersistedNotes = (applicantId: string, notes: CandidateNote[]) => {
-  setPersistedCacheValue(NOTES_STORAGE_KEY, applicantId, notes);
+export const setPersistedNotes = (userId: string, applicantId: string, notes: CandidateNote[]) => {
+  setPersistedCacheValue(NOTES_STORAGE_KEY, notesKey(userId, applicantId), notes);
 };

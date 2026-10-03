@@ -18,7 +18,7 @@ type ProfileLite = {
 };
 
 const CACHE_VERSION = 2;
-const PROFILE_TTL_MS = 15 * 60 * 1000;
+const PROFILE_TTL_MS = 2 * 60 * 1000;
 const memoryCache = new Map<string, { data: unknown; timestamp: number }>();
 const inFlight = new Map<string, Promise<unknown>>();
 const requestGeneration = new Map<string, number>();

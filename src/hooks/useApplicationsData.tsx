@@ -994,6 +994,8 @@ export const useApplicationsData = (
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
       queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-candidate-ratings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-colleague-rating', user?.id] });
     },
   });
 

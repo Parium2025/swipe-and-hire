@@ -1,11 +1,10 @@
 import { memo, useMemo, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Users, Info, Lightbulb, CalendarCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TruncatedText } from '@/components/ui/truncated-text';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
-
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 
 export interface TeamMemberStats {
   user_id: string;
@@ -41,31 +40,6 @@ const initialsOf = (name: string) =>
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || '?';
 
-/**
- * Teamets profilbilder lagras som filsökväg i databasen, inte som färdig adress.
- * Samma resolver som resten av appen används här, med permanenta lager
- * (initialer under, bild över) så inget hoppar när bilden är klar.
- */
-const TeamMemberAvatar = memo(({ path, name }: { path: string | null; name: string }) => {
-  const resolvedUrl = useMediaUrl(path || undefined, 'profile-image');
-  return (
-    <div className="relative h-8 w-8 rounded-full bg-white/10 overflow-hidden shrink-0 flex items-center justify-center">
-      <span className="text-[11px] font-semibold text-white">{initialsOf(name)}</span>
-      {resolvedUrl && (
-        <img
-          src={resolvedUrl}
-          alt=""
-          aria-hidden="true"
-          decoding="sync"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-    </div>
-  );
-});
-TeamMemberAvatar.displayName = 'TeamMemberAvatar';
-
-
 const InfoTip = memo(({ content }: { content: string }) => (
   <Popover modal>
     <PopoverTrigger asChild>
@@ -100,104 +74,87 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
   const traits = data?.top_traits ?? null;
 
   return (
-    <Card className="bg-white/5 border-white/10">
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex items-center gap-1.5 mb-1">
-          <Users className="h-4 w-4 text-white shrink-0" />
-          <h3 className="text-[15px] font-semibold text-white">Lär av varandra</h3>
-          <InfoTip content="Visar hur annonserna presterar per kollega i din organisation. Syftet är att se vad som fungerar bra och kopiera det – inte att ranka personer. Visningar är unika besökare. Intervjuer räknas på den kollega som bokat och håller intervjun, oavsett vem som äger annonsen. Chippet visar bokade intervjuer och hur många av dem som faktiskt hunnit genomföras (tiden har passerat och intervjun är varken avbokad eller nekad). Era egna visningar, ansökningar och intervjuer räknas aldrig med." />
+    <Card className="glass-panel border-white/10 overflow-hidden">
+      <CardHeader className="p-4 md:p-6 pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-white" />
+            <CardTitle className="text-lg font-semibold text-white">Teamets aktivitet</CardTitle>
+          </div>
+          <InfoTip content="Statistik över rekryterarnas aktivitet och resultat i rekryteringsverktyget." />
         </div>
-        <p className="text-[12px] text-white mb-4">
-          Så presterar er organisations annonser – per kollega under vald period.
-        </p>
-
-        <div className="space-y-2.5">
-          {visible.map((m, i) => {
-            const conv = m.views > 0 ? Math.round((m.applications / m.views) * 100) : 0;
-            const pct = Math.round((m.applications / maxApps) * 100);
+      </CardHeader>
+      <CardContent className="p-4 md:p-6 space-y-6">
+        <div className="space-y-4">
+          {visible.map((m) => {
+            const firstName = m.name.split(' ')[0] || 'Kollega';
+            const lastName = m.name.split(' ').slice(1).join(' ') || '';
             return (
-              <motion.div
-                key={m.user_id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.2) }}
-                className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <TeamMemberAvatar path={m.profile_image_url} name={m.name} />
-
-                  <div className="min-w-0 flex-1">
-                    <TruncatedText text={m.name} className="text-[13px] font-medium text-white" />
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-white">
-                      <span className="whitespace-nowrap">{m.jobs_count} annonser</span>
-                      <span aria-hidden className="text-white">·</span>
-                      <span className="whitespace-nowrap">{m.views} visningar</span>
-                      <span aria-hidden className="text-white">·</span>
-                      <span className="whitespace-nowrap">{m.applications} ansökningar</span>
-                      <span
-                        className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.10] px-2 py-0.5 font-medium"
-                        title={`${m.interviews} bokade intervjuer, varav ${m.interviews_completed ?? 0} genomförda`}
-                      >
-                        <CalendarCheck className="h-3 w-3 shrink-0" aria-hidden />
-                        {m.interviews} bokade
-                        <span aria-hidden className="text-white">/</span>
-                        {m.interviews_completed ?? 0} genomförda
-                      </span>
-                    </div>
+              <div key={m.user_id} className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <TeamMemberAvatar 
+                      profileImageUrl={m.profile_image_url} 
+                      firstName={firstName} 
+                      lastName={lastName}
+                      size="sm"
+                    />
+                    <TruncatedText text={m.name} className="text-white font-medium" />
                   </div>
-                  <span className="text-[13px] font-semibold text-white shrink-0">{conv}%</span>
-
+                  <span className="text-white/60 shrink-0">{m.applications} ansökningar</span>
                 </div>
-                <div className="mt-2 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-white/50 transition-all duration-700"
-                    style={{ width: `${Math.max(pct, 2)}%` }}
+                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(m.applications / maxApps) * 100}%` }}
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                   />
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
         {members.length > 5 && (
-          <div className="flex justify-center mt-3">
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              className="py-2 px-4 rounded-lg bg-white/[0.06] text-[12px] font-medium text-white hover:bg-white/[0.10] transition-colors active:scale-[0.97]"
-            >
-              {expanded ? 'Visa färre' : `Visa alla (${members.length})`}
-            </button>
-          </div>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full py-2 text-sm text-blue-400 hover:text-blue-300 transition-colors font-medium"
+          >
+            {expanded ? 'Visa färre' : `Visa alla ${members.length} medlemmar`}
+          </button>
         )}
 
-        {traits && traits.sample > 0 && (
-          <div className="mt-4 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Lightbulb className="h-3.5 w-3.5 text-white shrink-0" />
-              <p className="text-[13px] font-medium text-white">Vad era bästa annonser har gemensamt</p>
+        {traits && (
+          <div className="pt-4 border-t border-white/10 space-y-4">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-yellow-400" />
+              <h4 className="text-sm font-semibold text-white">Teaminsikter</h4>
             </div>
-            <p className="text-[12px] text-white leading-relaxed">
-              De {traits.sample} annonser som konverterar bäst har i snitt {traits.avg_conversion}% konvertering
-              {traits.avg_description_length > 0 && <> och en beskrivning på cirka {traits.avg_description_length} tecken</>}
-              {traits.best_day_of_week !== null && <> – flest av dem publicerades på {DAY_NAMES[traits.best_day_of_week]}</>}.
-            </p>
-            {traits.examples?.length > 0 && (
-              <ul className="mt-2 space-y-1">
-                {traits.examples.slice(0, 3).map((ex, idx) => (
-                  <li key={`${ex.title}-${idx}`} className="min-w-0">
-                    <TruncatedText
-                      text={`• ${ex.title} — ${ex.applications} ans. / ${ex.views} vis.`}
-                      className="text-[11px] text-white"
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-3 rounded-lg bg-white/5 space-y-1">
+                <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Bästa tid att publicera</p>
+                <p className="text-sm text-white">
+                  {traits.best_day_of_week !== null 
+                    ? `Era annonser får flest svar på ${DAY_NAMES[traits.best_day_of_week]}.`
+                    : 'För tidigt för att se trender.'}
+                </p>
+              </div>
+              
+              <div className="p-3 rounded-lg bg-white/5 space-y-1">
+                <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Konvertering</p>
+                <p className="text-sm text-white">
+                  {traits.avg_conversion > 0 
+                    ? `Teamets snitt är ${(traits.avg_conversion * 100).toFixed(1)}% från vy till ansökan.`
+                    : 'Ingen data för konvertering än.'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
   );
 });
-
 TeamInsightsSection.displayName = 'TeamInsightsSection';

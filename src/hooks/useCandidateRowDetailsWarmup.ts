@@ -5,6 +5,7 @@ import type { CandidateActivity, ActivityType } from '@/hooks/useCandidateActivi
 import { primeCandidateNotesCache } from '@/hooks/useCandidateNotes';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
 import { prewarmExistingInterviews } from '@/lib/existingInterviewQuery';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RowLike {
   applicant_id?: string | null;
@@ -26,6 +27,7 @@ interface RowLike {
 const MAX_ROWS = 60;
 
 export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enabled = true) {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const warmedRef = useRef<Set<string>>(new Set());
 
@@ -62,7 +64,7 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
   const warmedInterviewsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!enabled || applicantIds.length === 0) return;
+    if (!enabled || !user || applicantIds.length === 0) return;
 
     const conn = (navigator as unknown as {
       connection?: { saveData?: boolean; effectiveType?: string };
@@ -70,9 +72,9 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
     if (conn?.saveData) return;
     if (conn?.effectiveType && /(^|-)2g$/.test(conn.effectiveType)) return;
 
-    const pending = applicantIds.filter((id) => !warmedRef.current.has(id));
+    const pending = applicantIds.filter((id) => !warmedRef.current.has(`${user.id}:${id}`));
     if (pending.length === 0) return;
-    pending.forEach((id) => warmedRef.current.add(id));
+    pending.forEach((id) => warmedRef.current.add(`${user.id}:${id}`));
 
     let cancelled = false;
 
@@ -106,7 +108,7 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
           });
         }
         for (const [id, notes] of byApplicant) {
-          primeCandidateNotesCache(id, notes);
+          primeCandidateNotesCache(user.id, id, notes);
         }
       } catch { /* cache-warmup får aldrig störa UI */ }
 
@@ -183,5 +185,5 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, idsKey, queryClient]);
+  }, [enabled, idsKey, queryClient, user?.id]);
 }

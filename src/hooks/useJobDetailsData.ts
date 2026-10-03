@@ -8,7 +8,7 @@ import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/appli
 import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { syncProfileMediaVersions } from '@/lib/profileMediaVersions';
 import { chunk } from '@/lib/fetchAllPages';
-import { notesCache } from '@/components/candidateProfile/candidateProfileCache';
+import { notesCache, notesKey } from '@/components/candidateProfile/candidateProfileCache';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -651,7 +651,7 @@ export function useJobDetailsData(jobId: string | undefined) {
           // Noteringar ligger i en egen modulcache — släng posten för den
           // kandidat som ändrades så nästa öppning hämtar färskt.
           const row: any = payload.new || payload.old;
-          if (row?.applicant_id) notesCache.delete(row.applicant_id);
+          if (row?.applicant_id && user?.id) notesCache.delete(notesKey(user.id, row.applicant_id));
         }
       )
       .on(
