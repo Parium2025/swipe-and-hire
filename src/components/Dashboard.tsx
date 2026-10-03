@@ -42,7 +42,7 @@ const getEmptyMessage = (searchTerm: string, activeTab: JobStatusTab): string =>
 let __employerOrgDashboardHasMountedOnce = false;
 
 const Dashboard = memo(() => {
-  const { jobs: allJobs, stats, recruiters, isLoading, loadMore, hasMore, isLoadingMore } = useJobsData({ 
+  const { jobs: allJobs, stats, recruiters, isLoading, error: jobsError, refetch: retryJobs, loadMore, hasMore, isLoadingMore } = useJobsData({ 
     scope: 'organization',
     enableRealtime: true 
   });
@@ -376,7 +376,9 @@ const Dashboard = memo(() => {
 
       {/* Desktop: Card grid */}
       <div className="hidden md:block">
-        {tabFilteredJobs.length === 0 ? (
+        {jobsError && tabFilteredJobs.length === 0 ? (
+          <div className="text-center text-white py-12 font-medium text-sm">Kunde inte hämta annonserna. <button className="underline" onClick={() => void retryJobs()}>Försök igen</button></div>
+        ) : tabFilteredJobs.length === 0 ? (
           !searchTerm && !isLoading && serverCounts && activeTab === 'active' && serverCounts.total === 0
             ? <EmptyJobsCta />
             : <div className="text-center text-white py-12 font-medium text-sm">{getEmptyMessage(searchTerm, activeTab)}</div>
@@ -426,6 +428,8 @@ const Dashboard = memo(() => {
               </div>
             ))}
           </div>
+        ) : jobsError && tabFilteredJobs.length === 0 ? (
+          <div className="text-center text-white py-8 font-medium text-sm">Kunde inte hämta annonserna. <button className="underline" onClick={() => void retryJobs()}>Försök igen</button></div>
         ) : tabFilteredJobs.length === 0 ? (
           !searchTerm && !isLoading && serverCounts && activeTab === 'active' && serverCounts.total === 0
             ? <EmptyJobsCta compact />
