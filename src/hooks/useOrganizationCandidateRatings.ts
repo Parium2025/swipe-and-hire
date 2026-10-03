@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,8 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const idsKey = useMemo(() => [...new Set(applicantIds)].sort().join('|'), [applicantIds]);
+  const visibleIds = useRef<Set<string>>(new Set());
+  visibleIds.current = new Set(idsKey ? idsKey.split('|') : []);
   const queryKey = useMemo(() => ['organization-candidate-ratings', user?.id, idsKey], [user?.id, idsKey]);
 
   const { data, isSuccess } = useQuery({
@@ -52,18 +54,17 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
   });
 
   useEffect(() => {
-    if (!user || !idsKey) return;
-    const visible = new Set(idsKey.split('|'));
+    if (!user) return;
     const channel = createRealtimeChannel(`organization-candidate-ratings-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'candidate_ratings' }, payload => {
         const row = (payload.new ?? payload.old) as { applicant_id?: string };
-        if (!row.applicant_id || visible.has(row.applicant_id)) {
+        if (!row.applicant_id || visibleIds.current.has(row.applicant_id)) {
           queryClient.invalidateQueries({ queryKey: ['organization-candidate-ratings', user.id] });
           queryClient.invalidateQueries({ queryKey: ['candidate-colleague-rating', user.id] });
         }
       }).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user?.id, idsKey, queryClient]);
+  }, [user?.id, queryClient]);
 
   return isSuccess ? data ?? {} : {};
 }

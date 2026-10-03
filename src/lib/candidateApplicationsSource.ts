@@ -224,11 +224,11 @@ export async function getCandidateJobScope(userId: string): Promise<JobScope> {
   }
   const promise = loadJobScope(userId)
     .then((scope) => {
-      jobScopeCache = { userId, at: Date.now(), scope };
+      if (jobScopeInFlight?.promise === promise) jobScopeCache = { userId, at: Date.now(), scope };
       return scope;
     })
     .finally(() => {
-      jobScopeInFlight = null;
+      if (jobScopeInFlight?.promise === promise) jobScopeInFlight = null;
     });
   jobScopeInFlight = { userId, promise };
   return promise;
