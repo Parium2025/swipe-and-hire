@@ -596,7 +596,7 @@ const JobDetails = () => {
       }));
     if (rows.length === 0) return;
     const { error } = await supabase.from('candidate_activities').insert(rows);
-    if (!error) rows.forEach(r => queryClient.invalidateQueries({ queryKey: ['candidate-activities', r.applicant_id] }));
+    if (!error) rows.forEach(r => queryClient.invalidateQueries({ queryKey: ['candidate-activities', uid, r.applicant_id] }));
   }, [applications, job?.title, jobId, queryClient]);
 
   const confirmReject = useCallback(async () => {
