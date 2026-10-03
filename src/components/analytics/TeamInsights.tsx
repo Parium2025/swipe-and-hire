@@ -74,7 +74,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
   const traits = data?.top_traits ?? null;
 
   return (
-    <Card className="glass-panel border-white/10 overflow-hidden">
+    <Card className="bg-white/5 border-white/10 overflow-hidden">
       <CardHeader className="p-4 md:p-6 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ TeamInsightsSection.displayName = 'TeamInsightsSection';
 /* Statisk platshållare som visar kortets struktur medan RPC:n laddar.
    Sidans nederdel får aldrig ligga tomt och "poppa in" vid kallstart. */
 export const TeamInsightsSectionSkeleton = memo(() => (
-  <Card className="glass-panel border-white/10 overflow-hidden" aria-hidden>
+  <Card className="bg-white/5 border-white/10 overflow-hidden" aria-hidden>
     <CardHeader className="p-4 md:p-6 pb-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
