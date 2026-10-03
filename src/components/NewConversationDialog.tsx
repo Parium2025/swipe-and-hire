@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import { 
   Search, 
+  Check,
   Users, 
   Loader2,
   MessageSquare,
@@ -124,7 +124,7 @@ export function NewConversationDialog({
   };
 
   const handleCreate = async () => {
-    if (selectedContacts.length === 0) return;
+    if (selectedContactObjects.length === 0) return;
 
     try {
       // For single candidate selection, include applicationId for frozen profile
@@ -270,10 +270,10 @@ export function NewConversationDialog({
                 </div>
               )}
         </ScrollArea>
-        {selectedContacts.length > 0 && (
+        {selectedContactObjects.length > 0 && (
           <div className="space-y-3 shrink-0 border-t border-border pt-3">
             <p className="text-sm text-pure-white break-words">
-              {isGroup ? `${selectedContacts.length} valda` : getDisplayName(selectedContactObjects[0])}
+              {isGroup ? `${selectedContactObjects.length} valda` : getDisplayName(selectedContactObjects[0])}
             </p>
             {isGroup && (
               <Input
@@ -295,7 +295,7 @@ export function NewConversationDialog({
         )}
         <div className="flex justify-end gap-2 shrink-0 border-t border-border pt-3">
           <Button variant="ghost" onClick={handleClose} className="text-pure-white">Avbryt</Button>
-          <Button variant="glassBlue" onClick={handleCreate} disabled={selectedContacts.length === 0 || createConversation.isPending} className="text-pure-white">
+          <Button variant="glassBlue" onClick={handleCreate} disabled={selectedContactObjects.length === 0 || createConversation.isPending} className="text-pure-white">
             {createConversation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             {isGroup ? 'Skapa grupp' : 'Starta chatt'}
           </Button>
@@ -338,12 +338,9 @@ function ContactItem({
           : "border-transparent md:hover:bg-card"
       )}
     >
-      <Checkbox
-        checked={isSelected}
-        tabIndex={-1}
-        aria-hidden="true"
-        className="h-4 w-4 shrink-0 border-pure-white data-[state=checked]:bg-primary data-[state=checked]:border-primary pointer-events-none"
-      />
+      <span aria-hidden="true" className={cn("h-4 w-4 shrink-0 rounded-sm border border-pure-white flex items-center justify-center", isSelected && "bg-primary border-primary")}>
+        {isSelected && <Check className="h-3 w-3 text-pure-white" />}
+      </span>
       
       <ResolvedAvatar
         src={contact.profileImageUrl}
