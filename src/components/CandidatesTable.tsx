@@ -527,15 +527,15 @@ export function CandidatesTable({
     if (!info || info.length === 0) return null;
     
     const avgRating = info.reduce((sum, c) => sum + c.rating, 0) / info.length;
-    const colleagues = info.filter(c => c.recruiter_name !== 'Du');
+    const colleagues = info.filter(c => c.recruiter_id !== user?.id);
     
     return {
       avgRating: Math.round(avgRating * 10) / 10,
       maxRating: Math.max(...info.map(c => c.rating)),
-      colleagues: colleagues.map(c => c.recruiter_name),
+      colleagues: [...new Set(colleagues.map(c => c.recruiter_name))],
       count: info.length,
     };
-  }, [teamCandidates]);
+  }, [teamCandidates, user?.id]);
 
   const getDisplayRating = useCallback((application: ApplicationData) => {
     const shared = organizationRatings[application.applicant_id];
@@ -876,13 +876,13 @@ export function CandidatesTable({
                             {teamInfo && teamInfo.colleagues.length > 0 && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
+                                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor`} onClick={(event) => event.stopPropagation()} className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30">
                                     <Users className="h-3 w-3 text-purple-300" />
                                     <span className="text-[10px] text-purple-300 font-medium">{teamInfo.colleagues.length}</span>
-                                  </div>
+                                  </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
-                                  <p className="text-xs">Tillagd av: {teamInfo.colleagues.join(', ')}</p>
+                                  <div className="text-xs"><p>Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
                                 </TooltipContent>
                               </Tooltip>
                             )}

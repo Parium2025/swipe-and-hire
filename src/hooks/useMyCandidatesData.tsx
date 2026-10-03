@@ -535,6 +535,7 @@ export function useMyCandidatesData(
           // Fallback: refetch for other changes (insert/delete/unknown updates)
           // This catches changes made by colleagues that affect shared data
           queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user.id] });
         }
       )
       .subscribe();
@@ -775,6 +776,7 @@ export function useMyCandidatesData(
         addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
       toast.success('Kandidat tillagd i din lista', { route: '/my-candidates' } as Parameters<typeof toast.success>[1]);

@@ -117,6 +117,8 @@ const clearAllAppCachesSync = () => {
     // utloggning på delade datorer. Måste rensas som allt annat kontodata.
     'parium_my_candidates_v2_',
     'parium_colleague_candidates_v1_',
+    'parium_applicant_membership_v1_',
+    'media_url_',
     'parium_job_apps_v2_',
     'parium_job_detail_v2_',
     'parium_employer_jobs_v3_',
@@ -178,6 +180,7 @@ const clearAllAppCachesSync = () => {
     'parium_employer_candidates',
     'parium_my_candidates',
     'parium_company_reviews_count',
+    'org_id',
   ];
   
   try {
