@@ -50,3 +50,4 @@
 - [x] Check late-appearing unread notifications against their saved timestamp and ensure the bell retains its known state across a day; verify candidate-list loading boundaries
 - [ ] Keep known notification state across long returns and update live without crossing accounts; audit auth switches and key role flows
 - [ ] Fix clipped news text on dashboard without changing its visual design; verify on employer and job-seeker views
+- [x] Keep chat tabs, search and new-conversation action mounted while the inbox loads on cold start

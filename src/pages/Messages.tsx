@@ -28,8 +28,8 @@ import {
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { EmployerMessagesSkeleton } from '@/components/employer/EmployerPageSkeleton';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const TAB_STORAGE_KEY = 'parium:messages:tab';
@@ -65,20 +65,6 @@ export default function Messages() {
   const refetch = conversationsCtx?.refetch ?? (() => {});
 
 
-  // Instant render when conversations are already cached, fade-in only on cold load
-  const [showContentFade, setShowContentFade] = useState(() => !isLoading);
-  const dataWasCached = useRef(!isLoading);
-  useEffect(() => {
-    if (!isLoading && !showContentFade) {
-      if (dataWasCached.current) {
-        setShowContentFade(true);
-      } else {
-        const timer = setTimeout(() => setShowContentFade(true), 100);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [isLoading, showContentFade]);
-
   // Cacha antalet så skeleton kan rendera exakt lika många rader nästa cold-load.
   useEffect(() => {
     if (!isLoading) writeCachedCount(SKELETON_COUNT_KEYS.messages, conversations.length);
@@ -110,7 +96,10 @@ export default function Messages() {
       return map;
     },
   });
-  const { hasTeam } = useTeamMembers();
+  const { hasTeam, isLoading: isTeamLoading } = useTeamMembers();
+  // The employer's controls must not wait for the inbox or a first-time team lookup.
+  // A cached team result is used immediately; unresolved membership keeps the row in place.
+  const showTeamControls = hasTeam || (userRole?.role === 'employer' && isTeamLoading);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -202,11 +191,11 @@ export default function Messages() {
   // Öppnas ett samtal från annan flik (deep-link/ny chatt) — hoppa dit automatiskt
   // så att listan aldrig ser tom ut medan chatten är öppen.
   useEffect(() => {
-    if (!hasTeam || !selectedConversation) return;
+    if (!showTeamControls || !selectedConversation) return;
     const category = categorizeConversation(selectedConversation);
     setActiveTab((prev) => (prev === category ? prev : category));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedConversation?.id, hasTeam]);
+  }, [selectedConversation?.id, showTeamControls]);
 
   const candidateUnread = candidateConversations.reduce((sum, c) => sum + c.unread_count, 0);
   const colleagueUnread = colleagueConversations.reduce((sum, c) => sum + c.unread_count, 0);
@@ -379,26 +368,9 @@ export default function Messages() {
     }, MOBILE_SLIDE_MS);
   };
 
-  // Visa skelett när context fortfarande hämtar och vi saknar cachad data
-  const hasData = conversations.length > 0;
-  const showSkeleton = isLoading && !hasData;
-
-  if (!showContentFade) {
-    return (
-      <div className="flex-1 min-h-0 flex flex-col opacity-0 messages-container overflow-x-hidden">
-        {/* Invisible placeholder to prevent layout shift */}
-      </div>
-    );
-  }
-
-  if (showSkeleton) {
-    return (
-      <EmployerMessagesSkeleton
-        audience={userRole?.role === 'employer' ? 'employer' : 'job_seeker'}
-        hasTeam={hasTeam}
-      />
-    );
-  }
+  // Keep the actual header, tabs and search mounted during a cold inbox fetch.
+  // Only the list body waits for conversations, avoiding a late button/text jump.
+  const showSkeleton = isLoading && conversations.length === 0;
 
 
   return (
@@ -425,7 +397,7 @@ export default function Messages() {
 
         </div>
 
-        {hasTeam && (
+        {showTeamControls && (
           <Button
             variant="glass"
             onClick={() => setShowNewConversation(true)}
@@ -465,7 +437,7 @@ export default function Messages() {
           isMobile ? "w-full" : "w-80 lg:w-96"
         )}>
           <div className="flex-shrink-0">
-            {hasTeam ? (
+            {showTeamControls ? (
               <div
                 onTouchStart={(e) => { tabSwipeStartX.current = e.touches[0].clientX; }}
                 onTouchEnd={(e) => {
@@ -524,7 +496,19 @@ export default function Messages() {
 
           {/* Conversation list */}
           <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10" style={{ contain: 'layout paint' }}>
-            {showEmptyConversationList ? (
+            {showSkeleton ? (
+              <div className="p-2" aria-label="Laddar chattar">
+                {[0, 1, 2].map((index) => (
+                  <div key={index} className="flex h-[76px] items-center gap-3 p-3">
+                    <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-2/5" />
+                      <Skeleton className="h-3 w-3/5" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : showEmptyConversationList ? (
               <div className="h-full flex items-center justify-center">
                 <EmptyConversationList
                   hasSearch={!!searchQuery.trim()}
