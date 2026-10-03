@@ -11,6 +11,8 @@
 - Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Read shared review branding through the trimmed public-profile RPC under its own cache key; full profile rows are private and unavailable to colleagues.
+- Active org colleagues may read only each other's current profile image via `can_view_colleague_profile_image`; never widen it to originals, CVs or videos.
+- Upgrade candidate portraits from thumbnail to full size only after the full image decodes, so initials never flash between them.
 - Reports refresh team portraits on authorized profile-change signals; keep cached report data scoped to the signed-in account.
 - Scope report snapshots to both the user and organization; trust server job counts instead of locally adding application events already reflected by database triggers.
 - Resolve colleague-owned candidate application history through the authorized organization-member RPC; user_roles SELECT alone exposes only the caller.
