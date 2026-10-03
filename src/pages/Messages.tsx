@@ -386,7 +386,7 @@ export default function Messages() {
         style={{ transitionDuration: `${MOBILE_SLIDE_MS}ms` }}
         aria-hidden={showMobileChat && isMobile}
       >
-        <div className="flex items-center justify-center relative">
+        <div className="flex items-center justify-between gap-3 relative sm:justify-center">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-white" />
@@ -399,11 +399,12 @@ export default function Messages() {
 
         {showTeamControls && (
           <Button
-            variant="glass"
+            variant="glassBlue"
             onClick={() => setShowNewConversation(true)}
-            className="absolute right-0 bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30"
+            className="shrink-0 h-10 px-4 text-pure-white sm:absolute sm:right-0 md:hover:bg-primary/30"
+            aria-label="Ny konversation"
           >
-            <Plus className="h-4 w-4 mr-1.5" />
+            <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Ny konversation</span>
             <span className="sm:hidden">Ny</span>
           </Button>
