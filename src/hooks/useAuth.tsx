@@ -225,17 +225,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialisera från sessionStorage för omedelbar visning (som arbetsgivarsidan)
   const [preloadedAvatarUrl, setPreloadedAvatarUrl] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
+      return typeof window !== 'undefined' ? localStorage.getItem(AVATAR_CACHE_KEY) : null;
     } catch { return null; }
   });
   const [preloadedCoverUrl, setPreloadedCoverUrl] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? sessionStorage.getItem(COVER_CACHE_KEY) : null;
+      return typeof window !== 'undefined' ? localStorage.getItem(COVER_CACHE_KEY) : null;
     } catch { return null; }
   });
   const [preloadedVideoUrl, setPreloadedVideoUrl] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? sessionStorage.getItem(VIDEO_CACHE_KEY) : null;
+      return typeof window !== 'undefined' ? localStorage.getItem(VIDEO_CACHE_KEY) : null;
     } catch { return null; }
   });
   const [preloadedTotalJobs, setPreloadedTotalJobs] = useState<number>(() => {
@@ -340,6 +340,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const currentUserIdRef = useRef<string | null>(null);
   // Avoid doing heavy localStorage sweeps during the very first paint on /auth.
   const didInitialLoggedOutCleanupRef = useRef(false);
+
+  // 🔄 Synka profil och media mellan tabbar när localStorage ändras
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === CACHED_PROFILE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed?.user_id === currentUserIdRef.current) {
+            setProfile(parsed);
+          }
+        } catch {}
+      }
+      if (e.key === AVATAR_CACHE_KEY) setPreloadedAvatarUrl(e.newValue);
+      if (e.key === COVER_CACHE_KEY) setPreloadedCoverUrl(e.newValue);
+      if (e.key === VIDEO_CACHE_KEY) setPreloadedVideoUrl(e.newValue);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
   const isRecoveringSessionRef = useRef(false); // 🛡️ Guard against concurrent recovery attempts
  
   // Håll en ref i synk med state så att async login kan läsa korrekt värde
@@ -644,9 +663,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setPreloadedCoverUrl(null);
             setPreloadedVideoUrl(null);
             try {
-              sessionStorage.removeItem(AVATAR_CACHE_KEY);
-              sessionStorage.removeItem(COVER_CACHE_KEY);
-              sessionStorage.removeItem(VIDEO_CACHE_KEY);
+              localStorage.removeItem(AVATAR_CACHE_KEY);
+              localStorage.removeItem(COVER_CACHE_KEY);
+              localStorage.removeItem(VIDEO_CACHE_KEY);
               sessionStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);
               sessionStorage.removeItem(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);
               localStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);
@@ -718,9 +737,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setPreloadedCoverUrl(null);
           setPreloadedVideoUrl(null);
           try {
-            sessionStorage.removeItem(AVATAR_CACHE_KEY);
-            sessionStorage.removeItem(COVER_CACHE_KEY);
-            sessionStorage.removeItem(VIDEO_CACHE_KEY);
+            localStorage.removeItem(AVATAR_CACHE_KEY);
+            localStorage.removeItem(COVER_CACHE_KEY);
+            localStorage.removeItem(VIDEO_CACHE_KEY);
           } catch {}
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
           scheduleLoggedOutCacheClear(event);
@@ -938,10 +957,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             // Spara till sessionStorage (som arbetsgivarsidan)
             try {
-              if (avatarUrl) sessionStorage.setItem(AVATAR_CACHE_KEY, avatarUrl);
-              else sessionStorage.removeItem(AVATAR_CACHE_KEY);
-              if (coverUrl) sessionStorage.setItem(COVER_CACHE_KEY, coverUrl);
-              else sessionStorage.removeItem(COVER_CACHE_KEY);
+              if (avatarUrl) localStorage.setItem(AVATAR_CACHE_KEY, avatarUrl);
+              else localStorage.removeItem(AVATAR_CACHE_KEY);
+              if (coverUrl) localStorage.setItem(COVER_CACHE_KEY, coverUrl);
+              else localStorage.removeItem(COVER_CACHE_KEY);
               if (companyLogoUrl) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, companyLogoUrl);
             } catch {}
             
@@ -958,7 +977,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   if (videoUrl) {
                     // Spara till state OCH sessionStorage
                     setPreloadedVideoUrl(videoUrl);
-                    try { sessionStorage.setItem(VIDEO_CACHE_KEY, videoUrl); } catch {}
+                    try { localStorage.setItem(VIDEO_CACHE_KEY, videoUrl); } catch {}
                     
                     // Notera: imageCache hoppar över videofiler automatiskt
                   }
@@ -1897,7 +1916,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setPreloadedAvatarUrl(null);
         try {
-          sessionStorage.removeItem(AVATAR_CACHE_KEY);
+          localStorage.removeItem(AVATAR_CACHE_KEY);
           localStorage.removeItem(CACHED_PROFILE_KEY);
         } catch {
           // ignore cache cleanup failures
@@ -1908,7 +1927,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const freshAvatarUrl = await getMediaUrl(nextProfileImage, 'profile-image', 86400);
           if (freshAvatarUrl) {
             setPreloadedAvatarUrl(freshAvatarUrl);
-            try { sessionStorage.setItem(AVATAR_CACHE_KEY, freshAvatarUrl); } catch {}
+            try { localStorage.setItem(AVATAR_CACHE_KEY, freshAvatarUrl); } catch {}
           }
           void prefetchMediaUrl(nextProfileImage, 'profile-image').catch(() => {});
         }
@@ -1929,7 +1948,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setPreloadedCoverUrl(null);
         try {
-          sessionStorage.removeItem(COVER_CACHE_KEY);
+          localStorage.removeItem(COVER_CACHE_KEY);
           localStorage.removeItem(CACHED_PROFILE_KEY);
         } catch {
           // ignore cache cleanup failures
@@ -1940,7 +1959,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const freshCoverUrl = await getMediaUrl(nextCoverImage, 'cover-image', 86400);
           if (freshCoverUrl) {
             setPreloadedCoverUrl(freshCoverUrl);
-            try { sessionStorage.setItem(COVER_CACHE_KEY, freshCoverUrl); } catch {}
+            try { localStorage.setItem(COVER_CACHE_KEY, freshCoverUrl); } catch {}
           }
           void prefetchMediaUrl(nextCoverImage, 'cover-image').catch(() => {});
         }

@@ -1,15 +1,13 @@
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Loader2, Check, Users } from 'lucide-react';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { AVATAR_TRANSFORM, MEDIA_URL_TTL } from '@/lib/mediaPresets';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 
 interface ShareCandidateDialogProps {
   open: boolean;
@@ -18,17 +16,6 @@ interface ShareCandidateDialogProps {
   applicationId: string;
   jobId: string | null;
   candidateName: string;
-}
-
-function TeamMemberAvatar({ imageUrl }: { imageUrl: string | null }) {
-  // Liten avatar (40px) → be om optimerad version
-  const resolvedUrl = useMediaUrl(imageUrl, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
-  return (
-    <Avatar className="h-10 w-10">
-      <AvatarImage src={resolvedUrl || ''} />
-      <AvatarFallback className="bg-white/10 text-white" delayMs={150}>?</AvatarFallback>
-    </Avatar>
-  );
 }
 
 export function ShareCandidateDialog({
@@ -120,7 +107,12 @@ export function ShareCandidateDialog({
                     className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <TeamMemberAvatar imageUrl={member.profileImageUrl} />
+                      <TeamMemberAvatar 
+                        profileImageUrl={member.profileImageUrl} 
+                        firstName={member.firstName} 
+                        lastName={member.lastName}
+                        size="md" 
+                      />
                       <TruncatedText text={fullName} className="text-white font-medium" />
                     </div>
                     <Button

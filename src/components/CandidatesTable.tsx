@@ -10,6 +10,7 @@ import { useMyCandidatesData } from '@/hooks/useMyCandidatesData';
 import { useApplicantMembership } from '@/hooks/useApplicantMembership';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamCandidateInfo } from '@/hooks/useTeamCandidateInfo';
+import { useOrganizationCandidateRatings } from '@/hooks/useOrganizationCandidateRatings';
 import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueListDialog';
 import { useCandidateLists } from '@/hooks/useCandidateLists';
 import { UserPlus, UserCheck, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
@@ -164,6 +165,7 @@ export function CandidatesTable({
   // Team candidate info
   const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
   const { teamCandidates } = useTeamCandidateInfo(applicationIds);
+  const organizationRatings = useOrganizationCandidateRatings(visibleApplicantIds);
   
   // Team selection dialog state
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
@@ -181,7 +183,7 @@ export function CandidatesTable({
     // Anteckningarna måste värmas via hookens egen cache — dialogen läser
     // INTE React Query för dem, så en prefetchQuery här gav ett bortkastat
     // anrop och dialogen laddade ändå om vid öppning.
-    prefetchCandidateNotes(application.applicant_id);
+    prefetchCandidateNotes(application.applicant_id, user.id);
 
     // Dialogen visar porträttet UTAN transform (full storlek). Listan värmer bara
     // avatar-varianten, så utan detta hämtades och avkodades bilden först när
@@ -536,10 +538,15 @@ export function CandidatesTable({
   }, [teamCandidates]);
 
   const getDisplayRating = useCallback((application: ApplicationData) => {
-    if (application.rating !== undefined && application.rating !== null) return application.rating;
+    const shared = organizationRatings[application.applicant_id];
+    // Ett eget betyg har alltid företräde; annars visas kollegans betyg även
+    // när kandidaten inte har lagts till i någons personliga kandidatlista.
+    if (shared?.own !== undefined) return shared.own;
+    if (application.rating) return application.rating;
+    if (shared?.colleague !== undefined) return shared.colleague;
     const teamInfo = getTeamInfo(application.id);
     return teamInfo?.maxRating || 0;
-  }, [getTeamInfo]);
+  }, [getTeamInfo, organizationRatings]);
 
   // Sort applications
   const sortedApplications = useMemo(() => {

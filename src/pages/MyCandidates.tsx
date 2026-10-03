@@ -608,7 +608,7 @@ const MyCandidates = () => {
     prefetchCandidateActivities(queryClient, candidate.applicant_id, user.id);
     // prefetchCandidateNotes skriver till samma cache som dialogen läser;
     // den tidigare extra React Query-prefetchen lästes aldrig och togs bort.
-    prefetchCandidateNotes(candidate.applicant_id);
+    prefetchCandidateNotes(candidate.applicant_id, user.id);
   }, [user, queryClient]);
 
 

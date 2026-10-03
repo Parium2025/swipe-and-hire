@@ -31,18 +31,19 @@ describe("candidateProfileCache", () => {
   });
 
   it("håller anteckningar isolerade per kandidat", () => {
-    setPersistedNotes("kand-1", [note("a")]);
-    setPersistedNotes("kand-2", [note("b"), note("c")]);
-    expect(getPersistedNotes("kand-1")).toHaveLength(1);
-    expect(getPersistedNotes("kand-2")).toHaveLength(2);
-    expect(getPersistedNotes("kand-3")).toBeNull();
+    setPersistedNotes("user-1", "kand-1", [note("a")]);
+    setPersistedNotes("user-1", "kand-2", [note("b"), note("c")]);
+    expect(getPersistedNotes("user-1", "kand-1")).toHaveLength(1);
+    expect(getPersistedNotes("user-1", "kand-2")).toHaveLength(2);
+    expect(getPersistedNotes("user-1", "kand-3")).toBeNull();
+    expect(getPersistedNotes("user-2", "kand-1")).toBeNull();
   });
 
   it("överlever trasig localStorage-data utan att krascha", () => {
     localStorage.setItem(NOTES_STORAGE_KEY, "{trasig json");
-    expect(getPersistedNotes("kand-1")).toBeNull();
-    setPersistedNotes("kand-1", [note("a")]);
-    expect(getPersistedNotes("kand-1")).toHaveLength(1);
+    expect(getPersistedNotes("user-1", "kand-1")).toBeNull();
+    setPersistedNotes("user-1", "kand-1", [note("a")]);
+    expect(getPersistedNotes("user-1", "kand-1")).toHaveLength(1);
   });
 
   it("beskär cachen till max antal poster och behåller de nyaste", () => {

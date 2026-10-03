@@ -17,6 +17,7 @@ import {
   notesCache,
   getPersistedNotes,
   setPersistedNotes,
+  notesKey,
 } from '@/components/candidateProfile/candidateProfileCache';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
 
@@ -49,13 +50,14 @@ async function fetchNotesForApplicant(id: string): Promise<CandidateNote[]> {
  * Prefetch notes on hover/touch so the Anteckningar-tab opens with data already
  * in the same cache the hook reads from (memory → localStorage → DB).
  */
-export function prefetchCandidateNotes(applicantId: string | null | undefined): void {
-  if (!applicantId) return;
-  if (notesCache.has(applicantId)) return;
+export function prefetchCandidateNotes(applicantId: string | null | undefined, userId: string | undefined): void {
+  if (!applicantId || !userId) return;
+  const key = notesKey(userId, applicantId);
+  if (notesCache.has(key)) return;
   fetchNotesForApplicant(applicantId)
     .then((fresh) => {
-      notesCache.set(applicantId, fresh);
-      setPersistedNotes(applicantId, fresh);
+      notesCache.set(key, fresh);
+      setPersistedNotes(userId, applicantId, fresh);
     })
     .catch(() => { /* cache stays cold — the dialog fetches on open */ });
 }
@@ -65,10 +67,10 @@ export function prefetchCandidateNotes(applicantId: string | null | undefined): 
  * hooken läser. Utan detta hamnade listans batch-hämtning i React Query, där
  * ingen läste den — anteckningarna laddades ändå om när dialogen öppnades.
  */
-export function primeCandidateNotesCache(applicantId: string, notes: CandidateNote[]): void {
-  if (!applicantId) return;
-  notesCache.set(applicantId, notes);
-  setPersistedNotes(applicantId, notes);
+export function primeCandidateNotesCache(userId: string, applicantId: string, notes: CandidateNote[]): void {
+  if (!applicantId || !userId) return;
+  notesCache.set(notesKey(userId, applicantId), notes);
+  setPersistedNotes(userId, applicantId, notes);
 }
 
 interface UseCandidateNotesOptions {
@@ -95,25 +97,26 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
   const refreshInBackground = useCallback(async (id: string) => {
     try {
       const fresh = await fetchNotesFromDb(id);
-      notesCache.set(id, fresh);
-      setPersistedNotes(id, fresh);
+      if (!user) return;
+      notesCache.set(notesKey(user.id, id), fresh);
+      setPersistedNotes(user.id, id, fresh);
       setNotes(fresh);
     } catch {
       // Silently fail — cached data is already rendered
     }
-  }, [fetchNotesFromDb]);
+  }, [fetchNotesFromDb, user?.id]);
 
   // ─── Fetch (cache-first) ────────────────────────────────────────
   const fetchNotes = useCallback(async (forceRefresh = false) => {
     if (!applicantId || !user) return;
 
     if (!forceRefresh) {
-      const cached = notesCache.get(applicantId);
+      const cached = notesCache.get(notesKey(user.id, applicantId));
       if (cached) { setNotes(cached); return; }
 
-      const persisted = getPersistedNotes(applicantId);
+      const persisted = getPersistedNotes(user.id, applicantId);
       if (persisted) {
-        notesCache.set(applicantId, persisted);
+        notesCache.set(notesKey(user.id, applicantId), persisted);
         setNotes(persisted);
         refreshInBackground(applicantId);
         return;
@@ -123,8 +126,8 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
     setLoadingNotes(true);
     try {
       const fresh = await fetchNotesFromDb(applicantId);
-      notesCache.set(applicantId, fresh);
-      setPersistedNotes(applicantId, fresh);
+      notesCache.set(notesKey(user.id, applicantId), fresh);
+      setPersistedNotes(user.id, applicantId, fresh);
       setNotes(fresh);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -148,16 +151,18 @@ export function useCandidateNotes({ applicantId, jobId, enabled = true }: UseCan
 
   // ─── Helpers to persist optimistic changes ──────────────────────
   const persistOptimistic = useCallback((id: string, updated: CandidateNote[]) => {
-    notesCache.set(id, updated);
-    setPersistedNotes(id, updated);
+    if (!user) return;
+    notesCache.set(notesKey(user.id, id), updated);
+    setPersistedNotes(user.id, id, updated);
     setNotes(updated);
-  }, []);
+  }, [user?.id]);
 
   const rollback = useCallback((id: string, previous: CandidateNote[]) => {
-    notesCache.set(id, previous);
-    setPersistedNotes(id, previous);
+    if (!user) return;
+    notesCache.set(notesKey(user.id, id), previous);
+    setPersistedNotes(user.id, id, previous);
     setNotes(previous);
-  }, []);
+  }, [user?.id]);
 
   // ─── Save ───────────────────────────────────────────────────────
   const saveNote = useCallback(async (noteText: string, clearDraft: () => void) => {

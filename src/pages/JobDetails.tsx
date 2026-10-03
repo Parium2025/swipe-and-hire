@@ -545,7 +545,7 @@ const JobDetails = () => {
   const handlePrefetchCandidate = useCallback((app: JobApplication) => {
     if (!user || !app.applicant_id) return;
     prefetchCandidateActivities(queryClient, app.applicant_id, user.id);
-    prefetchCandidateNotes(app.applicant_id);
+    prefetchCandidateNotes(app.applicant_id, user.id);
   }, [user, queryClient]);
 
   const handleMobileMove = useCallback(async (applicationId: string, newStage: string) => {

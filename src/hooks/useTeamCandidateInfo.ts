@@ -23,7 +23,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
   const { teamMembers } = useTeamMembers();
 
   const { data: teamCandidates, isLoading } = useQuery({
-    queryKey: ['team-candidate-info', applicationIds.sort().join(',')],
+    queryKey: ['team-candidate-info', user?.id, [...applicationIds].sort().join(',')],
     queryFn: async () => {
       if (!user || applicationIds.length === 0) return {};
 
@@ -37,6 +37,7 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
 
       // Get unique applicant IDs to fetch persistent ratings and notes
       const applicantIds = [...new Set(myCandidatesData?.map(c => c.applicant_id) || [])];
+      if (applicantIds.length === 0) return {};
 
       // Fetch persistent ratings and notes in parallel
       const [ratingsResult, notesResult] = await Promise.all([
