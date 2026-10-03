@@ -47,3 +47,4 @@
 - [x] Match employer image preloads to actual card transforms, keep them account-scoped, and verify candidate portraits and active/expired job images on a signed-in cold start; remove the add-button's white hover surface
 - [ ] Verify profile photo changes live across two simultaneously signed-in employer accounts (blocked: second authorized account/session unavailable)
 - [ ] Verify cross-colleague counts after a real application and assess report refresh timing (blocked: no safe live test application submitted in this audit)
+- [ ] Check late-appearing unread notifications against their saved timestamp and ensure the bell retains its known state across a day; verify candidate-list loading boundaries

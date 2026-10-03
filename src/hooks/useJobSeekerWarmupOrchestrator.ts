@@ -1,6 +1,5 @@
 import { useJobSeekerMediaWarmup } from '@/hooks/useJobSeekerMediaWarmup';
 import { useJobSearchProgressivePagination } from '@/hooks/useJobSearchProgressivePagination';
-import { useNotificationsPreload } from '@/hooks/useNotificationsPreload';
 import { useJobSeekerPagePrewarm } from '@/hooks/useJobSeekerPagePrewarm';
 import { useDefaultJobSearchPrewarm } from '@/hooks/useDefaultJobSearchPrewarm';
 
@@ -28,7 +27,6 @@ import { useDefaultJobSearchPrewarm } from '@/hooks/useDefaultJobSearchPrewarm';
 export function useJobSeekerWarmupOrchestrator() {
   useJobSeekerMediaWarmup();
   useJobSearchProgressivePagination();
-  useNotificationsPreload();
   // 4. Kallstart för Sparade jobb / Mina ansökningar — samma nycklar som sidorna.
   useJobSeekerPagePrewarm();
   // 5. Kallstart för Swipe Mode: första söksidan förvärms i idle efter login.
