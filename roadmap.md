@@ -42,3 +42,4 @@
 - [x] Live-test organization-scoped reviews and comments with an invited recruiter account
 - [x] Hide billing and company-wide settings, privacy and team sections from recruiters while retaining personal calendar and account settings
 - [ ] Finish recruiter analytics freshness audit: cross-colleague live counts, expired-job status consistency, cache scope and first-login cold start; review identity, mobile rendering and white explanatory text checked
+- [ ] Verify colleague candidate ratings, notes and organization-wide job history in the live recruiter account; check profile photo refresh and cold starts

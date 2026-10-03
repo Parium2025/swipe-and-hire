@@ -700,10 +700,7 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           };
 
           if (payload.eventType === 'UPDATE') {
-            // Serverns applications_count är sanning. Släpp eventuella optimistiska
-            // deltas för samma jobb, annars adderas de ovanpå ett redan uppdaterat
-            // värde och siffran dubbelräknas tills nästa event kommer in.
-            if (payload.new?.id) pendingDeltas.delete(payload.new.id as string);
+            // Serverns applications_count är sanningen, även vid en ny ansökan.
             // Soft-delete kommer in som UPDATE. Utan detta skulle raden ligga
             // kvar i den sammanslagna listan tills nästa full genomströmning.
             if ((payload.new as { deleted_at?: string | null })?.deleted_at) {
@@ -730,29 +727,19 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
       )
       .subscribe();
 
-    // 🔥 HÅL #2/#3: Listen to job_applications BARA för våra laddade jobb.
-    // Buffra deltas och flush max 1×/sek (oförändrat).
-    const pendingDeltas = new Map<string, number>();
-    let flushTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const flushDeltas = () => {
-      flushTimer = null;
-      if (pendingDeltas.size === 0) return;
-      const deltas = new Map(pendingDeltas);
-      pendingDeltas.clear();
+    // Lyssna på ansökningar endast för laddade annonser. Triggern uppdaterar
+    // samtidigt job_postings.applications_count; addera därför aldrig ett lokalt
+    // delta ovanpå den serveruppdaterade raden (olika event kan komma i omvänd ordning).
+    let appsRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleApplicationsRefresh = () => {
+      if (appsRefreshTimer) return;
+      appsRefreshTimer = setTimeout(() => {
+        appsRefreshTimer = null;
+        queryClient.invalidateQueries({ queryKey: ['jobs', scope, profile?.organization_id, user?.id] });
+        scheduleStatsInvalidate();
+      }, 1000);
       queryClient.invalidateQueries({ queryKey: ['employer-inbox-stats'] });
       queryClient.invalidateQueries({ queryKey: [UNVIEWED_APPLICATIONS_QUERY_KEY] });
-      queryClient.setQueryData(['jobs', scope, profile?.organization_id, user?.id], (oldData: JobPosting[] | undefined) => {
-        if (!oldData) return oldData;
-        let mutated = false;
-        const next = oldData.map(job => {
-          const delta = deltas.get(job.id);
-          if (!delta) return job;
-          mutated = true;
-          return { ...job, applications_count: (job.applications_count || 0) + delta };
-        });
-        return mutated ? next : oldData;
-      });
     };
 
     // Bygg PostgREST in-filter från laddade ids
@@ -769,18 +756,14 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
             (payload) => {
               const jobId = (payload.new as { job_id?: string })?.job_id;
               if (!jobId) return;
-              pendingDeltas.set(jobId, (pendingDeltas.get(jobId) || 0) + 1);
-              if (!flushTimer) flushTimer = setTimeout(flushDeltas, 1000);
+              scheduleApplicationsRefresh();
             }
           )
           .subscribe()
       : null;
 
     return () => {
-      if (flushTimer) {
-        clearTimeout(flushTimer);
-        flushDeltas();
-      }
+      if (appsRefreshTimer) clearTimeout(appsRefreshTimer);
       if (invalidateStatsTimer) {
         clearTimeout(invalidateStatsTimer);
       }

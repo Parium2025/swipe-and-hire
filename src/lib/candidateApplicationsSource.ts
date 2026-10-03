@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { safeSetItem, safeReadJsonCache } from '@/lib/safeStorage';
 import { mapRawToApplicationData } from '@/lib/candidateApplicationMapper';
 import type { ApplicationData } from '@/hooks/useApplicationsData';
+import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 
 /**
  * 🎯 EN ENDA SANNING för "alla ansökningar från den här kandidaten".
@@ -191,15 +192,9 @@ async function loadJobScope(userId: string): Promise<JobScope> {
     .maybeSingle();
 
   if (myRole?.organization_id) {
-    const { data: members } = await supabase
-      .from('user_roles')
-      .select('user_id')
-      .eq('organization_id', myRole.organization_id)
-      .eq('is_active', true);
-
-    if (members?.length) {
-      employerIds = Array.from(new Set([userId, ...members.map((m) => m.user_id)]));
-    }
+    // user_roles SELECT visar endast den egna raden. Använd det autentiserade
+    // medlems-RPC:t; annars försvinner kollegornas sökta jobb tyst ur listan.
+    employerIds = Array.from(new Set([userId, ...await getOrganizationMemberIds(myRole.organization_id)]));
   }
 
   const jobs = await fetchAllPages<{ id: string; title: string }>((from, to) =>
