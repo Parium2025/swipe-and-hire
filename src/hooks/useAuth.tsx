@@ -830,8 +830,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     // 🛡️ Kontobyte: en långsam hämtning för konto A får aldrig skriva över
     // state som redan hunnit laddas för konto B.
-    const isStale = () =>
-      currentUserIdRef.current !== null && currentUserIdRef.current !== userId;
+    const isStale = () => currentUserIdRef.current !== userId;
     try {
       // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
       // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
@@ -929,6 +928,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ? fetchWithRetry(processedProfile.cover_image_url, 'cover-image', 2000)
                 : Promise.resolve(null)
             ]);
+            if (isStale()) return;
             
             avatarUrl = avatarResult;
             coverUrl = coverResult;
@@ -949,6 +949,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.warn('DOM preload timeout, continuing:', preloadError);
               }
             }
+            if (isStale()) return;
             
             // Sätt URLs för sidebar + spara i sessionStorage för omedelbar visning
             setPreloadedAvatarUrl(avatarUrl || coverUrl || null);
@@ -974,6 +975,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 try {
                   // Använd retry-funktionen för stabilare hämtning
                   const videoUrl = await fetchWithRetry(processedProfile.video_url, 'profile-video', 3000, 2);
+                  if (isStale()) return;
                   if (videoUrl) {
                     // Spara till state OCH sessionStorage
                     setPreloadedVideoUrl(videoUrl);
@@ -1007,6 +1009,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.warn('Weather location preload failed (non-blocking):', err);
             });
           } catch (error) {
+            if (isStale()) return;
             console.error('Media preload error:', error);
             setPreloadedAvatarUrl(null);
             setPreloadedCoverUrl(null);
