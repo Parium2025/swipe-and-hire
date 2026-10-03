@@ -373,7 +373,7 @@ const EmployerDashboard = memo(() => {
   const getPageImageUrls = useCallback((job: JobPosting) => {
     const version = getImageVersion(job);
     return [
-      buildCardImageUrl(job.job_image_url ?? job.job_image_desktop_url, 'job-images', version, { width: 600, height: 400, quality: 75, resize: 'cover' }),
+      buildCardImageUrl(job.job_image_url ?? job.job_image_desktop_url, 'job-images', version, { width: 600, quality: 75 }),
       buildCardImageUrl(job.company_logo_url, 'company-logos', version, { width: 64, height: 64, quality: 80, resize: 'contain' }),
     ];
   }, []);

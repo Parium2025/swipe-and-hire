@@ -189,11 +189,11 @@ export function useEmployerMediaWarmup() {
           const path = imagePath.trim();
           if (path && !warmed.has(`job-img:${path}:${version ?? ''}`)) {
             warmed.add(`job-img:${path}:${version ?? ''}`);
+            // EmployerJobCard/ReadOnlyMobileJobCard use width-only transforms.
+            // A different height creates a different URL and never warms the card.
             const url = buildCardImageUrl(path, 'job-images', version, {
               width: 600,
-              height: 400,
               quality: 75,
-              resize: 'cover',
             });
             if (url) urls.push(url);
           }
