@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
 import { AdvancedAnalyticsSections, type AdvancedAnalyticsData } from '@/components/analytics/AdvancedAnalytics';
-import { TeamInsightsSection, type TeamInsightsData } from '@/components/analytics/TeamInsights';
+import { TeamInsightsSection, TeamInsightsSectionSkeleton, type TeamInsightsData } from '@/components/analytics/TeamInsights';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { differenceInDays } from 'date-fns';
@@ -627,7 +627,7 @@ const EmployerAnalytics = memo(() => {
     [teamCacheKey],
   );
 
-  const { data: teamData } = useQuery({
+  const { data: teamData, isLoading: teamLoading } = useQuery({
     queryKey: ['employer-team-insights', user?.id, organization?.id, selectedDays],
     queryFn: async () => {
       if (!user) return null;
@@ -861,6 +861,39 @@ const EmployerAnalytics = memo(() => {
             ))}
           </div>
         </div>
+
+        {/* Visningar per timme — platshållare längst ner vid kallstart */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-40 bg-white/10 rounded" />
+            <div className="h-4 w-4 rounded-full bg-white/10" />
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="h-7 w-14 bg-white/10 rounded" />
+            <div className="h-3 w-36 bg-white/10 rounded" />
+          </div>
+          <div className="h-16 w-full bg-white/10 rounded" />
+        </div>
+
+        {/* Teamets aktivitet — platshållare längst ner vid kallstart */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded bg-white/10" />
+            <div className="h-4 w-36 bg-white/10 rounded" />
+          </div>
+          {[0, 1].map((i) => (
+            <div key={i} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-full bg-white/10" />
+                  <div className="h-3 w-28 bg-white/10 rounded" />
+                </div>
+                <div className="h-3 w-20 bg-white/10 rounded" />
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-white/10" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -1070,7 +1103,13 @@ const EmployerAnalytics = memo(() => {
       <AdvancedAnalyticsSections data={advancedData ?? null} />
 
       {/* ─── Kollegial statistik (endast för organisationer med flera rekryterare) ─── */}
-      <TeamInsightsSection data={teamData ?? null} />
+      {/* Statiskt läge: senast kända värden visas direkt vid kallstart; medan RPC:n
+          laddar håller platshållaren nederdelen stabil i stället för att poppa in. */}
+      {teamLoading && !teamData && organization?.id ? (
+        <TeamInsightsSectionSkeleton />
+      ) : (
+        <TeamInsightsSection data={teamData ?? null} />
+      )}
 
       {/* Fel vid hämtning får aldrig se ut som "inga data" – då tror
           arbetsgivaren att statistiken är tom trots att annonser finns. */}

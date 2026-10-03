@@ -158,3 +158,36 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
   );
 });
 TeamInsightsSection.displayName = 'TeamInsightsSection';
+
+/* Statisk platshållare som visar kortets struktur medan RPC:n laddar.
+   Sidans nederdel får aldrig ligga tomt och "poppa in" vid kallstart. */
+export const TeamInsightsSectionSkeleton = memo(() => (
+  <Card className="glass-panel border-white/10 overflow-hidden" aria-hidden>
+    <CardHeader className="p-4 md:p-6 pb-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-white/60" />
+          <CardTitle className="text-lg font-semibold text-white">Teamets aktivitet</CardTitle>
+        </div>
+        <div className="h-6 w-6 rounded-full bg-white/10" />
+      </div>
+    </CardHeader>
+    <CardContent className="p-4 md:p-6 space-y-4">
+      {[0, 1].map((i) => (
+        <div key={i} className="space-y-1.5">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-full bg-white/10" />
+              <div className="h-3 w-28 rounded bg-white/10" />
+            </div>
+            <div className="h-3 w-20 rounded bg-white/10" />
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+            <div className="h-full rounded-full bg-white/10" />
+          </div>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+));
+TeamInsightsSectionSkeleton.displayName = 'TeamInsightsSectionSkeleton';
