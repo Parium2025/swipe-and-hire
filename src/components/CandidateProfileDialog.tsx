@@ -75,6 +75,28 @@ function useVideoUrl(path: string | null | undefined) {
   return useMediaUrl(path, 'profile-video');
 }
 
+/**
+ * Returnerar den skarpa bild-URL:en först när den är avkodad, så länge en
+ * miniatyr redan visas. Saknas miniatyr returneras den skarpa direkt (som förut).
+ */
+function useDecodedUpgrade(full: string | null, fallback: string | null): string | null {
+  const [decoded, setDecoded] = useState<string | null>(null);
+  useEffect(() => {
+    if (!full || decoded === full) return;
+    let cancelled = false;
+    const img = new Image();
+    img.src = full;
+    const done = () => { if (!cancelled) setDecoded(full); };
+    if (img.complete && img.naturalWidth > 0) done();
+    else if (typeof img.decode === 'function') img.decode().then(done, done);
+    else { img.onload = done; img.onerror = done; }
+    return () => { cancelled = true; };
+  }, [full, decoded]);
+  if (!full) return null;
+  if (!fallback || decoded === full) return full;
+  return null;
+}
+
 
 interface CandidateProfileDialogProps {
   application: ApplicationData | null;
@@ -290,8 +312,11 @@ export const CandidateProfileDialog = ({
     setQuestionsLoading(true);
   }, [activeApplication?.id, activeApplication?.job_id]);
 
-  const profileImageUrl = useProfileImageUrl(activeApplication?.profile_image_url);
+  const profileImageUrlRaw = useProfileImageUrl(activeApplication?.profile_image_url);
   const profileThumbUrl = useProfileThumbUrl(activeApplication?.profile_image_url);
+  // Byt från miniatyr till skarp version först när den skarpa är avkodad —
+  // annars hinner initialerna blinka fram mellan de två bilderna.
+  const profileImageUrl = useDecodedUpgrade(profileImageUrlRaw, profileThumbUrl);
   const coverImageUrl = useProfileImageUrl(activeApplication?.cover_image_url);
   const videoUrl = useVideoUrl(activeApplication?.video_url);
   const signedCvUrl = useMediaUrl(activeApplication?.cv_url, 'cv');
