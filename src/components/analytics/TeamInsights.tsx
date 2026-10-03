@@ -125,7 +125,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
           </button>
         )}
 
-        {traits && (
+        {traits && traits.sample > 0 && (
           <div className="pt-4 border-t border-white/10 space-y-4">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-yellow-400" />
@@ -146,7 +146,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                 <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Konvertering</p>
                 <p className="text-sm text-white">
                   {traits.avg_conversion > 0 
-                    ? `Teamets snitt är ${(traits.avg_conversion * 100).toFixed(1)}% från vy till ansökan.`
+                    ? `Teamets snitt är ${traits.avg_conversion.toFixed(1)}% från vy till ansökan.`
                     : 'Ingen data för konvertering än.'}
                 </p>
               </div>
