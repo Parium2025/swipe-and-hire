@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
 
 /**
  * Prefetches employer data (templates, company profile, reviews)
@@ -17,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
  * Säkerhet: Samma query-keys som tidigare → komponenter märker noll skillnad.
  */
 export function useEmployerPrefetch() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -55,13 +56,14 @@ export function useEmployerPrefetch() {
       }).catch(() => {});
 
       // ── Company reviews (för /reviews) ──
+      const reviewOwnerId = await getOrganizationReviewOwnerId(userId, profile?.organization_id);
       queryClient.prefetchQuery({
-        queryKey: ['company-reviews', userId],
+        queryKey: ['company-reviews', reviewOwnerId],
         queryFn: async () => {
           const { data: reviews, error } = await supabase
             .from('company_reviews_public')
             .select('*')
-            .eq('company_id', userId)
+            .eq('company_id', reviewOwnerId)
             .order('created_at', { ascending: false });
 
           if (error) throw error;
@@ -105,5 +107,5 @@ export function useEmployerPrefetch() {
     }
     const id = window.setTimeout(run, 250);
     return () => window.clearTimeout(id);
-  }, [user, queryClient]);
+  }, [user, queryClient, profile?.organization_id]);
 }
