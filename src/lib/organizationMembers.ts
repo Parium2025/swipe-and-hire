@@ -12,9 +12,12 @@ export async function getOrganizationReviewOwnerId(userId: string, organizationI
   if (!organizationId) return userId;
   const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
   if (error) throw error;
-  // The earliest active admin is the founding employer in the legacy review schema.
-  // Never use company names: unrelated organizations may share one.
-  const founder = data?.filter(member => member.organization_id === organizationId && member.is_active && member.role === 'admin')
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
-  return founder?.user_id ?? userId;
+  const admins = data?.filter(member => member.organization_id === organizationId && member.is_active && member.role === 'admin') ?? [];
+  if (admins.length === 0) return userId;
+  // The legacy review key is a profile UUID, not the organization UUID.
+  // Query only authorized member IDs; never match a company name across organizations.
+  const { data: reviews, error: reviewsError } = await supabase
+    .from('company_reviews_public').select('company_id').in('company_id', admins.map(member => member.user_id)).limit(1);
+  if (reviewsError) throw reviewsError;
+  return reviews?.[0]?.company_id ?? admins[0].user_id;
 }
