@@ -64,7 +64,7 @@ describe('kontosiffror vid kallstart och byte', () => {
     expect(title).toContain('seekerCountsReadyUserId === user.id');
     expect(title).toContain('countsReady && preloadedUnreadMessages > 0');
     expect(title).toContain('countsReady && preloadedJobSeekerUnreadMessages > 0');
-    const accountSwitch = auth.slice(auth.indexOf('if (cachedBelongsToOther) {'), auth.indexOf('// 🧹 Reset transient flags'));
+    const accountSwitch = auth.slice(auth.indexOf('if (cachedBelongsToOther || (previousUserId !== null && previousUserId !== activeUserId)) {'), auth.indexOf('// 🧹 Reset transient flags'));
     expect(accountSwitch).toContain('setPreloadedUnreadMessages(0);');
     expect(accountSwitch).toContain('setPreloadedJobSeekerUnreadMessages(0);');
     expect(accountSwitch).toContain('localStorage.removeItem(UNREAD_MESSAGES_CACHE_KEY);');
