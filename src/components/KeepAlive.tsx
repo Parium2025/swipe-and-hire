@@ -602,8 +602,8 @@ function KeepAliveCached({
         const enterClasses = isEntered
           ? 'opacity-100 translate-y-0'
           : isFastEnter
-            ? 'opacity-90 translate-y-0.5 md:opacity-0 md:translate-y-1 pointer-events-none'
-            : 'opacity-80 translate-y-1.5 md:opacity-0 md:translate-y-2 pointer-events-none';
+            ? 'opacity-90 translate-y-0 md:opacity-0 md:translate-y-1 pointer-events-none'
+            : 'opacity-80 translate-y-0 md:opacity-0 md:translate-y-2 pointer-events-none';
         const durationClass = isFastEnter
           ? 'duration-[220ms] md:duration-[280ms]'
           : 'duration-[340ms] md:duration-500';
