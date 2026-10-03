@@ -154,7 +154,7 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
         // dialogen behöver den, även när aktivitetsrader kommer från batchen.
         warmActivityAvatars([...profileMap.values()].map((profile) => profile.profile_image_url));
         for (const [id, list] of byApplicant) {
-          queryClient.setQueryData(['candidate-activities', id], list);
+          queryClient.setQueryData(['candidate-activities', user.id, id], list);
           // Persistera kontoscopat så nästa kallstart visar loggen direkt.
           writeActivityCache(user.id, id, list);
         }

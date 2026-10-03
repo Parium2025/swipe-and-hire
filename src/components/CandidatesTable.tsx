@@ -542,8 +542,9 @@ export function CandidatesTable({
     // Ett eget betyg har alltid företräde; annars visas kollegans betyg även
     // när kandidaten inte har lagts till i någons personliga kandidatlista.
     if (shared?.own !== undefined) return shared.own;
-    if (application.rating) return application.rating;
+    // Kanoniska betyg går före den äldre ansökningssnapshoten.
     if (shared?.colleague !== undefined) return shared.colleague;
+    if (application.rating) return application.rating;
     const teamInfo = getTeamInfo(application.id);
     return teamInfo?.maxRating || 0;
   }, [getTeamInfo, organizationRatings]);

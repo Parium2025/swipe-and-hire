@@ -18,6 +18,7 @@ import { Layers, SlidersHorizontal } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
+import { useOrganizationCandidateRatings } from '@/hooks/useOrganizationCandidateRatings';
 
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
@@ -175,6 +176,7 @@ const JobDetails = () => {
     [applications, jobId]
   );
   useCandidatePageWarmup(warmupRows);
+  const organizationRatings = useOrganizationCandidateRatings(warmupRows.map((row) => row.applicant_id).filter((id): id is string => !!id));
 
 
 
@@ -539,8 +541,9 @@ const JobDetails = () => {
 
 
   const getDisplayRating = useCallback((app: ApplicationData) => {
-    return app.rating || 0;
-  }, []);
+    const rating = organizationRatings[app.applicant_id];
+    return rating?.own ?? rating?.colleague ?? app.rating ?? 0;
+  }, [organizationRatings]);
 
   const handlePrefetchCandidate = useCallback((app: JobApplication) => {
     if (!user || !app.applicant_id) return;
@@ -922,7 +925,7 @@ const JobDetails = () => {
           onStatusUpdate={() => {
             refetch();
           }}
-          candidateRating={selectedApplication?.rating}
+          candidateRating={selectedApplication ? getDisplayRating(mapToApplicationData(selectedApplication, jobId || '', job?.title || 'Okänt jobb')) : undefined}
           onRatingChange={(rating) => {
             if (selectedApplication) {
               updateCandidateRating(selectedApplication.applicant_id, rating);
