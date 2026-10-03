@@ -353,6 +353,14 @@ const EmployerDashboard = memo(() => {
     void loadMore(activeTab as 'expired' | 'draft');
   }, [archiveHasMore, isLoadingMore, tabFilteredJobs.length, page, pageSize, activeTab, loadMore]);
 
+  // Sökning måste gälla alla egna annonser: hämta återstående utgångna och
+  // utkast i bakgrunden så länge en sökterm finns.
+  useEffect(() => {
+    if (!searchTerm.trim() || isLoadingMore) return;
+    if (hasMore.expired) void loadMore('expired');
+    else if (hasMore.draft) void loadMore('draft');
+  }, [searchTerm, hasMore.expired, hasMore.draft, isLoadingMore, loadMore]);
+
   // Använd lokal data-längd så vi inte visar tomma sidor när server-count är högre
   // än vad som faktiskt laddats in i klienten — utom på arkivtabbarna, där
   // serverns totalsiffra styr hur många sidor som går att bläddra till.

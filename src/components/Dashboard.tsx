@@ -200,6 +200,13 @@ const Dashboard = memo(() => {
     void loadMore('expired');
   }, [archiveHasMore, isLoadingMore, tabFilteredJobs.length, page, pageSize, loadMore]);
 
+  // Sökning måste gälla alla annonser, inte bara de 200 första utgångna:
+  // hämta återstående sidor i bakgrunden så länge en sökterm finns.
+  useEffect(() => {
+    if (!searchTerm.trim() || !hasMore.expired || isLoadingMore) return;
+    void loadMore('expired');
+  }, [searchTerm, hasMore.expired, isLoadingMore, loadMore]);
+
   const loadedPages = Math.ceil(tabFilteredJobs.length / pageSize);
   const totalPages = Math.max(
     1,
