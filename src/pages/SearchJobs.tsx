@@ -388,16 +388,17 @@ const SearchJobs = memo(() => {
     let cancelled = false;
     void supabase
       .from('job_postings')
-      .select('company_name, employer_id')
-      .in('company_name', missing)
+      .select('workplace_name, employer_id')
+      .in('workplace_name', missing)
       .eq('is_active', true)
       .limit(500)
       .then(({ data }) => {
         if (cancelled || !data) return;
         let added = false;
         for (const row of data) {
-          if (row.company_name && row.employer_id && !companyNameToIdRef.current.has(row.company_name)) {
-            companyNameToIdRef.current.set(row.company_name, row.employer_id);
+          const name = row.workplace_name?.trim();
+          if (name && row.employer_id && !companyNameToIdRef.current.has(name)) {
+            companyNameToIdRef.current.set(name, row.employer_id);
             added = true;
           }
         }
