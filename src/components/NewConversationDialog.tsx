@@ -341,8 +341,8 @@ function ContactItem({
            : "border-transparent md:hover:bg-pure-white/10"
       )}
     >
-      <span aria-hidden="true" className={cn("h-4 w-4 shrink-0 rounded-sm border border-pure-white flex items-center justify-center", isSelected && "bg-primary border-primary")}>
-        {isSelected && <Check className="h-3 w-3 text-pure-white" />}
+      <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-sm border border-pure-white bg-transparent flex items-center justify-center">
+        {isSelected && <Check className="h-3 w-3 text-pure-white" strokeWidth={2.5} />}
       </span>
       
       <ResolvedAvatar
