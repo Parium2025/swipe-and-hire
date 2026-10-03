@@ -14,7 +14,7 @@ import { getMediaUrl } from '@/lib/mediaManager';
 import { clearMediaUrlCache, prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { isInactivityLogout, clearInactivityLogoutFlag } from '@/hooks/useInactivityTimeout';
-import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership, isAuthEventFromAnotherTab } from '@/lib/authStorage';
+import { authStorage, isInactivityLogoutFromStorage, clearInactivityLogoutFromStorage, claimAuthSnapshotOwnership, isAuthEventFromAnotherTab, getTabAuthUserId } from '@/lib/authStorage';
 import { preloadWeatherLocation } from '@/hooks/useWeather';
 import { clearAllDrafts } from '@/hooks/useFormDraft';
 import { triggerBackgroundSync, clearAllAppCaches, cancelPendingCacheClear } from '@/hooks/useEagerRatingsPreload';
@@ -200,6 +200,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const CACHED_PROFILE_KEY = 'parium_cached_profile';
+  const hasOwnCachedProfile = () => {
+    try {
+      const tabUserId = getTabAuthUserId();
+      const cachedUserId = JSON.parse(localStorage.getItem(CACHED_PROFILE_KEY) ?? 'null')?.user_id;
+      return Boolean(tabUserId && cachedUserId === tabUserId);
+    } catch { return false; }
+  };
   const [profile, setProfile] = useState<Profile | null>(() => {
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(CACHED_PROFILE_KEY) : null;
@@ -209,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try { localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
         return null;
       }
-      return parsed as Profile;
+      return parsed.user_id === getTabAuthUserId() ? parsed as Profile : null;
     } catch {
       try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch { /* ignore */ }
       return null;
@@ -225,17 +232,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialisera från sessionStorage för omedelbar visning (som arbetsgivarsidan)
   const [preloadedAvatarUrl, setPreloadedAvatarUrl] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? localStorage.getItem(AVATAR_CACHE_KEY) : null;
+      return typeof window !== 'undefined' && hasOwnCachedProfile() ? localStorage.getItem(AVATAR_CACHE_KEY) : null;
     } catch { return null; }
   });
   const [preloadedCoverUrl, setPreloadedCoverUrl] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? localStorage.getItem(COVER_CACHE_KEY) : null;
+      return typeof window !== 'undefined' && hasOwnCachedProfile() ? localStorage.getItem(COVER_CACHE_KEY) : null;
     } catch { return null; }
   });
   const [preloadedVideoUrl, setPreloadedVideoUrl] = useState<string | null>(() => {
     try {
-      return typeof window !== 'undefined' ? localStorage.getItem(VIDEO_CACHE_KEY) : null;
+      return typeof window !== 'undefined' && hasOwnCachedProfile() ? localStorage.getItem(VIDEO_CACHE_KEY) : null;
     } catch { return null; }
   });
   const [preloadedTotalJobs, setPreloadedTotalJobs] = useState<number>(() => {
@@ -306,12 +313,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [preloadedUnreadMessages, setPreloadedUnreadMessages] = useState<number>(() => {
     try {
-      return readUnreadBadgeCache(UNREAD_MESSAGES_CACHE_KEY);
+      return hasOwnCachedProfile() ? readUnreadBadgeCache(UNREAD_MESSAGES_CACHE_KEY) : 0;
     } catch { return 0; }
   });
   const [preloadedJobSeekerUnreadMessages, setPreloadedJobSeekerUnreadMessages] = useState<number>(() => {
     try {
-      return readUnreadBadgeCache(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY);
+      return hasOwnCachedProfile() ? readUnreadBadgeCache(JOB_SEEKER_UNREAD_MESSAGES_CACHE_KEY) : 0;
     } catch { return 0; }
   });
   const [preloadedCompanyReviewsCount, setPreloadedCompanyReviewsCount] = useState<number>(() => {
@@ -352,9 +359,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch {}
       }
-      if (e.key === AVATAR_CACHE_KEY) setPreloadedAvatarUrl(e.newValue);
-      if (e.key === COVER_CACHE_KEY) setPreloadedCoverUrl(e.newValue);
-      if (e.key === VIDEO_CACHE_KEY) setPreloadedVideoUrl(e.newValue);
+      // Media keys are shared by the browser, not by the tab's account.
+      // Only accept changes when the current profile belongs to this tab.
+      if (e.key === AVATAR_CACHE_KEY || e.key === COVER_CACHE_KEY || e.key === VIDEO_CACHE_KEY) {
+        const tabUserId = currentUserIdRef.current;
+        if (!tabUserId) return;
+        try {
+          const owner = JSON.parse(localStorage.getItem(CACHED_PROFILE_KEY) ?? 'null')?.user_id;
+          if (owner !== tabUserId) return;
+        } catch { return; }
+        if (e.key === AVATAR_CACHE_KEY) setPreloadedAvatarUrl(e.newValue);
+        if (e.key === COVER_CACHE_KEY) setPreloadedCoverUrl(e.newValue);
+        if (e.key === VIDEO_CACHE_KEY) setPreloadedVideoUrl(e.newValue);
+      }
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
