@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import {
   Briefcase, Users, UserCheck, MessageCircle, Building2, BarChart3,
   CreditCard, HelpCircle, ArrowRight, Check, ChevronLeft, UserPlus,
@@ -96,6 +97,7 @@ export function replayEmployerWelcomeCard(step: 0 | 1 = 0) {
  */
 const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: EmployerOnboardingTourProps) => {
   const navigate = useNavigate();
+  const { isAdmin } = useIsOrgAdmin();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<0 | 1>(initialStep);
 
@@ -191,7 +193,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
           'Guider, vanliga frågor och kontakt med oss. Vi svarar så fort vi bara kan.',
       },
     ],
-    []
+    [isAdmin]
   );
 
   return createPortal(
