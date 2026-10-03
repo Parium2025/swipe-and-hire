@@ -29,7 +29,6 @@ import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
 import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
-import { fetchMyProfile } from '@/lib/myProfile';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -113,7 +112,7 @@ const CompanyReviews = () => {
   });
 
   // Read the organization owner's shared company fields rather than a recruiter's invite-time copy.
-  const { data: company, isLoading: companyLoading } = useQuery({
+  const { data: company, isLoading: companyLoading, isError: companyError, refetch: refetchCompany } = useQuery({
     queryKey: ['company-public-profile', reviewOwnerId],
     queryFn: async () => {
       if (!reviewOwnerId) return null;
@@ -242,8 +241,9 @@ const CompanyReviews = () => {
             Företagsinformation saknas
           </h3>
           <p className="text-white">
-            Fyll i din företagsprofil för att se recensioner.
+            {companyError ? 'Det gick inte att hämta företagsinformationen.' : 'Företagsinformation saknas.'}
           </p>
+          {companyError && <Button onClick={() => void refetchCompany()} className="mt-4">Försök igen</Button>}
         </div>
       </div>
     );
