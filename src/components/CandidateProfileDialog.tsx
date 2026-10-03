@@ -680,13 +680,16 @@ export const CandidateProfileDialog = ({
   };
   const initials = `${displayApp.first_name?.[0] || ''}${displayApp.last_name?.[0] || ''}`.toUpperCase();
   const isProfileVideo = displayApp.is_profile_video && displayApp.video_url;
+  const videoCoverPending = !!isProfileVideo &&
+    (!!displayApp.cover_image_url || !!displayApp.profile_image_url) &&
+    !coverImageUrl && !profileImageUrl && !profileThumbUrl;
   // Kandidaten har media i databasen men den signerade URL:en är ännu inte löst.
   // Då får vi INTE falla tillbaka på initialer — det ger en synlig "FA"-blink.
   const mediaPending =
     (!!displayApp.profile_image_url || !!isProfileVideo) &&
     !profileImageUrl &&
     !profileThumbUrl &&
-    !(isProfileVideo && videoUrl);
+    !(isProfileVideo && videoUrl && !videoCoverPending);
   // Visa aldrig en preliminär siffra: när listan fortfarande hämtas och vi bara
   // har den klickade ansökan vet vi inte antalet ännu — då hålls badgen dold i
   // stället för att blinka "1 jobb" och sedan hoppa till t.ex. "14 jobb".
@@ -782,7 +785,7 @@ export const CandidateProfileDialog = ({
           {/* Header with circular profile image/video */}
           <div className="flex flex-col items-center text-center space-y-3 md:space-y-4">
             <div className="relative">
-              {isProfileVideo && videoUrl ? (
+              {isProfileVideo && videoUrl && !videoCoverPending ? (
                 <ProfileVideoCircle
                   videoUrl={videoUrl}
                   coverImageUrl={coverImageUrl || profileImageUrl || profileThumbUrl || undefined}
@@ -801,17 +804,8 @@ export const CandidateProfileDialog = ({
                 />
               ) : (
                 <Avatar key={displayApp.id} className="w-24 h-24 md:w-48 md:h-48 border-4 border-white/20 shadow-xl">
-                  {/* Cachad listavatar visas direkt medan högupplösta porträttet hämtas */}
-                  {!profileImageUrl && profileThumbUrl && (
-                    <AvatarImage
-                      src={profileThumbUrl}
-                      alt=""
-                      aria-hidden
-                      className="object-cover blur-[1px] scale-105"
-                    />
-                  )}
-                  <AvatarImage src={profileImageUrl || ''} alt={`${displayApp.first_name} ${displayApp.last_name}`} className="object-cover" />
-                  <AvatarFallback className="bg-white/10 text-white text-2xl md:text-5xl font-semibold" delayMs={0}>{initials}</AvatarFallback>
+                  <AvatarImage src={profileImageUrl || profileThumbUrl || ''} alt={`${displayApp.first_name} ${displayApp.last_name}`} className="object-cover" />
+                  <AvatarFallback className="bg-white/10 text-white text-2xl md:text-5xl font-semibold" delayMs={displayApp.profile_image_url ? 1200 : 0}>{initials}</AvatarFallback>
                 </Avatar>
 
               )}

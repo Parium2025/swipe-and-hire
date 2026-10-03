@@ -6,6 +6,7 @@ import { primeCandidateNotesCache } from '@/hooks/useCandidateNotes';
 import type { CandidateNote } from '@/components/candidateProfile/candidateProfileCache';
 import { prewarmExistingInterviews } from '@/lib/existingInterviewQuery';
 import { useAuth } from '@/hooks/useAuth';
+import { warmActivityAvatars } from '@/lib/warmTeamAvatars';
 
 interface RowLike {
   applicant_id?: string | null;
@@ -149,6 +150,9 @@ export function useCandidateRowDetailsWarmup(rows: RowLike[] | undefined, enable
             user_profile_image_url: profileMap.get(a.user_id)?.profile_image_url || null,
           } as CandidateActivity);
         }
+        // Värm samma exakta transform som TeamMemberAvatar använder innan
+        // dialogen behöver den, även när aktivitetsrader kommer från batchen.
+        warmActivityAvatars([...profileMap.values()].map((profile) => profile.profile_image_url));
         for (const [id, list] of byApplicant) {
           queryClient.setQueryData(['candidate-activities', id], list);
         }

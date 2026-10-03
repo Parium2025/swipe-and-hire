@@ -41,12 +41,12 @@ describe('useCandidatePageWarmup', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('kör text före media före CV-sammanfattningar', () => {
+  it('startar media och text direkt, före CV-sammanfattningar', () => {
     renderHook(() => useCandidatePageWarmup(rows));
 
-    // Steg 1: text på, media av, inga CV-rader
+    // Text och media startar samtidigt så ett tidigt tryck inte hinner före bilden.
     expect(last(calls.details)).toBe(true);
-    expect(last(calls.media)).toBe(false);
+    expect(last(calls.media)).toBe(true);
     expect(last(calls.cv)).toBe(0);
 
     act(() => {

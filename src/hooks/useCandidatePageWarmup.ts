@@ -15,7 +15,7 @@ import { useCvSummaryPreloader } from '@/hooks/useCvSummaryPreloader';
  * Den här hooken kör ETT deterministiskt schema för raderna som just nu visas:
  *
  *   Steg 1 (direkt)      Text: anteckningar + aktivitetslogg (2 batchade queries)
- *   Steg 2 (+250 ms)     Media: porträtt i dialogstorlek + profilvideor
+ *   Steg 1 (direkt)      Media: porträtt i dialogstorlek + profilvideor
  *   Steg 3 (+350 ms)     AI: generera endast sammanfattningar som verkligen saknas
  *
  * Samma pipeline används av /candidates och /my-candidates så att båda vyerna
@@ -39,7 +39,6 @@ interface Options {
   cvSummaries?: boolean;
 }
 
-const MEDIA_DELAY_MS = 250;
 const CV_DELAY_MS = 350;
 
 export function useCandidatePageWarmup(
@@ -63,10 +62,8 @@ export function useCandidatePageWarmup(
     lastKeyRef.current = pageKey;
 
     setStage(1);
-    const t1 = window.setTimeout(() => setStage(2), MEDIA_DELAY_MS);
     const t2 = window.setTimeout(() => setStage(3), CV_DELAY_MS);
     return () => {
-      window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
   }, [enabled, hasRows, pageKey]);
@@ -85,8 +82,8 @@ export function useCandidatePageWarmup(
   // Steg 1 — profildata som annars visar spinner: frågor, AI-sammanfattning, CV-länk
   useCandidateRowProfileWarmup(rows, enabled && stage >= 1);
 
-  // Steg 2 — media
-  useCandidateRowMediaWarmup(rows, enabled && stage >= 2);
+  // Bilderna startar parallellt med texten, inte först efter ett tidsfönster.
+  useCandidateRowMediaWarmup(rows, enabled && hasRows);
 
   // Steg 3 — AI-sammanfattningar
   const cvRows = useMemo(() => {

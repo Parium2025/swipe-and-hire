@@ -6,6 +6,7 @@ import { imageCache } from '@/lib/imageCache';
 import { AVATAR_TRANSFORM, CHAT_AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
 import { getImageVersion } from '@/lib/imageTransforms';
+import { readEmployerJobsMediaSnapshot } from '@/hooks/useJobsData';
 
 /**
  * 🖼️ EMPLOYER MEDIA WARMUP
@@ -59,7 +60,7 @@ interface ConversationLike {
 }
 
 export function useEmployerMediaWarmup() {
-  const { user, userRole } = useAuth();
+  const { user, userRole, profile } = useAuth();
   const queryClient = useQueryClient();
   const warmedRef = useRef<Set<string>>(new Set());
 
@@ -226,6 +227,9 @@ export function useEmployerMediaWarmup() {
     for (const q of allJobsQueries) {
       warmJobAdImages(q.state.data);
     }
+    // Vid riktig kallstart är React Query tom. Den kontoskopade diskcachen
+    // kan däremot redan ha annonsbilder: börja värma dem före sidans API-svar.
+    warmJobAdImages(readEmployerJobsMediaSnapshot(userId, profile?.organization_id || null));
 
     // 💬 CONVERSATION AVATARS — speglar jobbsökarens warmup-mönster
     // (useJobSeekerMediaWarmup). Warmar motpartens profil-/logobild +
@@ -317,5 +321,5 @@ export function useEmployerMediaWarmup() {
     return () => {
       unsubscribe();
     };
-  }, [user, userRole?.role, queryClient]);
+  }, [user?.id, userRole?.role, profile?.organization_id, queryClient]);
 }
