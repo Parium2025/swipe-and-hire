@@ -181,7 +181,7 @@ export function NewConversationDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         onOpenAutoFocus={(event) => event.preventDefault()}
-        className="bg-[hsl(var(--surface-blue))] border-pure-white/20 text-pure-white w-[calc(100%-2rem)] max-w-md max-h-[min(80dvh,680px)] flex flex-col gap-4 rounded-lg p-5 max-sm:top-[17dvh] max-sm:translate-y-0 sm:max-h-[min(85dvh,680px)] sm:p-6"
+        className="bg-[hsl(var(--surface-blue))] border-pure-white/20 text-pure-white w-[calc(100%-2rem)] max-w-md h-[min(72dvh,600px)] flex flex-col gap-4 rounded-lg p-5 max-sm:top-[17dvh] max-sm:translate-y-0 sm:h-[min(80dvh,620px)] sm:p-6"
       >
         <DialogHeader className="text-left pr-8">
           <DialogTitle className="flex items-center gap-2 text-pure-white">
@@ -335,7 +335,7 @@ function ContactItem({
       onClick={onToggle}
       aria-pressed={isSelected}
       className={cn(
-        "w-full h-auto min-h-14 min-w-0 whitespace-normal flex items-center justify-start gap-3 p-2.5 rounded-md text-left transition-colors text-pure-white",
+        "w-full h-auto min-h-14 min-w-0 whitespace-normal flex items-center justify-start gap-3 p-2.5 rounded-md text-left transition-colors text-pure-white active:scale-100 [-webkit-tap-highlight-color:transparent]",
         isSelected 
           ? "bg-primary/20 border-primary/40" 
            : "border-transparent md:hover:bg-pure-white/10"
