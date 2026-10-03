@@ -154,8 +154,9 @@ export function useSidebarRoutePrefetch() {
           }).catch(() => { prefetchedRef.current.delete(key); });
         }
         // Omdömeslistan hämtas bara när man faktiskt är på väg till /reviews.
-        if (url === '/reviews') void getOrganizationReviewOwnerId(user.id, orgId)
-          .then(ownerId => prewarmCompanyReviews(queryClient, ownerId));
+        void getOrganizationReviewOwnerId(user.id, orgId)
+          .then(ownerId => prewarmCompanyReviews(queryClient, ownerId))
+          .catch(() => { prefetchedRef.current.delete(key); });
         break;
       }
       // /my-candidates och /messages varmhålls redan via

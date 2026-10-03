@@ -56,7 +56,8 @@ export function useEmployerPrefetch() {
       }).catch(() => {});
 
       // ── Company reviews (för /reviews) ──
-      const reviewOwnerId = await getOrganizationReviewOwnerId(userId, profile?.organization_id);
+      const reviewOwnerId = await getOrganizationReviewOwnerId(userId, profile?.organization_id).catch(() => null);
+      if (!reviewOwnerId) return;
       queryClient.prefetchQuery({
         queryKey: ['company-reviews', reviewOwnerId],
         queryFn: async () => {
