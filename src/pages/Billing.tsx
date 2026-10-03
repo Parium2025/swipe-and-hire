@@ -43,7 +43,7 @@ type MonthGroup = {
 const Billing = () => {
   const { user, profile, userRole } = useAuth();
   const isEmployer = ((profile as any)?.role || (userRole?.role as string)) === 'employer';
-  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
+  const { isAdmin, loading: adminLoading, verified: adminVerified } = useIsOrgAdmin();
   const [expandedMonths, setExpandedMonths] = useState<{ [key: string]: boolean }>({});
 
   // Riktiga köp från databasen. Betalningar är ännu inte aktiverade, så för de
@@ -51,7 +51,7 @@ const Billing = () => {
   // för påhittade kort och fakturor.
   const { data: purchases = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['billing-purchases', user?.id],
-    enabled: !!user?.id && isAdmin,
+    enabled: !!user?.id && isAdmin && adminVerified,
     staleTime: 60_000,
     queryFn: async (): Promise<PurchaseRow[]> => {
       const { data, error } = await supabase
@@ -134,8 +134,9 @@ const Billing = () => {
 
   // Fakturering är bolagsinformation — bara admins får se den.
   // Rekryterare ska inte ens se att sidan finns — skicka hem direkt.
+  // Visa aldrig fakturering förrän servern bekräftat adminrollen.
+  if (isEmployer && !adminVerified) return null;
   if (isEmployer && !isAdmin) {
-    if (adminLoading) return null;
     return <Navigate to="/home" replace />;
   }
 
