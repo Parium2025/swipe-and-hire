@@ -114,16 +114,18 @@ const CompanyReviews = () => {
 
   // Read the organization owner's shared company fields rather than a recruiter's invite-time copy.
   const { data: company, isLoading: companyLoading } = useQuery({
-    queryKey: ['company-profile', reviewOwnerId],
+    queryKey: ['company-public-profile', reviewOwnerId],
     queryFn: async () => {
-      const { data, error } = reviewOwnerId === user?.id
-        ? await fetchMyProfile()
-        : await supabase.from('profiles').select('*').eq('user_id', reviewOwnerId!).single();
+      if (!reviewOwnerId) return null;
+      const { data, error } = await supabase
+        .rpc('get_employer_public_profile', { target_user_id: reviewOwnerId })
+        .maybeSingle();
       if (error) throw error;
-      const owner = Array.isArray(data) ? data[0] : data;
-      return owner ? {
-        ...owner,
-        company_social_media_links: (owner.company_social_media_links as unknown as SocialMediaLink[]) || [],
+      return data ? {
+        ...data,
+        id: data.user_id,
+        company_social_media_links: Array.isArray(data.company_social_media_links)
+          ? data.company_social_media_links as unknown as SocialMediaLink[] : [],
       } as CompanyProfile : null;
     },
     enabled: !!reviewOwnerId,
