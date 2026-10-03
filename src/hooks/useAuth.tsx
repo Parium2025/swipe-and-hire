@@ -651,7 +651,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return prev;
           });
 
-          if (cachedBelongsToOther) {
+          if (cachedBelongsToOther || (previousUserId !== null && previousUserId !== activeUserId)) {
             queryClient.clear();
             setUserRole(null);
             setOrganization(null);
