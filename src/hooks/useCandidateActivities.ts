@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { warmActivityAvatars } from '@/lib/warmTeamAvatars';
+import { clearMediaUrlCache } from '@/hooks/useMediaUrl';
 
 export type ActivityType =
   | 'rating_changed'
@@ -151,6 +152,9 @@ export function useCandidateActivities(applicantId: string | null) {
         const changedId = (payload.new ?? payload.old) as { profile_user_id?: string };
         const rows = queryClient.getQueryData<CandidateActivity[]>(['candidate-activities', user.id, applicantId]);
         if (changedId.profile_user_id && rows?.some((row) => row.user_id === changedId.profile_user_id)) {
+          for (const path of new Set(rows.filter((row) => row.user_id === changedId.profile_user_id).map((row) => row.user_profile_image_url))) {
+            if (path) clearMediaUrlCache(path, 'profile-image');
+          }
           queryClient.invalidateQueries({ queryKey: ['candidate-activities', user.id, applicantId] });
         }
       })
