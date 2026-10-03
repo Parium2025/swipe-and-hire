@@ -44,5 +44,6 @@
 - [x] Align report expiry status with dashboard; scope report caches to organization; prevent application event double-counting; confirm recruiter dashboard/report cold starts
 - [x] Verify colleague candidate ratings, notes and organization-wide job history in the live recruiter account; inspect mobile layout and cold starts
 - [x] Show organization colleagues' ratings directly in the candidate list; isolate notes per signed-in account and retain account-scoped media caches
+- [x] Match employer image preloads to actual card transforms, keep them account-scoped, and verify candidate portraits and active/expired job images on a signed-in cold start; remove the add-button's white hover surface
 - [ ] Verify profile photo changes live across two simultaneously signed-in employer accounts (blocked: second authorized account/session unavailable)
 - [ ] Verify cross-colleague counts after a real application and assess report refresh timing (blocked: no safe live test application submitted in this audit)
