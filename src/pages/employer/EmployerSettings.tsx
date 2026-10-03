@@ -125,8 +125,8 @@ const EmployerSettings = () => {
   // Förvärm panelernas data direkt när sidan öppnas, medan dragspelen är stängda.
   // Då finns team, regler och mallar redan i cache när användaren fäller ut dem.
   useEffect(() => {
-    prewarmEmployerSettings(user?.id);
-  }, [user?.id]);
+    if (isAdmin) prewarmEmployerSettings(user?.id);
+  }, [user?.id, isAdmin]);
 
   useLayoutEffect(() => {
     if (location.pathname !== '/settings') {

@@ -298,7 +298,7 @@ const EmployerOnboardingTour = ({ onComplete, firstName, initialStep = 0 }: Empl
               </div>
 
               <div className="mt-6 space-y-3">
-                {shortcuts.filter(item => isAdmin || !['/billing', '/settings'].includes(item.path)).map((item, index) => {
+                {shortcuts.filter(item => isAdmin || (item.path !== '/billing' && item.path !== '/settings')).map((item, index) => {
                   const Icon = item.icon;
                   return (
                     <button
