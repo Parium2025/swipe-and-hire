@@ -136,6 +136,14 @@ const MyCandidates = () => {
     setViewingColleagueListId(colleagueId ? listId : null);
   }, [setColleagueCandidates]);
 
+  // En kollega kan väljas innan dennes listor hämtats klart. Välj då den
+  // faktiska standardlistan så att tavla och räknare läser samma lista.
+  useEffect(() => {
+    if (!viewingColleagueId || viewingColleagueListId || colleagueLists.length === 0) return;
+    const defaultList = colleagueLists.find(list => list.is_default) ?? colleagueLists[0];
+    setViewingColleagueListId(defaultList.id);
+  }, [viewingColleagueId, viewingColleagueListId, colleagueLists]);
+
   useEffect(() => {
     if (!isSwitchingColleague) return;
     if (loadingColleagueCandidates) {
@@ -851,18 +859,6 @@ const MyCandidates = () => {
     return mapCandidateToAppData(selectedCandidate);
   }, [selectedCandidate, mapCandidateToAppData]);
 
-  if ((isViewingColleague ? loadingColleagueCandidates || isSwitchingColleague : isLoading) || !showContent) {
-    return (
-      <EmployerMyCandidatesSkeleton
-        stageOrder={activeStageOrder}
-        stageCounts={stageCounts}
-        userId={user?.id}
-        activeListId={isViewingColleague ? viewingColleagueListId : activeListId}
-      />
-    );
-  }
-
-
   return (
      <div className="responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       {/* Header with Search and Stage Filters */}
@@ -894,7 +890,14 @@ const MyCandidates = () => {
         useMobileView={useMobileView}
       />
 
-      {stats.total === 0 ? (
+       {((isViewingColleague ? loadingColleagueCandidates || isSwitchingColleague : isLoading) || !showContent) ? (
+         <EmployerMyCandidatesSkeleton
+           stageOrder={activeStageOrder}
+           stageCounts={stageCounts}
+           userId={user?.id}
+           activeListId={isViewingColleague ? viewingColleagueListId : activeListId}
+         />
+       ) : stats.total === 0 ? (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <UserCheck className="h-12 w-12 text-white mb-4" />
