@@ -535,6 +535,9 @@ export function useMyCandidatesData(
           // Fallback: refetch for other changes (insert/delete/unknown updates)
           // This catches changes made by colleagues that affect shared data
           queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['applicant-membership', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user.id] });
           queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user.id] });
         }
       )
@@ -776,6 +779,7 @@ export function useMyCandidatesData(
         addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
@@ -870,6 +874,7 @@ export function useMyCandidatesData(
         }
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
       if (result.inserted > 0) {
@@ -1002,6 +1007,7 @@ export function useMyCandidatesData(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
       // Räknarna i listmenyn och kollegevyn måste följa med – bulk-borttagning
       // gjorde detta, den enskilda missade det och siffrorna hängde kvar.
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
