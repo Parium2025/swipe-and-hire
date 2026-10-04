@@ -135,10 +135,10 @@ export const MyCandidatesHeader = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="center"
-              className="min-w-[240px] max-w-[86vw] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10"
+              className="min-w-[240px] max-w-[86vw] bg-slate-900/95 text-pure-white backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10"
             >
               <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-pure-white">Mina listor</DropdownMenuLabel>
-              {lists.map((list, index) => {
+              {lists.map((list) => {
                 const isActive = !isViewingColleague && activeList?.id === list.id;
                 return (
                   <DropdownMenuItem
