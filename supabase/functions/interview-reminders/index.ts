@@ -120,8 +120,10 @@ Deno.serve(async (req) => {
       members.add(row.user_id);
       membersByOrg.set(row.organization_id, members);
       orgByMember.set(row.user_id, row.organization_id);
-      if (row.role === "admin" || (row.role === "company_admin" && !adminByOrg.has(row.organization_id))) {
-        adminByOrg.set(row.organization_id, row.user_id);
+      // Samma entydiga adminval som outreach_rule_owner i databasen.
+      if (row.role === "admin") {
+        const current = adminByOrg.get(row.organization_id);
+        if (!current || row.user_id < current) adminByOrg.set(row.organization_id, row.user_id);
       }
     }
     const adminForBooker = (bookerId: string) => {
@@ -195,9 +197,10 @@ Deno.serve(async (req) => {
       };
       const groups = new Map<string, Group>();
       for (const automation of (automations || []) as InterviewTimelineAutomation[]) {
-        const orgId = automation.organization_id ?? orgByMember.get(automation.owner_user_id);
+        const orgId = orgByMember.get(automation.owner_user_id);
         // Äldre regler kan sakna organization_id. Teammedlemmars egna regler
         // ska ändå inte konkurrera med admins inställning.
+        if (automation.organization_id && automation.organization_id !== orgId) continue;
         if (orgId && adminByOrg.get(orgId) !== automation.owner_user_id) continue;
         const tplId = (automation as { template_id?: string | null }).template_id;
         if (tplId && !activeTemplateIds.has(tplId)) continue;
@@ -254,7 +257,7 @@ Deno.serve(async (req) => {
         // möte är den bästa proxy:n.
         const interviewStatuses = trigger === "interview_before" ? ["pending", "confirmed"] : ["confirmed", "completed"];
 
-        const orgId = automation.organization_id ?? orgByMember.get(automation.owner_user_id);
+        const orgId = orgByMember.get(automation.owner_user_id);
         const memberIds = orgId
           ? [...(membersByOrg.get(orgId) ?? [])]
           : [];

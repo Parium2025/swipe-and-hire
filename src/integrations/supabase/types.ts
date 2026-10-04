@@ -4970,6 +4970,7 @@ export type Database = {
         }[]
       }
       normalize_job_text: { Args: { t: string }; Returns: string }
+      outreach_rule_owner: { Args: { p_booker: string }; Returns: string }
       parium_answer_tokens: { Args: { _answers: Json }; Returns: string[] }
       parium_norm: { Args: { t: string }; Returns: string }
       parium_synonyms: { Args: { _tok: string }; Returns: string[] }
