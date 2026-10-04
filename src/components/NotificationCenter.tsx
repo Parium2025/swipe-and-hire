@@ -25,6 +25,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const typeIcons: Record<string, typeof Bell> = {
   new_application: UserCheck,
+  candidate_shared: UserCheck,
   application_status: Briefcase,
   interview_scheduled: Calendar,
   message: MessageCircle,

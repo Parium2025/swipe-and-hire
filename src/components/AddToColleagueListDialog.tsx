@@ -9,7 +9,7 @@ import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
 import { TeamMember } from '@/hooks/useTeamMembers';
-import { AlertTriangle, Trash2, UserCheck, Users } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Trash2, UserCheck, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -67,6 +67,7 @@ export function AddToColleagueListDialog({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState<string | null>(null);
+  const [expandedMemberId, setExpandedMemberId] = useState<string | null>(null);
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
@@ -311,23 +312,24 @@ export function AddToColleagueListDialog({
                   </Button>
                 ))}
 
-          {/* Kollegornas listor */}
+          {/* Kollegor: tryck på namnet för att visa kollegans listor */}
           {teamMembers.map((member) => {
             const memberLists = teamLists[member.userId] ?? [];
             const entries = memberLists.length > 0
               ? memberLists.map((l) => ({ id: l.id as string | null, name: l.name }))
               : [{ id: null as string | null, name: 'Kandidatlista' }];
+            const memberName = `${member.firstName} ${member.lastName}`.trim() || 'Kollega';
+            const expanded = expandedMemberId === member.userId;
 
-            return entries.map((entry) => {
-              const key = `${member.userId}:${entry.id ?? 'default'}`;
-              return (
+            return (
+              <div key={member.userId} className="space-y-2">
                 <Button
-                  key={key}
                   variant="outline"
                   className={buttonClass}
-                  onClick={() => handleAdd(member.userId, entry.id, key, false)}
+                  onClick={() => setExpandedMemberId(expanded ? null : member.userId)}
                   onPointerDown={(e) => e.preventDefault()}
                   disabled={isAdding !== null}
+                  aria-expanded={expanded}
                 >
                   <ResolvedAvatar
                     src={member.profileImageUrl}
@@ -336,20 +338,35 @@ export function AddToColleagueListDialog({
                     className="h-8 w-8 flex-shrink-0"
                     fallbackClassName="text-xs bg-white/20"
                   />
-                   <div className="min-w-0 flex-1 text-left">
-                     <TruncatedText text={entry.name} lines={2} className="font-medium" insideInteractive />
-                     <TruncatedText
-                       text={`${member.firstName} ${member.lastName}`.trim() || 'Kollega'}
-                       className="text-xs text-white"
-                       insideInteractive
-                     />
+                  <div className="min-w-0 flex-1 text-left">
+                    <TruncatedText text={memberName} lines={2} className="font-medium" insideInteractive />
+                    <div className="text-xs text-white">Kollegas listor</div>
                   </div>
-                  {isAdding === key && (
-                    <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
-                  )}
+                  <ChevronDown className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
                 </Button>
-              );
-            });
+
+                {expanded && entries.map((entry) => {
+                  const key = `${member.userId}:${entry.id ?? 'default'}`;
+                  return (
+                    <Button
+                      key={key}
+                      variant="outline"
+                      className={`${buttonClass} pl-6`}
+                      onClick={() => handleAdd(member.userId, entry.id, key, false)}
+                      onPointerDown={(e) => e.preventDefault()}
+                      disabled={isAdding !== null}
+                    >
+                      <div className="min-w-0 flex-1 text-left">
+                        <TruncatedText text={entry.name} lines={2} className="font-medium" insideInteractive />
+                      </div>
+                      {isAdding === key && (
+                        <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
+            );
           })}
 
           {canRemoveFromOwnList && rows.length === 1 && (
