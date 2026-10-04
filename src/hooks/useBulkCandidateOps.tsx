@@ -65,10 +65,6 @@ export function useBulkCandidateOps({
   const bulkMoveToStage = useCallback(
     async (targetStage: CandidateStage) => {
       const ids = Array.from(selectedCandidateIds);
-      const count = ids.length;
-      const cfg = stageConfig[targetStage];
-      const label = cfg?.label || targetStage;
-      const color = cfg?.color || '#22c55e';
 
       if (isViewingColleague) {
         // Räkna verkliga träffar: tidigare visades "X kandidater flyttade"
@@ -84,12 +80,6 @@ export function useBulkCandidateOps({
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         if (moved === 0) {
           toast.error('Kunde inte flytta kandidaterna');
-        } else if (moved < count) {
-          toast.warning(`${moved} av ${count} kandidater flyttades till "${label}"`);
-        } else {
-          toast.success(`${count} kandidater flyttade till "${label}"`, {
-            icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
-          });
         }
         return;
       }
@@ -113,9 +103,6 @@ export function useBulkCandidateOps({
         }
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
-        toast.success(`${count} kandidater flyttade till "${label}"`, {
-          icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />,
-        });
       } catch {
         // Enqueue each failed move for retry
         if (user) {
