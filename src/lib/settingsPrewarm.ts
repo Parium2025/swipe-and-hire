@@ -24,9 +24,14 @@ let lastUserId: string | null = null;
 let lastRunAt = 0;
 
 async function prewarmAutoRules(userId: string): Promise<void> {
+  const { data: organizationId, error: orgError } = await supabase.rpc('get_user_organization_id', { p_user_id: userId });
+  if (orgError) return;
+  const ownerResult = organizationId ? await supabase.rpc('outreach_settings_owner', { p_organization_id: organizationId }) : null;
+  if (organizationId && (ownerResult?.error || !ownerResult?.data)) return;
+  const ownerId = ownerResult?.data ?? userId;
   const [automationsRes, templatesRes] = await Promise.all([
-    supabase.from('outreach_automations').select('*').eq('owner_user_id', userId),
-    supabase.from('outreach_templates').select('*').eq('owner_user_id', userId),
+    organizationId ? supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId) : supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).is('organization_id', null),
+    organizationId ? supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId) : supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).is('organization_id', null),
   ]);
 
   if (automationsRes.error || templatesRes.error) return;

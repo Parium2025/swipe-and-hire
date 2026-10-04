@@ -104,6 +104,7 @@ function readCache(userId: string | undefined): AutoRulesCache | null {
 export function AutoMessagesPanel() {
   const { user, profile } = useAuth();
   const organizationId = (profile as { organization_id?: string | null } | null)?.organization_id ?? null;
+  const [settingsOwnerId, setSettingsOwnerId] = useState<string | null>(null);
   // Synkron hydrering från cache → panelen renderas direkt, ingen spinner vid retur.
   const initialCache = useRef(readCache(user?.id)).current;
   const [automations, setAutomations] = useState<OutreachAutomation[]>(initialCache?.automations ?? []);
@@ -114,9 +115,13 @@ export function AutoMessagesPanel() {
 
   const fetchData = useCallback(async () => {
     if (!user) return;
+    const ownerResult = organizationId ? await supabase.rpc('outreach_settings_owner', { p_organization_id: organizationId }) : null;
+    if (organizationId && (ownerResult?.error || !ownerResult?.data)) { setLoading(false); return; }
+    const ownerId = ownerResult?.data ?? user.id;
+    setSettingsOwnerId(ownerId);
     const [automationsRes, templatesRes] = await Promise.all([
-      supabase.from('outreach_automations').select('*').eq('owner_user_id', user.id),
-      supabase.from('outreach_templates').select('*').eq('owner_user_id', user.id),
+      organizationId ? supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId) : supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).is('organization_id', null),
+      organizationId ? supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId) : supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).is('organization_id', null),
     ]);
     const nextAutomations = (automationsRes.data as OutreachAutomation[]) ?? [];
     const nextTemplates = (templatesRes.data as OutreachTemplate[]) ?? [];
@@ -131,7 +136,7 @@ export function AutoMessagesPanel() {
     } catch {
       // Ignorera quota-fel
     }
-  }, [user]);
+  }, [user, organizationId]);
 
 
   useEffect(() => {
@@ -140,10 +145,14 @@ export function AutoMessagesPanel() {
     void (async () => {
       // Standard: allt påslaget för nya arbetsgivare. Har de redan egna
       // inställningar rör vi dem aldrig – av är av.
-      const seeded = await seedDefaultAutoRules(user.id, organizationId);
+      const ownerResult = organizationId ? await supabase.rpc('outreach_settings_owner', { p_organization_id: organizationId }) : null;
+      if (organizationId && (ownerResult?.error || !ownerResult?.data)) { setLoading(false); return; }
+      const ownerId = ownerResult?.data ?? user.id;
+      // Endast den valda administratörens regler används av servern.
+      const seeded = ownerId === user.id ? await seedDefaultAutoRules(user.id, organizationId) : false;
       if (cancelled) return;
       // Nya standardhändelser läggs till även för redan seedade arbetsgivare.
-      if (!seeded) await backfillMissingAutoRuleEvents(user.id, organizationId);
+      if (!seeded && ownerId === user.id) await backfillMissingAutoRuleEvents(user.id, organizationId);
       if (cancelled) return;
       await fetchData();
       if (seeded && !cancelled) {
@@ -204,7 +213,7 @@ export function AutoMessagesPanel() {
     const { data: remote } = await supabase
       .from('outreach_templates')
       .select('*')
-      .eq('owner_user_id', user!.id)
+      .eq('owner_user_id', settingsOwnerId ?? user!.id)
       .eq('name', config.name)
       .eq('channel', channel)
       .limit(1)
@@ -218,7 +227,7 @@ export function AutoMessagesPanel() {
     const { data, error } = await supabase
       .from('outreach_templates')
       .insert({
-        owner_user_id: user!.id,
+        owner_user_id: settingsOwnerId ?? user!.id,
         organization_id: organizationId,
         name: config.name,
         channel,
@@ -238,7 +247,7 @@ export function AutoMessagesPanel() {
 
 
   const handleToggle = async (event: AutoRuleEvent, channel: AutoRuleChannel, enabled: boolean) => {
-    if (!user) return;
+    if (!user || (organizationId && !settingsOwnerId)) return;
     const key = `${event.trigger}-${channel}`;
     setBusyKey(key);
 
@@ -268,7 +277,7 @@ export function AutoMessagesPanel() {
           (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`);
 
         const { error } = await supabase.from('outreach_automations').insert({
-          owner_user_id: user.id,
+          owner_user_id: settingsOwnerId ?? user.id,
           organization_id: organizationId,
           name: event.title,
           trigger: event.trigger,

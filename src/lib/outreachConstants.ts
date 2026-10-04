@@ -31,5 +31,4 @@ export const OUTREACH_TRIGGER_OPTIONS: { value: OutreachTrigger; label: string }
 
 export const OUTREACH_RECIPIENT_OPTIONS: { value: OutreachRecipient; label: string }[] = [
   { value: 'candidate', label: 'Kandidat' },
-  { value: 'employer', label: 'Arbetsgivare' },
 ];

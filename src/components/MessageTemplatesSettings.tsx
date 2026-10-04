@@ -96,7 +96,7 @@ type AutomationForm = {
   name: string;
   trigger: OutreachTrigger | '';
   channels: AutomationChannel[];
-  recipient_type: 'candidate' | 'employer';
+  recipient_type: 'candidate';
   template_ids: Partial<Record<AutomationChannel, string>>;
   delay_minutes: number;
   is_enabled: boolean;
@@ -509,6 +509,7 @@ const getLogStatusBadgeClassName = (status: string) => {
 export function MessageTemplatesSettings() {
   const { user, profile } = useAuth();
   const organizationId = (profile as { organization_id?: string | null } | null)?.organization_id ?? null;
+  const [settingsOwnerId, setSettingsOwnerId] = useState<string | null>(null);
   const cachedStudio = useMemo(() => (user ? readCachedOutreachStudio(user.id) : null), [user]);
   const [templates, setTemplates] = useState<OutreachTemplate[]>(() => cachedStudio?.templates ?? []);
   const [automations, setAutomations] = useState<OutreachAutomation[]>(() => cachedStudio?.automations ?? []);
@@ -806,10 +807,20 @@ export function MessageTemplatesSettings() {
       setLoading(!cached);
     }
 
+    const ownerResult = organizationId ? await supabase.rpc('outreach_settings_owner', { p_organization_id: organizationId }) : null;
+    if (requestId !== fetchRequestIdRef.current) return;
+    if (organizationId && (ownerResult?.error || !ownerResult?.data)) {
+      setLoading(false);
+      setIsRefreshing(false);
+      toast.error('Kunde inte läsa organisationens utskicksinställningar');
+      return;
+    }
+    const ownerId = ownerResult?.data ?? user.id;
+    setSettingsOwnerId(ownerId);
     const [templatesRes, automationsRes, logsRes] = await Promise.all([
-      supabase.from('outreach_templates').select('*').order('created_at', { ascending: false }),
-      supabase.from('outreach_automations').select('*').order('created_at', { ascending: false }),
-      supabase.from('outreach_dispatch_logs').select('*').order('created_at', { ascending: false }).limit(40),
+      organizationId ? supabase.from('outreach_templates').select('*').eq('organization_id', organizationId).eq('owner_user_id', ownerId).order('created_at', { ascending: false }) : supabase.from('outreach_templates').select('*').is('organization_id', null).eq('owner_user_id', user.id).order('created_at', { ascending: false }),
+      organizationId ? supabase.from('outreach_automations').select('*').eq('organization_id', organizationId).eq('owner_user_id', ownerId).order('created_at', { ascending: false }) : supabase.from('outreach_automations').select('*').is('organization_id', null).eq('owner_user_id', user.id).order('created_at', { ascending: false }),
+      organizationId ? supabase.from('outreach_dispatch_logs').select('*').eq('organization_id', organizationId).order('created_at', { ascending: false }).limit(40) : supabase.from('outreach_dispatch_logs').select('*').is('organization_id', null).eq('owner_user_id', user.id).order('created_at', { ascending: false }).limit(40),
     ]);
 
     if (requestId !== fetchRequestIdRef.current) return;
@@ -836,7 +847,7 @@ export function MessageTemplatesSettings() {
 
     setLoading(false);
     setIsRefreshing(false);
-  }, [user]);
+  }, [user, organizationId]);
 
   useEffect(() => {
     if (!user) return;
@@ -1007,6 +1018,10 @@ export function MessageTemplatesSettings() {
     );
 
   const handleSaveTemplate = async () => {
+    if (organizationId && !settingsOwnerId) {
+      toast.error('Organisationens inställningar läses fortfarande in');
+      return;
+    }
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
 
     if (!templateForm.trigger) {
@@ -1040,7 +1055,7 @@ export function MessageTemplatesSettings() {
     });
 
     const { error } = await supabase.rpc('upsert_outreach_templates_atomic', {
-      p_owner_user_id: user.id,
+      p_owner_user_id: settingsOwnerId ?? user.id,
       p_organization_id: organizationId,
       p_trigger: trigger,
       p_templates: payload,
@@ -1113,6 +1128,10 @@ export function MessageTemplatesSettings() {
   };
 
   const handleSaveAutomation = async () => {
+    if (organizationId && !settingsOwnerId) {
+      toast.error('Organisationens inställningar läses fortfarande in');
+      return;
+    }
     if (!user || !automationForm.name.trim() || automationForm.channels.length === 0) return;
 
     const missingTemplate = automationForm.channels.some((channel) => !automationForm.template_ids[channel]);
@@ -1134,7 +1153,7 @@ export function MessageTemplatesSettings() {
 
     const groupId = automationForm.group_id ?? crypto.randomUUID();
     const basePayload = {
-      owner_user_id: user.id,
+      owner_user_id: settingsOwnerId ?? user.id,
       organization_id: organizationId,
       name: automationForm.name.trim(),
       trigger: selectedTrigger,

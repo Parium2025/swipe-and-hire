@@ -34,8 +34,14 @@ function sanitizeFromName(name: string): string {
   return cleaned || SITE_NAME
 }
 
-function assertValidEmailEncoding(value: string, field: string): void {
+function assertValidEmailEncoding(value: string, field: string, sources?: Record<string, unknown>): void {
   if (value.includes('\uFFFD')) {
+    // Logga bara fältnamn, aldrig kandidatens text eller mejladress.
+    // På så sätt går felet att härleda utan att leverera ett skadat mejl.
+    const damagedSources = Object.entries(sources ?? {})
+      .filter(([, source]) => typeof source === 'string' && source.includes('\uFFFD'))
+      .map(([name]) => name);
+    console.error('Email encoding rejected', { field, damagedSources });
     throw new Error(`Email ${field} contains invalid UTF-8 replacement characters`)
   }
 }
@@ -82,9 +88,9 @@ export async function sendTemplateEmail(
 
   // A replacement character means content was already damaged before rendering.
   // Refuse the send rather than delivering visibly broken Swedish text.
-  assertValidEmailEncoding(subject, 'subject')
-  assertValidEmailEncoding(html, 'HTML')
-  assertValidEmailEncoding(text, 'plain text')
+  assertValidEmailEncoding(subject, 'subject', templateData)
+  assertValidEmailEncoding(html, 'HTML', templateData)
+  assertValidEmailEncoding(text, 'plain text', templateData)
 
   try {
     await sendLovableEmail(

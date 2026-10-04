@@ -77,16 +77,18 @@ async function getUserFromRequest(request: Request) {
   return data.user;
 }
 
-async function getUserOrganizationIds(userId: string) {
-  const { data } = await admin.from('user_roles').select('organization_id').eq('user_id', userId).eq('is_active', true).not('organization_id', 'is', null);
-  return [...new Set((data ?? []).map((row) => row.organization_id).filter(Boolean))] as string[];
-}
-
 async function ensureTemplateAccess(templateId: string, userId: string) {
   const { data: template, error } = await admin.from('outreach_templates').select('*').eq('id', templateId).maybeSingle();
   if (error || !template) throw new Error('Mallen kunde inte hittas');
-  const organizationIds = await getUserOrganizationIds(userId);
-  const allowed = template.owner_user_id === userId || (!!template.organization_id && organizationIds.includes(template.organization_id));
+  // Organisationsmallar styrs av organisationens admin, inte av en kollegas
+  // personliga konto eller av en förfalskad owner_user_id på en org-rad.
+  let allowed = !template.organization_id && template.owner_user_id === userId;
+  if (template.organization_id) {
+    const { data: role } = await admin.from('user_roles').select('user_id')
+      .eq('user_id', userId).eq('organization_id', template.organization_id)
+      .eq('role', 'admin').eq('is_active', true).limit(1).maybeSingle();
+    allowed = !!role;
+  }
   if (!allowed) throw new Error('Ingen åtkomst till vald mall');
   return template as OutreachTemplate;
 }
@@ -485,7 +487,7 @@ async function dispatchLog(log: OutreachLog) {
 
       // Skickar via Lovable Emails — samma domän (notify.parium.se) som övriga
       // mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
-      await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
+      const delivery = await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
         // Nyckeln måste inkludera försöksnumret. Med en fast nyckel svarar
         // mejltjänsten 409 "already failed – send again with a new idempotency
         // key" på varje omförsök, vilket gör att ett tillfälligt fel blir
@@ -502,6 +504,15 @@ async function dispatchLog(log: OutreachLog) {
           decline_url: declineUrl,
         },
       });
+
+      if (!delivery.sent) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Mottagaren har avregistrerat sig från mejl',
+          locked_until: null,
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
 
       const emailMessageId = null;
 
@@ -535,7 +546,14 @@ async function dispatchLog(log: OutreachLog) {
         .select('id', { count: 'exact', head: true })
         .eq('user_id', log.recipient_user_id)
         .eq('is_active', true);
-      if (!tokenCount) throw new Error('Inga registrerade enheter för push (push fungerar bara i mobilappen)');
+      if (!tokenCount) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Ingen registrerad enhet för push',
+          locked_until: null,
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
       const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
