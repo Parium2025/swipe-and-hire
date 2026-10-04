@@ -164,6 +164,18 @@ export function useTeamMembers() {
           },
           debouncedInvalidate
         )
+        // Kollegor som byter profilbild/namn — uppdatera listan live.
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'profile_change_signals' },
+          (payload) => {
+            const row = (payload.new ?? payload.old) as { profile_user_id?: string };
+            const members = queryClient.getQueryData<TeamMember[]>(['team-members', user.id]);
+            if (row?.profile_user_id && members?.some((m: any) => m.userId === row.profile_user_id)) {
+              queryClient.invalidateQueries({ queryKey: ['team-members', user.id] });
+            }
+          }
+        )
         .subscribe();
     };
 

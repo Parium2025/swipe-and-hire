@@ -24,7 +24,7 @@ import {
 import { computeStageOrder } from '@/hooks/useStageSettings';
 
 /** Första kolumnen exakt som tavlan visar den (standard- + egna steg). */
-async function resolveFirstStage(userId: string, listId: string | null): Promise<string> {
+export async function resolveFirstStage(userId: string, listId: string | null): Promise<string> {
   let query = supabase
     .from('user_stage_settings')
     .select('stage_key, order_index, is_custom, custom_label')
@@ -32,7 +32,11 @@ async function resolveFirstStage(userId: string, listId: string | null): Promise
   if (listId) query = query.eq('list_id', listId);
   const { data } = await query;
   const live = (data || []).filter((s: any) => s.order_index > -1 || s.custom_label === '__DELETED__');
-  return computeStageOrder(live as any)[0] || 'to_contact';
+  const order = computeStageOrder(live as any);
+  // Nya kandidater hamnar alltid i Pariums första standardsteg — aldrig i ett
+  // steg som användaren själv har skapat.
+  const customKeys = new Set((data || []).filter((s: any) => s.is_custom).map((s: any) => s.stage_key));
+  return order.find(key => !customKeys.has(key) && !key.startsWith('custom_')) || order[0] || 'to_contact';
 }
 
 /** Lokalt cachat eget betyg (fångar betyg som ännu ligger i synkkön). */
