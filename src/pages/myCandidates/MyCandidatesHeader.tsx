@@ -8,9 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -140,7 +137,7 @@ export const MyCandidatesHeader = ({
               align="center"
               className="min-w-[240px] max-w-[86vw] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl z-[10000] rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10"
             >
-              <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-white/70">Mina listor</DropdownMenuLabel>
+              <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-pure-white">Mina listor</DropdownMenuLabel>
               {lists.map((list, index) => {
                 const isActive = !isViewingColleague && activeList?.id === list.id;
                 return (
@@ -155,7 +152,7 @@ export const MyCandidatesHeader = ({
                     {isActive ? (
                       <Check className="h-4 w-4 flex-shrink-0" />
                     ) : (
-                      <UserCheck className="h-4 w-4 flex-shrink-0 text-white/70" />
+                       <UserCheck className="h-4 w-4 flex-shrink-0 text-pure-white" />
                     )}
                     <span className="block truncate min-w-0">{list.name}</span>
                     <span className="ml-auto pl-2 flex-shrink-0 text-white tabular-nums">
@@ -168,59 +165,43 @@ export const MyCandidatesHeader = ({
                 onClick={onManageLists}
                 className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors"
               >
-                <Settings2 className="h-4 w-4 flex-shrink-0 text-white/70" />
+                 <Settings2 className="h-4 w-4 flex-shrink-0 text-pure-white" />
                 Hantera listor
               </DropdownMenuItem>
 
               {hasTeam && teamMembers.length > 0 && (
                 <DropdownMenuGroup className="[&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
                   <DropdownMenuSeparator className="bg-white/10 my-1" />
-                  <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-white/70">Kollegors listor</DropdownMenuLabel>
+                   <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-pure-white">Kollegors listor</DropdownMenuLabel>
                   {teamMembers.map(member => {
                     const memberLists = colleagueListsByOwner[member.userId] ?? [];
-                    const avatar = (
-                      <TeamMemberAvatar
-                        profileImageUrl={member.profileImageUrl}
-                        firstName={member.firstName}
-                        lastName={member.lastName}
-                        size="xs"
-                        className="flex-shrink-0"
-                      />
-                    );
-
-                    if (memberLists.length <= 1) {
-                      return (
-                        <DropdownMenuItem
-                          key={member.userId}
-                          onClick={() => onViewColleague(member.userId, memberLists[0]?.id ?? null)}
-                          className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId ? 'bg-white/15' : ''}`}
-                        >
-                          {avatar}
-                          <span className="block truncate min-w-0">{member.firstName} {member.lastName}</span>
-                        </DropdownMenuItem>
-                      );
-                    }
+                     const defaultList = memberLists.find(list => list.is_default) ?? memberLists[0];
 
                     return (
-                      <DropdownMenuSub key={member.userId}>
-                        <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors">
-                          {avatar}
+                       <React.Fragment key={member.userId}>
+                         <DropdownMenuItem
+                           onSelect={() => onViewColleague(member.userId, defaultList?.id ?? null)}
+                           className={`flex items-center gap-2 cursor-pointer text-pure-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId && (!viewingColleagueList || viewingColleagueList.id === defaultList?.id) ? 'bg-white/15' : ''}`}
+                         >
+                           <TeamMemberAvatar
+                             profileImageUrl={member.profileImageUrl}
+                             firstName={member.firstName}
+                             lastName={member.lastName}
+                             size="xs"
+                             className="flex-shrink-0"
+                           />
                            <span className="block truncate min-w-0">{member.firstName} {member.lastName}</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="min-w-[200px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
-                          {memberLists.map(list => (
-                            <DropdownMenuItem
-                              key={list.id}
-                              onClick={() => onViewColleague(member.userId, list.id)}
-                              className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${
-                                viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/15' : ''
-                              }`}
-                            >
-                               <span className="block truncate min-w-0">{list.name}</span>
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
+                         </DropdownMenuItem>
+                         {memberLists.filter(list => list.id !== defaultList?.id).map(list => (
+                           <DropdownMenuItem
+                             key={list.id}
+                             onSelect={() => onViewColleague(member.userId, list.id)}
+                             className={`flex items-center gap-2 cursor-pointer pl-10 text-pure-white hover:bg-white/20 focus:bg-white/20 rounded-md pr-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/15' : ''}`}
+                           >
+                             <span className="block truncate min-w-0">{list.name}</span>
+                           </DropdownMenuItem>
+                         ))}
+                       </React.Fragment>
                     );
                   })}
                 </DropdownMenuGroup>
