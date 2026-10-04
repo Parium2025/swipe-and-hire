@@ -71,6 +71,8 @@ interface TrendData {
   prev_interviews: number;
   current_interviews_completed?: number;
   prev_interviews_completed?: number;
+  viewers_who_applied?: number;
+  applications_with_interview?: number;
 }
 
 interface BestDay {
@@ -1064,11 +1066,12 @@ const EmployerAnalytics = memo(() => {
         <CardContent className="p-5">
           <h3 className="text-sm font-medium text-white mb-5">Konverteringar</h3>
           <div className="flex gap-4">
+            {/* Andel av samma personer i varje steg — aldrig mer än 100 %. */}
             <ConversionGauge icon={Target} label="Annonskonvertering" subtitle="Besökare → Ansökan"
-              value={totals.applications} total={totals.views} />
+              value={trends?.viewers_who_applied ?? 0} total={totals.views} />
             <div className="w-px bg-white/10 self-stretch" />
             <ConversionGauge icon={Filter} label="Urvalskonvertering" subtitle="Ansökan → Intervju"
-              value={totals.interviews} total={totals.applications} />
+              value={trends?.applications_with_interview ?? 0} total={totals.applications} />
           </div>
         </CardContent>
       </Card>
