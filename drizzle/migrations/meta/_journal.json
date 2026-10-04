@@ -519,6 +519,13 @@
       "when": 1791143772175,
       "tag": "0073_guard_organization_outreach_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1791144010180,
+      "tag": "0074_align_organization_outreach_owner_and_admin_access",
+      "breakpoints": true
     }
   ]
 }
