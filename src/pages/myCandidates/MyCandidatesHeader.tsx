@@ -102,6 +102,7 @@ export const MyCandidatesHeader = ({
   useMobileView,
 }: MyCandidatesHeaderProps) => {
   const [listMenuOpen, setListMenuOpen] = React.useState(false);
+  const [expandedColleagueId, setExpandedColleagueId] = React.useState<string | null>(null);
   const countByList = useCandidateListCounts(!isViewingColleague);
   const activeListName = activeList?.name || 'Mina kandidater';
 
@@ -114,7 +115,10 @@ export const MyCandidatesHeader = ({
       {/* Title and description */}
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 min-w-0">
-          <DropdownMenu open={listMenuOpen} onOpenChange={setListMenuOpen}>
+          <DropdownMenu open={listMenuOpen} onOpenChange={(open) => {
+            setListMenuOpen(open);
+            if (!open) setExpandedColleagueId(null);
+          }}>
             <DropdownMenuTrigger asChild>
               <button
                 aria-label="Byt lista"
@@ -175,13 +179,17 @@ export const MyCandidatesHeader = ({
                    <DropdownMenuLabel className="px-2.5 py-1.5 text-xs font-medium text-pure-white">Kollegors listor</DropdownMenuLabel>
                   {teamMembers.map(member => {
                     const memberLists = colleagueListsByOwner[member.userId] ?? [];
-                     const defaultList = memberLists.find(list => list.is_default) ?? memberLists[0];
+                     const expanded = expandedColleagueId === member.userId;
 
-                    return (
+                     return (
                        <React.Fragment key={member.userId}>
                          <DropdownMenuItem
-                           onSelect={() => onViewColleague(member.userId, defaultList?.id ?? null)}
-                           className={`flex items-center gap-2 cursor-pointer text-pure-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId && (!viewingColleagueList || viewingColleagueList.id === defaultList?.id) ? 'bg-white/15' : ''}`}
+                           onSelect={(event) => {
+                             event.preventDefault();
+                             setExpandedColleagueId(expanded ? null : member.userId);
+                           }}
+                           aria-expanded={expanded}
+                           className={`flex items-center gap-2 cursor-pointer text-pure-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${expanded ? 'bg-white/15' : ''}`}
                          >
                            <TeamMemberAvatar
                              profileImageUrl={member.profileImageUrl}
@@ -191,13 +199,15 @@ export const MyCandidatesHeader = ({
                              className="flex-shrink-0"
                            />
                            <span className="block truncate min-w-0">{member.firstName} {member.lastName}</span>
+                           <ChevronDown className={`ml-auto h-4 w-4 flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} />
                          </DropdownMenuItem>
-                         {memberLists.filter(list => list.id !== defaultList?.id).map(list => (
+                         {expanded && memberLists.map(list => (
                            <DropdownMenuItem
                              key={list.id}
                              onSelect={() => onViewColleague(member.userId, list.id)}
                              className={`flex items-center gap-2 cursor-pointer pl-10 text-pure-white hover:bg-white/20 focus:bg-white/20 rounded-md pr-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/15' : ''}`}
                            >
+                             {viewingColleagueId === member.userId && viewingColleagueList?.id === list.id && <Check className="h-4 w-4 flex-shrink-0" />}
                              <span className="block truncate min-w-0">{list.name}</span>
                            </DropdownMenuItem>
                          ))}

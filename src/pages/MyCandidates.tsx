@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useOrganizationCandidateRatings } from '@/hooks/useOrganizationCandidateRatings';
 import { useColleagueCandidates } from '@/hooks/useColleagueCandidates';
 import { useColleagueStageSettings } from '@/hooks/useColleagueStageSettings';
 import { prefetchCandidateActivities } from '@/hooks/useCandidateActivities';
@@ -233,6 +234,15 @@ const MyCandidates = () => {
   const displayedCandidates = useMemo(() => {
     return isViewingColleague ? colleagueCandidates : candidates;
   }, [isViewingColleague, colleagueCandidates, candidates]);
+  // Mina egna betyg går först. Om jag ännu inte bedömt kandidaten visas
+  // kollegans sparade betyg även i Mina kandidater, precis som i ansökningsvyn.
+  const ratingApplicantIds = useMemo(() => displayedCandidates.map(c => c.applicant_id), [displayedCandidates]);
+  const organizationRatings = useOrganizationCandidateRatings(ratingApplicantIds);
+  const ratedCandidates = useMemo(() => displayedCandidates.map(candidate => {
+    if (isViewingColleague || candidate.rating > 0) return candidate;
+    const colleagueRating = organizationRatings[candidate.applicant_id]?.colleague;
+    return colleagueRating && colleagueRating > 0 ? { ...candidate, rating: colleagueRating } : candidate;
+  }), [displayedCandidates, isViewingColleague, organizationRatings]);
   
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
