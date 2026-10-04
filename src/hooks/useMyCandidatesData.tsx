@@ -779,10 +779,10 @@ export function useMyCandidatesData(
   const refreshAfterInsert = () => {
     const opts = { refetchType: 'all' as const };
     queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-    queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] }, opts);
-    queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] }, opts);
-    queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] }, opts);
-    queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] }, opts);
+    queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] , ...opts });
+    queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] , ...opts });
+    queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] , ...opts });
+    queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] , ...opts });
   };
 
   // Add candidate to my list
