@@ -19,6 +19,12 @@ interface TruncatedTextProps {
    * className drives the clamp.
    */
   lines?: number;
+  /**
+   * Touch-only: visa tooltipen först vid långtryck (~500 ms). Korta tryck
+   * släpps vidare till föräldern (t.ex. en dropdown-trigger) utan att
+   * tooltipen öppnas. Desktop påverkas aldrig.
+   */
+  touchTooltipOnLongPress?: boolean;
 }
 
 // Module-level lazy detection of touch/hover capability — runs ONCE for the
@@ -89,6 +95,7 @@ export function TruncatedText({
   instantClose = false,
   style,
   lines,
+  touchTooltipOnLongPress = false,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
