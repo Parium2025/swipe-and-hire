@@ -543,6 +543,17 @@ export default function Messages() {
             ) : (
               <ScrollArea className="h-full w-full min-w-0 max-w-full overflow-x-hidden no-chrome-pad [&_[data-radix-scroll-area-viewport]]:overflow-x-hidden [&_[data-radix-scroll-area-viewport]>div]:!block [&_[data-radix-scroll-area-viewport]>div]:!w-full [&_[data-radix-scroll-area-viewport]>div]:!min-w-0 [&_[data-radix-scroll-area-viewport]>div]:!max-w-full">
                 <div ref={listInnerRef} className="w-full min-w-0 overflow-hidden px-2 pb-[max(var(--chrome-strip-pad),0.5rem)]">
+                  {colleagueStarts.map(member => (
+                    <div key={member.userId} className="w-full min-w-0 max-w-full overflow-hidden">
+                      {colleagueStarts[0]?.userId !== member.userId && <div aria-hidden="true" className="mx-3 h-px bg-pure-white/20" />}
+                      <ColleagueStartItem
+                        member={member}
+                        pending={pendingColleagueId === member.userId}
+                        onStart={() => void startColleagueConversation(member.userId)}
+                      />
+                    </div>
+                  ))}
+                  {colleagueStarts.length > 0 && filteredConversations.length > 0 && <div aria-hidden="true" className="mx-3 h-px bg-pure-white/20" />}
                   {shouldVirtualizeConversations ? (
                     <div className="relative w-full" style={{ height: conversationVirtualizer.getTotalSize() }}>
                       {conversationVirtualizer.getVirtualItems().map((vItem) => {
@@ -585,17 +596,6 @@ export default function Messages() {
                       ))}
                     </div>
                   )}
-
-                  {colleagueStarts.map(member => (
-                    <div key={member.userId} className="w-full min-w-0 max-w-full overflow-hidden">
-                      {(filteredConversations.length > 0 || colleagueStarts[0]?.userId !== member.userId) && <div aria-hidden="true" className="mx-3 h-px bg-pure-white/20" />}
-                      <ColleagueStartItem
-                        member={member}
-                        pending={pendingColleagueId === member.userId}
-                        onStart={() => void startColleagueConversation(member.userId)}
-                      />
-                    </div>
-                  ))}
 
                   {/* Oändlig lista: laddar nästa 300 innan användaren nått botten */}
                   {hasMoreConversations && !searchQuery.trim() && (

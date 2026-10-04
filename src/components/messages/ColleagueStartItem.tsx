@@ -27,7 +27,7 @@ export function ColleagueStartItem({ member, pending, onStart }: ColleagueStartI
         className="border-2 border-primary/50"
       />
       <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-        <span className="w-full truncate text-base font-medium">{name}</span>
+        <span className="w-full break-words text-base font-medium">{name}</span>
         <span className="text-sm text-pure-white">Starta konversation</span>
       </span>
       {pending && <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden="true" />}
