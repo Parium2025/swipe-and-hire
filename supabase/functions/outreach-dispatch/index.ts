@@ -77,11 +77,6 @@ async function getUserFromRequest(request: Request) {
   return data.user;
 }
 
-async function getUserOrganizationIds(userId: string) {
-  const { data } = await admin.from('user_roles').select('organization_id').eq('user_id', userId).eq('is_active', true).not('organization_id', 'is', null);
-  return [...new Set((data ?? []).map((row) => row.organization_id).filter(Boolean))] as string[];
-}
-
 async function ensureTemplateAccess(templateId: string, userId: string) {
   const { data: template, error } = await admin.from('outreach_templates').select('*').eq('id', templateId).maybeSingle();
   if (error || !template) throw new Error('Mallen kunde inte hittas');
