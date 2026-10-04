@@ -65,7 +65,6 @@ export function useBulkCandidateOps({
   const bulkMoveToStage = useCallback(
     async (targetStage: CandidateStage) => {
       const ids = Array.from(selectedCandidateIds);
-      const count = ids.length;
 
       if (isViewingColleague) {
         // Räkna verkliga träffar: tidigare visades "X kandidater flyttade"
