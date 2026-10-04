@@ -128,14 +128,20 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
         });
       });
 
+      // Spara senaste teaminfo per konto så märket finns på plats från första steg vid kallstart.
+      writePersisted(user.id, applicationIds, infoMap);
       return infoMap;
     },
     enabled: !!user && applicationIds.length > 0,
     staleTime: 30000,
   });
 
+  // Senaste kända teaminfo för kontot: visas tills det nya svaret kommer fram
+  // och när sidnumrering byter frågens nyckel under pågående hämtning.
+  const persisted = useMemo(() => readPersisted(user?.id), [user?.id, teamCandidates]);
+
   return {
-    teamCandidates: teamCandidates || {},
+    teamCandidates: teamCandidates ?? persisted,
     isLoading,
   };
 }
