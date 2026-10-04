@@ -24,7 +24,7 @@ import {
 import { computeStageOrder } from '@/hooks/useStageSettings';
 
 /** Första kolumnen exakt som tavlan visar den (standard- + egna steg). */
-async function resolveFirstStage(userId: string, listId: string | null): Promise<string> {
+export async function resolveFirstStage(userId: string, listId: string | null): Promise<string> {
   let query = supabase
     .from('user_stage_settings')
     .select('stage_key, order_index, is_custom, custom_label')

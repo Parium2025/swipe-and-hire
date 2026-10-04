@@ -8,6 +8,7 @@ import {
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
+import { resolveFirstStage } from '@/hooks/useMyCandidatesData';
 import { TeamMember } from '@/hooks/useTeamMembers';
 import { AlertTriangle, ChevronDown, Trash2, UserCheck, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -103,17 +104,8 @@ export function AddToColleagueListDialog({
     if (rows.length === 0) return;
     setIsAdding(key);
     try {
-      // 1) Hitta första giltiga steget i mållistan (annars hamnar korten i ett steg som inte visas)
-      const { data: stageSettings } = await supabase
-        .from('user_stage_settings')
-        .select('stage_key, order_index')
-        .eq('user_id', recruiterId)
-        .eq('list_id', listId)
-        .gt('order_index', -1)
-        .order('order_index', { ascending: true })
-        .limit(1);
-
-      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+      // 1) Pariums första standardsteg i mållistan — aldrig ett egenskapat steg.
+      const defaultStage = await resolveFirstStage(recruiterId, listId);
 
       // 2) Kolla vilka kandidater som redan finns hos mottagaren (per person, inte per ansökan)
       const applicantIds = Array.from(new Set(rows.map((r) => r.applicantId)));
