@@ -113,14 +113,7 @@ export const ConversationItem = memo(function ConversationItem({
           isGroup={conversation.is_group}
           groupName={conversation.name}
           size="lg"
-          className={cn(
-            "border-2",
-            conversation.is_group
-              ? ""
-              : category === 'candidates'
-                ? "border-emerald-500/50"
-                : "border-blue-500/50"
-          )}
+          className="border-2 border-white/20"
         />
         {conversation.unread_count > 0 && (
           <span
