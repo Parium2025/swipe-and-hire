@@ -1033,7 +1033,7 @@ export function useMyCandidatesData(
       const previous = (context?.previousCandidates as any)?.pages
         ?.flatMap((page: any) => page.items as MyCandidateData[])
         .find((candidate: MyCandidateData) => candidate.id === variables.id);
-      if (previous && previous.stage !== variables.stage) {
+      if ((previous ?? candidates.find(candidate => candidate.id === variables.id))?.stage !== variables.stage) {
         toastArchive.add('success', 'Kandidat flyttad', undefined, '/my-candidates');
       }
     },

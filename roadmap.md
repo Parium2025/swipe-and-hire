@@ -61,4 +61,5 @@
 - [x] Make the notification bell react immediately and silently to incoming notices without late badge updates after a change
 - [x] Keep the list picker available while a colleague's candidates load, make colleague selection direct, and show pure white text in the picker (live employer verification unavailable with the current signed-in account)
 - [x] Show a colleague's saved rating on an unrated candidate in My Candidates while preserving personal ratings; collapse colleague lists under each colleague's name in the picker
+- [x] Inventory remaining candidate-action toasts and send confirmed candidate moves silently to the notification bell
 

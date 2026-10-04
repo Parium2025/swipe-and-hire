@@ -5,6 +5,7 @@ import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
+import { toastArchive } from '@/lib/toastArchive';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
