@@ -518,24 +518,23 @@ Deno.serve(async (req) => {
     const employerCandidateReminderRules = new Map<string, number[]>();
     const candidateRemindersAllowed = async (employerId: string, minutesLeft: number) => {
       const adminId = adminForBooker(employerId);
-      const ruleOwner = adminId ?? employerId;
-      let delays = employerCandidateReminderRules.get(ruleOwner);
+      // Organisationsmöten hanteras helt av admins tidsregel ovan; skicka
+      // aldrig den separata 10-minutersreserven (varken kandidat eller bokare).
+      if (adminId) return false;
+      let delays = employerCandidateReminderRules.get(employerId);
       if (!delays) {
         const { data } = await supabase
           .from("outreach_automations")
           .select("delay_minutes")
-          .eq("owner_user_id", ruleOwner)
+          .eq("owner_user_id", employerId)
           .eq("trigger", "interview_before")
           .eq("recipient_type", "candidate")
           .eq("is_enabled", true);
         delays = ((data ?? []) as Array<{ delay_minutes: number | null }>)
           .map((rule) => Math.max(rule.delay_minutes ?? 0, 0));
-        employerCandidateReminderRules.set(ruleOwner, delays);
+        employerCandidateReminderRules.set(employerId, delays);
       }
 
-      // För teamet är admins val facit, även när alla kanaler är avstängda.
-      // Standardens tiominuterslarm ska aldrig lägga till en egen tidpunkt.
-      if (adminId) return false;
       if (delays.length === 0) return false;
 
       // En egen regel ersätter standardpåminnelsen bara när intervjun faktiskt
