@@ -740,17 +740,8 @@ export function useMyCandidatesData(
       if (!getIsOnline()) throw new Error('Du är offline – anslut och försök igen');
       if (!user) throw new Error('Not authenticated');
 
-      // Add to the first available stage (avoids adding to deleted stages)
-      const { data: stageSettings } = await supabase
-        .from('user_stage_settings')
-        .select('stage_key, order_index')
-        .eq('user_id', user.id)
-        .eq('list_id', insertListId)
-        .gt('order_index', -1)
-        .order('order_index', { ascending: true })
-        .limit(1);
-
-      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+      // Alltid den första kolumnen exakt som tavlan visar den.
+      const defaultStage = await resolveFirstStage(user.id, insertListId);
 
       // Check for existing persistent rating for this applicant
       const { data: existingRating } = await supabase
@@ -760,7 +751,7 @@ export function useMyCandidatesData(
         .eq('applicant_id', applicantId)
         .maybeSingle();
 
-      const restoredRating = existingRating?.rating || 0;
+      const restoredRating = existingRating?.rating || readLocalRating(user.id, applicantId);
 
       // Check for existing persistent notes for this applicant
       const { data: existingNote } = await supabase
@@ -795,18 +786,14 @@ export function useMyCandidatesData(
         throw error;
       }
 
-
+      await insertRowsIntoCaches([data as RawMyCandidateRow]);
       return data;
     },
     onSuccess: (insertedCandidate) => {
       if (user && insertedCandidate?.applicant_id) {
         addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
       }
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
+      refreshAfterInsert();
       toast.success('Kandidat tillagd i din lista', { route: '/my-candidates' } as Parameters<typeof toast.success>[1]);
     },
     onError: (error: Error) => {
