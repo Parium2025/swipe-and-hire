@@ -96,7 +96,7 @@ type AutomationForm = {
   name: string;
   trigger: OutreachTrigger | '';
   channels: AutomationChannel[];
-  recipient_type: 'candidate' | 'employer';
+  recipient_type: 'candidate';
   template_ids: Partial<Record<AutomationChannel, string>>;
   delay_minutes: number;
   is_enabled: boolean;
@@ -807,9 +807,9 @@ export function MessageTemplatesSettings() {
     }
 
     const [templatesRes, automationsRes, logsRes] = await Promise.all([
-      supabase.from('outreach_templates').select('*').order('created_at', { ascending: false }),
-      supabase.from('outreach_automations').select('*').order('created_at', { ascending: false }),
-      supabase.from('outreach_dispatch_logs').select('*').order('created_at', { ascending: false }).limit(40),
+      organizationId ? supabase.from('outreach_templates').select('*').eq('organization_id', organizationId).order('created_at', { ascending: false }) : supabase.from('outreach_templates').select('*').is('organization_id', null).eq('owner_user_id', user.id).order('created_at', { ascending: false }),
+      organizationId ? supabase.from('outreach_automations').select('*').eq('organization_id', organizationId).order('created_at', { ascending: false }) : supabase.from('outreach_automations').select('*').is('organization_id', null).eq('owner_user_id', user.id).order('created_at', { ascending: false }),
+      organizationId ? supabase.from('outreach_dispatch_logs').select('*').eq('organization_id', organizationId).order('created_at', { ascending: false }).limit(40) : supabase.from('outreach_dispatch_logs').select('*').is('organization_id', null).eq('owner_user_id', user.id).order('created_at', { ascending: false }).limit(40),
     ]);
 
     if (requestId !== fetchRequestIdRef.current) return;
@@ -836,7 +836,7 @@ export function MessageTemplatesSettings() {
 
     setLoading(false);
     setIsRefreshing(false);
-  }, [user]);
+  }, [user, organizationId]);
 
   useEffect(() => {
     if (!user) return;
