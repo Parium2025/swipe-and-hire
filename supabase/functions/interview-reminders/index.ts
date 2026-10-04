@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
       .select("user_id, organization_id, role")
       .eq("is_active", true)
       .not("organization_id", "is", null)
-      .in("role", ["admin", "recruiter"]);
+      .in("role", ["admin", "company_admin", "employer", "recruiter"]);
     if (teamRolesError) throw teamRolesError;
     const membersByOrg = new Map<string, Set<string>>();
     const adminByOrg = new Map<string, string>();
@@ -120,7 +120,9 @@ Deno.serve(async (req) => {
       members.add(row.user_id);
       membersByOrg.set(row.organization_id, members);
       orgByMember.set(row.user_id, row.organization_id);
-      if (row.role === "admin") adminByOrg.set(row.organization_id, row.user_id);
+      if (row.role === "admin" || (row.role === "company_admin" && !adminByOrg.has(row.organization_id))) {
+        adminByOrg.set(row.organization_id, row.user_id);
+      }
     }
     const adminForBooker = (bookerId: string) => {
       const org = orgByMember.get(bookerId);
@@ -193,7 +195,10 @@ Deno.serve(async (req) => {
       };
       const groups = new Map<string, Group>();
       for (const automation of (automations || []) as InterviewTimelineAutomation[]) {
-        if (automation.organization_id && adminByOrg.get(automation.organization_id) !== automation.owner_user_id) continue;
+        const orgId = automation.organization_id ?? orgByMember.get(automation.owner_user_id);
+        // Äldre regler kan sakna organization_id. Teammedlemmars egna regler
+        // ska ändå inte konkurrera med admins inställning.
+        if (orgId && adminByOrg.get(orgId) !== automation.owner_user_id) continue;
         const tplId = (automation as { template_id?: string | null }).template_id;
         if (tplId && !activeTemplateIds.has(tplId)) continue;
         const delay = Math.max(automation.delay_minutes ?? 0, 0);
@@ -249,10 +254,11 @@ Deno.serve(async (req) => {
         // möte är den bästa proxy:n.
         const interviewStatuses = trigger === "interview_before" ? ["pending", "confirmed"] : ["confirmed", "completed"];
 
-        const memberIds = automation.organization_id
-          ? [...(membersByOrg.get(automation.organization_id) ?? [])]
+        const orgId = automation.organization_id ?? orgByMember.get(automation.owner_user_id);
+        const memberIds = orgId
+          ? [...(membersByOrg.get(orgId) ?? [])]
           : [];
-        if (automation.organization_id && memberIds.length === 0) continue;
+        if (orgId && memberIds.length === 0) continue;
         let interviewQuery = supabase
           .from("interviews")
           .select("id, applicant_id, employer_id, job_id, scheduled_at, location_type, location_details, revision")
@@ -375,7 +381,7 @@ Deno.serve(async (req) => {
 
             const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
               owner_user_id: interview.employer_id,
-              organization_id: automation.organization_id,
+              organization_id: orgId ?? null,
               automation_id: source.id,
               template_id: source.template_id,
               trigger,
