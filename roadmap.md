@@ -59,4 +59,5 @@
 - [x] Remove list-name tooltips from the candidate-list title and list picker without changing their selection behavior
 - [x] Synchronize saved-candidate status and list counts after removal, including changes in another tab; enlarge mobile profile action targets with icon-only labels (live employer check blocked by available job-seeker session)
 - [x] Make the notification bell react immediately and silently to incoming notices without late badge updates after a change
+- [x] Keep the list picker available while a colleague's candidates load, make colleague selection direct, and show pure white text in the picker (live employer verification unavailable with the current signed-in account)
 
