@@ -425,13 +425,20 @@ export function TruncatedText({
   // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
     if (!supportsHover && isTouch) {
+      // Långtrycksläge: korta tryck ska öppna förälderns kontroll (t.ex.
+      // listmenyn) — bara ett fullbordat långtryck får styra tooltipen.
+      if (touchTooltipOnLongPress && !longPressFiredRef.current) {
+        clearLongPressTimer();
+        return;
+      }
+      longPressFiredRef.current = false;
       e.stopPropagation();
       // Radix TooltipTrigger stänger tooltipen i sitt eget onClick direkt efter
       // vårt. Utan preventDefault öppnades bubblan och stängdes i samma tryck —
       // på mobil syntes den därför aldrig.
       e.preventDefault();
       releaseTriggerPress();
-      handleTap();
+      if (!touchTooltipOnLongPress) handleTap();
     } else if (onClick) {
       onClick();
     }
