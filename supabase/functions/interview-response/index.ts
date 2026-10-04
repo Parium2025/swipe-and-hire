@@ -66,6 +66,7 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
   const when = scheduledAt ? new Date(scheduledAt) : null
   const templateData = {
     recipient_name: typeof result.employer_name === 'string' ? result.employer_name : 'där',
+    company_name: typeof result.company_name === 'string' && result.company_name.trim() ? result.company_name : 'Parium',
     candidate_name: candidateName,
     job_title: jobTitle,
     date_str: when ? STOCKHOLM_DATE.format(when) : '',

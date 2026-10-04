@@ -7,6 +7,7 @@ import type { TemplateEntry } from './registry.ts'
 
 interface Props {
   recipient_name?: string
+  company_name?: string
   candidate_name?: string
   job_title?: string
   date_str?: string
@@ -16,6 +17,7 @@ interface Props {
 
 const InterviewResponseEmployerEmail = ({
   recipient_name = 'där',
+  company_name = 'Parium',
   candidate_name = 'Kandidaten',
   job_title = 'tjänsten',
   date_str = '',
@@ -36,7 +38,7 @@ const InterviewResponseEmployerEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={brandSection}>
-            <Text style={brand}>Parium</Text>
+            <Text style={brand}>{company_name}</Text>
             <Section style={accentBar} />
           </Section>
           <Text style={subjectLine}>Svar på intervjun · {job_title}</Text>
@@ -55,6 +57,8 @@ const InterviewResponseEmployerEmail = ({
                 : 'Mötet ligger kvar i din kalender, men är markerat som nekat i Parium. Du kan boka om eller ta bort det.'}
             </Text>
           </Section>
+          <Text style={footer}>Skickat av {company_name} via Parium</Text>
+          <Text style={noReply}>Svara inte på detta mejl — det är skickat från en automatisk utgående adress.</Text>
         </Container>
       </Body>
     </Html>
@@ -70,6 +74,7 @@ export const template = {
   displayName: 'Intervjusvar till arbetsgivare',
   previewData: {
     recipient_name: 'Anna',
+    company_name: 'Parium AB',
     candidate_name: 'Johan Berg',
     job_title: 'Servicetekniker',
     date_str: 'måndag 28 september',
@@ -78,13 +83,15 @@ export const template = {
   },
 } satisfies TemplateEntry
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif' }
-const container = { maxWidth: '560px', margin: '0 auto', padding: '32px 24px' }
-const brandSection = { marginBottom: '20px' }
-const brand = { fontSize: '18px', fontWeight: 700, color: '#001F3D', margin: '0' }
-const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', borderRadius: '2px', marginTop: '8px' }
-const subjectLine = { fontSize: '13px', color: '#64748b', margin: '0 0 12px' }
-const card = { border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px' }
-const text = { fontSize: '15px', lineHeight: '1.7', color: '#334155', margin: '0 0 12px' }
-const row = { fontSize: '15px', lineHeight: '1.7', color: '#334155', margin: '0 0 4px' }
+const main = { backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }
+const container = { padding: '32px 28px', maxWidth: '560px' }
+const brandSection = { margin: '0 0 24px' }
+const brand = { fontSize: '22px', fontWeight: 700 as const, color: '#001F3D', margin: 0, letterSpacing: '-0.3px' }
+const accentBar = { width: '44px', height: '3px', backgroundColor: '#1E4B8A', borderRadius: '2px', margin: '10px 0 0' }
+const subjectLine = { fontSize: '15px', fontWeight: 600 as const, color: '#1E4B8A', margin: '14px 0 20px' }
+const card = { backgroundColor: '#f8fafc', padding: '28px 32px', borderRadius: '8px', border: '1px solid #e2e8f0', margin: '0' }
+const text = { fontSize: '15px', color: '#334155', lineHeight: '1.6', margin: '0 0 12px' }
+const row = { margin: '4px 0', fontSize: '14px', color: '#111827', lineHeight: '1.6' }
 const hint = { fontSize: '13px', lineHeight: '1.6', color: '#64748b', margin: '12px 0 0' }
+const footer = { fontSize: '12px', color: '#94a3b8', margin: '32px 0 0', paddingTop: '20px', textAlign: 'center' as const }
+const noReply = { fontSize: '11px', color: '#6B7280', margin: '8px 0 0', textAlign: 'center' as const, fontStyle: 'italic' as const }
