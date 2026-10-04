@@ -26,7 +26,25 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
+import { myCandidatesCacheKey } from '@/hooks/useMyCandidatesData';
 import { addApplicantMembershipCacheEntry, removeApplicantMembershipCacheEntry } from '@/lib/applicantMembershipCache';
+
+
+/** Rensa listcacher så Mina kandidater aldrig visar ett gammalt (tomt) läge efter en ändring. */
+function resetMyCandidatesCaches(queryClient: ReturnType<typeof useQueryClient>, userId: string | undefined) {
+  if (userId) {
+    try {
+      const prefix = myCandidatesCacheKey(userId);
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && (k === prefix || k.startsWith(`${prefix}_`))) localStorage.removeItem(k);
+      }
+    } catch { /* lagring otillgänglig */ }
+  }
+  for (const key of ['my-candidates', 'candidate-list-counts', 'my-candidates-stage-counts', 'applicant-membership', 'job-my-candidates-map', 'team-candidate-info']) {
+    void queryClient.invalidateQueries({ queryKey: [key], refetchType: 'all' });
+  }
+}
 
 export interface CandidateToAdd {
   applicationId: string;
@@ -170,12 +188,7 @@ export function AddToColleagueListDialog({
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: ['my-candidates'] });
-      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] });
-      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] });
-      queryClient.invalidateQueries({ queryKey: ['applicant-membership'] });
-      queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] });
-      queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+      resetMyCandidatesCaches(queryClient, user?.id);
 
       const target = isOwnList ? 'din lista' : 'kollegans lista';
 
@@ -222,14 +235,7 @@ export function AddToColleagueListDialog({
       if (!data || data.length === 0) throw new Error('Kandidaten kunde inte tas bort');
 
       removeApplicantMembershipCacheEntry(user.id, rows[0].applicantId);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['applicant-membership', user.id] }),
-        queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] }),
-        queryClient.invalidateQueries({ queryKey: ['candidate-list-counts'] }),
-        queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts'] }),
-        queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] }),
-        queryClient.invalidateQueries({ queryKey: ['job-my-candidates-map'] }),
-      ]);
+      resetMyCandidatesCaches(queryClient, user.id);
       toast.success('Kandidat borttagen från din lista');
       setRemoveConfirmOpen(false);
       onAdded?.();
@@ -371,8 +377,8 @@ export function AddToColleagueListDialog({
 
           {canRemoveFromOwnList && rows.length === 1 && (
             <Button
-              variant="outline"
-              className="mobile-touch-removal-action w-full justify-start gap-3 h-auto py-3 bg-red-500/80 border-0 text-white hover:bg-red-500 hover:text-white"
+              variant="destructiveSoft"
+              className="mobile-touch-removal-action w-full justify-start gap-3 h-auto py-3 border-0 !bg-red-500/80 !text-white hover:!bg-red-500/80 active:!bg-red-500/80 focus:!bg-red-500/80 disabled:!bg-red-500/80 disabled:opacity-60 [-webkit-tap-highlight-color:transparent]"
               onClick={() => setRemoveConfirmOpen(true)}
               disabled={isAdding !== null || isRemoving}
             >
