@@ -1098,6 +1098,32 @@ const EmployerAnalytics = memo(() => {
         </div>
       )}
 
+      {/* ─── Svarstid + rekryteringens längd ─── */}
+      {(() => {
+        const pt = (advancedData as AdvancedWithProcess | null | undefined)?.process_times;
+        if (!pt) return null;
+        const r = pt.response;
+        const d = pt.decision;
+        return (
+          <div className="grid grid-cols-2 gap-2">
+            <ProcessTimeCard
+              label="Svarstid"
+              info="Genomsnittlig tid från ansökan till er första åtgärd: stegflytt, bokat möte eller eget chattmeddelande. Automatiska utskick räknas inte."
+              stat={r}
+              showTrend={selectedDays !== null}
+              footnote={r.sample > 0 ? `${r.sample} besvarade${r.waiting ? ` · ${r.waiting} väntar` : ''}` : (r.waiting ? `${r.waiting} väntar på svar` : 'Inga ansökningar ännu')}
+            />
+            <ProcessTimeCard
+              label="Rekryteringens längd"
+              info="Genomsnittlig tid från ansökan till beslut, det vill säga Anställd eller avslag."
+              stat={d}
+              showTrend={selectedDays !== null}
+              footnote={d.sample > 0 ? `${d.sample} beslut` : 'Inga beslut ännu'}
+            />
+          </div>
+        );
+      })()}
+
       {/* ─── Per-job time to first application ─── */}
       {ttfa.length > 0 && (
         <TtfaList
