@@ -528,7 +528,10 @@ export function TruncatedText({
             onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            onTouchStart={isTouch && !supportsHover ? () => { measureTruncation(); } : undefined}
+            onTouchStart={isTouch && !supportsHover ? (touchTooltipOnLongPress ? handleLongPressTouchStart : () => { measureTruncation(); }) : undefined}
+            onTouchEnd={touchTooltipOnLongPress ? clearLongPressTimer : undefined}
+            onTouchMove={touchTooltipOnLongPress ? clearLongPressTimer : undefined}
+            onTouchCancel={touchTooltipOnLongPress ? clearLongPressTimer : undefined}
             onMouseDown={(e) => e.stopPropagation()}
             // No native `title` attribute — it would render a second (gray) browser
             // tooltip on top of our custom one.
