@@ -751,8 +751,8 @@ export function CandidatesTable({
               </>
             )}
             <div className="w-px h-5 bg-white/20 flex-shrink-0" />
-            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection} className="!h-10 !w-10 flex-shrink-0 border-white/50 bg-white/10">
-              <X className="h-5 w-5 flex-shrink-0" strokeWidth={2.5} />
+            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection} className={`flex-shrink-0 border-white/50 bg-white/10 ${selectedIds.size > 0 ? '!h-10 !w-10' : '!h-8 !w-8'}`}>
+              <X className={`flex-shrink-0 ${selectedIds.size > 0 ? 'h-5 w-5' : 'h-4 w-4'}`} strokeWidth={2.5} />
             </PillButton>
 
 
