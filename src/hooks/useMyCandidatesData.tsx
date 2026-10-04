@@ -824,18 +824,8 @@ export function useMyCandidatesData(
         return { inserted: 0, alreadyExisted: candidates.length };
       }
 
-      // Get the user's stage settings to find the first available stage
-      const { data: stageSettings } = await supabase
-        .from('user_stage_settings')
-        .select('stage_key, order_index, custom_label')
-        .eq('user_id', user.id)
-        .eq('list_id', insertListId)
-        .gt('order_index', -1) // Exclude deleted stages
-        .order('order_index', { ascending: true })
-        .limit(1);
-
-      // Use the first available stage, or fall back to 'to_contact' if no stages configured
-      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+      // Alltid den första kolumnen exakt som tavlan visar den.
+      const defaultStage = await resolveFirstStage(user.id, insertListId);
 
       // Check for existing persistent ratings for these applicants
       const applicantIds = newCandidates.map(c => c.applicantId);
@@ -864,7 +854,7 @@ export function useMyCandidatesData(
         job_id: c.jobId || null,
         list_id: insertListId,
         stage: defaultStage,
-        rating: ratingsMap.get(c.applicantId) || 0, // Restore previous rating
+        rating: ratingsMap.get(c.applicantId) || readLocalRating(user.id, c.applicantId), // Restore previous rating
         notes: notesMap.get(c.applicantId) || null, // Restore previous notes
       }));
 
@@ -875,7 +865,7 @@ export function useMyCandidatesData(
 
       if (error) throw error;
 
-
+      await insertRowsIntoCaches((data || []) as RawMyCandidateRow[]);
       return { inserted: data?.length || 0, alreadyExisted: existingIds.size };
     },
     onSuccess: (result, requestedCandidates) => {
@@ -884,10 +874,7 @@ export function useMyCandidatesData(
           addApplicantMembershipCacheEntry(user.id, candidate.applicantId);
         }
       }
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
+      refreshAfterInsert();
       if (result.inserted > 0) {
         toast.success(`${result.inserted} kandidat${result.inserted !== 1 ? 'er' : ''} tillagd${result.inserted !== 1 ? 'a' : ''} i din lista`);
       } else if (result.alreadyExisted > 0) {
