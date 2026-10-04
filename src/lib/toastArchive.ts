@@ -29,7 +29,9 @@ export interface ArchivedToast {
 const BASE_KEY = "parium_toast_archive_v1";
 const MAX = 50;
 const MERGE_WINDOW = 60_000;
-const SYNC_DEBOUNCE = 1400;
+// Den lokala klockan reagerar direkt; skicka även vidare till andra enheter
+// utan den tidigare väntan på 1,4 sekunder.
+const SYNC_DEBOUNCE = 0;
 const SYNCED_FALLBACK_MS = 15_000;
 
 /**
