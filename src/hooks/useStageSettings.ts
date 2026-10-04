@@ -366,8 +366,8 @@ export function useStageSettings(listId: string | null = null) {
       );
       return { previous };
     },
-    onError: (_error, _vars, context) => {
-      context?.previous?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+    onError: (_error, _vars, context: { previous?: [readonly unknown[], DbStageSetting[] | undefined][] } | undefined) => {
+      context?.previous?.forEach(([key, data]) => queryClient.setQueryData<DbStageSetting[] | undefined>(key, data));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
