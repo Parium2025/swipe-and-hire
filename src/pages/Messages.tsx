@@ -249,7 +249,7 @@ export default function Messages() {
       .map(m => {
         const p = m.profile;
         if (!p) return '';
-        if (p.role === 'employer' && p.company_name) return p.company_name;
+        if (conv.kind !== 'internal' && p.role === 'employer' && p.company_name) return p.company_name;
         return `${p.first_name || ''} ${p.last_name || ''}`;
       })
       .join(' ');
