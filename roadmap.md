@@ -63,4 +63,5 @@
 - [x] Show a colleague's saved rating on an unrated candidate in My Candidates while preserving personal ratings; collapse colleague lists under each colleague's name in the picker
 - [x] Inventory remaining candidate-action toasts and send confirmed candidate moves silently to the notification bell
 - [x] Show team application totals in pure white for every reporting period; move the mobile recruiter filter to the right below job-status tabs and remove its white pressed/hover surface
+- [x] Put the mobile recruiter filter beside the expand-all control above the adverts and remove the extra row gap
 
