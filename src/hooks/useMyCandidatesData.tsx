@@ -762,7 +762,6 @@ export function useMyCandidatesData(
       };
     });
     // Querynyckeln: ['my-candidates', uid, search, listId, stages] — sök/annan lista får inte raden.
-    queryClient.setQueriesData({ queryKey: ['my-candidates', user.id] }, (old: any) => old);
     for (const q of queryClient.getQueryCache().findAll({ queryKey: ['my-candidates', user.id] })) {
       const [, , search, qListId] = q.queryKey as any[];
       if ((search && String(search).trim()) || (qListId && rowListId && qListId !== rowListId)) {
