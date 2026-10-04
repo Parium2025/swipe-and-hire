@@ -189,9 +189,16 @@ export function useTeamCandidateInfo(applications: Array<{ id: string; applicant
   // Senaste kända teaminfo för kontot: visas tills det nya svaret kommer fram
   // och när sidnumrering byter frågens nyckel under pågående hämtning.
   const persisted = useMemo(() => readPersisted(user?.id), [user?.id, teamCandidates]);
+  // Ett färskt tomt svar måste också rensa tidigare sparade märken för de
+  // synliga ansökningarna, annars dyker borttagna kollegamärken upp igen.
+  const visibleInfo = { ...persisted };
+  if (teamCandidates) {
+    applicationIds.forEach(id => { delete visibleInfo[id]; });
+    Object.assign(visibleInfo, teamCandidates);
+  }
 
   return {
-    teamCandidates: { ...persisted, ...teamCandidates },
+    teamCandidates: visibleInfo,
     isLoading,
   };
 }
