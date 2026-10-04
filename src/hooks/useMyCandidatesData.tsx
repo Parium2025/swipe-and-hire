@@ -1000,6 +1000,12 @@ export function useMyCandidatesData(
       const removedApplicantId = candidates.find((candidate) => candidate.id === id)?.applicant_id;
       if (user && removedApplicantId) {
         removeApplicantMembershipCacheEntry(user.id, removedApplicantId);
+        // Alla kandidater kan redan vara öppna i en annan vy. Uppdatera även
+        // medlemskapsfrågan direkt, inte först efter nästa nätverkssvar.
+        queryClient.setQueriesData<string[]>(
+          { queryKey: ['applicant-membership', user.id] },
+          (old) => old?.filter((applicantId) => applicantId !== removedApplicantId),
+        );
       }
 
       return { previousCandidates, removedApplicantId };
