@@ -467,7 +467,7 @@ export function useColleagueCandidates(
   const moveCandidateInColleagueList = async (
     candidateId: string,
     newStage: CandidateStage,
-    opts?: { silent?: boolean },
+    opts?: { silent?: boolean; silentNotification?: boolean },
   ): Promise<boolean> => {
     // Läs alltid ur den senaste listan (inte closure-värdet) — annars skrev en
     // bulkflytt tillbaka en gammal ögonblicksbild där tidigare flyttar saknades.
@@ -503,7 +503,7 @@ export function useColleagueCandidates(
           previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
         );
       }
-      if (previousCandidates.some(c => c.id === candidateId && c.stage !== newStage)) {
+      if (!opts?.silentNotification && previousCandidates.some(c => c.id === candidateId && c.stage !== newStage)) {
         toastArchive.add('success', 'Kandidat flyttad', undefined, '/my-candidates');
       }
       return true;
