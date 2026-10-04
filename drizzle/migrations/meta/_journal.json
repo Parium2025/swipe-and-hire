@@ -477,6 +477,13 @@
       "when": 1791099983573,
       "tag": "0067_restore_org_candidate_filter_questions",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1791130569918,
+      "tag": "0068_my_candidates_one_per_person",
+      "breakpoints": true
     }
   ]
 }

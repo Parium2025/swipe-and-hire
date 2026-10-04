@@ -61,26 +61,54 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
       const memberIds = role?.organization_id ? await getOrganizationMemberIds(role.organization_id) : [user.id];
       if (!memberIds.includes(user.id)) return {};
 
-      // Fetch all my_candidates entries for these applications from any team member
-      const myCandidatesData: Array<{ applicant_id: string; application_id: string; recruiter_id: string; rating: number | null; stage: string; notes: string | null }> = [];
+      // Kandidater är personer: en kollega kan ha lagt till samma person via en
+      // annan ansökan. Matcha därför på sökande (applicant), inte ansökan.
+      const appToApplicant: Record<string, string> = {};
       for (let i = 0; i < applicationIds.length; i += 100) {
         const ids = applicationIds.slice(i, i + 100);
-        for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabase
-            .from('my_candidates')
-            .select('applicant_id, application_id, recruiter_id, rating, stage, notes')
-            .in('application_id', ids)
-            .in('recruiter_id', memberIds)
-            .range(offset, offset + 999);
-          if (error) throw error;
-          myCandidatesData.push(...(data ?? []));
-          if (!data || data.length < 1000) break;
-        }
+        const { data, error } = await supabase
+          .from('job_applications').select('id, applicant_id').in('id', ids);
+        if (error) throw error;
+        (data ?? []).forEach((a: any) => { if (a.applicant_id) appToApplicant[a.id] = a.applicant_id; });
       }
+      const lookupApplicantIds = [...new Set(Object.values(appToApplicant))];
 
-      // Get unique applicant IDs to fetch persistent ratings and notes
+      const myCandidatesData: Array<{ applicant_id: string; application_id: string; recruiter_id: string; rating: number | null; stage: string; notes: string | null }> = [];
+      const seenRows = new Set<string>();
+      const pushRows = (rows: typeof myCandidatesData | null) => {
+        (rows ?? []).forEach(r => {
+          const k = `${r.recruiter_id}:${r.applicant_id}`;
+          if (!seenRows.has(k)) { seenRows.add(k); myCandidatesData.push(r); }
+        });
+      };
+      const fetchBy = async (column: 'application_id' | 'applicant_id', values: string[]) => {
+        for (let i = 0; i < values.length; i += 100) {
+          const ids = values.slice(i, i + 100);
+          for (let offset = 0; ; offset += 1000) {
+            const { data, error } = await supabase
+              .from('my_candidates')
+              .select('applicant_id, application_id, recruiter_id, rating, stage, notes')
+              .in(column, ids)
+              .in('recruiter_id', memberIds)
+              .range(offset, offset + 999);
+            if (error) throw error;
+            pushRows(data as any);
+            if (!data || data.length < 1000) break;
+          }
+        }
+      };
+      await fetchBy('applicant_id', lookupApplicantIds);
+      await fetchBy('application_id', applicationIds);
+
       const applicantIds = [...new Set(myCandidatesData.map(c => c.applicant_id))];
       if (applicantIds.length === 0) return {};
+
+      // applicant -> alla visade ansökningar för den personen
+      const applicantToApps: Record<string, string[]> = {};
+      applicationIds.forEach(id => {
+        const a = appToApplicant[id];
+        if (a) (applicantToApps[a] ||= []).push(id);
+      });
 
       // Fetch persistent ratings and notes in parallel
       // Create a lookup map for persistent ratings: applicant_id -> recruiter_id -> rating
@@ -126,29 +154,24 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
       recruiterNames[user.id] = 'Du';
 
       myCandidatesData?.forEach(candidate => {
-        const appId = candidate.application_id;
-        if (!infoMap[appId]) {
-          infoMap[appId] = [];
-        }
-
         const recruiterName = recruiterNames[candidate.recruiter_id] || 'Kollega';
-        
-        // Use persistent rating if available, otherwise use my_candidates rating
         const persistentRating = persistentRatingMap[candidate.applicant_id]?.[candidate.recruiter_id];
         const effectiveRating = persistentRating ?? candidate.rating ?? 0;
-        
-        // Use persistent notes if available, otherwise use my_candidates notes
         const persistentNotes = persistentNotesMap[candidate.applicant_id]?.[candidate.recruiter_id];
         const effectiveNotes = persistentNotes ?? candidate.notes ?? null;
-        
-        infoMap[appId].push({
-          applicant_id: candidate.applicant_id,
-          application_id: candidate.application_id,
-          recruiter_id: candidate.recruiter_id,
-          recruiter_name: recruiterName,
-          rating: effectiveRating,
-          stage: candidate.stage,
-          notes: effectiveNotes,
+
+        const targets = new Set(applicantToApps[candidate.applicant_id] ?? []);
+        if (applicationIds.includes(candidate.application_id)) targets.add(candidate.application_id);
+        targets.forEach(appId => {
+          (infoMap[appId] ||= []).push({
+            applicant_id: candidate.applicant_id,
+            application_id: candidate.application_id,
+            recruiter_id: candidate.recruiter_id,
+            recruiter_name: recruiterName,
+            rating: effectiveRating,
+            stage: candidate.stage,
+            notes: effectiveNotes,
+          });
         });
       });
 
