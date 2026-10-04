@@ -17,6 +17,10 @@ import { AUTO_RULE_CHANNELS, AUTO_RULE_EVENTS, type AutoRuleChannel } from '@/li
  */
 const inFlight = new Map<string, Promise<boolean>>();
 
+function scopedRules<T>(query: T & { eq: (column: string, value: string) => T; is: (column: string, value: null) => T }, organizationId: string | null): T {
+  return organizationId ? query.eq('organization_id', organizationId) : query.is('organization_id', null);
+}
+
 async function runSeed(userId: string, organizationId: string | null): Promise<boolean> {
   // 1. Claima seedningen atomiskt (PK på user_id gör detta race-säkert).
   const { error: claimError } = await supabase
@@ -32,11 +36,11 @@ async function runSeed(userId: string, organizationId: string | null): Promise<b
 
   try {
     // 2. Har arbetsgivaren redan egna regler? Respektera dem fullt ut.
-    const { data: existing, error: existingError } = await supabase
+    const { data: existing, error: existingError } = await scopedRules(supabase
       .from('outreach_automations')
       .select('id')
       .eq('owner_user_id', userId)
-      .limit(1);
+      .limit(1), organizationId);
 
     if (existingError) {
       await releaseClaim();
@@ -44,10 +48,10 @@ async function runSeed(userId: string, organizationId: string | null): Promise<b
     }
     if (existing && existing.length > 0) return false; // markerad som seedad, inget skapas
 
-    const { data: templateRows, error: templatesError } = await supabase
+    const { data: templateRows, error: templatesError } = await scopedRules(supabase
       .from('outreach_templates')
       .select('id, name, channel')
-      .eq('owner_user_id', userId);
+      .eq('owner_user_id', userId), organizationId);
 
     if (templatesError) {
       await releaseClaim();
@@ -145,10 +149,10 @@ export async function seedDefaultAutoRules(userId: string, organizationId: strin
 const backfillInFlight = new Map<string, Promise<boolean>>();
 
 async function runBackfill(userId: string, organizationId: string | null): Promise<boolean> {
-  const { data, error } = await supabase
+  const { data, error } = await scopedRules(supabase
     .from('outreach_automations')
     .select('trigger')
-    .eq('owner_user_id', userId);
+    .eq('owner_user_id', userId), organizationId);
 
   if (error || !data || data.length === 0) return false;
 
@@ -156,10 +160,10 @@ async function runBackfill(userId: string, organizationId: string | null): Promi
   const missing = AUTO_RULE_EVENTS.filter((event) => !existingTriggers.has(event.trigger));
   if (missing.length === 0) return false;
 
-  const { data: templateRows } = await supabase
+  const { data: templateRows } = await scopedRules(supabase
     .from('outreach_templates')
     .select('id, name, channel')
-    .eq('owner_user_id', userId);
+    .eq('owner_user_id', userId), organizationId);
 
   const cache: { id: string; name: string; channel: string }[] = (templateRows ?? []).map((t) => ({
     id: t.id as string,
