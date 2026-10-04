@@ -704,7 +704,7 @@ export function CandidatesTable({
       {/* Bulk actions bar */}
       {selectionMode && (
         <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mb-3">
-           <div className="flex items-center gap-1.5 sm:gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-2 sm:px-4 py-2 shadow-xl min-w-0 max-w-full">
+           <div className={`flex items-center gap-1.5 sm:gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full shadow-xl min-w-0 max-w-full ${selectedIds.size > 0 ? 'px-2 sm:px-4 py-2' : 'px-3 py-1.5'}`}>
             <span className="text-white text-xs font-semibold whitespace-nowrap flex-shrink-0">
               {selectedIds.size > 0 
                 ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
