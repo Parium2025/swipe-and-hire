@@ -120,8 +120,8 @@ export function AutoMessagesPanel() {
     const ownerId = ownerResult?.data ?? user.id;
     setSettingsOwnerId(ownerId);
     const [automationsRes, templatesRes] = await Promise.all([
-      supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId ?? ''),
-      supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId ?? ''),
+      organizationId ? supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId) : supabase.from('outreach_automations').select('*').eq('owner_user_id', ownerId).is('organization_id', null),
+      organizationId ? supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).eq('organization_id', organizationId) : supabase.from('outreach_templates').select('*').eq('owner_user_id', ownerId).is('organization_id', null),
     ]);
     const nextAutomations = (automationsRes.data as OutreachAutomation[]) ?? [];
     const nextTemplates = (templatesRes.data as OutreachTemplate[]) ?? [];
