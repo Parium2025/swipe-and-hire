@@ -659,6 +659,44 @@ const EmployerAnalytics = memo(() => {
     persistEmployerAnalyticsFilter(selectedDays);
   }, [selectedDays]);
 
+  // Förvärm övriga perioder i bakgrunden när den valda är klar, så att
+  // periodbyte visar färdiga siffror direkt i stället för en laddningsvy.
+  const prefetchedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user?.id || !rawData) return;
+    const scope = `${user.id}:${organization?.id ?? ''}`;
+    if (prefetchedForRef.current === scope) return;
+    prefetchedForRef.current = scope;
+    const uid = user.id;
+    const orgId = organization?.id;
+    const timer = setTimeout(() => {
+      for (const f of TIME_FILTERS) {
+        const days = f.days as number | null;
+        if (days === selectedDays) continue;
+        const write = <T,>(kind: 'overview' | 'advanced' | 'team', value: T) => {
+          if (value) writeEmployerAnalyticsCache(getEmployerAnalyticsCacheKey(kind, uid, days, orgId), value);
+          return value;
+        };
+        void queryClient.prefetchQuery({
+          queryKey: ['employer-analytics-v2', uid, orgId, days],
+          queryFn: async () => write('overview', await fetchEmployerAnalyticsOverview(uid, days)),
+          staleTime: 2 * 60 * 1000,
+        });
+        void queryClient.prefetchQuery({
+          queryKey: ['employer-advanced-analytics', uid, orgId, days],
+          queryFn: async () => write('advanced', await fetchEmployerAnalyticsAdvanced(uid, days)),
+          staleTime: 2 * 60 * 1000,
+        });
+        void queryClient.prefetchQuery({
+          queryKey: ['employer-team-insights', uid, orgId, days],
+          queryFn: async () => write('team', await fetchEmployerTeamInsights(uid, days)),
+          staleTime: 2 * 60 * 1000,
+        });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [user?.id, organization?.id, rawData, selectedDays, queryClient]);
+
   useEffect(() => {
     if (rawData && user?.id) {
       writeEmployerAnalyticsCache(overviewCacheKey, rawData);
