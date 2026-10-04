@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams } from 'react-router-dom';
-import { clearAutoReadSuppression, type Conversation } from '@/hooks/useConversations';
+import { clearAutoReadSuppression, useCreateConversation, type Conversation } from '@/hooks/useConversations';
 import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { NewConversationDialog } from '@/components/NewConversationDialog';
 import { ConversationItem } from '@/components/messages/ConversationItem';
+import { ColleagueStartItem } from '@/components/messages/ColleagueStartItem';
 import { SwipeableConversationItem } from '@/components/messages/SwipeableConversationItem';
 import { ChatView } from '@/components/messages/ChatView';
 import { EmptyConversationList, EmptyChatState } from '@/components/messages/EmptyStates';
@@ -24,7 +24,6 @@ import { prefetchConversationMessages } from '@/hooks/useConversations';
 import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
-  Plus,
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -96,7 +95,7 @@ export default function Messages() {
       return map;
     },
   });
-  const { hasTeam, isLoading: isTeamLoading } = useTeamMembers();
+  const { teamMembers, hasTeam, isLoading: isTeamLoading } = useTeamMembers();
   // The employer's controls must not wait for the inbox or a first-time team lookup.
   // A cached team result is used immediately; unresolved membership keeps the row in place.
   const showTeamControls = hasTeam || (userRole?.role === 'employer' && isTeamLoading);
@@ -104,7 +103,9 @@ export default function Messages() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileChat, setShowMobileChat] = useState(false);
-  const [showNewConversation, setShowNewConversation] = useState(false);
+  const createConversation = useCreateConversation();
+  const [pendingColleagueId, setPendingColleagueId] = useState<string | null>(null);
+  const startingColleagueRef = useRef(false);
   const [activeTab, setActiveTab] = useState<ConversationTab>(() => readStoredTab() ?? 'candidates');
 
   const handleTabChange = (tab: ConversationTab) => {
@@ -188,7 +189,7 @@ export default function Messages() {
   const candidateConversations = conversations.filter(c => categorizeConversation(c) === 'candidates');
   const colleagueConversations = conversations.filter(c => categorizeConversation(c) === 'colleagues');
 
-  // Öppnas ett samtal från annan flik (deep-link/ny chatt) — hoppa dit automatiskt
+  // Öppnas ett samtal från annan flik (deep-link/kollega) — hoppa dit automatiskt
   // så att listan aldrig ser tom ut medan chatten är öppen.
   useEffect(() => {
     if (!showTeamControls || !selectedConversation) return;
@@ -200,10 +201,28 @@ export default function Messages() {
   const candidateUnread = candidateConversations.reduce((sum, c) => sum + c.unread_count, 0);
   const colleagueUnread = colleagueConversations.reduce((sum, c) => sum + c.unread_count, 0);
 
-  const handleConversationCreated = (conversationId: string) => {
-    refetch();
-    setSelectedConversationId(conversationId);
-    setShowMobileChat(true);
+  const startColleagueConversation = async (memberId: string) => {
+    if (startingColleagueRef.current) return;
+    startingColleagueRef.current = true;
+    setPendingColleagueId(memberId);
+    try {
+      const existing = colleagueConversations.find(c =>
+        !c.is_group && c.members.some(m => m.user_id === memberId)
+      );
+      if (existing) {
+        handleSelectConversation(existing.id);
+      } else {
+        const result = await createConversation.mutateAsync({ memberIds: [memberId], kind: 'internal' });
+        await refetch();
+        handleSelectConversation(result.id);
+      }
+    } catch (error) {
+      console.error('Kunde inte öppna kollegachatten:', error);
+      toast.error('Kunde inte starta konversationen. Försök igen.');
+    } finally {
+      startingColleagueRef.current = false;
+      setPendingColleagueId(null);
+    }
   };
 
   // Filter conversations based on tab and search
@@ -248,8 +267,17 @@ export default function Messages() {
     return terms.every(term => haystack.includes(term));
   });
 
+  const colleagueStarts = hasTeam && activeTab === 'colleagues'
+    ? teamMembers.filter(member => {
+        if (colleagueConversations.some(c => !c.is_group && c.members.some(m => m.user_id === member.userId))) return false;
+        if (!searchQuery.trim()) return true;
+        const name = `${member.firstName || ''} ${member.lastName || ''}`.toLowerCase();
+        return searchQuery.toLowerCase().trim().split(/\s+/).every(term => name.includes(term));
+      })
+    : [];
 
-  const showEmptyConversationList = filteredConversations.length === 0;
+
+  const showEmptyConversationList = filteredConversations.length === 0 && colleagueStarts.length === 0;
   const showEmptyChatState = !selectedConversation;
 
   const queryClient = useQueryClient();
@@ -398,18 +426,6 @@ export default function Messages() {
 
         </div>
 
-        {showTeamControls && (
-          <Button
-            variant="glassBlue"
-            onClick={() => setShowNewConversation(true)}
-            className="shrink-0 h-10 px-4 text-pure-white sm:absolute sm:right-0 md:hover:bg-primary/30"
-            aria-label="Ny konversation"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Ny konversation</span>
-            <span className="sm:hidden">Ny</span>
-          </Button>
-        )}
         </div>
       </div>
 
@@ -498,7 +514,7 @@ export default function Messages() {
 
           {/* Conversation list */}
           <div className="relative flex-1 overflow-hidden rounded-xl bg-white/5 border border-white/10" style={{ contain: 'layout paint' }}>
-            {showSkeleton ? (
+            {showSkeleton && !(hasTeam && activeTab === 'colleagues' && colleagueStarts.length > 0) ? (
               <div className="p-2" aria-label="Laddar chattar">
                 {[0, 1, 2].map((index) => (
                   <div key={index} className="flex h-[76px] items-center gap-3 p-3">
@@ -571,6 +587,17 @@ export default function Messages() {
                     </div>
                   )}
 
+                  {colleagueStarts.map(member => (
+                    <div key={member.userId} className="w-full min-w-0 max-w-full overflow-hidden">
+                      {(filteredConversations.length > 0 || colleagueStarts[0]?.userId !== member.userId) && <div aria-hidden="true" className="mx-3 h-px bg-pure-white/20" />}
+                      <ColleagueStartItem
+                        member={member}
+                        pending={pendingColleagueId === member.userId}
+                        onStart={() => void startColleagueConversation(member.userId)}
+                      />
+                    </div>
+                  ))}
+
                   {/* Oändlig lista: laddar nästa 300 innan användaren nått botten */}
                   {hasMoreConversations && !searchQuery.trim() && (
                     <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
@@ -612,11 +639,6 @@ export default function Messages() {
         </div>
       </div>
 
-      <NewConversationDialog
-        open={showNewConversation}
-        onOpenChange={setShowNewConversation}
-        onConversationCreated={handleConversationCreated}
-      />
     </div>
   );
 }
