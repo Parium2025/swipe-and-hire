@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, useId } from 'react';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
+import { applyOwnRatingOptimistic } from '@/hooks/useOrganizationCandidateRatings';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
