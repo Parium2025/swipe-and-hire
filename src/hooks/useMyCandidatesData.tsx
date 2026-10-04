@@ -734,6 +734,58 @@ export function useMyCandidatesData(
     };
   }, [user, queryClient]);
 
+  // Lägg in nya rader direkt i alla synliga tavlor + kallstartscachen, så att
+  // kandidaten syns live (med betyg) utan att vänta på en omhämtning.
+  const insertRowsIntoCaches = async (rows: RawMyCandidateRow[]) => {
+    if (!user || rows.length === 0) return;
+    let items: MyCandidateData[] = [];
+    try {
+      items = await hydrateMyCandidateRows(user.id, rows);
+    } catch {
+      return;
+    }
+    if (items.length === 0) return;
+    const newIds = new Set(items.map(i => i.applicant_id));
+    const prepend = (list: MyCandidateData[]) => [
+      ...items,
+      ...list.filter(c => !newIds.has(c.applicant_id)),
+    ];
+    const rowListId = (rows[0] as any).list_id ?? insertListId ?? null;
+    queryClient.setQueriesData({ queryKey: ['my-candidates', user.id] }, (old: any) => {
+      if (!old?.pages?.length) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any, idx: number) => ({
+          ...page,
+          items: idx === 0 ? prepend(page.items || []) : (page.items || []).filter((c: MyCandidateData) => !newIds.has(c.applicant_id)),
+        })),
+      };
+    });
+    // Querynyckeln: ['my-candidates', uid, search, listId, stages] — sök/annan lista får inte raden.
+    queryClient.setQueriesData({ queryKey: ['my-candidates', user.id] }, (old: any) => old);
+    for (const q of queryClient.getQueryCache().findAll({ queryKey: ['my-candidates', user.id] })) {
+      const [, , search, qListId] = q.queryKey as any[];
+      if ((search && String(search).trim()) || (qListId && rowListId && qListId !== rowListId)) {
+        queryClient.invalidateQueries({ queryKey: q.queryKey, exact: true });
+      }
+    }
+    const cachedAll = readMyCandidatesCache(user.id) ?? [];
+    writeMyCandidatesCache(user.id, prepend(cachedAll), null);
+    if (rowListId) {
+      const cachedList = readMyCandidatesCache(user.id, rowListId) ?? [];
+      writeMyCandidatesCache(user.id, prepend(cachedList), rowListId);
+    }
+  };
+
+  const refreshAfterInsert = () => {
+    const opts = { refetchType: 'all' as const };
+    queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] }, opts);
+    queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] }, opts);
+    queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] }, opts);
+    queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] }, opts);
+  };
+
   // Add candidate to my list
   const addCandidate = useMutation({
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
