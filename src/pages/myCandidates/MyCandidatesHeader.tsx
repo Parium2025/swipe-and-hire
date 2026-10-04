@@ -126,7 +126,7 @@ export const MyCandidatesHeader = ({
               >
                 {isViewingColleague && <Eye className="h-5 w-5 flex-shrink-0 text-fuchsia-400" />}
                 <span className="min-w-0 flex-1 md:hidden">
-                  <TruncatedText text={title} lines={2} className="min-w-0 text-center text-white break-words [overflow-wrap:anywhere]" side="bottom" />
+                  <TruncatedText text={title} lines={2} className="min-w-0 text-center text-white break-words [overflow-wrap:anywhere]" side="bottom" touchTooltipOnLongPress />
                 </span>
                 <span className="hidden min-w-0 flex-1 md:block">
                   <TruncatedText text={title} className="truncate min-w-0 text-white" side="bottom" />

@@ -19,6 +19,12 @@ interface TruncatedTextProps {
    * className drives the clamp.
    */
   lines?: number;
+  /**
+   * Touch-only: visa tooltipen först vid långtryck (~500 ms). Korta tryck
+   * släpps vidare till föräldern (t.ex. en dropdown-trigger) utan att
+   * tooltipen öppnas. Desktop påverkas aldrig.
+   */
+  touchTooltipOnLongPress?: boolean;
 }
 
 // Module-level lazy detection of touch/hover capability — runs ONCE for the
@@ -89,6 +95,7 @@ export function TruncatedText({
   instantClose = false,
   style,
   lines,
+  touchTooltipOnLongPress = false,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
@@ -418,13 +425,20 @@ export function TruncatedText({
   // Stop propagation to prevent parent onClick from firing when interacting with tooltip
   const handleClick = (e: React.MouseEvent) => {
     if (!supportsHover && isTouch) {
+      // Långtrycksläge: korta tryck ska öppna förälderns kontroll (t.ex.
+      // listmenyn) — bara ett fullbordat långtryck får styra tooltipen.
+      if (touchTooltipOnLongPress && !longPressFiredRef.current) {
+        clearLongPressTimer();
+        return;
+      }
+      longPressFiredRef.current = false;
       e.stopPropagation();
       // Radix TooltipTrigger stänger tooltipen i sitt eget onClick direkt efter
       // vårt. Utan preventDefault öppnades bubblan och stängdes i samma tryck —
       // på mobil syntes den därför aldrig.
       e.preventDefault();
       releaseTriggerPress();
-      handleTap();
+      if (!touchTooltipOnLongPress) handleTap();
     } else if (onClick) {
       onClick();
     }
@@ -437,6 +451,8 @@ export function TruncatedText({
   // vilket fick ett andra tryck att öppna igen i stället för att stänga.
   const touchOnly = !supportsHover && isTouch;
   const triggerPressRef = useRef(false);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressFiredRef = useRef(false);
   const handleRadixOpenChange = (next: boolean) => {
     // Touch: rutan styrs helt av eget tryck och eget "tryck utanför" — Radix
     // stänger annars vid scroll-/fokushändelser som iOS skickar efter trycket.
@@ -449,6 +465,29 @@ export function TruncatedText({
   const releaseTriggerPress = () => {
     triggerPressRef.current = false;
   };
+
+  // Långtrycksläge: tooltipen öppnas först efter ~500 ms intryckt. Korta
+  // tryck når aldrig handleTap, så förälderns klick (t.ex. en dropdown)
+  // fungerar som vanligt.
+  const clearLongPressTimer = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleLongPressTouchStart = () => {
+    measureTruncation();
+    clearLongPressTimer();
+    longPressFiredRef.current = false;
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressTimerRef.current = null;
+      longPressFiredRef.current = true;
+      handleTap();
+    }, 500);
+  };
+
+  useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
 
   const stopTooltipPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
@@ -489,7 +528,10 @@ export function TruncatedText({
             onMouseLeave={handleMouseLeave}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            onTouchStart={isTouch && !supportsHover ? () => { measureTruncation(); } : undefined}
+            onTouchStart={isTouch && !supportsHover ? (touchTooltipOnLongPress ? handleLongPressTouchStart : () => { measureTruncation(); }) : undefined}
+            onTouchEnd={touchTooltipOnLongPress ? clearLongPressTimer : undefined}
+            onTouchMove={touchTooltipOnLongPress ? clearLongPressTimer : undefined}
+            onTouchCancel={touchTooltipOnLongPress ? clearLongPressTimer : undefined}
             onMouseDown={(e) => e.stopPropagation()}
             // No native `title` attribute — it would render a second (gray) browser
             // tooltip on top of our custom one.
