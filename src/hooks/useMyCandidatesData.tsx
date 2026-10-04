@@ -979,10 +979,10 @@ export function useMyCandidatesData(
     },
     onMutate: async (id: string) => {
       // Optimistic removal
-      await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
+      queryClient.setQueriesData({ queryKey: ['my-candidates', user?.id] }, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -996,6 +996,9 @@ export function useMyCandidatesData(
       // Ta bort ur localStorage-cachen också — annars kom kandidaten tillbaka
       // som spökkort vid nästa instant-load.
       updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id), listId);
+      if (listId) {
+        updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id));
+      }
 
       const removedApplicantId = candidates.find((candidate) => candidate.id === id)?.applicant_id;
       if (user && removedApplicantId) {
