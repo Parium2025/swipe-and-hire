@@ -122,7 +122,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={!IS_TOUCH_ONLY ? openArticle : undefined}
-                className={`w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
+                className={`w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
                 {IS_TOUCH_ONLY ? (
                   <TruncatedText
