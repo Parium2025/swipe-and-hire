@@ -17,8 +17,8 @@ const STOCKHOLM_TIME = new Intl.DateTimeFormat('sv-SE', {
 /**
  * Efterarbete när kandidaten svarat via mejllänken:
  *  1. Arbetsgivaren får ett mejl (kan stängas av i aviseringar).
- *  2. Vid nej ligger mötet kvar i kalendern, men rubriken märks "Nekad"
- *     så att historik och statistik behålls.
+ *  2. Vid nej ligger mötet kvar märkt "Nekad"; vid ett nytt ja tas
+ *     märkningen bort i båda parters kopplade kalendrar.
  * Fel här får aldrig påverka kandidatens svar.
  */
 async function afterResponse(result: Record<string, unknown>, accept: boolean) {
@@ -29,7 +29,7 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
   const scheduledAt = typeof result.scheduled_at === 'string' ? result.scheduled_at : null
   const interviewId = typeof result.interview_id === 'string' ? result.interview_id : null
 
-  if (!accept && interviewId && employerId && scheduledAt) {
+  const calendarTask = interviewId && employerId && scheduledAt ? (async () => {
     const applicantId = typeof result.applicant_id === 'string' ? result.applicant_id : null
     const input = {
       interviewId,
@@ -39,26 +39,28 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
       scheduledAt,
       durationMinutes: typeof result.duration_minutes === 'number' ? result.duration_minutes : null,
       locationDetails: typeof result.location_details === 'string' ? result.location_details : null,
-      statusLabel: 'Nekad',
+      statusLabel: accept ? null : 'Nekad',
     }
-    for (const connector of SUPPORTED_CONNECTORS) {
-      try {
-        await addInterviewToCalendar(employerId, connector, input, 'employer')
-        if (applicantId) await addInterviewToCalendar(applicantId, connector, input, 'job_seeker')
-      } catch (err) {
-        console.warn('Kalenderuppdatering vid nej misslyckades:', err)
-      }
-    }
-  }
+    await Promise.all(SUPPORTED_CONNECTORS.flatMap((connector) => [
+      addInterviewToCalendar(employerId, connector, input, 'employer'),
+      ...(applicantId ? [addInterviewToCalendar(applicantId, connector, input, 'job_seeker')] : []),
+    ]))
+  })().catch((err) => console.warn('Kalenderuppdatering vid intervjusvar misslyckades:', err)) : Promise.resolve()
 
-  if (!employerEmail || !employerId) return
+  if (!employerEmail || !employerId) {
+    await calendarTask
+    return
+  }
 
   try {
     const { data: allowed } = await admin.rpc('is_email_notification_enabled', {
       p_user_id: employerId,
       p_type: 'interview_response',
     })
-    if (allowed === false) return
+    if (allowed === false) {
+      await calendarTask
+      return
+    }
   } catch (err) {
     console.warn('Kunde inte läsa mejlinställning, skickar ändå:', err)
   }
@@ -73,10 +75,11 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
     time_str: when ? STOCKHOLM_TIME.format(when) : '',
     accepted: accept,
   }
-  // Basnyckeln hindrar dubbelutskick vid samma svar. Om ett utskick redan
-  // misslyckats hos e-posttjänsten blockeras nyckeln permanent (409), så ett
-  // nytt försök måste ha en ny nyckel — annars får arbetsgivaren aldrig svaret.
-  const baseKey = `interview-response-${interviewId ?? 'unknown'}-${accept ? 'yes' : 'no'}`
+  // Varje faktisk statusändring får ett eget händelse-id från den låsta
+  // databastransaktionen. Ja → nej → ja måste ge tre separata mejl, medan
+  // ett upprepat tryck på samma svar inte skickar något nytt.
+  const responseEventId = typeof result.response_event_id === 'string' ? result.response_event_id : crypto.randomUUID()
+  const baseKey = `interview-response-${interviewId ?? 'unknown'}-${responseEventId}`
   try {
     await sendLoggedTemplateEmail('interview-response-employer', employerEmail, {
       templateData,
@@ -93,6 +96,7 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
       console.error('Nytt försök att skicka svarsmejl misslyckades:', retryErr)
     }
   }
+  await calendarTask
 }
 
 const admin = createClient(
@@ -188,13 +192,13 @@ Deno.serve(async (req) => {
     return page(
       accept ? 'Tacka ja till intervjun' : 'Tacka nej till intervjun',
       `<p>Bekräfta ditt svar så meddelas arbetsgivaren direkt.</p>
-       <form method="POST">
-         <input type="hidden" name="token" value="${escapeHtml(token)}" />
-         <input type="hidden" name="answer" value="${escapeHtml(answer)}" />
-         <div class="actions">
-           <button class="${accept ? 'yes' : 'no'}" type="submit">${accept ? 'Ja, jag kommer' : 'Nej, jag kan inte'}</button>
-         </div>
-       </form>`,
+        <form method="POST">
+          <input type="hidden" name="token" value="${escapeHtml(token)}" />
+          <div class="actions">
+            <button class="${accept ? 'yes' : 'no'}" name="answer" value="${escapeHtml(answer)}" type="submit">${accept ? 'Ja, jag kommer' : 'Nej, jag kan inte'}</button>
+            <button class="${accept ? 'no' : 'yes'}" name="answer" value="${accept ? 'no' : 'yes'}" type="submit">${accept ? 'Nej, jag kan inte' : 'Ja, jag kommer'}</button>
+          </div>
+        </form>`,
     )
   }
 
@@ -241,7 +245,8 @@ Deno.serve(async (req) => {
   const suffix = jobTitle ? ` för ${escapeHtml(jobTitle)}` : ''
   const already = result.already === true
 
+  const changeAnswer = `<form method="POST"><input type="hidden" name="token" value="${escapeHtml(token)}" /><input type="hidden" name="answer" value="${accept ? 'no' : 'yes'}" /><div class="actions"><button class="${accept ? 'no' : 'yes'}" type="submit">Ändra svar till ${accept ? 'nej' : 'ja'}</button></div></form>`
   return accept
-    ? page('Tack – du är anmäld', `<p>${already ? 'Du hade redan tackat ja' : 'Du har tackat ja'} till intervjun${suffix}. Arbetsgivaren har fått besked.</p><p>Du hittar tid och plats under Mina ansökningar i Parium.</p>`)
-    : page('Tack för ditt besked', `<p>${already ? 'Du hade redan tackat nej' : 'Du har tackat nej'} till intervjun${suffix}. Arbetsgivaren har fått besked.</p>`)
+    ? page('Tack – du är anmäld', `<p>${already ? 'Du hade redan tackat ja' : 'Du har tackat ja'} till intervjun${suffix}.${already ? '' : ' Arbetsgivaren har fått besked.'}</p><p>Du hittar tid och plats under Mina ansökningar i Parium.</p>${changeAnswer}`)
+    : page('Tack för ditt besked', `<p>${already ? 'Du hade redan tackat nej' : 'Du har tackat nej'} till intervjun${suffix}.${already ? '' : ' Arbetsgivaren har fått besked.'}</p>${changeAnswer}`)
 })
