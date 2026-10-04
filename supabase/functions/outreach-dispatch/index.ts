@@ -546,7 +546,14 @@ async function dispatchLog(log: OutreachLog) {
         .select('id', { count: 'exact', head: true })
         .eq('user_id', log.recipient_user_id)
         .eq('is_active', true);
-      if (!tokenCount) throw new Error('Inga registrerade enheter för push (push fungerar bara i mobilappen)');
+      if (!tokenCount) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Ingen registrerad enhet för push',
+          locked_until: null,
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
       const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
