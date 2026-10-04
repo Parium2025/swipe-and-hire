@@ -19,7 +19,7 @@ describe('Avatar – aldrig tom cirkel', () => {
 
   it('kontextvärdet är stabilt så att bildens effekter inte loopar', () => {
     const src = readFileSync(resolve(process.cwd(), 'src/components/ui/avatar.tsx'), 'utf8');
-    expect(src).toContain('React.useMemo(() => ({ imageLoaded, setImageLoaded }), [imageLoaded])');
+    expect(src).toContain('[imageLoaded, hasSource]');
   });
 });
 

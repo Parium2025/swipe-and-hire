@@ -14,6 +14,8 @@ import { fetchPriority } from '@/lib/fetchPriority';
 interface AvatarContextValue {
   imageLoaded: boolean;
   setImageLoaded: (loaded: boolean) => void;
+  hasSource: boolean;
+  setHasSource: (has: boolean) => void;
 }
 
 const AvatarContext = React.createContext<AvatarContextValue | null>(null);
@@ -26,7 +28,11 @@ const Avatar = React.forwardRef<
   // Stabilt kontextvärde: ett nytt objekt vid varje rendering fick bildens
   // effekter att köras om i en ping-pong-loop, som kunde fastna med bilden
   // dold OCH initialerna dolda (tom cirkel).
-  const contextValue = React.useMemo(() => ({ imageLoaded, setImageLoaded }), [imageLoaded]);
+  const [hasSource, setHasSource] = React.useState(false);
+  const contextValue = React.useMemo(
+    () => ({ imageLoaded, setImageLoaded, hasSource, setHasSource }),
+    [imageLoaded, hasSource],
+  );
   
   return (
     <AvatarContext.Provider value={contextValue}>
@@ -53,6 +59,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
   ({ className, src, alt, onLoadingStatusChange, ...props }, ref) => {
     const context = React.useContext(AvatarContext);
     const setImageLoaded = context?.setImageLoaded;
+    const setHasSource = context?.setHasSource;
     const imgRef = React.useRef<HTMLImageElement | null>(null);
     const statusCbRef = React.useRef(onLoadingStatusChange);
     statusCbRef.current = onLoadingStatusChange;
@@ -82,7 +89,12 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
       statusCbRef.current?.(status);
     }, [status, setImageLoaded]);
 
-    React.useEffect(() => () => setImageLoaded?.(false), [setImageLoaded]);
+    // Talar om för initialerna att en bild faktiskt finns att vänta på.
+    React.useLayoutEffect(() => {
+      setHasSource?.(!!src && status !== 'error');
+    }, [src, status, setHasSource]);
+
+    React.useEffect(() => () => { setImageLoaded?.(false); setHasSource?.(false); }, [setImageLoaded, setHasSource]);
 
     // Fångar en load-händelse som hann ske innan React lyssnade.
     React.useEffect(() => {
@@ -134,21 +146,24 @@ interface AvatarFallbackProps extends React.HTMLAttributes<HTMLSpanElement> {
 const AvatarFallback = React.forwardRef<HTMLSpanElement, AvatarFallbackProps>(
   ({ className, delayMs, fallbackType: _fallbackType, children, ...props }, ref) => {
     const context = React.useContext(AvatarContext);
-    const [showFallback, setShowFallback] = React.useState(!delayMs);
+    // Fördröjning bara när det finns en bild att vänta på — utan bild visas
+    // initialerna direkt (före första ritningen).
+    const effectiveDelay = context ? (context.hasSource ? delayMs : 0) : delayMs;
+    const [showFallback, setShowFallback] = React.useState(!effectiveDelay);
     
     // Återställ alltid synligheten när bildläget ändras. Utan else-grenen låg
     // föregående kandidats 1,2 s-fördröjning kvar när nästa kandidat saknade
     // bild, vilket gjorde att initialerna kom sent trots delayMs={0}.
-    React.useEffect(() => {
-      if (delayMs && delayMs > 0) {
+    React.useLayoutEffect(() => {
+      if (effectiveDelay && effectiveDelay > 0) {
         setShowFallback(false);
         const timeout = setTimeout(() => {
           setShowFallback(true);
-        }, delayMs);
+        }, effectiveDelay);
         return () => clearTimeout(timeout);
       }
       setShowFallback(true);
-    }, [delayMs]);
+    }, [effectiveDelay]);
     
     // Don't show fallback if image is already loaded
     if (context?.imageLoaded) {
