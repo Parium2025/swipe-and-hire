@@ -74,7 +74,7 @@ export const ConversationItem = memo(function ConversationItem({
 
   const lastMessagePreview = lastMsg
     ? (lastMsg.is_system_message ? (lastMsg.content.startsWith('📋') ? '📋 Ny jobbkontext' : lastMsg.content) : lastMsg.content)
-    : 'Inga meddelanden ännu';
+    : category === 'colleagues' && !conversation.is_group ? 'Starta konversation' : 'Inga meddelanden ännu';
   const isOwnMessage = conversation.last_message?.sender_id === currentUserId;
 
   const identityUnknown = displayName === 'Okänd användare';

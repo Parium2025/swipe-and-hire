@@ -5,7 +5,6 @@ import { clearAutoReadSuppression, useCreateConversation, type Conversation } fr
 import { useConversationsContext } from '@/contexts/ConversationsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ConversationItem } from '@/components/messages/ConversationItem';
@@ -24,8 +23,8 @@ import { prefetchConversationMessages } from '@/hooks/useConversations';
 import { getConversationDisplayName, resolveDisplayMember } from '@/lib/conversationDisplayUtils';
 import {
   MessageSquare,
-  Search,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { writeCachedCount, SKELETON_COUNT_KEYS } from '@/lib/skeletonCounts';
 import { Skeleton } from '@/components/ui/skeleton';
