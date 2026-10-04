@@ -29,7 +29,7 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
   const scheduledAt = typeof result.scheduled_at === 'string' ? result.scheduled_at : null
   const interviewId = typeof result.interview_id === 'string' ? result.interview_id : null
 
-  if (interviewId && employerId && scheduledAt) {
+  const calendarTask = interviewId && employerId && scheduledAt ? (async () => {
     const applicantId = typeof result.applicant_id === 'string' ? result.applicant_id : null
     const input = {
       interviewId,
@@ -41,24 +41,26 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
       locationDetails: typeof result.location_details === 'string' ? result.location_details : null,
       statusLabel: accept ? null : 'Nekad',
     }
-    for (const connector of SUPPORTED_CONNECTORS) {
-      try {
-        await addInterviewToCalendar(employerId, connector, input, 'employer')
-        if (applicantId) await addInterviewToCalendar(applicantId, connector, input, 'job_seeker')
-      } catch (err) {
-        console.warn('Kalenderuppdatering vid intervjusvar misslyckades:', err)
-      }
-    }
-  }
+    await Promise.all(SUPPORTED_CONNECTORS.flatMap((connector) => [
+      addInterviewToCalendar(employerId, connector, input, 'employer'),
+      ...(applicantId ? [addInterviewToCalendar(applicantId, connector, input, 'job_seeker')] : []),
+    ]))
+  })().catch((err) => console.warn('Kalenderuppdatering vid intervjusvar misslyckades:', err)) : Promise.resolve()
 
-  if (!employerEmail || !employerId) return
+  if (!employerEmail || !employerId) {
+    await calendarTask
+    return
+  }
 
   try {
     const { data: allowed } = await admin.rpc('is_email_notification_enabled', {
       p_user_id: employerId,
       p_type: 'interview_response',
     })
-    if (allowed === false) return
+    if (allowed === false) {
+      await calendarTask
+      return
+    }
   } catch (err) {
     console.warn('Kunde inte läsa mejlinställning, skickar ändå:', err)
   }
@@ -94,6 +96,7 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
       console.error('Nytt försök att skicka svarsmejl misslyckades:', retryErr)
     }
   }
+  await calendarTask
 }
 
 const admin = createClient(
