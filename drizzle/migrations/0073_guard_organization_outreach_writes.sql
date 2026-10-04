@@ -3,8 +3,7 @@
 CREATE OR REPLACE FUNCTION public.can_manage_outreach_scope(p_owner_user_id uuid, p_organization_id uuid DEFAULT NULL)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT CASE WHEN p_organization_id IS NULL THEN auth.uid() = p_owner_user_id
-    ELSE EXISTS (SELECT 1 FROM public.user_roles ur WHERE ur.user_id = auth.uid()
-      AND ur.organization_id = p_organization_id AND ur.is_active = true) END;
+    ELSE public.is_org_admin(auth.uid(), p_organization_id) END;
 $$;
 
 DROP POLICY IF EXISTS "Owners and org admins can insert outreach templates" ON public.outreach_templates;
@@ -53,11 +52,15 @@ DECLARE
   v_existing_id uuid;
   v_result_id uuid;
 BEGIN
-  IF auth.uid() IS DISTINCT FROM p_owner_user_id THEN
-    RAISE EXCEPTION 'Du får endast spara egna mallar' USING ERRCODE = '42501';
-  END IF;
-  IF p_organization_id IS NOT NULL AND NOT public.is_org_admin(auth.uid(), p_organization_id) THEN
-    RAISE EXCEPTION 'Endast organisationens admin får ändra utskicksmallar' USING ERRCODE = '42501';
+  IF p_organization_id IS NULL THEN
+    IF auth.uid() IS DISTINCT FROM p_owner_user_id THEN
+      RAISE EXCEPTION 'Du får endast spara egna mallar' USING ERRCODE = '42501';
+    END IF;
+  ELSIF NOT public.is_org_admin(auth.uid(), p_organization_id) OR
+        p_owner_user_id IS DISTINCT FROM (SELECT ur.user_id FROM public.user_roles ur
+          WHERE ur.organization_id = p_organization_id AND ur.is_active = true AND ur.role = 'admin'
+          ORDER BY ur.user_id LIMIT 1) THEN
+    RAISE EXCEPTION 'Endast organisationens admin får ändra organisationens mallar' USING ERRCODE = '42501';
   END IF;
   FOR v_template IN SELECT * FROM jsonb_array_elements(p_templates) LOOP
     v_channel := (v_template->>'channel')::public.outreach_channel;
