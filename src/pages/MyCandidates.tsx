@@ -231,18 +231,18 @@ const MyCandidates = () => {
 
   
   // Active candidates to display (hook already deduplicates by applicant_id)
-  const displayedCandidates = useMemo(() => {
+  const rawDisplayedCandidates = useMemo(() => {
     return isViewingColleague ? colleagueCandidates : candidates;
   }, [isViewingColleague, colleagueCandidates, candidates]);
   // Mina egna betyg går först. Om jag ännu inte bedömt kandidaten visas
   // kollegans sparade betyg även i Mina kandidater, precis som i ansökningsvyn.
-  const ratingApplicantIds = useMemo(() => displayedCandidates.map(c => c.applicant_id), [displayedCandidates]);
+  const ratingApplicantIds = useMemo(() => rawDisplayedCandidates.map(c => c.applicant_id), [rawDisplayedCandidates]);
   const organizationRatings = useOrganizationCandidateRatings(ratingApplicantIds);
-  const ratedCandidates = useMemo(() => displayedCandidates.map(candidate => {
+  const displayedCandidates = useMemo(() => rawDisplayedCandidates.map(candidate => {
     if (isViewingColleague || candidate.rating > 0) return candidate;
     const colleagueRating = organizationRatings[candidate.applicant_id]?.colleague;
     return colleagueRating && colleagueRating > 0 ? { ...candidate, rating: colleagueRating } : candidate;
-  }), [displayedCandidates, isViewingColleague, organizationRatings]);
+  }), [rawDisplayedCandidates, isViewingColleague, organizationRatings]);
   
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
