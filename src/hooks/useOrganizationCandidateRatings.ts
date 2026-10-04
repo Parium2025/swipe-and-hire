@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -16,7 +16,7 @@ function readPersisted(userId: string | undefined): Ratings {
     return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as Ratings : {};
   } catch { return {}; }
 }
-function writePersisted(userId: string, ids: string[], fresh: Ratings) {
+export function writePersisted(userId: string, ids: string[], fresh: Ratings) {
   try {
     const merged = readPersisted(userId);
     for (const id of ids) {
@@ -69,6 +69,18 @@ export async function fetchOrganizationRatings(userId: string, ids: string[]): P
   return result;
 }
 
+/** Mitt nya betyg blir direkt det delade betyget i alla vyer och i den sparade cachen. */
+export function applyOwnRatingOptimistic(queryClient: QueryClient, userId: string, applicantId: string, rating: number) {
+  queryClient.setQueriesData<Ratings>({ queryKey: ['organization-candidate-ratings', userId] }, (old) => {
+    if (!old) return old;
+    return { ...old, [applicantId]: { ...(old[applicantId] ?? {}), own: rating, latest: rating > 0 ? rating : old[applicantId]?.colleague } };
+  });
+  queryClient.setQueriesData({ queryKey: ['candidate-colleague-rating', userId, applicantId] }, () => rating > 0 ? rating : null);
+  const persisted = readPersisted(userId);
+  persisted[applicantId] = { ...(persisted[applicantId] ?? {}), own: rating, latest: rating > 0 ? rating : persisted[applicantId]?.colleague };
+  writePersisted(userId, [applicantId], persisted);
+}
+
 /** Ratings are personal, but colleagues' ratings are visible inside the current organization. */
 export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings {
   const { user } = useAuth();
@@ -82,6 +94,9 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
     queryKey,
     enabled: !!user?.id && !!idsKey,
     staleTime: 30_000,
+    // Tillbaka till appen/fliken: hämta om, realtime kan ha tappats i bakgrunden.
+    refetchOnWindowFocus: 'always',
+    refetchOnReconnect: 'always',
     queryFn: () => fetchOrganizationRatings(user!.id, idsKey.split('|')),
   });
 
@@ -99,7 +114,19 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
           queryClient.invalidateQueries({ queryKey: ['candidate-colleague-rating', user.id] });
         }
       }).subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        queryClient.invalidateQueries({ queryKey: ['organization-candidate-ratings', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['candidate-colleague-rating', user.id] });
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('pageshow', onVisible);
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('pageshow', onVisible);
+    };
   }, [user?.id, queryClient]);
 
   return isSuccess && data ? data : persisted;

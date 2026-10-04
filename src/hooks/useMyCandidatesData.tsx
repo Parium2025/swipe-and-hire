@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, useId } from 'react';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
+import { applyOwnRatingOptimistic } from '@/hooks/useOrganizationCandidateRatings';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -552,6 +553,8 @@ export function useMyCandidatesData(
                   };
                 }
               );
+              // Även kollegors/andra flikars flyttar ska ge rätt rubriksiffror direkt.
+              queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user.id] });
               return;
             }
           }
@@ -962,6 +965,21 @@ export function useMyCandidatesData(
       // hamnar överst i målkolumnen. Speglas här så att ett kort du drar från
       // plats 5 000 inte "försvinner" ner i den nya kolumnen tills nästa hämtning.
       const movedAt = new Date().toISOString();
+      // Rubrikernas siffror justeras i samma bildruta som kortet flyttas,
+      // annars stod "1" kvar på en tom kolumn tills servern svarat.
+      const fromStage = (previousCandidates as any)?.pages
+        ?.flatMap((page: any) => page.items as MyCandidateData[])
+        .find((c: MyCandidateData) => c.id === id)?.stage;
+      if (fromStage && fromStage !== stage) {
+        queryClient.setQueriesData<Record<string, number>>(
+          { queryKey: ['my-candidates-stage-counts', user?.id, listId ?? null, null] },
+          (counts) => counts ? {
+            ...counts,
+            [fromStage]: Math.max(0, (counts[fromStage] ?? 1) - 1),
+            [stage]: (counts[stage] ?? 0) + 1,
+          } : counts,
+        );
+      }
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
@@ -1157,6 +1175,8 @@ export function useMyCandidatesData(
       return data;
     },
     onMutate: async ({ id, rating, applicantId }) => {
+      const ratedApplicantId = applicantId || candidates.find((c) => c.id === id)?.applicant_id;
+      if (user && ratedApplicantId) applyOwnRatingOptimistic(queryClient, user.id, ratedApplicantId, rating);
       // Optimistic update (paginated structure)
       await queryClient.cancelQueries({ queryKey });
       const previousCandidates = queryClient.getQueryData(queryKey);

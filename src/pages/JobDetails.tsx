@@ -18,7 +18,7 @@ import { Layers, SlidersHorizontal } from 'lucide-react';
 import { CandidateProfileDialog } from '@/components/CandidateProfileDialog';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCandidatePageWarmup } from '@/hooks/useCandidatePageWarmup';
-import { useOrganizationCandidateRatings } from '@/hooks/useOrganizationCandidateRatings';
+import { useOrganizationCandidateRatings, applyOwnRatingOptimistic } from '@/hooks/useOrganizationCandidateRatings';
 
 import { ApplicationData } from '@/hooks/useApplicationsData';
 import { SelectionCriteriaDialog } from '@/components/SelectionCriteriaDialog';
@@ -276,6 +276,7 @@ const JobDetails = () => {
     }
     if (!user) return;
 
+    applyOwnRatingOptimistic(queryClient, user.id, applicantId, newRating);
     updateApplicationLocally(
       applications.find(a => a.applicant_id === applicantId)?.id || '',
       { rating: newRating }
