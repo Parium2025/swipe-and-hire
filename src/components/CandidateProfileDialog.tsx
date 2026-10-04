@@ -964,7 +964,7 @@ export const CandidateProfileDialog = ({
 
           {/* Activity Sidebar - desktop only */}
           <div className="hidden md:flex w-80 border-l border-white/20 bg-white/5 flex-col overflow-hidden relative">
-            <div className="relative flex border-b border-white/20 pr-10">
+            <div className="relative flex min-h-11 border-b border-white/20 pr-10">
               <motion.div
                 className="absolute bottom-0 h-0.5 bg-white"
                 initial={false}
@@ -997,12 +997,15 @@ export const CandidateProfileDialog = ({
                 </div>
               </button>
               <button
+                type="button"
                 style={{ visibility: cvOpen ? 'hidden' : 'visible' }}
                 onClick={() => onOpenChange(false)}
                 aria-label="Stäng"
-                className={cn(dialogCloseButtonClassName, 'right-2 top-1/2 -translate-y-1/2 touch-manipulation')}
+                className="absolute right-1 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 touch-manipulation items-center justify-center rounded-full p-0 text-white outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <X className={dialogCloseIconClassName} />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20">
+                  <X className="h-4 w-4 shrink-0" />
+                </span>
               </button>
             </div>
 
