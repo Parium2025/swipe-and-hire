@@ -1174,6 +1174,8 @@ export function useMyCandidatesData(
       return data;
     },
     onMutate: async ({ id, rating, applicantId }) => {
+      const ratedApplicantId = applicantId || candidates.find((c) => c.id === id)?.applicant_id;
+      if (user && ratedApplicantId) applyOwnRatingOptimistic(queryClient, user.id, ratedApplicantId, rating);
       // Optimistic update (paginated structure)
       await queryClient.cancelQueries({ queryKey });
       const previousCandidates = queryClient.getQueryData(queryKey);
