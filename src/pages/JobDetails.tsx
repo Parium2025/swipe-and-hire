@@ -544,7 +544,7 @@ const JobDetails = () => {
 
   const getDisplayRating = useCallback((app: ApplicationData) => {
     const rating = organizationRatings[app.applicant_id];
-    return rating?.own ?? rating?.colleague ?? app.rating ?? 0;
+    return rating?.latest ?? rating?.own ?? app.rating ?? 0;
   }, [organizationRatings]);
 
   const handlePrefetchCandidate = useCallback((app: JobApplication) => {

@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 
-type Ratings = Record<string, { own?: number; colleague?: number }>;
+/** latest = senast satta betyget i organisationen; det delade betyget alla ser. */
+type Ratings = Record<string, { own?: number; colleague?: number; latest?: number }>;
 
 /** Account-scoped persisted ratings so stars render on the first frame after tab switches and cold starts. */
 export const ORG_RATINGS_CACHE_PREFIX = 'parium_org_ratings_v1_';
@@ -65,6 +66,7 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
           if (error) throw error;
           for (const row of rows ?? []) {
             const entry = result[row.applicant_id] ?? (result[row.applicant_id] = {});
+            if (entry.latest === undefined && row.rating > 0) entry.latest = row.rating;
             if (row.recruiter_id === user.id) entry.own = row.rating;
             else if (entry.colleague === undefined) entry.colleague = row.rating;
           }

@@ -234,14 +234,12 @@ const MyCandidates = () => {
   const rawDisplayedCandidates = useMemo(() => {
     return isViewingColleague ? colleagueCandidates : candidates;
   }, [isViewingColleague, colleagueCandidates, candidates]);
-  // Mina egna betyg går först. Om jag ännu inte bedömt kandidaten visas
-  // kollegans sparade betyg även i Mina kandidater, precis som i ansökningsvyn.
   const ratingApplicantIds = useMemo(() => rawDisplayedCandidates.map(c => c.applicant_id), [rawDisplayedCandidates]);
   const organizationRatings = useOrganizationCandidateRatings(ratingApplicantIds);
   const displayedCandidates = useMemo(() => rawDisplayedCandidates.map(candidate => {
-    if (isViewingColleague || candidate.rating > 0) return candidate;
-    const colleagueRating = organizationRatings[candidate.applicant_id]?.colleague;
-    return colleagueRating && colleagueRating > 0 ? { ...candidate, rating: colleagueRating } : candidate;
+    // Betyget är delat i organisationen: det senast satta betyget gäller för alla.
+    const shared = organizationRatings[candidate.applicant_id]?.latest;
+    return shared && shared > 0 && shared !== candidate.rating ? { ...candidate, rating: shared } : candidate;
   }), [rawDisplayedCandidates, isViewingColleague, organizationRatings]);
   
   const [selectedCandidate, setSelectedCandidate] = useState<MyCandidateData | null>(null);
