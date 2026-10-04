@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 
-interface TeamCandidateInfo {
+export interface TeamCandidateInfo {
   applicant_id: string;
   application_id: string;
   recruiter_id: string;
@@ -13,6 +13,30 @@ interface TeamCandidateInfo {
   rating: number;
   stage: string;
   notes: string | null;
+}
+
+/** Account-scoped persisted team info so "Added by colleague" badges render on the first frame after cold starts. */
+export const TEAM_CANDIDATE_INFO_CACHE_PREFIX = 'parium_team_candidate_info_v1_';
+function readPersisted(userId: string | undefined): Record<string, TeamCandidateInfo[]> {
+  if (!userId) return {};
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TEAM_CANDIDATE_INFO_CACHE_PREFIX + userId) || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed as Record<string, TeamCandidateInfo[]>
+      : {};
+  } catch { return {}; }
+}
+function writePersisted(userId: string, appIds: string[], fresh: Record<string, TeamCandidateInfo[]>) {
+  try {
+    const merged = readPersisted(userId);
+    for (const id of appIds) {
+      if (fresh[id]) merged[id] = fresh[id]; else delete merged[id];
+    }
+    const keys = Object.keys(merged);
+    const trimmed: Record<string, TeamCandidateInfo[]> = {};
+    keys.slice(-3000).forEach(k => { trimmed[k] = merged[k]; });
+    localStorage.setItem(TEAM_CANDIDATE_INFO_CACHE_PREFIX + userId, JSON.stringify(trimmed));
+  } catch { /* ignore quota */ }
 }
 
 /**
@@ -128,14 +152,20 @@ export function useTeamCandidateInfo(applicationIds: string[]) {
         });
       });
 
+      // Spara senaste teaminfo per konto så märket finns på plats från första steg vid kallstart.
+      writePersisted(user.id, applicationIds, infoMap);
       return infoMap;
     },
     enabled: !!user && applicationIds.length > 0,
     staleTime: 30000,
   });
 
+  // Senaste kända teaminfo för kontot: visas tills det nya svaret kommer fram
+  // och när sidnumrering byter frågens nyckel under pågående hämtning.
+  const persisted = useMemo(() => readPersisted(user?.id), [user?.id, teamCandidates]);
+
   return {
-    teamCandidates: teamCandidates || {},
+    teamCandidates: teamCandidates ?? persisted,
     isLoading,
   };
 }

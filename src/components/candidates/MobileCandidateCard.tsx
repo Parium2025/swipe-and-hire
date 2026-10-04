@@ -102,18 +102,6 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
               insideInteractive
               className="flex-1 min-w-0 font-medium text-white text-sm"
             />
-            {teamInfo && teamInfo.colleagues.length > 0 && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={event => event.stopPropagation()} className="flex items-center justify-center h-6 w-6 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0 active:scale-95">
-                    <Users className="h-3 w-3 text-purple-300" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="bottom" align="start" className="w-auto max-w-[min(300px,calc(100vw-24px))] p-3" onClick={event => event.stopPropagation()}>
-                  <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
-                </PopoverContent>
-              </Popover>
-            )}
           </div>
 
           {/* Rating stars */}
@@ -154,37 +142,51 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
           </span>
         </div>
 
-        {/* Right side: add/status button or chevron */}
+        {/* Right side: add/status button + kollegamärke staplat under, eller chevron */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          {!isMyCandidatesLoading && !selectionMode && (
-            isAlreadyAdded ? (
-              <button
-                aria-label="Kandidaten finns i din lista – öppna listväljaren"
-                className="h-8 w-8 flex items-center justify-center rounded-full text-green-400 active:scale-[0.97]"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToTeam();
-                }}
-              >
-                <UserCheck className="h-4 w-4" />
-              </button>
-            ) : (
-              <button
-                aria-label="Lägg till i kandidatlista"
-                className="h-8 w-8 flex items-center justify-center rounded-full text-white active:scale-[0.97]"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (hasTeam) {
+          <div className="flex flex-col items-center gap-1">
+            {!isMyCandidatesLoading && !selectionMode && (
+              isAlreadyAdded ? (
+                <button
+                  aria-label="Kandidaten finns i din lista – öppna listväljaren"
+                  className="h-8 w-8 flex items-center justify-center rounded-full text-green-400 active:scale-[0.97]"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onAddToTeam();
-                  } else {
-                    onAddCandidate();
-                  }
-                }}
-              >
-                <UserPlus className="h-4 w-4" />
-              </button>
-            )
-          )}
+                  }}
+                >
+                  <UserCheck className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  aria-label="Lägg till i kandidatlista"
+                  className="h-8 w-8 flex items-center justify-center rounded-full text-white active:scale-[0.97]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (hasTeam) {
+                      onAddToTeam();
+                    } else {
+                      onAddCandidate();
+                    }
+                  }}
+                >
+                  <UserPlus className="h-4 w-4" />
+                </button>
+              )
+            )}
+            {teamInfo && teamInfo.colleagues.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={event => event.stopPropagation()} className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-500/20 border border-purple-500/30 active:scale-95">
+                    <Users className="h-3.5 w-3.5 text-purple-300" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="bottom" align="end" className="w-auto max-w-[min(300px,calc(100vw-24px))] p-3" onClick={event => event.stopPropagation()}>
+                  <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
           {!selectionMode && (
             <ChevronRight className="h-4 w-4 text-white flex-shrink-0" />
           )}
