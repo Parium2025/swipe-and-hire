@@ -220,15 +220,15 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
               Aktiv
             </Badge>
           )}
+        </div>
+
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
           {!isDraft && !isExpired && (
             <Badge variant="glass" className="inline-flex items-center gap-1 border-white/15 bg-black/60 px-2 py-0.5 text-[11px] leading-snug text-white" aria-label={`${timeInfo.text} kvar på annonsen`}>
               <Timer className="h-3 w-3 shrink-0" />
               {timeInfo.text} kvar
             </Badge>
           )}
-        </div>
-
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
           {unviewedCount > 0 && (
             <span
               className="flex items-center gap-1 rounded-full border border-white/20 bg-blue-500 px-2.5 py-1 shadow-lg"
