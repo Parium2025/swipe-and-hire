@@ -20,6 +20,30 @@ import {
   removeApplicantMembershipCacheEntry,
   writeApplicantMembershipCache,
 } from '@/lib/applicantMembershipCache';
+import { computeStageOrder } from '@/hooks/useStageSettings';
+
+/** Första kolumnen exakt som tavlan visar den (standard- + egna steg). */
+async function resolveFirstStage(userId: string, listId: string | null): Promise<string> {
+  let query = supabase
+    .from('user_stage_settings')
+    .select('stage_key, order_index, is_custom, custom_label')
+    .eq('user_id', userId);
+  if (listId) query = query.eq('list_id', listId);
+  const { data } = await query;
+  const live = (data || []).filter((s: any) => s.order_index > -1 || s.custom_label === '__DELETED__');
+  return computeStageOrder(live as any)[0] || 'to_contact';
+}
+
+/** Lokalt cachat eget betyg (fångar betyg som ännu ligger i synkkön). */
+function readLocalRating(userId: string, applicantId: string): number {
+  try {
+    const raw = localStorage.getItem(`ratings_cache_${userId}`);
+    const value = raw ? JSON.parse(raw)?.ratings?.[applicantId] : 0;
+    return typeof value === 'number' ? value : 0;
+  } catch {
+    return 0;
+  }
+}
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
@@ -710,23 +734,65 @@ export function useMyCandidatesData(
     };
   }, [user, queryClient]);
 
+  // Lägg in nya rader direkt i alla synliga tavlor + kallstartscachen, så att
+  // kandidaten syns live (med betyg) utan att vänta på en omhämtning.
+  const insertRowsIntoCaches = async (rows: RawMyCandidateRow[]) => {
+    if (!user || rows.length === 0) return;
+    let items: MyCandidateData[] = [];
+    try {
+      items = await hydrateMyCandidateRows(user.id, rows);
+    } catch {
+      return;
+    }
+    if (items.length === 0) return;
+    const newIds = new Set(items.map(i => i.applicant_id));
+    const prepend = (list: MyCandidateData[]) => [
+      ...items,
+      ...list.filter(c => !newIds.has(c.applicant_id)),
+    ];
+    const rowListId = (rows[0] as any).list_id ?? insertListId ?? null;
+    queryClient.setQueriesData({ queryKey: ['my-candidates', user.id] }, (old: any) => {
+      if (!old?.pages?.length) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any, idx: number) => ({
+          ...page,
+          items: idx === 0 ? prepend(page.items || []) : (page.items || []).filter((c: MyCandidateData) => !newIds.has(c.applicant_id)),
+        })),
+      };
+    });
+    // Querynyckeln: ['my-candidates', uid, search, listId, stages] — sök/annan lista får inte raden.
+    for (const q of queryClient.getQueryCache().findAll({ queryKey: ['my-candidates', user.id] })) {
+      const [, , search, qListId] = q.queryKey as any[];
+      if ((search && String(search).trim()) || (qListId && rowListId && qListId !== rowListId)) {
+        queryClient.invalidateQueries({ queryKey: q.queryKey, exact: true });
+      }
+    }
+    const cachedAll = readMyCandidatesCache(user.id) ?? [];
+    writeMyCandidatesCache(user.id, prepend(cachedAll), null);
+    if (rowListId) {
+      const cachedList = readMyCandidatesCache(user.id, rowListId) ?? [];
+      writeMyCandidatesCache(user.id, prepend(cachedList), rowListId);
+    }
+  };
+
+  const refreshAfterInsert = () => {
+    const opts = { refetchType: 'all' as const };
+    queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] , ...opts });
+    queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] , ...opts });
+    queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] , ...opts });
+    queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] , ...opts });
+  };
+
   // Add candidate to my list
   const addCandidate = useMutation({
     mutationFn: async ({ applicationId, applicantId, jobId }: { applicationId: string; applicantId: string; jobId?: string }) => {
       if (!getIsOnline()) throw new Error('Du är offline – anslut och försök igen');
       if (!user) throw new Error('Not authenticated');
 
-      // Add to the first available stage (avoids adding to deleted stages)
-      const { data: stageSettings } = await supabase
-        .from('user_stage_settings')
-        .select('stage_key, order_index')
-        .eq('user_id', user.id)
-        .eq('list_id', insertListId)
-        .gt('order_index', -1)
-        .order('order_index', { ascending: true })
-        .limit(1);
-
-      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+      // Alltid den första kolumnen exakt som tavlan visar den.
+      const defaultStage = await resolveFirstStage(user.id, insertListId);
 
       // Check for existing persistent rating for this applicant
       const { data: existingRating } = await supabase
@@ -736,7 +802,7 @@ export function useMyCandidatesData(
         .eq('applicant_id', applicantId)
         .maybeSingle();
 
-      const restoredRating = existingRating?.rating || 0;
+      const restoredRating = existingRating?.rating || readLocalRating(user.id, applicantId);
 
       // Check for existing persistent notes for this applicant
       const { data: existingNote } = await supabase
@@ -771,18 +837,14 @@ export function useMyCandidatesData(
         throw error;
       }
 
-
+      await insertRowsIntoCaches([data as RawMyCandidateRow]);
       return data;
     },
     onSuccess: (insertedCandidate) => {
       if (user && insertedCandidate?.applicant_id) {
         addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
       }
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
+      refreshAfterInsert();
       toast.success('Kandidat tillagd i din lista', { route: '/my-candidates' } as Parameters<typeof toast.success>[1]);
     },
     onError: (error: Error) => {
@@ -813,18 +875,8 @@ export function useMyCandidatesData(
         return { inserted: 0, alreadyExisted: candidates.length };
       }
 
-      // Get the user's stage settings to find the first available stage
-      const { data: stageSettings } = await supabase
-        .from('user_stage_settings')
-        .select('stage_key, order_index, custom_label')
-        .eq('user_id', user.id)
-        .eq('list_id', insertListId)
-        .gt('order_index', -1) // Exclude deleted stages
-        .order('order_index', { ascending: true })
-        .limit(1);
-
-      // Use the first available stage, or fall back to 'to_contact' if no stages configured
-      const defaultStage = stageSettings?.[0]?.stage_key || 'to_contact';
+      // Alltid den första kolumnen exakt som tavlan visar den.
+      const defaultStage = await resolveFirstStage(user.id, insertListId);
 
       // Check for existing persistent ratings for these applicants
       const applicantIds = newCandidates.map(c => c.applicantId);
@@ -853,7 +905,7 @@ export function useMyCandidatesData(
         job_id: c.jobId || null,
         list_id: insertListId,
         stage: defaultStage,
-        rating: ratingsMap.get(c.applicantId) || 0, // Restore previous rating
+        rating: ratingsMap.get(c.applicantId) || readLocalRating(user.id, c.applicantId), // Restore previous rating
         notes: notesMap.get(c.applicantId) || null, // Restore previous notes
       }));
 
@@ -864,7 +916,7 @@ export function useMyCandidatesData(
 
       if (error) throw error;
 
-
+      await insertRowsIntoCaches((data || []) as RawMyCandidateRow[]);
       return { inserted: data?.length || 0, alreadyExisted: existingIds.size };
     },
     onSuccess: (result, requestedCandidates) => {
@@ -873,10 +925,7 @@ export function useMyCandidatesData(
           addApplicantMembershipCacheEntry(user.id, candidate.applicantId);
         }
       }
-      queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
+      refreshAfterInsert();
       if (result.inserted > 0) {
         toast.success(`${result.inserted} kandidat${result.inserted !== 1 ? 'er' : ''} tillagd${result.inserted !== 1 ? 'a' : ''} i din lista`);
       } else if (result.alreadyExisted > 0) {

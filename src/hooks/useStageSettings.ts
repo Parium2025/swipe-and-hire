@@ -163,6 +163,42 @@ export async function fetchStageSettings(
   return settings;
 }
 
+/**
+ * Exakt samma kolumnordning som tavlan visar. Används även när en kandidat
+ * läggs till, så att den alltid hamnar i den första synliga kolumnen.
+ */
+export function computeStageOrder(
+  dbSettings: Array<Pick<DbStageSetting, 'stage_key' | 'order_index' | 'is_custom' | 'custom_label'>> | null | undefined,
+): string[] {
+  const deletedDefaultStages = new Set(
+    (dbSettings || [])
+      .filter(s => s.custom_label === '__DELETED__' && !s.is_custom)
+      .map(s => s.stage_key)
+  );
+  const defaultKeys = [...DEFAULT_STAGE_KEYS].filter(k => !deletedDefaultStages.has(k));
+  const customKeys = (dbSettings || [])
+    .filter(s => s.is_custom)
+    .sort((a, b) => a.order_index - b.order_index)
+    .map(s => s.stage_key);
+
+  const allStages: string[] = [];
+  let customIdx = 0;
+  for (let i = 0; i < defaultKeys.length + customKeys.length; i++) {
+    const dbSetting = dbSettings?.find(s => s.order_index === i && s.is_custom);
+    if (dbSetting?.is_custom) {
+      allStages.push(dbSetting.stage_key);
+      customIdx++;
+    } else {
+      const defaultIdx = i - customIdx;
+      if (defaultIdx < defaultKeys.length) allStages.push(defaultKeys[defaultIdx]);
+    }
+  }
+  if (allStages.length === 0) return [...defaultKeys, ...customKeys];
+  const allKeys = new Set([...defaultKeys, ...customKeys]);
+  allStages.forEach(k => allKeys.delete(k));
+  return [...allStages, ...Array.from(allKeys)];
+}
+
 export function useStageSettings(listId: string | null = null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -229,40 +265,7 @@ export function useStageSettings(listId: string | null = null) {
   );
 
   // Get all stage keys in order (default + custom), excluding deleted stages
-  const stageOrder: string[] = (() => {
-    const defaultKeys = [...DEFAULT_STAGE_KEYS].filter(k => !deletedDefaultStages.has(k));
-    const customKeys = (dbSettings || [])
-      .filter(s => s.is_custom)
-      .sort((a, b) => a.order_index - b.order_index)
-      .map(s => s.stage_key);
-    
-    // Insert custom stages at their order positions
-    const allStages: string[] = [];
-    let customIdx = 0;
-    
-    for (let i = 0; i < defaultKeys.length + customKeys.length; i++) {
-      const dbSetting = dbSettings?.find(s => s.order_index === i && s.is_custom);
-      if (dbSetting?.is_custom) {
-        allStages.push(dbSetting.stage_key);
-        customIdx++;
-      } else {
-        const defaultIdx = i - customIdx;
-        if (defaultIdx < defaultKeys.length) {
-          allStages.push(defaultKeys[defaultIdx]);
-        }
-      }
-    }
-    
-    // Fallback: if no custom ordering, just append custom stages after defaults
-    if (allStages.length === 0) {
-      return [...defaultKeys, ...customKeys];
-    }
-    
-    // Make sure all stages are included
-    const allKeys = new Set([...defaultKeys, ...customKeys]);
-    allStages.forEach(k => allKeys.delete(k));
-    return [...allStages, ...Array.from(allKeys)];
-  })();
+  const stageOrder: string[] = computeStageOrder(dbSettings);
 
   // Merge DB settings with defaults (excluding deleted stages)
   const stageConfig: Record<string, StageSettings> = (() => {
