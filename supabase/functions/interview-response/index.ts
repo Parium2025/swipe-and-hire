@@ -17,8 +17,8 @@ const STOCKHOLM_TIME = new Intl.DateTimeFormat('sv-SE', {
 /**
  * Efterarbete när kandidaten svarat via mejllänken:
  *  1. Arbetsgivaren får ett mejl (kan stängas av i aviseringar).
-   *  2. Vid nej ligger mötet kvar märkt "Nekad"; vid ett nytt ja tas
-   *     märkningen bort i båda parters kopplade kalendrar.
+ *  2. Vid nej ligger mötet kvar märkt "Nekad"; vid ett nytt ja tas
+ *     märkningen bort i båda parters kopplade kalendrar.
  * Fel här får aldrig påverka kandidatens svar.
  */
 async function afterResponse(result: Record<string, unknown>, accept: boolean) {
@@ -189,13 +189,13 @@ Deno.serve(async (req) => {
     return page(
       accept ? 'Tacka ja till intervjun' : 'Tacka nej till intervjun',
       `<p>Bekräfta ditt svar så meddelas arbetsgivaren direkt.</p>
-       <form method="POST">
-         <input type="hidden" name="token" value="${escapeHtml(token)}" />
-         <input type="hidden" name="answer" value="${escapeHtml(answer)}" />
-         <div class="actions">
-           <button class="${accept ? 'yes' : 'no'}" type="submit">${accept ? 'Ja, jag kommer' : 'Nej, jag kan inte'}</button>
-         </div>
-       </form>`,
+        <form method="POST">
+          <input type="hidden" name="token" value="${escapeHtml(token)}" />
+          <div class="actions">
+            <button class="${accept ? 'yes' : 'no'}" name="answer" value="${escapeHtml(answer)}" type="submit">${accept ? 'Ja, jag kommer' : 'Nej, jag kan inte'}</button>
+            <button class="${accept ? 'no' : 'yes'}" name="answer" value="${accept ? 'no' : 'yes'}" type="submit">${accept ? 'Nej, jag kan inte' : 'Ja, jag kommer'}</button>
+          </div>
+        </form>`,
     )
   }
 
@@ -242,7 +242,8 @@ Deno.serve(async (req) => {
   const suffix = jobTitle ? ` för ${escapeHtml(jobTitle)}` : ''
   const already = result.already === true
 
+  const changeAnswer = `<form method="POST"><input type="hidden" name="token" value="${escapeHtml(token)}" /><input type="hidden" name="answer" value="${accept ? 'no' : 'yes'}" /><div class="actions"><button class="${accept ? 'no' : 'yes'}" type="submit">Ändra svar till ${accept ? 'nej' : 'ja'}</button></div></form>`
   return accept
-    ? page('Tack – du är anmäld', `<p>${already ? 'Du hade redan tackat ja' : 'Du har tackat ja'} till intervjun${suffix}. Arbetsgivaren har fått besked.</p><p>Du hittar tid och plats under Mina ansökningar i Parium.</p>`)
-    : page('Tack för ditt besked', `<p>${already ? 'Du hade redan tackat nej' : 'Du har tackat nej'} till intervjun${suffix}. Arbetsgivaren har fått besked.</p>`)
+    ? page('Tack – du är anmäld', `<p>${already ? 'Du hade redan tackat ja' : 'Du har tackat ja'} till intervjun${suffix}.${already ? '' : ' Arbetsgivaren har fått besked.'}</p><p>Du hittar tid och plats under Mina ansökningar i Parium.</p>${changeAnswer}`)
+    : page('Tack för ditt besked', `<p>${already ? 'Du hade redan tackat nej' : 'Du har tackat nej'} till intervjun${suffix}.${already ? '' : ' Arbetsgivaren har fått besked.'}</p>${changeAnswer}`)
 })
