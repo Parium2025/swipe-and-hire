@@ -124,35 +124,18 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 onClick={!IS_TOUCH_ONLY ? openArticle : undefined}
                 className={`w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
-                {IS_TOUCH_ONLY ? (
-                  <TruncatedText
-                    alwaysShowTooltip
-                    text={`${currentNews.title}\n\n${currentNews.summary || ''}`}
-                    className="w-full"
-                  >
-                    <div className="w-full">
-                      <div className="text-sm font-semibold text-white leading-5 mb-2">
-                        {currentNews.title}
-                      </div>
-                      <div
-                        className="text-sm leading-5 text-white"
-                      >
-                        {currentNews.summary || currentNews.title}
-                      </div>
-                    </div>
-                  </TruncatedText>
-                ) : (
-                  <>
-                    <TruncatedText
-                      text={currentNews.title}
-                      className="text-sm font-semibold text-white leading-5 mb-2"
-                    />
-                    <TruncatedText
-                      text={currentNews.summary || currentNews.title}
-                      className="text-sm leading-5 text-white"
-                    />
-                  </>
-                )}
+                <TruncatedText
+                  alwaysShowTooltip={IS_TOUCH_ONLY}
+                  lines={2}
+                  text={currentNews.title}
+                  className="text-sm font-semibold text-white leading-5 mb-1"
+                />
+                <TruncatedText
+                  alwaysShowTooltip={IS_TOUCH_ONLY}
+                  lines={2}
+                  text={currentNews.summary || currentNews.title}
+                  className="text-sm leading-5 text-white"
+                />
               </motion.div>
             ) : (
               <p className="text-xs text-white text-center">Inga nyheter just nu</p>
