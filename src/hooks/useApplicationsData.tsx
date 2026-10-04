@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { applyOwnRatingOptimistic } from '@/hooks/useOrganizationCandidateRatings';
 import { safeSetItem, safeReadJsonCache } from '@/lib/safeStorage';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -938,6 +939,7 @@ export const useApplicationsData = (
   const updateRating = useMutation({
     mutationFn: async ({ applicantId, rating }: { applicantId: string; rating: number }) => {
       if (!user) throw new Error('Ej inloggad');
+      applyOwnRatingOptimistic(queryClient, user.id, applicantId, rating);
 
       // Upsert to candidate_ratings table
       const { error } = await supabase
