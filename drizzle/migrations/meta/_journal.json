@@ -463,6 +463,13 @@
       "when": 1791033026047,
       "tag": "0065_org_colleagues_view_profile_images",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1791098189184,
+      "tag": "0066_notify_colleague_candidate_shared",
+      "breakpoints": true
     }
   ]
 }
