@@ -19,7 +19,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Input } from '@/components/ui/input';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
-import { AlertTriangle, Check, GripVertical, ListPlus, Pencil, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Check, GripVertical, ListPlus, Pencil, Trash2 } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
