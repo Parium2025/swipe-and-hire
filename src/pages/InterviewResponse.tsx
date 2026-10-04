@@ -120,22 +120,19 @@ const InterviewResponse = () => {
         </p>
 
         {validLink && !deadReason && (
-          <div className="flex flex-col gap-3">
-            {(['yes', 'no'] as const).map((choice) => (
-              <Button
-                key={choice}
-                type="button"
-                variant={choice === initialAnswer ? 'secondary' : 'outline'}
-                className="w-full rounded-full text-white [&_svg]:text-white"
-                onClick={() => submit(choice)}
-                disabled={phase === 'sending'}
-              >
-                {phase === 'sending' && choice === currentAnswer
-                  ? 'Skickar svar…'
-                  : choice === 'yes' ? 'Ja, jag kommer' : 'Nej, jag kan inte'}
-              </Button>
-            ))}
-          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full rounded-full text-white [&_svg]:text-white"
+            onClick={() => submit(phase === 'done' ? (accept ? 'no' : 'yes') : currentAnswer)}
+            disabled={phase === 'sending'}
+          >
+            {phase === 'sending'
+              ? 'Skickar svar…'
+              : phase === 'done'
+                ? accept ? 'Ändra svar till nej' : 'Ändra svar till ja'
+                : accept ? 'Ja, jag kommer' : 'Nej, jag kan inte'}
+          </Button>
         )}
 
         <Link to="/" className="mt-5 block text-center text-sm text-white underline-offset-4 hover:underline">
