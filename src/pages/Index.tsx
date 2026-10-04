@@ -275,7 +275,7 @@ const CandidatesContent = () => {
               <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
                 type="text"
-                placeholder="Sök på namn, email, telefon, plats, jobb..."
+                placeholder="Sök namn, jobb etcetera"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="dashboard-control-compact pl-11 pr-11 text-base font-medium bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/90 placeholder:font-normal transition-colors"
