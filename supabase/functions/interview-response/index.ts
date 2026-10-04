@@ -17,8 +17,8 @@ const STOCKHOLM_TIME = new Intl.DateTimeFormat('sv-SE', {
 /**
  * Efterarbete när kandidaten svarat via mejllänken:
  *  1. Arbetsgivaren får ett mejl (kan stängas av i aviseringar).
- *  2. Vid nej ligger mötet kvar i kalendern, men rubriken märks "Nekad"
- *     så att historik och statistik behålls.
+   *  2. Vid nej ligger mötet kvar märkt "Nekad"; vid ett nytt ja tas
+   *     märkningen bort i båda parters kopplade kalendrar.
  * Fel här får aldrig påverka kandidatens svar.
  */
 async function afterResponse(result: Record<string, unknown>, accept: boolean) {
@@ -29,7 +29,7 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
   const scheduledAt = typeof result.scheduled_at === 'string' ? result.scheduled_at : null
   const interviewId = typeof result.interview_id === 'string' ? result.interview_id : null
 
-  if (!accept && interviewId && employerId && scheduledAt) {
+  if (interviewId && employerId && scheduledAt) {
     const applicantId = typeof result.applicant_id === 'string' ? result.applicant_id : null
     const input = {
       interviewId,
@@ -39,14 +39,14 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
       scheduledAt,
       durationMinutes: typeof result.duration_minutes === 'number' ? result.duration_minutes : null,
       locationDetails: typeof result.location_details === 'string' ? result.location_details : null,
-      statusLabel: 'Nekad',
+      statusLabel: accept ? null : 'Nekad',
     }
     for (const connector of SUPPORTED_CONNECTORS) {
       try {
         await addInterviewToCalendar(employerId, connector, input, 'employer')
         if (applicantId) await addInterviewToCalendar(applicantId, connector, input, 'job_seeker')
       } catch (err) {
-        console.warn('Kalenderuppdatering vid nej misslyckades:', err)
+        console.warn('Kalenderuppdatering vid intervjusvar misslyckades:', err)
       }
     }
   }
@@ -73,10 +73,11 @@ async function afterResponse(result: Record<string, unknown>, accept: boolean) {
     time_str: when ? STOCKHOLM_TIME.format(when) : '',
     accepted: accept,
   }
-  // Basnyckeln hindrar dubbelutskick vid samma svar. Om ett utskick redan
-  // misslyckats hos e-posttjänsten blockeras nyckeln permanent (409), så ett
-  // nytt försök måste ha en ny nyckel — annars får arbetsgivaren aldrig svaret.
-  const baseKey = `interview-response-${interviewId ?? 'unknown'}-${accept ? 'yes' : 'no'}`
+  // Varje faktisk statusändring får ett eget händelse-id från den låsta
+  // databastransaktionen. Ja → nej → ja måste ge tre separata mejl, medan
+  // ett upprepat tryck på samma svar inte skickar något nytt.
+  const responseEventId = typeof result.response_event_id === 'string' ? result.response_event_id : crypto.randomUUID()
+  const baseKey = `interview-response-${interviewId ?? 'unknown'}-${responseEventId}`
   try {
     await sendLoggedTemplateEmail('interview-response-employer', employerEmail, {
       templateData,
