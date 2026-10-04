@@ -134,13 +134,60 @@ const fetchEmployerAnalyticsOverview = async (userId: string, selectedDays: numb
   return data as unknown as AnalyticsData;
 };
 
+interface ProcessTimeStat {
+  avg_seconds: number | null;
+  sample: number;
+  prev_avg_seconds: number | null;
+  waiting?: number;
+}
+interface ProcessTimes {
+  response: ProcessTimeStat;
+  decision: ProcessTimeStat;
+}
+type AdvancedWithProcess = AdvancedAnalyticsData & { process_times?: ProcessTimes | null };
+
 const fetchEmployerAnalyticsAdvanced = async (userId: string, selectedDays: number | null) => {
   const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
   if (selectedDays !== null) params.p_days_back = selectedDays;
-  const { data, error } = await supabase.rpc('get_employer_advanced_analytics', params);
-  if (error) throw error;
-  return data as unknown as AdvancedAnalyticsData;
+  const [adv, proc] = await Promise.all([
+    supabase.rpc('get_employer_advanced_analytics', params),
+    supabase.rpc('get_employer_process_times' as never, params as never),
+  ]);
+  if (adv.error) throw adv.error;
+  return {
+    ...(adv.data as unknown as AdvancedAnalyticsData),
+    process_times: proc.error ? null : (proc.data as unknown as ProcessTimes),
+  } as AdvancedWithProcess;
 };
+
+/* Kortare tid är bättre: pil ned = förbättring. */
+const ProcessTimeCard = memo(({ label, info, stat, footnote, showTrend }: {
+  label: string; info: string; stat: ProcessTimeStat | undefined; footnote: string; showTrend: boolean;
+}) => {
+  const avg = stat?.avg_seconds ?? null;
+  const prev = stat?.prev_avg_seconds ?? null;
+  const pct = showTrend && avg !== null && prev !== null && prev > 0
+    ? Math.round(((avg - prev) / prev) * 100)
+    : null;
+  return (
+    <Card className="bg-white/5 border-white/10 overflow-hidden">
+      <CardContent className="p-4 flex flex-col h-full">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-white [overflow-wrap:anywhere]">{label}</span>
+          <div className="-mt-1 shrink-0"><InlineInfoTooltip content={info} /></div>
+        </div>
+        <p className="text-xl font-bold text-white">{avg !== null ? formatDuration(avg) : '–'}</p>
+        <p className="text-[11px] text-white mt-0.5">{footnote}</p>
+        {pct !== null && pct !== 0 && (
+          <p className={`text-[11px] mt-1 font-medium ${pct < 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {pct < 0 ? '▼' : '▲'} {Math.abs(pct)} % mot förra perioden
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+});
+ProcessTimeCard.displayName = 'ProcessTimeCard';
 
 const fetchEmployerTeamInsights = async (userId: string, selectedDays: number | null) => {
   const params: { p_user_id: string; p_days_back?: number } = { p_user_id: userId };
