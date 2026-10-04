@@ -7,7 +7,7 @@ type PersistedAnalyticsCacheEntry<T> = {
   value: T;
 };
 
-const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics:v2';
+const EMPLOYER_ANALYTICS_CACHE_PREFIX = 'parium-employer-analytics:v3';
 const EMPLOYER_ANALYTICS_SELECTED_FILTER_KEY = 'parium-employer-analytics:selected-filter';
 const VALID_FILTERS = new Set<number>([1, 7, 14, 30, 90]);
 
