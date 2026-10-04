@@ -66,3 +66,4 @@
 - [x] Put the mobile recruiter filter beside the expand-all control above the adverts and remove the extra row gap
 
 - [x] Granska att organisationens statistik (rapporter) är korrekt kopplad
+- [x] Matcha intervjusvarets mejl med intervjuinbjudans layout och avsändande företagsnamn
