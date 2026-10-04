@@ -65,4 +65,4 @@
 - [x] Show team application totals in pure white for every reporting period; move the mobile recruiter filter to the right below job-status tabs and remove its white pressed/hover surface
 - [x] Put the mobile recruiter filter beside the expand-all control above the adverts and remove the extra row gap
 
-- [ ] Granska att organisationens statistik (rapporter) är korrekt kopplad
+- [x] Granska att organisationens statistik (rapporter) är korrekt kopplad
