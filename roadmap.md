@@ -57,5 +57,5 @@
 - [x] Show full candidate-list title on mobile; simplify inline list renaming and enlarge the two dialog close controls
 - [x] Standardize dialog close controls; show colleagues' filterable questions to recruiters and shrink empty question menus
 - [x] Remove list-name tooltips from the candidate-list title and list picker without changing their selection behavior
-- [ ] Synchronize saved-candidate status and list counts immediately after removal, including changes in another tab; enlarge mobile profile action targets with icon-only labels
+- [x] Synchronize saved-candidate status and list counts after removal, including changes in another tab; enlarge mobile profile action targets with icon-only labels (live employer check blocked by available job-seeker session)
 
