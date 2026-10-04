@@ -425,7 +425,7 @@ export const CandidateProfileDialog = ({
     if (onRatingChange && application) {
       previousRating.current = newRating;
       // Visa mitt nya betyg direkt som det delade betyget.
-      queryClient.setQueryData(['candidate-colleague-rating', user?.id, application.applicant_id], newRating);
+      interviewPrefetchClient.setQueryData(['candidate-colleague-rating', user?.id, application.applicant_id], newRating);
       onRatingChange(newRating);
     }
   };
