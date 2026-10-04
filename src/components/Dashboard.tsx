@@ -346,13 +346,13 @@ const Dashboard = memo(() => {
       </div>
 
        {/* Antal och åtgärder på en rad, även på mobil */}
-       <div className="relative flex items-center justify-end gap-1 md:justify-center">
+       <div className="relative flex min-h-10 items-center justify-end">
         {!searchTerm && tabFilteredJobs.length > 0 && (
-           <div className="min-w-0 flex-1 text-center text-xs text-white md:flex-none md:text-sm">
+           <div className="pointer-events-none absolute inset-x-0 text-center text-xs text-white md:text-sm">
             Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
           </div>
         )}
-         <div className="flex shrink-0 items-center gap-1 md:absolute md:right-0">
+         <div className="relative z-10 flex shrink-0 items-center gap-1">
            {recruiters.length > 1 && (
              <div className="md:hidden">
                <MobileRecruiterFilter
@@ -369,7 +369,7 @@ const Dashboard = memo(() => {
              onClick={toggleExpandAll}
              aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
              title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
-             className="h-9 w-9 rounded-full border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white md:h-auto md:w-auto md:px-3 md:py-1.5"
+             className="h-10 w-10 rounded-full border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white md:h-auto md:w-auto md:px-3 md:py-1.5"
            >
              {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
              <span className="hidden md:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
