@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { fetchPriority } from '@/lib/fetchPriority';
 import { getCompanyInitials } from '@/lib/companyInitials';
 
@@ -60,6 +60,17 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
       : logoUrl
     : null;
 
+  // Bilden kan redan ligga i webbläsarens cache vid kallstart — visa den då
+  // direkt utan intoning, och låt aldrig initialerna blinka förbi först.
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  useLayoutEffect(() => {
+    const node = imgRef.current;
+    if (node && node.complete && node.naturalWidth > 0 && logoUrl) {
+      loadedLogoUrls.add(logoUrl);
+      setLoaded(true);
+    }
+  }, [src, logoUrl]);
+
   return (
     <div
       className={
@@ -67,10 +78,13 @@ export function CompanyLogoAvatar({ logoUrl, companyName, className }: CompanyLo
         'relative h-14 w-14 shrink-0 rounded-full overflow-hidden bg-white/20 ring-2 ring-white/20 flex items-center justify-center active:scale-95 transition-transform'
       }
     >
-      <span className="text-sm font-semibold text-white">{getCompanyInitials(companyName)}</span>
+      {!src && (
+        <span className="text-sm font-semibold text-white">{getCompanyInitials(companyName)}</span>
+      )}
 
       {src && (
         <img
+          ref={imgRef}
           src={src}
           alt={`${companyName} logotyp`}
           className={`absolute inset-0 w-full h-full object-cover ${
