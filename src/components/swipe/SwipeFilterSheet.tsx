@@ -217,10 +217,10 @@ export function SwipeFilterSheet({
               </div>
               <button
                 onClick={animatedClose}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90"
                 aria-label="Stäng"
               >
-                <X className="h-4 w-4 text-white" />
+                <X className="h-5 w-5 text-white" />
               </button>
             </div>
 

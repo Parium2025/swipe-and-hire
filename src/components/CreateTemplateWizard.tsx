@@ -1438,9 +1438,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {!showQuestionForm && !showQuestionTemplates && (
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             )}
             {showQuestionForm && (
@@ -1449,9 +1449,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   setShowQuestionForm(false);
                   setEditingQuestion(null);
                 }}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
+                className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white bg-white/10 md:bg-transparent md:hover:bg-white/20 transition-colors focus:outline-none"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             )}
           </div>
@@ -2210,9 +2210,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         onMouseUp={(e) => e.currentTarget.blur()}
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0"
+                        className="h-10 w-10 !min-h-0 !min-w-0 rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-white/20 focus:outline-none focus:ring-0"
                       >
-                        <X className="h-4.5 w-4.5 text-[hsl(var(--pure-white))]" />
+                        <X className="h-5 w-5 text-[hsl(var(--pure-white))]" />
                       </Button>
                     </div>
 

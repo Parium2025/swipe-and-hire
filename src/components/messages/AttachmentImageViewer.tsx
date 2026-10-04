@@ -194,7 +194,7 @@ export function AttachmentImageViewer({ open, onClose, src, fileName }: Attachme
           aria-label="Stäng"
           className="h-10 w-10 flex items-center justify-center rounded-full border border-white/25 text-white transition-all active:scale-95 md:hover:bg-white/10"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
         <span className="min-w-0 flex-1 truncate text-sm text-white">{fileName || 'Bilaga'}</span>
         <button
