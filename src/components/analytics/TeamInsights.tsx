@@ -134,7 +134,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-3 rounded-lg bg-white/5 space-y-1">
-                <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Bästa tid att publicera</p>
+                <p className="text-[10px] text-white uppercase tracking-wider font-semibold">Bästa tid att publicera</p>
                 <p className="text-sm text-white">
                   {traits.best_day_of_week !== null 
                     ? `Era annonser får flest svar på ${DAY_NAMES[traits.best_day_of_week]}.`
@@ -143,7 +143,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
               </div>
               
               <div className="p-3 rounded-lg bg-white/5 space-y-1">
-                <p className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Konvertering</p>
+                <p className="text-[10px] text-white uppercase tracking-wider font-semibold">Konvertering</p>
                 <p className="text-sm text-white">
                   {traits.avg_conversion > 0 
                     ? `Teamets snitt är ${traits.avg_conversion.toFixed(1)}% från vy till ansökan.`
