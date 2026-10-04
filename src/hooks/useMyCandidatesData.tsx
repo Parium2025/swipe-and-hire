@@ -552,6 +552,8 @@ export function useMyCandidatesData(
                   };
                 }
               );
+              // Även kollegors/andra flikars flyttar ska ge rätt rubriksiffror direkt.
+              queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user.id] });
               return;
             }
           }
@@ -962,6 +964,21 @@ export function useMyCandidatesData(
       // hamnar överst i målkolumnen. Speglas här så att ett kort du drar från
       // plats 5 000 inte "försvinner" ner i den nya kolumnen tills nästa hämtning.
       const movedAt = new Date().toISOString();
+      // Rubrikernas siffror justeras i samma bildruta som kortet flyttas,
+      // annars stod "1" kvar på en tom kolumn tills servern svarat.
+      const fromStage = (previousCandidates as any)?.pages
+        ?.flatMap((page: any) => page.items as MyCandidateData[])
+        .find((c: MyCandidateData) => c.id === id)?.stage;
+      if (fromStage && fromStage !== stage) {
+        queryClient.setQueriesData<Record<string, number>>(
+          { queryKey: ['my-candidates-stage-counts', user?.id, listId ?? null, null] },
+          (counts) => counts ? {
+            ...counts,
+            [fromStage]: Math.max(0, (counts[fromStage] ?? 1) - 1),
+            [stage]: (counts[stage] ?? 0) + 1,
+          } : counts,
+        );
+      }
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old?.pages) return old;
         return {
