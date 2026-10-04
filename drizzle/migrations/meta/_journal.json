@@ -498,6 +498,13 @@
       "when": 1791140145751,
       "tag": "0070_application_response_decision_times",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1791141765142,
+      "tag": "0071_allow_repeated_interview_answers_with_distinct_email_events",
+      "breakpoints": true
     }
   ]
 }
