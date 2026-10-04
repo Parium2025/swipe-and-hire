@@ -874,16 +874,25 @@ export function CandidatesTable({
                               className="font-medium text-white max-w-[220px]"
                             />
                             {teamInfo && teamInfo.colleagues.length > 0 && (
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={(event) => event.stopPropagation()} className="flex items-center justify-center h-6 w-6 rounded-full bg-purple-500/20 border border-purple-500/30 active:scale-95">
-                                    <Users className="h-3 w-3 text-purple-300" />
-                                  </button>
-                                </PopoverTrigger>
-                                <PopoverContent side="top" align="start" className="w-auto max-w-xs p-3" onClick={(event) => event.stopPropagation()}>
-                                  <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
-                                </PopoverContent>
-                              </Popover>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex">
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={(event) => event.stopPropagation()} className="flex items-center justify-center h-6 w-6 rounded-full bg-purple-500/20 border border-purple-500/30 active:scale-95">
+                                          <Users className="h-3 w-3 text-purple-300" />
+                                        </button>
+                                      </PopoverTrigger>
+                                      <PopoverContent side="top" align="start" className="w-auto max-w-xs p-3" onClick={(event) => event.stopPropagation()}>
+                                        <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
+                                      </PopoverContent>
+                                    </Popover>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <p className="text-xs">Tillagd av {teamInfo.colleagues.length === 1 ? 'en kollega' : `${teamInfo.colleagues.length} kollegor`} – tryck för att se vilka.</p>
+                                </TooltipContent>
+                              </Tooltip>
                             )}
                             {application.account_deleted && (
                               <Tooltip>
