@@ -369,11 +369,20 @@ const Dashboard = memo(() => {
              onClick={toggleExpandAll}
              aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
              title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
-             className="h-10 w-10 rounded-full border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white md:h-auto md:w-auto md:px-3 md:py-1.5"
+             className="h-10 w-10 rounded-full border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white md:hidden"
            >
              {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
-             <span className="hidden md:inline">{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
            </Button>
+           <button
+             type="button"
+             onClick={toggleExpandAll}
+             aria-label={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+             title={expandAll ? 'Dölj detaljer' : 'Visa detaljer'}
+             className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors"
+           >
+             {expandAll ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
+             <span>{expandAll ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+           </button>
          </div>
       </div>
 

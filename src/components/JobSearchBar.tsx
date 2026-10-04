@@ -79,6 +79,7 @@ export const JobSearchBar = memo(({
 }: JobSearchBarProps) => {
   const showRecruiterFilter = recruiters.length > 1;
   const [sortOpen, setSortOpen] = useState(false);
+  const [recruiterOpen, setRecruiterOpen] = useState(false);
 
   const sortLabels: Record<SortOption, string> = {
     newest: 'Nyast först',
@@ -107,20 +108,26 @@ export const JobSearchBar = memo(({
         
         {/* Recruiter filter - only show if multiple recruiters */}
         {showRecruiterFilter && onRecruiterChange && (
-          <DropdownMenu>
+          <DropdownMenu open={recruiterOpen} onOpenChange={setRecruiterOpen}>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="dashboard-control w-auto min-w-[180px] bg-white/5 border-white/20 text-white transition-colors duration-150 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
+              <button
+                type="button"
+                className={`dashboard-control w-auto min-w-[180px] flex items-center justify-center gap-1.5 rounded-md px-4 border text-sm font-medium text-white transition-all whitespace-nowrap ${
+                  recruiterOpen
+                    ? 'bg-white/20 border-white/30'
+                    : 'bg-white/5 border-white/20 md:hover:bg-white/10 md:hover:border-white/50'
+                }`}
               >
-                <UserCheck className="mr-2 h-4 w-4" />
-                {selectedRecruiterId 
-                  ? recruiters.find(r => r.id === selectedRecruiterId)
-                    ? `${recruiters.find(r => r.id === selectedRecruiterId)!.first_name} ${recruiters.find(r => r.id === selectedRecruiterId)!.last_name}`
-                    : 'Rekryterare'
-                  : 'Alla rekryterare'
-                }
-              </Button>
+                <UserCheck className="h-4 w-4 flex-shrink-0 text-white" />
+                <span className="truncate">
+                  {selectedRecruiterId
+                    ? recruiters.find(r => r.id === selectedRecruiterId)
+                      ? `${recruiters.find(r => r.id === selectedRecruiterId)!.first_name} ${recruiters.find(r => r.id === selectedRecruiterId)!.last_name}`
+                      : 'Rekryterare'
+                    : 'Alla rekryterare'}
+                </span>
+                <ChevronDown className={`ml-auto h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 ${recruiterOpen ? 'rotate-180' : ''}`} />
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px] z-[10000] glass-panel rounded-md">
               <DropdownMenuItem 
