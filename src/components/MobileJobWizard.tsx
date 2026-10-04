@@ -2843,6 +2843,7 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Jobbtitel<RequiredMark filled={!!formData.title?.trim()} /></Label>
                   <Input
+                    autoComplete="off"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
@@ -2854,6 +2855,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Yrke<RequiredMark filled={!!formData.occupation?.trim()} /></Label>
                   <div className="relative occupation-dropdown">
                     <Input
+                      autoComplete="off"
                       value={formData.occupation}
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
@@ -2910,6 +2912,7 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Jobbeskrivning<RequiredMark filled={!!formData.description?.trim()} /></Label>
                   <Textarea
+                    autoComplete="off"
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
@@ -2924,6 +2927,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
                   <div className="relative benefits-dropdown">
                     <Input
+                      autoComplete="off"
                       value={formData.benefits.length > 0 
                         ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
                         : ''}
@@ -2995,6 +2999,7 @@ const MobileJobWizard = ({
                   {/* Övrigt / Custom benefit */}
                   <div className="flex items-center gap-2">
                     <Input
+                      autoComplete="off"
                       type="text"
                       value={customBenefitInput}
                       onChange={(e) => setCustomBenefitInput(e.target.value)}
@@ -3027,6 +3032,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Anställningsform<RequiredMark filled={employmentSectionComplete} /></Label>
                   <div className="relative employment-type-dropdown">
                     <Input
+                      autoComplete="off"
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
@@ -3075,6 +3081,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Lönetyp<RequiredMark filled={!!formData.salary_type} /></Label>
                   <div className="relative salary-type-dropdown">
                     <Input
+                      autoComplete="off"
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
@@ -3112,6 +3119,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026)<RequiredMark filled={!!formData.salary_transparency} /></Label>
                   <div className="relative salary-transparency-dropdown">
                     <Input
+                      autoComplete="off"
                       value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
                       onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
                       onClick={handleSalaryTransparencyClick}
@@ -3149,6 +3157,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Antal personer att rekrytera<RequiredMark filled={!!formData.positions_count} /></Label>
                   <div className="flex items-center gap-2">
                     <Input
+                      autoComplete="off"
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
@@ -3202,6 +3211,7 @@ const MobileJobWizard = ({
                   <div className="flex gap-3 items-center">
                     <div className="flex-1">
                       <Input
+                        autoComplete="off"
                         type="text"
                         inputMode="numeric"
                         value={formData.work_start_time}
@@ -3232,6 +3242,7 @@ const MobileJobWizard = ({
                     <span className="text-white text-sm">–</span>
                     <div className="flex-1">
                       <Input
+                        autoComplete="off"
                         ref={workEndTimeRef}
                         type="text"
                         inputMode="numeric"
@@ -3269,6 +3280,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Var utförs arbetet?<RequiredMark filled={!!formData.work_location_type} /></Label>
                   <div className="relative work-location-dropdown">
                     <Input
+                      autoComplete="off"
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
@@ -3306,6 +3318,7 @@ const MobileJobWizard = ({
                   <Label className="text-white font-medium text-sm">Är distansarbete möjligt?<RequiredMark filled={!!formData.remote_work_possible} /></Label>
                   <div className="relative remote-work-dropdown">
                     <Input
+                      autoComplete="off"
                       value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
@@ -3342,6 +3355,7 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Bolagsnamn<RequiredMark filled={!!formData.workplace_name?.trim()} /></Label>
                   <Input
+                    autoComplete="off"
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
@@ -3352,6 +3366,7 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Kontakt e-mail<RequiredMark filled={!!formData.contact_email?.trim()} /></Label>
                   <Input
+                    autoComplete="off"
                     type="email"
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
@@ -3363,6 +3378,7 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Gatuadress (frivilligt)</Label>
                   <Input
+                    autoComplete="off"
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="T.ex. Modulvägen 1"
@@ -3491,6 +3507,7 @@ const MobileJobWizard = ({
 
                     <div className="relative">
                       <Input
+                        autoComplete="off"
                         value={questionSearchTerm}
                         onChange={(e) => setQuestionSearchTerm(e.target.value)}
                         placeholder="Sök efter fråga..."
@@ -3700,6 +3717,7 @@ const MobileJobWizard = ({
                         <Label className="text-white font-medium">Frågetyp *</Label>
                         <div className="relative question-type-dropdown">
                           <Input
+                            autoComplete="off"
                             value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
@@ -3738,6 +3756,7 @@ const MobileJobWizard = ({
                         <div className="space-y-2">
                           <Label className="text-white font-medium">Rubrik *</Label>
                           <Input
+                            autoComplete="off"
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Beskriv dina erfarenheter inom..."
@@ -3750,6 +3769,7 @@ const MobileJobWizard = ({
                         <div className="space-y-2">
                           <Label className="text-white font-medium">Rubrik *</Label>
                           <Input
+                            autoComplete="off"
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
@@ -3763,6 +3783,7 @@ const MobileJobWizard = ({
                           <div className="space-y-2">
                             <Label className="text-white font-medium">Rubrik *</Label>
                             <Input
+                              autoComplete="off"
                               value={editingQuestion?.question_text || ''}
                               onChange={(e) => updateQuestionField('question_text', e.target.value)}
                               placeholder="T.ex. Antal års erfarenhet inom..."
@@ -3775,6 +3796,7 @@ const MobileJobWizard = ({
                             <div className="space-y-2">
                               <Label className="text-white font-medium">Min värde</Label>
                               <Input
+                                autoComplete="off"
                                 type="number"
                                 value={editingQuestion?.min_value ?? ''}
                                 onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -3785,6 +3807,7 @@ const MobileJobWizard = ({
                             <div className="space-y-2">
                               <Label className="text-white font-medium">Max värde</Label>
                               <Input
+                                autoComplete="off"
                                 type="number"
                                 value={editingQuestion?.max_value ?? ''}
                                 onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -3801,6 +3824,7 @@ const MobileJobWizard = ({
                         <div className="space-y-2">
                           <Label className="text-white font-medium">Rubrik *</Label>
                           <Input
+                            autoComplete="off"
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Vilka behörigheter har du?"
@@ -3816,6 +3840,7 @@ const MobileJobWizard = ({
                             {(editingQuestion.options || []).map((option, index) => (
                               <div key={index} className="flex items-center gap-2">
                                 <Input
+                                  autoComplete="off"
                                   value={option}
                                   onChange={(e) => updateOption(index, e.target.value)}
                                   placeholder={`Alternativ ${index + 1}`}
