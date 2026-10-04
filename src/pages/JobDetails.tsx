@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { toastArchive } from '@/lib/toastArchive';
 import {
   DndContext,
   DragOverlay,
@@ -387,7 +388,6 @@ const JobDetails = () => {
     const idsToMove = Array.from(selectedApplicationIds);
     const count = idsToMove.length;
     const targetLabel = stageSettings[targetStage]?.label || targetStage;
-    const stageColor = stageSettings[targetStage]?.color || '#22c55e';
     
     idsToMove.forEach(id => {
       updateApplicationLocally(id, stagePatch(targetStage));
@@ -403,14 +403,12 @@ const JobDetails = () => {
         
       if (error) throw error;
       if (!data || data.length !== idsToMove.length) throw new Error('Alla kandidater kunde inte flyttas');
-      toast.success(`${count} kandidater flyttade till "${targetLabel}"`, {
-        icon: <div className="w-4 h-4 rounded-full" style={{ backgroundColor: stageColor }} />,
-      });
+      if (count > 0) toastArchive.add('success', 'Kandidat flyttad', `${count} kandidater flyttade till "${targetLabel}".`, `/job-details/${jobId}`);
     } catch (error) {
       refetch();
       toast.error('Kunde inte flytta kandidaterna');
     }
-  }, [selectedApplicationIds, stageSettings, updateApplicationLocally, exitSelectionMode, refetch]);
+  }, [selectedApplicationIds, stageSettings, updateApplicationLocally, exitSelectionMode, refetch, jobId]);
 
   const resolveStageForApplication = useCallback((app: JobApplication): string => {
     const directStage = app.status;
@@ -555,6 +553,7 @@ const JobDetails = () => {
   }, [user, queryClient]);
 
   const handleMobileMove = useCallback(async (applicationId: string, newStage: string) => {
+    const previousStage = applications.find(app => app.id === applicationId)?.status;
     updateApplicationLocally(applicationId, stagePatch(newStage));
     const stageLabel = stageSettings[newStage]?.label || newStage;
     try {
@@ -568,12 +567,12 @@ const JobDetails = () => {
       if (!data) {
         throw new Error('Ingen rad uppdaterades');
       }
-      toast.success(`Flyttad till "${stageLabel}"`);
+      if (previousStage !== newStage) toastArchive.add('success', 'Kandidat flyttad', `Flyttad till "${stageLabel}".`, `/job-details/${jobId}`);
     } catch {
       refetch();
       toast.error('Kunde inte flytta kandidaten');
     }
-  }, [updateApplicationLocally, stageSettings, refetch]);
+  }, [applications, updateApplicationLocally, stageSettings, refetch, jobId]);
 
   // Avslaget är en markering per ansökan/annons — kandidaten ligger kvar i
   // sitt steg med en "Avslagen"-etikett, kan fortfarande flyttas/swipas och

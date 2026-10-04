@@ -7,6 +7,7 @@ import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { toast } from 'sonner';
+import { toastArchive } from '@/lib/toastArchive';
 import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';

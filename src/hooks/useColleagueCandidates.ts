@@ -502,6 +502,9 @@ export function useColleagueCandidates(
           previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
         );
       }
+      if (previousCandidates.some(c => c.id === candidateId && c.stage !== newStage)) {
+        toastArchive.add('success', 'Kandidat flyttad', undefined, '/my-candidates');
+      }
       return true;
     } catch (error: any) {
       if (!opts?.silent) toast.error(error.message || 'Kunde inte flytta kandidaten');

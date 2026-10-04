@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { toastArchive } from '@/lib/toastArchive';
 import { enqueueCandidateOperation } from '@/hooks/useCandidateOperationQueue';
 import { updateMyCandidatesCache } from '@/hooks/useMyCandidatesData';
 import type { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
@@ -80,6 +81,8 @@ export function useBulkCandidateOps({
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
         if (moved === 0) {
           toast.error('Kunde inte flytta kandidaterna');
+        } else if (moved < ids.length) {
+          toast.warning(`${moved} av ${ids.length} kandidater flyttades`);
         }
         return;
       }
@@ -103,6 +106,9 @@ export function useBulkCandidateOps({
         }
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
         queryClient.invalidateQueries({ queryKey: ['team-candidate-info'] });
+        if (ids.length > 0 && displayedCandidates.some(c => selectedCandidateIds.has(c.id) && c.stage !== targetStage)) {
+          toastArchive.add('success', 'Kandidat flyttad', `${ids.length} kandidater flyttade.`, '/my-candidates');
+        }
       } catch {
         // Enqueue each failed move for retry
         if (user) {
@@ -231,7 +237,7 @@ export function useBulkCandidateOps({
 
         queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
         queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
-        toast.success(`${ids.length} kandidat${ids.length !== 1 ? 'er' : ''} flyttade till "${targetListName}"`);
+        toastArchive.add('success', 'Kandidat flyttad', `${ids.length} kandidat${ids.length !== 1 ? 'er' : ''} flyttade till "${targetListName}".`, '/my-candidates');
       } catch {
         // Utan detta lämnade ett nätverksfel kandidaterna dolda i vyn, utan
         // felmeddelande — trots att de fortfarande låg kvar i listan.
