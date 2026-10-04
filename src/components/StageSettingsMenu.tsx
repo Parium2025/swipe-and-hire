@@ -34,6 +34,8 @@ import {
   getIconByName,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface StageSettingsMenuProps {
@@ -69,7 +71,9 @@ export function StageSettingsMenu({
   onTriggerPointerDown,
   centerOnStageCard = false,
 }: StageSettingsMenuProps) {
-  const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings();
+  // Samma lista som vyn visar: annars ändrades/skapades steg i fel lista.
+  const { user: stageMenuUser } = useAuth();
+  const { stageConfig, updateStageSetting, resetStageSetting, deleteStage, getDefaultConfig, isDefaultStage } = useStageSettings(getActiveCandidateListId(stageMenuUser?.id));
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);

@@ -22,6 +22,8 @@ import {
   AVAILABLE_COLORS,
 } from '@/hooks/useStageSettings';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { MAX_KANBAN_STAGES } from '@/hooks/useKanbanLayout';
 import { cn } from '@/lib/utils';
 import { TruncatedText } from '@/components/ui/truncated-text';
@@ -32,7 +34,9 @@ interface CreateStageDialogProps {
 }
 
 export function CreateStageDialog({ trigger, currentStageCount = 0 }: CreateStageDialogProps) {
-  const { createCustomStage, stageOrder } = useStageSettings();
+  // Samma lista som vyn visar: annars ändrades/skapades steg i fel lista.
+  const { user: stageMenuUser } = useAuth();
+  const { createCustomStage, stageOrder } = useStageSettings(getActiveCandidateListId(stageMenuUser?.id));
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [selectedColor, setSelectedColor] = useState(AVAILABLE_COLORS[4].value); // Red

@@ -354,7 +354,22 @@ export function useStageSettings(listId: string | null = null) {
         if (!data) throw new Error('Steget kunde inte sparas');
       }
     },
-    onSuccess: () => {
+    // Nytt namn/färg/ikon syns direkt i alla vyer; servern bekräftar i bakgrunden.
+    onMutate: async ({ stageKey, label, color, iconName }) => {
+      if (!user) return;
+      await queryClient.cancelQueries({ queryKey: ['stage-settings', user.id] });
+      const previous = queryClient.getQueriesData<DbStageSetting[]>({ queryKey: ['stage-settings', user.id] });
+      queryClient.setQueriesData<DbStageSetting[]>({ queryKey: ['stage-settings', user.id] }, (rows) =>
+        rows?.map((row) => row.stage_key === stageKey && (!listId || row.list_id === listId || !row.list_id)
+          ? { ...row, custom_label: label ?? row.custom_label, color: color ?? row.color, icon_name: iconName ?? row.icon_name }
+          : row),
+      );
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      context?.previous?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['stage-settings', user?.id] });
     },
   });
