@@ -308,12 +308,15 @@ Deno.serve(async (req) => {
           // tidpunkt. Claim på intervjun skyddar även vid samtidiga körningar.
           // Bara den aktiva före-regeln styr detta, aldrig eftermeddelandet.
           if (trigger === "interview_before" && adminForBooker(interview.employer_id) === automation.owner_user_id) {
-            const { data: claimed } = await supabase.from("interviews")
+            const { data: claimed, error: claimError } = await supabase.from("interviews")
               .update({ reminder_sent_at: now.toISOString() })
               .eq("id", interview.id)
+              .in("status", ["pending", "confirmed"])
+              .gt("scheduled_at", now.toISOString())
               .is("reminder_sent_at", null)
               .select("id")
               .maybeSingle();
+            if (claimError) console.error("Could not claim recruiter interview reminder:", claimError);
             if (claimed) {
               const minutesLeft = Math.max(1, Math.round((new Date(interview.scheduled_at).getTime() - Date.now()) / 60000));
               const title = `Intervju om ${minutesLeft} minuter ⏰`;
@@ -325,7 +328,16 @@ Deno.serve(async (req) => {
                 body,
                 metadata: { interview_id: interview.id, route: "/employer" },
               });
-              if (noticeError) console.error("Could not create recruiter interview reminder:", noticeError);
+              if (noticeError) {
+                console.error("Could not create recruiter interview reminder:", noticeError);
+                // Försök igen nästa minut om notisklockan inte kunde skrivas.
+                // Jämför värdet så vi inte rensar en ny omboknings claim.
+                await supabase.from("interviews")
+                  .update({ reminder_sent_at: null })
+                  .eq("id", interview.id)
+                  .eq("reminder_sent_at", now.toISOString());
+                continue;
+              }
               const googleCollides = await collidesWithGoogleReminder(interview.employer_id, automation.delay_minutes);
               if (!googleCollides) {
                 try {
