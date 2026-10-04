@@ -101,7 +101,12 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                     />
                     <TruncatedText text={m.name} className="text-white font-medium" />
                   </div>
-                   <span className="text-white shrink-0">{m.applications} ansökningar</span>
+                   <div className="flex flex-col items-end gap-0.5 shrink-0">
+                     <span className="text-white">{m.applications} ansökningar</span>
+                     <span className="text-xs text-white">
+                       {m.views} visningar · {m.interviews} intervjuer
+                     </span>
+                   </div>
                 </div>
                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                   <motion.div
@@ -180,7 +185,10 @@ export const TeamInsightsSectionSkeleton = memo(() => (
               <div className="h-6 w-6 rounded-full bg-white/10" />
               <div className="h-3 w-28 rounded bg-white/10" />
             </div>
-            <div className="h-3 w-20 rounded bg-white/10" />
+             <div className="flex flex-col items-end gap-0.5">
+               <div className="h-3 w-20 rounded bg-white/10" />
+               <div className="h-2.5 w-28 rounded bg-white/10" />
+             </div>
           </div>
           <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
             <div className="h-full rounded-full bg-white/10" />
