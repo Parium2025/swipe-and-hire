@@ -2,14 +2,13 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { getOrganizationMemberIds } from '@/lib/organizationMembers';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 
 /** latest = senast satta betyget i organisationen; det delade betyget alla ser. */
 type Ratings = Record<string, { own?: number; colleague?: number; latest?: number }>;
 
 /** Account-scoped persisted ratings so stars render on the first frame after tab switches and cold starts. */
-export const ORG_RATINGS_CACHE_PREFIX = 'parium_org_ratings_v1_';
+export const ORG_RATINGS_CACHE_PREFIX = 'parium_org_ratings_v2_';
 function readPersisted(userId: string | undefined): Ratings {
   if (!userId) return {};
   try {
@@ -30,6 +29,46 @@ function writePersisted(userId: string, ids: string[], fresh: Ratings) {
   } catch { /* ignore quota */ }
 }
 
+let memberCache: { userId: string; ids: string[]; at: number } | null = null;
+/** Active members of the caller's organization; one RPC, cached briefly per account. */
+async function getMemberIds(userId: string): Promise<string[]> {
+  if (memberCache?.userId === userId && Date.now() - memberCache.at < 60_000) return memberCache.ids;
+  const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
+  if (error) throw error;
+  const ids = [...new Set([userId, ...(data ?? []).filter((m) => m.is_active).map((m) => m.user_id)])];
+  memberCache = { userId, ids, at: Date.now() };
+  return ids;
+}
+
+/** Fetches shared ratings and persists them for this account (also used for background warming). */
+export async function fetchOrganizationRatings(userId: string, ids: string[]): Promise<Ratings> {
+  const result: Ratings = {};
+  if (!ids.length) return result;
+  const allowed = await getMemberIds(userId);
+  const chunks: string[][] = [];
+  for (let start = 0; start < ids.length; start += 100) chunks.push(ids.slice(start, start + 100));
+  await Promise.all(chunks.map(async (chunk) => {
+    const local: Ratings = {};
+    for (let offset = 0; ; offset += 1000) {
+      const { data: rows, error } = await supabase.from('candidate_ratings')
+        .select('applicant_id, recruiter_id, rating, updated_at')
+        .in('applicant_id', chunk).in('recruiter_id', allowed)
+        .order('updated_at', { ascending: false }).range(offset, offset + 999);
+      if (error) throw error;
+      for (const row of rows ?? []) {
+        const entry = local[row.applicant_id] ?? (local[row.applicant_id] = {});
+        if (entry.latest === undefined && row.rating > 0) entry.latest = row.rating;
+        if (row.recruiter_id === userId) entry.own = row.rating;
+        else if (entry.colleague === undefined) entry.colleague = row.rating;
+      }
+      if (!rows || rows.length < 1000) break;
+    }
+    Object.assign(result, local);
+  }));
+  writePersisted(userId, ids, result);
+  return result;
+}
+
 /** Ratings are personal, but colleagues' ratings are visible inside the current organization. */
 export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings {
   const { user } = useAuth();
@@ -43,39 +82,7 @@ export function useOrganizationCandidateRatings(applicantIds: string[]): Ratings
     queryKey,
     enabled: !!user?.id && !!idsKey,
     staleTime: 30_000,
-    queryFn: async (): Promise<Ratings> => {
-      if (!user || !idsKey) return {};
-      const { data: role, error: roleError } = await supabase.from('user_roles')
-        .select('organization_id').eq('user_id', user.id).eq('is_active', true)
-        .not('organization_id', 'is', null).order('created_at', { ascending: false }).limit(1).maybeSingle();
-      if (roleError) throw roleError;
-      const memberIds = role?.organization_id
-        ? await getOrganizationMemberIds(role.organization_id)
-        : [user.id];
-      const allowed = [...new Set([user.id, ...memberIds])];
-      const result: Ratings = {};
-      const ids = idsKey.split('|');
-      // Bound request size and paginate so large teams cannot silently lose ratings.
-      for (let start = 0; start < ids.length; start += 100) {
-        const chunk = ids.slice(start, start + 100);
-        for (let offset = 0; ; offset += 1000) {
-          const { data: rows, error } = await supabase.from('candidate_ratings')
-            .select('applicant_id, recruiter_id, rating, updated_at')
-            .in('applicant_id', chunk).in('recruiter_id', allowed)
-            .order('updated_at', { ascending: false }).range(offset, offset + 999);
-          if (error) throw error;
-          for (const row of rows ?? []) {
-            const entry = result[row.applicant_id] ?? (result[row.applicant_id] = {});
-            if (entry.latest === undefined && row.rating > 0) entry.latest = row.rating;
-            if (row.recruiter_id === user.id) entry.own = row.rating;
-            else if (entry.colleague === undefined) entry.colleague = row.rating;
-          }
-          if (!rows || rows.length < 1000) break;
-        }
-      }
-      writePersisted(user.id, ids, result);
-      return result;
-    },
+    queryFn: () => fetchOrganizationRatings(user!.id, idsKey.split('|')),
   });
 
   // Last known ratings for this account: shown until the fresh answer arrives,

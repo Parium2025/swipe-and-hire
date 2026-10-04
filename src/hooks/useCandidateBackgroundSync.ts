@@ -8,6 +8,7 @@ import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { hydrateMyCandidateRows } from '@/lib/myCandidatesHydration';
 import { fetchMyApplicationViews, resolveApplicationViewedAt } from '@/lib/applicationViews';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchOrganizationRatings } from '@/hooks/useOrganizationCandidateRatings';
 import { updateLastSyncTime } from '@/lib/draftUtils';
 
 const PAGE_SIZE = 50; // Större batch för att ha mer data redo
@@ -345,6 +346,8 @@ async function syncMyCandidatesData(userId: string, queryClient: ReturnType<type
     }
   }
   const items = Array.from(deduped.values());
+  // Förvärm organisationens delade betyg så stjärnorna finns redan vid första bilden.
+  void fetchOrganizationRatings(userId, items.map((i) => i.applicant_id)).catch(() => {});
 
   // Uppdatera React Query cache
   const existingData: any = queryClient.getQueryData(queryKey);
