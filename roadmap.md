@@ -50,7 +50,8 @@
 - [x] Check late-appearing unread notifications against their saved timestamp and ensure the bell retains its known state across a day; verify candidate-list loading boundaries
 - [ ] Keep known notification state across long returns and update live without crossing accounts; audit auth switches and key role flows
 - [ ] Fix clipped news text on dashboard without changing its visual design; verify on employer and job-seeker views
-- [x] Keep chat tabs, search and new-conversation action mounted while the inbox loads on cold start
+- [x] Keep chat tabs and search mounted while the inbox loads on cold start
+- [x] Show colleagues directly under Kollegor; start or reopen their single conversation from the row without a Ny button
 - [x] Polish the new-chat action and simplify the conversation dialog with fully legible white text
 - [x] Show static known values for the analytics page's bottom sections on cold start; hold a placeholder for the team card while its RPC loads
 
