@@ -1087,6 +1087,19 @@ All colors MUST be HSL.
     }
   }
 
+  /* A missing or unmatched question needs only its search row and message. */
+  .question-filter-content.question-filter-empty {
+    height: auto;
+  }
+
+  .question-filter-empty .question-filter-list {
+    flex: none;
+  }
+
+  .question-filter-empty .question-filter-scroll {
+    height: auto;
+  }
+
   /* Desktop-only question filter sizing. A definite height is required here:
      max-height alone lets the question list keep its natural height, which
      clips it inside the popover instead of giving the mouse wheel a scroll

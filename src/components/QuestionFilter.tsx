@@ -434,7 +434,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
   const hasFilters = value.length > 0;
 
   // Dropdown styling matching nav dropdowns - left aligned
-  const dropdownContentClass = "question-filter-content w-[calc(100vw-2rem)] min-w-0 sm:w-[22rem] sm:max-w-[calc(100vw-2rem)] lg:w-[24rem] glass-panel shadow-xl z-[10000] rounded-lg p-0 flex max-h-[min(480px,var(--radix-popover-content-available-height))] flex-col overflow-hidden";
+  const dropdownContentClass = `question-filter-content ${!isLoading && filterableQuestions.length === 0 ? 'question-filter-empty' : ''} w-[calc(100vw-2rem)] min-w-0 sm:w-[22rem] sm:max-w-[calc(100vw-2rem)] lg:w-[24rem] glass-panel shadow-xl z-[10000] rounded-lg p-0 flex max-h-[min(480px,var(--radix-popover-content-available-height))] flex-col overflow-hidden`;
   const dropdownItemClass = "flex items-start gap-2 cursor-pointer text-white md:hover:bg-white/15 focus-visible:bg-white/15 focus:outline-none rounded-md px-3 py-3 text-sm transition-colors min-h-[44px] touch-manipulation [-webkit-tap-highlight-color:transparent]";
 
   // chipsOnly mode: only render the filter chips
@@ -599,7 +599,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             </div>
 
             {/* Scroll indicator gradient */}
-            {canScrollDown && (
+            {canScrollDown && filterableQuestions.length > 0 && (
               <div 
                 className="question-filter-scroll-fade absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-900/90 to-transparent pointer-events-none rounded-b-lg"
                 aria-hidden="true"
