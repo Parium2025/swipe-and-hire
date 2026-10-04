@@ -30,3 +30,4 @@
 - Start internal one-to-one chats from the colleague roster and reuse existing threads; why: each colleague remains a single discoverable entry without duplicate starts.
 - Candidate activity queries and persistent cache are account-scoped (user+applicant key), warmed by the page, and refreshed for current author profiles; why: instant cold-start logs and live avatars without cross-account leaks or historical image snapshots.
 - The notification bell alone owns its account-scoped cache and refresh; keep its last-known state through ordinary daily returns and avoid a second silent preloader, because competing cache writes can hide older unread items until refetch.
+- Aggregate employer question filters for active members of the caller's organization in an authenticated definer function; why: ordinary role-table visibility hides colleagues' questions from recruiters.

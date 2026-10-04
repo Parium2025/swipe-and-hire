@@ -599,7 +599,7 @@ export const QuestionFilter = ({ value, onChange, hideChips, chipsOnly }: Questi
             </div>
 
             {/* Scroll indicator gradient */}
-            {canScrollDown && (
+            {canScrollDown && filterableQuestions.length > 0 && (
               <div 
                 className="question-filter-scroll-fade absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-900/90 to-transparent pointer-events-none rounded-b-lg"
                 aria-hidden="true"
