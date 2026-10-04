@@ -512,6 +512,13 @@
       "when": 1791143289348,
       "tag": "0072_organization_admin_outreach_rules_for_team",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1791143772175,
+      "tag": "0073_guard_organization_outreach_writes",
+      "breakpoints": true
     }
   ]
 }
