@@ -62,5 +62,5 @@
 - [x] Keep the list picker available while a colleague's candidates load, make colleague selection direct, and show pure white text in the picker (live employer verification unavailable with the current signed-in account)
 - [x] Show a colleague's saved rating on an unrated candidate in My Candidates while preserving personal ratings; collapse colleague lists under each colleague's name in the picker
 - [x] Inventory remaining candidate-action toasts and send confirmed candidate moves silently to the notification bell
-- [x] Show team application totals in pure white for every reporting period; move the mobile recruiter filter beside job-status tabs and remove its white pressed/hover surface
+- [x] Show team application totals in pure white for every reporting period; move the mobile recruiter filter to the right below job-status tabs and remove its white pressed/hover surface
 
