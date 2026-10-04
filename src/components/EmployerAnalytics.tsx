@@ -666,10 +666,10 @@ const EmployerAnalytics = memo(() => {
     if (!user?.id || !rawData) return;
     const scope = `${user.id}:${organization?.id ?? ''}`;
     if (prefetchedForRef.current === scope) return;
-    prefetchedForRef.current = scope;
     const uid = user.id;
     const orgId = organization?.id;
     const timer = setTimeout(() => {
+      prefetchedForRef.current = scope;
       for (const f of TIME_FILTERS) {
         const days = f.days as number | null;
         if (days === selectedDays) continue;
