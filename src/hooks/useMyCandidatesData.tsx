@@ -535,6 +535,9 @@ export function useMyCandidatesData(
           // Fallback: refetch for other changes (insert/delete/unknown updates)
           // This catches changes made by colleagues that affect shared data
           queryClient.invalidateQueries({ queryKey: ['my-candidates', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['applicant-membership', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user.id] });
           queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user.id] });
         }
       )
@@ -776,6 +779,7 @@ export function useMyCandidatesData(
         addApplicantMembershipCacheEntry(user.id, insertedCandidate.applicant_id);
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['team-candidate-info', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
@@ -870,6 +874,7 @@ export function useMyCandidatesData(
         }
       }
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-candidates-stage-counts', user?.id] });
       if (result.inserted > 0) {
@@ -974,10 +979,10 @@ export function useMyCandidatesData(
     },
     onMutate: async (id: string) => {
       // Optimistic removal
-      await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({ queryKey: ['my-candidates', user?.id] });
       const previousCandidates = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
+      queryClient.setQueriesData({ queryKey: ['my-candidates', user?.id] }, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
@@ -991,10 +996,19 @@ export function useMyCandidatesData(
       // Ta bort ur localStorage-cachen också — annars kom kandidaten tillbaka
       // som spökkort vid nästa instant-load.
       updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id), listId);
+      if (listId) {
+        updateMyCandidatesCache(user?.id, (items) => items.filter((c) => c.id !== id));
+      }
 
       const removedApplicantId = candidates.find((candidate) => candidate.id === id)?.applicant_id;
       if (user && removedApplicantId) {
         removeApplicantMembershipCacheEntry(user.id, removedApplicantId);
+        // Alla kandidater kan redan vara öppna i en annan vy. Uppdatera även
+        // medlemskapsfrågan direkt, inte först efter nästa nätverkssvar.
+        queryClient.setQueriesData<string[]>(
+          { queryKey: ['applicant-membership', user.id] },
+          (old) => old?.filter((applicantId) => applicantId !== removedApplicantId),
+        );
       }
 
       return { previousCandidates, removedApplicantId };
@@ -1002,6 +1016,7 @@ export function useMyCandidatesData(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-candidates', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['applicant-membership', user?.id] });
       // Räknarna i listmenyn och kollegevyn måste följa med – bulk-borttagning
       // gjorde detta, den enskilda missade det och siffrorna hängde kvar.
       queryClient.invalidateQueries({ queryKey: ['candidate-list-counts', user?.id] });
