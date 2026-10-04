@@ -20,6 +20,30 @@ import {
   removeApplicantMembershipCacheEntry,
   writeApplicantMembershipCache,
 } from '@/lib/applicantMembershipCache';
+import { computeStageOrder } from '@/hooks/useStageSettings';
+
+/** Första kolumnen exakt som tavlan visar den (standard- + egna steg). */
+async function resolveFirstStage(userId: string, listId: string | null): Promise<string> {
+  let query = supabase
+    .from('user_stage_settings')
+    .select('stage_key, order_index, is_custom, custom_label')
+    .eq('user_id', userId);
+  if (listId) query = query.eq('list_id', listId);
+  const { data } = await query;
+  const live = (data || []).filter((s: any) => s.order_index > -1 || s.custom_label === '__DELETED__');
+  return computeStageOrder(live as any)[0] || 'to_contact';
+}
+
+/** Lokalt cachat eget betyg (fångar betyg som ännu ligger i synkkön). */
+function readLocalRating(userId: string, applicantId: string): number {
+  try {
+    const raw = localStorage.getItem(`ratings_cache_${userId}`);
+    const value = raw ? JSON.parse(raw)?.ratings?.[applicantId] : 0;
+    return typeof value === 'number' ? value : 0;
+  } catch {
+    return 0;
+  }
+}
 
 // Stage can be a default stage or a custom stage key
 export type CandidateStage = string;
