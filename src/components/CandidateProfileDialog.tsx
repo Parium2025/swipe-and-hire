@@ -424,6 +424,8 @@ export const CandidateProfileDialog = ({
   const handleRatingChange = (newRating: number) => {
     if (onRatingChange && application) {
       previousRating.current = newRating;
+      // Visa mitt nya betyg direkt som det delade betyget.
+      queryClient.setQueryData(['candidate-colleague-rating', user?.id, application.applicant_id], newRating);
       onRatingChange(newRating);
     }
   };
@@ -844,9 +846,6 @@ export const CandidateProfileDialog = ({
 
               {onRatingChange && (
                 <div className="mt-2">
-                  {(false && !candidateRating && colleagueRating) && (
-                    <p className="text-xs text-white text-center mb-1">Tidigare betyg från kollega</p>
-                  )}
                   <InteractiveStarRating rating={colleagueRating || candidateRating || 0} onChange={handleRatingChange} />
                 </div>
               )}
