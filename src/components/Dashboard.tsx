@@ -9,7 +9,7 @@ import { MobileJobCard } from '@/components/MobileJobCard';
 import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { isEmployerJobActive, isEmployerJobExpired } from '@/lib/jobStatus';
 import { StatsGrid } from '@/components/StatsGrid';
-import { JobSearchBar } from '@/components/JobSearchBar';
+import { JobSearchBar, MobileRecruiterFilter } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
@@ -337,6 +337,13 @@ const Dashboard = memo(() => {
           activeCount={serverCounts?.active ?? activeJobs.length}
           expiredCount={serverCounts?.expired ?? expiredJobs.length}
         />
+         <div className="absolute right-0 md:hidden">
+           <MobileRecruiterFilter
+             recruiters={recruiters}
+             selectedRecruiterId={selectedRecruiterId}
+             onRecruiterChange={setSelectedRecruiterId}
+           />
+         </div>
         {totalPages > 1 && (
           <span className="hidden xl:inline absolute right-40 text-sm text-white">
             Sida {page} av {totalPages}
