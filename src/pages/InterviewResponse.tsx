@@ -21,8 +21,9 @@ const InterviewResponse = () => {
   // aldrig kan misstolka dem som lösenordsåterställning. Behåll fallback för
   // redan utskickade länkar.
   const token = params.get('interview_token') ?? params.get('token') ?? '';
-  const answer = params.get('answer') === 'no' ? 'no' : 'yes';
-  const accept = answer === 'yes';
+  const initialAnswer = params.get('answer') === 'no' ? 'no' : 'yes';
+  const [currentAnswer, setCurrentAnswer] = useState<'yes' | 'no'>(initialAnswer);
+  const accept = currentAnswer === 'yes';
 
   const validLink = useMemo(
     () => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token),
@@ -33,7 +34,8 @@ const InterviewResponse = () => {
   const [message, setMessage] = useState('');
   const [deadReason, setDeadReason] = useState<DeadReason>(null);
 
-  const submit = async () => {
+  const submit = async (answer: 'yes' | 'no') => {
+    setCurrentAnswer(answer);
     setPhase('sending');
     try {
       const response = await fetch(FUNCTIONS_URL, {
@@ -64,9 +66,9 @@ const InterviewResponse = () => {
 
       const suffix = data.jobTitle ? ` för ${data.jobTitle}` : '';
       setMessage(
-        accept
-          ? `${data.already ? 'Du hade redan tackat ja' : 'Du har tackat ja'} till intervjun${suffix}. Arbetsgivaren har fått besked.`
-          : `${data.already ? 'Du hade redan tackat nej' : 'Du har tackat nej'} till intervjun${suffix}. Arbetsgivaren har fått besked.`,
+        answer === 'yes'
+          ? `${data.already ? 'Du hade redan tackat ja' : 'Du har tackat ja'} till intervjun${suffix}.${data.already ? '' : ' Arbetsgivaren har fått besked.'}`
+          : `${data.already ? 'Du hade redan tackat nej' : 'Du har tackat nej'} till intervjun${suffix}.${data.already ? '' : ' Arbetsgivaren har fått besked.'}`,
       );
       setPhase('done');
     } catch {
@@ -117,22 +119,23 @@ const InterviewResponse = () => {
               : message}
         </p>
 
-        {validLink && !deadReason && (phase === 'confirm' || phase === 'sending' || phase === 'error') && (
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full rounded-full text-white [&_svg]:text-white"
-            onClick={submit}
-            disabled={phase === 'sending'}
-          >
-            {phase === 'sending'
-              ? 'Skickar svar…'
-              : phase === 'error'
-                ? 'Försök igen'
-                : accept
-                  ? 'Ja, jag kommer'
-                  : 'Nej, jag kan inte'}
-          </Button>
+        {validLink && !deadReason && (
+          <div className="flex flex-col gap-3">
+            {(['yes', 'no'] as const).map((choice) => (
+              <Button
+                key={choice}
+                type="button"
+                variant={choice === initialAnswer ? 'secondary' : 'outline'}
+                className="w-full rounded-full text-white [&_svg]:text-white"
+                onClick={() => submit(choice)}
+                disabled={phase === 'sending'}
+              >
+                {phase === 'sending' && choice === currentAnswer
+                  ? 'Skickar svar…'
+                  : choice === 'yes' ? 'Ja, jag kommer' : 'Nej, jag kan inte'}
+              </Button>
+            ))}
+          </div>
         )}
 
         <Link to="/" className="mt-5 block text-center text-sm text-white underline-offset-4 hover:underline">
