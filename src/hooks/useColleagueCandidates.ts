@@ -5,6 +5,7 @@ import { resolveCandidateMedia } from '@/lib/candidateMedia';
 import { useAuth } from '@/hooks/useAuth';
 import { MyCandidateData, CandidateStage } from '@/hooks/useMyCandidatesData';
 import { toast } from 'sonner';
+import { toastArchive } from '@/lib/toastArchive';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
@@ -466,7 +467,7 @@ export function useColleagueCandidates(
   const moveCandidateInColleagueList = async (
     candidateId: string,
     newStage: CandidateStage,
-    opts?: { silent?: boolean },
+    opts?: { silent?: boolean; silentNotification?: boolean },
   ): Promise<boolean> => {
     // Läs alltid ur den senaste listan (inte closure-värdet) — annars skrev en
     // bulkflytt tillbaka en gammal ögonblicksbild där tidigare flyttar saknades.
@@ -501,6 +502,9 @@ export function useColleagueCandidates(
           listId,
           previousCandidates.map((c) => (c.id === candidateId ? { ...c, stage: newStage } : c)),
         );
+      }
+      if (!opts?.silentNotification && previousCandidates.some(c => c.id === candidateId && c.stage !== newStage)) {
+        toastArchive.add('success', 'Kandidat flyttad', undefined, '/my-candidates');
       }
       return true;
     } catch (error: any) {

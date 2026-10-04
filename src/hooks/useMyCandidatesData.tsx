@@ -7,6 +7,7 @@ import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { getActiveCandidateListId } from '@/lib/activeCandidateList';
 import { toast } from 'sonner';
+import { toastArchive } from '@/lib/toastArchive';
 import { enqueueCandidateOperation, useCandidateOperationQueue } from '@/hooks/useCandidateOperationQueue';
 import { getIsOnline } from '@/lib/connectivityManager';
 import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
@@ -1026,6 +1027,15 @@ export function useMyCandidatesData(
       } else {
         queryClient.setQueryData(queryKey, context?.previousCandidates);
         toast.error('Kunde inte flytta kandidaten');
+      }
+    },
+    onSuccess: (_result, variables, context) => {
+      const previous = (context?.previousCandidates as any)?.pages
+        ?.flatMap((page: any) => page.items as MyCandidateData[])
+        .find((candidate: MyCandidateData) => candidate.id === variables.id);
+      const fromStage = previous?.stage ?? candidates.find(candidate => candidate.id === variables.id)?.stage;
+      if (fromStage && fromStage !== variables.stage) {
+        toastArchive.add('success', 'Kandidat flyttad', undefined, '/my-candidates');
       }
     },
     onSettled: () => {

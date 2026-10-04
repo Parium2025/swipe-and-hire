@@ -34,3 +34,4 @@
 - Keep candidate membership, paginated list caches and server counts synchronized across mutations and realtime events; why: saved icons and list totals must agree immediately without stale cross-view data.
 - Stage menus and stage creation read/write the active candidate list's stage settings; why: default stage keys repeat across lists, so the all-lists view edited the wrong row.
 - Rating writes update the shared organization-rating cache optimistically and the ratings refetch on app return; why: the shared latest rating outranks the row's own rating and realtime can drop in the background.
+- Confirmed candidate moves are archived directly to the account-scoped notification bell, not shown as transient toasts; why: move confirmations stay visible without interrupting the workflow.
