@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
@@ -45,13 +45,15 @@ function writePersisted(userId: string, appIds: string[], fresh: Record<string, 
  */
 export function useTeamCandidateInfo(applications: Array<{ id: string; applicant_id: string }>) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { teamMembers } = useTeamMembers();
   const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
   const applicantKey = useMemo(() => [...new Set(applications.map(a => a.applicant_id).filter(Boolean))].sort().join(','), [applications]);
   const memberNamesKey = useMemo(() => teamMembers.map(m => `${m.userId}:${m.firstName ?? ''}:${m.lastName ?? ''}`).sort().join('|'), [teamMembers]);
 
+  const queryKey = ['team-candidate-info', user?.id, [...applicationIds].sort().join(','), applicantKey, memberNamesKey];
   const { data: teamCandidates, isLoading } = useQuery({
-    queryKey: ['team-candidate-info', user?.id, [...applicationIds].sort().join(','), applicantKey, memberNamesKey],
+    queryKey,
     queryFn: async () => {
       if (!user || applicationIds.length === 0) return {};
 
@@ -97,7 +99,10 @@ export function useTeamCandidateInfo(applications: Array<{ id: string; applicant
       await Promise.all([fetchBy('applicant_id', lookupApplicantIds), fetchBy('application_id', applicationIds)]);
 
       const applicantIds = [...new Set(myCandidatesData.map(c => c.applicant_id))];
-      if (applicantIds.length === 0) return {};
+      if (applicantIds.length === 0) {
+        writePersisted(user.id, applicationIds, {});
+        return {};
+      }
 
       // applicant -> alla visade ansökningar för den personen
       const applicantToApps: Record<string, string[]> = {};
@@ -105,6 +110,34 @@ export function useTeamCandidateInfo(applications: Array<{ id: string; applicant
         const a = appToApplicant[id];
         if (a) (applicantToApps[a] ||= []).push(id);
       });
+
+      const recruiterNames: Record<string, string> = {};
+      teamMembers.forEach(member => {
+        recruiterNames[member.userId] = `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Kollega';
+      });
+      recruiterNames[user.id] = 'Du';
+
+      const infoMap: Record<string, TeamCandidateInfo[]> = {};
+      myCandidatesData.forEach(candidate => {
+        const targets = new Set(applicantToApps[candidate.applicant_id] ?? []);
+        if (applicationIds.includes(candidate.application_id)) targets.add(candidate.application_id);
+        targets.forEach(appId => {
+          (infoMap[appId] ||= []).push({
+            applicant_id: candidate.applicant_id,
+            application_id: candidate.application_id,
+            recruiter_id: candidate.recruiter_id,
+            recruiter_name: recruiterNames[candidate.recruiter_id] || 'Kollega',
+            rating: candidate.rating ?? 0,
+            stage: candidate.stage,
+            notes: candidate.notes,
+          });
+        });
+      });
+
+      // Visa kollegamärket så snart medlemskapet är känt. Betyg och anteckningar
+      // kompletteras utan att blockera själva märket.
+      writePersisted(user.id, applicationIds, infoMap);
+      queryClient.setQueryData(queryKey, { ...infoMap });
 
       // Fetch persistent ratings and notes in parallel
       // Create a lookup map for persistent ratings: applicant_id -> recruiter_id -> rating
@@ -140,38 +173,10 @@ export function useTeamCandidateInfo(applications: Array<{ id: string; applicant
         return requests;
       }, []));
 
-      // Create a map of application_id -> array of team members who have added it
-      const infoMap: Record<string, TeamCandidateInfo[]> = {};
-
-      // Create a recruiter name lookup
-      const recruiterNames: Record<string, string> = {};
-      teamMembers.forEach(member => {
-        recruiterNames[member.userId] = `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Kollega';
-      });
-      // Add current user
-      recruiterNames[user.id] = 'Du';
-
-      myCandidatesData?.forEach(candidate => {
-        const recruiterName = recruiterNames[candidate.recruiter_id] || 'Kollega';
-        const persistentRating = persistentRatingMap[candidate.applicant_id]?.[candidate.recruiter_id];
-        const effectiveRating = persistentRating ?? candidate.rating ?? 0;
-        const persistentNotes = persistentNotesMap[candidate.applicant_id]?.[candidate.recruiter_id];
-        const effectiveNotes = persistentNotes ?? candidate.notes ?? null;
-
-        const targets = new Set(applicantToApps[candidate.applicant_id] ?? []);
-        if (applicationIds.includes(candidate.application_id)) targets.add(candidate.application_id);
-        targets.forEach(appId => {
-          (infoMap[appId] ||= []).push({
-            applicant_id: candidate.applicant_id,
-            application_id: candidate.application_id,
-            recruiter_id: candidate.recruiter_id,
-            recruiter_name: recruiterName,
-            rating: effectiveRating,
-            stage: candidate.stage,
-            notes: effectiveNotes,
-          });
-        });
-      });
+      Object.values(infoMap).forEach(rows => rows.forEach(row => {
+        row.rating = persistentRatingMap[row.applicant_id]?.[row.recruiter_id] ?? row.rating;
+        row.notes = persistentNotesMap[row.applicant_id]?.[row.recruiter_id] ?? row.notes;
+      }));
 
       // Spara senaste teaminfo per konto så märket finns på plats från första steg vid kallstart.
       writePersisted(user.id, applicationIds, infoMap);
