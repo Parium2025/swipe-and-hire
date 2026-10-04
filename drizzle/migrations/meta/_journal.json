@@ -505,6 +505,13 @@
       "when": 1791141765142,
       "tag": "0071_allow_repeated_interview_answers_with_distinct_email_events",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1791143289348,
+      "tag": "0072_organization_admin_outreach_rules_for_team",
+      "breakpoints": true
     }
   ]
 }
