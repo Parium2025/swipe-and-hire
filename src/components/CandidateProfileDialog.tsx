@@ -184,7 +184,8 @@ export const CandidateProfileDialog = ({
         .not('organization_id', 'is', null).limit(1).maybeSingle();
       if (roleError) throw roleError;
       if (!role?.organization_id) return null;
-      const colleagues = (await getOrganizationMemberIds(role.organization_id)).filter(id => id !== user.id);
+      // Inklusive mig själv: det senast satta betyget i organisationen är det delade.
+      const colleagues = await getOrganizationMemberIds(role.organization_id);
       if (!colleagues.length) return null;
       const { data, error } = await supabase.from('candidate_ratings')
         .select('rating').eq('applicant_id', application.applicant_id)
@@ -843,10 +844,10 @@ export const CandidateProfileDialog = ({
 
               {onRatingChange && (
                 <div className="mt-2">
-                  {(!candidateRating && colleagueRating) && (
+                  {(false && !candidateRating && colleagueRating) && (
                     <p className="text-xs text-white text-center mb-1">Tidigare betyg från kollega</p>
                   )}
-                  <InteractiveStarRating rating={candidateRating || colleagueRating || 0} onChange={handleRatingChange} />
+                  <InteractiveStarRating rating={colleagueRating || candidateRating || 0} onChange={handleRatingChange} />
                 </div>
               )}
 

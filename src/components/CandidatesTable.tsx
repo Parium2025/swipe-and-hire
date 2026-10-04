@@ -539,11 +539,9 @@ export function CandidatesTable({
 
   const getDisplayRating = useCallback((application: ApplicationData) => {
     const shared = organizationRatings[application.applicant_id];
-    // Ett eget betyg har alltid företräde; annars visas kollegans betyg även
-    // när kandidaten inte har lagts till i någons personliga kandidatlista.
+    // Delat organisationsbetyg: senast satta betyget gäller för alla kollegor.
+    if (shared?.latest !== undefined) return shared.latest;
     if (shared?.own !== undefined) return shared.own;
-    // Kanoniska betyg går före den äldre ansökningssnapshoten.
-    if (shared?.colleague !== undefined) return shared.colleague;
     if (application.rating) return application.rating;
     const teamInfo = getTeamInfo(application.id);
     return teamInfo?.maxRating || 0;
