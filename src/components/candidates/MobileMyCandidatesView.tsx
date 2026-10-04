@@ -349,6 +349,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   const previewTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const previewDelayRef = useRef<ReturnType<typeof setTimeout>>();
   const longPressFiredRef = useRef(false);
+  const pressStartRef = useRef<{ x: number; y: number } | null>(null);
   const dragScrollRef = useDragScroll<HTMLDivElement>();
   const isTouchCapable = useTouchCapable();
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -407,8 +408,9 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   }, []);
 
   /** Långtryck på en trunkerad etikett visar hela namnet (tooltip). */
-  const handleStagePointerDown = useCallback((stage: string, pointerType: string, target?: EventTarget | null) => {
+  const handleStagePointerDown = useCallback((stage: string, pointerType: string, target?: EventTarget | null, point?: { x: number; y: number }) => {
     if (pointerType === 'mouse') return;
+    pressStartRef.current = point ?? null;
     // Trepunktsmenyn har sin egen tunnel – inget långtryck där.
     if (target instanceof HTMLElement && target.closest('[data-stage-menu]')) return;
     const cfg = stageConfig[stage];
@@ -421,7 +423,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       longPressFiredRef.current = true;
       setPreviewStage(stage);
       if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
-      previewTimerRef.current = setTimeout(() => setPreviewStage(null), 2200);
+      previewTimerRef.current = setTimeout(() => setPreviewStage(null), 3000);
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         try { navigator.vibrate?.(8); } catch { /* ignorera */ }
       }
@@ -558,10 +560,14 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                 ref={(el) => { tabRefs.current[stage] = el; }}
                 data-stage-tab
                 tabIndex={0}
-                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType, e.target)}
+                onPointerDownCapture={(e) => handleStagePointerDown(stage, e.pointerType, e.target, { x: e.clientX, y: e.clientY })}
                 onPointerUp={clearLongPress}
                 onPointerCancel={clearLongPress}
-                onPointerMove={clearLongPress}
+                onPointerMove={(e) => {
+                  // Fingret darrar alltid lite: avbryt långtrycket först vid en verklig svepning.
+                  const start = pressStartRef.current;
+                  if (!start || Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) clearLongPress();
+                }}
                 onClick={() => handleStageClick(stage)}
                 onContextMenu={(e) => { if (isTouchCapable) e.preventDefault(); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(stage); } }}
@@ -575,10 +581,12 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                   <TooltipProvider delayDuration={200}>
                     <Tooltip
                       open={isTouchCapable ? previewStage === stage : undefined}
-                      onOpenChange={isTouchCapable ? (open) => { if (!open) setPreviewStage(null); } : undefined}
+                      // Touch: bara eget långtryck och eget tryck utanför styr tooltipen.
+                      // Safaris emulerade mus-/scrollhändelser får aldrig öppna eller stänga den.
+                      onOpenChange={isTouchCapable ? () => {} : undefined}
                     >
                       <TooltipTrigger asChild>
-                        <span className="truncate cursor-default min-w-0">{cfg.label}</span>
+                        <span className="truncate cursor-default min-w-0 select-none [-webkit-touch-callout:none]">{cfg.label}</span>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" sideOffset={6} className="max-w-[min(90vw,600px)] break-words whitespace-normal">
                         <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
