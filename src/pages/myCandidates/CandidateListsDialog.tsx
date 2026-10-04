@@ -279,7 +279,7 @@ export const CandidateListsDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card-parium border-white/20 rounded-3xl max-w-md [&>button]:!h-10 [&>button]:!w-10 [&>button>svg]:!h-5 [&>button>svg]:!w-5">
+        <DialogContent className="bg-card-parium border-white/20 rounded-3xl max-w-md">
           <DialogHeader className="pr-10">
             <DialogTitle className="text-white">Hantera listor</DialogTitle>
             <DialogDescription className="text-white">
