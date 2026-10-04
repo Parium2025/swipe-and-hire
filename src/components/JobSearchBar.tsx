@@ -19,6 +19,39 @@ export interface Recruiter {
   last_name: string;
 }
 
+export const MobileRecruiterFilter = ({ recruiters, selectedRecruiterId, onRecruiterChange }: {
+  recruiters: Recruiter[];
+  selectedRecruiterId: string | null;
+  onRecruiterChange: (recruiterId: string | null) => void;
+}) => {
+  if (recruiters.length < 2) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outlineNeutral"
+          size="icon"
+          aria-label="Filtrera på rekryterare"
+          className="dashboard-icon-control border-0 bg-transparent text-white hover:bg-transparent hover:text-white focus:bg-transparent focus:text-white active:bg-transparent active:text-white data-[state=open]:bg-transparent"
+        >
+          <UserCheck className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[200px] z-[10000] glass-panel rounded-md">
+        <DropdownMenuItem onClick={() => onRecruiterChange(null)} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">
+          Alla rekryterare
+        </DropdownMenuItem>
+        {recruiters.map((recruiter) => (
+          <DropdownMenuItem key={recruiter.id} onClick={() => onRecruiterChange(recruiter.id)} className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer">
+            {recruiter.first_name} {recruiter.last_name}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 interface JobSearchBarProps {
   searchInput: string;
   onSearchChange: (value: string) => void;
@@ -194,41 +227,6 @@ export const JobSearchBar = memo(({
           )}
         </div>
 
-        {/* Recruiter filter - only show if multiple recruiters */}
-        {showRecruiterFilter && onRecruiterChange && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                aria-label="Filtrera på rekryterare"
-                className="dashboard-icon-control flex-shrink-0 text-white focus:outline-none focus-visible:outline-none focus:ring-0"
-              >
-                <UserCheck className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="end" 
-              className="w-[200px] z-[10000] glass-panel rounded-md"
-            >
-              <DropdownMenuItem 
-                onClick={() => onRecruiterChange(null)}
-                className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-              >
-                Alla rekryterare
-              </DropdownMenuItem>
-              {recruiters.map((recruiter) => (
-                <DropdownMenuItem 
-                  key={recruiter.id} 
-                  onClick={() => onRecruiterChange(recruiter.id)}
-                  className="text-white hover:bg-white/20 focus:bg-white/20 cursor-pointer"
-                >
-                  {recruiter.first_name} {recruiter.last_name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
       </div>
     </>
   );

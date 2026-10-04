@@ -9,7 +9,7 @@ import { MobileJobCard } from '@/components/MobileJobCard';
 import { useUnviewedApplicationCounts } from '@/hooks/useUnviewedApplicationCounts';
 import { isEmployerJobActive, isEmployerJobExpired } from '@/lib/jobStatus';
 import { StatsGrid } from '@/components/StatsGrid';
-import { JobSearchBar } from '@/components/JobSearchBar';
+import { JobSearchBar, MobileRecruiterFilter } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 import { JobStatusTabs } from '@/components/ui/job-status-tabs';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
@@ -343,6 +343,16 @@ const Dashboard = memo(() => {
           </span>
         )}
       </div>
+
+       {recruiters.length > 1 && (
+         <div className="flex justify-end md:hidden">
+           <MobileRecruiterFilter
+             recruiters={recruiters}
+             selectedRecruiterId={selectedRecruiterId}
+             onRecruiterChange={setSelectedRecruiterId}
+           />
+         </div>
+       )}
 
       {/* Antalsindikator + Visa detaljer: knappen ligger på samma rad som antalet */}
       <div className="relative mt-2 flex items-center justify-center">

@@ -101,7 +101,7 @@ export const TeamInsightsSection = memo(({ data }: { data: TeamInsightsData | nu
                     />
                     <TruncatedText text={m.name} className="text-white font-medium" />
                   </div>
-                  <span className="text-white/60 shrink-0">{m.applications} ansökningar</span>
+                   <span className="text-white shrink-0">{m.applications} ansökningar</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                   <motion.div
