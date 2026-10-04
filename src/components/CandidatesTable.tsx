@@ -704,7 +704,7 @@ export function CandidatesTable({
       {/* Bulk actions bar */}
       {selectionMode && (
         <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mb-3">
-           <div className={`flex items-center gap-1.5 sm:gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full shadow-xl min-w-0 max-w-full ${selectedIds.size > 0 ? 'px-2 sm:px-4 py-2' : 'px-3 py-1.5'}`}>
+           <div className={`flex items-center gap-1.5 sm:gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full shadow-xl min-w-0 max-w-full ${selectedIds.size > 0 ? 'px-2 sm:px-4 py-2' : 'pl-3 pr-2 py-1.5'}`}>
             <span className="text-white text-xs font-semibold whitespace-nowrap flex-shrink-0">
               {selectedIds.size > 0 
                 ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
@@ -751,8 +751,8 @@ export function CandidatesTable({
               </>
             )}
             <div className="w-px h-5 bg-white/20 flex-shrink-0" />
-            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection} className={`flex-shrink-0 border-white/50 bg-white/10 ${selectedIds.size > 0 ? '!h-10 !w-10' : '!h-8 !w-8'}`}>
-              <X className={`flex-shrink-0 ${selectedIds.size > 0 ? 'h-5 w-5' : 'h-4 w-4'}`} strokeWidth={2.5} />
+            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection} className={`flex-shrink-0 border-white/50 bg-white/10 ${'!h-10 !w-10'}`}>
+              <X className={`flex-shrink-0 ${'h-5 w-5'}`} strokeWidth={2.5} />
             </PillButton>
 
 

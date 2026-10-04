@@ -36,7 +36,7 @@ export const SwipeEmptyState = memo(function SwipeEmptyState({
             className="flex h-11 w-11 items-center justify-center touch-manipulation"
             aria-label="Stäng"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors">
               <X className="h-5 w-5 text-white" />
             </div>
           </button>

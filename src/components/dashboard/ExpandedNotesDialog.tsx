@@ -92,9 +92,9 @@ export const ExpandedNotesDialog = memo(({
               {saveIndicator}
               <button
                 onClick={handleClose}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               >
-                <X className="h-4 w-4 text-white" />
+                <X className="h-5 w-5 text-white" />
               </button>
             </div>
           </div>

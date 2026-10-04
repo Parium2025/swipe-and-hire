@@ -117,7 +117,7 @@ export function SwipeJobDetail({ job, open, onClose, onApply, hasApplied }: Swip
               className="absolute top-3 right-4 z-10 flex h-11 w-11 !min-h-0 !min-w-0 items-center justify-center touch-manipulation"
               aria-label="Stäng"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90 [@media(hover:hover)]:hover:bg-white/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-all active:scale-90 [@media(hover:hover)]:hover:bg-white/20">
                 <X className="h-5 w-5 text-white" />
               </div>
             </button>

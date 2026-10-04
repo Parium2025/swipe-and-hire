@@ -776,8 +776,8 @@ export const CandidateProfileDialog = ({
             aria-label="Stäng"
             className="relative mr-1 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full p-0 text-white"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-colors active:bg-white/20">
-              <X className="h-[18px] w-[18px] shrink-0 text-white" />
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors active:bg-white/20">
+              <X className="h-5 w-5 shrink-0 text-white" />
             </span>
           </button>}
         />
