@@ -1028,6 +1028,14 @@ export function useMyCandidatesData(
         toast.error('Kunde inte flytta kandidaten');
       }
     },
+    onSuccess: (_result, variables, context) => {
+      const previous = (context?.previousCandidates as any)?.pages
+        ?.flatMap((page: any) => page.items as MyCandidateData[])
+        .find((candidate: MyCandidateData) => candidate.id === variables.id);
+      if (previous && previous.stage !== variables.stage) {
+        toastArchive.add('success', 'Kandidat flyttad', undefined, '/my-candidates');
+      }
+    },
     onSettled: () => {
       isDraggingRef.current = false;
       // Kolumnrubrikernas riktiga antal kommer från databasen och hängde kvar
