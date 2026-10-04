@@ -233,8 +233,14 @@ Deno.serve(async (req) => {
           ? new Date(now.getTime() + delayMs)
           : new Date(now.getTime() - delayMs);
 
-        const rangeStart = new Date(targetTime.getTime() - WINDOW_PADDING_MS).toISOString();
-        const rangeEnd = new Date(targetTime.getTime() + WINDOW_PADDING_MS).toISOString();
+        // Aldrig före den valda tidpunkten. Låt försenade minutkörningar
+        // hinna ikapp inom fönstret, men skicka inte t.ex. 17 min före 15.
+        const rangeStart = trigger === "interview_before"
+          ? new Date(targetTime.getTime() - WINDOW_PADDING_MS).toISOString()
+          : targetTime.toISOString();
+        const rangeEnd = trigger === "interview_before"
+          ? targetTime.toISOString()
+          : new Date(targetTime.getTime() + WINDOW_PADDING_MS).toISOString();
 
         // Före intervjun räcker pending/confirmed. Efteråt krävs ett faktiskt
         // svar: tack-mejlet ska aldrig gå till en intervju kandidaten tackat
