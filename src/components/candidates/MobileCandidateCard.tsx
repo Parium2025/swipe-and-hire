@@ -102,18 +102,6 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
               insideInteractive
               className="flex-1 min-w-0 font-medium text-white text-sm"
             />
-            {teamInfo && teamInfo.colleagues.length > 0 && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={event => event.stopPropagation()} className="flex items-center justify-center h-6 w-6 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0 active:scale-95">
-                    <Users className="h-3 w-3 text-purple-300" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="bottom" align="start" className="w-auto max-w-[min(300px,calc(100vw-24px))] p-3" onClick={event => event.stopPropagation()}>
-                  <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
-                </PopoverContent>
-              </Popover>
-            )}
           </div>
 
           {/* Rating stars */}
