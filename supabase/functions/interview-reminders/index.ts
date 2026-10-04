@@ -101,6 +101,32 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // Företagets admin äger intervjureglerna; bokaren äger fortfarande mötet
+    // och får sin egen notis. Läs endast aktiva medlemskap så ingen annan
+    // organisation kan ärva en regel efter att en kollega lämnat teamet.
+    const { data: teamRoles, error: teamRolesError } = await supabase
+      .from("user_roles")
+      .select("user_id, organization_id, role")
+      .eq("is_active", true)
+      .not("organization_id", "is", null)
+      .in("role", ["admin", "recruiter"]);
+    if (teamRolesError) throw teamRolesError;
+    const membersByOrg = new Map<string, Set<string>>();
+    const adminByOrg = new Map<string, string>();
+    const orgByMember = new Map<string, string>();
+    for (const row of teamRoles ?? []) {
+      if (!row.organization_id) continue;
+      const members = membersByOrg.get(row.organization_id) ?? new Set<string>();
+      members.add(row.user_id);
+      membersByOrg.set(row.organization_id, members);
+      orgByMember.set(row.user_id, row.organization_id);
+      if (row.role === "admin") adminByOrg.set(row.organization_id, row.user_id);
+    }
+    const adminForBooker = (bookerId: string) => {
+      const org = orgByMember.get(bookerId);
+      return org ? adminByOrg.get(org) : undefined;
+    };
+
     // Hur många möten som behandlas samtidigt. Arbetet är nästan bara väntan på
     // nätverk, så bredden – inte processorn – avgör hur många som hinner med.
     const REMINDER_CONCURRENCY = 120;
@@ -167,6 +193,7 @@ Deno.serve(async (req) => {
       };
       const groups = new Map<string, Group>();
       for (const automation of (automations || []) as InterviewTimelineAutomation[]) {
+        if (automation.organization_id && adminByOrg.get(automation.organization_id) !== automation.owner_user_id) continue;
         const tplId = (automation as { template_id?: string | null }).template_id;
         if (tplId && !activeTemplateIds.has(tplId)) continue;
         const delay = Math.max(automation.delay_minutes ?? 0, 0);
@@ -216,13 +243,20 @@ Deno.serve(async (req) => {
         // möte är den bästa proxy:n.
         const interviewStatuses = trigger === "interview_before" ? ["pending", "confirmed"] : ["confirmed", "completed"];
 
-        const { data: interviews, error: interviewsError } = await supabase
+        const memberIds = automation.organization_id
+          ? [...(membersByOrg.get(automation.organization_id) ?? [])]
+          : [];
+        if (automation.organization_id && memberIds.length === 0) continue;
+        let interviewQuery = supabase
           .from("interviews")
           .select("id, applicant_id, employer_id, job_id, scheduled_at, location_type, location_details, revision")
-          .eq("employer_id", automation.owner_user_id)
           .in("status", interviewStatuses)
           .gte("scheduled_at", rangeStart)
           .lte("scheduled_at", rangeEnd);
+        interviewQuery = memberIds.length > 0
+          ? interviewQuery.in("employer_id", memberIds)
+          : interviewQuery.eq("employer_id", automation.owner_user_id);
+        const { data: interviews, error: interviewsError } = await interviewQuery;
 
         if (interviewsError) {
           console.error(`Error fetching interviews for ${trigger}:`, interviewsError);
@@ -257,6 +291,46 @@ Deno.serve(async (req) => {
           const revision = (interview as { revision?: number }).revision ?? 0;
 
           const existingLogs = logsByInterview.get(interview.id) ?? [];
+
+          // Den som bokade mötet får påminnelsen i sin egen klocka vid admins
+          // tidpunkt. Claim på intervjun skyddar även vid samtidiga körningar.
+          // Bara den aktiva före-regeln styr detta, aldrig eftermeddelandet.
+          if (trigger === "interview_before" && adminForBooker(interview.employer_id) === automation.owner_user_id) {
+            const { data: claimed } = await supabase.from("interviews")
+              .update({ reminder_sent_at: now.toISOString() })
+              .eq("id", interview.id)
+              .is("reminder_sent_at", null)
+              .select("id")
+              .maybeSingle();
+            if (claimed) {
+              const minutesLeft = Math.max(1, Math.round((new Date(interview.scheduled_at).getTime() - Date.now()) / 60000));
+              const title = `Intervju om ${minutesLeft} minuter ⏰`;
+              const body = `Din intervju börjar snart.`;
+              const { error: noticeError } = await supabase.from("notifications").insert({
+                user_id: interview.employer_id,
+                type: "interview_reminder",
+                title,
+                body,
+                metadata: { interview_id: interview.id, route: "/employer" },
+              });
+              if (noticeError) console.error("Could not create recruiter interview reminder:", noticeError);
+              const googleCollides = await collidesWithGoogleReminder(interview.employer_id, automation.delay_minutes);
+              if (!googleCollides) {
+                try {
+                  await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseServiceKey}` },
+                    body: JSON.stringify({
+                      recipient_id: interview.employer_id, title, body,
+                      data: { type: "interview_reminder", interview_id: interview.id, route: "/employer" },
+                    }),
+                  });
+                } catch (pushError) {
+                  console.error("Recruiter interview reminder push failed:", pushError);
+                }
+              }
+            }
+          }
 
           const alreadyQueuedChannels = new Set(
             existingLogs
@@ -294,7 +368,7 @@ Deno.serve(async (req) => {
             const source = byChannel.get(channel) ?? automation;
 
             const { error: insertError } = await supabase.from("outreach_dispatch_logs").insert({
-              owner_user_id: automation.owner_user_id,
+              owner_user_id: interview.employer_id,
               organization_id: automation.organization_id,
               automation_id: source.id,
               template_id: source.template_id,
@@ -431,20 +505,25 @@ Deno.serve(async (req) => {
     // putten också över, annars får kandidaten två påminnelser samtidigt.
     const employerCandidateReminderRules = new Map<string, number[]>();
     const candidateRemindersAllowed = async (employerId: string, minutesLeft: number) => {
-      let delays = employerCandidateReminderRules.get(employerId);
+      const adminId = adminForBooker(employerId);
+      const ruleOwner = adminId ?? employerId;
+      let delays = employerCandidateReminderRules.get(ruleOwner);
       if (!delays) {
         const { data } = await supabase
           .from("outreach_automations")
           .select("delay_minutes")
-          .eq("owner_user_id", employerId)
+          .eq("owner_user_id", ruleOwner)
           .eq("trigger", "interview_before")
           .eq("recipient_type", "candidate")
           .eq("is_enabled", true);
         delays = ((data ?? []) as Array<{ delay_minutes: number | null }>)
           .map((rule) => Math.max(rule.delay_minutes ?? 0, 0));
-        employerCandidateReminderRules.set(employerId, delays);
+        employerCandidateReminderRules.set(ruleOwner, delays);
       }
 
+      // För teamet är admins val facit, även när alla kanaler är avstängda.
+      // Standardens tiominuterslarm ska aldrig lägga till en egen tidpunkt.
+      if (adminId) return false;
       if (delays.length === 0) return false;
 
       // En egen regel ersätter standardpåminnelsen bara när intervjun faktiskt
@@ -468,6 +547,9 @@ Deno.serve(async (req) => {
       // åtta möten samtidigt – samma claim-skydd, samma ordning per möte, men
       // hela svepet blir klart i tid även vid hög belastning.
       const processInterview = async (interview: Interview) => {
+        // Teamets före-regel skickar även bokarens notis vid admins valda tid.
+        // En äldre kvarvarande standardtid får inte dyka upp elva minuter före.
+        if (adminForBooker(interview.employer_id)) return;
         // Claim direkt: en samtidig körning får aldrig skicka samma påminnelse.
         const { data: claimed } = await supabase
           .from("interviews")
