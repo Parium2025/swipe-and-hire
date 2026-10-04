@@ -19,7 +19,7 @@ import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus
 import { Input } from '@/components/ui/input';
 import { TruncatedText } from '@/components/TruncatedText';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
-import { AlertTriangle, Check, GripVertical, ListPlus, Pencil, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Check, GripVertical, ListPlus, Pencil, Trash2 } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -86,8 +86,8 @@ const SortableListRow = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative flex w-full select-none items-center gap-2 overflow-hidden rounded-full bg-white/5 py-1.5 pr-1.5 ring-1 ring-inset ring-white/20 min-w-0 transition-colors duration-150 ${
-        canReorder && !isEditing ? 'pl-1' : 'pl-4'
+      className={`relative flex w-full select-none items-center gap-2 min-w-0 transition-colors duration-150 ${
+        isEditing ? '' : `overflow-hidden rounded-full bg-white/5 py-1.5 pr-1.5 ring-1 ring-inset ring-white/20 ${canReorder ? 'pl-1' : 'pl-4'}`
       } ${isDragging ? 'bg-white/10 ring-white/30' : ''}`}
     >
       {isEditing ? (
@@ -100,21 +100,14 @@ const SortableListRow = ({
               if (e.key === 'Enter') onSaveEdit();
               if (e.key === 'Escape') onCancelEdit();
             }}
-            className="h-9 rounded-full text-base bg-white/5 border-white/20 text-white focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="min-w-0 flex-1 h-11 rounded-full px-5 text-base bg-white/5 border-white/20 text-white focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
           <button
             onClick={onSaveEdit}
             aria-label="Spara namn"
-            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
-            <Check className="h-4 w-4" />
-          </button>
-          <button
-            onClick={onCancelEdit}
-            aria-label="Avbryt"
-            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white bg-white/10 transition-colors md:hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          >
-            <X className="h-4 w-4" />
+            <Check className="h-5 w-5" />
           </button>
         </>
       ) : (
@@ -286,8 +279,8 @@ export const CandidateListsDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card-parium border-white/20 rounded-3xl max-w-md">
-          <DialogHeader>
+        <DialogContent className="bg-card-parium border-white/20 rounded-3xl max-w-md [&>button]:!h-10 [&>button]:!w-10 [&>button>svg]:!h-5 [&>button>svg]:!w-5">
+          <DialogHeader className="pr-10">
             <DialogTitle className="text-white">Hantera listor</DialogTitle>
             <DialogDescription className="text-white">
               Dela upp kandidaterna i egna listor, till exempel Lager eller Chefsroller.
