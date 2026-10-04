@@ -487,7 +487,7 @@ async function dispatchLog(log: OutreachLog) {
 
       // Skickar via Lovable Emails — samma domän (notify.parium.se) som övriga
       // mejl, så leverans landar i inkorgen tack vare SPF/DKIM/DMARC.
-      await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
+      const delivery = await sendLoggedTemplateEmail('outreach-message', context.recipientEmail, {
         // Nyckeln måste inkludera försöksnumret. Med en fast nyckel svarar
         // mejltjänsten 409 "already failed – send again with a new idempotency
         // key" på varje omförsök, vilket gör att ett tillfälligt fel blir
@@ -504,6 +504,15 @@ async function dispatchLog(log: OutreachLog) {
           decline_url: declineUrl,
         },
       });
+
+      if (!delivery.sent) {
+        await admin.from('outreach_dispatch_logs').update({
+          status: 'skipped',
+          error_message: 'Mottagaren har avregistrerat sig från mejl',
+          locked_until: null,
+        }).eq('id', log.id);
+        return { skipped: true };
+      }
 
       const emailMessageId = null;
 
