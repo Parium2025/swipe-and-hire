@@ -890,7 +890,7 @@ export function CandidatesTable({
                                   </span>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
-                                  <p className="text-xs">Tillagd av {teamInfo.colleagues.length === 1 ? 'en kollega' : `${teamInfo.colleagues.length} kollegor`} – tryck för att se vilka.</p>
+                                  <p className="text-xs">Tillagd av: {teamInfo.colleagues.join(', ')}</p>
                                 </TooltipContent>
                               </Tooltip>
                             )}
