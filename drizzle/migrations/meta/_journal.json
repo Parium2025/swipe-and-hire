@@ -491,6 +491,13 @@
       "when": 1791136125697,
       "tag": "0069_analytics_v2_consistent_conversions",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1791140145751,
+      "tag": "0070_application_response_decision_times",
+      "breakpoints": true
     }
   ]
 }
