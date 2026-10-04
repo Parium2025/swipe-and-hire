@@ -1,6 +1,7 @@
 import { memo, useRef, useState, useCallback } from 'react';
 import { Star, UserPlus, UserCheck, Users, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { TruncatedText } from '@/components/ui/truncated-text';
@@ -102,17 +103,16 @@ export const MobileCandidateCard = memo(function MobileCandidateCard({
               className="flex-1 min-w-0 font-medium text-white text-sm"
             />
             {teamInfo && teamInfo.colleagues.length > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor`} onClick={event => event.stopPropagation()} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0">
-                    <Users className="h-2.5 w-2.5 text-purple-300" />
-                    <span className="text-[9px] text-purple-300 font-medium">{teamInfo.colleagues.length}</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={event => event.stopPropagation()} className="flex items-center justify-center h-6 w-6 rounded-full bg-purple-500/20 border border-purple-500/30 flex-shrink-0 active:scale-95">
+                    <Users className="h-3 w-3 text-purple-300" />
                   </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-[min(300px,calc(100vw-24px))]">
-                  <div className="text-xs"><p>Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
-                </TooltipContent>
-              </Tooltip>
+                </PopoverTrigger>
+                <PopoverContent side="bottom" align="start" className="w-auto max-w-[min(300px,calc(100vw-24px))] p-3" onClick={event => event.stopPropagation()}>
+                  <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
+                </PopoverContent>
+              </Popover>
             )}
           </div>
 
