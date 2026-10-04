@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2, ChevronDown, Eye, Users, UserPlus, Edit, Trash2, RotateCcw } from 'lucide-react';
+import { Building2, ChevronDown, Eye, Users, UserPlus, Edit, Trash2, RotateCcw, Timer } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { getEmploymentTypeLabel, formatEmploymentDetails } from '@/lib/employmentTypes';
 import { formatDateShortSv, getTimeRemaining } from '@/lib/date';
@@ -206,7 +206,7 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
         </div>
         <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent ${displayUrl ? 'opacity-100' : 'opacity-0'}`} />
 
-        <div className="absolute top-2.5 left-2.5">
+        <div className="absolute top-2.5 left-2.5 flex flex-col items-start gap-1.5">
           {isExpired ? (
             <Badge className="bg-red-500/80 text-white border-0 text-[11px] px-2 py-0.5">
               Utgången
@@ -218,6 +218,12 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
           ) : (
             <Badge className="bg-green-500/90 text-white border-0 text-[11px] px-2 py-0.5">
               Aktiv
+            </Badge>
+          )}
+          {!isDraft && !isExpired && (
+            <Badge variant="glass" className="inline-flex items-center gap-1 border-white/15 bg-black/60 px-2 py-0.5 text-[11px] leading-snug text-white" aria-label={`${timeInfo.text} kvar på annonsen`}>
+              <Timer className="h-3 w-3 shrink-0" />
+              {timeInfo.text} kvar
             </Badge>
           )}
         </div>
