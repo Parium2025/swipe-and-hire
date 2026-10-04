@@ -56,4 +56,5 @@
 - [x] Show static known values for the analytics page's bottom sections on cold start; hold a placeholder for the team card while its RPC loads
 - [x] Show full candidate-list title on mobile; simplify inline list renaming and enlarge the two dialog close controls
 - [x] Standardize dialog close controls; show colleagues' filterable questions to recruiters and shrink empty question menus
+- [x] Remove list-name tooltips from the candidate-list title and list picker without changing their selection behavior
 

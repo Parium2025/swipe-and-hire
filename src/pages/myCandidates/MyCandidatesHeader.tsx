@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { TruncatedText } from '@/components/ui/truncated-text';
 import { useCandidateListCounts } from '@/hooks/useCandidateListCounts';
 import { TeamMemberAvatar } from '@/components/TeamMemberAvatar';
 import {
@@ -126,10 +125,10 @@ export const MyCandidatesHeader = ({
               >
                 {isViewingColleague && <Eye className="h-5 w-5 flex-shrink-0 text-fuchsia-400" />}
                 <span className="min-w-0 flex-1 md:hidden">
-                  <TruncatedText text={title} lines={2} className="min-w-0 text-center text-white break-words [overflow-wrap:anywhere]" side="bottom" />
+                  <span className="block min-w-0 line-clamp-2 text-center text-white break-words [overflow-wrap:anywhere]">{title}</span>
                 </span>
                 <span className="hidden min-w-0 flex-1 md:block">
-                  <TruncatedText text={title} className="truncate min-w-0 text-white" side="bottom" />
+                  <span className="block truncate min-w-0 text-white">{title}</span>
                 </span>
                 <span className="text-white flex-shrink-0">({totalCount})</span>
                 <ChevronDown
@@ -158,7 +157,7 @@ export const MyCandidatesHeader = ({
                     ) : (
                       <UserCheck className="h-4 w-4 flex-shrink-0 text-white/70" />
                     )}
-                    <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive touchTooltipOnLongPress />
+                    <span className="block truncate min-w-0">{list.name}</span>
                     <span className="ml-auto pl-2 flex-shrink-0 text-white tabular-nums">
                       ({countByList[list.id] ?? 0})
                     </span>
@@ -197,7 +196,7 @@ export const MyCandidatesHeader = ({
                           className={`flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${viewingColleagueId === member.userId ? 'bg-white/15' : ''}`}
                         >
                           {avatar}
-                          <TruncatedText text={`${member.firstName} ${member.lastName}`} className="truncate min-w-0" insideInteractive />
+                          <span className="block truncate min-w-0">{member.firstName} {member.lastName}</span>
                         </DropdownMenuItem>
                       );
                     }
@@ -206,7 +205,7 @@ export const MyCandidatesHeader = ({
                       <DropdownMenuSub key={member.userId}>
                         <DropdownMenuSubTrigger className="flex items-center gap-2 cursor-pointer text-white hover:bg-white/20 focus:bg-white/20 rounded-md px-2.5 py-2 text-sm font-medium transition-colors">
                           {avatar}
-                          <TruncatedText text={`${member.firstName} ${member.lastName}`} className="truncate min-w-0" insideInteractive />
+                           <span className="block truncate min-w-0">{member.firstName} {member.lastName}</span>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent className="min-w-[200px] bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-xl rounded-lg p-1 [&>*+*:not([role=separator])]:border-t [&>*+*:not([role=separator])]:border-white/10">
                           {memberLists.map(list => (
@@ -217,7 +216,7 @@ export const MyCandidatesHeader = ({
                                 viewingColleagueId === member.userId && viewingColleagueList?.id === list.id ? 'bg-white/15' : ''
                               }`}
                             >
-                              <TruncatedText text={list.name} className="truncate min-w-0" insideInteractive touchTooltipOnLongPress />
+                               <span className="block truncate min-w-0">{list.name}</span>
                             </DropdownMenuItem>
                           ))}
                         </DropdownMenuSubContent>
