@@ -1018,6 +1018,10 @@ export function MessageTemplatesSettings() {
     );
 
   const handleSaveTemplate = async () => {
+    if (organizationId && !settingsOwnerId) {
+      toast.error('Organisationens inställningar läses fortfarande in');
+      return;
+    }
     if (!user || !templateForm.name.trim() || templateForm.channels.length === 0) return;
 
     if (!templateForm.trigger) {
@@ -1124,6 +1128,10 @@ export function MessageTemplatesSettings() {
   };
 
   const handleSaveAutomation = async () => {
+    if (organizationId && !settingsOwnerId) {
+      toast.error('Organisationens inställningar läses fortfarande in');
+      return;
+    }
     if (!user || !automationForm.name.trim() || automationForm.channels.length === 0) return;
 
     const missingTemplate = automationForm.channels.some((channel) => !automationForm.template_ids[channel]);
