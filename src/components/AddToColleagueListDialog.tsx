@@ -257,8 +257,8 @@ export function AddToColleagueListDialog({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus elevated={elevated} className="bg-card-parium border-white/20 max-w-sm max-h-[calc(100dvh-2rem)] overflow-hidden">
-        <DialogHeader>
+      <DialogContentNoFocus elevated={elevated} className="bg-card-parium border-white/20 max-w-sm max-h-[calc(100dvh-2rem)] overflow-hidden [&>button]:!h-10 [&>button]:!w-10 [&>button>svg]:!h-5 [&>button>svg]:!w-5">
+        <DialogHeader className="pr-10">
           <DialogTitle className="text-white flex items-center gap-2">
             <Users className="h-5 w-5" />
             {title}

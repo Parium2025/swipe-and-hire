@@ -125,11 +125,10 @@ export const MyCandidatesHeader = ({
                 className="flex items-center gap-2 min-w-0 max-w-full text-xl md:text-2xl font-semibold text-white tracking-tight transition-colors md:hover:text-white/80 active:scale-[0.99] touch-manipulation"
               >
                 {isViewingColleague && <Eye className="h-5 w-5 flex-shrink-0 text-fuchsia-400" />}
-                <TruncatedText
-                  text={title}
-                  className="truncate min-w-0 text-white"
-                  side="bottom"
-                />
+                <span className="min-w-0 flex-1 text-center break-words [overflow-wrap:anywhere] md:hidden">{title}</span>
+                <span className="hidden min-w-0 flex-1 md:block">
+                  <TruncatedText text={title} className="truncate min-w-0 text-white" side="bottom" />
+                </span>
                 <span className="text-white flex-shrink-0">({totalCount})</span>
                 <ChevronDown
                   className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-300 ease-out ${listMenuOpen ? 'rotate-180' : 'rotate-0'}`}
