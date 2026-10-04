@@ -444,6 +444,8 @@ export function TruncatedText({
   // vilket fick ett andra tryck att öppna igen i stället för att stänga.
   const touchOnly = !supportsHover && isTouch;
   const triggerPressRef = useRef(false);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressFiredRef = useRef(false);
   const handleRadixOpenChange = (next: boolean) => {
     // Touch: rutan styrs helt av eget tryck och eget "tryck utanför" — Radix
     // stänger annars vid scroll-/fokushändelser som iOS skickar efter trycket.
@@ -456,6 +458,29 @@ export function TruncatedText({
   const releaseTriggerPress = () => {
     triggerPressRef.current = false;
   };
+
+  // Långtrycksläge: tooltipen öppnas först efter ~500 ms intryckt. Korta
+  // tryck når aldrig handleTap, så förälderns klick (t.ex. en dropdown)
+  // fungerar som vanligt.
+  const clearLongPressTimer = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleLongPressTouchStart = () => {
+    measureTruncation();
+    clearLongPressTimer();
+    longPressFiredRef.current = false;
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressTimerRef.current = null;
+      longPressFiredRef.current = true;
+      handleTap();
+    }, 500);
+  };
+
+  useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
 
   const stopTooltipPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
