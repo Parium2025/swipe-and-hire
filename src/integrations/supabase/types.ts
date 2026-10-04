@@ -1831,9 +1831,11 @@ export type Database = {
           created_at: string
           custom_answers: Json | null
           cv_url: string | null
+          decided_at: string | null
           email: string | null
           employment_status: string | null
           first_name: string | null
+          first_response_at: string | null
           hidden_by_applicant_at: string | null
           id: string
           job_id: string
@@ -1863,9 +1865,11 @@ export type Database = {
           created_at?: string
           custom_answers?: Json | null
           cv_url?: string | null
+          decided_at?: string | null
           email?: string | null
           employment_status?: string | null
           first_name?: string | null
+          first_response_at?: string | null
           hidden_by_applicant_at?: string | null
           id?: string
           job_id: string
@@ -1895,9 +1899,11 @@ export type Database = {
           created_at?: string
           custom_answers?: Json | null
           cv_url?: string | null
+          decided_at?: string | null
           email?: string | null
           employment_status?: string | null
           first_name?: string | null
+          first_response_at?: string | null
           hidden_by_applicant_at?: string | null
           id?: string
           job_id?: string
@@ -4682,6 +4688,10 @@ export type Database = {
           p_sort?: string
           p_status?: string
         }
+        Returns: Json
+      }
+      get_employer_process_times: {
+        Args: { p_days_back?: number; p_user_id: string }
         Returns: Json
       }
       get_employer_public_profile: {
