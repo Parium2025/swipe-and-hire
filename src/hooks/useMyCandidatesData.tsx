@@ -865,18 +865,21 @@ export function useMyCandidatesData(
       if (!getIsOnline()) throw new Error('Du är offline – anslut och försök igen');
       if (!user) throw new Error('Not authenticated');
 
-      // First, check which candidates already exist in my_candidates
-      const applicationIds = candidates.map(c => c.applicationId);
+      // En kandidat = en person: hoppa över personer som redan finns och
+      // dubbletter av samma person (flera ansökningar) i samma urval.
+      const allApplicantIds = [...new Set(candidates.map(c => c.applicantId))];
       const { data: existing } = await supabase
         .from('my_candidates')
-        .select('application_id')
+        .select('applicant_id')
         .eq('recruiter_id', user.id)
-        .in('application_id', applicationIds);
+        .in('applicant_id', allApplicantIds);
 
-      const existingIds = new Set(existing?.map(e => e.application_id) || []);
-      
-      // Filter out candidates that already exist
-      const newCandidates = candidates.filter(c => !existingIds.has(c.applicationId));
+      const seenApplicants = new Set(existing?.map(e => e.applicant_id) || []);
+      const newCandidates = candidates.filter(c => {
+        if (seenApplicants.has(c.applicantId)) return false;
+        seenApplicants.add(c.applicantId);
+        return true;
+      });
       
       if (newCandidates.length === 0) {
         return { inserted: 0, alreadyExisted: candidates.length };
