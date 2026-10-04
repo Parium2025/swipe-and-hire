@@ -657,12 +657,15 @@ const EmployerProfile = () => {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Avatar key={formData.profile_image_url || 'no-profile-image'} className="h-32 w-32 border-4 border-white/10">
-                    <AvatarImage 
-                      src={profileImageUrl || ''} 
-                      alt="Profilbild" 
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white" delayMs={150}>
+                    {profileImageUrl ? (
+                      <AvatarImage 
+                        src={profileImageUrl} 
+                        alt="Profilbild" 
+                        className="object-cover"
+                      />
+                    ) : null}
+                    {/* Ingen bild sparad → initialerna direkt, utan fördröjning/skeleton */}
+                    <AvatarFallback className="text-4xl font-semibold bg-white/20 text-white" delayMs={formData.profile_image_url ? 150 : 0}>
                       {(formData.first_name?.trim()?.[0]?.toUpperCase() || '') + (formData.last_name?.trim()?.[0]?.toUpperCase() || '') || '?'}
                     </AvatarFallback>
                   </Avatar>
