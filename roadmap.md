@@ -58,5 +58,5 @@
 - [x] Standardize dialog close controls; show colleagues' filterable questions to recruiters and shrink empty question menus
 - [x] Remove list-name tooltips from the candidate-list title and list picker without changing their selection behavior
 - [x] Synchronize saved-candidate status and list counts after removal, including changes in another tab; enlarge mobile profile action targets with icon-only labels (live employer check blocked by available job-seeker session)
-- [ ] Make the notification bell react immediately and silently to incoming notices without late badge updates after a change
+- [x] Make the notification bell react immediately and silently to incoming notices without late badge updates after a change
 

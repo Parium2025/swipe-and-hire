@@ -127,6 +127,9 @@ export function useNotifications() {
   // man på en notis medan den hämtningen pågår får det gamla svaret ("oläst")
   // aldrig skriva över det man just gjort — annars kommer pricken tillbaka.
   const mutationSeqRef = useRef(0);
+  // En pågående hämtning får inte skriva över en notis som kom via realtid
+  // efter att frågan startade.
+  const realtimeSeqRef = useRef(0);
   const inflightMutationsRef = useRef(0);
   const refetchAfterMutationRef = useRef(false);
   const beginMutation = () => {
@@ -144,6 +147,7 @@ export function useNotifications() {
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     const seqAtStart = mutationSeqRef.current;
+    const realtimeAtStart = realtimeSeqRef.current;
     try {
       // Tidigare väntade vi på avstängda typer INNAN notiserna ens började
       // hämtas — ett extra serverhopp framför varje laddning. Nu körs alla tre
@@ -183,6 +187,12 @@ export function useNotifications() {
           refetchAfterMutationRef.current = false;
           void fetchNotificationsRef.current?.();
         }
+        return;
+      }
+      if (realtimeAtStart !== realtimeSeqRef.current) {
+        // Ett INSERT/UPDATE/DELETE kan ha kommit medan svaret var på väg.
+        // Behåll den omedelbara uppdateringen och läs in hela listan på nytt.
+        void fetchNotificationsRef.current?.();
         return;
       }
       const items = (data || []) as AppNotification[];
@@ -302,6 +312,7 @@ export function useNotifications() {
         },
         (payload) => {
           if (activeUserIdRef.current !== user.id) return;
+          realtimeSeqRef.current += 1;
           const newNotif = payload.new as AppNotification;
           if (mutedTypesRef.current.has(newNotif.type) || isHiddenType(newNotif.type)) return;
           setNotifications(prev => {
@@ -327,6 +338,7 @@ export function useNotifications() {
         },
         (payload) => {
           if (activeUserIdRef.current !== user.id) return;
+          realtimeSeqRef.current += 1;
           const updatedNotif = payload.new as AppNotification;
           setNotifications(prev => {
             const before = prev.find(n => n.id === updatedNotif.id);
@@ -351,6 +363,7 @@ export function useNotifications() {
         },
         (payload) => {
           if (activeUserIdRef.current !== user.id) return;
+          realtimeSeqRef.current += 1;
           const removed = payload.old as Partial<AppNotification>;
           if (!removed?.id) return;
           setNotifications(prev => {
@@ -377,7 +390,12 @@ export function useNotifications() {
       // och "markera alla lästa" mellan användarens enheter via broadcast.
       .on('broadcast', { event: 'local_clear' }, () => { toastArchive.clear(); })
       .on('broadcast', { event: 'local_read_all' }, () => { toastArchive.markAllAsRead(); })
-      .subscribe();
+      .subscribe((status) => {
+        // Hämta ikapp händelser som kom medan fliken var frånkopplad.
+        if (status === 'SUBSCRIBED' && activeUserIdRef.current === user.id) {
+          void fetchNotificationsRef.current?.();
+        }
+      });
 
     broadcastRef.current = channel;
     return () => { broadcastRef.current = null; supabase.removeChannel(channel); };
