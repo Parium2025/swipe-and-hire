@@ -164,8 +164,7 @@ export function CandidatesTable({
   }, [selectionMode]);
 
   // Team candidate info
-  const applicationIds = useMemo(() => applications.map(a => a.id), [applications]);
-  const { teamCandidates } = useTeamCandidateInfo(applicationIds);
+  const { teamCandidates } = useTeamCandidateInfo(applications);
   const organizationRatings = useOrganizationCandidateRatings(visibleApplicantIds);
   
   // Team selection dialog state
