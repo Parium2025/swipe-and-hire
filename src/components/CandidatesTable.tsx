@@ -704,7 +704,7 @@ export function CandidatesTable({
       {/* Bulk actions bar */}
       {selectionMode && (
         <div className="animate-in slide-in-from-bottom-4 duration-300 flex justify-center mb-3">
-          <div className="flex items-center gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 shadow-xl overflow-hidden min-w-0 max-w-full">
+           <div className="flex items-center gap-1.5 sm:gap-2 bg-card-parium/95 backdrop-blur-md border border-white/20 rounded-full px-2 sm:px-4 py-2 shadow-xl min-w-0 max-w-full">
             <span className="text-white text-xs font-semibold whitespace-nowrap flex-shrink-0">
               {selectedIds.size > 0 
                 ? `${selectedIds.size} markerad${selectedIds.size !== 1 ? 'e' : ''}`
@@ -714,12 +714,12 @@ export function CandidatesTable({
             {selectedIds.size > 0 && (
               <>
                 <div className="w-px h-5 bg-white/20 flex-shrink-0" />
-                <PillButton onClick={() => setSelectedIds(new Set())}>
+                 <PillButton onClick={() => setSelectedIds(new Set())} className="!px-2 sm:!px-4">
                   Avmarkera
                 </PillButton>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <PillButton menu>
+                     <PillButton menu className="!px-2 sm:!px-4">
                       Åtgärder
                       <ChevronDown className="h-3 w-3 text-white" />
                     </PillButton>
@@ -751,8 +751,8 @@ export function CandidatesTable({
               </>
             )}
             <div className="w-px h-5 bg-white/20 flex-shrink-0" />
-            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection}>
-              <X className="h-4 w-4" />
+            <PillButton shape="icon" aria-label="Avsluta urval" onClick={clearSelection} className="!h-10 !w-10 flex-shrink-0 border-white/50 bg-white/10">
+              <X className="h-5 w-5 flex-shrink-0" strokeWidth={2.5} />
             </PillButton>
 
 
