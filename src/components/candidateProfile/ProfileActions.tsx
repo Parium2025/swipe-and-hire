@@ -43,22 +43,22 @@ export const ProfileActions = ({
 
         <div className="flex justify-center gap-2 md:gap-1">
           <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" aria-label="Chatta" title="Chatta" className="min-w-0 flex-1 h-12 px-0 md:h-9 md:px-3 md:text-sm">
-            <MessageSquare className="h-5 w-5 md:h-4 md:w-4 md:mr-1 shrink-0" />
+            <MessageSquare className="!h-5 !w-5 md:!h-4 md:!w-4 md:mr-1 shrink-0" />
             <span className="hidden md:inline truncate">Chatta</span>
           </Button>
           <Button {...noFocusRingProps} onClick={onBookInterview} variant="glassBlue" aria-label="Boka möte" title="Boka möte" className="min-w-0 flex-1 h-12 px-0 md:h-9 md:px-3 md:text-sm">
-            <CalendarPlus className="h-5 w-5 md:h-4 md:w-4 md:mr-1 shrink-0" />
+            <CalendarPlus className="!h-5 !w-5 md:!h-4 md:!w-4 md:mr-1 shrink-0" />
             <span className="hidden md:inline truncate">Boka möte</span>
           </Button>
           {hasTeam && (
             <Button {...noFocusRingProps} onClick={onShare} variant="glassAmber" aria-label="Dela" title="Dela" className="min-w-0 flex-1 h-12 px-0 md:h-9 md:px-3 md:text-sm">
-              <Users className="h-5 w-5 md:h-4 md:w-4 md:mr-1 shrink-0" />
+              <Users className="!h-5 !w-5 md:!h-4 md:!w-4 md:mr-1 shrink-0" />
               <span className="hidden md:inline truncate">Dela</span>
             </Button>
           )}
           {onAddToList && (
             <Button {...noFocusRingProps} onClick={onAddToList} variant="glassGreen" aria-label="Lägg till i lista" title="Lägg till i lista" className="min-w-0 flex-1 h-12 px-0 md:h-9 md:px-3 md:text-sm">
-              <ListPlus className="h-5 w-5 md:h-4 md:w-4 md:mr-1 shrink-0" />
+              <ListPlus className="!h-5 !w-5 md:!h-4 md:!w-4 md:mr-1 shrink-0" />
               <span className="hidden md:inline truncate">Lägg till i lista</span>
             </Button>
           )}
@@ -71,7 +71,7 @@ export const ProfileActions = ({
               title="Ta bort från listan"
               className="min-w-0 flex-1 h-12 px-0 md:h-9 md:px-3 md:text-sm"
             >
-              <Trash2 className="h-5 w-5 md:h-4 md:w-4 md:mr-1 shrink-0" />
+              <Trash2 className="!h-5 !w-5 md:!h-4 md:!w-4 md:mr-1 shrink-0" />
               <span className="hidden truncate md:inline">Ta bort från listan</span>
             </Button>
           )}
