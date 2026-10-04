@@ -927,7 +927,7 @@ export function useMyCandidatesData(
       if (error) throw error;
 
       await insertRowsIntoCaches((data || []) as RawMyCandidateRow[]);
-      return { inserted: data?.length || 0, alreadyExisted: existingIds.size };
+      return { inserted: data?.length || 0, alreadyExisted: candidates.length - newCandidates.length };
     },
     onSuccess: (result, requestedCandidates) => {
       if (user && result.inserted > 0) {
