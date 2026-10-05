@@ -21,7 +21,7 @@ export const JobDetailQuestions = memo(function JobDetailQuestions({
       <div className="bg-white/10 rounded-lg p-4">
         <h3 className="text-white font-semibold text-[17px] sm:text-base mb-2 tracking-[-0.01em]">Inga ansökningsfrågor</h3>
         <p className="text-white text-[15px] sm:text-sm">
-          {hasApplied ? 'Din profil skickades in med ansökan.' : 'Din profil skickas in direkt med ansökan.'}
+          {hasApplied ? 'Din profil skickades med ansökan.' : 'Din profil skickas med ansökan.'}
         </p>
       </div>
     );

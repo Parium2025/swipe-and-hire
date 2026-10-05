@@ -215,7 +215,7 @@ export function SwipeApplySheet({ jobId, jobTitle, companyName, open, onClose, o
                   {questions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
                       <p className="text-white text-sm max-w-xs">
-                        Inga ansökningsfrågor. Din profil skickas in direkt med ansökan.
+                        Inga ansökningsfrågor. Din profil skickas med ansökan.
                       </p>
                       {profileSelector}
                       <button

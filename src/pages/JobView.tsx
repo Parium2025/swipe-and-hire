@@ -1065,7 +1065,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 {jobQuestions.length === 0 && !isJobExpired && applicationStatusKnown && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-4">
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
-                    <p className="text-sm text-white">Inga ansökningsfrågor. Din profil skickas in direkt med ansökan.</p>
+                    <p className="text-sm text-white">Inga ansökningsfrågor. Din profil skickas med ansökan.</p>
 
                     {!alreadyAppliedForUi && (
                       <div className="mx-auto max-w-md text-left">{applicationProfileSelector}</div>
@@ -1143,9 +1143,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
             )}
 
             {user && isEmployer && isPreviewMode && jobQuestions.length === 0 && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-2">
-                <h3 className="text-lg font-medium text-white">Inga ansökningsfrågor</h3>
-                <p className="text-sm text-white">Din profil skickas in direkt med ansökan.</p>
+              <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
+                <h2 className="text-sm font-semibold text-white">Inga ansökningsfrågor</h2>
+                <p className="text-sm text-white">Ansökan skickas direkt med profilen.</p>
               </div>
             )}
 
