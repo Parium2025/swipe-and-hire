@@ -348,7 +348,7 @@ const Dashboard = memo(() => {
        {/* Antal och åtgärder på en rad, även på mobil */}
        <div className="relative flex min-h-10 items-center justify-end">
         {!searchTerm && tabFilteredJobs.length > 0 && (
-           <div className="pointer-events-none absolute left-0 right-20 text-center text-xs text-white md:right-0 md:text-sm">
+           <div className="pointer-events-none absolute inset-x-[5.5rem] text-center text-xs text-white md:inset-x-0 md:text-sm">
             Visar {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, tabFilteredJobs.length)} av {tabFilteredJobs.length} annonser
           </div>
         )}
