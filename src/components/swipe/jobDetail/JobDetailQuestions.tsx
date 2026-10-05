@@ -16,7 +16,16 @@ export const JobDetailQuestions = memo(function JobDetailQuestions({
   myAnswers,
   hasApplied,
 }: JobDetailQuestionsProps) {
-  if (questions.length === 0) return null;
+  if (questions.length === 0) {
+    return (
+      <div className="bg-white/10 rounded-lg p-4">
+        <h3 className="text-white font-semibold text-[17px] sm:text-base mb-2 tracking-[-0.01em]">Inga ansökningsfrågor</h3>
+        <p className="text-white text-[15px] sm:text-sm">
+          {hasApplied ? 'Din profil skickades in med ansökan.' : 'Din profil skickas in direkt med ansökan.'}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="bg-white/10 rounded-lg p-4">
       <h3 className="text-white font-semibold text-[17px] sm:text-base mb-3 tracking-[-0.01em]">Ansökningsfrågor</h3>
