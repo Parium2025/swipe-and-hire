@@ -414,9 +414,9 @@ export default function Messages() {
         style={{ transitionDuration: `${MOBILE_SLIDE_MS}ms` }}
         aria-hidden={showMobileChat && isMobile}
       >
-        <div className="flex items-center justify-between gap-3 relative sm:justify-center">
+        <div className="flex items-center justify-center gap-3 relative min-h-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+          <div className="absolute left-0 sm:static w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-white" />
           </div>
           <div>

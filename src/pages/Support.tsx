@@ -274,7 +274,7 @@ const Support = () => {
                   avoidCollisions={false}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
-                  <div className="p-2">
+                  <div className="p-2 divide-y divide-sidebar-foreground/20">
                     {categoryOptions.map((opt) => {
                       const isSelected = category === opt.value;
                       return (
