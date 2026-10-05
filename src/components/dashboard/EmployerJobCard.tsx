@@ -16,6 +16,7 @@ import { getImageVersion } from '@/lib/imageTransforms';
 import { ResilientImage } from '@/components/ui/ResilientImage';
 import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { getJobQuestionCount } from '@/hooks/useJobsData';
 
 const TRANSPARENT_IMAGE_SRC = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -35,6 +36,8 @@ interface EmployerJobCardProps {
     views_count: number;
     applications_count: number;
     removed_applicants_count?: number;
+    /** Inbäddad räknare: `[{"count": N}]` från job_questions. */
+    job_questions?: Array<{ count: number }>;
 
     created_at: string;
     expires_at?: string;
@@ -296,6 +299,14 @@ export const EmployerJobCard = memo(({ job, activeTab, onClick, onRepublish, col
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+
+                {/* 2b. Frågor — visar om annonsen har ansökningsfrågor eller inte */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Frågor:</span>
+                  <span className="text-sm leading-snug text-white font-medium text-right">
+                    {getJobQuestionCount(job) ?? '–'}
+                  </span>
+                </div>
 
                 {/* 3. Recruiter — ownership */}
                 <div className="flex items-center justify-between gap-3">
