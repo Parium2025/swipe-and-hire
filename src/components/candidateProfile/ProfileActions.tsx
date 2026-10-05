@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { MessageSquare, CalendarPlus, Users, Trash2, ListPlus, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
+import { MessageSquare, CalendarPlus, Users, Trash2, ListPlus, UserPlus, UserCheck, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import type { StageSettings } from '@/hooks/useStageSettings';
 import { noFocusRingProps } from '@/lib/noFocusRing';
 
@@ -12,6 +12,8 @@ interface ProfileActionsProps {
   onRemove?: () => void;
   /** Visas i stället för borttagning när kandidaten ännu inte ligger i en lista. */
   onAddToList?: () => void;
+  isAddedToList?: boolean;
+  isListActionPending?: boolean;
   onReject?: () => void;
   isRejected?: boolean;
   currentStage?: string;
@@ -28,6 +30,8 @@ export const ProfileActions = ({
   onShare,
   onRemove,
   onAddToList,
+  isAddedToList,
+  isListActionPending = false,
   onReject,
   isRejected = false,
   currentStage,
@@ -134,7 +138,9 @@ export const ProfileActions = ({
 
 
 
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className={onAddToList && isAddedToList !== undefined
+        ? 'flex flex-wrap justify-center gap-2 [&>button]:px-3 [&>button]:gap-1 [&>button>svg]:mr-0'
+        : 'flex flex-wrap justify-center gap-2'}>
         <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" size="default">
           <MessageSquare className="h-4 w-4 mr-1.5" />
           Meddelande
@@ -144,10 +150,25 @@ export const ProfileActions = ({
           Boka möte
         </Button>
         {onAddToList && (
-          <Button {...noFocusRingProps} onClick={onAddToList} variant="glassGreen" size="default">
-            <ListPlus className="h-4 w-4 mr-1.5" />
-            Lägg till i lista
-          </Button>
+          isAddedToList !== undefined ? (
+            <Button
+              {...noFocusRingProps}
+              onClick={onAddToList}
+              disabled={isListActionPending}
+              variant={isAddedToList ? 'glassGreen' : 'glass'}
+              size="icon"
+              className="!h-11 !w-11 !px-0"
+              aria-label={isAddedToList ? 'Kandidaten finns i din lista – öppna listväljaren' : 'Lägg till i kandidatlista'}
+              title={isAddedToList ? 'Hantera kandidat i listor' : 'Lägg till i kandidatlista'}
+            >
+              {isAddedToList ? <UserCheck className="!h-5 !w-5" /> : <UserPlus className="!h-5 !w-5" />}
+            </Button>
+          ) : (
+            <Button {...noFocusRingProps} onClick={onAddToList} variant="glassGreen" size="default">
+              <ListPlus className="h-4 w-4 mr-1.5" />
+              Lägg till i lista
+            </Button>
+          )
         )}
         {onReject && !isRejected && (
           <Button {...noFocusRingProps} onClick={onReject} variant="glassRed" size="default">

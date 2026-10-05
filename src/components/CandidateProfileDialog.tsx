@@ -117,6 +117,8 @@ interface CandidateProfileDialogProps {
   fromSwipe?: boolean;
   /** Visas när kandidaten ännu inte ligger i någon lista. */
   onAddToList?: () => void;
+  isAddedToList?: boolean;
+  isListActionPending?: boolean;
   /** Avslag får bara erbjudas när profilen öppnats från en specifik annons. */
   enableJobRejection?: boolean;
   onRejectApplication?: (applicationId: string) => Promise<boolean>;
@@ -161,6 +163,8 @@ export const CandidateProfileDialog = ({
   onRemoveFromList,
   fromSwipe = false,
   onAddToList,
+  isAddedToList,
+  isListActionPending,
   enableJobRejection = false,
   onRejectApplication,
   onNavigatePrev,
@@ -953,6 +957,8 @@ export const CandidateProfileDialog = ({
             onShare={() => setShareDialogOpen(true)}
             onRemove={onRemoveFromList && !fromSwipe ? () => setRemoveConfirmOpen(true) : undefined}
             onAddToList={onAddToList}
+            isAddedToList={isAddedToList}
+            isListActionPending={isListActionPending}
             onReject={enableJobRejection ? () => setRejectConfirmOpen(true) : undefined}
             isRejected={isRejectedForDisplayedJob}
             currentStage={currentStage}

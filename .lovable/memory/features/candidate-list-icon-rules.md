@@ -10,3 +10,4 @@ Regel: en kandidat = en person = en lista hos varje rekryterare.
 - Tillagd → grön `UserCheck`, klickbar, öppnar `AddToColleagueListDialog` där användaren kan flytta kandidaten till annan egen lista eller lägga till hos kollega. Dialogen flyttar befintliga kort i stället för att dubblett-fela.
 - Kollegor kan vara tillagda oberoende — visas som info, aldrig blockerande.
 - Desktop: `CandidatesTable.tsx` sista cellen. Mobil: `MobileCandidateCard.tsx` höger sida. Båda använder samma regel.
+- På touch ska samma plus/bock finnas längst ner i kandidatprofilen intill Meddelande och Boka möte, med identiskt tilläggs- och listväljarbeteende.

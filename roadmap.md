@@ -69,3 +69,5 @@
 - [x] Matcha intervjusvarets mejl med intervjuinbjudans layout och avsändande företagsnamn
 - [x] Låt admins automatiska mallar och utskick gälla kollegors annonser, ansökningar och intervjuer
 - [ ] Verifiera en framtida kollegaintervju live vid admins valda påminnelsetid
+- [x] Add the candidate row's list action to touch profiles; plus/check tests pass (3), visual action checks pass
+- [ ] Verify profile-to-list save live with an employer session (blocked: requesting user's session is a job-seeker)

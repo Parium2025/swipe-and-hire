@@ -29,6 +29,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
+import { useTouchCapable } from '@/hooks/useInputCapability';
 
 import { MobileCandidatesList } from '@/components/candidates/MobileCandidatesList';
 import { BulkMessageDialog } from '@/components/candidates/BulkMessageDialog';
@@ -103,6 +104,7 @@ export function CandidatesTable({
 }: CandidatesTableProps) {
   const deviceType = useDevice();
   const isMobile = deviceType === 'mobile';
+  const touchCapable = useTouchCapable();
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [allCandidateApplications, setAllCandidateApplications] = useState<ApplicationData[]>([]);
@@ -1086,6 +1088,15 @@ export function CandidatesTable({
         onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
         adjacentMedia={adjacentCandidateMedia}
         fromSwipe={returnToSwipe}
+        onAddToList={touchCapable && selectedApplication ? () => {
+          if (isApplicantAdded(selectedApplication.applicant_id)) {
+            handleMobileAddToTeam(selectedApplication);
+          } else {
+            handleMobileAddCandidate(selectedApplication);
+          }
+        } : undefined}
+        isAddedToList={selectedApplication ? isApplicantAdded(selectedApplication.applicant_id) : false}
+        isListActionPending={isMembershipLoading || addCandidate.isPending}
 
       />
 
