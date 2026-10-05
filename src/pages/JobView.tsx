@@ -1114,28 +1114,31 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                 <h2 className="text-sm font-semibold text-white">
                   {jobQuestions.length === 1 ? 'Ansökningsfråga' : 'Ansökningsfrågor'} ({jobQuestions.length} st)
                 </h2>
-                <ol className="space-y-2 list-decimal list-inside">
+                <ol className="divide-y divide-sidebar-foreground/15">
                   {jobQuestions.map((q, i) => (
-                    <li key={q.id ?? i} className="text-sm text-white leading-relaxed">
-                      <span className="font-medium">{q.question_text}</span>
-                      {q.is_required && <span className="text-white ml-1">*</span>}
-                      <span className="ml-2 text-xs text-white">
-                        ({q.question_type === 'yes_no' ? 'Ja/Nej'
+                    <li key={q.id ?? i} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0 text-sm text-sidebar-foreground leading-relaxed">
+                      <span className="w-5 shrink-0 tabular-nums font-medium" aria-hidden="true">{i + 1}.</span>
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <TruncatedText text={q.question_text} lines={2} className="font-medium" />
+                        <p className="text-xs text-sidebar-foreground">
+                        {q.question_type === 'yes_no' ? 'Ja/Nej'
                           : q.question_type === 'multiple_choice' ? 'Flerval'
                           : q.question_type === 'number' ? 'Nummer'
                           : q.question_type === 'date' ? 'Datum'
                           : q.question_type === 'file' ? 'Filuppladdning'
                           : q.question_type === 'range' ? 'Skala'
                           : q.question_type === 'video' ? 'Video'
-                          : 'Text'})
-                      </span>
+                          : 'Text'}
+                        {q.is_required && <span> · Obligatorisk</span>}
+                        </p>
                       {q.options && q.options.length > 0 && (
-                        <ul className="mt-1 ml-6 list-disc space-y-0.5">
+                        <ul className="ml-4 list-disc space-y-0.5">
                           {q.options.map((opt, oi) => (
-                            <li key={oi} className="text-xs text-white">{opt}</li>
+                            <li key={oi} className="text-xs text-sidebar-foreground"><TruncatedText text={opt} lines={2} /></li>
                           ))}
                         </ul>
                       )}
+                      </div>
                     </li>
                   ))}
                 </ol>
