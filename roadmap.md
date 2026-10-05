@@ -71,3 +71,4 @@
 - [ ] Verifiera en framtida kollegaintervju live vid admins valda påminnelsetid
 - [x] Add the candidate row's list action to touch profiles; plus/check tests pass (3), visual action checks pass
 - [ ] Verify profile-to-list save live with an employer session (blocked: requesting user's session is a job-seeker)
+- [x] Show the advert's question count in the expanded job details on mobile and desktop (verified live: 0, 2, 3, 4 and 7 match the database)

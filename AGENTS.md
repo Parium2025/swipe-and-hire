@@ -36,3 +36,4 @@
 - Rating writes update the shared organization-rating cache optimistically and the ratings refetch on app return; why: the shared latest rating outranks the row's own rating and realtime can drop in the background.
 - Archive candidate moves to the account-scoped bell, not toasts; why: non-interrupting confirmations.
 - Touch profile list actions reuse row handlers and person membership; why: identical add/picker behavior.
+- Employer job rows fetch `job_questions(count)` in the shared select so detail panels can show question counts without a second query; bump the employer-jobs cache key version whenever that select changes, because stale snapshots silently lack the field.
