@@ -138,7 +138,9 @@ export const ProfileActions = ({
 
 
 
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className={onAddToList && isAddedToList !== undefined
+        ? 'flex flex-wrap justify-center gap-2 [&>button]:px-3 [&>button]:gap-1 [&>button>svg]:mr-0'
+        : 'flex flex-wrap justify-center gap-2'}>
         <Button {...noFocusRingProps} onClick={onSendMessage} variant="glassPurple" size="default">
           <MessageSquare className="h-4 w-4 mr-1.5" />
           Meddelande
@@ -155,7 +157,7 @@ export const ProfileActions = ({
               disabled={isListActionPending}
               variant={isAddedToList ? 'glassGreen' : 'glass'}
               size="icon"
-              className="!h-11 !w-11"
+              className="!h-11 !w-11 !px-0"
               aria-label={isAddedToList ? 'Kandidaten finns i din lista – öppna listväljaren' : 'Lägg till i kandidatlista'}
               title={isAddedToList ? 'Hantera kandidat i listor' : 'Lägg till i kandidatlista'}
             >
