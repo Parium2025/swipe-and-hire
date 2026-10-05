@@ -1,5 +1,8 @@
 # Project architecture rules
 
+- Render app emails statically and retain encoding validation; the legacy async renderer corrupts UTF-8 characters at stream chunk boundaries.
+- Fetch support ticket sender names separately by user_id; support_tickets references auth.users rather than profiles, so embedded profile joins fail.
+
 - Save outreach template families atomically; reset per-channel lookup state each loop.
 - Keep the structured interview invitation locked and separate from editable automations.
 - Mobile shells stay `100dvh`; keyboard-heavy pages scroll internally; long employer text areas scroll inside bounded height; browser chrome never covers content.
