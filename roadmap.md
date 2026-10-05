@@ -69,3 +69,4 @@
 - [x] Matcha intervjusvarets mejl med intervjuinbjudans layout och avsändande företagsnamn
 - [x] Låt admins automatiska mallar och utskick gälla kollegors annonser, ansökningar och intervjuer
 - [ ] Verifiera en framtida kollegaintervju live vid admins valda påminnelsetid
+- [ ] Add the candidate row's list action to the bottom of touch candidate profiles and verify both icon states
