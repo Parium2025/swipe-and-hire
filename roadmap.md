@@ -74,4 +74,5 @@
 - [x] Show the advert's question count in the expanded job details on mobile and desktop (verified live: 0, 2, 3, 4 and 7 match the database)
 - [x] Split the "Inga ansökningsfrågor" copy by reader (employer preview vs job-seeker views) and match the panel surface to its sibling (verified live in both sessions)
 - [x] Structure employer preview questions with separators and two-line text with full-text tooltips (live two-line clamp and full tooltip text verified with hover and touch)
-- [ ] Add white separators between support categories, center mobile Chattar heading, and verify support category delivery
+- [x] Add white separators between support categories and center mobile Chattar heading (all four choices verified live; heading centered within 0.01px; 364 tests pass); audit admin mapping and fix/deploy Swedish category labels in support alert emails
+- [ ] Verify receipt of a newly submitted support alert email (blocked: no real test ticket/email sent in this check)
