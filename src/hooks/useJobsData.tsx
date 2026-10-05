@@ -55,6 +55,21 @@ export interface JobPosting {
     first_name: string;
     last_name: string;
   };
+  /** Inbäddad räknare: `[{"count": N}]` från job_questions. */
+  job_questions?: Array<{ count: number }>;
+}
+
+/**
+ * Antalet ansökningsfrågor i en annons. `null` = okänt (raden ännu inte hämtats
+ * med räknaren); `0` = tydligt svar att annonsen inte har några frågor alls.
+ */
+export function getJobQuestionCount(
+  job: Pick<JobPosting, 'job_questions'> | null | undefined,
+): number | null {
+  const embedded = job?.job_questions;
+  if (!Array.isArray(embedded) || embedded.length === 0) return null;
+  const raw = embedded[0]?.count;
+  return typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
 }
 
 
@@ -77,9 +92,9 @@ const STREAM_COOLDOWN_MS = 60 * 1000;
 
 
 // 🔥 localStorage cache for employer jobs - instant-load
-// v4: egen nyckel per scope (personal/organization) + kravet på published_at,
-// så gamla payloads (före published_at fanns) aldrig kan felklassa annonser.
-const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v4_';
+// v5: raderna måste innehålla frågeräknaren (job_questions). Snapshots från v4
+// saknar den och skulle ge "–" för frågor, därför bytet av nyckel.
+const EMPLOYER_JOBS_CACHE_KEY = 'parium_employer_jobs_v5_';
 
 const cacheKeyFor = (userId: string, scope: string) => `${EMPLOYER_JOBS_CACHE_KEY}${scope}_${userId}`;
 
@@ -221,7 +236,8 @@ const JOB_SELECT = `
   employer_profile:profiles!job_postings_employer_id_fkey (
     first_name,
     last_name
-  )
+  ),
+  job_questions(count)
 `;
 
 interface JobCursor { created_at: string; id: string }
@@ -770,13 +786,37 @@ export const useJobsData = (options: UseJobsDataOptions = { scope: 'personal', e
           .subscribe()
       : null;
 
+    // Frågor läggs till, ändras och tas bort i guiden och redigeraren. Utan denna
+    // lyssnare skulle "Frågor:" i detaljerna ligga kvar gamalt tills nästa
+    // sidladdning — nu syns kollegors ändringar direkt.
+    let questionsRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleQuestionsRefresh = () => {
+      if (questionsRefreshTimer) return;
+      questionsRefreshTimer = setTimeout(() => {
+        questionsRefreshTimer = null;
+        queryClient.invalidateQueries({ queryKey: ['jobs', scope, profile?.organization_id, user.id] });
+      }, 1000);
+    };
+
+    const questionsChannel = appsFilter
+      ? createRealtimeChannel(`job-questions-rt-${channelSuffix}`)
+          .on(
+            'postgres_changes',
+            { event: '*' as const, schema: 'public' as const, table: 'job_questions' as const, filter: appsFilter },
+            () => scheduleQuestionsRefresh()
+          )
+          .subscribe()
+      : null;
+
     return () => {
       if (appsRefreshTimer) clearTimeout(appsRefreshTimer);
+      if (questionsRefreshTimer) clearTimeout(questionsRefreshTimer);
       if (invalidateStatsTimer) {
         clearTimeout(invalidateStatsTimer);
       }
       supabase.removeChannel(channel);
       if (applicationsChannel) supabase.removeChannel(applicationsChannel);
+      if (questionsChannel) supabase.removeChannel(questionsChannel);
     };
   }, [enableRealtime, user, queryClient, scope, profile?.organization_id, jobIdsKey, realtimeEmployerIdsKey]);
 

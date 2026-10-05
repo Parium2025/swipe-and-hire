@@ -15,7 +15,7 @@ import { getImageVersion } from '@/lib/imageTransforms';
 
 import { useCompactWidth } from '@/hooks/useCompactWidth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { JobPosting } from '@/hooks/useJobsData';
+import { getJobQuestionCount, type JobPosting } from '@/hooks/useJobsData';
 import { getJobOverlayTextStyle } from '@/lib/jobOverlayText';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchPriority } from '@/lib/fetchPriority';
@@ -402,6 +402,12 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
                   <span className="text-sm leading-snug text-white">Status:</span>
                   <span className={`text-sm leading-snug font-medium ${isExpired ? 'text-red-400' : isDraft ? 'text-amber-300' : 'text-white'}`}>
                     {isExpired ? 'Utgången' : isDraft ? 'Utkast' : `${timeInfo.text} kvar`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm leading-snug text-white">Frågor:</span>
+                  <span className="text-sm leading-snug text-white font-medium text-right">
+                    {getJobQuestionCount(job) ?? '–'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
