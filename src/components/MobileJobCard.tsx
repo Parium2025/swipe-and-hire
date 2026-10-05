@@ -364,10 +364,10 @@ export const MobileJobCard = memo(({ job, onOpen, onEdit, onDelete, onEditDraft,
               onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
               aria-label={expanded ? 'Dölj detaljer' : 'Visa detaljer'}
               aria-expanded={expanded}
-              className="flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-3 py-1 text-xs font-medium text-white transition-colors"
+              className="relative flex items-center justify-center rounded-full bg-white/10 hover:bg-white/15 border border-white/15 pl-3 pr-7 py-1 text-xs font-medium text-white transition-colors"
             >
-              <span>{expanded ? 'Dölj detaljer' : 'Visa detaljer'}</span>
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+              <span className="text-center leading-none">{expanded ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+              <ChevronDown className={`absolute right-2.5 h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
             </button>
           </div>
         )}
