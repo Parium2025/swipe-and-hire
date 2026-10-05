@@ -12,6 +12,14 @@ const corsHeaders = {
 // utan kodändring och inte ligger i repo-historiken.
 const ADMIN_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") ?? "fredrikandits@hotmail.com";
 
+const categoryLabels: Record<string, string> = {
+  technical: 'Teknisk support',
+  billing: 'Fakturering',
+  account: 'Kontofrågor',
+  other: 'Övrigt',
+  feature: 'Funktionsfrågor',
+};
+
 interface NotificationRequest {
   ticketId: string;
 }
@@ -77,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
       idempotencyKey: `support-ticket-${ticket.id}`,
       templateData: {
         ticket_id: ticket.id,
-        category: ticket.category || '—',
+        category: categoryLabels[ticket.category] || ticket.category || '—',
         subject: ticket.subject || 'Nytt supportärende',
         from_name: fromName,
         created_at: new Date(ticket.created_at).toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' }),
