@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
+import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 import { verifyCaller } from "../_shared/service-auth.ts";
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2.117.2/cors';
 import { z } from 'npm:zod@3.25.76';
 
 // Läses från secrets (samma mönster som send-admin-alert) så adressen kan bytas
