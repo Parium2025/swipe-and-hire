@@ -1142,6 +1142,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
               </div>
             )}
 
+            {user && isEmployer && isPreviewMode && jobQuestions.length === 0 && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center space-y-2">
+                <h3 className="text-lg font-medium text-white">Inga ansökningsfrågor</h3>
+                <p className="text-sm text-white">Din profil skickas in direkt med ansökan.</p>
+              </div>
+            )}
+
             {/* Info for employer users - cannot apply */}
             {user && isEmployer && !isJobExpired && !isPreviewMode && (
               <div className="bg-white/[0.06] backdrop-blur-md rounded-lg p-4 border border-white/[0.06] text-center space-y-1.5">
