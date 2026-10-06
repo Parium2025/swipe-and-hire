@@ -1,3 +1,4 @@
+import { useEmployerNavCounts } from '@/hooks/useEmployerNavCounts';
 import React, { useEffect, useState, memo, useMemo, useRef, startTransition } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
@@ -147,8 +148,13 @@ export function EmployerSidebar() {
 
   // On mobile, always show labels (the sidebar slides in full-width)
   const collapsed = isMobile ? false : state === 'collapsed';
-  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedEmployerTotalViews, preloadedEmployerTotalApplications, preloadedMyCandidates, employerCountsReadyUserId } = useAuth();
-  const countsReady = !!user && employerCountsReadyUserId === user.id;
+  const { profile, signOut, user, preloadedCompanyLogoUrl, preloadedUnreadMessages, preloadedEmployerTotalViews, preloadedEmployerTotalApplications } = useAuth();
+  const navCounts = useEmployerNavCounts();
+  const countsReady = navCounts.ready;
+  const preloadedEmployerDashboardJobs = navCounts.dashboard;
+  const preloadedEmployerMyJobs = navCounts.myJobs;
+  const preloadedEmployerCandidates = navCounts.candidates;
+  const preloadedMyCandidates = navCounts.myCandidates;
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt).
   // När context är mountad (även med värde 0) ska live alltid vinna över det cachade
   // värdet, annars står en gammal siffra kvar efter att olästa nollställts.

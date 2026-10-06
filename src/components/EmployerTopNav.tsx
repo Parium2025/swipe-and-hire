@@ -1,3 +1,4 @@
+import { useEmployerNavCounts } from '@/hooks/useEmployerNavCounts';
 import React, { memo, useEffect, useState } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -79,7 +80,7 @@ const dropdownItemActiveClass = "bg-white/15 text-white";
 
 function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
   const { isAdmin } = useIsOrgAdmin();
-  const { profile, signOut, user, preloadedEmployerCandidates, preloadedUnreadMessages, preloadedEmployerMyJobs, preloadedEmployerDashboardJobs, preloadedMyCandidates, preloadedCompanyLogoUrl, employerCountsReadyUserId } = useAuth();
+  const { profile, signOut, user, preloadedUnreadMessages, preloadedCompanyLogoUrl } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -93,7 +94,12 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     ? conversationsCtx.totalUnreadCount
     : 0;
   
-  const countsReady = !!user && employerCountsReadyUserId === user.id;
+  const navCounts = useEmployerNavCounts();
+  const countsReady = navCounts.ready;
+  const preloadedEmployerDashboardJobs = navCounts.dashboard;
+  const preloadedEmployerMyJobs = navCounts.myJobs;
+  const preloadedEmployerCandidates = navCounts.candidates;
+  const preloadedMyCandidates = navCounts.myCandidates;
   // TopNav-avatar är alltid liten (~32-40px) → be om optimerad version (2x för retina automatiskt)
   const resolvedProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image', MEDIA_URL_TTL, AVATAR_TRANSFORM);
 
