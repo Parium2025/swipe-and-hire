@@ -138,10 +138,14 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 className={`w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
                 <TruncatedText
+                  alwaysShowTooltip={IS_TOUCH_ONLY}
+                  lines={2}
                   text={currentTip.title}
-                  className="text-sm font-semibold text-white leading-5 mb-2 sm:mb-2.5"
+                  className="text-sm font-semibold text-white leading-5 mb-1"
                 />
                 <TruncatedText
+                  alwaysShowTooltip={IS_TOUCH_ONLY}
+                  lines={2}
                   text={currentTip.summary || currentTip.title}
                   className="text-sm leading-5 text-white"
                 />
