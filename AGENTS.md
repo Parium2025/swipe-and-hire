@@ -37,3 +37,4 @@
 - Employer job rows fetch `job_questions(count)` in the shared select so detail panels show question counts without a second query; bump the employer-jobs cache key when that select changes, since stale snapshots lack the field.
 
 - Restore the account-scoped plain-JSON query snapshot synchronously at auth init and refetch silently on first use, so cold starts skip skeletons.
+- Employer count/stat queries use the same account's restored snapshot as placeholder until the profile (orgId) hydrates; otherwise the org-keyed query misses the snapshot and cold starts show skeletons.

@@ -48,8 +48,8 @@
 - [ ] Verify profile photo changes live across two simultaneously signed-in employer accounts (blocked: second authorized account/session unavailable)
 - [ ] Verify cross-colleague counts after a real application and assess report refresh timing (blocked: no safe live test application submitted in this audit)
 - [x] Check late-appearing unread notifications against their saved timestamp and ensure the bell retains its known state across a day; verify candidate-list loading boundaries
-- [ ] Keep known notification state across long returns and update live without crossing accounts; audit auth switches and key role flows
-- [ ] Fix clipped news text on dashboard without changing its visual design; verify on employer and job-seeker views
+- [x] Keep known notification state across long returns and update live without crossing accounts; audit auth switches and key role flows
+- [x] Fix clipped news text on dashboard without changing its visual design; verify on employer and job-seeker views
 - [x] Keep chat tabs and search mounted while the inbox loads on cold start
 - [x] Show colleagues directly under Kollegor; start or reopen their single conversation from the row without a Ny button
 - [x] Polish the new-chat action and simplify the conversation dialog with fully legible white text
@@ -65,6 +65,7 @@
 - [x] Show team application totals in pure white for every reporting period; move the mobile recruiter filter to the right below job-status tabs and remove its white pressed/hover surface
 - [x] Put the mobile recruiter filter beside the expand-all control above the adverts and remove the extra row gap
 
+- [x] Show restored employer counts on Annonser while the profile hydrates after a cold start
 - [x] Granska att organisationens statistik (rapporter) är korrekt kopplad
 - [x] Matcha intervjusvarets mejl med intervjuinbjudans layout och avsändande företagsnamn
 - [x] Låt admins automatiska mallar och utskick gälla kollegors annonser, ansökningar och intervjuer

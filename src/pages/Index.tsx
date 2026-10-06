@@ -627,7 +627,6 @@ const Index = () => {
   // Vid en kall återladdning ska appytan finnas från första React-bildrutan.
   // Tidigare ritades bara en tom blå yta under session- och profilhämtningen.
   if (loading && !user && authAction !== 'logout') {
-    (window as any).__dbgIdx = [...((window as any).__dbgIdx||[]), ['nouser',Math.round(performance.now())]];
     return lastKnownRole === 'employer'
       ? renderEmployerColdSkeleton(location.pathname)
       : <div className="min-h-screen bg-gradient-parium" />;
@@ -641,7 +640,6 @@ const Index = () => {
   // Profilen är nästa nätverkssteg efter sessionen. Visa den senast kända
   // rollens riktiga sidstruktur under tiden i stället för ännu en tom skärm.
   if (!profile) {
-    (window as any).__dbgIdx = [...((window as any).__dbgIdx||[]), ['noprof',Math.round(performance.now())]];
     return lastKnownRole === 'employer'
       ? renderEmployerColdSkeleton(location.pathname)
       : <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
