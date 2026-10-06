@@ -111,10 +111,16 @@ export function restoreQuerySnapshot(qc: QueryClient, userId: string | null | un
     // Fyll bara luckor — färskare data i minnet vinner alltid.
     const queries = (parsed.state.queries ?? []).filter((q: any) => !cache.get(q.queryHash)?.state.data);
     hydrate(qc, { mutations: [], queries });
+    if (queries.length === 0) restoredUserId = null;
     for (const q of queries) restoredHashes.add(q.queryHash);
   } catch {
     try { localStorage.removeItem(PREFIX + userId); } catch { /* noop */ }
   }
+}
+
+/** Sant när senast visade data återställts vid kallstart — sidor kan då hoppa över fördröjd fade-in. */
+export function hasRestoredSnapshot(): boolean {
+  return restoredUserId !== null && restoredUserId === activeUserId;
 }
 
 /** Utloggning/kontobyte: inget får följa med till nästa konto. */

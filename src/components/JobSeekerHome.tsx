@@ -1,4 +1,5 @@
 import { memo, useMemo, useEffect, useState } from 'react';
+import { hasRestoredSnapshot } from '@/lib/queryPersistence';
 import { useAuth } from '@/hooks/useAuth';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
@@ -32,7 +33,7 @@ DateTimeDisplay.displayName = 'DateTimeDisplay';
 const JobSeekerHome = memo(() => {
   const { profile } = useAuth();
   
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(hasRestoredSnapshot);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);

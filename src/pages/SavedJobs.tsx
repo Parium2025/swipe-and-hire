@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { hasRestoredSnapshot } from '@/lib/queryPersistence';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -97,7 +98,7 @@ const SavedJobs = () => {
     });
   }, []);
 
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(hasRestoredSnapshot);
 
   // Mouse-drag scrolling for sort chips
   const chipsRef = useRef<HTMLDivElement>(null);
