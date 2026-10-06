@@ -6,7 +6,7 @@
 - Save outreach template families atomically; reset per-channel lookup state each loop.
 - Keep the structured interview invitation locked and separate from editable automations.
 - Mobile shells stay `100dvh`; keyboard-heavy pages scroll internally; long employer text areas scroll inside bounded height; browser chrome never covers content.
-- Mobile inputs use 16px and native Safari focus; no pointer focus or delayed field scrolling; release residual field focus when the iOS keyboard closes.
+- Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; release field focus when the iOS keyboard closes.
 - Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
 - Employer welcome drafts until confirmation; replay trials write nothing; only valid meeting links become defaults.
 - Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
