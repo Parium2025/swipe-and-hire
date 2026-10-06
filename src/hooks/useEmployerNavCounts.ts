@@ -39,7 +39,10 @@ export function useEmployerNavCounts(): EmployerNavCounts {
     user, profile, employerCountsReadyUserId,
     preloadedEmployerDashboardJobs, preloadedEmployerMyJobs, preloadedEmployerCandidates, preloadedMyCandidates,
   } = useAuth();
-  const userId = user?.id ?? null;
+  // Sessionen återställs asynkront, men den cachade profilen finns redan i
+  // första bilden och är verifierad mot flikens konto — använd den så att
+  // sparade siffror kan visas direkt i stället för först efter sessionen.
+  const userId = user?.id ?? (profile as { user_id?: string } | null)?.user_id ?? null;
   const orgId = profile?.organization_id ?? null;
   const live = !!userId && employerCountsReadyUserId === userId;
 
