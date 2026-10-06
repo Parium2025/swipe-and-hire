@@ -79,3 +79,4 @@
 - [x] Test all four support categories through the real form; fix the failed profile join and UTF-8 stream corruption; confirm four sent alerts to the authorized recipient (364 tests pass)
 - [ ] Verify support-owner details live (blocked: Support Admin did not become accessible in the requesting user's current preview session)
 - [x] Confirm actual inbox receipt of the four support test emails (confirmed by the recipient: all four arrived and look correct)
+- [x] Verify recruiter template access live with the real recruiter account (20 org templates readable, org email template sent and delivered, create blocked with 403); the UTF-8 corrupted "Efter intervju" template now sends clean
