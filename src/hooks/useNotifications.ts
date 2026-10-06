@@ -285,9 +285,14 @@ export function useNotifications() {
         fetchNotifications();
       }
     };
+    // Efter en lång paus kan nätet komma tillbaka först efter att fliken blivit
+    // synlig; hämta då igen så klockan inte fastnar på senast kända läge.
+    const handleOnline = () => { void fetchNotifications(); };
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
     };
   }, [fetchNotifications]);
 
