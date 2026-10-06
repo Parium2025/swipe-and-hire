@@ -29,11 +29,11 @@
 - Candidate activity queries and cache are account-scoped (user+applicant key), warmed by the page and refreshed for current author profiles: instant cold-start logs and live avatars without cross-account leaks.
 - The notification bell alone owns its account-scoped cache and refresh; keep last-known state through daily returns and avoid a second silent preloader, because competing writes hide older unread items.
 - Aggregate employer question filters for active org members in an authenticated definer function; role-table visibility alone hides colleagues' questions from recruiters.
-- Keep candidate membership, paginated list caches and server counts synchronized across mutations and realtime events, so saved icons and totals agree immediately.
+- Sync candidate membership, list caches and server counts across mutations and realtime so icons and totals agree.
 - Stage menus and stage creation read/write the active candidate list's stage settings; default stage keys repeat across lists.
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
 - Archive candidate moves to the account-scoped bell, not toasts.
 - Touch profile list actions reuse row handlers and person membership for identical add/picker behavior.
 - Employer job rows fetch `job_questions(count)` in the shared select so detail panels show question counts without a second query; bump the employer-jobs cache key when that select changes, since stale snapshots lack the field.
 
-- Persist an account-scoped React Query snapshot (plain JSON only) and restore it synchronously at auth init; restored queries refetch silently on first use, so cold starts render last-known data instead of skeletons.
+- Restore the account-scoped plain-JSON query snapshot synchronously at auth init and refetch silently on first use, so cold starts skip skeletons.
