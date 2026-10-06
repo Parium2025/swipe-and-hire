@@ -17,7 +17,7 @@
 - Resolve colleague-owned candidate history and ratings through the authorized organization-member RPC; candidate-list ratings stay scoped to the signed-in account, because user_roles SELECT exposes only the caller and RLS alone does not set display priority.
 - Ignore delayed account-scoped image and job-scope fetches after an account switch or sign-out so they cannot overwrite the new account's cache.
 - Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks across accounts.
-- Candidate skeletons use resolved server totals per user/list.
+- Candidate skeletons use server totals per user/list.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
 - Company identity is organizational; invitees inherit it, skip setup, and chat updates live.
 - Browser autofill keeps each field's own surface; never repaint it globally.
