@@ -11,6 +11,11 @@ import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
 import { DashboardCarouselDots } from './DashboardCarouselDots';
 
+const IS_TOUCH_ONLY =
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+  !(window.matchMedia?.('(hover: hover)').matches || window.matchMedia?.('(pointer: fine)').matches);
+
 interface CareerTipsCardProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
@@ -141,7 +146,7 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                   alwaysShowTooltip={IS_TOUCH_ONLY}
                   lines={2}
                   text={currentTip.title}
-                  className="text-sm font-semibold text-white leading-5 mb-1"
+                  className="text-sm font-semibold text-white leading-5 mb-0.5"
                 />
                 <TruncatedText
                   alwaysShowTooltip={IS_TOUCH_ONLY}

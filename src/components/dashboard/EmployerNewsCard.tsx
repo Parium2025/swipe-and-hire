@@ -128,7 +128,7 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                   alwaysShowTooltip={IS_TOUCH_ONLY}
                   lines={2}
                   text={currentNews.title}
-                  className="text-sm font-semibold text-white leading-5 mb-1"
+                  className="text-sm font-semibold text-white leading-5 mb-0.5"
                 />
                 <TruncatedText
                   alwaysShowTooltip={IS_TOUCH_ONLY}
