@@ -164,8 +164,12 @@ export const useEmployerJobsCounts = (scope: 'personal' | 'organization' = 'pers
   const orgId = profile?.organization_id || null;
   useEmployerStatsLiveSync(user?.id);
 
+  const queryClient = useQueryClient();
   const query = useQuery<EmployerJobsCounts>({
     queryKey: ['employer-jobs-counts', scope, orgId, user?.id],
+    // Kallstart: profilen (och därmed orgId) hydreras efter snapshoten. Visa
+    // samma kontos återställda värde tills profilen finns; tyst omhämtning följer.
+    placeholderData: () => (!profile && user ? findRestoredForUser(queryClient, 'employer-jobs-counts', scope, user.id) : undefined),
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_jobs_counts', { p_scope: scope });
       if (error) throw error;
@@ -197,8 +201,12 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
   const orgId = profile?.organization_id || null;
   useEmployerStatsLiveSync(user?.id);
 
+  const queryClient = useQueryClient();
   const query = useQuery<EmployerDashboardStats>({
     queryKey: ['employer-dashboard-stats', scope, orgId, user?.id],
+    // Kallstart: profilen (och därmed orgId) hydreras efter snapshoten. Visa
+    // samma kontos återställda värde tills profilen finns; tyst omhämtning följer.
+    placeholderData: () => (!profile && user ? findRestoredForUser(queryClient, 'employer-dashboard-stats', scope, user.id) : undefined),
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_dashboard_stats', { p_scope: scope });
       if (error) throw error;
@@ -217,3 +225,9 @@ export const useEmployerDashboardStats = (scope: 'personal' | 'organization' = '
 
   return query;
 };
+
+function findRestoredForUser<T>(qc: QueryClient, key: string, scope: string, userId: string): T | undefined {
+  const match = qc.getQueriesData<T>({ queryKey: [key, scope] })
+    .find(([k, d]) => Array.isArray(k) && k[3] === userId && d !== undefined);
+  return match?.[1];
+}
