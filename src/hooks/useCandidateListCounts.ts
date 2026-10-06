@@ -11,7 +11,7 @@ import { readCandidateCounts, writeCandidateCounts } from '@/lib/candidateCounts
  * uppdateras mot databasen — samma mönster som sparade jobb/ansökningar.
  */
 export const useCandidateListCounts = (enabled = true) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const query = useQuery({
     queryKey: ['candidate-list-counts', user?.id],
@@ -35,7 +35,7 @@ export const useCandidateListCounts = (enabled = true) => {
 
     enabled: enabled && !!user,
     staleTime: 30 * 1000,
-    placeholderData: () => readCandidateCounts('lists', user?.id) ?? undefined,
+    placeholderData: () => readCandidateCounts('lists', user?.id ?? (profile as { user_id?: string } | null)?.user_id) ?? undefined,
   });
 
   return (query.data ?? {}) as Record<string, number>;

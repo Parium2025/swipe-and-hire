@@ -1,5 +1,6 @@
 import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
+import { useSeekerNavCounts } from '@/hooks/useSeekerNavCounts';
 import { useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
@@ -62,8 +63,12 @@ export function AppSidebar() {
   // tidigare sparats som kollapsad i samma session.
   const collapsed = isMobile ? false : state === 'collapsed';
 
-  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedTotalJobs, preloadedSavedJobs, preloadedJobSeekerUnreadMessages, preloadedMyApplications, seekerCountsReadyUserId } = useAuth();
-  const countsReady = !!user && seekerCountsReadyUserId === user.id;
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl, preloadedVideoUrl, preloadedJobSeekerUnreadMessages } = useAuth();
+  const seekerCounts = useSeekerNavCounts();
+  const countsReady = seekerCounts.ready;
+  const preloadedTotalJobs = seekerCounts.totalJobs;
+  const preloadedSavedJobs = seekerCounts.savedJobs;
+  const preloadedMyApplications = seekerCounts.myApplications;
   // Realtids-räknare för chattbadgen (delad context — en enda subscription globalt)
   // Viktigt: när context är mountad (även med värde 0) ska live alltid vinna över preloaded,
   // annars visar badgen ett gammalt cachat värde efter att olästa nollställts.
