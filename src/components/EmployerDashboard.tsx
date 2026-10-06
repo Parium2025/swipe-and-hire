@@ -171,7 +171,7 @@ const EmployerDashboard = memo(() => {
 
   // Full-screen skeleton overlay — visas vid kall mount (browser refresh / direkt URL),
   // hoppar över vid in-app sidebar-navigering (mirror av seeker-sidans pattern).
-  const [initialLoadDone, setInitialLoadDone] = useState(__employerDashboardHasMountedOnce);
+  const [initialLoadDone, setInitialLoadDone] = useState(() => __employerDashboardHasMountedOnce || !loading);
   useEffect(() => {
     if (!loading && !initialLoadDone) {
       setInitialLoadDone(true);
