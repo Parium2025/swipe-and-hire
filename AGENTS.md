@@ -32,8 +32,8 @@
 - Sync candidate membership, list caches and server counts across mutations and realtime so icons and totals agree.
 - Stage menus and stage creation read/write the active candidate list's stage settings; default stage keys repeat across lists.
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
-- Archive candidate moves to the account-scoped bell, not toasts.
-- Touch profile list actions reuse row handlers and person membership for identical add/picker behavior.
+- Candidate moves go to the account-scoped bell, not toasts.
+- Touch profile list actions reuse row handlers and person membership.
 - Employer job rows fetch `job_questions(count)` in the shared select so detail panels show question counts without a second query; bump the employer-jobs cache key when that select changes, since stale snapshots lack the field.
 
 - Restore the account-scoped plain-JSON query snapshot synchronously at auth init and refetch silently on first use, so cold starts skip skeletons.
