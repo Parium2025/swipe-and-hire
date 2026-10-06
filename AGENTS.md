@@ -25,7 +25,7 @@
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping. Preserve loop/reload/boot guards and tests.
 - The landing-video route alone owns browser chrome color `#626262`; preserve its bounded chrome-reload guard (max two reloads per 10 s per tab) and never change other routes with it.
 - Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows to keep large inboxes fast.
-- Start internal one-to-one chats from the colleague roster and reuse existing threads, so each colleague stays one discoverable entry.
+- Start internal one-to-one chats from the colleague roster and reuse existing threads,, one entry per colleague.
 - Candidate activity queries and cache are account-scoped (user+applicant key), warmed by the page and refreshed for current author profiles: instant cold-start logs and live avatars without cross-account leaks.
 - The notification bell alone owns its account-scoped cache and refresh; keep last-known state through daily returns and avoid a second silent preloader, because competing writes hide older unread items.
 - Aggregate employer question filters for active org members in an authenticated definer function; role-table visibility alone hides colleagues' questions from recruiters.
