@@ -1,4 +1,5 @@
 import { TruncatedText } from '@/components/TruncatedText';
+import { hasRestoredSnapshot } from '@/lib/queryPersistence';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { looksLikeVideoFile } from '@/lib/videoInput';
 import { invalidateCachedProfile } from '@/lib/performanceGuards';
@@ -360,7 +361,7 @@ const Profile = () => {
   const { profile, userRole, updateProfile, refreshProfile, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
 
   // Delayed fade-in (employer-side parity)
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(hasRestoredSnapshot);
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 100);
     return () => clearTimeout(timer);

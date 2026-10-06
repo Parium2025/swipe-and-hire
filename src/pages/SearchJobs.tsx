@@ -177,7 +177,15 @@ const SearchJobs = memo(() => {
   // toast and blurHandlers removed — no longer needed after filter extraction
   const queryClient = useQueryClient();
 
-  const skipInitialEffects = useMemo(shouldSkipSearchEnterEffects, []);
+  const skipInitialEffects = useMemo(
+    () =>
+      shouldSkipSearchEnterEffects() ||
+      // Återställd data finns redan (kallstart): visa den direkt, ingen fördröjd skeleton.
+      queryClient.getQueriesData<{ pages?: unknown[] }>({ queryKey: ['optimized-job-search'] })
+        .some(([, d]) => Array.isArray(d?.pages) && d!.pages!.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   // Delayed fade-in (employer-side parity) — skipped on re-mounts
   const [showContent, setShowContent] = useState(skipInitialEffects);
   // Full-screen skeleton overlay: visible until first data load completes — skipped on re-mounts

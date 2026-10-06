@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isSlowConnection } from "@/hooks/useNetworkAwareFetch";
 import { initConnectivityManager } from "@/lib/connectivityManager";
+import { startQueryPersistence } from "@/lib/queryPersistence";
 import { useUiLockGuard } from "@/hooks/useUiLockGuard";
 import { BrowserRouter, Routes, Route, useLocation, Navigate as RRNavigate } from "react-router-dom";
 
@@ -190,6 +191,7 @@ const queryClient = new QueryClient({
 // Gardera för SSR (Workers): timers/fetch/listeners är förbjudna i global scope.
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   initConnectivityManager(queryClient);
+  startQueryPersistence(queryClient);
 }
 
 // Minimal loading fallback - just gradient background, no spinner

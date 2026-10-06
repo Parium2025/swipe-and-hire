@@ -22,6 +22,7 @@ import { authSplashEvents, cacheAuthRoleForEmail, getCachedAuthRoleForEmail, nor
 import { forceConnectivityCheck, getIsOnline, onConnectivityChange } from '@/lib/connectivityManager';
 import { useSessionManager, clearSessionToken, beginSignOutTracking, endSignOutTracking } from '@/hooks/useSessionManager';
 import { useQueryClient } from '@tanstack/react-query';
+import { restoreQuerySnapshot, clearQuerySnapshots } from '@/lib/queryPersistence';
 import { patchPrefetchedJobsByEmployer } from './useJobPrefetchCache';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
@@ -595,6 +596,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // En annan fliks konto får aldrig lämna data i den här flikens
             // React Query-cache medan vi går till inloggningen.
             queryClient.clear();
+            clearQuerySnapshots();
             clearSessionToken();
             window.location.href = '/auth';
           }, 1500);
@@ -642,6 +644,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         currentUserIdRef.current = newUserId;
+        // Kallstart: senast visade data för just detta konto, före första render.
+        restoreQuerySnapshot(queryClient, newUserId);
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -670,6 +674,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (cachedBelongsToOther || (previousUserId !== null && previousUserId !== activeUserId)) {
             queryClient.clear();
+            restoreQuerySnapshot(queryClient, activeUserId, true);
             setUserRole(null);
             setOrganization(null);
             setSeekerCountsReadyUserId(null);
@@ -805,6 +810,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       finishInitialization();
 
       currentUserIdRef.current = session?.user?.id ?? null;
+      restoreQuerySnapshot(queryClient, session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -1669,6 +1675,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllAppCaches();
       clearEmployerCountsMirror();
       try { queryClient.clear(); } catch {}
+      clearQuerySnapshots();
       clearLocalState();
 
       // 🔐 Rensa i rätt ordning i bakgrunden:
@@ -1705,6 +1712,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAllAppCaches();
       clearEmployerCountsMirror();
       try { queryClient.clear(); } catch {}
+      clearQuerySnapshots();
       clearSessionToken();
       authStorage.clear();
       clearLocalState();
