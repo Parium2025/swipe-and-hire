@@ -731,6 +731,7 @@ const EmployerDashboard = memo(() => {
   // Full-screen skeleton vid kall mount i tab-sessionen — visas tills första data
   // landar oavsett om localStorage-cachen var varm (mirror av seeker SearchJobs).
   if (!initialLoadDone || countsPending || statsPending || !serverCounts || !serverStats) {
+    (window as any).__dbgGate = [...((window as any).__dbgGate||[]), {i:initialLoadDone,c:!!serverCounts,s:!!serverStats,l:loading,p:!!profile,t:Math.round(performance.now())}];
     return <EmployerDashboardSkeleton showDrafts titleWidthClass="w-48" />;
   }
   // Sidebar-navigering (varm cache) → osynlig placeholder under fade-in delay.
