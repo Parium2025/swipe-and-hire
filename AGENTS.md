@@ -35,3 +35,5 @@
 - Archive candidate moves to the account-scoped bell, not toasts.
 - Touch profile list actions reuse row handlers and person membership for identical add/picker behavior.
 - Employer job rows fetch `job_questions(count)` in the shared select so detail panels show question counts without a second query; bump the employer-jobs cache key when that select changes, since stale snapshots lack the field.
+
+- Persist an account-scoped React Query snapshot (plain JSON only) and restore it synchronously at auth init; restored queries refetch silently on first use, so cold starts render last-known data instead of skeletons.
