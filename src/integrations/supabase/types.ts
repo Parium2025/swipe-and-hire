@@ -4231,6 +4231,10 @@ export type Database = {
         Args: { p_profile_user_id: string }
         Returns: boolean
       }
+      can_use_outreach_template: {
+        Args: { p_organization_id: string; p_owner_user_id: string }
+        Returns: boolean
+      }
       can_view_colleague_profile_image: {
         Args: { p_name: string }
         Returns: boolean

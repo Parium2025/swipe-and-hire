@@ -526,6 +526,13 @@
       "when": 1791144010180,
       "tag": "0074_align_organization_outreach_owner_and_admin_access",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1791259058733,
+      "tag": "0075_org_members_read_outreach_templates",
+      "breakpoints": true
     }
   ]
 }
