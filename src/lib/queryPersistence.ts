@@ -9,7 +9,7 @@ import { dehydrate, hydrate, type QueryClient, type Query } from '@tanstack/reac
  * använder den, så innehållet alltid blir färskt utan synligt vänteläge.
  */
 
-const PREFIX = 'parium-rq-snapshot:v1:';
+const PREFIX = 'parium-rq-snapshot:v2:';
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_TOTAL_CHARS = 1_500_000;
 const MAX_QUERY_CHARS = 250_000;
@@ -20,12 +20,22 @@ let activeUserId: string | null = null;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 let started = false;
 
+/** Endast ren JSON-data: Set/Map/Date/klassinstanser överlever inte en omstart. */
+function isPlainJson(v: unknown, depth = 0): boolean {
+  if (v === null || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return true;
+  if (typeof v !== 'object' || depth > 12) return false;
+  if (Array.isArray(v)) return v.every((x) => isPlainJson(x, depth + 1));
+  const proto = Object.getPrototypeOf(v);
+  if (proto !== Object.prototype && proto !== null) return false;
+  return Object.values(v as Record<string, unknown>).every((x) => x === undefined || isPlainJson(x, depth + 1));
+}
+
 function persistable(query: Query): boolean {
   if (query.state.status !== 'success' || query.state.data === undefined) return false;
   const first = query.queryKey[0];
   // Auth-/sessionsnära nycklar sparas aldrig.
   if (typeof first === 'string' && /session|auth|token|signed-url/i.test(first)) return false;
-  return true;
+  return isPlainJson(query.state.data);
 }
 
 function writeSnapshot(qc: QueryClient) {
