@@ -11,6 +11,11 @@ import { useSynchronizedRotation } from '@/hooks/useSynchronizedRotation';
 import { GRADIENTS, formatTipPublishedTime } from './dashboardConstants';
 import { DashboardCarouselDots } from './DashboardCarouselDots';
 
+const IS_TOUCH_ONLY =
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+  !(window.matchMedia?.('(hover: hover)').matches || window.matchMedia?.('(pointer: fine)').matches);
+
 interface CareerTipsCardProps {
   isPaused: boolean;
   setIsPaused: (v: boolean) => void;
