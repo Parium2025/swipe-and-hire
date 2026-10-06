@@ -84,8 +84,9 @@ export function startQueryPersistence(qc: QueryClient) {
 }
 
 /** Synkron återställning för rätt konto. Anropas innan användaren sätts i state. */
-export function restoreQuerySnapshot(qc: QueryClient, userId: string | null | undefined) {
+export function restoreQuerySnapshot(qc: QueryClient, userId: string | null | undefined, force = false) {
   activeUserId = userId ?? null;
+  if (force) restoredUserId = null;
   if (!userId || restoredUserId === userId || typeof window === 'undefined') return;
   restoredUserId = userId;
   try {
