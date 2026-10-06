@@ -81,13 +81,13 @@ function JobSeekerTopNav() {
     preloadedAvatarUrl, 
     preloadedCoverUrl, 
     preloadedVideoUrl,
-    preloadedTotalJobs,
-    preloadedSavedJobs,
-    preloadedMyApplications,
-    seekerCountsReadyUserId,
     preloadedJobSeekerUnreadMessages
   } = useAuth();
-  const countsReady = !!user && seekerCountsReadyUserId === user.id;
+  const seekerCounts = useSeekerNavCounts();
+  const countsReady = seekerCounts.ready;
+  const preloadedTotalJobs = seekerCounts.totalJobs;
+  const preloadedSavedJobs = seekerCounts.savedJobs;
+  const preloadedMyApplications = seekerCounts.myApplications;
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
