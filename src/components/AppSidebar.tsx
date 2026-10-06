@@ -1,5 +1,6 @@
 import React, { useEffect, useState, memo, useMemo, useCallback, useRef, startTransition } from "react";
 import { CountBadge } from '@/components/ui/count-badge';
+import { useSeekerNavCounts } from '@/hooks/useSeekerNavCounts';
 import { useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 

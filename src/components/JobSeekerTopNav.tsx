@@ -1,5 +1,6 @@
 import React, { memo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSeekerNavCounts } from '@/hooks/useSeekerNavCounts';
 import { useAuth } from "@/hooks/useAuth";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
