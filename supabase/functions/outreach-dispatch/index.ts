@@ -80,13 +80,13 @@ async function getUserFromRequest(request: Request) {
 async function ensureTemplateAccess(templateId: string, userId: string) {
   const { data: template, error } = await admin.from('outreach_templates').select('*').eq('id', templateId).maybeSingle();
   if (error || !template) throw new Error('Mallen kunde inte hittas');
-  // Organisationsmallar styrs av organisationens admin, inte av en kollegas
-  // personliga konto eller av en förfalskad owner_user_id på en org-rad.
+  // Organisationsmallar redigeras bara av admin, men alla aktiva kollegor
+  // använder dem vid utskick så att organisationens standard följs.
   let allowed = !template.organization_id && template.owner_user_id === userId;
   if (template.organization_id) {
     const { data: role } = await admin.from('user_roles').select('user_id')
       .eq('user_id', userId).eq('organization_id', template.organization_id)
-      .eq('role', 'admin').eq('is_active', true).limit(1).maybeSingle();
+      .eq('is_active', true).limit(1).maybeSingle();
     allowed = !!role;
   }
   if (!allowed) throw new Error('Ingen åtkomst till vald mall');
