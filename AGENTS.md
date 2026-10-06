@@ -34,7 +34,7 @@
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
 - Candidate moves go to the account-scoped bell, not toasts.
 - Touch profile list actions reuse row handlers and person membership.
-- Employer job rows fetch `job_questions(count)` in the shared select so detail panels show question counts without a second query; bump the employer-jobs cache key when that select changes, since stale snapshots lack the field.
+- Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes, since stale snapshots lack the field.
 
 - Restore the account-scoped plain-JSON query snapshot synchronously at auth init and refetch silently on first use, so cold starts skip skeletons.
-- Employer count/stat queries use the same account's restored snapshot as placeholder until the profile (orgId) hydrates; otherwise the org-keyed query misses the snapshot and cold starts show skeletons.
+- Employer count queries use the account's restored snapshot as placeholder until orgId hydrates, else cold starts show skeletons.
