@@ -4196,6 +4196,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_team_invitation: {
+        Args: { p_email: string; p_token_hash: string; p_user_id: string }
+        Returns: Json
+      }
       application_answer_is_present: {
         Args: { answer: Json }
         Returns: boolean
@@ -4992,6 +4996,10 @@ export type Database = {
       parium_synonyms: { Args: { _tok: string }; Returns: string[] }
       pause_criteria_eval_run: {
         Args: { p_reason: string; p_run_id: string }
+        Returns: undefined
+      }
+      provision_confirmed_employer_workspace: {
+        Args: { p_email: string; p_user_id: string }
         Returns: undefined
       }
       purge_completed_deletion_rows: { Args: never; Returns: number }

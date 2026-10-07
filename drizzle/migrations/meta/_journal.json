@@ -575,6 +575,13 @@
       "when": 1791404160991,
       "tag": "0081_atomic_jobseeker_welcome_completion",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1791404282513,
+      "tag": "0082_atomic_team_accept_and_workspace",
+      "breakpoints": true
     }
   ]
 }
