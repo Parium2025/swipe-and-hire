@@ -922,7 +922,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`py-4 px-8 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0 ${isReplay ? 'bg-primary hover:bg-primary/90' : 'bg-green-500 hover:bg-green-600'}`}
+                className={`py-4 px-8 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-full focus:outline-none focus:ring-0 ${isReplay ? 'bg-primary hover:bg-primary/90' : 'bg-green-500 hover:bg-green-600 md:hover:bg-green-600 active:bg-green-600'}`}
               >
                 {isSubmitting ? (
                   <>
