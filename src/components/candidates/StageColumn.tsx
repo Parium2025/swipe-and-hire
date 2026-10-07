@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedText } from '@/components/ui/truncated-text';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
@@ -180,18 +180,7 @@ export const StageColumn = ({
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-white flex-shrink-0" />
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="font-medium text-xs text-white truncate cursor-default flex-1 min-w-0">
-                  {stageSettings.label}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[min(90vw,500px)] break-words whitespace-pre-wrap">
-                <p className="break-words whitespace-pre-wrap">{stageSettings.label}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TruncatedText text={stageSettings.label} side="top" className="font-medium text-xs text-sidebar-foreground cursor-default flex-1 min-w-0" />
           <span
             className="text-white text-[10px] h-4 min-w-4 px-1 flex items-center justify-center rounded-full flex-shrink-0"
             style={{ backgroundColor: `${displayColor}66` }}

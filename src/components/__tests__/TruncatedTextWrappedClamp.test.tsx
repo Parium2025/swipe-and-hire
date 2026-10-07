@@ -47,8 +47,9 @@ describe('TruncatedText: klamrad rad som bryts vid mellanslag', () => {
     for (const [p, d] of saved) if (d) Object.defineProperty(HTMLElement.prototype, p, d);
   });
 
-  it('öppnar rutan med hela namnet vid tryck', async () => {
+  it('öppnar rutan med hela namnet vid långtryck', async () => {
     vi.resetModules();
+    vi.useFakeTimers();
     const { TruncatedText } = await import('@/components/ui/truncated-text');
     render(<TruncatedText text="Fredrik Andits" />);
     const trigger = screen.getByText('Fredrik Andits');
@@ -56,9 +57,14 @@ describe('TruncatedText: klamrad rad som bryts vid mellanslag', () => {
     await act(async () => {
       fireEvent.touchStart(trigger);
       fireEvent.pointerDown(trigger, { pointerType: 'touch' });
+      vi.advanceTimersByTime(500);
+    });
+    await act(async () => {
+      fireEvent.touchEnd(trigger);
       fireEvent.pointerUp(trigger, { pointerType: 'touch' });
       fireEvent.click(trigger);
     });
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Fredrik Andits');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Fredrik Andits');
+    vi.useRealTimers();
   });
 });

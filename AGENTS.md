@@ -1,7 +1,7 @@
 # Project architecture rules
 
 - Render app emails statically and retain encoding validation; the legacy async renderer corrupts UTF-8 characters at stream chunk boundaries.
-- Fetch support ticket sender names separately by user_id; support_tickets references auth.users rather than profiles, so embedded profile joins fail.
+- Fetch support senders separately by user_id; tickets reference auth.users, so profile joins fail.
 
 - Save outreach template families atomically; reset per-channel lookup state per loop.
 - Keep the structured interview invitation locked and separate from editable automations.
@@ -32,7 +32,7 @@
 - Sync candidate membership, list caches and server counts across mutations and realtime so icons and totals agree; candidate moves go to the account-scoped bell, not toasts.
 - Stage menus and stage creation read/write the active candidate list's stage settings; default stage keys repeat across lists.
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
-- Touch profile list actions reuse row handlers and person membership.
+- Touch profile actions reuse row handlers and membership; text tooltips use cancellable holds, and stage menus clear previews.
 - Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes.
 
 - Restore the account-scoped JSON query snapshot synchronously at auth init and refetch silently, so cold starts skip skeletons.
