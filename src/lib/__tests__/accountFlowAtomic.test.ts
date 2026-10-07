@@ -23,6 +23,8 @@ CREATE FUNCTION copy_org_company_fields_to_member(uuid,uuid) RETURNS void LANGUA
   await db.exec(readFileSync('drizzle/migrations/0082_atomic_team_accept_and_workspace.sql','utf8'));
   await db.exec(readFileSync('drizzle/migrations/0083_team_accept_profile_result.sql','utf8'));
   await db.exec(readFileSync('drizzle/migrations/0084_atomic_team_invitation_creation.sql','utf8'));
+  await db.exec(readFileSync('drizzle/migrations/0085_protect_welcome_completion_state.sql','utf8'));
+  await db.exec('GRANT USAGE ON SCHEMA auth TO authenticated; GRANT SELECT,INSERT,UPDATE ON profiles TO authenticated;');
  },30000);
  afterAll(async()=>{await db?.close();});
  beforeEach(async()=>{await db.exec(`TRUNCATE profiles,user_roles,user_data_consents,organizations,organization_invitations; SET test.uid='${uid}'; SET test.fail_copy='no'; INSERT INTO profiles(user_id,role,company_name) VALUES('${uid}','job_seeker','Företag'),('${other}','job_seeker','Annat'); INSERT INTO organizations VALUES('${org}','Organisation'),('${org2}','Annat'); INSERT INTO organization_invitations(token_hash,organization_id,email,role) VALUES('token','${org}','person@example.test','recruiter');`);});
@@ -46,6 +48,17 @@ CREATE FUNCTION copy_org_company_fields_to_member(uuid,uuid) RETURNS void LANGUA
  });
  it('leaves other account untouched',async()=>{
   await welcome('Första'); expect((await db.query('SELECT onboarding_completed,first_name FROM profiles WHERE user_id=$1',[other])).rows[0]).toEqual({onboarding_completed:false,first_name:null});
+ });
+ it('blocks direct completion/reset but allows atomic save and later profile edits',async()=>{
+  await db.exec('SET ROLE authenticated');
+  try {
+   await expect(db.query('UPDATE profiles SET onboarding_completed=true WHERE user_id=$1',[uid])).rejects.toThrow('atomic welcome');
+   expect((await welcome('Första')).rows[0]?.result).toBe('completed');
+   await expect(db.query('UPDATE profiles SET onboarding_completed=false WHERE user_id=$1',[uid])).rejects.toThrow('cannot be reopened');
+   await db.query('UPDATE profiles SET first_name=$1 WHERE user_id=$2',['Senare ändring',uid]);
+   expect((await welcome('Gammal flik')).rows[0]?.result).toBe('already_completed');
+   expect((await db.query('SELECT first_name FROM profiles WHERE user_id=$1',[uid])).rows[0]).toEqual({first_name:'Senare ändring'});
+  } finally { await db.exec('RESET ROLE'); }
  });
  it('creates one membership through 1000 queued invite replays',async()=>{
   await db.exec(`UPDATE profiles SET role='employer' WHERE user_id='${uid}'`);
