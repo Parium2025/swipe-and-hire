@@ -1,13 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { verifyCaller } from "../_shared/service-auth.ts";
 import { sendLoggedTemplateEmail } from "../_shared/transactional-email-templates/send-logged-email.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -161,7 +157,8 @@ serve(async (req) => {
     await supabaseAdmin
       .from("organization_invitations")
       .update({ status: "revoked" })
-      .eq("id", pending.id);
+      .eq("id", pending.id)
+      .eq("status", "pending");
   }
 
   const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
@@ -181,6 +178,9 @@ serve(async (req) => {
     .select("id, email, role, status, expires_at, created_at")
     .single();
 
+  if (insertError?.code === "23505") {
+    return json({ error: "En inbjudan skapades samtidigt. Uppdatera sidan för att se den." }, 409);
+  }
   if (insertError || !invitation) {
     console.error("invitation insert failed", insertError);
     return json({ error: "Kunde inte skapa inbjudan." }, 500);

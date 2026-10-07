@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3";
 import { createClient } from "npm:@supabase/supabase-js@2.53.0";
 
 const supabase = createClient(
@@ -6,73 +8,16 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+const ConfirmSchema = z.object({ token: z.string().min(20).max(200) });
 
-interface ConfirmRequest {
-  token: string;
-}
-
-// Arbetsgivare: organisation + admin-roll skapas först när e-posten är
-// bekräftad — aldrig vid själva registreringen. Annars kunde vem som helst
-// registrera en obekräftad adress och direkt få arbetsgivarbehörighet.
+// The caller has already confirmed this user through Auth before provisioning.
 const provisionEmployerWorkspace = async (userId: string): Promise<void> => {
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, company_name')
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (profile?.role !== 'employer') return;
-
-    const { data: existingRole } = await supabase
-      .from('user_roles')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (existingRole) return;
-
-    // Inbjuden kollega: ingen egen organisation — kontot kopplas till
-    // bolaget när inbjudan accepteras.
-    const { data: authUser } = await supabase.auth.admin.getUserById(userId);
-    const email = (authUser?.user?.email || '').toLowerCase();
-    if (email) {
-      const { data: pendingInvite } = await supabase
-        .from('organization_invitations')
-        .select('id')
-        .ilike('email', email)
-        .eq('status', 'pending')
-        .gt('expires_at', new Date().toISOString())
-        .limit(1)
-        .maybeSingle();
-      if (pendingInvite) return;
-    }
-
-    const orgName = (profile.company_name || '').trim() || 'Min organisation';
-    const { data: org, error: orgError } = await supabase
-      .from('organizations')
-      .insert({ name: orgName })
-      .select('id')
-      .single();
-    if (orgError || !org) {
-      console.error('Failed to create employer organization:', orgError);
-      return;
-    }
-
-    await supabase.from('user_roles').insert({
-      user_id: userId,
-      role: 'admin',
-      organization_id: org.id,
-      is_active: true,
-    });
-    await supabase.from('profiles').update({ organization_id: org.id }).eq('user_id', userId);
-  } catch (e) {
-    console.error('provisionEmployerWorkspace failed:', e);
-  }
+  const { data, error: authError } = await supabase.auth.admin.getUserById(userId);
+  if (authError || !data.user?.email_confirmed_at || !data.user.email) throw new Error('Confirmed account required');
+  const { error } = await supabase.rpc('provision_confirmed_employer_workspace', {
+    p_user_id: userId, p_email: data.user.email,
+  });
+  if (error) throw error;
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -81,7 +26,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { token }: ConfirmRequest = await req.json();
+    const parsed = ConfirmSchema.safeParse(await req.json());
+    if (!parsed.success) return new Response(JSON.stringify({ error: "Ogiltig bekräftelselänk." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { token } = parsed.data;
 
     if (!token) {
       return new Response(JSON.stringify({ 

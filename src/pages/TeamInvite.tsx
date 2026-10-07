@@ -34,14 +34,21 @@ const TeamInvite = () => {
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const attempted = useRef(false);
+  const acceptingRef = useRef(false);
+  const activeUserRef = useRef(user?.id);
+  activeUserRef.current = user?.id;
   const destination = `/team-invite?token=${encodeURIComponent(token)}`;
 
   const accept = useCallback(async () => {
+    if (acceptingRef.current || !user?.id) return;
+    const acceptingUserId = user.id;
+    acceptingRef.current = true;
     setStatus("working");
     try {
       const { data, error } = await supabase.functions.invoke("team-invite-accept", {
         body: { token },
       });
+      if (activeUserRef.current !== acceptingUserId) return;
 
       if (error) {
         const serverMessage = await readServerError(error, "Inbjudan kunde inte accepteras.");
@@ -54,12 +61,16 @@ const TeamInvite = () => {
       forgetInvite();
       // Läs om profilen så välkomstguiden direkt vet att bolagets uppgifter är ärvda.
       await refreshProfile();
+      if (activeUserRef.current !== acceptingUserId) return;
       navigate('/home', { replace: true });
     } catch {
+      if (activeUserRef.current !== acceptingUserId) return;
       setStatus("error");
       setMessage("Något gick fel. Försök igen om en stund.");
+    } finally {
+      acceptingRef.current = false;
     }
-  }, [token, refreshProfile]);
+  }, [token, refreshProfile, user?.id, navigate]);
 
   // Förhandsvisningen kräver ingen inloggning. Den hämtas direkt med den
   // publika nyckeln och en tidsgräns, så en gammal/trasig inloggning i
@@ -128,11 +139,11 @@ const TeamInvite = () => {
   }, [authLoading]);
 
   useEffect(() => {
-    if (previewState !== "ready" || !preview || preview.alreadyAccepted || attempted.current) return;
+    if (previewState !== "ready" || !preview || attempted.current) return;
     if (authLoading && !authWaitExpired) return;
     attempted.current = true;
     if (!user) {
-      setStatus("needs-auth");
+      setStatus(preview.alreadyAccepted ? "already-accepted" : "needs-auth");
       return;
     }
     if ((user.email || "").toLowerCase() !== preview.email.toLowerCase()) {
