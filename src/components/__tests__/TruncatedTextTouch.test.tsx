@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
-// Regression: på mobil öppnade ett tryck tooltipen och Radix stängde den i
-// samma klick, så hela namnet (t.ex. i Team) syntes aldrig.
+// Touch tooltips require a deliberate hold; short taps retain the parent action.
 describe('TruncatedText på touchskärm', () => {
   const originalMatchMedia = window.matchMedia;
   const scrollWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollWidth');
@@ -31,8 +30,11 @@ describe('TruncatedText på touchskärm', () => {
     if (clientWidth) Object.defineProperty(HTMLElement.prototype, 'clientWidth', clientWidth);
   });
 
-  it('visar hela texten när man trycker på ett kapat namn, och stänger vid nästa tryck', async () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('visar hela texten först under långtryck och stänger vid nästa korta tryck', async () => {
     vi.resetModules();
+    vi.useFakeTimers();
     const { TruncatedText } = await import('@/components/ui/truncated-text');
     render(<TruncatedText text="Fredrik Andersson Långnamn" />);
     const trigger = screen.getByText('Fredrik Andersson Långnamn');
@@ -40,10 +42,17 @@ describe('TruncatedText på touchskärm', () => {
     await act(async () => {
       fireEvent.touchStart(trigger);
       fireEvent.pointerDown(trigger, { pointerType: 'touch' });
+      vi.advanceTimersByTime(499);
+    });
+    expect(trigger).toHaveAttribute('data-state', 'closed');
+    await act(async () => { vi.advanceTimersByTime(1); });
+    expect(trigger.getAttribute('data-state')).toMatch(/open/);
+    await act(async () => {
+      fireEvent.touchEnd(trigger);
       fireEvent.pointerUp(trigger, { pointerType: 'touch' });
       fireEvent.click(trigger);
     });
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Fredrik Andersson Långnamn');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Fredrik Andersson Långnamn');
     expect(trigger.getAttribute('data-state')).toMatch(/open/);
 
     await act(async () => {
@@ -57,11 +66,12 @@ describe('TruncatedText på touchskärm', () => {
   // Regression: Safari skickar emulerade mus-rörelser efter ett tryck (t.ex.
   // när en panel fälls ut under fingret). Radix öppnade då rutan i smyg och
   // användarens tryck stängde den i stället — namnet syntes aldrig.
-  it('ignorerar emulerade musrörelser och öppnar på första riktiga trycket', async () => {
+  it('ignorerar emulerade musrörelser och låter korta tryck nå föräldern utan tooltip', async () => {
     vi.resetModules();
     vi.useFakeTimers();
     const { TruncatedText } = await import('@/components/ui/truncated-text');
-    render(<TruncatedText text="Fredrik Andits Långnamn" />);
+    const parentClick = vi.fn();
+    render(<div onClick={parentClick}><TruncatedText text="Fredrik Andits Långnamn" /></div>);
     const trigger = screen.getByText('Fredrik Andits Långnamn');
 
     await act(async () => {
@@ -69,15 +79,52 @@ describe('TruncatedText på touchskärm', () => {
       vi.advanceTimersByTime(1000);
     });
     expect(trigger).toHaveAttribute('data-state', 'closed');
-    vi.useRealTimers();
 
     await act(async () => {
       fireEvent.touchStart(trigger);
       fireEvent.pointerDown(trigger, { pointerType: 'touch' });
+      vi.advanceTimersByTime(100);
+      fireEvent.touchEnd(trigger);
       fireEvent.pointerUp(trigger, { pointerType: 'touch' });
       fireEvent.click(trigger);
     });
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    expect(trigger).toHaveAttribute('data-state', 'closed');
+    expect(parentClick).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['touchMove', 'touchCancel'] as const)('avbryter långtryck vid %s', async (event) => {
+    vi.resetModules();
+    vi.useFakeTimers();
+    const { TruncatedText } = await import('@/components/ui/truncated-text');
+    render(<TruncatedText text="Ett långt kandidatsteg" />);
+    const trigger = screen.getByText('Ett långt kandidatsteg');
+    await act(async () => {
+      fireEvent.touchStart(trigger);
+      vi.advanceTimersByTime(200);
+      fireEvent[event](trigger);
+      vi.advanceTimersByTime(1000);
+    });
+    expect(trigger).toHaveAttribute('data-state', 'closed');
+  });
+
+  it('hindrar långtryckets efterföljande klick från att öppna förälderns meny', async () => {
+    vi.resetModules();
+    vi.useFakeTimers();
+    const { TruncatedText } = await import('@/components/ui/truncated-text');
+    const parentClick = vi.fn();
+    render(<div onClick={parentClick}><TruncatedText text="Ett långt steg med meny" /></div>);
+    const trigger = screen.getByText('Ett långt steg med meny');
+    await act(async () => {
+      fireEvent.touchStart(trigger);
+      vi.advanceTimersByTime(500);
+    });
+    await act(async () => {
+      fireEvent.touchEnd(trigger);
+      fireEvent.click(trigger);
+    });
     expect(trigger.getAttribute('data-state')).toMatch(/open/);
+    expect(parentClick).not.toHaveBeenCalled();
   });
 });
 
