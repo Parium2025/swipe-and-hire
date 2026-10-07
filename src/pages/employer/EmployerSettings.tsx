@@ -177,8 +177,8 @@ const EmployerSettings = () => {
       toast({
         title: enabled ? "Bakgrundsplats aktiverad" : "Bakgrundsplats inaktiverad",
         description: enabled 
-          ? "Vädret uppdateras automatiskt även när appen är i bakgrunden" 
-          : "Vädret uppdateras endast när appen är aktiv"
+          ? "Vädret uppdateras automatiskt även när appen är i bakgrunden." 
+          : "Vädret uppdateras endast när appen är aktiv."
       });
     } catch (error) {
       // Revert on error
