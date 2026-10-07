@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.39.3";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { requireServiceRoleOrCronSecret } from "../_shared/service-auth.ts";
 import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts'
 
