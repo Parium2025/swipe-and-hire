@@ -94,7 +94,7 @@ const EmployerNotificationsPanel = ({
           <>
             <span className="font-medium">I appen</span> är notisklockan i menyn,{' '}
             <span className="font-medium">Push</span> är skärmnotisen i mobilen och{' '}
-            <span className="font-medium">Mejl</span> går till din e-post. Inställningarna gäller bara
+            <span className="font-medium">Mejl</span> skickas till din e-postadress. Inställningarna gäller bara
             dig — dina kollegor styr sina egna.
           </>
         }

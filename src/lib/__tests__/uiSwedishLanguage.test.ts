@@ -41,4 +41,19 @@ describe('consistent Swedish UI language', () => {
   it('keeps onboarding profile targeting independent of translated labels', () => {
     expect(read('src/components/AppSidebar.tsx')).toContain("data-onboarding={item.url === '/profile' ? 'min-profil' : undefined}");
   });
+
+  it('uses precise notification wording for both audiences', () => {
+    for (const file of ['src/components/JobSeekerNotificationSettings.tsx', 'src/components/employer/settings/EmployerNotificationsPanel.tsx']) {
+      expect(read(file)).toContain('skickas till din e-postadress.');
+    }
+    expect(read('src/components/JobSeekerNotificationSettings.tsx')).toContain('reglagen styr bara hur du aviseras om dem.');
+  });
+
+  it('spells profile media controls consistently', () => {
+    const source = read('src/pages/Profile.tsx');
+    for (const text of ['Anpassa coverbild', 'Ta bort coverbild', 'Lägg till coverbild', 'Laddar upp coverbild…']) {
+      expect(source).toContain(text);
+    }
+    expect(source).not.toContain('cover-bilden för redigering.');
+  });
 });
