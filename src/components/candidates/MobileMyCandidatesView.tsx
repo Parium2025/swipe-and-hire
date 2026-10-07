@@ -410,14 +410,15 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
   /** Långtryck på en trunkerad etikett visar hela namnet (tooltip). */
   const handleStagePointerDown = useCallback((stage: string, pointerType: string, target?: EventTarget | null, point?: { x: number; y: number }) => {
     if (pointerType === 'mouse') return;
+    clearLongPress();
+    longPressFiredRef.current = false;
+    setPreviewStage(null);
     pressStartRef.current = point ?? null;
     // Trepunktsmenyn har sin egen tunnel – inget långtryck där.
     if (target instanceof HTMLElement && target.closest('[data-stage-menu]')) return;
     const cfg = stageConfig[stage];
     if (!cfg || cfg.label.length <= 10) return;
 
-    longPressFiredRef.current = false;
-    clearLongPress();
     previewDelayRef.current = setTimeout(() => {
       previewDelayRef.current = undefined;
       longPressFiredRef.current = true;
@@ -427,7 +428,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         try { navigator.vibrate?.(8); } catch { /* ignorera */ }
       }
-    }, 420);
+    }, 500);
   }, [stageConfig, clearLongPress]);
 
   // Stäng tooltip direkt när man trycker någon annanstans
@@ -580,7 +581,7 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
               {cfg.label.length > 10 ? (
                   <TooltipProvider delayDuration={200}>
                     <Tooltip
-                      open={isTouchCapable ? previewStage === stage : undefined}
+                       open={openStageMenu ? false : isTouchCapable ? previewStage === stage : undefined}
                       // Touch: bara eget långtryck och eget tryck utanför styr tooltipen.
                       // Safaris emulerade mus-/scrollhändelser får aldrig öppna eller stänga den.
                       onOpenChange={isTouchCapable ? () => {} : undefined}
@@ -620,9 +621,17 @@ export const MobileMyCandidatesView = memo(function MobileMyCandidatesView({
                       useJobDetailsTriggerStyle
                       disableTouchTrigger={false}
                       centerOnStageCard
-                      onTriggerPointerDown={() => setActiveTab(stage)}
+                       onTriggerPointerDown={() => {
+                         clearLongPress();
+                         setPreviewStage(null);
+                         setActiveTab(stage);
+                       }}
                       open={openStageMenu === stage}
                       onOpenChange={(nextOpen) => {
+                         if (nextOpen) {
+                           clearLongPress();
+                           setPreviewStage(null);
+                         }
                         setOpenStageMenu((prev) => {
                           if (nextOpen) return stage;
                           return prev === stage ? null : prev;
