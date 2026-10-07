@@ -28,6 +28,8 @@ import { fetchPriority } from '@/lib/fetchPriority';
 import { RequiredMark } from '@/components/wizard/RequiredMark';
 import TunnelSelectField from '@/components/tunnel/TunnelSelectField';
 import WizardFooter from '@/components/wizard/WizardFooter';
+import { completeJobseekerWelcome, signalWelcomeCompletion } from '@/lib/welcomeCompletion';
+import { useWelcomeCompletionSync } from '@/hooks/useWelcomeCompletionSync';
 
 
 interface WelcomeTunnelProps {
@@ -62,7 +64,7 @@ const purgeForeignWelcomeDrafts = (uid: string) => {
 };
 
 const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
-  const { profile, updateProfile, refreshProfile, user, signOut } = useAuth();
+  const { profile, refreshProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const userId = user?.id ?? null;
 
@@ -102,6 +104,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const activeUserRef = useRef(user?.id);
+  activeUserRef.current = user?.id;
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current); }, []);
   const [redirectState, setRedirectState] = useState<'idle' | 'checking' | 'already_completed'>('idle');
 
 
@@ -120,10 +127,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     }
     setRedirectState('already_completed');
     console.log(`[WelcomeTunnel] redirectIfCompleted: ${reason}`);
-    setTimeout(() => {
-      onComplete();
+    const completedUserId = user?.id;
+    redirectTimerRef.current = setTimeout(() => {
+      if (activeUserRef.current === completedUserId) onComplete();
     }, delay);
-  }, [onComplete]);
+  }, [onComplete, user?.id, WELCOME_STEP_KEY]);
 
   // Kontrollera direkt vid mount och när profilen laddas
   useEffect(() => {
@@ -132,27 +140,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     }
   }, [profile?.onboarding_completed, redirectState, redirectIfCompleted]);
 
-  // Kontrollera när fliken blir synlig igen (t.ex. användare gick till mobil och tillbaka)
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && currentStep >= 1 && currentStep <= 6 && redirectState !== 'already_completed') {
-        setRedirectState('checking');
-        refreshProfile().then(() => {
-          if (profile?.onboarding_completed) {
-            redirectIfCompleted('tab became visible, profile already completed');
-          } else {
-            setRedirectState('idle');
-          }
-        }).catch((err) => {
-          console.warn('refreshProfile on visibility change failed:', err);
-          setRedirectState('idle');
-        });
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [currentStep, refreshProfile, profile?.onboarding_completed, redirectState, redirectIfCompleted]);
-
+  useWelcomeCompletionSync(user?.id, isSubmitting || redirectState === 'already_completed', async () => {
+    const completedUserId = user?.id;
+    if (!completedUserId || activeUserRef.current !== completedUserId) return;
+    await refreshProfile();
+    if (activeUserRef.current === completedUserId) redirectIfCompleted('server confirmed completion on another device', 0);
+  });
 
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
@@ -1116,56 +1109,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const handleSubmit = async () => {
+    if (submittingRef.current || !user?.id || isRedirectingRef.current) return;
+    const submittingUserId = user.id;
+    submittingRef.current = true;
     setIsSubmitting(true);
     try {
-      // 🔒 Säkerhetsventil: om profilen redan är slutförd på annan enhet/flik,
-      // skriv aldrig över den. Rensa utkast och omdirigera istället.
-      if (profile?.onboarding_completed) {
-        redirectIfCompleted('handleSubmit detected already completed profile');
-        return;
-      }
-
-      if (!user?.id) {
-        throw new Error('Not authenticated');
-      }
-
-      // 🔒 Färsk kontroll direkt mot databasen (lokalt profil-state kan vara
-      // gammalt om tunneln slutfördes på en annan enhet under tiden).
-      try {
-        const { data: liveProfile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if ((liveProfile as { onboarding_completed?: boolean } | null)?.onboarding_completed) {
-          await refreshProfile().catch(() => {});
-          redirectIfCompleted('handleSubmit: live DB check says profile already completed');
-          return;
-        }
-      } catch (err) {
-        console.warn('[WelcomeTunnel] live completion check failed:', err);
-      }
-
-
-      // First, save consent
-      if (formData.consentGiven) {
-        const { error: consentError } = await supabase
-          .from('user_data_consents')
-          .upsert({
-            user_id: user.id,
-            consent_given: true,
-            consent_date: new Date().toISOString(),
-          }, {
-            onConflict: 'user_id'
-          });
-
-        if (consentError) {
-          console.error('Consent save failed:', consentError);
-          throw new Error('Could not save consent: ' + consentError.message);
-        }
-      }
-
-      const result = await updateProfile({
+      const result = await completeJobseekerWelcome({
         first_name: formData.firstName,
         last_name: formData.lastName,
         bio: formData.bio,
@@ -1179,18 +1128,19 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         availability: formData.availability,
         interests: formData.interests,
         cv_url: formData.cvUrl,
-        cv_filename: formData.cvFileName,
+        profile_file_name: formData.cvFileName,
         // Fix: Properly save profile media and cover image
         profile_image_url: formData.profileMediaType === 'video' ? null : formData.profileImageUrl,
         video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
-        cover_image_url: formData.coverImageUrl || null, // Save cover image correctly
-        onboarding_completed: true // Mark onboarding as completed
-      } as any);
-      
-
-      if (result?.error) {
-        console.error('Profile update failed:', result.error);
-        throw new Error('Profile update failed: ' + result.error);
+        cover_image_url: formData.coverImageUrl || null,
+      }, formData.consentGiven);
+      if (activeUserRef.current !== submittingUserId) return;
+      signalWelcomeCompletion(submittingUserId);
+      await refreshProfile();
+      if (activeUserRef.current !== submittingUserId) return;
+      if (result === 'already_completed') {
+        redirectIfCompleted('atomic save returned already completed', 0);
+        return;
       }
       
       setCurrentStep(totalSteps - 1); // Go to completion step
@@ -1200,11 +1150,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
 
 
-      setTimeout(() => {
-        onComplete();
+      redirectTimerRef.current = setTimeout(() => {
+        if (activeUserRef.current === submittingUserId) onComplete();
       }, 2000);
 
     } catch (error) {
+      if (activeUserRef.current !== submittingUserId) return;
       console.error('Error in handleSubmit:', error);
       const message = error instanceof Error ? error.message : String(error ?? '');
       const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
@@ -1228,7 +1179,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       });
 
     } finally {
-      setIsSubmitting(false);
+      submittingRef.current = false;
+      if (activeUserRef.current === submittingUserId) setIsSubmitting(false);
     }
   };
 

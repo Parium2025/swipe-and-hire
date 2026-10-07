@@ -1,13 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { verifyCaller } from "../_shared/service-auth.ts";
 import { sendLoggedTemplateEmail } from "../_shared/transactional-email-templates/send-logged-email.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -140,51 +136,20 @@ serve(async (req) => {
     }
   }
 
-  // Expire stale pending invitations before checking for duplicates.
-  await supabaseAdmin
-    .from("organization_invitations")
-    .update({ status: "expired" })
-    .eq("organization_id", organizationId)
-    .eq("status", "pending")
-    .lt("expires_at", new Date().toISOString());
-
-  const { data: pending } = await supabaseAdmin
-    .from("organization_invitations")
-    .select("id")
-    .eq("organization_id", organizationId)
-    .eq("status", "pending")
-    .ilike("email", email)
-    .maybeSingle();
-
-  if (pending) {
-    // Re-inviting replaces the old invitation so the newest link is the valid one.
-    await supabaseAdmin
-      .from("organization_invitations")
-      .update({ status: "revoked" })
-      .eq("id", pending.id);
-  }
-
   const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
   const tokenHash = await sha256Hex(token);
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-  const { data: invitation, error: insertError } = await supabaseAdmin
-    .from("organization_invitations")
-    .insert({
-      organization_id: organizationId,
-      email,
-      role,
-      token_hash: tokenHash,
-      invited_by: caller.userId,
-      expires_at: expiresAt.toISOString(),
-    })
-    .select("id, email, role, status, expires_at, created_at")
-    .single();
-
+  const { data: created, error: insertError } = await supabaseAdmin.rpc('create_team_invitation', {
+    p_inviter: caller.userId, p_organization: organizationId, p_email: email, p_role: role, p_token_hash: tokenHash,
+  });
+  if (created?.code === 'in_progress') {
+    return json({ error: "En inbjudan till adressen skapades nyss. Vänta en stund innan du försöker igen." }, 409);
+  }
+  const invitation = created?.invitation;
   if (insertError || !invitation) {
-    console.error("invitation insert failed", insertError);
+    console.error("invitation creation failed", insertError?.code);
     return json({ error: "Kunde inte skapa inbjudan." }, 500);
   }
+  const expiresAt = new Date(invitation.expires_at);
 
   const [{ data: org }, { data: inviterProfile }] = await Promise.all([
     supabaseAdmin.from("organizations").select("name").eq("id", organizationId).maybeSingle(),
@@ -224,7 +189,8 @@ serve(async (req) => {
     await supabaseAdmin
       .from("organization_invitations")
       .update({ status: "revoked" })
-      .eq("id", invitation.id);
+      .eq("id", invitation.id)
+      .eq("status", "pending");
     return json({ error: "Inbjudan kunde inte mejlas. Försök igen." }, 502);
   }
 

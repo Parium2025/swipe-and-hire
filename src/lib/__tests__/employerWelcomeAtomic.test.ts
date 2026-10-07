@@ -90,7 +90,9 @@ describe('Atomic employer welcome completion', () => {
     const source = readFileSync('src/components/EmployerWelcomeTunnel.tsx', 'utf8');
     expect(source).toContain('completeEmployerWelcome({');
     expect(source).not.toContain('await updateProfile(');
-    expect(source).toContain('event.key === welcomeCompletionKey(userId)');
-    expect(source).toContain('if (!user?.id || isReplay) return');
+    expect(source).toContain('useWelcomeCompletionSync(user?.id, isReplay || isSubmitting');
+    const sync = readFileSync('src/hooks/useWelcomeCompletionSync.ts', 'utf8');
+    expect(sync).toContain('event.key === welcomeCompletionKey(userId)');
+    expect(sync).toContain('if (!userId || disabled) return');
   });
 });

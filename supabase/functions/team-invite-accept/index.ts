@@ -1,12 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { verifyCaller } from "../_shared/service-auth.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -95,136 +91,26 @@ serve(async (req) => {
   if (caller instanceof Response) return caller;
   if (!caller.userId) return json({ error: "Unauthorized" }, 401);
 
-  const { data: invitation, error } = await supabaseAdmin
-    .from("organization_invitations")
-    .select("id, organization_id, email, role, status, expires_at")
-    .eq("token_hash", tokenHash)
-    .maybeSingle();
-
-  if (error || !invitation) return json({ error: "Inbjudan hittades inte." }, 404);
-  if (invitation.status === "accepted") {
-    return json({ error: "Inbjudan är redan använd." }, 409);
-  }
-  if (invitation.status !== "pending") {
-    return json({ error: "Inbjudan är återkallad." }, 409);
-  }
-  if (new Date(invitation.expires_at).getTime() < Date.now()) {
-    await supabaseAdmin
-      .from("organization_invitations")
-      .update({ status: "expired" })
-      .eq("id", invitation.id);
-    return json({ error: "Inbjudan har gått ut." }, 410);
-  }
-
-  // The invitation is bound to the invited address — no one else can claim it.
-  const callerEmail = (caller.email || "").toLowerCase();
-  if (!callerEmail || callerEmail !== invitation.email.toLowerCase()) {
-    return json(
-      { error: "Inbjudan gäller en annan e-postadress. Logga in med den adressen." },
-      403,
-    );
-  }
-
-  // En adress kan inte vara både jobbsökare och teammedlem.
-  const { data: callerProfile } = await supabaseAdmin
-    .from("profiles")
-    .select("role")
-    .eq("user_id", caller.userId)
-    .maybeSingle();
-  if (callerProfile?.role === "job_seeker") {
-    return json(
-      { error: "Den här adressen har redan ett jobbsökarkonto. Be om en inbjudan till din företagsmejl." },
-      409,
-    );
-  }
-
-  // En person tillhör bara ett företag åt gången.
-  const { data: otherOrgRole } = await supabaseAdmin
-    .from("user_roles")
-    .select("id")
-    .eq("user_id", caller.userId)
-    .eq("is_active", true)
-    .neq("organization_id", invitation.organization_id)
-    .limit(1)
-    .maybeSingle();
-  if (otherOrgRole) {
-    return json(
-      { error: "Ditt konto tillhör redan ett annat företag på Parium. Be om en inbjudan till en annan jobbmejl." },
-      409,
-    );
-  }
-
-  // Lås inbjudan atomiskt: bara ett klick/en flik kan använda den, även om
-  // "Gå med" trycks två gånger eller länken öppnas på två enheter samtidigt.
-  const { data: claimed } = await supabaseAdmin
-    .from("organization_invitations")
-    .update({ status: "accepted", accepted_at: new Date().toISOString(), accepted_by: caller.userId })
-    .eq("id", invitation.id)
-    .eq("status", "pending")
-    .select("id");
-  if (!claimed || claimed.length === 0) {
-    return json({ error: "Inbjudan är redan använd." }, 409);
-  }
-  const releaseClaim = () =>
-    supabaseAdmin
-      .from("organization_invitations")
-      .update({ status: "pending", accepted_at: null, accepted_by: null })
-      .eq("id", invitation.id);
-
-  const { data: existingRole } = await supabaseAdmin
-    .from("user_roles")
-    .select("id, is_active, role")
-    .eq("user_id", caller.userId)
-    .eq("organization_id", invitation.organization_id)
-    .maybeSingle();
-
-  // Aktiv medlem redan: rör aldrig rollen (en admin får aldrig nedgraderas).
-  if (existingRole?.is_active) {
-    return json({ success: true, alreadyMember: true });
-  }
-
-  if (existingRole) {
-    const { error: updateRoleError } = await supabaseAdmin
-      .from("user_roles")
-      .update({ role: invitation.role, is_active: true })
-      .eq("id", existingRole.id);
-    if (updateRoleError) {
-      console.error("role update failed", updateRoleError);
-      await releaseClaim();
-      return json({ error: "Kunde inte koppla dig till teamet." }, 500);
-    }
-  } else {
-    const { error: insertRoleError } = await supabaseAdmin.from("user_roles").insert({
-      user_id: caller.userId,
-      organization_id: invitation.organization_id,
-      role: invitation.role,
-      is_active: true,
-    });
-    if (insertRoleError) {
-      console.error("role insert failed", insertRoleError);
-      await releaseClaim();
-      return json({ error: "Kunde inte koppla dig till teamet." }, 500);
-    }
-  }
-
-  await supabaseAdmin
-    .from("profiles")
-    .update({ organization_id: invitation.organization_id, joined_via_invite: true })
-    .eq("user_id", caller.userId);
-
-  // Bolagets uppgifter (namn, logga, bransch m.m.) ärvs från bolaget —
-  // medlemmen fyller bara i sina personliga uppgifter i välkomstguiden.
-  const { error: copyError } = await supabaseAdmin.rpc("copy_org_company_fields_to_member", {
+  const { data, error } = await supabaseAdmin.rpc("accept_team_invitation", {
     p_user_id: caller.userId,
-    p_organization_id: invitation.organization_id,
+    p_email: caller.email || "",
+    p_token_hash: tokenHash,
   });
-  if (copyError) console.error("company copy failed", copyError);
-
-  const { data: org } = await supabaseAdmin
-    .from("organizations")
-    .select("name")
-    .eq("id", invitation.organization_id)
-    .maybeSingle();
-
-  return json({ success: true, organizationName: org?.name ?? null, role: invitation.role });
+  if (error) {
+    console.error("atomic invitation acceptance failed", error.code);
+    return json({ error: "Kunde inte koppla dig till teamet. Försök igen." }, 500);
+  }
+  if (data?.success) return json(data);
+  const failures: Record<string, [number, string]> = {
+    not_found: [404, "Inbjudan hittades inte."],
+    wrong_email: [403, "Inbjudan gäller en annan e-postadress. Logga in med den adressen."],
+    already_used: [409, "Inbjudan är redan använd."],
+    revoked: [409, "Inbjudan är återkallad."],
+    expired: [410, "Inbjudan har gått ut."],
+    other_org: [409, "Ditt konto tillhör redan ett annat företag på Parium. Be om en inbjudan till en annan jobbmejl."],
+    profile_required: [409, "Du behöver ett arbetsgivarkonto med den inbjudna adressen. Jobbsökarkonton kan inte gå med i team."],
+    invalid_role: [409, "Inbjudan har en ogiltig roll. Be om en ny inbjudan."],
+  };
+  const [status, message] = failures[data?.code] ?? [500, "Kunde inte koppla dig till teamet. Försök igen."];
+  return json({ error: message }, status);
 });

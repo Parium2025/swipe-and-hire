@@ -4196,6 +4196,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_team_invitation: {
+        Args: { p_email: string; p_token_hash: string; p_user_id: string }
+        Returns: Json
+      }
       application_answer_is_present: {
         Args: { answer: Json }
         Returns: boolean
@@ -4379,6 +4383,10 @@ export type Database = {
         Args: { p_preferences?: Json; p_profile: Json }
         Returns: string
       }
+      complete_jobseeker_welcome: {
+        Args: { p_consent?: boolean; p_profile: Json }
+        Returns: string
+      }
       complete_past_interviews: { Args: never; Returns: number }
       complete_push_notifications: {
         Args: { p_error?: string; p_failed_ids: number[]; p_sent_ids: number[] }
@@ -4452,6 +4460,16 @@ export type Database = {
       create_system_performance_alert: {
         Args: { _body: string; _metadata?: Json; _title: string }
         Returns: string
+      }
+      create_team_invitation: {
+        Args: {
+          p_email: string
+          p_inviter: string
+          p_organization: string
+          p_role: string
+          p_token_hash: string
+        }
+        Returns: Json
       }
       cron_auth_header: { Args: never; Returns: Json }
       delete_candidate_list_safely: {
@@ -4988,6 +5006,10 @@ export type Database = {
       parium_synonyms: { Args: { _tok: string }; Returns: string[] }
       pause_criteria_eval_run: {
         Args: { p_reason: string; p_run_id: string }
+        Returns: undefined
+      }
+      provision_confirmed_employer_workspace: {
+        Args: { p_email: string; p_user_id: string }
         Returns: undefined
       }
       purge_completed_deletion_rows: { Args: never; Returns: number }

@@ -1,6 +1,6 @@
 # Project architecture rules
 
-- Render app emails statically and retain encoding validation; the legacy async renderer corrupts UTF-8 characters at stream chunk boundaries.
+- Render emails statically with encoding validation; async streaming corrupts UTF-8 at chunk boundaries.
 - Fetch support senders separately by user_id; tickets reference auth.users, so profile joins fail.
 
 - Save outreach template families atomically; reset per-channel lookup state per loop.
@@ -8,7 +8,7 @@
 - Mobile shells stay `100dvh`; keyboard-heavy pages scroll internally; long employer text areas scroll inside bounded height; browser chrome never covers content.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; blur when the iOS keyboard closes.
 - Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
-- Employer welcome: drafts until confirmation, replay writes nothing, valid links only; row-locked atomic first-commit-wins save; same-user signals/return checks close stale guides without reload.
+- Welcome drafts until confirmation; replay writes nothing; valid links only; row-locked first-save-wins; account signals/visible checks close stale guides across devices without reload.
 - Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Shared review branding reads the trimmed public-profile RPC under its own cache key; full profile rows stay private. Colleagues may read only each other's current profile image via `can_view_colleague_profile_image`, never originals, CVs or videos.
@@ -19,7 +19,7 @@
 - Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks across accounts.
 - Candidate skeletons use per-user/list server totals.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
-- Company identity is organizational; invitees inherit it, skip setup, and chat updates live.
+- Company identity is shared; invitees inherit it, skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
 - Autofill keeps each field's own surface; never repaint it globally.
 - Auth is isolated per tab; device limits are per account with two devices. Cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping. Preserve loop/reload/boot guards and tests.

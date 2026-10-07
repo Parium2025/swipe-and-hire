@@ -176,4 +176,13 @@ describe('TeamInvite', () => {
     expect(mocks.invoke).toHaveBeenCalledTimes(2);
     expect(mocks.refreshProfile).toHaveBeenCalledTimes(1);
   });
+  it('går vidare för rätt mottagare när inbjudan redan är accepterad', async () => {
+    mocks.auth.user = { id: 'invited-employer', email: 'ny@firma.se' };
+    mocks.invoke.mockResolvedValueOnce({ data: { ...PREVIEW.data, alreadyAccepted: true }, error: null })
+      .mockResolvedValue({ data: { success: true, alreadyMember: true }, error: null });
+    renderInvite(`/team-invite?token=${'a'.repeat(64)}`);
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/home'));
+    expect(mocks.invoke).toHaveBeenCalledTimes(2);
+    expect(mocks.refreshProfile).toHaveBeenCalledTimes(1);
+  });
 });
