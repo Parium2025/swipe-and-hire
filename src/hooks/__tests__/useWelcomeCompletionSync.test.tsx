@@ -26,4 +26,15 @@ describe('Welcome cross-device synchronization',()=>{
   const {rerender}=renderHook(({id,disabled})=>useWelcomeCompletionSync(id,disabled,completed),{initialProps:{id:'one',disabled:false}});rerender({id:'two',disabled:true});
   await act(async()=>{resolveRead(true);await vi.advanceTimersByTimeAsync(30000);});expect(completed).not.toHaveBeenCalled();expect(check).toHaveBeenCalledTimes(1);
  });
+ it('checks immediately when a hidden device returns after five hours',async()=>{
+  let visibility='hidden';
+  const spy=vi.spyOn(document,'visibilityState','get').mockImplementation(()=>visibility as DocumentVisibilityState);
+  try {
+   const completed=vi.fn();renderHook(()=>useWelcomeCompletionSync('one',false,completed));
+   await act(async()=>{await vi.advanceTimersByTimeAsync(5*60*60*1000);});expect(check).not.toHaveBeenCalled();
+   check.mockResolvedValue(true);visibility='visible';
+   await act(async()=>{document.dispatchEvent(new Event('visibilitychange'));});
+   expect(completed).toHaveBeenCalledTimes(1);expect(check).toHaveBeenCalledWith('one');
+  } finally {spy.mockRestore();}
+ });
 });
