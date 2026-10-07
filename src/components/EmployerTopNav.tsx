@@ -49,13 +49,13 @@ import { useNavOverflowGuard } from '@/hooks/useNavOverflowGuard';
 // Dashboard dropdown items
 const dashboardItems = [
   { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
-  { title: "Mina Annonser", url: "/my-jobs", icon: Briefcase },
+  { title: "Mina annonser", url: "/my-jobs", icon: Briefcase },
 ];
 
 // Kandidater dropdown items
 const candidateItems = [
-  { title: "Alla Kandidater", url: "/candidates", icon: Users },
-  { title: "Mina Kandidater", url: "/my-candidates", icon: UserCheck },
+  { title: "Alla kandidater", url: "/candidates", icon: Users },
+  { title: "Mina kandidater", url: "/my-candidates", icon: UserCheck },
   { title: "Statistik", url: "/reports", icon: BarChart3 },
 ];
 
@@ -69,8 +69,8 @@ const businessItems = [
 
 // Profil dropdown items (ersätter Support)
 const profileItems = [
-  { title: "Min Profil", url: "/profile", icon: UserCircle },
-  { title: "Hjälp & Support", url: "/support", icon: HelpCircle },
+  { title: "Min profil", url: "/profile", icon: UserCircle },
+  { title: "Hjälp & support", url: "/support", icon: HelpCircle },
 ];
 
 // Dropdown styling matching the sort dropdown - compact and centered
@@ -180,7 +180,7 @@ function EmployerTopNav({ extraRight }: { extraRight?: React.ReactNode }) {
     const lastName = profile?.last_name || '';
     if (firstName && lastName) return `${firstName} ${lastName}`;
     if (firstName) return firstName;
-    return 'Min Profil';
+    return 'Min profil';
   };
 
   const getCount = (url: string) => {

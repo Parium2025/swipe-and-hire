@@ -322,7 +322,7 @@ const MyApplications = () => {
       <section>
         <div className="text-center mb-5">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
-            Mina Ansökningar
+            Mina ansökningar
           </h1>
           <p className="text-sm text-white">Dina inskickade jobbansökningar</p>
         </div>

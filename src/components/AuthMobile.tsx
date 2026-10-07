@@ -1019,7 +1019,7 @@ const AuthMobile = ({
                               <div className="flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
                                 <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 flex-shrink-0" />
                                 <p className="text-xs text-white leading-snug">
-                                  Ange företagets officiella e-post. Denna mail kommer att visas för jobbsökarna i annonsen under "kontakt".
+                                  Ange företagets officiella e-postadress. Adressen visas för jobbsökare under "Kontakt" i annonsen.
                                 </p>
                               </div>
                             </AuthFieldNotice>

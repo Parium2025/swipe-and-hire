@@ -394,11 +394,11 @@ const SavedJobs = () => {
         <div className="text-center mb-5">
           <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
             {activeTab === 'skipped'
-              ? (skeletonCount > 0 ? `Skippade Jobb (${skeletonCount})` : 'Skippade Jobb')
-              : (skeletonCount > 0 ? `Sparade Jobb (${skeletonCount})` : 'Sparade Jobb')}
+              ? (skeletonCount > 0 ? `Skippade jobb (${skeletonCount})` : 'Skippade jobb')
+              : (skeletonCount > 0 ? `Sparade jobb (${skeletonCount})` : 'Sparade jobb')}
           </h1>
           <p className="text-sm text-white">
-            {activeTab === 'skipped' ? 'Jobb du har svipat förbi — återställ de du ångrar' : 'Dina favorit-jobb samlade på ett ställe'}
+            {activeTab === 'skipped' ? 'Jobb du har svept förbi — återställ dem du ångrar.' : 'Dina favoritjobb samlade på ett ställe.'}
           </p>
         </div>
         <JobCardGridSkeleton count={skeletonCount} />
@@ -411,10 +411,10 @@ const SavedJobs = () => {
     <div className="responsive-container-wide [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-5">
         <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight mb-2">
-          {activeTab === 'saved' ? `Sparade Jobb (${sortedJobs.length})` : `Skippade Jobb (${filteredSkippedJobs.length})`}
+          {activeTab === 'saved' ? `Sparade jobb (${sortedJobs.length})` : `Skippade jobb (${filteredSkippedJobs.length})`}
         </h1>
         <p className="text-sm text-white">
-          {activeTab === 'saved' ? 'Dina favorit-jobb samlade på ett ställe' : 'Jobb du har svipat förbi — återställ de du ångrar'}
+          {activeTab === 'saved' ? 'Dina favoritjobb samlade på ett ställe.' : 'Jobb du har svept förbi — återställ dem du ångrar.'}
         </p>
       </div>
 
@@ -627,7 +627,7 @@ const SavedJobs = () => {
                 <EyeOff className="h-12 w-12 text-white mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Inga skippade jobb</h3>
                 <p className="text-white mb-4">
-                  Jobb du svipat förbi i swipe-läget hamnar här.
+                  Jobb du har svept förbi i svepläget hamnar här.
                 </p>
                 <Button onClick={() => navigate('/search-jobs')} variant="glass">
                   Sök jobb

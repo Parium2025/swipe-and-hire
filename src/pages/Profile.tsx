@@ -2198,9 +2198,9 @@ const Profile = () => {
    return (
      <div className="responsive-container-wide space-y-6 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
       <div className="text-center mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Min Profil</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-white tracking-tight">Min profil</h1>
         <p className="text-sm text-white mt-1">
-          Hantera din personliga information
+          Hantera din personliga information.
         </p>
         {!isEmployer && (
           <p className="mt-1 text-xs text-white">
