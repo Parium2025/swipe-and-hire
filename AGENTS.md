@@ -8,13 +8,13 @@
 - Mobile shells stay `100dvh`; keyboard-heavy pages scroll internally; long employer text areas scroll inside bounded height; browser chrome never covers content.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; blur when the iOS keyboard closes.
 - Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
-- Employer welcome drafts until confirmation; replay trials write nothing; only valid meeting links become defaults.
+- Employer welcome: drafts until confirmation, replay writes nothing, valid links only; row-locked atomic first-commit-wins save; same-user signals/return checks close stale guides without reload.
 - Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Shared review branding reads the trimmed public-profile RPC under its own cache key; full profile rows stay private. Colleagues may read only each other's current profile image via `can_view_colleague_profile_image`, never originals, CVs or videos.
 - Upgrade candidate portraits to full size only after it decodes, so initials never flash.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over locally added application events, and keep cached report data account-scoped.
-- Resolve colleague-owned candidate history and ratings through the authorized organization-member RPC; candidate-list ratings stay scoped to the signed-in account, because user_roles SELECT exposes only the caller and RLS alone does not set display priority.
+- Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
 - Drop delayed account-scoped fetches after account switch/sign-out so they can't overwrite the new cache.
 - Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks across accounts.
 - Candidate skeletons use per-user/list server totals.
