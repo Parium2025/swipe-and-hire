@@ -1122,7 +1122,7 @@ const AuthDesktop = ({
                               {passwordStrength >= 5 && 'Starkt lösenord'}
                             </p>
                             <p className="text-xs text-white mt-2">
-                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken)
+                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken).
                             </p>
                           </div>
                         )}
