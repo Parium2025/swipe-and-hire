@@ -10,7 +10,8 @@ describe('sentence punctuation in shared UI', () => {
       const source = read(`src/components/${file}.tsx`);
       expect(source).toContain('Vänligen ange företagsnamn.');
       expect(source).toContain('Vänligen välj bransch.');
-      expect(source).toContain('Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken).');
+      expect(source).toContain('Lösenordet måste innehålla minst 7 tecken (bokstäver, siffror eller symboler).');
+      expect(source).toContain('Medelstarkt lösenord');
     });
   }
 

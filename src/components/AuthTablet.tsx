@@ -472,7 +472,7 @@ const AuthTablet = ({
         if (currentPassword.length < 7) {
           toast({
             title: "För kort lösenord",
-            description: "Lösenordet måste vara minst 7 tecken.",
+            description: "Lösenordet måste innehålla minst 7 tecken.",
             variant: "destructive"
           });
           setLoading(false);
@@ -1121,12 +1121,12 @@ const AuthTablet = ({
                               </div>
                               <p className="text-sm text-white mt-1">
                                 {passwordStrength < 3 && 'Svagt lösenord'}
-                                {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
+                                {passwordStrength >= 3 && passwordStrength < 5 && 'Medelstarkt lösenord'}
                                 {passwordStrength >= 5 && 'Starkt lösenord'}
                               </p>
                             </div>
                             <p className="text-xs text-white mt-2">
-                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken).
+                              Lösenordet måste innehålla minst 7 tecken (bokstäver, siffror eller symboler).
                             </p>
                           </>
                         )}

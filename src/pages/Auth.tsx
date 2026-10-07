@@ -419,7 +419,7 @@ const Auth = () => {
     if (newPassword.length < 7) {
       toast({
         title: "Lösenordet är för kort",
-        description: "Lösenordet måste vara minst 7 tecken.",
+        description: "Lösenordet måste innehålla minst 7 tecken.",
         variant: "destructive"
       });
       return;
