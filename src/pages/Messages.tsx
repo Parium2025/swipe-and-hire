@@ -416,8 +416,8 @@ export default function Messages() {
       >
         <div className="flex items-center justify-center gap-3 relative min-h-10">
         <div className="flex items-center gap-3">
-          <div className="absolute left-0 sm:static w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-            <MessageSquare className="h-5 w-5 text-white" />
+          <div className="w-10 h-10 shrink-0 rounded-full bg-sidebar-foreground/10 flex items-center justify-center" aria-hidden="true">
+            <MessageSquare className="h-5 w-5 text-pure-white" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Chattar</h1>

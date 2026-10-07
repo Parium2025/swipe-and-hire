@@ -1,3 +1,4 @@
+- [x] Compact the applications empty state and center the icon+Chattar group (verified signed-in at 390/1280); correct all 3 empty descriptions and 12 additional missing sentence periods found in the audit
 - [x] Make employer candidate info truly full-screen and keep undo available at the end of Swipe Mode
 - [x] Center Create Job close control (browser offset <1px); require touch holds and clear stage previews on menu presses (9 regression tests; 371 total pass). Full employer-session verification unavailable with current job-seeker session.
 - [x] Separate office interview instructions from the clickable address in invitation emails
