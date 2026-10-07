@@ -41,7 +41,7 @@ export default function MediaMigration() {
             <div>
               <p className="font-medium text-foreground mb-1">PRIVATE bucket (all användar-media):</p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">job-applications</code> → Profilvideor, profilbilder, cover-bilder, CV:n</li>
+                <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">job-applications</code> → Profilvideor, profilbilder, coverbilder, CV:n</li>
               </ul>
             </div>
             <div className="pt-2 border-t border-border">

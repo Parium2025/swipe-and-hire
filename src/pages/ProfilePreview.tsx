@@ -397,7 +397,7 @@ export default function ProfilePreview() {
                   {/* Anställningsstatus */}
                   {data.employment_type && (
                     <div className="space-y-0.5">
-                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
+                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus</p>
                       <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_type)}</p>
                     </div>
                   )}
@@ -676,7 +676,7 @@ export default function ProfilePreview() {
               <CardContent className="space-y-2 text-xs pb-2 px-2 sm:px-4">
                 {consentedData?.employment_type && (
                   <div className="flex flex-col items-start gap-0.5 min-w-0">
-                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">Anställningsstatus?</p>
+                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">Anställningsstatus</p>
                     <p className="text-white text-[9px] sm:text-[10px] break-words">
                       Svar: {getEmploymentStatusLabel(consentedData.employment_type)}
                     </p>
