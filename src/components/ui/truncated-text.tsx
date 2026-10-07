@@ -25,6 +25,8 @@ interface TruncatedTextProps {
    * raden i stället för att fånga upp en tooltip.
    */
   insideInteractive?: boolean;
+  /** Visa hela texten vid mushovring även när den får plats. */
+  alwaysShowTooltip?: boolean | 'desktop-only';
   /** Touch: visa tooltipen först vid långtryck; korta tryck når föräldern. */
   touchTooltipOnLongPress?: boolean;
 }
@@ -40,6 +42,7 @@ export function TruncatedText({
   lines = 1,
   side = 'bottom',
   insideInteractive = false,
+  alwaysShowTooltip,
   touchTooltipOnLongPress = true,
 }: TruncatedTextProps) {
   const clampClass = lines === 1 ? 'truncate' : lines === 2 ? 'line-clamp-2' : 'line-clamp-3';
@@ -53,6 +56,7 @@ export function TruncatedText({
       text={text}
       lines={lines}
       tooltipSide={side}
+      alwaysShowTooltip={alwaysShowTooltip}
       touchTooltipOnLongPress={touchTooltipOnLongPress}
       className={cn('block w-full min-w-0', className)}
     />
