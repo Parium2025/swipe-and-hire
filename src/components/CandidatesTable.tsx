@@ -876,6 +876,7 @@ export function CandidatesTable({
                                 <TooltipTrigger asChild>
                                   <span
                                     aria-label={`Tillagd av ${teamInfo.colleagues.join(', ')}`}
+                                    onClick={(event) => event.stopPropagation()}
                                     className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 border border-purple-500/30"
                                   >
                                     <Users className="h-3 w-3 text-purple-300" />
