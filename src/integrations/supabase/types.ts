@@ -4476,6 +4476,7 @@ export type Database = {
         Args: { p_job_id: string }
         Returns: boolean
       }
+      enqueue_missed_job_closed: { Args: never; Returns: number }
       enqueue_push_notifications: { Args: { p_rows: Json }; Returns: number }
       ensure_default_candidate_list: {
         Args: { p_owner_id: string }

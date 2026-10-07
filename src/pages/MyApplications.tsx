@@ -177,6 +177,14 @@ const MyApplications = () => {
       const isExpiredOrDeleted = !!(job.deleted_at || timeInfo.isExpired);
       (isExpiredOrDeleted ? expired : active).push(app);
     }
+    // Utgångna: senast avslutade annons först (borttagen eller utgången),
+    // inte efter när man sökte.
+    const endedAt = (app: (typeof applications)[number]) => {
+      const job = app.job_postings as any;
+      const t = Date.parse(job?.deleted_at || job?.expires_at || '');
+      return Number.isFinite(t) ? t : 0;
+    };
+    expired.sort((a, b) => endedAt(b) - endedAt(a));
     return { activeApplications: active, expiredApplications: expired };
   }, [applications]);
 
