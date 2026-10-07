@@ -17,6 +17,7 @@ import {
   type CandidateProfile, type CandidateProfileInput,
 } from '@/hooks/useCandidateProfiles';
 import CandidateProfileEditor from './CandidateProfileEditor';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 
 
 interface Props {
@@ -107,9 +108,7 @@ function ProfileChip({
         <span className="mx-auto block w-14">
           <ProfileAvatar imagePath={imagePath} imageMediaType={imageMediaType} signedImageUrl={signedImageUrl} hasVideo={hasVideo} />
         </span>
-        <span title={label} className="mt-2 block truncate text-[12px] font-medium leading-tight text-white">
-          {label}
-        </span>
+        <TruncatedTooltip text={label} className="mt-2 block truncate text-[12px] font-medium leading-tight text-white" />
       </button>
 
       <button
@@ -471,9 +470,7 @@ export const ProfileSwitcherRail = React.forwardRef<ProfileSwitcherRailHandle, P
                 size={40}
               />
               <span className="min-w-0 flex-1">
-                <span title={activeChip?.label} className="block truncate text-[15px] font-medium leading-tight text-white">
-                  {activeChip?.label}
-                </span>
+                <TruncatedTooltip text={activeChip?.label ?? ''} className="block truncate text-[15px] font-medium leading-tight text-white" />
                 <span className="block text-[12px] leading-tight text-white">
                   {activeChip?.isDefault ? 'Standardprofil' : 'Tryck för att byta profil'}
                 </span>

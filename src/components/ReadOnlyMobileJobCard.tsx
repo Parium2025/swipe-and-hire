@@ -22,6 +22,7 @@ import { getJobBadgeSalary } from '@/lib/swipeJobSalary';
 import { effectiveStartDate } from '@/lib/startDate';
 import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 
 
 interface ReadOnlyMobileJobCardProps {
@@ -370,7 +371,7 @@ export const ReadOnlyMobileJobCard = memo(({ job, hasApplied = false, onUnsaveCl
           </Badge>
           <Badge variant="glass" className="text-[11px] px-2 py-0.5 border-white/15 leading-snug inline-flex items-center max-w-[42%] min-w-0 overflow-hidden text-white">
             <MapPin className="h-3 w-3 mr-0.5 flex-shrink-0" />
-            <span className="min-w-0 flex-1 truncate leading-snug" title={job.location}>{job.location}</span>
+            <TruncatedTooltip text={job.location} className="min-w-0 flex-1 truncate leading-snug" />
           </Badge>
         </div>
 

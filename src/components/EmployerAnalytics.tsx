@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BarChart3, Target, Filter, Smartphone, Monitor, Tablet, HelpCircle, TrendingUp, TrendingDown, Minus, Eye, Users, CalendarCheck, Clock, Calendar, Info } from 'lucide-react';
 import { AdvancedAnalyticsSections, type AdvancedAnalyticsData } from '@/components/analytics/AdvancedAnalytics';
@@ -237,7 +237,7 @@ const TrendPill = memo(({ current, previous, label, icon: Icon, daysLabel, footn
     <div className="flex-1 min-w-0 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
       <div className="flex items-center justify-center gap-1.5 mb-1.5">
         <Icon className="h-3.5 w-3.5 text-white shrink-0" />
-        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-white" title={label}>{label}</span>
+        <TruncatedTooltip text={label} className="min-w-0 flex-1 truncate text-[11px] font-medium text-white" />
       </div>
       <div className="flex items-baseline justify-center gap-1 flex-nowrap min-w-0">
         <span className="text-xl font-bold text-white tabular-nums">{current}</span>
@@ -522,16 +522,11 @@ const TtfaList = memo(({ ttfa, appCountMap, initialCount, step }: {
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <TooltipProvider delayDuration={200}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="text-[12px] text-white truncate min-w-0 flex-1 cursor-default">{t.title}</span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[300px] text-xs">
-                          <p>{t.title}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <TruncatedTooltip
+                      text={t.title}
+                      className="text-[12px] text-white truncate min-w-0 flex-1 cursor-default"
+                      contentClassName="max-w-[300px] text-xs"
+                    />
                     {expired ? (
                       <span className="shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-red-500/20 text-white border border-red-500/30">
                         Utgången

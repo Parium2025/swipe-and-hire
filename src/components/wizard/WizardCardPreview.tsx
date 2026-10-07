@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { TruncatedText } from '@/components/TruncatedText';
+import { useTruncationTooltip } from '@/hooks/useTruncationTooltip';
 import {
   Tooltip,
   TooltipContent,
@@ -108,6 +109,9 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
     () => getJobOverlayTextStyle(overlayTextColor),
     [overlayTextColor],
   );
+  // Ruta öppnas endast när företagspillen respektive metaraden faktiskt är kapad.
+  const companyTooltip = useTruncationTooltip<HTMLSpanElement>();
+  const metaTooltip = useTruncationTooltip<HTMLParagraphElement>();
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -162,7 +166,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
 
           {/* Företagspill */}
           <div className="flex justify-center">
-            <Tooltip>
+            <Tooltip open={companyTooltip.open} onOpenChange={companyTooltip.onOpenChange}>
               <TooltipTrigger asChild>
                 <button
                   type="button"
@@ -173,7 +177,7 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
                    className="inline-flex max-w-[90%] items-center gap-0.5 rounded-full border border-white/10 bg-black/45 px-1 py-px shadow-[0_1px_2px_rgba(0,0,0,0.35)] md:gap-1 md:px-1.5 md:py-[2px]"
                 >
                    <Building2 className="h-1.5 w-1.5 shrink-0 text-white md:h-2 md:w-2" />
-                   <span className="truncate text-[7px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] md:text-[8px]">
+                   <span ref={companyTooltip.ref} className="truncate text-[7px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] md:text-[8px]">
                     {companyName || 'Företag'}
                   </span>
                 </button>
@@ -184,27 +188,22 @@ export const WizardSwipePreview = memo(function WizardSwipePreview({
             </Tooltip>
           </div>
 
-          {/* Titel — luft ovanför så företagspillen får andas, tillåter 2 rader */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="mt-1 cursor-default md:mt-2">
-                <TruncatedText
-                  text={title || 'Jobbtitel'}
-                   className="w-full break-words pb-[0.14em] text-[10px] font-extrabold leading-[1.2] tracking-tight line-clamp-2 md:text-[12px] md:leading-[1.25]"
-                  style={overlayStyle}
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={6} className="max-w-[280px] text-center">
-              {title || 'Jobbtitel'}
-            </TooltipContent>
-          </Tooltip>
+          {/* Titel — luft ovanför så företagspillen får andas, tillåter 2 rader.
+              TruncatedText har egen ruta som redan endast öppnas när titeln är kapad. */}
+          <div className="mt-1 cursor-default md:mt-2">
+            <TruncatedText
+              text={title || 'Jobbtitel'}
+               className="w-full break-words pb-[0.14em] text-[10px] font-extrabold leading-[1.2] tracking-tight line-clamp-2 md:text-[12px] md:leading-[1.25]"
+              style={overlayStyle}
+            />
+          </div>
 
           {/* Meta */}
           {metaLine && (
-            <Tooltip>
+            <Tooltip open={metaTooltip.open} onOpenChange={metaTooltip.onOpenChange}>
               <TooltipTrigger asChild>
                 <p
+                  ref={metaTooltip.ref}
                    className="mt-1 truncate text-[7px] font-semibold cursor-default md:mt-1.5 md:text-[8px]"
                   style={overlayStyle}
                 >
@@ -270,12 +269,13 @@ function toSwipeDate(label: string): string {
 }
 
 function PreviewPill({ icon, text }: { icon?: React.ReactNode; text: string }) {
+  const { ref, open, onOpenChange } = useTruncationTooltip<HTMLSpanElement>();
   return (
-    <Tooltip>
+    <Tooltip open={open} onOpenChange={onOpenChange}>
       <TooltipTrigger asChild>
         <div className="inline-flex max-w-full cursor-default items-center gap-0.5 rounded-full border border-white/10 bg-black/45 px-1.5 py-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.35)] md:gap-1 md:px-2 md:py-1">
           {icon}
-          <span className="truncate text-[7px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] md:text-[9px]">
+          <span ref={ref} className="truncate text-[7px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] md:text-[9px]">
             {text}
           </span>
         </div>
