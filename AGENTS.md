@@ -8,7 +8,7 @@
 - Mobile shells stay `100dvh`; keyboard-heavy pages scroll internally; long employer text areas scroll inside bounded height; browser chrome never covers content.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; blur when the iOS keyboard closes.
 - Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
-- Welcome drafts until confirmation; replay writes nothing; valid links only; row-locked first-save-wins; account signals/visible checks close stale guides across devices without reload.
+- Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
 - Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Shared review branding reads the trimmed public-profile RPC under its own cache key; full profile rows stay private. Colleagues may read only each other's current profile image via `can_view_colleague_profile_image`, never originals, CVs or videos.
