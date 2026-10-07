@@ -37,3 +37,4 @@
 
 - Restore the account-scoped plain-JSON query snapshot synchronously at auth init and refetch silently on first use, so cold starts skip skeletons.
 - Employer counts (queries and nav badges) show the account+org's last confirmed values until live totals arrive, else cold starts flash.
+- Job-closed outreach is queued only by the enqueue_outreach_dispatch trigger, unique per job publish round; no secondary sweeper, since it diverged from the interview/rule-owner exclusions.
