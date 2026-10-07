@@ -15,7 +15,6 @@ import { AddToColleagueListDialog, type CandidateToAdd } from './AddToColleagueL
 import { useCandidateLists } from '@/hooks/useCandidateLists';
 import { UserPlus, UserCheck, Clock, Star, Users, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, ChevronRight, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -875,17 +874,12 @@ export function CandidatesTable({
                             {teamInfo && teamInfo.colleagues.length > 0 && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="inline-flex">
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <button type="button" aria-label={`Tillagd av ${teamInfo.colleagues.length} kollegor – tryck för att se vilka`} onClick={(event) => event.stopPropagation()} className="flex items-center justify-center h-6 w-6 rounded-full bg-purple-500/20 border border-purple-500/30 active:scale-95">
-                                          <Users className="h-3 w-3 text-purple-300" />
-                                        </button>
-                                      </PopoverTrigger>
-                                      <PopoverContent side="top" align="start" className="w-auto max-w-xs p-3" onClick={(event) => event.stopPropagation()}>
-                                        <div className="text-xs"><p className="font-medium">Tillagd av:</p><ul className="mt-1 max-h-48 overflow-y-auto space-y-0.5">{teamInfo.colleagues.map((name, index) => <li key={`${name}-${index}`} className="break-words">{name}</li>)}</ul></div>
-                                      </PopoverContent>
-                                    </Popover>
+                                  <span
+                                    aria-label={`Tillagd av ${teamInfo.colleagues.join(', ')}`}
+                                    onClick={(event) => event.stopPropagation()}
+                                    className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 border border-purple-500/30"
+                                  >
+                                    <Users className="h-3 w-3 text-purple-300" />
                                   </span>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
