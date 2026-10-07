@@ -553,7 +553,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     if (missingRequired) {
       toast({
         title: 'Obligatoriska fält saknas',
-        description: 'Vänligen besvara alla obligatoriska frågor',
+        description: 'Vänligen besvara alla obligatoriska frågor.',
         variant: 'destructive',
       });
       return;
@@ -700,7 +700,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       toast({
         title: 'Ansökan skickad!',
-        description: 'Din ansökan har skickats till arbetsgivaren',
+        description: 'Din ansökan har skickats till arbetsgivaren.',
         route: '/my-applications',
       });
 

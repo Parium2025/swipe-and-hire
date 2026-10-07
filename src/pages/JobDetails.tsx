@@ -272,7 +272,7 @@ const JobDetails = () => {
 
   const updateCandidateRating = useCallback(async (applicantId: string, newRating: number) => {
     if (!getIsOnline()) {
-      toast('Offline', { description: 'Du måste vara online för att uppdatera betyg' });
+      toast('Offline', { description: 'Du måste vara online för att uppdatera betyg.' });
       return;
     }
     if (!user) return;
@@ -314,7 +314,7 @@ const JobDetails = () => {
         if (!updatedRows || updatedRows.length === 0) throw new Error('Betyget kunde inte synkroniseras');
       }
     } catch {
-      toast.error('Fel', { description: 'Kunde inte uppdatera betyg' });
+      toast.error('Fel', { description: 'Kunde inte uppdatera betyg.' });
       refetch();
     }
   }, [user, myCandidatesMap, updateApplicationLocally, applications, selectedApplication?.applicant_id, refetch, queryClient]);

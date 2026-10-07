@@ -90,7 +90,7 @@ const EmailVerification = () => {
     } catch (err) {
       toast({
         title: "Kunde inte kopiera",
-        description: "Kopiera länken manuellt",
+        description: "Kopiera länken manuellt.",
         variant: "destructive"
       });
     }

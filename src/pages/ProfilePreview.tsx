@@ -210,7 +210,7 @@ export default function ProfilePreview() {
     const handleCvClick = async (e: React.MouseEvent) => {
       e.preventDefault();
       if (!data.cv_url) {
-        toast({ title: 'CV ej tillgängligt', description: 'Inget CV har laddats upp', variant: 'destructive' });
+        toast({ title: 'CV ej tillgängligt', description: 'Inget CV har laddats upp.', variant: 'destructive' });
         return;
       }
       setCvOpen(true);
@@ -564,7 +564,7 @@ export default function ProfilePreview() {
     const handleCvClick = async (e: React.MouseEvent) => {
       e.preventDefault();
       if (!consentedData?.cv_url) {
-        toast({ title: 'CV ej tillgängligt', description: 'Inget CV har laddats upp', variant: 'destructive' });
+        toast({ title: 'CV ej tillgängligt', description: 'Inget CV har laddats upp.', variant: 'destructive' });
         return;
       }
       setCvOpen(true);

@@ -531,7 +531,7 @@ const JobApplication = () => {
       if (isPermanentApplicationError(error)) {
         toast({
           title: 'Kunde inte skicka ansökan',
-          description: msg || 'Försök igen',
+          description: msg || 'Försök igen.',
           variant: 'destructive',
         });
         return;
@@ -1027,7 +1027,7 @@ const JobApplication = () => {
                         handleInputChange('cvUrl', url);
                         toast({
                           title: "CV uppladdad",
-                          description: `${fileName} har laddats upp`
+                          description: `${fileName} har laddats upp.`
                         });
                       }}
                       onFileRemoved={() => handleInputChange('cvUrl', '')}
@@ -1055,7 +1055,7 @@ const JobApplication = () => {
                       handleInputChange('additionalDocuments', url);
                       toast({
                         title: "Dokument uppladdat",
-                        description: `${fileName} har laddats upp`
+                        description: `${fileName} har laddats upp.`
                       });
                     }}
                     onFileRemoved={() => handleInputChange('additionalDocuments', '')}
