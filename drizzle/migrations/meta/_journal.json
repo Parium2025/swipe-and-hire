@@ -582,6 +582,13 @@
       "when": 1791404282513,
       "tag": "0082_atomic_team_accept_and_workspace",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1791404539464,
+      "tag": "0083_team_accept_profile_result",
+      "breakpoints": true
     }
   ]
 }
