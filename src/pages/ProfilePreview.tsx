@@ -759,7 +759,7 @@ export default function ProfilePreview() {
        <div className="py-6 responsive-container-wide space-y-6">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
-          <h1 className="text-2xl font-semibold text-white">Förhandsgranska Profil</h1>
+          <h1 className="text-2xl font-semibold text-white">Förhandsgranska profil</h1>
           <p className="text-white max-w-2xl mx-auto">
             Se hur din profil visas för arbetsgivare på mobil och dator.
           </p>

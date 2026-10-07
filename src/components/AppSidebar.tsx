@@ -46,8 +46,8 @@ import { replayWelcomeCard } from "@/components/AppOnboardingTour";
 
 
 const profileItems = [
-  { title: 'Min Profil', url: '/profile', icon: User },
-  { title: 'Förhandsgranska Profil', url: '/profile-preview', icon: Eye },
+  { title: 'Min profil', url: '/profile', icon: User },
+  { title: 'Förhandsgranska profil', url: '/profile-preview', icon: Eye },
 ];
 
 const businessItems = [
@@ -274,9 +274,9 @@ export function AppSidebar() {
             <SidebarMenu>
                {[
                  { title: 'Hem', url: '/home', icon: Home, count: undefined, showBadge: false },
-                 { title: 'Sök Jobb', url: '/search-jobs', icon: Building, count: countsReady ? preloadedTotalJobs : undefined, showBadge: false },
-                 { title: 'Sparade Jobb', url: '/saved-jobs', icon: Heart, count: countsReady ? preloadedSavedJobs : undefined, showBadge: false },
-                 { title: 'Mina Ansökningar', url: '/my-applications', icon: FileText, count: countsReady ? preloadedMyApplications : undefined, showBadge: false },
+                 { title: 'Sök jobb', url: '/search-jobs', icon: Building, count: countsReady ? preloadedTotalJobs : undefined, showBadge: false },
+                 { title: 'Sparade jobb', url: '/saved-jobs', icon: Heart, count: countsReady ? preloadedSavedJobs : undefined, showBadge: false },
+                 { title: 'Mina ansökningar', url: '/my-applications', icon: FileText, count: countsReady ? preloadedMyApplications : undefined, showBadge: false },
                  { title: 'Chattar', url: '/messages', icon: MessageCircle, count: jobSeekerUnreadMessages, showBadge: jobSeekerUnreadMessages > 0 },
                ].map((item) => (
                  <SidebarMenuItem key={item.title}>
@@ -341,7 +341,7 @@ export function AppSidebar() {
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                       asChild
-                      data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
+                      data-onboarding={item.url === '/profile' ? 'min-profil' : undefined}
                       className={`
                         mx-2 rounded-lg text-[0.875rem] transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 

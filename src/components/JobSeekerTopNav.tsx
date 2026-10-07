@@ -46,15 +46,15 @@ import { useSidebarRoutePrefetch } from '@/hooks/useSidebarRoutePrefetch';
 
 // Jobb dropdown items
 const jobItems = [
-  { title: "Sök Jobb", url: "/search-jobs", icon: Building },
-  { title: "Sparade Jobb", url: "/saved-jobs", icon: Heart },
-  { title: "Mina Ansökningar", url: "/my-applications", icon: FileText },
+  { title: "Sök jobb", url: "/search-jobs", icon: Building },
+  { title: "Sparade jobb", url: "/saved-jobs", icon: Heart },
+  { title: "Mina ansökningar", url: "/my-applications", icon: FileText },
 ];
 
 // Profil dropdown items
 const profileItems = [
-  { title: "Min Profil", url: "/profile", icon: User },
-  { title: "Förhandsgranska Profil", url: "/profile-preview", icon: Eye },
+  { title: "Min profil", url: "/profile", icon: User },
+  { title: "Förhandsgranska profil", url: "/profile-preview", icon: Eye },
 ];
 
 // Ekonomi dropdown items

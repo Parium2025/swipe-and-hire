@@ -2607,7 +2607,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium text-sm">Kontakt e-mail<RequiredMark filled={!!formData.contact_email?.trim()} /></Label>
+                        <Label className="text-white font-medium text-sm">Kontaktens e-postadress<RequiredMark filled={!!formData.contact_email?.trim()} /></Label>
                         <Input
                           autoComplete="off"
                           type="email"

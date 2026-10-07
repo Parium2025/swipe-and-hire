@@ -523,7 +523,7 @@ const AuthMobile = ({
         if (currentPassword.length < 7) {
           toast({
             title: "För kort lösenord",
-            description: "Lösenordet måste vara minst 7 tecken.",
+            description: "Lösenordet måste innehålla minst 7 tecken.",
             variant: "destructive"
           });
           setLoading(false);
@@ -1019,7 +1019,7 @@ const AuthMobile = ({
                               <div className="flex items-start gap-2 rounded-md bg-white/5 border border-white/10 px-2.5 py-2">
                                 <Info className="h-3.5 w-3.5 text-white/70 mt-0.5 flex-shrink-0" />
                                 <p className="text-xs text-white leading-snug">
-                                  Ange företagets officiella e-post. Denna mail kommer att visas för jobbsökarna i annonsen under "kontakt".
+                                  Ange företagets officiella e-postadress. Adressen visas för jobbsökare under "Kontakt" i annonsen.
                                 </p>
                               </div>
                             </AuthFieldNotice>
@@ -1202,12 +1202,12 @@ const AuthMobile = ({
                               </div>
                               <p className="text-sm text-white mt-1">
                                 {passwordStrength < 3 && 'Svagt lösenord'}
-                                {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
+                                {passwordStrength >= 3 && passwordStrength < 5 && 'Medelstarkt lösenord'}
                                 {passwordStrength >= 5 && 'Starkt lösenord'}
                               </p>
                             </div>
                             <p className="text-xs text-white mt-2">
-                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken).
+                              Lösenordet måste innehålla minst 7 tecken (bokstäver, siffror eller symboler).
                             </p>
                           </>
                         )}

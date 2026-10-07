@@ -66,7 +66,7 @@ const employerNavItems = [
     group: "huvudmeny"
   },
   {
-    title: "Mina Annonser", 
+    title: "Mina annonser", 
     url: "/my-jobs",
     icon: Briefcase,
     group: "huvudmeny"
@@ -78,7 +78,7 @@ const employerNavItems = [
     group: "huvudmeny"
   },
   {
-    title: "Mina Kandidater",
+    title: "Mina kandidater",
     url: "/my-candidates", 
     icon: UserCheck,
     group: "huvudmeny"
@@ -120,7 +120,7 @@ const businessNavItems = [
 
 const supportNavItems = [
   {
-    title: "Min Profil",
+    title: "Min profil",
     url: "/profile", 
     icon: UserCircle,
     group: "support"
@@ -132,7 +132,7 @@ const supportNavItems = [
     group: "support"
   },
   {
-    title: "Hjälp & Support",
+    title: "Hjälp & support",
     url: "/support",
     icon: HelpCircle,
     group: "support"

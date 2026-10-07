@@ -30,7 +30,7 @@ const EmployerLocationPanel = ({
             <p className="text-sm text-white">
               {isNativeApp
                 ? 'Uppdatera vädret automatiskt även när appen är i bakgrunden.'
-                : 'Aktiveras endast i native-appen (iOS/Android).'}
+                : 'Aktiveras endast i mobilappen (iOS/Android).'}
             </p>
             {!isNativeApp && (
               <div className="flex items-center gap-1.5 mt-1.5 text-xs text-white">

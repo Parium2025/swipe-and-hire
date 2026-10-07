@@ -42,7 +42,7 @@ const EMPLOYER_ROWS: NotificationRow[] = [
     type: 'interview_response',
     label: 'Kandidatens svar',
     description:
-      'Kandidaten tackar ja eller nej till kallelsen. I appen betyder att svaret också landar som ett meddelande från kandidaten i chatten.',
+      'Kandidaten tackar ja eller nej till kallelsen. Alternativet "I appen" innebär att svaret också visas som ett meddelande från kandidaten i chatten.',
     channels: ['in_app', 'push', 'email'],
   },
 ];
