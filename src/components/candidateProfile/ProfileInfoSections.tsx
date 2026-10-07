@@ -106,7 +106,7 @@ export const ProfileInfoSections = ({
           <div className="grid sm:grid-cols-2 gap-2 min-w-0">
             {displayApp.employment_status && (
               <div className="min-w-0">
-                <span className="text-sm text-white">Anställningsstatus?</span>
+                <span className="text-sm text-white">Anställningsstatus</span>
                 <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {employmentStatusLabels[displayApp.employment_status] || displayApp.employment_status}</p>
               </div>
             )}
