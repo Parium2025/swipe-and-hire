@@ -133,8 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Candidate-facing job_closed messages are queued atomically by the
-    // enqueue_outreach_dispatch database trigger when a job closes, via the
-    // enqueue_outreach_dispatch trigger (once per publish round). Keeping a
+    // enqueue_outreach_dispatch database trigger (once per publish round). Keeping a
     // second sender here caused duplicate chat, push and email deliveries.
 
     await supabase.rpc('release_job_lock', { _key: 'job-expiration-notifications' });
