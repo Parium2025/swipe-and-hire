@@ -1,5 +1,5 @@
 - [x] Make employer candidate info truly full-screen and keep undo available at the end of Swipe Mode
-- [ ] Center the Create Job close button in its header and verify long-press-only touch tooltips without overlapping stage menus.
+- [x] Center Create Job close control (browser offset <1px); require touch holds and clear stage previews on menu presses (9 regression tests; 371 total pass). Full employer-session verification unavailable with current job-seeker session.
 - [x] Separate office interview instructions from the clickable address in invitation emails
 - [x] Keep interview response tokens on the public response page instead of password reset
 - [x] Audit remaining interview booking, reminder, email and visibility failure paths
