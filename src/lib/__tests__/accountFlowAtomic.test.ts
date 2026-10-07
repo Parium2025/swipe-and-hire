@@ -15,10 +15,14 @@ CREATE TABLE profiles(user_id uuid PRIMARY KEY,role text,organization_id uuid,jo
 CREATE TABLE user_data_consents(user_id uuid UNIQUE,consent_given boolean,consent_date timestamptz,updated_at timestamptz);
 CREATE TABLE organizations(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),name text);
 CREATE TABLE user_roles(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid,organization_id uuid,role text,is_active boolean,created_at timestamptz DEFAULT now(),updated_at timestamptz);
-CREATE TABLE organization_invitations(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),token_hash text UNIQUE,organization_id uuid,email text,role text,status text DEFAULT 'pending',expires_at timestamptz DEFAULT now()+interval '7 days',accepted_by uuid,accepted_at timestamptz,updated_at timestamptz);
+CREATE TABLE organization_invitations(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),token_hash text UNIQUE,organization_id uuid,email text,role text,status text DEFAULT 'pending',expires_at timestamptz DEFAULT now()+interval '7 days',accepted_by uuid,accepted_at timestamptz,updated_at timestamptz,created_at timestamptz DEFAULT now(),invited_by uuid);
+CREATE UNIQUE INDEX pending_invite ON organization_invitations(organization_id,lower(email)) WHERE status='pending';
+CREATE FUNCTION is_org_admin(uuid,uuid) RETURNS boolean LANGUAGE sql AS 'SELECT true';
 CREATE FUNCTION copy_org_company_fields_to_member(uuid,uuid) RETURNS void LANGUAGE plpgsql AS $$ BEGIN IF current_setting('test.fail_copy',true)='yes' THEN RAISE EXCEPTION 'copy failure'; END IF; END $$;`);
   await db.exec(readFileSync('drizzle/migrations/0081_atomic_jobseeker_welcome_completion.sql','utf8'));
   await db.exec(readFileSync('drizzle/migrations/0082_atomic_team_accept_and_workspace.sql','utf8'));
+  await db.exec(readFileSync('drizzle/migrations/0083_team_accept_profile_result.sql','utf8'));
+  await db.exec(readFileSync('drizzle/migrations/0084_atomic_team_invitation_creation.sql','utf8'));
  },30000);
  afterAll(async()=>{await db?.close();});
  beforeEach(async()=>{await db.exec(`TRUNCATE profiles,user_roles,user_data_consents,organizations,organization_invitations; SET test.uid='${uid}'; SET test.fail_copy='no'; INSERT INTO profiles(user_id,role,company_name) VALUES('${uid}','job_seeker','Företag'),('${other}','job_seeker','Annat'); INSERT INTO organizations VALUES('${org}','Organisation'),('${org2}','Annat'); INSERT INTO organization_invitations(token_hash,organization_id,email,role) VALUES('token','${org}','person@example.test','recruiter');`);});
@@ -75,4 +79,13 @@ CREATE FUNCTION copy_org_company_fields_to_member(uuid,uuid) RETURNS void LANGUA
  it('keeps privileged functions service-only',async()=>{
   expect((await db.query("SELECT has_function_privilege('authenticated','accept_team_invitation(uuid,text,text)','execute') accept,has_function_privilege('anon','provision_confirmed_employer_workspace(uuid,text)','execute') provision")).rows[0]).toEqual({accept:false,provision:false});
  });
+ it('suppresses 1000 duplicate creations and rolls back failed replacement',async()=>{
+  const create=(token:string)=>db.query<{result:{code?:string;invitation?:unknown}}>('SELECT create_team_invitation($1,$2,$3,$4,$5) result',[uid,org,'new@example.test','recruiter',token]);
+  const results=await Promise.all(Array.from({length:1000},(_,i)=>create(i.toString().padStart(64,'0'))));
+  expect(results.filter(r=>r.rows[0]?.result.invitation)).toHaveLength(1);
+  expect(results.filter(r=>r.rows[0]?.result.code==='in_progress')).toHaveLength(999);
+  await db.exec("UPDATE organization_invitations SET created_at=now()-interval '1 minute' WHERE email='new@example.test'");
+  await expect(create('0'.repeat(64))).rejects.toThrow();
+  expect((await db.query("SELECT status FROM organization_invitations WHERE email='new@example.test'")).rows[0]).toEqual({status:'pending'});
+ },30000);
 });
