@@ -685,7 +685,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       console.error('Cover upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: error instanceof Error ? error.message : "Kunde inte ladda upp cover-bilden.",
+        description: error instanceof Error ? error.message : "Kunde inte ladda upp coverbilden.",
         variant: "destructive"
       });
     } finally {
@@ -837,7 +837,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       console.error('Error loading existing cover:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte ladda cover-bilden för redigering.",
+        description: "Kunde inte ladda coverbilden för redigering.",
         variant: "destructive"
       });
     }
@@ -976,7 +976,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       console.error('Cover upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp cover-bilden.",
+        description: "Kunde inte ladda upp coverbilden.",
         variant: "destructive"
       });
     } finally {
@@ -1500,7 +1500,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               {formData.employmentStatus && (
                 <TunnelSelectField
                   id="availability"
-                  label="När kan du börja nytt jobb?"
+                  label="När kan du börja ett nytt jobb?"
                   placeholder="Välj din tillgänglighet"
                   value={formData.availability}
                   onChange={(v) => handleInputChange('availability', v)}
@@ -1695,7 +1695,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                           disabled={isUploadingCover}
                           className="bg-white/5 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10 hover:border-white/50 disabled:opacity-50 px-4 py-1.5 text-sm font-medium rounded-full transition-colors w-full focus:outline-none focus-visible:outline-none focus:ring-0"
                         >
-                          {formData.coverImageUrl ? 'Byt cover-bild' : 'Lägg till cover-bild'}
+                          {formData.coverImageUrl ? 'Byt coverbild' : 'Lägg till coverbild'}
                         </button>
 
                         {formData.coverImageUrl && (
@@ -1706,8 +1706,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                               deleteCoverImage();
                             }}
                             className="absolute -right-12 rounded-full border border-0 bg-red-500/80 p-2 text-white outline-none transition-colors [-webkit-tap-highlight-color:transparent] focus:ring-0 focus-visible:ring-0 md:hover:!bg-red-500 md:hover:!text-white"
-                            aria-label="Ta bort cover-bild"
-                            title="Ta bort cover-bild"
+                            aria-label="Ta bort coverbild"
+                            title="Ta bort coverbild"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -1741,14 +1741,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     
                     {isUploadingCover && (
                       <div className="flex flex-col items-center w-full">
-                        <UploadInlineProgress label="Laddar upp cover-bild…" />
+                        <UploadInlineProgress label="Laddar upp coverbild…" />
                       </div>
                     )}
                     
                     {formData.coverImageUrl && !isUploadingCover && (
                       <div className="flex items-center justify-center">
                         <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-full flex items-center justify-center">
-                          Cover-bild uppladdad!
+                          Coverbild uppladdad
                         </Badge>
                       </div>
                     )}

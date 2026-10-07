@@ -1137,7 +1137,7 @@ const Profile = () => {
       if (activeCandidateProfile && uploadedStoragePath) {
         toast({
           title: 'Uppladdningen återställdes',
-          description: 'Cover-bilden kunde inte kopplas till profilen och kommer att städas säkert.',
+          description: 'Coverbilden kunde inte kopplas till profilen och kommer att tas bort på ett säkert sätt.',
           variant: 'destructive',
         });
         return;
@@ -1153,7 +1153,7 @@ const Profile = () => {
       if (!enqueued) {
         toast({
           title: "Fel vid uppladdning",
-          description: "Kunde inte ladda upp cover-bilden.",
+          description: "Kunde inte ladda upp coverbilden.",
           variant: "destructive"
         });
       }
@@ -1497,7 +1497,7 @@ const Profile = () => {
       if (activeCandidateProfile && uploadedStoragePath) {
         toast({
           title: 'Uppladdningen återställdes',
-          description: 'Cover-bilden kunde inte kopplas till profilen och kommer att städas säkert.',
+          description: 'Coverbilden kunde inte kopplas till profilen och kommer att tas bort på ett säkert sätt.',
           variant: 'destructive',
         });
         return;
@@ -1514,7 +1514,7 @@ const Profile = () => {
       if (!enqueued) {
         toast({
           title: "Fel vid uppladdning",
-          description: "Kunde inte ladda upp cover-bilden.",
+          description: "Kunde inte ladda upp coverbilden.",
           variant: "destructive"
         });
       }
@@ -1818,7 +1818,7 @@ const Profile = () => {
         }
       } catch (error) {
         console.error('Error loading existing cover:', error);
-        toast({ title: 'Fel', description: 'Kunde inte ladda cover-bilden för redigering.', variant: 'destructive' });
+        toast({ title: 'Fel', description: 'Kunde inte ladda coverbilden för redigering.', variant: 'destructive' });
       }
       return;
     }
@@ -1859,7 +1859,7 @@ const Profile = () => {
       console.error('Error loading existing cover:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte ladda cover-bilden för redigering.",
+        description: "Kunde inte ladda coverbilden för redigering.",
         variant: "destructive"
       });
     }
@@ -2325,7 +2325,7 @@ const Profile = () => {
                   {displayIsVideo && (
                     <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
                       <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
-                        Cover-bild{displayCoverPath ? '' : ' saknas'}
+                        Coverbild{displayCoverPath ? '' : ' saknas'}
                       </span>
                       <span className={displayCoverPath ? 'text-success' : 'text-destructive'} aria-hidden="true">
                         {displayCoverPath ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
@@ -2368,7 +2368,7 @@ const Profile = () => {
                         onClick={handleEditExistingCover}
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                       >
-                        Anpassa cover-bild
+                        Anpassa coverbild
                       </Button>
                       <Button
                         type="button"
@@ -2377,7 +2377,7 @@ const Profile = () => {
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Ta bort cover-bild
+                        Ta bort coverbild
                       </Button>
                     </>
                   )}
@@ -2392,7 +2392,7 @@ const Profile = () => {
                       disabled={isUploadingCover || isUploadingMedia}
                       className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm transition-all duration-200 active:scale-[0.97] touch-manipulation"
                     >
-                      Lägg till cover-bild
+                      Lägg till coverbild
                     </Button>
                     {((activeCandidateProfile && deletedCandidateMedia?.profileId === activeCandidateProfile.id && deletedCandidateMedia.kind === 'cover') || (!activeCandidateProfile && !coverImageUrl && deletedCoverImage)) && (
                       <Button
@@ -2443,7 +2443,7 @@ const Profile = () => {
 
                 {isUploadingCover && (
                   <UploadInlineProgress
-                    label="Laddar upp cover-bild…"
+                    label="Laddar upp coverbild…"
                     percent={coverProgressInfo?.percent}
                   />
                 )}
@@ -2735,7 +2735,7 @@ const Profile = () => {
                     {/* Visa tillgänglighet endast om användaren har valt något i anställningsstatus */}
                     {employmentStatus && (
                       <div className="space-y-2 md:space-y-1.5">
-                        <Label htmlFor="availability" className="text-white text-sm">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                        <Label htmlFor="availability" className="text-white text-sm">När kan du börja ett nytt jobb? <span className="text-white">*</span></Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button

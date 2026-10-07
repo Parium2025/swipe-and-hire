@@ -118,7 +118,7 @@ export const ProfileInfoSections = ({
             )}
             {displayApp.availability && (
               <div className="sm:col-span-2 min-w-0">
-                <span className="text-sm text-white">När kan du börja nytt jobb?</span>
+                <span className="text-sm text-white">När kan du börja ett nytt jobb?</span>
                 <p className="text-sm text-white break-words [overflow-wrap:anywhere]">Svar: {availabilityLabels[displayApp.availability] || displayApp.availability}</p>
               </div>
             )}
