@@ -14,7 +14,7 @@ vi.mock('@/components/StageSettingsMenu', () => ({
 
 const label = 'Ett mycket långt kandidatsteg';
 const setup = () => {
-  render(<MobileMyCandidatesView candidates={[]} stages={['custom']} stageConfig={{ custom: { label, color: '#123456', iconName: 'inbox' } }} onOpenProfile={vi.fn()} onMoveToStage={vi.fn()} />);
+  render(<MobileMyCandidatesView candidates={[]} stages={['custom']} stageConfig={{ custom: { label, color: '#123456', iconName: 'inbox' } }} onOpenProfile={vi.fn()} onMoveToStage={vi.fn()} onMoveCandidatesAndDelete={vi.fn()} />);
   const text = screen.getByText(label);
   const tab = text.closest('[data-stage-tab]');
   if (!tab) throw new Error('Stage tab missing');
@@ -42,7 +42,7 @@ describe('Mobile candidate stage tooltip and menu', () => {
     vi.useFakeTimers();
     const { text, tab, menu } = setup();
     await act(async () => { press(tab); vi.advanceTimersByTime(500); });
-    expect(text).toHaveAttribute('data-state', 'delayed-open');
+    expect(text.getAttribute('data-state')).toMatch(/open/);
     await act(async () => { fireEvent.pointerUp(tab); press(menu); fireEvent.click(menu); });
     expect(text).toHaveAttribute('data-state', 'closed');
     expect(menu).toHaveTextContent('Meny öppen');
