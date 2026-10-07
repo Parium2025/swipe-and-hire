@@ -37,7 +37,7 @@ export function useDeleteConversation() {
     onError: (error: Error) => {
       console.error('Failed to delete conversation:', error);
       if (error.message === 'Du är offline') {
-        toast.error('Du är offline', { description: 'Anslut till internet för att radera konversationen' });
+        toast.error('Du är offline', { description: 'Anslut till internet för att radera konversationen.' });
       } else {
         toast.error('Kunde inte radera konversation');
       }

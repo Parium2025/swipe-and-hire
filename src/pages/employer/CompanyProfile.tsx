@@ -577,7 +577,7 @@ const CompanyProfile = () => {
         if (!silent) {
           toast({
             title: "Ogiltig URL",
-            description: `Kontrollera URL:en för ${getPlatformLabel(link.platform)}`,
+            description: `Kontrollera URL:en för ${getPlatformLabel(link.platform)}.`,
             variant: "destructive"
           });
         }

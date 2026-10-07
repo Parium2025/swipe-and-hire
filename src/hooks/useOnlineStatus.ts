@@ -106,7 +106,7 @@ export const useOnline = (): OnlineContextValue => {
     isOnline: fallbackIsOnline,
     showOfflineToast: () => {
       toast.error('Ingen anslutning', {
-        description: 'Kontrollera din internetanslutning och försök igen',
+        description: 'Kontrollera din internetanslutning och försök igen.',
         duration: 3000,
       });
     },

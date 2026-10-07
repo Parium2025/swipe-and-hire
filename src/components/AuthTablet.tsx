@@ -399,7 +399,7 @@ const AuthTablet = ({
           if (!employerData.companyName.trim()) {
             toast({
               title: "Företagsnamn krävs",
-              description: "Vänligen ange företagsnamn",
+              description: "Vänligen ange företagsnamn.",
               variant: "destructive"
             });
             setLoading(false);
@@ -409,7 +409,7 @@ const AuthTablet = ({
           if (!employerData.industry.trim()) {
             toast({
               title: "Bransch krävs",
-              description: "Vänligen välj bransch",
+              description: "Vänligen välj bransch.",
               variant: "destructive"
             });
             setLoading(false);
