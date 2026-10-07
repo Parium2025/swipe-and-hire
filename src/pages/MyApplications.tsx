@@ -357,22 +357,22 @@ const MyApplications = () => {
 
 
         {visibleApplications.length === 0 ? (
-          <Card className="bg-white/5 border-white/10">
-            <CardContent className="p-8 text-center">
-              <Briefcase className="h-12 w-12 text-white mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">
+          <Card className="bg-sidebar-foreground/5 border-sidebar-foreground/10">
+            <CardContent className="p-5 text-center">
+              <Briefcase className="h-8 w-8 text-pure-white mx-auto mb-3" aria-hidden="true" />
+              <h3 className="text-sm font-medium text-pure-white mb-1.5">
                 {applications.length === 0
                   ? 'Inga ansökningar än'
                   : activeTab === 'active'
                     ? 'Inga aktiva ansökningar'
                     : 'Inga utgångna ansökningar'}
               </h3>
-              <p className="text-white mb-4">
+              <p className="text-sm leading-relaxed text-pure-white break-words">
                 {applications.length === 0
-                  ? 'När du söker jobb kommer dina ansökningar att visas här'
+                  ? 'När du söker jobb kommer dina ansökningar att visas här.'
                   : activeTab === 'active'
-                    ? 'Alla dina ansökningar är avslutade — kika under Utgångna'
-                    : 'Dina aktiva ansökningar syns under Under granskning'}
+                    ? 'Alla dina ansökningar är avslutade — kika under Utgångna.'
+                    : 'Dina aktiva ansökningar syns under Under granskning.'}
               </p>
             </CardContent>
           </Card>
