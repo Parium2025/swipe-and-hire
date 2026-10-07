@@ -514,6 +514,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           <div className="relative z-10 flex flex-col max-h-[75vh] sm:max-h-[80vh]">
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
               <h2 className="text-white text-lg font-semibold">Skapa jobb</h2>
+              <div className="absolute inset-y-0 right-4 flex items-center">
               <Button
                 variant="ghost"
                 size="icon"
@@ -521,10 +522,11 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                 onClick={handleClose}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className={cn(dialogCloseButtonClassName, "top-1/2 -translate-y-1/2")}
+                className={cn(dialogCloseButtonClassName, "static right-auto top-auto")}
               >
                 <X className={dialogCloseIconClassName} />
               </Button>
+              </div>
             </div>
 
             <div className="min-h-0 overflow-y-auto px-5 pt-5 pb-4 space-y-5">
