@@ -8,6 +8,7 @@ import {
 import { DialogContentNoFocus } from '@/components/ui/dialog-no-focus';
 import { Button } from '@/components/ui/button';
 import { ResolvedAvatar } from '@/components/ui/resolved-avatar';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 import { resolveFirstStage } from '@/hooks/useMyCandidatesData';
 import { TeamMember } from '@/hooks/useTeamMembers';
 import { AlertTriangle, ChevronDown, Trash2, UserCheck, Users } from 'lucide-react';
@@ -283,7 +284,7 @@ export function AddToColleagueListDialog({
                   >
                     <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
                     <div className="min-w-0 flex-1 text-left">
-                      <TruncatedText text={list.name} lines={2} className="font-medium" insideInteractive />
+                      <TruncatedText text={list.name} lines={2} className="font-medium whitespace-normal [overflow-wrap:anywhere]" insideInteractive />
                       <div className="text-xs text-white">Min lista</div>
                     </div>
                     {isAdding === `own:${list.id}` && (
@@ -332,12 +333,13 @@ export function AddToColleagueListDialog({
                   <ResolvedAvatar
                     src={member.profileImageUrl}
                     mediaType="profile-image"
+                    transform={AVATAR_TRANSFORM}
                     fallback={`${member.firstName?.[0] || ''}${member.lastName?.[0] || ''}`}
                     className="h-8 w-8 flex-shrink-0"
                     fallbackClassName="text-xs bg-white/20"
                   />
                   <div className="min-w-0 flex-1 text-left">
-                    <TruncatedText text={memberName} lines={2} className="font-medium" insideInteractive />
+                    <TruncatedText text={memberName} lines={2} className="font-medium whitespace-normal [overflow-wrap:anywhere]" insideInteractive />
                     <div className="text-xs text-white">Kollegas listor</div>
                   </div>
                   <ChevronDown className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
@@ -355,7 +357,7 @@ export function AddToColleagueListDialog({
                       disabled={isAdding !== null}
                     >
                       <div className="min-w-0 flex-1 text-left">
-                        <TruncatedText text={entry.name} lines={2} className="font-medium" insideInteractive />
+                        <TruncatedText text={entry.name} lines={2} className="font-medium whitespace-normal [overflow-wrap:anywhere]" insideInteractive />
                       </div>
                       {isAdding === key && (
                         <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -370,7 +372,7 @@ export function AddToColleagueListDialog({
           {canRemoveFromOwnList && rows.length === 1 && (
             <Button
               variant="destructiveSoft"
-              className="mobile-touch-removal-action w-full justify-start gap-3 h-auto py-3 border-0 !bg-red-500/80 !text-white hover:!bg-red-500/80 active:!bg-red-500/80 focus:!bg-red-500/80 disabled:!bg-red-500/80 disabled:opacity-60 [-webkit-tap-highlight-color:transparent]"
+              className="mobile-touch-removal-action w-full justify-center gap-3 h-auto py-3 border-0 !bg-red-500/80 !text-white hover:!bg-red-500/80 active:!bg-red-500/80 focus:!bg-red-500/80 disabled:!bg-red-500/80 disabled:opacity-60 [-webkit-tap-highlight-color:transparent]"
               onClick={() => setRemoveConfirmOpen(true)}
               disabled={isAdding !== null || isRemoving}
             >
