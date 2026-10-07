@@ -39,3 +39,5 @@
 - Employer badges retain confirmed account/org totals until fresh totals arrive.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
+
+- Tooltips over clipped text open only on measured overflow (TruncatedTooltip, TruncatedMenuItem, TruncatedText); an unconditional Tooltip or a native title attribute over truncated text reintroduces hover tooltips on text that fits.
