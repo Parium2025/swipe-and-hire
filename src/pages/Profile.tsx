@@ -2459,10 +2459,10 @@ const Profile = () => {
           <div className="p-4 border-b border-white/10">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <User className="h-4 w-4" />
-              Personlig Information
+              Personlig information
             </h3>
             <p className="text-white text-sm mt-1">
-              Uppdatera din grundläggande profilinformation
+              Uppdatera din grundläggande profilinformation.
             </p>
           </div>
           <div className="p-4">
@@ -2549,7 +2549,7 @@ const Profile = () => {
                             setErrors(prev => ({ ...prev, phone: undefined }));
                           }
                         }}
-                        onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
+                        onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt telefonnummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
                         className={`h-11 !min-h-0 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 placeholder:text-white text-sm ${errors.phone ? 'border-red-400' : ''}`}
                       />

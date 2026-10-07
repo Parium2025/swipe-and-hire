@@ -32,7 +32,7 @@ const shortcuts: Shortcut[] = [
   {
     icon: Heart,
     title: 'Sparade jobb',
-    description: 'Jobb du sparat med hjärtat ligger kvar här tills annonsen stänger.',
+    description: 'Jobb du har sparat med hjärtat ligger kvar här tills annonsen stängs.',
     path: '/saved-jobs',
   },
   {
