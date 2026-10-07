@@ -56,4 +56,18 @@ describe('consistent Swedish UI language', () => {
     }
     expect(source).not.toContain('cover-bilden för redigering.');
   });
+
+  it('keeps media wording consistent across profile and onboarding', () => {
+    for (const file of ['src/pages/Profile.tsx', 'src/components/WelcomeTunnel.tsx', 'src/components/candidateProfiles/CandidateProfileEditor.tsx']) {
+      expect(read(file)).toContain('Lägg till coverbild');
+      expect(read(file)).toContain('Ta bort coverbild');
+    }
+  });
+
+  it('uses the same complete availability question across profile views', () => {
+    for (const file of ['src/pages/Profile.tsx', 'src/pages/ProfilePreview.tsx', 'src/components/WelcomeTunnel.tsx', 'src/components/candidateProfile/ProfileInfoSections.tsx']) {
+      expect(read(file)).toContain('När kan du börja ett nytt jobb?');
+      expect(read(file)).not.toContain('När kan du börja nytt jobb?');
+    }
+  });
 });

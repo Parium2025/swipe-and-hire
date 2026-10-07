@@ -402,7 +402,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                     {hasVideo && (
                       <div className="flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 backdrop-blur-sm">
                         <span className="whitespace-nowrap text-xs font-medium leading-tight text-white">
-                          Cover-bild{coverUrl ? '' : ' saknas'}
+                          Coverbild{coverUrl ? '' : ' saknas'}
                         </span>
                         <span className={coverUrl ? 'text-success' : 'text-destructive'} aria-hidden="true">
                           {coverUrl ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
@@ -424,7 +424,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         onClick={() => void openExistingInEditor(signedCover, 'cover-image', coverUrl)}
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
-                        Anpassa cover-bild
+                        Anpassa coverbild
                       </Button>
                       <Button
                         type="button"
@@ -433,7 +433,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Ta bort cover-bild
+                        Ta bort coverbild
                       </Button>
                       </>
                     )}
@@ -447,7 +447,7 @@ export function CandidateProfileEditor({ open, onOpenChange, profile, saving, on
                         disabled={uploading}
                         className="h-auto min-h-10 w-full max-w-xs whitespace-normal px-4 py-2 text-center text-sm"
                       >
-                        Lägg till cover-bild
+                        Lägg till coverbild
                       </Button>
                       {deletedCover ? (
                         <Button

@@ -414,7 +414,7 @@ export default function ProfilePreview() {
                   {/* Tillgänglighet */}
                   {data.availability && (
                     <div className="space-y-0.5">
-                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">När kan du börja nytt jobb?</p>
+                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">När kan du börja ett nytt jobb?</p>
                       <p className="text-[11px] text-white leading-relaxed">Svar: {getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
@@ -690,7 +690,7 @@ export default function ProfilePreview() {
                 )}
                 {consentedData?.availability && (
                   <div className="flex flex-col items-start gap-0.5 min-w-0">
-                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">När kan du börja nytt jobb?</p>
+                    <p className="text-[10px] sm:text-xs text-white font-medium break-words">När kan du börja ett nytt jobb?</p>
                     <p className="text-white text-[9px] sm:text-[10px] break-words">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}

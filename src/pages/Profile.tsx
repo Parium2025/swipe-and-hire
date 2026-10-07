@@ -2735,7 +2735,7 @@ const Profile = () => {
                     {/* Visa tillgänglighet endast om användaren har valt något i anställningsstatus */}
                     {employmentStatus && (
                       <div className="space-y-2 md:space-y-1.5">
-                        <Label htmlFor="availability" className="text-white text-sm">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                        <Label htmlFor="availability" className="text-white text-sm">När kan du börja ett nytt jobb? <span className="text-white">*</span></Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
