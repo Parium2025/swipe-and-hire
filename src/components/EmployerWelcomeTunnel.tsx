@@ -28,7 +28,8 @@ import { useEmailSubscription } from '@/hooks/useEmailSubscription';
 import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
-import { completeEmployerWelcome, isEmployerWelcomeCompleted, signalWelcomeCompletion, welcomeCompletionKey } from '@/lib/employerWelcomeCompletion';
+import { completeEmployerWelcome, signalWelcomeCompletion } from '@/lib/employerWelcomeCompletion';
+import { useWelcomeCompletionSync } from '@/hooks/useWelcomeCompletionSync';
 
 // Samma texter som på inställningssidan (EmployerNotificationsPanel) — håll dessa i synk.
 const notificationRows: NotificationRow[] = [
@@ -92,42 +93,12 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const refreshProfileRef = useRef(refreshProfile);
   refreshProfileRef.current = refreshProfile;
 
-  // No auth synchronization or reload: signals are scoped to this account and
-  // only prompt an authoritative read. Return/online checks cover missed signals.
-  useEffect(() => {
-    if (!user?.id || isReplay) return;
-    const userId = user.id;
-    let cancelled = false;
-    let checking = false;
-    const check = async () => {
-      if (cancelled || checking || submittingRef.current || activeUserRef.current !== userId) return;
-      checking = true;
-      try {
-        const completed = await isEmployerWelcomeCompleted(userId);
-        if (completed && !cancelled && activeUserRef.current === userId) {
-          clearEmployerWelcomeDraft(userId);
-          await refreshProfileRef.current();
-        }
-      } catch { /* Offline: retain draft; the atomic submit remains authoritative. */ }
-      finally { checking = false; }
-    };
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === welcomeCompletionKey(userId) && event.newValue) void check();
-    };
-    const onVisible = () => { if (document.visibilityState === 'visible') void check(); };
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('focus', onVisible);
-    window.addEventListener('online', onVisible);
-    document.addEventListener('visibilitychange', onVisible);
-    void check();
-    return () => {
-      cancelled = true;
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('focus', onVisible);
-      window.removeEventListener('online', onVisible);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
-  }, [user?.id, isReplay]);
+  useWelcomeCompletionSync(user?.id, isReplay || isSubmitting, async () => {
+    const completedUserId = user?.id;
+    if (!completedUserId || activeUserRef.current !== completedUserId) return;
+    clearEmployerWelcomeDraft(completedUserId);
+    await refreshProfileRef.current();
+  });
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
