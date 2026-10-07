@@ -547,6 +547,13 @@
       "when": 1791348995896,
       "tag": "0077_job_closed_bell_order_and_sweep",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1791349014996,
+      "tag": "0078_job_closed_sweep_outreach_only",
+      "breakpoints": true
     }
   ]
 }
