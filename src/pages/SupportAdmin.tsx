@@ -165,7 +165,7 @@ const SupportAdmin = () => {
 
       toast({
         title: "Status uppdaterad",
-        description: `Ärendet har markerats som ${getStatusLabel(status).toLowerCase()}`
+        description: `Ärendet har markerats som ${getStatusLabel(status).toLowerCase()}.`
       });
 
       fetchTickets(0, true);
@@ -287,7 +287,7 @@ const SupportAdmin = () => {
      <div className="max-w-4xl mx-auto space-y-6 px-3 md:px-8 py-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Support Admin</h1>
-        <p className="text-white mt-2">Hantera alla supportärenden</p>
+        <p className="text-white mt-2">Hantera alla supportärenden.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
