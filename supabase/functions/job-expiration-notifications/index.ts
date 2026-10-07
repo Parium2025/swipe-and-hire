@@ -133,8 +133,11 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Candidate-facing job_closed messages are queued atomically by the
-    // enqueue_outreach_dispatch database trigger when a job closes. Keeping a
-    // second sender here caused duplicate chat, push and email deliveries.
+    // enqueue_outreach_dispatch database trigger when a job closes. The sweep
+    // below only fills gaps (unique index prevents duplicates).
+    const { data: swept, error: sweepError } = await supabase.rpc('enqueue_missed_job_closed');
+    if (sweepError) console.error('job_closed sweep failed:', sweepError);
+    else if (swept) console.log(`job_closed sweep queued ${swept} missed messages`);
 
     await supabase.rpc('release_job_lock', { _key: 'job-expiration-notifications' });
     lockAcquired = false;
