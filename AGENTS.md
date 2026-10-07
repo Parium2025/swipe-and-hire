@@ -35,6 +35,6 @@
 - Touch profile list actions reuse row handlers and person membership.
 - Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes, since stale snapshots lack the field.
 
-- Restore the account-scoped plain-JSON query snapshot synchronously at auth init and refetch silently on first use, so cold starts skip skeletons.
-- Employer counts (queries and nav badges) show the account+org's last confirmed values until live totals arrive, else cold starts flash.
-- Job-closed outreach is queued only by the enqueue_outreach_dispatch trigger, unique per job publish round; no secondary sweeper, since it diverged from the interview/rule-owner exclusions.
+- Restore the account-scoped JSON query snapshot synchronously at auth init and refetch silently, so cold starts skip skeletons.
+- Employer counts and nav badges show the account+org's last confirmed values until live totals arrive, else cold starts flash.
+- Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
