@@ -5,6 +5,8 @@ import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 import { getOrganizationMemberIds } from '@/lib/organizationMembers';
+import { prefetchMediaUrl } from '@/hooks/useMediaUrl';
+import { AVATAR_TRANSFORM } from '@/lib/mediaPresets';
 
 export interface TeamMember {
   userId: string;
@@ -120,6 +122,18 @@ export function useTeamMembers() {
       return cached ? Date.now() - 60000 : undefined; // Trigger background refetch
     },
   });
+
+  // Förvärm kollegornas profilbilder (samma transform som listväljaren ritar)
+  // så att de finns direkt även efter kallstart.
+  const avatarKey = teamMembers.map((m) => m.profileImageUrl ?? '').join('|');
+  useEffect(() => {
+    teamMembers.forEach((m) => {
+      if (m.profileImageUrl && !/^(https?:|blob:)/.test(m.profileImageUrl)) {
+        prefetchMediaUrl(m.profileImageUrl, 'profile-image', 86400, AVATAR_TRANSFORM).catch(() => {});
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [avatarKey]);
 
   // Only show loading if we don't have cached data
   const isLoading = queryLoading && !hasCachedData;

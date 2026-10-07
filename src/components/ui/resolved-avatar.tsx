@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { cn } from '@/lib/utils';
+import type { ImageTransformOptions } from '@/lib/mediaPresets';
 
 interface ResolvedAvatarProps {
   /** Storage path OR full URL. Will auto-detect and handle accordingly. */
@@ -17,6 +18,8 @@ interface ResolvedAvatarProps {
   delayMs?: number;
   /** Additional fallback className */
   fallbackClassName?: string;
+  /** Valfri bildtransform; måste matcha förvärmningen för cacheträff */
+  transform?: ImageTransformOptions;
 }
 
 /**
@@ -34,6 +37,7 @@ export function ResolvedAvatar({
   alt,
   delayMs = 150,
   fallbackClassName,
+  transform,
 }: ResolvedAvatarProps) {
   // Check if src is already a full URL (not a storage path)
   const isFullUrl = src?.startsWith('http://') || src?.startsWith('https://') || src?.startsWith('blob:');
@@ -41,7 +45,9 @@ export function ResolvedAvatar({
   // Only use useMediaUrl if it's a storage path
   const resolvedFromStorage = useMediaUrl(
     isFullUrl ? null : src, 
-    mediaType
+    mediaType,
+    86400,
+    transform
   );
   
   // Use direct URL if it's already full, otherwise use resolved URL
