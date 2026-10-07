@@ -1,4 +1,5 @@
 import { Check, X, AlertCircle, Sparkles } from 'lucide-react';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 
 // Badge showing criterion title + result icon (used on candidate cards)
 interface CriterionResultBadgeProps {
@@ -39,7 +40,7 @@ export function CriterionResultBadge({ result, title, reasoning }: CriterionResu
       <span className={`flex items-center justify-center h-3.5 w-3.5 rounded-full ring-1 ${ringColor} ${bg}`}>
         <Icon className={`h-2 w-2 ${iconColor}`} />
       </span>
-      <span className="text-white/80 truncate min-w-0" title={title}>{title}</span>
+      <TruncatedTooltip text={title} className="text-white/80 truncate min-w-0" />
     </div>
   );
 }
@@ -77,7 +78,7 @@ export function CriterionIconBadge({ result, title }: CriterionIconBadgeProps) {
   return (
     <span className={`inline-flex min-w-0 max-w-full items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${bg} ring-1 ring-inset ${border}`}>
       <Icon className={`h-3 w-3 ${iconColor} flex-shrink-0`} />
-      <span className="text-white/80 truncate min-w-0" title={title}>{title}</span>
+      <TruncatedTooltip text={title} className="text-white/80 truncate min-w-0" />
     </span>
   );
 }

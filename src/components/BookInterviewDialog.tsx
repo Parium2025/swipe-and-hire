@@ -12,6 +12,7 @@ import { CalendarIcon, Clock, MapPin, Video, Building2, Loader2, X, Pencil, Chec
 import { format, startOfDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { isTextTruncated, useTruncationTooltip } from '@/hooks/useTruncationTooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -89,6 +90,12 @@ export const BookInterviewDialog = ({
   const invitationSummaryRef = useRef<HTMLParagraphElement | null>(null);
   const [invitationSummaryTruncated, setInvitationSummaryTruncated] = useState(false);
   const [summaryTooltipOpen, setSummaryTooltipOpen] = useState(false);
+  const videoLabelRef = useRef<HTMLParagraphElement>(null);
+  const videoUrlRef = useRef<HTMLParagraphElement>(null);
+  // Videolänkens ruta öppnas bara om etiketten eller länken faktiskt är kapad.
+  const videoLinkTooltip = useTruncationTooltip<HTMLDivElement>(() =>
+    isTextTruncated(videoLabelRef.current) || isTextTruncated(videoUrlRef.current),
+  );
 
 
 
@@ -967,11 +974,11 @@ export const BookInterviewDialog = ({
                     <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
                   )}
                   <TooltipProvider delayDuration={200}>
-                    <Tooltip>
+                    <Tooltip open={videoLinkTooltip.open} onOpenChange={videoLinkTooltip.onOpenChange}>
                       <TooltipTrigger asChild>
                         <div className="min-w-0 flex-1 cursor-help text-left">
-                          <p className="text-white text-sm truncate">{getVideoLinkLabel(trimmedVideoLink)}</p>
-                          <p className="text-white/70 text-xs line-clamp-2 break-all">
+                          <p ref={videoLabelRef} className="text-white text-sm truncate">{getVideoLinkLabel(trimmedVideoLink)}</p>
+                          <p ref={videoUrlRef} className="text-white/70 text-xs line-clamp-2 break-all">
                             {trimmedVideoLink.replace(/^https?:\/\//, '')}
                           </p>
                         </div>

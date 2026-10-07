@@ -12,6 +12,7 @@ import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info
 import { PreviewModeTabs } from '@/components/ui/preview-mode-tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTruncationTooltip } from '@/hooks/useTruncationTooltip';
 import { getMediaUrl } from '@/lib/mediaManager';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
@@ -237,6 +238,7 @@ export default function ProfilePreview() {
 
     // ANDRA VY: Fullständig information - matchar exakt struktur från Min Profil
     const DetailedView = () => {
+      const emailTooltip = useTruncationTooltip<HTMLSpanElement>();
       // Helper för att översätta anställningsstatus
       const getEmploymentStatusLabel = (status: string) => {
         const labels: Record<string, string> = {
@@ -330,14 +332,14 @@ export default function ProfilePreview() {
                     <div>
                       <p className="text-xs text-white">E-post:</p>
                       <TooltipProvider delayDuration={0}>
-                        <Tooltip>
+                        <Tooltip open={emailTooltip.open} onOpenChange={emailTooltip.onOpenChange}>
                           <TooltipTrigger asChild>
                             <button
                               onClick={handleEmailClick}
                               className="flex items-center gap-1 min-w-0 w-full transition-colors text-white"
                             >
                               <Mail className="h-3 w-3 flex-shrink-0 text-white" />
-                              <span className="text-xs truncate block flex-1 min-w-0 text-white">{user.email}</span>
+                              <span ref={emailTooltip.ref} className="text-xs truncate block flex-1 min-w-0 text-white">{user.email}</span>
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>

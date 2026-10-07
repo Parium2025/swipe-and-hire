@@ -3,6 +3,7 @@ import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { CriterionIconBadge, CriteriaSummaryPill } from '@/components/criteria/CriteriaBadges';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 import { formatCompactTime } from '@/lib/date';
 import { ArrowDown, Clock, Star, XCircle } from 'lucide-react';
 import type { JobApplication } from '@/hooks/useJobDetailsData';
@@ -135,18 +136,13 @@ export const ApplicationCardContent = memo(({
         <SmallCandidateAvatarWrapper application={application} />
         
         <div className="flex-1 min-w-0 pr-4">
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                  <p className="text-white font-medium text-xs truncate transition-colors cursor-default">
-                  {application.first_name} {application.last_name}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p>{application.first_name} {application.last_name}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TruncatedTooltip
+            as="p"
+            delayDuration={300}
+            text={`${application.first_name} ${application.last_name}`}
+            className="text-white font-medium text-xs truncate transition-colors cursor-default"
+            contentClassName="max-w-xs"
+          />
           <StarRating rating={application.rating} />
           {isRejected && (
             <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded-full bg-red-500/15 ring-1 ring-inset ring-red-400/30 text-red-300 text-[9px] font-medium w-fit">

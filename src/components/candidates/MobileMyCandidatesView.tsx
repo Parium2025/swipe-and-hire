@@ -1,6 +1,7 @@
 import { memo, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSwipeGesture, useHorizontalSwipeLock } from '@/hooks/useSwipeGesture';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedMenuItem } from '@/components/TruncatedMenuItem';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { getIconByName, type CandidateStage } from '@/hooks/useStageSettings';
 import { StageSettingsMenu } from '@/components/StageSettingsMenu';
@@ -269,26 +270,16 @@ const MyCandidateRow = memo(function MyCandidateRow({
               const Icon = getIconByName(cfg.iconName);
               return (
                 <TooltipProvider key={stage} delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuItem
-                        onClick={e => {
-                          e.stopPropagation();
-                          setMoveMenuOpen(false);
-                          onMoveToStage(candidate.id, stage);
-                        }}
-                        className="gap-2 min-h-[44px] min-w-0"
-                      >
-                        <Icon className="h-4 w-4 shrink-0 text-white" />
-                        <span className="truncate min-w-0">{cfg.label}</span>
-                      </DropdownMenuItem>
-                    </TooltipTrigger>
-                    {cfg.label.length > 20 && (
-                      <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] break-words whitespace-normal z-[999999]">
-                        <p className="text-sm break-words whitespace-pre-wrap">{cfg.label}</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
+                  <TruncatedMenuItem
+                    label={cfg.label}
+                    icon={<Icon className="h-4 w-4 shrink-0 text-white" />}
+                    itemClassName="gap-2 min-h-[44px] min-w-0"
+                    onSelect={e => {
+                      e.stopPropagation();
+                      setMoveMenuOpen(false);
+                      onMoveToStage(candidate.id, stage);
+                    }}
+                  />
                 </TooltipProvider>
               );
             })}

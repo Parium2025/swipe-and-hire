@@ -3,6 +3,7 @@ import { Star, Trash2, ArrowDown, Clock } from 'lucide-react';
 import { CandidateAvatar } from '@/components/CandidateAvatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 import { formatCompactTime } from '@/lib/date';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -118,20 +119,17 @@ export const CandidateCardContent = memo(function CandidateCardContent({
         <SmallCandidateAvatar candidate={candidate} />
 
         <div className="flex-1 min-w-0 pr-4">
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-fuchsia-400 font-medium text-xs truncate pointer-fine:group-hover:text-fuchsia-300 pointer-fine:transition-colors cursor-default">
-                  {candidate.first_name} {candidate.last_name}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[min(90vw,500px)] break-words whitespace-pre-wrap">
-                <p className="break-words whitespace-pre-wrap">
-                  {candidate.first_name} {candidate.last_name}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TruncatedTooltip
+            as="p"
+            delayDuration={300}
+            text={`${candidate.first_name} ${candidate.last_name}`}
+            className="text-fuchsia-400 font-medium text-xs truncate pointer-fine:group-hover:text-fuchsia-300 pointer-fine:transition-colors cursor-default"
+            contentClassName="max-w-[min(90vw,500px)] break-words whitespace-pre-wrap"
+          >
+            <p className="break-words whitespace-pre-wrap">
+              {candidate.first_name} {candidate.last_name}
+            </p>
+          </TruncatedTooltip>
           <StarRating rating={candidate.rating} />
           {(latestApplicationTime || lastActiveTime) && (
             <div className="flex items-center gap-1.5 mt-0.5 max-w-full text-white text-[9px] leading-snug">

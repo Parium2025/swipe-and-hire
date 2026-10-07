@@ -13,6 +13,8 @@ import { openCvFile } from '@/utils/cvUtils';
 import { CvViewer } from '@/components/CvViewer';
 import { uploadMedia, getMediaUrl, type MediaType } from '@/lib/mediaManager';
 import { useOnline } from '@/hooks/useOnlineStatus';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTruncationTooltip } from '@/hooks/useTruncationTooltip';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -45,6 +47,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [lastFailedFile, setLastFailedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { isOnline, showOfflineToast } = useOnline();
+  // Filnamnet får bara en tooltip när det faktiskt är kapat i ytan.
+  const fileNameTooltip = useTruncationTooltip<HTMLAnchorElement>();
 
 
   const getFileIcon = (fileName: string) => {
@@ -256,31 +260,39 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <div className="flex items-center gap-2 min-w-0 flex-1">
 
             {getFileIcon(currentFile.name)}
-            <a
-              href="#"
-              className="text-sm font-medium truncate min-w-0 flex-1 text-white hover:text-white underline cursor-pointer"
-              title={currentFile.name}
+            <TooltipProvider delayDuration={200}>
+              <Tooltip open={fileNameTooltip.open} onOpenChange={fileNameTooltip.onOpenChange}>
+                <TooltipTrigger asChild>
+                  <a
+                    ref={fileNameTooltip.ref}
+                    href="#"
+                    className="text-sm font-medium truncate min-w-0 flex-1 text-white hover:text-white underline cursor-pointer"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      if (isPdf) return; // Inline viewer below
 
-              onClick={async (e) => {
-                e.preventDefault();
-                if (isPdf) return; // Inline viewer below
-                
-                // Använd openCvFile för robust öppning av alla filer via mediaManager
-                await openCvFile({
-                  cvUrl: currentFile.url,
-                  fileName: currentFile.name,
-                  onError: (error) => {
-                    toast({
-                      title: "Fel vid öppning",
-                      description: error.message,
-                      variant: "destructive"
-                    });
-                  }
-                });
-              }}
-            >
-              {currentFile.name}
-            </a>
+                      // Använd openCvFile för robust öppning av alla filer via mediaManager
+                      await openCvFile({
+                        cvUrl: currentFile.url,
+                        fileName: currentFile.name,
+                        onError: (error) => {
+                          toast({
+                            title: "Fel vid öppning",
+                            description: error.message,
+                            variant: "destructive"
+                          });
+                        }
+                      });
+                    }}
+                  >
+                    {currentFile.name}
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[320px] break-words whitespace-normal">
+                  <p className="text-sm break-words whitespace-pre-wrap">{currentFile.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <Button
             variant="ghost"

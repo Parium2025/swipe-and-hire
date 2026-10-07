@@ -51,6 +51,7 @@ import { BenefitsList } from '@/components/wizard/BenefitsList';
 
 // Import shared wizard components and types
 import { SortableQuestionItem, WizardFooter } from '@/components/wizard';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 import { 
   JobQuestion, 
   TemplateFormData,
@@ -2303,9 +2304,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                           onClick={() => useQuestionTemplate(template)}
                                           className="text-left hover:opacity-80 transition-opacity min-w-0"
                                         >
-                                          <span className="block min-w-0 truncate text-sm font-medium leading-tight text-white" title={template.question_text}>
-                                            {template.question_text}
-                                          </span>
+                                          <TruncatedTooltip
+                                            text={template.question_text}
+                                            className="block min-w-0 truncate text-sm font-medium leading-tight text-white"
+                                          />
                                         </button>
                                         <div className="flex items-center justify-center gap-2">
                                           <button
