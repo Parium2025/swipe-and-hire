@@ -1,3 +1,4 @@
+// @vitest-environment node
 // Execute the applied function in isolated PostgreSQL; never touch real accounts.
 import { PGlite } from '@electric-sql/pglite';
 import { readFileSync } from 'node:fs';
@@ -42,8 +43,8 @@ describe('Atomic employer welcome completion', () => {
   it('keeps the first successful submission when two calls arrive together', async () => {
     const results = await Promise.all([complete(payload, { 'new_message:email': true }), complete({ ...payload, first_name: 'Andra' }, { 'new_message:email': false })]);
     expect(results).toEqual(['completed', 'already_completed']);
-    const profile = await db.query('SELECT first_name FROM profiles WHERE user_id=$1', [userId]);
-    const prefs = await db.query('SELECT email_enabled FROM notification_preferences');
+    const profile = await db.query<{ first_name: string }>('SELECT first_name FROM profiles WHERE user_id=$1', [userId]);
+    const prefs = await db.query<{ email_enabled: boolean }>('SELECT email_enabled FROM notification_preferences');
     expect(profile.rows[0]?.first_name).toBe('Första');
     expect(prefs.rows[0]?.email_enabled).toBe(true);
   });
