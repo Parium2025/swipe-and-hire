@@ -361,9 +361,15 @@ const JobTemplatesOverview = () => {
         }}
         templateToEdit={editingTemplate}
         onTemplateCreated={() => {
+          const wasUpdate = !!editingTemplate;
           setShowCreateDialog(false);
           setShowEditDialog(false);
           setEditingTemplate(null);
+          // Enda notisen för mall-flödet härifrån — guiden skapar ingen egen.
+          toast({
+            title: wasUpdate ? "Mall uppdaterad!" : "Mall skapad!",
+            description: wasUpdate ? "Din mall har uppdaterats." : "Din nya mall är nu tillgänglig."
+          });
           void fetchTemplates();
         }}
       />
