@@ -499,7 +499,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 {isOwnProfile ? (
                   <div className="bg-white/5 p-3 rounded-lg">
                     <p className="text-sm text-white text-center">
-                      (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
+                      (Här lämnar jobbsökarna kommentarer om de vill samt betyg.)
                     </p>
                   </div>
                 ) : (

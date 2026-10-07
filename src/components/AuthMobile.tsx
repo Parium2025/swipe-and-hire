@@ -450,7 +450,7 @@ const AuthMobile = ({
           if (!employerData.companyName.trim()) {
             toast({
               title: "Företagsnamn krävs",
-              description: "Vänligen ange företagsnamn",
+              description: "Vänligen ange företagsnamn.",
               variant: "destructive"
             });
             setLoading(false);
@@ -460,7 +460,7 @@ const AuthMobile = ({
           if (!employerData.industry.trim()) {
             toast({
               title: "Bransch krävs",
-              description: "Vänligen välj bransch",
+              description: "Vänligen välj bransch.",
               variant: "destructive"
             });
             setLoading(false);
@@ -1207,7 +1207,7 @@ const AuthMobile = ({
                               </p>
                             </div>
                             <p className="text-xs text-white mt-2">
-                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken)
+                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken).
                             </p>
                           </>
                         )}

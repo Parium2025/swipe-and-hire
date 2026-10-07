@@ -282,7 +282,7 @@ const Billing = () => {
               <CreditCard className="h-10 w-10 text-white mx-auto mb-4" />
               <h3 className="font-medium text-white mb-2 text-sm">Kunde inte hämta betalningshistoriken</h3>
               <p className="text-sm text-white mb-4">
-                Något gick fel när uppgifterna skulle hämtas
+                Något gick fel när uppgifterna skulle hämtas.
               </p>
               <button
                 onClick={() => refetch()}

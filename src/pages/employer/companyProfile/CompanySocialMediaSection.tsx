@@ -82,7 +82,7 @@ export const CompanySocialMediaSection = ({ links, onLinksChange, onRemoveLinkCl
     if (!validateUrl(newSocialLink.url, newSocialLink.platform)) {
       toast({
         title: "Ogiltig URL",
-        description: `Ange en giltig URL för ${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}`,
+        description: `Ange en giltig URL för ${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}.`,
         variant: "destructive"
       });
       return;

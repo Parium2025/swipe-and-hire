@@ -3792,7 +3792,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated, onPublished, rep
               console.error('Error saving edited image:', error);
               toast({
                 title: "Kunde inte spara bild",
-                description: "Försök igen",
+                description: "Försök igen.",
                 variant: "destructive",
               });
             }

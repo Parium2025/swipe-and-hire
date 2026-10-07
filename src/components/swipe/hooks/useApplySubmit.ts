@@ -161,7 +161,7 @@ export function useApplySubmit({
       queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', userId] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-jobs', userId] });
 
-      toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats`, route: '/my-applications' });
+      toast({ title: 'Ansökan skickad!', description: `Din ansökan till ${companyName} har skickats.`, route: '/my-applications' });
       refreshQuota();
 
       setTimeout(() => {

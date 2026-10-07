@@ -221,8 +221,8 @@ export const MyCandidatesHeader = ({
         </div>
         <p className="text-sm text-white mt-1">
           {isViewingColleague 
-            ? `Visar ${viewingColleague?.firstName}s rekryteringspipeline - du kan flytta och ta bort kandidater`
-            : 'Din personliga rekryteringspipeline - dra kandidater mellan steg'
+            ? `Visar ${viewingColleague?.firstName}s rekryteringspipeline - du kan flytta och ta bort kandidater.`
+            : 'Din personliga rekryteringspipeline - dra kandidater mellan steg.'
           }
         </p>
       </div>

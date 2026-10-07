@@ -32,8 +32,8 @@ export function EmptyConversationList({
         {hasError
           ? 'Något gick fel när chattarna skulle hämtas.'
           : hasSearch
-            ? 'Prova ett annat sökord'
-            : 'Starta en konversation med en kandidat eller kollega'}
+            ? 'Prova ett annat sökord.'
+            : 'Starta en konversation med en kandidat eller kollega.'}
       </p>
       {hasError && onRetry && (
         <button
