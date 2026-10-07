@@ -1088,7 +1088,7 @@ export function CandidatesTable({
         onRatingChange={onRatingUpdate && selectedApplication ? (rating) => onRatingUpdate(selectedApplication.applicant_id, rating) : undefined}
         adjacentMedia={adjacentCandidateMedia}
         fromSwipe={returnToSwipe}
-        onAddToList={touchCapable && selectedApplication ? () => {
+        onAddToList={selectedApplication ? () => {
           if (isApplicantAdded(selectedApplication.applicant_id)) {
             handleMobileAddToTeam(selectedApplication);
           } else {
