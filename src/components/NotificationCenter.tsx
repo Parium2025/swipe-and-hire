@@ -257,7 +257,6 @@ const TOAST_ROUTE_RULES: Array<[RegExp, string]> = [
   [/ansökan skickad/i, '/my-applications'],
   [/intervju (bokad|ombokad|inbokad|flyttad)/i, '/my-candidates'],
   [/kandidat (tillagd|flyttad|sparad)/i, '/my-candidates'],
-  [/mall (skapad|uppdaterad|sparad)/i, '/templates'],
   [/meddelande(n)? (skickat|skickade|köat)/i, '/messages'],
   [/profil(en)? (uppdaterad|sparad)/i, '/profile'],
   [/supportärende|supportmeddelande/i, '/support'],

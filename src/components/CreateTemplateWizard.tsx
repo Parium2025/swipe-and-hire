@@ -1112,11 +1112,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           return;
         }
 
-        toast({
-          title: "Mall uppdaterad!",
-          description: `Mallen "${formData.name}" har uppdaterats.`,
-          route: '/templates'
-        });
       } else {
         // Create new template
         const { error } = await supabase
@@ -1132,11 +1127,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           return;
         }
 
-        toast({
-          title: "Mall skapad!",
-          description: `Mallen "${formData.name}" har skapats.`,
-          route: '/templates'
-        });
       }
 
       resetAndClose();
