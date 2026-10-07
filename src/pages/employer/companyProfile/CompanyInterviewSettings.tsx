@@ -10,6 +10,7 @@ import { InterviewTypeTabs, type InterviewType } from './InterviewTypeTabs';
 import { isValidMeetingLink } from './meetingLinkValidation';
 import { normalizeMeetingLink } from '@/lib/meetingLink';
 import type { CompanyFormData } from './types';
+import { RequiredMark } from '@/components/wizard/RequiredMark';
 
 interface CompanyInterviewSettingsProps {
   formData: CompanyFormData;
@@ -18,9 +19,10 @@ interface CompanyInterviewSettingsProps {
   orgDefaultVideoLink?: string;
   /** Dölj den övre avgränsningslinjen (används när komponenten ligger i ett eget kort). */
   hideTopDivider?: boolean;
+  requireVideoLink?: boolean;
 }
 
-export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaultVideoLink = '', hideTopDivider = false }: CompanyInterviewSettingsProps) => {
+export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaultVideoLink = '', hideTopDivider = false, requireVideoLink = false }: CompanyInterviewSettingsProps) => {
   const [interviewType, setInterviewType] = useState<InterviewType>('video');
 
   return (
@@ -51,6 +53,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 <Label htmlFor="interview_video_link" className="text-white flex flex-wrap items-center gap-x-1.5 gap-y-1">
                   <Video className="h-3.5 w-3.5" />
                   Videolänk
+                  {requireVideoLink && <RequiredMark filled={!!formData.interview_video_link.trim() && isValidMeetingLink(formData.interview_video_link)} />}
                 </Label>
                 <p className="mt-1 text-xs leading-5 text-white">Din Teams-, Zoom- eller Google Meet-länk som visas för kandidater.</p>
               </div>
@@ -58,6 +61,8 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
               <div className="flex min-w-0 items-center gap-2">
                 <Input
                   id="interview_video_link"
+                  required={requireVideoLink}
+                  aria-describedby={requireVideoLink && !formData.interview_video_link.trim() ? 'interview-video-link-required' : undefined}
                   name="interview-video-link-noautofill"
                   autoComplete="off"
                   data-lpignore="true"
@@ -65,7 +70,7 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                   value={formData.interview_video_link}
                   onChange={(e) => onFormDataChange({ interview_video_link: e.target.value })}
                   onBlur={(e) => onFormDataChange({ interview_video_link: normalizeMeetingLink(e.target.value) })}
-                  placeholder="https://teams.microsoft.com/... eller https://meet.google.com/..."
+                  placeholder={requireVideoLink ? 'Lägg till videolänk' : 'https://teams.microsoft.com/... eller https://meet.google.com/...'}
                    className="min-w-0 flex-1 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white h-11 !min-h-0 [&]:text-white"
                 />
                 
@@ -77,6 +82,9 @@ export const CompanyInterviewSettings = ({ formData, onFormDataChange, orgDefaul
                 )}
               </div>
               
+              {requireVideoLink && !formData.interview_video_link.trim() && (
+                <p id="interview-video-link-required" className="text-xs text-white">Lägg till videolänk för att gå vidare.</p>
+              )}
               {formData.interview_video_link && !isValidMeetingLink(formData.interview_video_link) && (
                 <p className="text-amber-400 text-xs">
                   Länken ser inte ut som en giltig möteslänk från Teams, Zoom, Google Meet, Webex, Whereby, Jitsi, Discord, FaceTime, Slack, Pexip, Skype, GoToMeeting, BlueJeans med flera.

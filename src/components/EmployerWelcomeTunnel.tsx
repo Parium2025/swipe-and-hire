@@ -259,8 +259,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       toast({ title: 'Ange företagets namn', variant: 'destructive' });
       return;
     }
-    if (currentStep === 4 && formData.interviewVideoLink.trim() && !isValidMeetingLink(formData.interviewVideoLink)) {
-      toast({ title: 'Kontrollera möteslänken eller lämna fältet tomt', variant: 'destructive' });
+    if (currentStep === 4 && (!formData.interviewVideoLink.trim() || !isValidMeetingLink(formData.interviewVideoLink))) {
+      toast({ title: 'Lägg till en giltig videolänk', variant: 'destructive' });
       return;
     }
     if (currentStep < totalSteps - 1) {
@@ -441,6 +441,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     notificationDraft[`${type}:${channel}`] ?? notificationEnabled(type, channel);
 
   const handleSubmit = async () => {
+    if (!formData.interviewVideoLink.trim() || !isValidMeetingLink(formData.interviewVideoLink)) {
+      toast({ title: 'Lägg till en giltig videolänk', variant: 'destructive' });
+      setCurrentStep(4);
+      return;
+    }
     if (isReplay) {
       clearEmployerWelcomeDraft(user?.id);
       // Testläget firar exakt som riktiga konton, men sparar ingenting.
@@ -861,6 +866,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 }))}
                 orgDefaultVideoLink={orgDefaultVideoLink}
                 hideTopDivider
+                requireVideoLink
               />
             </div>
           </div>
@@ -1037,7 +1043,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 onMouseDown={(e) => { e.currentTarget.blur(); (document.activeElement as HTMLElement)?.blur?.(); }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 onClick={(e) => { e.currentTarget.blur(); handleNext(); }}
-                 disabled={isUploadingLogo}
+                 disabled={isUploadingLogo || (currentStep === 4 && (!formData.interviewVideoLink.trim() || !isValidMeetingLink(formData.interviewVideoLink)))}
                   className={`rounded-full bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 touch-border-white transition-colors duration-150 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${currentStep === 0 ? 'flex-1 text-lg font-semibold' : ''}`}
               >
                 {currentStep === 0 ? 'Sätt igång' : 'Nästa'}
