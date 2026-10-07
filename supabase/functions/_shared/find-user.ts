@@ -1,10 +1,5 @@
-// Hitta en auth-användare via e-post – med korrekt paginering.
-//
-// `auth.admin.listUsers()` returnerar som standard endast de 50 första
-// användarna. Att söka i den listan fungerar därför bara i ett nystartat
-// projekt: så fort användarantalet växer "försvinner" befintliga konton,
-// vilket bryter t.ex. återsändning av bekräftelsemejl och admin-radering.
-// Den här hjälparen bläddrar igenom alla sidor tills träff eller slut.
+// Exact email lookup uses the protected indexed RPC, not a scan of all accounts.
+// Full pagination is retained only for scheduled account-retention processing.
 
 type AdminClient = {
   auth: {
@@ -47,19 +42,26 @@ export async function forEachAuthUser(
 
 /** Returnerar användaren med angiven e-post, eller null. */
 export async function findUserByEmail(
-  admin: AdminClient,
+  admin: {
+    rpc: (name: string, args: { _email: string }) => PromiseLike<{
+      data: { user_id: string }[] | null;
+      error: { message: string } | null;
+    }>;
+    auth: { admin: { getUserById: (id: string) => Promise<{
+      data: { user: AuthUserLike | null };
+      error: { message: string } | null;
+    }> } };
+  },
   email: string,
 ): Promise<AuthUserLike | null> {
   const normalized = email.trim().toLowerCase()
   if (!normalized) return null
 
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: PER_PAGE })
-    if (error) throw new Error(error.message)
-    const users = data?.users ?? []
-    const match = users.find((u) => u.email?.toLowerCase() === normalized)
-    if (match) return match
-    if (users.length < PER_PAGE) return null
-  }
-  return null
+  const { data: matches, error: lookupError } = await admin.rpc('lookup_auth_email_for_resend', { _email: normalized });
+  if (lookupError) throw new Error(lookupError.message);
+  const match = matches?.[0];
+  if (!match) return null;
+  const { data, error } = await admin.auth.admin.getUserById(match.user_id);
+  if (error) throw new Error(error.message);
+  return data.user?.email?.trim().toLowerCase() === normalized ? data.user : null;
 }
