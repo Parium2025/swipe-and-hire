@@ -28,6 +28,7 @@ import { useEmailSubscription } from '@/hooks/useEmailSubscription';
 import { isTunnelReplayAccount } from '@/lib/tunnelTestAccounts';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { getMediaUrl, getOriginalImageUrl, uploadMedia, uploadOriginalImage } from '@/lib/mediaManager';
+import { completeEmployerWelcome, isEmployerWelcomeCompleted, signalWelcomeCompletion, welcomeCompletionKey } from '@/lib/employerWelcomeCompletion';
 
 // Samma texter som på inställningssidan (EmployerNotificationsPanel) — håll dessa i synk.
 const notificationRows: NotificationRow[] = [
@@ -74,7 +75,7 @@ interface EmployerWelcomeTunnelProps {
 }
 
 const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
-  const { profile, updateProfile, user } = useAuth();
+  const { profile, refreshProfile, user } = useAuth();
   const orgDefaultVideoLink = useOrgDefaultVideoLink();
   const { toast } = useToast();
   const { isEnabled: notificationEnabled, isLoading: notificationsLoading } = useNotificationPreferences();
@@ -85,6 +86,48 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoProgress, setLogoProgress] = useState(0);
   const [draftRestored, setDraftRestored] = useState(false);
+  const submittingRef = useRef(false);
+  const activeUserRef = useRef(user?.id);
+  activeUserRef.current = user?.id;
+  const refreshProfileRef = useRef(refreshProfile);
+  refreshProfileRef.current = refreshProfile;
+
+  // No auth synchronization or reload: signals are scoped to this account and
+  // only prompt an authoritative read. Return/online checks cover missed signals.
+  useEffect(() => {
+    if (!user?.id || isReplay) return;
+    const userId = user.id;
+    let cancelled = false;
+    let checking = false;
+    const check = async () => {
+      if (cancelled || checking || submittingRef.current || activeUserRef.current !== userId) return;
+      checking = true;
+      try {
+        const completed = await isEmployerWelcomeCompleted(userId);
+        if (completed && !cancelled && activeUserRef.current === userId) {
+          clearEmployerWelcomeDraft(userId);
+          await refreshProfileRef.current();
+        }
+      } catch { /* Offline: retain draft; the atomic submit remains authoritative. */ }
+      finally { checking = false; }
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === welcomeCompletionKey(userId) && event.newValue) void check();
+    };
+    const onVisible = () => { if (document.visibilityState === 'visible') void check(); };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', onVisible);
+    window.addEventListener('online', onVisible);
+    document.addEventListener('visibilitychange', onVisible);
+    void check();
+    return () => {
+      cancelled = true;
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', onVisible);
+      window.removeEventListener('online', onVisible);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [user?.id, isReplay]);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -441,6 +484,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     notificationDraft[`${type}:${channel}`] ?? notificationEnabled(type, channel);
 
   const handleSubmit = async () => {
+    if (submittingRef.current || !user?.id) return;
     if (!formData.interviewVideoLink.trim() || !isValidMeetingLink(formData.interviewVideoLink)) {
       toast({ title: 'Lägg till en giltig videolänk', variant: 'destructive' });
       setCurrentStep(4);
@@ -453,6 +497,8 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       onComplete();
       return;
     }
+    const submittingUserId = user.id;
+    submittingRef.current = true;
     setIsSubmitting(true);
     try {
       if (!isTeamMember && !formData.companyName.trim()) {
@@ -471,7 +517,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         website: formData.website.trim(),
         company_description: formData.companyDescription.trim(),
       };
-      const result = await updateProfile({
+      const result = await completeEmployerWelcome({
         ...companyFields,
         interview_video_link: formData.interviewVideoLink
           ? normalizeMeetingLink(formData.interviewVideoLink)
@@ -483,36 +529,18 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         first_name: formData.firstName.trim(),
         last_name: formData.lastName.trim(),
         ...(formData.profileImageUrl !== (profile?.profile_image_url || '') ? { profile_image_url: formData.profileImageUrl } : {}),
-      } as any);
-
-      if (result?.error) {
-        throw result.error;
-      }
-
-      if (user?.id && Object.keys(notificationDraft).length > 0) {
-        const { data: existing, error: readError } = await supabase.from('notification_preferences')
-          .select('notification_type, is_enabled, email_enabled, in_app_enabled').eq('user_id', user.id);
-        if (readError) throw readError;
-        const rows = notificationRows.filter(row => row.type !== 'interview_scheduled' && row.channels.some(channel => `${row.type}:${channel}` in notificationDraft)).map(row => {
-          const previous = existing?.find(item => item.notification_type === row.type);
-          return {
-            user_id: user.id, notification_type: row.type,
-            is_enabled: notificationDraft[`${row.type}:push`] ?? previous?.is_enabled ?? notificationEnabled(row.type, 'push'),
-            email_enabled: notificationDraft[`${row.type}:email`] ?? previous?.email_enabled ?? notificationEnabled(row.type, 'email'),
-            in_app_enabled: notificationDraft[`${row.type}:in_app`] ?? previous?.in_app_enabled ?? notificationEnabled(row.type, 'in_app'),
-            updated_at: new Date().toISOString(),
-          };
-        });
-        if (rows.length) {
-          const { error: prefsError } = await supabase.from('notification_preferences').upsert(rows, { onConflict: 'user_id,notification_type' });
-          if (prefsError) throw prefsError;
-        }
-      }
-      const completion = await updateProfile({ onboarding_completed: true });
-      if (completion?.error) throw completion.error;
+      }, notificationDraft);
+      if (activeUserRef.current !== submittingUserId) return;
 
       // Clear draft after successful submission
-      clearEmployerWelcomeDraft(user?.id);
+      clearEmployerWelcomeDraft(submittingUserId);
+      signalWelcomeCompletion(submittingUserId);
+      await refreshProfileRef.current();
+      if (activeUserRef.current !== submittingUserId) return;
+      if (result === 'already_completed') {
+        onComplete();
+        return;
+      }
 
       // Samma firande som vid publicering av jobb
       void celebrate({ intensity: 'big' });
@@ -524,6 +552,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       onComplete();
     } catch (error) {
+      if (activeUserRef.current !== submittingUserId) return;
       console.error('Profile update error:', error);
       toast({
         title: "Fel",
@@ -531,6 +560,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         variant: "destructive"
       });
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -573,7 +603,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 },
                 {
                   title: 'Möteslänk',
-                  desc: isTeamMember ? 'Din egen länk för videointervjuer. Helt valfritt.' : 'Er fasta länk för videointervjuer. Helt valfritt.',
+                  desc: isTeamMember ? 'Din egen länk för videointervjuer. Obligatorisk.' : 'Er fasta länk för videointervjuer. Obligatorisk.',
                 },
                 {
                   title: 'Standardmeddelanden',
