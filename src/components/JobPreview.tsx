@@ -380,7 +380,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
                   ) : (
                     <Button
                       size="lg"
-                      className="bg-green-500 hover:bg-green-600 text-white h-14 px-8 text-lg"
+                      className="bg-green-500 hover:bg-green-600 md:hover:bg-green-600 active:bg-green-600 text-white h-14 px-8 text-lg"
                     >
                       Skicka ansökan
                     </Button>
