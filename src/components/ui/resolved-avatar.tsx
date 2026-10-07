@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { cn } from '@/lib/utils';
-import type { ImageTransformOptions } from '@/lib/mediaPresets';
+import type { ImageTransformOptions } from '@/lib/mediaManager';
 
 interface ResolvedAvatarProps {
   /** Storage path OR full URL. Will auto-detect and handle accordingly. */
