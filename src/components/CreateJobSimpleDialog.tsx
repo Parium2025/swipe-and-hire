@@ -521,7 +521,7 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                 onClick={handleClose}
                 onMouseDown={(e) => e.currentTarget.blur()}
                 onMouseUp={(e) => e.currentTarget.blur()}
-                className={dialogCloseButtonClassName}
+                className={cn(dialogCloseButtonClassName, "top-1/2 -translate-y-1/2")}
               >
                 <X className={dialogCloseIconClassName} />
               </Button>

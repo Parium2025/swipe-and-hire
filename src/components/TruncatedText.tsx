@@ -95,7 +95,7 @@ export function TruncatedText({
   instantClose = false,
   style,
   lines,
-  touchTooltipOnLongPress = false,
+  touchTooltipOnLongPress = true,
 }: TruncatedTextProps) {
   const textRef = useRef<HTMLDivElement>(null);
   const tooltipContentRef = useRef<HTMLDivElement>(null);
@@ -228,8 +228,8 @@ export function TruncatedText({
   }, [text, clearCloseTimeout]);
 
   // EAGER MEASUREMENT FOR TOUCH DEVICES
-  // On touch devices there is no hover, so the user's first tap must already
-  // open the tooltip. We measure synchronously after layout so the tooltip
+  // On touch devices there is no hover. Measure after layout so a long press
+  // can open the tooltip without waiting for another render. The tooltip
   // wrapper is wired up on first paint. Desktop still uses lazy measurement
   // on hover for performance (60+ instances on dashboards).
   useLayoutEffect(() => {
@@ -429,6 +429,9 @@ export function TruncatedText({
       // listmenyn) — bara ett fullbordat långtryck får styra tooltipen.
       if (touchTooltipOnLongPress && !longPressFiredRef.current) {
         clearLongPressTimer();
+        releaseTriggerPress();
+        setIsOpen(false);
+        onClick?.();
         return;
       }
       longPressFiredRef.current = false;
@@ -480,6 +483,7 @@ export function TruncatedText({
     measureTruncation();
     clearLongPressTimer();
     longPressFiredRef.current = false;
+    if (forceClosed) return;
     longPressTimerRef.current = window.setTimeout(() => {
       longPressTimerRef.current = null;
       longPressFiredRef.current = true;
@@ -488,6 +492,10 @@ export function TruncatedText({
   };
 
   useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
+
+  useEffect(() => {
+    if (forceClosed) clearLongPressTimer();
+  }, [forceClosed, clearLongPressTimer]);
 
   const stopTooltipPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();

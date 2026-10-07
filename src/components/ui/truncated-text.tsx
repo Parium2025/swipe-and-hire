@@ -40,7 +40,7 @@ export function TruncatedText({
   lines = 1,
   side = 'bottom',
   insideInteractive = false,
-  touchTooltipOnLongPress = false,
+  touchTooltipOnLongPress = true,
 }: TruncatedTextProps) {
   const clampClass = lines === 1 ? 'truncate' : lines === 2 ? 'line-clamp-2' : 'line-clamp-3';
 
