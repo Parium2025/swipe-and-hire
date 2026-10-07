@@ -283,7 +283,7 @@ export function AddToColleagueListDialog({
                   >
                     <UserCheck className="h-5 w-5 text-white flex-shrink-0" />
                     <div className="min-w-0 flex-1 text-left">
-                      <TruncatedText text={list.name} lines={2} className="font-medium" insideInteractive />
+                      <TruncatedText text={list.name} lines={2} className="font-medium" insideInteractive alwaysShowTooltip="desktop-only" />
                       <div className="text-xs text-white">Min lista</div>
                     </div>
                     {isAdding === `own:${list.id}` && (
@@ -337,7 +337,7 @@ export function AddToColleagueListDialog({
                     fallbackClassName="text-xs bg-white/20"
                   />
                   <div className="min-w-0 flex-1 text-left">
-                    <TruncatedText text={memberName} lines={2} className="font-medium" insideInteractive />
+                    <TruncatedText text={memberName} lines={2} className="font-medium" insideInteractive alwaysShowTooltip="desktop-only" />
                     <div className="text-xs text-white">Kollegas listor</div>
                   </div>
                   <ChevronDown className={`h-4 w-4 text-white flex-shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
@@ -355,7 +355,7 @@ export function AddToColleagueListDialog({
                       disabled={isAdding !== null}
                     >
                       <div className="min-w-0 flex-1 text-left">
-                        <TruncatedText text={entry.name} lines={2} className="font-medium" insideInteractive />
+                        <TruncatedText text={entry.name} lines={2} className="font-medium" insideInteractive alwaysShowTooltip="desktop-only" />
                       </div>
                       {isAdding === key && (
                         <div className="ml-auto animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
