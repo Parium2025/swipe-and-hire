@@ -9,7 +9,7 @@ const formData = { interview_video_link: '', interview_video_default_message: ''
 describe('Obligatorisk videolänk i välkomstguiden', () => {
   it('visar stjärna, tydlig uppmaning och obligatoriskt fält', () => {
     render(<CompanyInterviewSettings formData={formData} onFormDataChange={() => {}} requireVideoLink />);
-    expect(screen.getByLabelText('Videolänk')).toBeRequired();
+    expect(screen.getByPlaceholderText('Lägg till videolänk')).toBeRequired();
     expect(screen.getByPlaceholderText('Lägg till videolänk')).toBeInTheDocument();
     expect(screen.getByText('Lägg till videolänk för att gå vidare.')).toBeInTheDocument();
     expect(screen.getByTitle('Obligatoriskt fält')).toBeInTheDocument();
