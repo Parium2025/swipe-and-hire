@@ -589,6 +589,13 @@
       "when": 1791404539464,
       "tag": "0083_team_accept_profile_result",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1791404668921,
+      "tag": "0084_atomic_team_invitation_creation",
+      "breakpoints": true
     }
   ]
 }

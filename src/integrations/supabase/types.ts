@@ -4461,6 +4461,16 @@ export type Database = {
         Args: { _body: string; _metadata?: Json; _title: string }
         Returns: string
       }
+      create_team_invitation: {
+        Args: {
+          p_email: string
+          p_inviter: string
+          p_organization: string
+          p_role: string
+          p_token_hash: string
+        }
+        Returns: Json
+      }
       cron_auth_header: { Args: never; Returns: Json }
       delete_candidate_list_safely: {
         Args: { p_list_id: string }
