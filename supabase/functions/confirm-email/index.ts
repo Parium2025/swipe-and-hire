@@ -103,10 +103,11 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // 5. Markera bekräftelsen som klar
-    await supabase
+    const { error: markError } = await supabase
       .from('email_confirmations')
       .update({ confirmed_at: new Date().toISOString() })
       .eq('id', confirmation.id);
+    if (markError) throw markError;
 
     // 6. Arbetsgivare: organisation + admin-roll skapas nu, inte tidigare
     await provisionEmployerWorkspace(confirmation.user_id);
