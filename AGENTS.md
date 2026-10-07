@@ -12,12 +12,12 @@
 - Store uncropped originals with crops; reopen originals for edits; media remove/restore uses synchronous guards against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Shared review branding reads the trimmed public-profile RPC under its own cache key; full profile rows stay private. Colleagues may read only each other's current profile image via `can_view_colleague_profile_image`, never originals, CVs or videos.
-- Upgrade candidate portraits from thumbnail to full size only after the full image decodes, so initials never flash.
+- Upgrade candidate portraits to full size only after it decodes, so initials never flash.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over locally added application events, and keep cached report data account-scoped.
 - Resolve colleague-owned candidate history and ratings through the authorized organization-member RPC; candidate-list ratings stay scoped to the signed-in account, because user_roles SELECT exposes only the caller and RLS alone does not set display priority.
 - Drop delayed account-scoped fetches after account switch/sign-out so they can't overwrite the new cache.
 - Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks across accounts.
-- Candidate skeletons use server totals per user/list.
+- Candidate skeletons use per-user/list server totals.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
 - Company identity is organizational; invitees inherit it, skip setup, and chat updates live.
 - Autofill keeps each field's own surface; never repaint it globally.
