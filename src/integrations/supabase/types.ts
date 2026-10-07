@@ -4375,6 +4375,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      complete_employer_welcome: {
+        Args: { p_preferences?: Json; p_profile: Json }
+        Returns: string
+      }
       complete_past_interviews: { Args: never; Returns: number }
       complete_push_notifications: {
         Args: { p_error?: string; p_failed_ids: number[]; p_sent_ids: number[] }
