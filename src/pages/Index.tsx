@@ -624,12 +624,19 @@ const Index = () => {
     try { return localStorage.getItem('parium-last-role'); } catch { return null; }
   })();
 
+  // Om senaste kända läget var en ofärdig välkomstguide ska omladdningen inte
+  // blixtra fram appens skelett/profiler bakom guiden — visa bara bakgrunden.
+  const onboardingPending = (() => {
+    try { return localStorage.getItem('parium-onboarding-pending') === '1'; } catch { return false; }
+  })();
+  const plainBg = <div className="min-h-screen bg-gradient-parium" />;
+
   // Vid en kall återladdning ska appytan finnas från första React-bildrutan.
   // Tidigare ritades bara en tom blå yta under session- och profilhämtningen.
   if (loading && !user && authAction !== 'logout') {
-    return lastKnownRole === 'employer'
+    return lastKnownRole === 'employer' && !onboardingPending
       ? renderEmployerColdSkeleton(location.pathname)
-      : <div className="min-h-screen bg-gradient-parium" />;
+      : plainBg;
   }
 
   // Om ingen användare: redirecta omedelbart till /auth (säkerhetsnät för mobil)
@@ -640,7 +647,7 @@ const Index = () => {
   // Profilen är nästa nätverkssteg efter sessionen. Visa den senast kända
   // rollens riktiga sidstruktur under tiden i stället för ännu en tom skärm.
   if (!profile) {
-    return lastKnownRole === 'employer'
+    return lastKnownRole === 'employer' && !onboardingPending
       ? renderEmployerColdSkeleton(location.pathname)
       : <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
@@ -664,6 +671,10 @@ const Index = () => {
   const needsOnboarding = tunnelReplay
     ? !hasCompletedTunnelThisSession()
     : !profile?.onboarding_completed;
+  try {
+    if (needsOnboarding) localStorage.setItem('parium-onboarding-pending', '1');
+    else localStorage.removeItem('parium-onboarding-pending');
+  } catch { /* ignorera */ }
 
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
