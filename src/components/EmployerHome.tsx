@@ -4,6 +4,7 @@ import { useJobsData } from '@/hooks/useJobsData';
 import { useWeather } from '@/hooks/useWeather';
 import { useGreeting } from '@/hooks/useGreeting';
 import { useMinuteTick } from '@/hooks/useMinuteTick';
+import { useIsSunDown } from '@/hooks/useIsSunDown';
 
 import { hasConfirmedWeather } from '@/lib/weatherApi';
 import { formatLocalDateTime } from '@/lib/localTime';
@@ -126,7 +127,7 @@ const EmployerHome = memo(() => {
 
   const firstName = profile?.first_name || 'du';
   
-  const { text: greetingText, isEvening, isDaytime } = useGreeting();
+  const { text: greetingText, isEvening: isEveningByClock } = useGreeting();
   
   // Fetch weather independently of GPS permission. If GPS is denied, useWeather
   // still falls back to IP/server/profile city; blocking the hook here makes the
@@ -141,6 +142,9 @@ const EmployerHome = memo(() => {
     backgroundLocationEnabled,
   });
 
+  // Sol/måne följer verklig soluppgång och solnedgång på platsen.
+  const isEvening = useIsSunDown(isEveningByClock, weather.city);
+  const isDaytime = !isEvening;
   const showWeatherEffects = hasConfirmedWeather(weather);
   
   // Emoji logic based on time of day and weather
