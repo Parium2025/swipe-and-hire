@@ -290,9 +290,14 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     };
   }, [justApplied, asOverlay, applicationReturnPath, navigate]);
   const [applicationStatusChecked, setApplicationStatusChecked] = useState(Boolean(cached) || navigationImageState.hasApplied === true);
-  const { data: appliedJobIds = new Set<string>(), isFetched: appliedJobIdsFetched } = useAppliedJobIds();
+  const { data: appliedJobIds = new Set<string>(), isFetchedAfterMount: appliedJobIdsFetchedNow, dataUpdatedAt: appliedJobIdsUpdatedAt } = useAppliedJobIds();
   const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
-  const applicationStatusKnown = alreadyAppliedForUi || applicationStatusChecked || appliedJobIdsFetched || !user || isEmployer;
+  // "Inte sökt" visas bara när det är bekräftat för just den här annonsen:
+  // serverkontrollen i den här vyn, eller en ansökningslista hämtad nyss.
+  // En återställd/äldre lista får aldrig visa ansökningsformuläret — då kan
+  // ett redan sökt jobb blixtra förbi som osökt. "Sökt" är alltid slutgiltigt.
+  const appliedListConfirmedFresh = appliedJobIdsFetchedNow && Date.now() - appliedJobIdsUpdatedAt <= JOB_SNAPSHOT_MAX_AGE_MS;
+  const applicationStatusKnown = alreadyAppliedForUi || applicationStatusChecked || appliedListConfirmedFresh || !user || isEmployer;
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close
   const [pullY, setPullY] = useState(0);
