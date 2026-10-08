@@ -4371,6 +4371,7 @@ export type Database = {
       }
       cleanup_push_notification_queue: { Args: never; Returns: number }
       cleanup_stale_sessions: { Args: never; Returns: number }
+      company_owner_id: { Args: { _uid: string }; Returns: string }
       complete_cv_analysis: {
         Args: {
           p_error_message?: string
@@ -5109,6 +5110,13 @@ export type Database = {
         Returns: Json
       }
       reserve_rate_limits: { Args: { _rules: Json }; Returns: Json }
+      resolve_company_owner_ids: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          owner_id: string
+          user_id: string
+        }[]
+      }
       respond_to_interview_by_token: {
         Args: { p_accept: boolean; p_token: string }
         Returns: Json

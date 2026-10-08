@@ -15,6 +15,7 @@ import { Trash2, AlertTriangle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { resolveCompanyOwnerIds } from '@/lib/companyOwner';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -386,7 +387,15 @@ const SearchJobs = memo(() => {
   // Vi läser ids från redan laddade jobb. När användaren väljer ett företag
   // som inte finns i nuvarande resultat (t.ex. via sparad sökning) faller vi
   // tillbaka på namn-filtrering tills ids är kända.
-  const companyNameToIdRef = useRef<Map<string, string>>(new Map());
+  const companyNameToIdRef = useRef<Map<string, Set<string>>>(new Map());
+  // Ett bolagsnamn kan ha flera kollegors annonser — samla alla deras konton.
+  const addCompanyId = (name: string, id: string): boolean => {
+    const set = companyNameToIdRef.current.get(name) ?? new Set<string>();
+    if (set.has(id)) return false;
+    set.add(id);
+    companyNameToIdRef.current.set(name, set);
+    return true;
+  };
   const [companyMapVersion, setCompanyMapVersion] = useState(0);
   // Företag som inte finns bland laddade sidor slås upp i databasen, så
   // filtret alltid gäller hela träffmängden och inte bara inlästa sidor.
@@ -405,10 +414,7 @@ const SearchJobs = memo(() => {
         let added = false;
         for (const row of data) {
           const name = row.workplace_name?.trim();
-          if (name && row.employer_id && !companyNameToIdRef.current.has(name)) {
-            companyNameToIdRef.current.set(name, row.employer_id);
-            added = true;
-          }
+          if (name && row.employer_id && addCompanyId(name, row.employer_id)) added = true;
         }
         if (added) setCompanyMapVersion((v) => v + 1);
       });
@@ -418,8 +424,7 @@ const SearchJobs = memo(() => {
     if (selectedCompanies.length === 0) return undefined;
     const ids: string[] = [];
     for (const name of selectedCompanies) {
-      const id = companyNameToIdRef.current.get(name);
-      if (id) ids.push(id);
+      companyNameToIdRef.current.get(name)?.forEach((id) => { if (!ids.includes(id)) ids.push(id); });
     }
     return ids.length > 0 ? ids : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -477,9 +482,7 @@ const SearchJobs = memo(() => {
   // Uppdatera namn→id-mapping så att framtida company-val kan filtreras i DB
   useEffect(() => {
     for (const j of jobs) {
-      if (j.company_name && j.employer_id && !companyNameToIdRef.current.has(j.company_name)) {
-        companyNameToIdRef.current.set(j.company_name, j.employer_id);
-      }
+      if (j.company_name && j.employer_id && addCompanyId(j.company_name, j.employer_id)) setCompanyMapVersion((v) => v + 1);
     }
   }, [jobs]);
 
@@ -523,6 +526,15 @@ const SearchJobs = memo(() => {
     enabled: !!user && companyIds.length > 0,
     staleTime: 5 * 60 * 1000,
   });
+  const { data: companyOwnerIds } = useQuery({
+    queryKey: ['company-owner-ids', [...companyIds].sort().join(',')],
+    queryFn: async () => Object.fromEntries(await resolveCompanyOwnerIds(companyIds)) as Record<string, string>,
+    enabled: !!user && companyIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+  // Ett bolag = en nyckel: kollegors annonser hamnar under bolagets ägarkonto.
+  const companyKeyForJob = useCallback((job: { employer_id?: string | null }) =>
+    (job.employer_id && (companyOwnerIds?.[job.employer_id] ?? job.employer_id)) || '', [companyOwnerIds]);
   const companyNameForJob = useCallback((job: { employer_id?: string | null; company_name?: string | null }) =>
     (job.employer_id && employerCompanyNames?.[job.employer_id]) || job.company_name?.trim() || '', [employerCompanyNames]);
   // Bolagsnamnet pekar alltid på samma arbetsgivare, oavsett arbetsplatsnamn.
@@ -530,10 +542,7 @@ const SearchJobs = memo(() => {
     let added = false;
     for (const j of jobs) {
       const name = companyNameForJob(j);
-      if (name && j.employer_id && companyNameToIdRef.current.get(name) !== j.employer_id) {
-        companyNameToIdRef.current.set(name, j.employer_id);
-        added = true;
-      }
+      if (name && j.employer_id && addCompanyId(name, j.employer_id)) added = true;
     }
     if (added) setCompanyMapVersion((v) => v + 1);
   }, [jobs, companyNameForJob]);
@@ -671,7 +680,7 @@ const SearchJobs = memo(() => {
 
     // Fallback: om vi har valda företag som ännu saknar id-mapping,
     // filtrera på namn så användaren inte ser fel jobb under första rendern.
-    if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedEmployerIds.length < selectedCompanies.length)) {
+    if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedCompanies.some(n => !companyNameToIdRef.current.has(n)))) {
       result = result.filter(j => selectedCompanies.includes(j.company_name) || selectedCompanies.includes(companyNameForJob(j)));
     }
 
@@ -824,18 +833,19 @@ const SearchJobs = memo(() => {
       const company = companyNameForJob(job);
       if (!company || company === 'Okänt företag') return;
       const names = [company, job.company_name?.trim() || ''].filter(Boolean).map(n => n.toLowerCase());
-      if (names.some(n => n.includes(searchLower) || searchLower.includes(n.split(' ')[0]))) matchedCompanyNames.add(company);
+      if (names.some(n => n.includes(searchLower) || searchLower.includes(n.split(' ')[0]))) matchedCompanyNames.add(companyKeyForJob(job) || company);
     });
     const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string; jobCount: number; avgRating?: number; reviewCount: number }>();
     jobs.forEach(job => {
       const company = companyNameForJob(job);
-      if (!matchedCompanyNames.has(company)) return;
-      const existing = uniqueCompanies.get(company);
+      const key = companyKeyForJob(job) || company;
+      if (!matchedCompanyNames.has(key)) return;
+      const existing = uniqueCompanies.get(key);
       if (existing) {
         existing.jobCount++;
       } else {
-        uniqueCompanies.set(company, {
-          id: job.employer_id || '',
+        uniqueCompanies.set(key, {
+          id: companyKeyForJob(job),
           name: company,
           logo: job.company_logo_url,
           jobCount: 1,
@@ -848,7 +858,7 @@ const SearchJobs = memo(() => {
     // Return first matching company
     const matches = Array.from(uniqueCompanies.values());
     return matches.length > 0 ? matches[0] : null;
-  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading, companyNameForJob]);
+  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading, companyNameForJob, companyKeyForJob]);
 
   // Company data for dropdown-selected company filters
   const selectedCompaniesData = useMemo(() => {
@@ -859,15 +869,16 @@ const SearchJobs = memo(() => {
     selectedCompanies.forEach(companyName => {
       const match = jobs.find(job => companyNameForJob(job) === companyName || job.company_name === companyName);
       const company = match ? companyNameForJob(match) : companyName;
-      const existing = byCompany.get(company);
+      const key = (match && companyKeyForJob(match)) || company;
+      const existing = byCompany.get(key);
       if (existing) { existing.selectedNames.push(companyName); return; }
-      byCompany.set(company, { id: match?.employer_id || '', name: company, logo: match?.company_logo_url, jobCount: 0, avgRating: match?.company_avg_rating, reviewCount: match?.company_review_count || 0, selectedNames: [companyName] });
+      byCompany.set(key, { id: (match && companyKeyForJob(match)) || '', name: company, logo: match?.company_logo_url, jobCount: 0, avgRating: match?.company_avg_rating, reviewCount: match?.company_review_count || 0, selectedNames: [companyName] });
     });
     byCompany.forEach(data => {
       data.jobCount = jobs.filter(job => data.selectedNames.includes(job.company_name) || data.selectedNames.includes(companyNameForJob(job))).length;
     });
     return Array.from(byCompany.values());
-  }, [jobs, selectedCompanies, companyNameForJob]);
+  }, [jobs, selectedCompanies, companyNameForJob, companyKeyForJob]);
 
   useEffect(() => {
     try {
@@ -915,7 +926,7 @@ const SearchJobs = memo(() => {
 
   // jobs from useOptimizedJobSearch already filters expired — use directly
   const activeJobCount = useMemo(() => filteredAndSortedJobs.length, [filteredAndSortedJobs]);
-  const uniqueCompanyCount = useMemo(() => new Set(filteredAndSortedJobs.map(j => j.employer_id || j.company_name)).size, [filteredAndSortedJobs]);
+  const uniqueCompanyCount = useMemo(() => new Set(filteredAndSortedJobs.map(j => companyKeyForJob(j) || j.company_name)).size, [filteredAndSortedJobs, companyKeyForJob]);
   const newThisWeekCount = useMemo(() => {
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return filteredAndSortedJobs.filter(j => new Date(j.created_at).getTime() > weekAgo).length;
