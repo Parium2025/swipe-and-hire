@@ -39,3 +39,4 @@
 <!-- LOVABLE:BEGIN -->
 - Job-seeker header controls follow the underlying KeepAlive page key, not an overlay URL, to prevent search-icon flashes during job-detail transitions.
 <!-- LOVABLE:END -->
+- Job view shows cached ad content or a "not applied" state only when confirmed fresh (≤60 s) or checked for that job in the view; "applied" is final. Stale snapshots otherwise flash outdated ads or forms.
