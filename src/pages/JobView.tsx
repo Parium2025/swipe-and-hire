@@ -252,6 +252,27 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const [hasAlreadyApplied, setHasAlreadyApplied] = useState(cached?.applied ?? navigationImageState.hasApplied === true);
   // Sant endast direkt efter en lyckad submit i den här vyn → knappen visar "Nyss sökt".
   const [justApplied, setJustApplied] = useState(false);
+  const [applicationReturnFading, setApplicationReturnFading] = useState(false);
+  const applicationBackground = (location.state as { background?: { pathname?: string } } | null)?.background?.pathname;
+  const applicationReturnPath = applicationBackground === '/index' ? '/index' : '/search-jobs';
+  useEffect(() => {
+    if (!justApplied) return;
+    const mobile = window.matchMedia('(max-width: 1023px)').matches;
+    const fade = mobile && asOverlay && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let returnTimer = 0;
+    const successTimer = window.setTimeout(() => {
+      if (fade) {
+        setApplicationReturnFading(true);
+        returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), 180);
+      } else {
+        navigate(applicationReturnPath, { replace: true });
+      }
+    }, mobile ? 650 : 1500);
+    return () => {
+      window.clearTimeout(successTimer);
+      window.clearTimeout(returnTimer);
+    };
+  }, [justApplied, asOverlay, applicationReturnPath, navigate]);
   const [applicationStatusChecked, setApplicationStatusChecked] = useState(Boolean(cached) || navigationImageState.hasApplied === true);
   const { data: appliedJobIds = new Set<string>(), isFetched: appliedJobIdsFetched } = useAppliedJobIds();
   const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
@@ -693,6 +714,14 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       // Utan detta låg Mina ansökningar, "Sökt"-markeringen i söklistan och
       // siffrorna på startsidan kvar på gammal data efter en skickad ansökan.
       clearMyApplicationsLocalCache();
+      if (user?.id && jobId) {
+        // Bekräftad skrivning: listans markering är klar innan annonsen tonas ut.
+        const appliedKey = ['applied-job-ids', user.id];
+        await queryClient.cancelQueries({ queryKey: appliedKey });
+        queryClient.setQueryData<Set<string>>(appliedKey, previous => new Set([...(previous ?? []), jobId]));
+        const cachedJob = _jobCache.get(jobId);
+        if (cachedJob) _jobCache.set(jobId, { ...cachedJob, applied: true });
+      }
       queryClient.invalidateQueries({ queryKey: ['my-applications', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
       queryClient.invalidateQueries({ queryKey: ['applied-job-ids', user?.id] });
@@ -708,7 +737,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setHasAlreadyApplied(true);
       setApplicationStatusChecked(true);
       try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
-      setTimeout(() => { navigate('/search-jobs'); }, 1500);
     } catch (error: any) {
       const raw = String(error?.message || '');
       const isQuota = raw.includes('application_quota_exceeded');
@@ -878,8 +906,10 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       style={{
         isolation: 'isolate',
         contain: 'layout paint style',
+        opacity: applicationReturnFading ? 0 : 1,
+        pointerEvents: applicationReturnFading ? 'none' : undefined,
         transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
-        transition: pullActiveRef.current
+        transition: applicationReturnFading ? 'opacity 180ms ease-out' : pullActiveRef.current
           ? 'none'
           : isDismissing
             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
@@ -1067,8 +1097,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     <h3 className="text-lg font-medium text-white">Redo att ansöka?</h3>
                     <p className="text-sm text-white">Inga ansökningsfrågor. Din profil skickas med ansökan.</p>
 
-                    {!alreadyAppliedForUi && (
-                      <div className="mx-auto max-w-md text-left">{applicationProfileSelector}</div>
+                    {(!alreadyAppliedForUi || justApplied) && (
+                      <div inert={justApplied ? '' : undefined} className={`mx-auto max-w-md text-left${justApplied ? ' invisible' : ''}`}>{applicationProfileSelector}</div>
                     )}
                     
                     
