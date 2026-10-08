@@ -81,6 +81,7 @@ const Auth = () => {
   // Inloggad men profilen saknas (tillfälligt fel): visa aldrig formuläret igen,
   // hämta profilen på nytt. Först efter flera misslyckanden släpps användaren.
   const profileRetryRef = useRef(0);
+  const [profileRetryTick, setProfileRetryTick] = useState(0);
   const awaitingProfile = !!user && !profile && !loading && authAction !== 'logout';
   useEffect(() => {
     if (!awaitingProfile) { profileRetryRef.current = 0; return; }
@@ -88,12 +89,15 @@ const Auth = () => {
       void signOut();
       return;
     }
-    const timer = setTimeout(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
       profileRetryRef.current += 1;
-      void refreshProfile();
+      await refreshProfile();
+      if (!cancelled) setProfileRetryTick((t) => t + 1);
     }, 800 * (profileRetryRef.current + 1));
-    return () => clearTimeout(timer);
-  }, [awaitingProfile, profile, refreshProfile, signOut]);
+    return () => { cancelled = true; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [awaitingProfile, profileRetryTick]);
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
