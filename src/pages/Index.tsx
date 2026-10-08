@@ -627,7 +627,7 @@ const Index = () => {
   // Om senaste kända läget var en ofärdig välkomstguide ska omladdningen inte
   // blixtra fram appens skelett/profiler bakom guiden — visa bara bakgrunden.
   const onboardingPending = (() => {
-    try { return localStorage.getItem('parium-onboarding-pending') === '1'; } catch { return false; }
+    try { return !!localStorage.getItem('parium-onboarding-pending'); } catch { return false; }
   })();
   const plainBg = <div className="min-h-screen bg-gradient-parium" />;
 
@@ -647,7 +647,10 @@ const Index = () => {
   // Profilen är nästa nätverkssteg efter sessionen. Visa den senast kända
   // rollens riktiga sidstruktur under tiden i stället för ännu en tom skärm.
   if (!profile) {
-    return lastKnownRole === 'employer' && !onboardingPending
+    // Fliken vet nu vilket konto som laddas: bara samma kontos flagga gäller.
+    let ownPending = false;
+    try { ownPending = localStorage.getItem('parium-onboarding-pending') === user.id; } catch { /* ignorera */ }
+    return lastKnownRole === 'employer' && !ownPending
       ? renderEmployerColdSkeleton(location.pathname)
       : <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
@@ -672,8 +675,8 @@ const Index = () => {
     ? !hasCompletedTunnelThisSession()
     : !profile?.onboarding_completed;
   try {
-    if (needsOnboarding) localStorage.setItem('parium-onboarding-pending', '1');
-    else localStorage.removeItem('parium-onboarding-pending');
+    if (needsOnboarding) localStorage.setItem('parium-onboarding-pending', user.id);
+    else if (localStorage.getItem('parium-onboarding-pending') === user.id) localStorage.removeItem('parium-onboarding-pending');
   } catch { /* ignorera */ }
 
   

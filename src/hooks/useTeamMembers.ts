@@ -1,3 +1,4 @@
+import { invalidateOrgMemberProfiles } from '@/lib/orgMemberProfiles';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { safeSetItem } from '@/lib/safeStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -163,6 +164,7 @@ export function useTeamMembers() {
       const debouncedInvalidate = () => {
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
+          invalidateOrgMemberProfiles(user.id);
           queryClient.invalidateQueries({ queryKey: ['team-members', user.id] });
         }, 2000);
       };
@@ -186,6 +188,7 @@ export function useTeamMembers() {
             const row = (payload.new ?? payload.old) as { profile_user_id?: string };
             const members = queryClient.getQueryData<TeamMember[]>(['team-members', user.id]);
             if (row?.profile_user_id && members?.some((m: any) => m.userId === row.profile_user_id)) {
+              invalidateOrgMemberProfiles(user.id);
               queryClient.invalidateQueries({ queryKey: ['team-members', user.id] });
             }
           }
