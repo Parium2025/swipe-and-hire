@@ -254,6 +254,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   // Sant endast direkt efter en lyckad submit i den här vyn → knappen visar "Nyss sökt".
   const [justApplied, setJustApplied] = useState(false);
   const [applicationReturnFading, setApplicationReturnFading] = useState(false);
+  // Glidtiden skalar med sträckan (skärmhöjden) så att upplevd hastighet är lika på alla telefoner.
+  const [applicationReturnMs, setApplicationReturnMs] = useState(360);
   const applicationBackground = (location.state as { background?: { pathname?: string } } | null)?.background?.pathname;
   const applicationReturnPath = applicationBackground === '/index' ? '/index' : '/search-jobs';
   useEffect(() => {
@@ -264,8 +266,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     // Mobilöverlägget lämnar direkt från den inskickade granskningsvyn.
     // Scrollläget och formulärets geometri behålls tills hela vyn är utanför skärmen.
     if (fade) {
+      const distance = window.innerHeight || 800;
+      const duration = Math.round(Math.min(420, Math.max(320, distance * 0.45)));
+      setApplicationReturnMs(duration);
       setApplicationReturnFading(true);
-      returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), 360);
+      returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), duration);
     }
     const successTimer = !fade ? window.setTimeout(() => {
       navigate(applicationReturnPath, { replace: true });
