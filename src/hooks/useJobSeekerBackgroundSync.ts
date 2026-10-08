@@ -133,9 +133,10 @@ export const useJobSeekerBackgroundSync = () => {
       // Uppdatera React Query cache
       queryClient.setQueryData(['my-applications', userId], data);
       
-      // Bygg även applied-job-ids cache
-      const appliedJobIds = new Set(data.map(app => app.job_id));
-      queryClient.setQueryData(['applied-job-ids', userId], appliedJobIds);
+      // Ansökningslistan ovan är begränsad till 50 rader — den får aldrig ersätta
+      // den fullständiga "redan sökt"-mängden (äldre ansökningar skulle då se
+      // osökta ut). Hämta om hela mängden från servern i stället.
+      void queryClient.invalidateQueries({ queryKey: ['applied-job-ids', userId], refetchType: 'all' });
     }
   }, [queryClient]);
 

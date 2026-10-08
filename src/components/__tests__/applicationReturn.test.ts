@@ -34,3 +34,14 @@ describe('confirmed application return', () => {
     expect(wizard).toContain("justApplied ? ' pointer-events-none' : ''");
   });
 });
+describe('application status freshness', () => {
+  it('never treats a restored or old applied list as "not applied"', async () => {
+    const { readFileSync } = await import('node:fs');
+    const job = readFileSync('src/pages/JobView.tsx', 'utf8');
+    const sync = readFileSync('src/hooks/useJobSeekerBackgroundSync.ts', 'utf8');
+    expect(job).toContain('appliedJobIdsFetchedNow && Date.now() - appliedJobIdsUpdatedAt <= JOB_SNAPSHOT_MAX_AGE_MS');
+    expect(job).not.toContain('|| appliedJobIdsFetched ||');
+    expect(job).toContain('freshJobCacheEntry(jobId)');
+    expect(sync).not.toContain("setQueryData(['applied-job-ids'");
+  });
+});

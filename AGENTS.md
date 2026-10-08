@@ -10,7 +10,7 @@
 - Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
-- Shared review branding reads the trimmed public-profile RPC under its own cache key; full profile rows stay private, and colleagues see only each other's current profile image via `can_view_colleague_profile_image`, never originals, CVs or videos.
+- Review branding reads the trimmed public-profile RPC under its own cache key; profile rows stay private; colleagues see only current profile images via `can_view_colleague_profile_image`.
 - Upgrade portraits only after decode to prevent initials flashing.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over local events, keep cached report data account-scoped.
 - Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
@@ -24,7 +24,7 @@
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping; preserve loop/reload/boot guards and tests.
 - The landing-video route alone owns browser chrome color `#626262` and its bounded chrome-reload guard (max two per 10 s per tab); never change other routes with it.
 - Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows; one internal thread per colleague.
-- Candidate activity queries and cache are account-scoped (user+applicant key), warmed by the page and refreshed for current author profiles: instant cold-start logs and live avatars without leaks.
+- Candidate activity cache is account-scoped (user+applicant), page-warmed and refreshed for current authors: instant logs, live avatars, no leaks.
 - The notification bell alone owns its account-scoped cache and refresh; keep last-known state through daily returns and avoid a second silent preloader, because competing writes hide older unread items.
 - Aggregate employer question filters for active org members in an authenticated definer function; role-table visibility alone hides colleagues' questions from recruiters.
 - Sync candidate membership, list caches and server counts across mutations and realtime so icons and totals agree; candidate moves go to the account-scoped bell, not toasts.
@@ -32,7 +32,7 @@
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
 - Touch profile actions reuse row handlers and membership; text tooltips use cancellable holds, and stage menus clear previews.
 - Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes.
-- Restore the account-scoped JSON query snapshot synchronously at auth init and refetch silently, so cold starts skip skeletons; employer badges retain confirmed account/org totals until fresh totals arrive.
+- Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fresh (≤60 s) or checked for that job; "applied" is final.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
 - Tooltips over clipped text open only on measured overflow (TruncatedTooltip/TruncatedMenuItem/TruncatedText); never an unconditional Tooltip or native title on truncated text.
