@@ -617,6 +617,13 @@
       "when": 1791432308034,
       "tag": "0087_search_my_candidates_require_current_access",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1791432600568,
+      "tag": "0088_media_batch_require_current_access",
+      "breakpoints": true
     }
   ]
 }
