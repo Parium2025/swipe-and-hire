@@ -261,6 +261,8 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
         .order('created_at', { ascending: false });
 
       if (error) {
+        // Utloggning/sessionsbyte pågår: ingen behörighet är förväntat, visa inget fel.
+        if ((error as { code?: string }).code === '42501') return;
         toast({
           title: "Fel vid hämtning av mallar",
           description: error.message,
