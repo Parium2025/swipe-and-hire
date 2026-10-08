@@ -264,11 +264,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     const successTimer = window.setTimeout(() => {
       if (fade) {
         setApplicationReturnFading(true);
-        returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), 180);
+        returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), 360);
       } else {
         navigate(applicationReturnPath, { replace: true });
       }
-    }, mobile ? 650 : 1500);
+    }, mobile ? 900 : 1500);
     return () => {
       window.clearTimeout(successTimer);
       window.clearTimeout(returnTimer);
@@ -908,10 +908,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       style={{
         isolation: 'isolate',
         contain: 'layout paint style',
-        opacity: applicationReturnFading ? 0 : 1,
-        pointerEvents: applicationReturnFading ? 'none' : undefined,
-        transform: pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
-        transition: applicationReturnFading ? 'opacity 180ms ease-out' : pullActiveRef.current
+        pointerEvents: justApplied ? 'none' : undefined,
+        transform: applicationReturnFading ? 'translate3d(0, 100%, 0)' : pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
+        transition: applicationReturnFading ? 'transform 360ms cubic-bezier(0.32, 0.72, 0.24, 1)' : pullActiveRef.current
           ? 'none'
           : isDismissing
             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
@@ -1100,7 +1099,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     <p className="text-sm text-white">Inga ansökningsfrågor. Din profil skickas med ansökan.</p>
 
                     {(!alreadyAppliedForUi || justApplied) && (
-                      <div className={`mx-auto max-w-md text-left${justApplied ? ' invisible' : ''}`}>{applicationProfileSelector}</div>
+                      <div className={`mx-auto max-w-md text-left${justApplied ? ' pointer-events-none' : ''}`} aria-disabled={justApplied || undefined}>{applicationProfileSelector}</div>
                     )}
                     
                     
