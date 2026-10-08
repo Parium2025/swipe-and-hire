@@ -505,6 +505,27 @@ const SearchJobs = memo(() => {
     return [...new Set(jobs.map(job => job.employer_id).filter(Boolean))] as string[];
   }, [jobs]);
 
+  // Annonsens arbetsplatsnamn är fritt per annons och kan vara ett gammalt namn.
+  // Recensioner och betyg tillhör alltid arbetsgivarens bolag — därför grupperas
+  // företagskorten på bolagets aktuella namn, aldrig på arbetsplatsnamnet.
+  const { data: employerCompanyNames } = useQuery({
+    queryKey: ['employer-company-names', [...companyIds].sort().join(',')],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_employer_public_profiles', { target_user_ids: companyIds });
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: { user_id: string; company_name: string | null }) => {
+        const name = p.company_name?.trim();
+        if (p.user_id && name) map[p.user_id] = name;
+      });
+      return map;
+    },
+    enabled: !!user && companyIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+  const companyNameForJob = useCallback((job: { employer_id?: string | null; company_name?: string | null }) =>
+    (job.employer_id && employerCompanyNames?.[job.employer_id]) || job.company_name?.trim() || '', [employerCompanyNames]);
+
   // Prefetch reviews AND profiles when jobs load — DEFERRED tills efter mount
   // så det inte konkurrerar med sidebar-stängningsanimationen om main-tråden.
   // Recensioner hämtas bara för inloggade användare.
@@ -785,52 +806,56 @@ const SearchJobs = memo(() => {
     
     const searchLower = debouncedSearch.toLowerCase().trim();
     
-    // Get unique companies from jobs with job count and rating
+    // Matcha på bolagsnamn eller arbetsplatsnamn, men gruppera per bolag.
+    const matchedCompanyNames = new Set<string>();
+    jobs.forEach(job => {
+      const company = companyNameForJob(job);
+      if (!company || company === 'Okänt företag') return;
+      const names = [company, job.company_name?.trim() || ''].filter(Boolean).map(n => n.toLowerCase());
+      if (names.some(n => n.includes(searchLower) || searchLower.includes(n.split(' ')[0]))) matchedCompanyNames.add(company);
+    });
     const uniqueCompanies = new Map<string, { id: string; name: string; logo?: string; jobCount: number; avgRating?: number; reviewCount: number }>();
     jobs.forEach(job => {
-      if (job.company_name && job.company_name !== 'Okänt företag') {
-        const companyLower = job.company_name.toLowerCase();
-        // Check if search term matches company name (partial match)
-        if (companyLower.includes(searchLower) || searchLower.includes(companyLower.split(' ')[0])) {
-          const existing = uniqueCompanies.get(job.company_name);
-          if (existing) {
-            existing.jobCount++;
-          } else {
-            uniqueCompanies.set(job.company_name, {
-              id: job.employer_id || '',
-              name: job.company_name,
-              logo: job.company_logo_url,
-              jobCount: 1,
-              avgRating: job.company_avg_rating,
-              reviewCount: job.company_review_count || 0
-            });
-          }
-        }
+      const company = companyNameForJob(job);
+      if (!matchedCompanyNames.has(company)) return;
+      const existing = uniqueCompanies.get(company);
+      if (existing) {
+        existing.jobCount++;
+      } else {
+        uniqueCompanies.set(company, {
+          id: job.employer_id || '',
+          name: company,
+          logo: job.company_logo_url,
+          jobCount: 1,
+          avgRating: job.company_avg_rating,
+          reviewCount: job.company_review_count || 0
+        });
       }
     });
     
     // Return first matching company
     const matches = Array.from(uniqueCompanies.values());
     return matches.length > 0 ? matches[0] : null;
-  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading]);
+  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading, companyNameForJob]);
 
   // Company data for dropdown-selected company filters
   const selectedCompaniesData = useMemo(() => {
     if (selectedCompanies.length === 0) return [];
-    return selectedCompanies.map(companyName => {
-      const data = { id: '', name: companyName, logo: undefined as string | undefined, jobCount: 0, avgRating: undefined as number | undefined, reviewCount: 0 };
-      jobs.forEach(job => {
-        if (job.company_name === companyName) {
-          data.jobCount++;
-          if (!data.id) data.id = job.employer_id || '';
-          if (!data.logo) data.logo = job.company_logo_url;
-          if (!data.avgRating) data.avgRating = job.company_avg_rating;
-          if (!data.reviewCount) data.reviewCount = job.company_review_count || 0;
-        }
-      });
-      return data;
+    // Flera valda arbetsplatsnamn från samma bolag blir ett kort — annars visas
+    // samma recensioner på två kort som ser ut som olika företag.
+    const byCompany = new Map<string, { id: string; name: string; logo?: string; jobCount: number; avgRating?: number; reviewCount: number; selectedNames: string[] }>();
+    selectedCompanies.forEach(companyName => {
+      const match = jobs.find(job => job.company_name === companyName);
+      const company = match ? companyNameForJob(match) : companyName;
+      const existing = byCompany.get(company);
+      if (existing) { existing.selectedNames.push(companyName); return; }
+      byCompany.set(company, { id: match?.employer_id || '', name: company, logo: match?.company_logo_url, jobCount: 0, avgRating: match?.company_avg_rating, reviewCount: match?.company_review_count || 0, selectedNames: [companyName] });
     });
-  }, [jobs, selectedCompanies]);
+    byCompany.forEach(data => {
+      data.jobCount = jobs.filter(job => data.selectedNames.includes(job.company_name)).length;
+    });
+    return Array.from(byCompany.values());
+  }, [jobs, selectedCompanies, companyNameForJob]);
 
   useEffect(() => {
     try {
@@ -992,7 +1017,7 @@ const SearchJobs = memo(() => {
             setSelectedCompanyId(id);
             setCompanyDialogOpen(true);
           }}
-          onRemove={() => setSelectedCompanies(prev => prev.filter(c => c !== companyData.name))}
+          onRemove={() => setSelectedCompanies(prev => prev.filter(c => !companyData.selectedNames.includes(c)))}
         />
       ))}
 
