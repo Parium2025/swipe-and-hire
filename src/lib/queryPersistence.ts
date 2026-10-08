@@ -37,7 +37,7 @@ function persistable(query: Query): boolean {
   if (typeof first === 'string' && /session|auth|token|signed-url/i.test(first)) return false;
   // The shared applied-status query deliberately uses a Set for fast row lookup.
   if (first === 'applied-job-ids') {
-    return query.state.data instanceof Set && [...query.state.data].every((id) => typeof id === 'string');
+    return query.queryKey[1] === activeUserId && query.state.data instanceof Set && [...query.state.data].every((id) => typeof id === 'string');
   }
   return isPlainJson(query.state.data);
 }

@@ -10,8 +10,10 @@ describe('applied status survives a document restart', () => {
     persistence.startQueryPersistence(source);
     persistence.restoreQuerySnapshot(source, 'owner');
     source.setQueryData(['applied-job-ids', 'owner'], new Set(['job-1', 'job-2']));
+    source.setQueryData(['applied-job-ids', 'other'], new Set(['private-job']));
     window.dispatchEvent(new Event('pagehide'));
     const saved = JSON.parse(localStorage.getItem('parium-rq-snapshot:v2:owner') ?? '{}');
+    expect(saved.state.queries).toHaveLength(1);
     expect(saved.state.queries[0].state.data).toEqual(['job-1', 'job-2']);
     const restored = new QueryClient();
     persistence.restoreQuerySnapshot(restored, 'owner', true);
