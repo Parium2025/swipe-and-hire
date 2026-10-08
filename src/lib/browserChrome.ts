@@ -70,6 +70,12 @@ const nudgeColor = (color: string) => {
 let pendingThemeFrame: number | null = null;
 let pendingSyncTimers: number[] = [];
 let committedDocumentColor: string | null = null;
+let committedPathname: string | null = null;
+
+// Inloggning (/auth → appen) får aldrig ladda om dokumentet: en omladdning mitt
+// i inloggningen kan avbryta sessionen och skicka tillbaka till formuläret.
+export const isSignInTransition = (from: string | null, to: string) =>
+  from !== null && isAuthPath(from) && !isAuthPath(to) && !isLandingVideoPath(to) && !isAudienceLandingPath(to);
 
 // Loopspärr: högst två chrome-omladdningar per 10 s per flik (t.ex. mejllänk
 // → videosidan → /home). Därefter byts bara färgen utan reload — aldrig loop.
@@ -170,6 +176,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   if (
     committedDocumentColor !== null &&
     committedDocumentColor !== color &&
+    !isSignInTransition(committedPathname, pathname) &&
     needsFullPageChromeNavigation() &&
     claimChromeReload()
   ) {
@@ -177,6 +184,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
     return;
   }
   committedDocumentColor = color;
+  committedPathname = pathname;
 
   removeLegacySentinels();
 
