@@ -651,6 +651,13 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                             </p>
                           </div>
                         )}
+                        {review.employer_reply && (
+                          <ReviewThread
+                            reviewId={review.id}
+                            canPost={myReviewIds.has(review.id)}
+                            viewer={myReviewIds.has(review.id) ? 'reviewer' : null}
+                          />
+                        )}
                       </div>
                     ))
                   )}
