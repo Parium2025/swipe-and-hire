@@ -20,7 +20,7 @@ describe('confirmed application return', () => {
     expect(job).toContain('window.clearTimeout(returnTimer)');
   });
   it('reserves success geometry and respects reduced motion', () => {
-    expect(wizard).toContain("justApplied ? ' invisible' : ' hidden'");
+    expect(wizard).toContain("justApplied ? ' invisible inline-flex items-center justify-center' : ' hidden'");
     expect(wizard).toContain('(!hasAlreadyApplied || justApplied) && profileSelector');
     expect(job).toContain('(prefers-reduced-motion: reduce)');
     expect(job).toContain("transform 360ms cubic-bezier(0.32, 0.72, 0.24, 1)");
