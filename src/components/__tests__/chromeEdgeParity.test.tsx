@@ -84,3 +84,13 @@ describe('Blue screen edge parity', () => {
     expect(app).toContain("pathname === '/jobbsokare' || pathname === '/arbetsgivare'");
   });
 });
+import { isSignInTransition } from '@/lib/browserChrome';
+describe('sign-in never reloads the document', () => {
+  it('treats /auth → app as a sign-in transition', () => {
+    expect(isSignInTransition('/auth', '/home')).toBe(true);
+    expect(isSignInTransition('/auth', '/search-jobs')).toBe(true);
+    expect(isSignInTransition('/auth', '/')).toBe(false);
+    expect(isSignInTransition('/home', '/auth')).toBe(false);
+    expect(isSignInTransition(null, '/home')).toBe(false);
+  });
+});
