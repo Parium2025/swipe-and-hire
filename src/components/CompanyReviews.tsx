@@ -69,8 +69,6 @@ const CompanyReviews = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
-  // Endast bolagets admin svarar på recensioner; rekryterare ser svaren.
-  const canReply = !profile?.organization_id || isOrgAdmin;
   const queryClient = useQueryClient();
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState('');
@@ -155,6 +153,10 @@ const CompanyReviews = () => {
     isLoadingMore,
   } = useCompanyReviewsCache(reviewOwnerId ?? null);
   const reviews = (cachedReviews ?? []) as unknown as CompanyReview[];
+  // Endast bolagets admin svarar (eller ägaren själv utan organisation); rekryterare och jobbsökare ser bara svaren.
+  const canReply = profile?.organization_id
+    ? isOrgAdmin
+    : !!user?.id && !!reviewOwnerId && reviewOwnerId === user.id;
 
   const loading = companyLoading || ownerLoading || reviewsLoading;
 
