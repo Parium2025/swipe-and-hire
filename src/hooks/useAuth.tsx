@@ -875,7 +875,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Fetch OWN full profile via SECURITY DEFINER RPC — needed because
       // sensitive columns (phone/email/org_number/address/…) are REVOKEd from
       // the `authenticated` role to prevent cross-row leakage.
-      const { data: profileRows, error: profileError } = await fetchMyProfile({ force: true });
+      // Ett tillfälligt fel (t.ex. långsam databas precis vid inloggning) får
+      // aldrig lämna användaren inloggad utan profil på inloggningssidan.
+      let { data: profileRows, error: profileError } = await fetchMyProfile({ force: true });
+      for (let attempt = 1; profileError && attempt <= 3 && !isStale(); attempt += 1) {
+        await new Promise((r) => setTimeout(r, 500 * attempt));
+        if (isStale()) return;
+        ({ data: profileRows, error: profileError } = await fetchMyProfile({ force: true }));
+      }
       if (isStale()) return;
       const profileData = Array.isArray(profileRows) ? profileRows[0] ?? null : null;
 

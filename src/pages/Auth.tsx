@@ -77,7 +77,27 @@ const Auth = () => {
   const [resendMessage, setResendMessage] = useState('');
   const [isLoginMode, setIsLoginMode] = useState(true); // Track if user is on login or register
 
-  const { user, profile, loading, authAction, updatePassword, confirmEmail } = useAuth();
+  const { user, profile, loading, authAction, updatePassword, confirmEmail, refreshProfile, signOut } = useAuth();
+  // Inloggad men profilen saknas (tillfälligt fel): visa aldrig formuläret igen,
+  // hämta profilen på nytt. Först efter flera misslyckanden släpps användaren.
+  const profileRetryRef = useRef(0);
+  const [profileRetryTick, setProfileRetryTick] = useState(0);
+  const awaitingProfile = !!user && !profile && !loading && authAction !== 'logout';
+  useEffect(() => {
+    if (!awaitingProfile) { profileRetryRef.current = 0; return; }
+    if (profileRetryRef.current >= 3) {
+      void signOut();
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      profileRetryRef.current += 1;
+      await refreshProfile();
+      if (!cancelled) setProfileRetryTick((t) => t + 1);
+    }, 800 * (profileRetryRef.current + 1));
+    return () => { cancelled = true; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [awaitingProfile, profileRetryTick]);
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -681,7 +701,7 @@ const Auth = () => {
 
   // 🎯 AuthSplashScreen hanterar nu laddningsupplevelsen vid inloggning
   // Returnera bara en tom bakgrund medan splashen täcker allt
-  if (user && loading && authAction !== 'logout') {
+  if (user && (loading || (awaitingProfile && profileRetryRef.current < 3)) && authAction !== 'logout') {
     return <div className="min-h-screen bg-gradient-parium" />;
   }
 
