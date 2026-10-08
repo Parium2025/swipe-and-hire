@@ -10,6 +10,7 @@ import { Clock, CheckCircle, AlertCircle, MessageCircle, User, Calendar, Tag } f
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TruncatedText } from '@/components/ui/truncated-text';
+import { ReviewReportsAdmin } from '@/components/ReviewReportsAdmin';
 
 interface SupportTicket {
   id: string;
@@ -289,6 +290,8 @@ const SupportAdmin = () => {
         <h1 className="text-3xl font-bold text-white">Support Admin</h1>
         <p className="text-white mt-2">Hantera alla supportärenden.</p>
       </div>
+
+      <ReviewReportsAdmin />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Ärendelista */}
