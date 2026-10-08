@@ -33,11 +33,6 @@ interface EmployerNewsCardProps {
   setIsPaused: (v: boolean) => void;
 }
 
-const IS_TOUCH_ONLY =
-  typeof window !== 'undefined' &&
-  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
-  !(window.matchMedia?.('(hover: hover)').matches || window.matchMedia?.('(pointer: fine)').matches);
-
 export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCardProps) => {
   const { data: news, isLoading } = useHrNews();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -86,9 +81,6 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
   }
 
   const currentNews = newsItems[currentIndex];
-  const openArticle = () => {
-    if (currentNews?.source_url) window.open(currentNews.source_url, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <Card
@@ -121,20 +113,18 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                onClick={!IS_TOUCH_ONLY ? openArticle : undefined}
-                className={`w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
+                className="w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
               >
-                {/* Kortet har ingen egen tryckåtgärd på touch (artikeln öppnas
-                    via "Läs mer"), så ett kort tryck får öppna tooltipen direkt. */}
+                {/* Kortet har ingen egen tryckåtgärd (artikeln öppnas enbart
+                    via "Läs mer"), så ett kort tryck öppnar tooltipen — men
+                    bara när texten faktiskt är trunkerad. */}
                 <TruncatedText
-                  alwaysShowTooltip={IS_TOUCH_ONLY}
                   touchTooltipOnLongPress={false}
                   lines={2}
                   text={currentNews.title}
                   className="text-sm font-semibold text-white leading-5 mb-0.5"
                 />
                 <TruncatedText
-                  alwaysShowTooltip={IS_TOUCH_ONLY}
                   touchTooltipOnLongPress={false}
                   lines={2}
                   text={currentNews.summary || currentNews.title}
