@@ -1,4 +1,9 @@
-import type { VerifiedCaller } from '../_shared/service-auth.ts';
+// Structural contract keeps this pure handler testable without Deno imports.
+interface VerifiedCaller {
+  isServiceRole: boolean;
+  userId: string | null;
+  email: string | null;
+}
 
 interface Dependencies {
   verifyCaller: (request: Request, headers: Record<string, string>) => Promise<Response | VerifiedCaller>;
