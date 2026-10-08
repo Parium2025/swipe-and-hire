@@ -487,7 +487,7 @@ export function ApplicationQuestionsWizard({
                 })}
               </div>
 
-              {(!hasAlreadyApplied || justApplied) && profileSelector && <div inert={justApplied ? '' : undefined} className={`mt-3 mb-4 px-1${justApplied ? ' invisible' : ''}`}>{profileSelector}</div>}
+              {(!hasAlreadyApplied || justApplied) && profileSelector && <div className={`mt-3 mb-4 px-1${justApplied ? ' invisible' : ''}`}>{profileSelector}</div>}
 
             </div>
           ) : null}

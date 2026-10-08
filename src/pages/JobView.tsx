@@ -1098,7 +1098,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                     <p className="text-sm text-white">Inga ansökningsfrågor. Din profil skickas med ansökan.</p>
 
                     {(!alreadyAppliedForUi || justApplied) && (
-                      <div inert={justApplied ? '' : undefined} className={`mx-auto max-w-md text-left${justApplied ? ' invisible' : ''}`}>{applicationProfileSelector}</div>
+                      <div className={`mx-auto max-w-md text-left${justApplied ? ' invisible' : ''}`}>{applicationProfileSelector}</div>
                     )}
                     
                     
