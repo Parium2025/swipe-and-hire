@@ -146,8 +146,10 @@ const SavedJobs = () => {
     try {
       await restoreSkippedJob(jobId);
       toast.success('Jobbet har återställts');
-    } catch {
-      toast.error('Kunde inte återställa jobbet');
+    } catch (error) {
+      toast.error((error as Error)?.message === 'job_expired'
+        ? 'Jobbet har utgått och kan inte återställas.'
+        : 'Kunde inte återställa jobbet');
     }
   }, [restoreSkippedJob]);
 
