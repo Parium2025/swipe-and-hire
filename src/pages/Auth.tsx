@@ -1,3 +1,4 @@
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,9 +20,8 @@ import { applyIntentToSearchFilters } from '@/lib/savedSearchIntent';
 
 // Delad bakgrund för hela /auth (inklusive status- och felsidor)
 const AUTH_BACKDROP_STYLE = {
-  backgroundColor: 'hsl(215 100% 12%)',
-  backgroundImage:
-    'radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 22%) 50%, hsl(215 100% 12%) 100%)',
+  backgroundColor: 'var(--active-browser-chrome-color)',
+  backgroundImage: 'var(--gradient-auth-shell)',
 };
 
 
@@ -776,19 +776,7 @@ const Auth = () => {
   const authBackdropStyle = AUTH_BACKDROP_STYLE;
 
 
-  const AuthBackdrop = () => (
-    <div
-      aria-hidden
-      className="fixed inset-x-0 top-0 z-0 overflow-hidden pointer-events-none"
-      style={{
-        ...authBackdropStyle,
-        // Extra höjd under viewporten: när iOS-tangentbordet öppnas skjuts
-        // sidan upp och en remsa av html-bakgrunden syns annars i botten.
-        height: 'calc(100dvh + var(--chrome-strip-pad, 0px) + 45vh)',
-        backgroundAttachment: 'scroll',
-      }}
-    />
-  );
+  const AuthBackdrop = () => <ChromeMatchedBackground variant="auth" />;
 
 
   if (device === 'mobile') {

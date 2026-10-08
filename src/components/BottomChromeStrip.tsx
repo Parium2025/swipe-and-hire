@@ -92,6 +92,7 @@ const BottomChromeStrip = () => {
   return (
     <div
       data-browser-chrome-strip="bottom"
+      className={location.pathname === '/' || location.pathname === '' ? undefined : 'chrome-bottom-separator'}
       key={location.pathname}
       aria-hidden="true"
       style={{

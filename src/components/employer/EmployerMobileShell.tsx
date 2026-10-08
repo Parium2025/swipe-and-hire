@@ -1,3 +1,4 @@
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 import type { CSSProperties, Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMessagesChrome } from '@/hooks/useMessagesChrome';
@@ -38,7 +39,7 @@ const EmployerMobileShell = ({
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-      <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+      <ChromeMatchedBackground variant="standard" />
 
       <div
         data-mobile-app-shell="true"

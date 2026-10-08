@@ -1,3 +1,4 @@
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import EmployerTopNav from '@/components/EmployerTopNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -19,12 +20,7 @@ const EmployerDesktopShell = ({
 }: EmployerDesktopShellProps) => {
   return (
     <>
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: 'linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 25%) 50%, hsl(215 100% 12%) 100%)',
-        }}
-      />
+      <ChromeMatchedBackground />
 
       <div className="h-screen flex flex-col w-full overflow-hidden relative">
         <AnimatedBackground showBubbles={false} />

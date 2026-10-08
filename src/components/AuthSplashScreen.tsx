@@ -273,12 +273,10 @@ export function AuthSplashScreen() {
         {/* Tagline - exakt samma som index.html. Byter text beroende på
             senast kända roll (persisterad i localStorage av useAuth) så att
             arbetsgivare får en tagline anpassad för dem. */}
-        <p 
+        <p className="auth-splash-tagline"
           style={{
             color: 'white',
-            fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
             fontWeight: 600,
-            letterSpacing: '-0.01em',
             marginTop: 'clamp(4px, 1vw, 8px)',
             marginBottom: '40px',
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
