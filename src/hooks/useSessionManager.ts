@@ -270,9 +270,34 @@ export function useSessionManager(
 
         // Fjärrutloggad från en annan enhet → logga ut direkt, återanslut inte.
         if (result?.status === 'revoked') {
+          // En ny inloggning kan ärva ett gammalt, återkallat enhetstoken från
+          // localStorage. Servern har nu raderat den raden — skapa ett nytt
+          // token och registrera igen i stället för att logga ut direkt.
+          const { data: sessData } = await supabase.auth.getSession();
+          const lastSignIn = Date.parse(sessData.session?.user?.last_sign_in_at ?? '');
+          const isFreshLogin = Number.isFinite(lastSignIn) && Date.now() - lastSignIn < 5 * 60_000;
+          if (isFreshLogin && !force) {
+            clearSessionToken(true);
+            const newToken = await getOrCreateSessionToken();
+            sessionTokenRef.current = newToken;
+            const retry = await supabase.rpc('register_session', {
+              p_session_token: newToken,
+              p_device_label: getDeviceLabel(),
+              p_ip_address: null,
+              p_user_agent: navigator.userAgent.substring(0, 200),
+            });
+            if (signOutInProgress || alreadyKickedRef.current) return;
+            const retryStatus = (retry.data as Record<string, unknown> | null)?.status;
+            if (!retry.error && retryStatus !== 'revoked') {
+              registeredRef.current = true;
+              lastRegisteredAtRef.current = Date.now();
+              return;
+            }
+          }
           if (!alreadyKickedRef.current) {
             alreadyKickedRef.current = true;
             registeredRef.current = false;
+            clearSessionToken(true);
             console.log('🚫 Sessionen har loggats ut från en annan enhet');
             onKicked();
           }
