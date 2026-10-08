@@ -127,21 +127,20 @@ describe('TruncatedText på touchskärm', () => {
     expect(parentClick).not.toHaveBeenCalled();
   });
 
-  // Nyhetskortet och karriärtipset delar beteende: ett kort tryck öppnar
-  // artikeln (förälderns åtgärd) och ett långtryck visar tooltipen.
-  it('låter korta tryck öppna artikeln och långtryck visa tooltipen', async () => {
+  // Nyhetskortet och karriärtipset delar beteende: artikeln öppnas bara via
+  // "Läs mer", och ett kort tryck på texten visar tooltipen direkt.
+  it('visar tooltipen vid kort tryck på nyhetstexten utan att öppna artikeln', async () => {
     vi.resetModules();
     vi.useFakeTimers();
     const { TruncatedText } = await import('@/components/TruncatedText');
-    const openArticle = vi.fn();
+    const parentClick = vi.fn();
     render(
-      <div onClick={openArticle}>
-        <TruncatedText text="Nordnet rekryterar ny Sverigechef" />
+      <div onClick={parentClick}>
+        <TruncatedText text="Nordnet rekryterar ny Sverigechef" touchTooltipOnLongPress={false} />
       </div>
     );
     const trigger = screen.getByText('Nordnet rekryterar ny Sverigechef');
 
-    // Kort tryck → artikeln öppnas, ingen tooltip.
     await act(async () => {
       fireEvent.touchStart(trigger);
       fireEvent.pointerDown(trigger, { pointerType: 'touch' });
@@ -150,21 +149,8 @@ describe('TruncatedText på touchskärm', () => {
       fireEvent.pointerUp(trigger, { pointerType: 'touch' });
       fireEvent.click(trigger);
     });
-    await act(async () => { vi.advanceTimersByTime(600); });
-    expect(openArticle).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole('tooltip')).toBeNull();
-
-    // Långtryck → tooltipen visas, artikeln öppnas inte igen.
-    await act(async () => {
-      fireEvent.touchStart(trigger);
-      fireEvent.pointerDown(trigger, { pointerType: 'touch' });
-      vi.advanceTimersByTime(500);
-      fireEvent.touchEnd(trigger);
-      fireEvent.pointerUp(trigger, { pointerType: 'touch' });
-      fireEvent.click(trigger);
-    });
     expect(screen.getByRole('tooltip')).toHaveTextContent('Nordnet rekryterar ny Sverigechef');
-    expect(openArticle).toHaveBeenCalledTimes(1);
+    expect(parentClick).not.toHaveBeenCalled();
   });
 });
 
