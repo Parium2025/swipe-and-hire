@@ -25,6 +25,9 @@
 }
 .chrome-bottom-separator { box-shadow: 0 -1px 0 hsl(var(--chrome-edge-line)); }
 @media (max-width: 767px) and (any-pointer: coarse) {
+  [data-mobile="true"] [data-sidebar="content"] {
+    min-height: 100% !important;
+  }
   [data-mobile="true"] .sidebar-logout-spacing {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + 14px);
     flex-shrink: 0;

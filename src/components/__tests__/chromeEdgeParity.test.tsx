@@ -20,7 +20,7 @@ describe('Blue screen edge parity', () => {
   it('reserves the bottom strip before the logout button padding on touch phones', () => {
     const sidebar = readFileSync('src/components/AppSidebar.tsx', 'utf8');
     const css = readFileSync('src/index.css', 'utf8');
-    expect(sidebar).toContain('sidebar-logout-spacing mt-auto p-4');
+    expect(sidebar).toContain('sidebar-logout-spacing p-4');
     expect(css).toContain('[data-mobile="true"] .sidebar-logout-spacing');
     expect(css).toContain('padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + 14px)');
   });
