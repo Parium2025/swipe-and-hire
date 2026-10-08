@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 const { fire, create } = vi.hoisted(() => {
   const fire = vi.fn();
@@ -7,6 +8,17 @@ const { fire, create } = vi.hoisted(() => {
 vi.mock('canvas-confetti', () => ({ default: { create } }));
 
 describe('publication celebration', () => {
+  it('uses the same celebration only in successful new application branches', () => {
+    const job = readFileSync('src/pages/JobView.tsx', 'utf8');
+    const swipe = readFileSync('src/components/swipe/hooks/useApplySubmit.ts', 'utf8');
+    for (const source of [job, swipe]) {
+      expect(source).toContain("import { celebrate } from '@/lib/celebrate'");
+      expect(source.match(/void celebrate\(/g)).toHaveLength(1);
+      expect(source.indexOf('void celebrate(')).toBeGreaterThan(source.indexOf('if (error) throw error;'));
+      expect(source.slice(source.indexOf("code === '23505'"))).not.toContain('celebrate(');
+      expect(source).toContain("celebrate({ intensity: 'big' }).catch(");
+    }
+  });
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();

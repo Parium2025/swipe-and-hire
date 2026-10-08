@@ -1,4 +1,5 @@
 import { fetchMyProfile } from '@/lib/myProfile';
+import { celebrate } from '@/lib/celebrate';
 import { useCallback, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -126,6 +127,8 @@ export function useApplySubmit({
       });
 
       if (error) throw error;
+
+      void celebrate({ intensity: 'big' }).catch(() => { /* Firandet påverkar aldrig en skickad ansökan. */ });
 
       const emailPayload = {
         applicant_email: userEmail || profile?.email || '',
