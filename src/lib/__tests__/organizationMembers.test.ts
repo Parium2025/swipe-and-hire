@@ -39,12 +39,10 @@ describe('organization member scope', () => {
     expect(rpc).toHaveBeenCalledTimes(1);
   });
 
-  it('finds the existing review owner among this organization’s admins only', async () => {
-    const limit = vi.fn().mockResolvedValue({ data: [{ company_id: 'owner' }], error: null });
-    const inQuery = vi.fn().mockReturnValue({ limit });
-    select.mockReturnValue({ in: inQuery });
+  it('resolves the review owner server-side via company_owner_id', async () => {
+    rpc.mockResolvedValueOnce({ data: [{ user_id: 'recruiter', owner_id: 'owner' }], error: null });
     expect(await getOrganizationReviewOwnerId('recruiter', org)).toBe('owner');
-    expect(inQuery).toHaveBeenCalledWith('company_id', ['owner']);
+    expect(rpc).toHaveBeenCalledWith('resolve_company_owner_ids', { p_user_ids: ['recruiter'] });
   });
 
   it('retains personal identity outside an organization', async () => {
