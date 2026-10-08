@@ -642,6 +642,12 @@ export function useSavedJobsCache(opts?: { enableSkipped?: boolean }) {
 
   const restoreSkippedJob = useCallback(async (jobId: string) => {
     if (!user?.id) return;
+    // Endast aktiva jobb kan återställas till swipe-kön.
+    const posting = (queryClient.getQueryData<SkippedJob[]>(['skipped-jobs', user.id]) ?? [])
+      .find((sj) => sj.job_id === jobId)?.job_postings;
+    if (posting && (!posting.is_active || (posting.expires_at && new Date(posting.expires_at) < new Date()))) {
+      throw new Error('job_expired');
+    }
 
     removeSkippedJobLocally(jobId);
 
