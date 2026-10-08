@@ -35,8 +35,8 @@
 - Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fetched since last app resume or checked for that job; "applied" is final.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
-- Tooltips over clipped text open only on measured overflow (TruncatedTooltip/TruncatedMenuItem/TruncatedText); never an unconditional Tooltip or native title on truncated text.
+- Tooltips on clipped text open only on measured overflow (Truncated* components), never unconditionally.
 <!-- LOVABLE:BEGIN -->
 - Job-seeker header controls follow the underlying KeepAlive page key, not an overlay URL, to prevent search-icon flashes during job-detail transitions.
 <!-- LOVABLE:END -->
-- Company identity resolves through `company_owner_id` (organization's founding admin): reviews, ratings, search cards and own-company checks use it; only org admins reply to reviews, and members cannot review their own company.
+- Company identity = `company_owner_id` (founding admin) for reviews, ratings, search cards, own-company checks; only org admins reply; members can't self-review.
