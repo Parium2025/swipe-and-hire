@@ -364,7 +364,7 @@ export function ApplicationQuestionsWizard({
       )}
 
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
-      <div className={'flex items-center justify-center gap-1.5 min-h-9 py-1 shrink-0' + (hasAlreadyApplied ? ' hidden' : '')}>
+      <div className={'flex items-center justify-center gap-1.5 min-h-9 py-1 shrink-0' + (hasAlreadyApplied ? (justApplied ? ' invisible' : ' hidden') : '')}>
 
         {Array.from({ length: totalSteps }).map((_, i) => (
           <button
@@ -487,7 +487,7 @@ export function ApplicationQuestionsWizard({
                 })}
               </div>
 
-              {!hasAlreadyApplied && profileSelector && <div className="mt-3 mb-4 px-1">{profileSelector}</div>}
+              {(!hasAlreadyApplied || justApplied) && profileSelector && <div className={`mt-3 mb-4 px-1${justApplied ? ' invisible' : ''}`}>{profileSelector}</div>}
 
             </div>
           ) : null}
@@ -508,7 +508,7 @@ export function ApplicationQuestionsWizard({
            disabled={currentStep === 0 && !(hasAlreadyApplied && !previewMode)}
            className={
              backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none' +
-             ((hasAlreadyApplied && !previewMode) && buttonIsSubmitStep ? ' hidden' : ' inline-flex items-center justify-center')
+              ((hasAlreadyApplied && !previewMode) && buttonIsSubmitStep ? (justApplied ? ' invisible inline-flex items-center justify-center' : ' hidden') : ' inline-flex items-center justify-center')
           }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
