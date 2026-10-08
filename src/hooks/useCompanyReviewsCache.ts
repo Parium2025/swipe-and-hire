@@ -1,3 +1,4 @@
+import { resolveCompanyOwnerId, resolveCompanyOwnerIds } from '@/lib/companyOwner';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
@@ -71,10 +72,11 @@ const setLocalCache = (companyId: string, data: CompanyReviewsData) => {
 
 /** Hämta en sida recensioner + berika med profilnamn för icke-anonyma. */
 async function fetchReviewsPage(companyId: string, from: number, to: number): Promise<CachedReview[]> {
+  const ownerId = await resolveCompanyOwnerId(companyId);
   const { data: reviews, error } = await supabase
     .from('company_reviews_public')
     .select('*')
-    .eq('company_id', companyId)
+    .eq('company_id', ownerId)
     .order('created_at', { ascending: false })
     // Tiebreak så att sidorna inte kan tappa eller dubblera ett omdöme.
     .order('id', { ascending: false })
@@ -304,11 +306,12 @@ export function useBatchPrefetchReviews() {
 
     if (uncachedIds.length === 0) return;
 
-    // Batch fetch all reviews at once
+    // Batch fetch all reviews at once — alltid på bolagets ägarkonto.
+    const ownerById = await resolveCompanyOwnerIds(uncachedIds);
     const { data: allReviews } = await supabase
       .from('company_reviews_public')
       .select('*')
-      .in('company_id', uncachedIds)
+      .in('company_id', [...new Set(ownerById.values())])
       .order('created_at', { ascending: false })
       // Förhämtning ska vara billig — aldrig en obegränsad payload.
       .limit(600);
@@ -358,7 +361,7 @@ export function useBatchPrefetchReviews() {
 
     // Update query cache for each company
     uncachedIds.forEach(companyId => {
-      const reviews = reviewsByCompany.get(companyId) || [];
+      const reviews = reviewsByCompany.get(ownerById.get(companyId) ?? companyId) || [];
       const stats = statsByCompany.get(companyId);
 
       const result: CompanyReviewsData = {
