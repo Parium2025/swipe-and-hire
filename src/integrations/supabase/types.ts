@@ -677,6 +677,48 @@ export type Database = {
           },
         ]
       }
+      company_review_messages: {
+        Row: {
+          author_id: string
+          author_kind: string
+          body: string
+          created_at: string
+          id: string
+          review_id: string
+        }
+        Insert: {
+          author_id: string
+          author_kind: string
+          body: string
+          created_at?: string
+          id?: string
+          review_id: string
+        }
+        Update: {
+          author_id?: string
+          author_kind?: string
+          body?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_review_messages_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "company_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_review_messages_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "company_reviews_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_reviews: {
         Row: {
           comment: string | null
@@ -4481,6 +4523,10 @@ export type Database = {
           moved_count: number
         }[]
       }
+      delete_company_review_message: {
+        Args: { _message_id: string }
+        Returns: boolean
+      }
       delete_note_activities_for_applicant: {
         Args: { p_applicant_id: string }
         Returns: undefined
@@ -4996,6 +5042,10 @@ export type Database = {
           source: string
         }[]
       }
+      my_company_review_message_ids: {
+        Args: { _review_ids: string[] }
+        Returns: string[]
+      }
       normalize_job_text: { Args: { t: string }; Returns: string }
       outreach_rule_owner: { Args: { p_booker: string }; Returns: string }
       outreach_settings_owner: {
@@ -5008,6 +5058,10 @@ export type Database = {
       pause_criteria_eval_run: {
         Args: { p_reason: string; p_run_id: string }
         Returns: undefined
+      }
+      post_company_review_message: {
+        Args: { _body: string; _review_id: string }
+        Returns: string
       }
       provision_confirmed_employer_workspace: {
         Args: { p_email: string; p_user_id: string }
