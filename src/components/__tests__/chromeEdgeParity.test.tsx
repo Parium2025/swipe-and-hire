@@ -40,4 +40,20 @@ describe('Blue screen edge parity', () => {
     expect(react).toContain('className="auth-splash-tagline"');
     expect(react).not.toContain("fontSize: 'clamp(1.25rem");
   });
+
+  it('keeps auth sampling roots solid and matches the initial document chrome', () => {
+    const html = readFileSync('index.html', 'utf8');
+    const auth = readFileSync('src/pages/Auth.tsx', 'utf8');
+    const gate = readFileSync('src/lib/authSplashEvents.ts', 'utf8');
+    expect(html).not.toContain('#062B5E');
+    expect(gate).not.toContain('#062B5E');
+    expect(auth).toContain("el.style.setProperty('background-image', 'none', 'important')");
+    expect(auth).not.toContain("backgroundImage: 'var(--gradient-auth-shell)'");
+  });
+
+  it('uses destination paint instead of the generic gradient while audience routes load', () => {
+    const app = readFileSync('src/App.tsx', 'utf8');
+    expect(app).toContain('className="fixed inset-0 audience-route-paint"');
+    expect(app).toContain("pathname === '/jobbsokare' || pathname === '/arbetsgivare'");
+  });
 });
