@@ -8,19 +8,21 @@ import ChromeMatchedBackground, { ChromeEdgeBlend } from '../ChromeMatchedBackgr
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('Blue screen edge parity', () => {
-  it('shares auth edge gradients with audience and video without reserving space', () => {
-    const { container } = render(<><ChromeEdgeBlend /><ChromeEdgeBlend video /></>);
+  it('paints audience edge strips without reserving space and leaves the video route strip-free', () => {
+    const { container } = render(<ChromeEdgeBlend />);
     expect(container.querySelector('[data-chrome-edge-blend="audience"]')?.classList.contains('fixed')).toBe(true);
-    expect(container.querySelector('[data-chrome-edge-blend="video"]')?.classList.contains('absolute')).toBe(true);
     const css = readFileSync('src/index.css', 'utf8');
     expect(css).toContain('.chrome-matched-background::before,\n.chrome-matched-background::after,\n.chrome-edge-blend::before,\n.chrome-edge-blend::after');
     expect(css).toContain('--parium-chrome-color: #00193D');
     expect(css).toContain('--active-browser-chrome-color: var(--parium-chrome-color)');
     expect(css).toContain('html[data-audience-chrome] body::before { background: var(--active-browser-chrome-color); }');
     expect(readFileSync('src/pages/AudienceLanding.tsx', 'utf8')).toContain('<ChromeEdgeBlend />');
-    expect(readFileSync('src/components/landing/LandingHero.tsx', 'utf8')).toContain('<ChromeEdgeBlend video />');
+    // Videon täcker hela skärmen — inga remsor på videosidan.
+    const hero = readFileSync('src/components/landing/LandingHero.tsx', 'utf8');
+    expect(hero).not.toContain('ChromeEdgeBlend');
+    expect(hero).not.toContain('chrome-edge-blend');
   });
-  it('keeps audience and video strips flat — no fade — and hard-stops the shell at the strip edge', () => {
+  it('keeps audience strips flat — no fade — and hard-stops the shell at the strip edge', () => {
     const css = readFileSync('src/index.css', 'utf8');
     // Flat solid strip, no linear-gradient in the edge-blend blocks
     expect(css).toContain('.chrome-edge-blend::before {\n  top: 0;\n  height: calc(env(safe-area-inset-top, 0px) + 22px);\n  background: var(--active-browser-chrome-color);');
