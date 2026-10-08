@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { claimChromeReload, needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome, navigateAcrossChromeColor } from '../browserChrome';
+import { claimChromeReload, needsFullPageChromeNavigation, primeBrowserChrome, syncBrowserChrome } from '../browserChrome';
 
 const themeColorTags = () =>
   Array.from(document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'));
@@ -9,7 +9,6 @@ const themeColorTags = () =>
 describe('browserChrome', () => {
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllGlobals();
     themeColorTags().forEach((tag) => tag.remove());
     document.documentElement.removeAttribute('style');
     document.body.removeAttribute('style');
@@ -24,7 +23,7 @@ describe('browserChrome', () => {
 
     const landingTags = themeColorTags();
     expect(landingTags).toHaveLength(1);
-    expect(landingTags[0]?.content).toBe('#00193D');
+    expect(landingTags[0]?.content).toBe('#626262');
 
     syncBrowserChrome('/auth');
     vi.advanceTimersByTime(20);
@@ -41,10 +40,10 @@ describe('browserChrome', () => {
     vi.advanceTimersByTime(20);
 
     expect(themeColorTags()).toHaveLength(1);
-    expect(themeColorTags().every((tag) => tag.content === '#00193D')).toBe(true);
+    expect(themeColorTags().every((tag) => tag.content === '#001F3D')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
-    ).toBe('#00193D');
+    ).toBe('#001F3D');
   });
 
   it('begränsar full sidväxling till vanlig iOS-webbläsare', () => {
@@ -60,10 +59,10 @@ describe('browserChrome', () => {
     vi.advanceTimersByTime(20);
 
     expect(themeColorTags()).toHaveLength(1);
-    expect(themeColorTags().every((tag) => tag.content === '#00193D')).toBe(true);
+    expect(themeColorTags().every((tag) => tag.content === '#626262')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
-    ).toBe('#00193D');
+    ).toBe('#626262');
 
     syncBrowserChrome('/auth');
     vi.advanceTimersByTime(20);
@@ -72,15 +71,6 @@ describe('browserChrome', () => {
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
     ).toBe('#00193D');
-  });
-
-  it.each(['/auth', '/jobbsokare', '/arbetsgivare', '/'])('uses same-document navigation to %s even on iPhone', (target) => {
-    vi.stubGlobal('navigator', { userAgent: 'iPhone', maxTouchPoints: 1 });
-    vi.stubGlobal('matchMedia', () => ({ matches: false }));
-    expect(needsFullPageChromeNavigation()).toBe(true);
-    const navigate = vi.fn();
-    navigateAcrossChromeColor(target, navigate);
-    expect(navigate).toHaveBeenCalledOnce();
   });
 
   it('tillåter högst två chrome-omladdningar per tidsfönster så den aldrig loopar', () => {

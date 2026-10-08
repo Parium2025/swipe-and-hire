@@ -218,6 +218,9 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
       {/* Background video — fills entire viewport including safe areas */}
       <HeroVideo />
 
+      {/* iOS Safari bottom-toolbar färg styrs via body.landing-video-chrome
+          regeln i index.css — den färgar body grå så Safari samplar grått. */}
+
 
       {/* Stacked hero: heading/text/CTAs stay in one responsive flow */}
       <motion.div

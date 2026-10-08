@@ -7,9 +7,7 @@
 .chrome-matched-background--auth { background: var(--gradient-auth-shell); }
 .chrome-matched-background--standard { background: var(--gradient-parium); }
 .chrome-matched-background::before,
-.chrome-matched-background::after,
-.chrome-edge-blend::before,
-.chrome-edge-blend::after {
+.chrome-matched-background::after {
   content: '';
   position: absolute;
   left: 0;
@@ -25,17 +23,6 @@
   height: calc(env(safe-area-inset-bottom, 0px) + 120px);
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
 }
-/* Audience/video: flat strip, no fade — matches the flat shell top and Safari anchors. */
-.chrome-edge-blend::before {
-  top: 0;
-  height: calc(env(safe-area-inset-top, 0px) + 22px);
-  background: var(--active-browser-chrome-color);
-}
-.chrome-edge-blend::after {
-  bottom: 0;
-  height: calc(env(safe-area-inset-bottom, 0px) + 14px);
-  background: var(--active-browser-chrome-color);
-}
 .chrome-bottom-separator { box-shadow: 0 -1px 0 hsl(var(--chrome-edge-line)); }
 @media (max-width: 767px) and (any-pointer: coarse) {
   [data-mobile="true"] [data-sidebar="content"] {
@@ -46,13 +33,11 @@
     flex-shrink: 0;
   }
 }
-.audience-route-paint {
-  background: var(--gradient-audience-shell);
-}
+.audience-route-paint { background: var(--gradient-audience-shell); }
 html[data-audience-chrome], html[data-audience-chrome] body {
-  background-image: none !important;
+  background-image: var(--gradient-audience-shell) !important;
 }
-html[data-audience-chrome] body::before { background: var(--active-browser-chrome-color); }
+html[data-audience-chrome] body::before { background: var(--gradient-audience-shell); }
 .auth-splash-tagline {
   font-size: 20px;
   line-height: 1.4;
@@ -274,13 +259,12 @@ All colors MUST be HSL.
     --primary-foreground: 210 40% 98%;
     --primary-glow: 200 100% 35%;
     --parium-chrome-blue: 212 100% 10%;
-    --parium-chrome-color: #00193D;
     --landing-chrome-gray: 0 0% 38.4%;
-    --active-browser-chrome-color: var(--parium-chrome-color);
+    --active-browser-chrome-color: hsl(var(--parium-chrome-blue));
     --chrome-edge-line: 0 0% 100% / 0.28;
     --gradient-app-shell: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 85% 25%) 50%, hsl(var(--primary)) 100%);
     --gradient-auth-shell: radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 85% 22%) 50%, hsl(var(--primary)) 100%);
-    --gradient-audience-shell: linear-gradient(180deg, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), hsl(215 80% 22%) calc(env(safe-area-inset-top, 0px) + 22px), hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%);
+    --gradient-audience-shell: linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%);
 
     /* Parium Light Blue (från loggans ringar) */
     --secondary: 200 100% 60%;
@@ -804,10 +788,13 @@ All colors MUST be HSL.
     background-size: cover;
   }
 
-  /* Video remains unchanged; its browser sampling roots share app blue. */
+  /* Landing video route (/) — färga body grå så iOS Safari samplar
+     grått för bottenverktygsfältet (matchar topp + video). Detta är
+     den ENDA platsen där body-färgen avviker från Parium-blå.
+     Klassen sätts av syncBrowserChrome() + index.html init-script. */
   html.landing-video-chrome,
   body.landing-video-chrome {
-    background-color: var(--active-browser-chrome-color) !important;
+    background-color: #626262 !important;
     background-image: none !important;
   }
 

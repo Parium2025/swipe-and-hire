@@ -3,7 +3,6 @@ import { Link, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { ChromeEdgeBlend } from '@/components/ChromeMatchedBackground';
 import { navigateAcrossChromeColor } from '@/lib/browserChrome';
 
 
@@ -1968,7 +1967,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
-      <ChromeEdgeBlend />
       <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
         <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
