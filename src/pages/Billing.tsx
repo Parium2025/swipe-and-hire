@@ -51,7 +51,7 @@ const Billing = () => {
   // för påhittade kort och fakturor.
   const { data: purchases = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['billing-purchases', user?.id],
-    enabled: !!user?.id && isAdmin && adminVerified,
+    enabled: !!user?.id && (!isEmployer || (isAdmin && adminVerified)),
     staleTime: 60_000,
     queryFn: async (): Promise<PurchaseRow[]> => {
       const { data, error } = await supabase
@@ -140,7 +140,8 @@ const Billing = () => {
     return <Navigate to="/home" replace />;
   }
 
-  if (!adminLoading && !isAdmin) {
+  // Jobbsökare ser alltid sina egna betalningar; adminspärren gäller bara arbetsgivare.
+  if (isEmployer && !adminLoading && !isAdmin) {
     return (
       <div className="responsive-container-wide space-y-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+50px)]">
         <div className="text-center mb-6">
