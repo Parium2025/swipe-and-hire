@@ -21,6 +21,8 @@ interface ApplicationQuestionsWizardProps {
   hasAlreadyApplied: boolean;
   /** Sant direkt efter en lyckad submit i samma vy → visar "Nyss sökt" istället för "Redan sökt" */
   justApplied?: boolean;
+  /** Keep the submitted controls in place while the mobile overlay exits. */
+  preserveSubmissionLayout?: boolean;
   /** Preview mode: allows navigation but disables inputs and hides submit */
   previewMode?: boolean;
   /** Wizard-preview: keep the real controls interactive while submit remains hidden. */
@@ -37,6 +39,7 @@ export function ApplicationQuestionsWizard({
   canSubmit,
   hasAlreadyApplied,
   justApplied = false,
+  preserveSubmissionLayout = false,
   previewMode = false,
   interactivePreview = false,
   profileSelector,
@@ -53,6 +56,7 @@ export function ApplicationQuestionsWizard({
 
   // buttonIsSubmitStep now tracks currentStep directly (no delay needed without AnimatePresence)
   const buttonIsSubmitStep = isSubmitStep;
+  const retainSubmittedControls = justApplied && preserveSubmissionLayout;
   
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
   const isCurrentAnswered = currentQuestion 
@@ -505,10 +509,10 @@ export function ApplicationQuestionsWizard({
           onMouseDown={handleMouseDown}
            onMouseUp={handleMouseUp}
            onClick={(e) => { e.currentTarget.blur(); (hasAlreadyApplied && !previewMode) ? setCurrentStep(questions.length) : handlePrev(); }}
-           disabled={currentStep === 0 && !(hasAlreadyApplied && !previewMode)}
+           disabled={retainSubmittedControls || (currentStep === 0 && !(hasAlreadyApplied && !previewMode))}
            className={
              backButtonClasses + ' disabled:opacity-30 disabled:pointer-events-none' +
-              ((hasAlreadyApplied && !previewMode) && buttonIsSubmitStep ? (justApplied ? ' invisible inline-flex items-center justify-center' : ' hidden') : ' inline-flex items-center justify-center')
+              ((hasAlreadyApplied && !previewMode) && buttonIsSubmitStep && !retainSubmittedControls ? (justApplied ? ' invisible inline-flex items-center justify-center' : ' hidden') : ' inline-flex items-center justify-center')
           }
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />
@@ -537,7 +541,7 @@ export function ApplicationQuestionsWizard({
           disabled
           className={
             'rounded-full bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 cursor-default focus:outline-none focus:ring-0 focus-visible:ring-0' +
-            (buttonIsSubmitStep && hasAlreadyApplied && !previewMode ? ' inline-flex items-center justify-center' : ' hidden')
+            (buttonIsSubmitStep && hasAlreadyApplied && !previewMode && !retainSubmittedControls ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           <CheckCircle className="mr-1.5 h-4 w-4" />
@@ -550,13 +554,13 @@ export function ApplicationQuestionsWizard({
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onClick={(e) => { e.currentTarget.blur(); onSubmit(); }}
-          disabled={isSubmitting || !canSubmit}
+          disabled={retainSubmittedControls || isSubmitting || !canSubmit}
           className={
             submitButtonClasses + ' disabled:pointer-events-none' +
-            (isSubmitStep && !hasAlreadyApplied && !previewMode ? ' inline-flex items-center justify-center' : ' hidden')
+            (isSubmitStep && (!hasAlreadyApplied || retainSubmittedControls) && !previewMode ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
-          {isSubmitting ? (
+          {isSubmitting && !retainSubmittedControls ? (
             'Skickar...'
           ) : (
             <>
