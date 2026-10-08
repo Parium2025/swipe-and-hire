@@ -17,6 +17,7 @@ import { ResilientImage } from '@/components/ui/ResilientImage';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { hapticLight } from '@/lib/haptics';
+import { celebrate } from '@/lib/celebrate';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { imageCache } from '@/lib/imageCache';
 import { ApplicationQuestionsWizard } from '@/components/ApplicationQuestionsWizard';
@@ -737,6 +738,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setHasAlreadyApplied(true);
       setApplicationStatusChecked(true);
       try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
+      void celebrate({ intensity: 'big' }).catch(() => { /* Firandet påverkar aldrig en skickad ansökan. */ });
     } catch (error: any) {
       const raw = String(error?.message || '');
       const isQuota = raw.includes('application_quota_exceeded');
