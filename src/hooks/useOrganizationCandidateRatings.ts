@@ -3,6 +3,7 @@ import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-quer
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
+import { fetchCachedOrgMemberProfiles } from '@/lib/orgMemberProfiles';
 
 /** latest = senast satta betyget i organisationen; det delade betyget alla ser. */
 type Ratings = Record<string, { own?: number; colleague?: number; latest?: number }>;
@@ -29,15 +30,10 @@ export function writePersisted(userId: string, ids: string[], fresh: Ratings) {
   } catch { /* ignore quota */ }
 }
 
-let memberCache: { userId: string; ids: string[]; at: number } | null = null;
-/** Active members of the caller's organization; one RPC, cached briefly per account. */
+/** Active members of the caller's organization; one shared cached RPC per account. */
 async function getMemberIds(userId: string): Promise<string[]> {
-  if (memberCache?.userId === userId && Date.now() - memberCache.at < 60_000) return memberCache.ids;
-  const { data, error } = await supabase.rpc('get_my_organization_member_profiles');
-  if (error) throw error;
-  const ids = [...new Set([userId, ...(data ?? []).filter((m) => m.is_active).map((m) => m.user_id)])];
-  memberCache = { userId, ids, at: Date.now() };
-  return ids;
+  const data = await fetchCachedOrgMemberProfiles(userId);
+  return [...new Set([userId, ...data.filter((m) => m.is_active).map((m) => m.user_id)])];
 }
 
 /** Fetches shared ratings and persists them for this account (also used for background warming). */
