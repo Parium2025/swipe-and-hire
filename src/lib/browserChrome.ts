@@ -181,6 +181,7 @@ export const syncBrowserChrome = (pathname = window.location.pathname) => {
   removeLegacySentinels();
 
   document.documentElement.classList.toggle('landing-video-chrome', isLandingVideo);
+  document.documentElement.toggleAttribute('data-audience-chrome', isAudienceLandingPath(pathname));
   document.body.classList.toggle('landing-video-chrome', isLandingVideo);
   document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideo);
   document.body.classList.toggle('parium-app-chrome', !isLandingVideo);

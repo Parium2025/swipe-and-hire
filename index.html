@@ -52,6 +52,7 @@
           var isLandingVideoRoute = path === '/' || path === '';
           var isAudienceLandingRoute = path === '/jobbsokare' || path === '/arbetsgivare';
           var isAuthRoute = path === '/auth';
+          document.documentElement.toggleAttribute('data-audience-chrome', isAudienceLandingRoute);
           var chromeColor = isLandingVideoRoute
             ? '#626262'
             : (isAudienceLandingRoute ? '#001F3D' : '#00193D');
