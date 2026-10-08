@@ -553,11 +553,10 @@ export function EmployerSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-white/20 mx-4" />
-
         {/* Admin Panel - Only for specific user */}
         {isPlatformAdmin && (
           <>
+            <SidebarSeparator className="bg-white/20 mx-4" />
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -584,12 +583,13 @@ export function EmployerSidebar() {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            <SidebarSeparator className="bg-white/20 mx-4" />
           </>
         )}
 
         {/* Logout Button */}
-        <div className="mt-auto p-4">
+        <div className="mt-auto">
+        <SidebarSeparator className="bg-white/20 mx-4" />
+        <div className="sidebar-logout-spacing p-4">
           <Button
             onClick={signOut}
             variant="glass"
@@ -602,6 +602,7 @@ export function EmployerSidebar() {
             <LogOut className="h-4 w-4" />
             {!collapsed && <span>Logga ut</span>}
           </Button>
+        </div>
         </div>
       </SidebarContent>
     </Sidebar>

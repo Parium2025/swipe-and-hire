@@ -17,8 +17,8 @@ describe('Blue screen edge parity', () => {
     expect(gate.match(/setProperty\('background-image', 'none', 'important'\)/g)).toHaveLength(2);
   });
 
-  it('reserves the bottom strip before the logout button padding on touch phones', () => {
-    const sidebar = readFileSync('src/components/AppSidebar.tsx', 'utf8');
+  it.each(['AppSidebar', 'EmployerSidebar'])('reserves the bottom strip before the %s logout button padding on touch phones', (name) => {
+    const sidebar = readFileSync(`src/components/${name}.tsx`, 'utf8');
     const css = readFileSync('src/index.css', 'utf8');
     expect(sidebar).toContain('sidebar-logout-spacing p-4');
     expect(css).toContain('[data-mobile="true"] .sidebar-logout-spacing');
