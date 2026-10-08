@@ -29,3 +29,13 @@ describe('confirmed application return', () => {
     expect(wizard).toContain("justApplied ? ' pointer-events-none' : ''");
   });
 });
+describe('ingen mellanbildruta med "Redan sökt"', () => {
+  it('markerar Nyss sökt innan listans sökt-cache uppdateras', async () => {
+    const { readFileSync } = await import('node:fs');
+    const src = readFileSync('src/pages/JobView.tsx', 'utf8');
+    const first = src.indexOf('setJustApplied(true)');
+    const cache = src.indexOf("const appliedKey = ['applied-job-ids'");
+    expect(first).toBeGreaterThan(-1);
+    expect(first).toBeLessThan(cache);
+  });
+});
