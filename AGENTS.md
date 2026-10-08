@@ -22,7 +22,7 @@
 - Autofill retains field surfaces.
 - Auth is isolated per tab; device limits are two per account; cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping; preserve loop/reload/boot guards and tests.
-- Shared chrome avoids reloads; keep guards for future color changes. Audience/video edges use a flat solid chrome strip (no fade) and the shell hard-stops at the strip edge.
+- Shared chrome avoids reloads; keep guards for future color changes. Audience edges use a flat solid chrome strip (no fade); the video route has no strips — video fills the full viewport.
 - Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows; one internal thread per colleague.
 - Candidate activity queries and cache are account-scoped (user+applicant key), warmed by the page and refreshed for current author profiles: instant cold-start logs and live avatars without leaks.
 - The notification bell alone owns its account-scoped cache and refresh; keep last-known state through daily returns and avoid a second silent preloader, because competing writes hide older unread items.
