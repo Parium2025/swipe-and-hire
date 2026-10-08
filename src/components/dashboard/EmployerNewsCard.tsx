@@ -113,21 +113,22 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => currentNews.source_url && window.open(currentNews.source_url, '_blank', 'noopener,noreferrer')}
-                className={`w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
+                className="w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide"
               >
-                {/* Samma tryckbeteende som karriärtipset: ett kort tryck
-                    öppnar artikeln, ett långtryck (eller hovring på dator)
-                    visar hela texten — men bara när den faktiskt är kapad. */}
+                {/* Artikeln öppnas enbart via "Läs mer". Ett kort tryck (eller
+                    hovring på dator) visar hela texten — men bara när den
+                    faktiskt är kapad. Samma beteende som karriärtipset. */}
                 <TruncatedText
                   lines={2}
                   text={currentNews.title}
                   className="text-sm font-semibold text-white leading-5 mb-0.5"
+                  touchTooltipOnLongPress={false}
                 />
                 <TruncatedText
                   lines={2}
                   text={currentNews.summary || currentNews.title}
                   className="text-sm leading-5 text-white"
+                  touchTooltipOnLongPress={false}
                 />
               </motion.div>
             ) : (

@@ -135,21 +135,22 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -18 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
-                className={`w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
+                className="w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide"
               >
-                {/* Tooltipen öppnas endast när texten faktiskt är trunkerad
-                    (samma regel som i nyhetskortet och resten av appen).
-                    Kort tryck öppnar artikeln, långtryck visar hela texten. */}
+                {/* Artikeln öppnas enbart via "Läs mer". Ett kort tryck på
+                    rubriken/ingressen visar hela texten — men bara när den
+                    faktiskt är kapad. Samma beteende som nyhetskortet. */}
                 <TruncatedText
                   lines={2}
                   text={currentTip.title}
                   className="text-sm font-semibold text-white leading-5 mb-0.5"
+                  touchTooltipOnLongPress={false}
                 />
                 <TruncatedText
                   lines={2}
                   text={currentTip.summary || currentTip.title}
                   className="text-sm leading-5 text-white"
+                  touchTooltipOnLongPress={false}
                 />
               </motion.div>
             ) : (
