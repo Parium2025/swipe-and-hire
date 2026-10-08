@@ -680,7 +680,7 @@ const SearchJobs = memo(() => {
 
     // Fallback: om vi har valda företag som ännu saknar id-mapping,
     // filtrera på namn så användaren inte ser fel jobb under första rendern.
-    if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedEmployerIds.length < selectedCompanies.length)) {
+    if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedCompanies.some(n => !companyNameToIdRef.current.has(n)))) {
       result = result.filter(j => selectedCompanies.includes(j.company_name) || selectedCompanies.includes(companyNameForJob(j)));
     }
 
