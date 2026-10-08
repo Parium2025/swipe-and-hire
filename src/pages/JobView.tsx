@@ -29,6 +29,7 @@ import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
 import { CompanyLogoAvatar } from '@/components/jobview/CompanyLogoAvatar';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
+import { getLastResumeAt, isFetchedSinceResume } from '@/lib/appResume';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchPrefetchCompanyProfiles, prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
@@ -108,13 +109,13 @@ const getSchemaEmploymentType = (employmentType: string | null | undefined) => {
 
 // Module-level cache: survives component remounts during viewport resizes
 const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean; at?: number }>();
-// Annonsdata äldre än så här visas aldrig som första bild — efter återkomst till
-// appen kan annonsen ha ändrats, och en gammal version får inte blixtra förbi.
-const JOB_SNAPSHOT_MAX_AGE_MS = 60_000;
+// Annonsdata från före senaste uppvaknandet (sidladdning eller återkomst till
+// appen) visas aldrig som första bild — då kan en gammal version blixtra förbi.
+// Under en aktiv session hålls listan live av realtime och får användas direkt.
 const freshJobCacheEntry = (id: string) => {
   const entry = _jobCache.get(id);
   if (!entry) return undefined;
-  if (!entry.at || Date.now() - entry.at > JOB_SNAPSHOT_MAX_AGE_MS) { _jobCache.delete(id); return undefined; }
+  if (!isFetchedSinceResume(entry.at)) { _jobCache.delete(id); return undefined; }
   return entry;
 };
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
@@ -212,7 +213,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   
   // Try module cache first, then React Query prefetch cache from search results
   const cached = jobId ? freshJobCacheEntry(jobId) : undefined;
-  const prefetched = !cached && jobId ? getPrefetchedJob(jobId, JOB_SNAPSHOT_MAX_AGE_MS) : undefined;
+  const prefetched = !cached && jobId ? getPrefetchedJob(jobId, getLastResumeAt()) : undefined;
   
   // Build initial job from prefetch data if available (partial — no profiles join)
   const initialJob: JobPosting | null = cached?.job ?? (prefetched ? {
@@ -296,7 +297,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   // serverkontrollen i den här vyn, eller en ansökningslista hämtad nyss.
   // En återställd/äldre lista får aldrig visa ansökningsformuläret — då kan
   // ett redan sökt jobb blixtra förbi som osökt. "Sökt" är alltid slutgiltigt.
-  const appliedListConfirmedFresh = appliedJobIdsFetchedNow && Date.now() - appliedJobIdsUpdatedAt <= JOB_SNAPSHOT_MAX_AGE_MS;
+  const appliedListConfirmedFresh = appliedJobIdsFetchedNow && isFetchedSinceResume(appliedJobIdsUpdatedAt);
   const applicationStatusKnown = alreadyAppliedForUi || applicationStatusChecked || appliedListConfirmedFresh || !user || isEmployer;
   const contentRef = useRef<HTMLDivElement>(null);
   // Pull-to-dismiss (mobile): drag down from top of page to close

@@ -1,3 +1,4 @@
+import { APP_RESUME_EVENT } from '@/lib/appResume';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -1347,8 +1348,15 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
       pendingWhileHiddenRef.current = false;
       scheduleSearchInvalidate();
     };
+    // Efter en stund i bakgrunden kan realtime ha missat ändringar: hämta om listan
+    // så att annonsvyn får färsk data att visa direkt.
+    const onResume = () => { pendingWhileHiddenRef.current = false; scheduleSearchInvalidate(); };
     document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
+    window.addEventListener(APP_RESUME_EVENT, onResume);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener(APP_RESUME_EVENT, onResume);
+    };
   }, [scheduleSearchInvalidate]);
 
   useEffect(() => () => {

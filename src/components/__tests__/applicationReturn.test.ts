@@ -39,7 +39,7 @@ describe('application status freshness', () => {
     const { readFileSync } = await import('node:fs');
     const job = readFileSync('src/pages/JobView.tsx', 'utf8');
     const sync = readFileSync('src/hooks/useJobSeekerBackgroundSync.ts', 'utf8');
-    expect(job).toContain('appliedJobIdsFetchedNow && Date.now() - appliedJobIdsUpdatedAt <= JOB_SNAPSHOT_MAX_AGE_MS');
+    expect(job).toContain('appliedJobIdsFetchedNow && isFetchedSinceResume(appliedJobIdsUpdatedAt)');
     expect(job).not.toContain('|| appliedJobIdsFetched ||');
     expect(job).toContain('freshJobCacheEntry(jobId)');
     expect(sync).not.toContain("setQueryData(['applied-job-ids'");
