@@ -6,25 +6,19 @@
 .chrome-matched-background { background: var(--gradient-app-shell); }
 .chrome-matched-background--auth { background: var(--gradient-auth-shell); }
 .chrome-matched-background--standard { background: var(--gradient-parium); }
-.chrome-matched-background--audience { background: none; }
 .chrome-matched-background::before,
-.chrome-matched-background::after,
-.audience-route-paint::before,
-.audience-route-paint::after {
+.chrome-matched-background::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
-  pointer-events: none;
 }
-.chrome-matched-background::before,
-.audience-route-paint::before {
+.chrome-matched-background::before {
   top: 0;
   height: calc(env(safe-area-inset-top, 0px) + 140px);
   background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), transparent 100%);
 }
-.chrome-matched-background::after,
-.audience-route-paint::after {
+.chrome-matched-background::after {
   bottom: 0;
   height: calc(env(safe-area-inset-bottom, 0px) + 120px);
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
@@ -41,9 +35,9 @@
 }
 .audience-route-paint { background: var(--gradient-audience-shell); }
 html[data-audience-chrome], html[data-audience-chrome] body {
-  background-image: none !important;
+  background-image: var(--gradient-audience-shell) !important;
 }
-html[data-audience-chrome] body::before { background: var(--active-browser-chrome-color); }
+html[data-audience-chrome] body::before { background: var(--gradient-audience-shell); }
 .auth-splash-tagline {
   font-size: 20px;
   line-height: 1.4;
