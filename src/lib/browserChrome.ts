@@ -162,10 +162,8 @@ const setChromeCssColor = (color: string) => {
 /**
  * Synkar browser-chrome (URL-bar topp + body-bakgrund).
  *
- * iOS Safaris bottenverktygsfält samplar body's bakgrundsfärg vid first paint
- * och uppdaterar inte vid SPA-nav. Vi accepterar den begränsningen — topp-baren
- * och body-färgen byts dock korrekt. Hard reloads tas bort eftersom de orsakade
- * vit/trasig sida i kombination med cache-killswitchen i index.html.
+ * All routes share one blue sampling color. Equal-color navigation stays
+ * within the document; the bounded fallback remains for future differences.
  */
 export const syncBrowserChrome = (pathname = window.location.pathname) => {
   const isLandingVideo = isLandingVideoPath(pathname);
