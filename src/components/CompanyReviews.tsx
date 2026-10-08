@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ReviewThread } from '@/components/ReviewThread';
+import { ReportContentButton } from '@/components/ReportContentButton';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -464,6 +465,7 @@ const CompanyReviews = () => {
                         </span>
                       </div>
                     </div>
+                    <ReportContentButton target="review" reviewId={review.id} />
                   </div>
                   {review.comment && (
                     <div className="text-sm text-white mt-2">

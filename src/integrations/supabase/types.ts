@@ -3598,6 +3598,67 @@ export type Database = {
         }
         Relationships: []
       }
+      review_content_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string | null
+          reason: string | null
+          reporter_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          review_id: string
+          status: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reason?: string | null
+          reporter_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id: string
+          status?: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          reason?: string | null
+          reporter_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id?: string
+          status?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_content_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "company_review_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_content_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "company_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_content_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "company_reviews_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rss_source_health: {
         Row: {
           consecutive_failures: number
@@ -4241,6 +4302,24 @@ export type Database = {
       accept_team_invitation: {
         Args: { p_email: string; p_token_hash: string; p_user_id: string }
         Returns: Json
+      }
+      admin_list_review_reports: {
+        Args: never
+        Returns: {
+          company_name: string
+          content: string
+          created_at: string
+          message_id: string
+          reason: string
+          report_count: number
+          report_id: string
+          review_id: string
+          target_type: string
+        }[]
+      }
+      admin_resolve_review_report: {
+        Args: { _remove: boolean; _report_id: string }
+        Returns: boolean
       }
       application_answer_is_present: {
         Args: { answer: Json }
@@ -5149,6 +5228,15 @@ export type Database = {
       }
       reply_to_company_review: {
         Args: { _reply: string; _review_id: string }
+        Returns: boolean
+      }
+      report_review_content: {
+        Args: {
+          _message_id: string
+          _reason: string
+          _review_id: string
+          _target_type: string
+        }
         Returns: boolean
       }
       republish_job: {

@@ -33,6 +33,7 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
 import { resolveCompanyLogoUrl } from "@/lib/companyLogoUrl";
 import { ReviewThread } from "@/components/ReviewThread";
+import { ReportContentButton } from "@/components/ReportContentButton";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -615,7 +616,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   ) : (
                     cachedReviews.map((review) => (
                       <div key={review.id} className="border border-white/10 rounded-lg p-4 space-y-2">
-                        <div>
+                        <div className="relative pr-8">
+                          <div className="absolute right-0 top-0">
+                            <ReportContentButton target="review" reviewId={review.id} />
+                          </div>
                           <p className="font-medium text-white">
                             {review.is_anonymous
                               ? "Anonym"
@@ -659,7 +663,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                         )}
                         {review.employer_reply && (
                           <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
-                            <p className="text-sm font-medium text-white">Svar från företaget</p>
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-sm font-medium text-white">Svar från företaget</p>
+                              <ReportContentButton target="company_reply" reviewId={review.id} />
+                            </div>
                             <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
                               {review.employer_reply}
                             </p>
