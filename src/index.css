@@ -6,7 +6,7 @@
 .chrome-matched-background { background: var(--gradient-app-shell); }
 .chrome-matched-background--auth { background: var(--gradient-auth-shell); }
 .chrome-matched-background--standard { background: var(--gradient-parium); }
-.chrome-matched-background--audience { background: var(--gradient-audience-shell); }
+.chrome-matched-background--audience { background: none; }
 .chrome-matched-background::before,
 .chrome-matched-background::after,
 .audience-route-paint::before,

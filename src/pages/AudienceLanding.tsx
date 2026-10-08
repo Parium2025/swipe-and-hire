@@ -1936,7 +1936,6 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   return (
     <>
     <AudienceSEO audience={audience} />
-    <ChromeMatchedBackground variant="audience" />
     {/* `no-chrome-pad`: global CSS lägger annars en TRANSPARENT ::after-spacer
         (68px) sist i scrollytan — den lät gradient/glöd skymta under footern
         på iPad. Vi använder en egen opak bottenplatta i stället. */}
@@ -1970,6 +1969,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
       <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
+      <ChromeMatchedBackground variant="audience" />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 

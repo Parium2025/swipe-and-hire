@@ -8,6 +8,17 @@ import ChromeMatchedBackground from '../ChromeMatchedBackground';
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('Blue screen edge parity', () => {
+  it('reuses edge paint on audience loading and final views without changing the video', () => {
+    const css = readFileSync('src/index.css', 'utf8');
+    const page = readFileSync('src/pages/AudienceLanding.tsx', 'utf8');
+    const hero = readFileSync('src/components/landing/LandingHero.tsx', 'utf8');
+    expect(css).toContain('.audience-route-paint::before');
+    expect(css).toContain('.audience-route-paint::after');
+    expect(page).toContain('<ChromeMatchedBackground variant="audience" />');
+    expect(hero).toContain('if (event.persisted) setSelectedRole(null)');
+    expect(hero).toContain('navigateAcrossChromeColor(target, () => navigate(target))');
+    expect(hero).toContain('}, 860)');
+  });
   it('uses the active chrome color on both login/logout splash covers', () => {
     const html = readFileSync('index.html', 'utf8');
     const react = readFileSync('src/components/AuthSplashScreen.tsx', 'utf8');
