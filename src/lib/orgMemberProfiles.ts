@@ -46,7 +46,7 @@ async function currentUserId(userId?: string | null): Promise<string | null> {
 }
 
 /**
- * Medlemslistan för anroparens organisation. Utan ett kända konto-id hämtas
+ * Medlemslistan för anroparens organisation. Utan ett känt konto-id hämtas
  * den utan cache (svaret är ändå skopat till inloggad användare på servern).
  */
 export async function fetchCachedOrgMemberProfiles(userId?: string | null): Promise<OrgMemberProfile[]> {
