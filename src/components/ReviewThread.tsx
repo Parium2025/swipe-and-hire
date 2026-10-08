@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { ReportContentButton } from '@/components/ReportContentButton';
 
 type Message = { id: string; review_id: string; author_kind: 'reviewer' | 'company'; body: string; created_at: string };
 
@@ -81,6 +82,7 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
         <div key={m.id} className="border-l-2 border-white/20 pl-3 space-y-1">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium text-white">{label(m)}</p>
+            {!data?.mine.has(m.id) && <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
             {data?.mine.has(m.id) && (
               <button type="button" onClick={() => remove(m.id)} className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors" aria-label="Ta bort svar">
                 <Trash2 className="h-3.5 w-3.5" />
