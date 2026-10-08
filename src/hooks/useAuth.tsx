@@ -2814,6 +2814,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user, userRole?.role, refreshSidebarCounts, refreshEmployerStats]);
 
+  // Kollegor (rekryterare/fler admins) lyssnar på bolagets recensioner, inte
+  // sitt eget konto — annars uppdateras recensionsräknaren aldrig live för dem.
+  useEffect(() => {
+    if (!user?.id || userRole?.role !== 'employer' || !profile?.organization_id) return;
+    let channel: ReturnType<typeof createRealtimeChannel> | null = null;
+    let cancelled = false;
+    void getOrganizationReviewOwnerId(user.id, profile.organization_id).then((ownerId) => {
+      if (cancelled || ownerId === user.id) return;
+      channel = createRealtimeChannel(`company-reviews-owner-${user.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'company_reviews', filter: `company_id=eq.${ownerId}` }, () => { void refreshEmployerStats(); })
+        .subscribe();
+    }).catch(() => {});
+    return () => { cancelled = true; if (channel) supabase.removeChannel(channel); };
+  }, [user?.id, userRole?.role, profile?.organization_id, refreshEmployerStats]);
+
   const value: AuthContextType = {
     user,
     session,
