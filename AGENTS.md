@@ -36,3 +36,6 @@
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
 - Tooltips over clipped text open only on measured overflow (TruncatedTooltip/TruncatedMenuItem/TruncatedText); never an unconditional Tooltip or native title on truncated text.
+<!-- LOVABLE:BEGIN -->
+- Job-seeker header controls follow the underlying KeepAlive page key, not an overlay URL, to prevent search-icon flashes during job-detail transitions.
+<!-- LOVABLE:END -->
