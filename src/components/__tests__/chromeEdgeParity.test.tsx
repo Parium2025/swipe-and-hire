@@ -13,7 +13,8 @@ describe('Blue screen edge parity', () => {
     const { container } = render(<MemoryRouter initialEntries={[path]}><BottomChromeStrip /></MemoryRouter>);
     const strip = container.querySelector<HTMLElement>('[data-browser-chrome-strip="bottom"]');
     expect(strip?.classList.contains('chrome-bottom-separator')).toBe(true);
-    expect(strip?.style.height).toBe('calc(env(safe-area-inset-bottom, 0px) + 14px)');
+    // jsdom cannot parse env() in calc(); guard the unchanged source instead.
+    expect(readFileSync('src/components/BottomChromeStrip.tsx', 'utf8')).toContain("height: 'calc(env(safe-area-inset-bottom, 0px) + 14px)'");
   });
 
   it('leaves the video strip without the new line', () => {
