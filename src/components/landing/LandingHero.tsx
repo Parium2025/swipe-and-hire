@@ -217,9 +217,6 @@ const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroPro
     >
       {/* Background video — fills entire viewport including safe areas */}
       <HeroVideo />
-      <ChromeEdgeBlend video />
-
-      {/* Shared blue edge paint blends the video into Safari's solid anchors. */}
 
 
       {/* Stacked hero: heading/text/CTAs stay in one responsive flow */}
