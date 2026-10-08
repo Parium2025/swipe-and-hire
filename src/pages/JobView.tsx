@@ -611,6 +611,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   };
 
   const handleApplicationSubmit = async () => {
+    if (!jobId) return;
     if (alreadyAppliedForUi) {
       setHasAlreadyApplied(true);
       toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
@@ -649,7 +650,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         const { data: existingApplication } = await supabase
           .from('job_applications')
           .select('id')
-          .eq('job_id', jobId!)
+          .eq('job_id', jobId)
           .eq('applicant_id', user.id)
           .limit(1)
           .maybeSingle();
