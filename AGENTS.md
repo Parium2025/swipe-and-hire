@@ -6,7 +6,7 @@
 - Keep the structured interview invitation locked and separate from editable automations.
 - Mobile shells stay `100dvh`; keyboard-heavy pages and long employer text areas scroll inside bounded height; browser chrome never covers content.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; blur when the iOS keyboard closes.
-- Standalone owns the persistent safe-area strip and offset; ordinary Safari has a zero-offset top overlay only on the landing-video route.
+- Standalone owns safe-area offsets; Safari top overlay is video-only. Blue shells use ChromeMatchedBackground for matching edges; splash uses fixed pixel sizes to avoid text jumps.
 - Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
@@ -16,7 +16,7 @@
 - Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
 - Drop delayed account-scoped fetches after account switch/sign-out so they can't overwrite the new cache.
 - Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks.
-- Candidate skeletons use account/list totals.
+- Skeletons use account/list totals.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
 - Company identity is shared; invitees inherit it and skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
 - Autofill retains field surfaces.

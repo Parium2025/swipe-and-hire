@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Blue screens only: flat edges match the route-owned Safari anchors. */
+.chrome-matched-background { background: var(--gradient-app-shell); }
+.chrome-matched-background--auth { background: var(--gradient-auth-shell); }
+.chrome-matched-background--standard { background: var(--gradient-parium); }
+.chrome-matched-background::before,
+.chrome-matched-background::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.chrome-matched-background::before {
+  top: 0;
+  height: calc(env(safe-area-inset-top, 0px) + 140px);
+  background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), transparent 100%);
+}
+.chrome-matched-background::after {
+  bottom: 0;
+  height: calc(env(safe-area-inset-bottom, 0px) + 120px);
+  background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
+}
+.chrome-bottom-separator { box-shadow: 0 -1px 0 hsl(var(--chrome-edge-line)); }
+.auth-splash-tagline {
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: 0;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+@media (min-width: 1024px) { .auth-splash-tagline { font-size: 24px; } }
+
+
 /* iOS Safari: dölj native play-button som visas vid blockerad autoplay
    (t.ex. Low Power Mode). Postern visas tills videon kan spela av sig själv
    eller efter första user interaction. */
