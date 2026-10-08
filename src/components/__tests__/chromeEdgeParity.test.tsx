@@ -3,11 +3,24 @@ import { cleanup, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { readFileSync } from 'node:fs';
 import BottomChromeStrip from '../BottomChromeStrip';
-import ChromeMatchedBackground from '../ChromeMatchedBackground';
+import ChromeMatchedBackground, { ChromeEdgeBlend } from '../ChromeMatchedBackground';
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('Blue screen edge parity', () => {
+  it('shares auth edge gradients with audience and video without reserving space', () => {
+    const { container } = render(<><ChromeEdgeBlend /><ChromeEdgeBlend video /></>);
+    expect(container.querySelector('[data-chrome-edge-blend="audience"]')?.classList.contains('fixed')).toBe(true);
+    expect(container.querySelector('[data-chrome-edge-blend="video"]')?.classList.contains('absolute')).toBe(true);
+    const css = readFileSync('src/index.css', 'utf8');
+    expect(css).toContain('.chrome-matched-background::before,\n.chrome-edge-blend::before');
+    expect(css).toContain('.chrome-matched-background::after,\n.chrome-edge-blend::after');
+    expect(css).toContain('--parium-chrome-color: #00193D');
+    expect(css).toContain('--active-browser-chrome-color: var(--parium-chrome-color)');
+    expect(css).toContain('html[data-audience-chrome] body::before { background: var(--active-browser-chrome-color); }');
+    expect(readFileSync('src/pages/AudienceLanding.tsx', 'utf8')).toContain('<ChromeEdgeBlend />');
+    expect(readFileSync('src/components/landing/LandingHero.tsx', 'utf8')).toContain('<ChromeEdgeBlend video />');
+  });
   it('uses the active chrome color on both login/logout splash covers', () => {
     const html = readFileSync('index.html', 'utf8');
     const react = readFileSync('src/components/AuthSplashScreen.tsx', 'utf8');

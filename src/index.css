@@ -7,18 +7,22 @@
 .chrome-matched-background--auth { background: var(--gradient-auth-shell); }
 .chrome-matched-background--standard { background: var(--gradient-parium); }
 .chrome-matched-background::before,
-.chrome-matched-background::after {
+.chrome-matched-background::after,
+.chrome-edge-blend::before,
+.chrome-edge-blend::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
 }
-.chrome-matched-background::before {
+.chrome-matched-background::before,
+.chrome-edge-blend::before {
   top: 0;
   height: calc(env(safe-area-inset-top, 0px) + 140px);
   background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), transparent 100%);
 }
-.chrome-matched-background::after {
+.chrome-matched-background::after,
+.chrome-edge-blend::after {
   bottom: 0;
   height: calc(env(safe-area-inset-bottom, 0px) + 120px);
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
@@ -33,11 +37,13 @@
     flex-shrink: 0;
   }
 }
-.audience-route-paint { background: var(--gradient-audience-shell); }
-html[data-audience-chrome], html[data-audience-chrome] body {
-  background-image: var(--gradient-audience-shell) !important;
+.audience-route-paint {
+  background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), transparent calc(env(safe-area-inset-top, 0px) + 140px)), linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent calc(env(safe-area-inset-bottom, 0px) + 120px)), var(--gradient-audience-shell);
 }
-html[data-audience-chrome] body::before { background: var(--gradient-audience-shell); }
+html[data-audience-chrome], html[data-audience-chrome] body {
+  background-image: none !important;
+}
+html[data-audience-chrome] body::before { background: var(--active-browser-chrome-color); }
 .auth-splash-tagline {
   font-size: 20px;
   line-height: 1.4;
@@ -259,8 +265,9 @@ All colors MUST be HSL.
     --primary-foreground: 210 40% 98%;
     --primary-glow: 200 100% 35%;
     --parium-chrome-blue: 212 100% 10%;
+    --parium-chrome-color: #00193D;
     --landing-chrome-gray: 0 0% 38.4%;
-    --active-browser-chrome-color: hsl(var(--parium-chrome-blue));
+    --active-browser-chrome-color: var(--parium-chrome-color);
     --chrome-edge-line: 0 0% 100% / 0.28;
     --gradient-app-shell: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 85% 25%) 50%, hsl(var(--primary)) 100%);
     --gradient-auth-shell: radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 85% 22%) 50%, hsl(var(--primary)) 100%);
