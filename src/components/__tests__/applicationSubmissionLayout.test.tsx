@@ -9,7 +9,7 @@ describe('mobile submitted review layout', () => {
   it('retains the same footer nodes after confirmation and prevents a second submission', () => {
     const onSubmit = vi.fn();
     const props = {
-      questions: [{ id: 'q1', question_text: 'Har du erfarenhet?', question_type: 'yes_no' as const, is_required: true }],
+      questions: [{ id: 'q1', question_text: 'Har du erfarenhet?', question_type: 'yes_no' as const, is_required: true, order_index: 0 }],
       answers: { q1: 'yes' },
       onAnswerChange: vi.fn(), onSubmit, isSubmitting: false, canSubmit: true,
       hasAlreadyApplied: false, preserveSubmissionLayout: true,
