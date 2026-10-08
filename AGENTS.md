@@ -32,7 +32,7 @@
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
 - Touch profile actions reuse row handlers and membership; text tooltips use cancellable holds, and stage menus clear previews.
 - Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes.
-- Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fresh (≤60 s) or checked for that job; "applied" is final.
+- Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fetched since last app resume or checked for that job; "applied" is final.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
 - Tooltips over clipped text open only on measured overflow (TruncatedTooltip/TruncatedMenuItem/TruncatedText); never an unconditional Tooltip or native title on truncated text.

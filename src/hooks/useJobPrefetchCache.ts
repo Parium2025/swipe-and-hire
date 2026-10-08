@@ -72,13 +72,12 @@ export function useJobPrefetchCache() {
   }, [queryClient]);
 
   /** Read a single prefetched job (returns undefined if not cached) */
-  // maxAgeMs: äldre data (t.ex. återställd efter några timmar) returneras inte.
-  const getPrefetchedJob = useCallback((jobId: string, maxAgeMs = Infinity): SearchJob | undefined => {
-    const now = Date.now();
+  // notBefore: data som sparades före den tidpunkten (t.ex. före återkomst till appen) returneras inte.
+  const getPrefetchedJob = useCallback((jobId: string, notBefore = 0): SearchJob | undefined => {
     const state = queryClient.getQueryState<SearchJob>([JOB_PREFETCH_KEY, jobId]);
-    if (state?.data && now - state.dataUpdatedAt <= maxAgeMs) return state.data;
+    if (state?.data && state.dataUpdatedAt >= notBefore) return state.data;
     const hot = hotJobPrefetchCache.get(jobId);
-    if (hot && now - hot.at <= maxAgeMs) return hot.job;
+    if (hot && hot.at >= notBefore) return hot.job;
     return undefined;
   }, [queryClient]);
 
