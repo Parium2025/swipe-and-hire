@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, BriefcaseBusiness, Search } from 'lucide-react';
 import HeroVideo from './HeroVideo';
-import { ChromeEdgeBlend } from '@/components/ChromeMatchedBackground';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { isAndroidDevice, isWindowsDevice } from '@/lib/videoPlatform';
 import { navigateAcrossChromeColor } from '@/lib/browserChrome';

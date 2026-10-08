@@ -1,6 +1,7 @@
-/** Edge-only paint: no layout changes or coverage of the video centre. */
-export function ChromeEdgeBlend({ video = false }: { video?: boolean }) {
-  return <div aria-hidden="true" data-chrome-edge-blend={video ? 'video' : 'audience'} className={`chrome-edge-blend pointer-events-none inset-0 ${video ? 'absolute z-[1]' : 'fixed z-0'}`} />;
+/** Edge-only paint for the audience pages. The video route has NO strips —
+ *  the hero video covers the full viewport edge to edge. */
+export function ChromeEdgeBlend() {
+  return <div aria-hidden="true" data-chrome-edge-blend="audience" className="chrome-edge-blend pointer-events-none fixed inset-0 z-0" />;
 }
 
 /** Paint only: preserves shell sizing and excludes the video route. */
