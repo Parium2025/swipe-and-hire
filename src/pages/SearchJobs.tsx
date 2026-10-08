@@ -387,7 +387,15 @@ const SearchJobs = memo(() => {
   // Vi läser ids från redan laddade jobb. När användaren väljer ett företag
   // som inte finns i nuvarande resultat (t.ex. via sparad sökning) faller vi
   // tillbaka på namn-filtrering tills ids är kända.
-  const companyNameToIdRef = useRef<Map<string, string>>(new Map());
+  const companyNameToIdRef = useRef<Map<string, Set<string>>>(new Map());
+  // Ett bolagsnamn kan ha flera kollegors annonser — samla alla deras konton.
+  const addCompanyId = (name: string, id: string): boolean => {
+    const set = companyNameToIdRef.current.get(name) ?? new Set<string>();
+    if (set.has(id)) return false;
+    set.add(id);
+    companyNameToIdRef.current.set(name, set);
+    return true;
+  };
   const [companyMapVersion, setCompanyMapVersion] = useState(0);
   // Företag som inte finns bland laddade sidor slås upp i databasen, så
   // filtret alltid gäller hela träffmängden och inte bara inlästa sidor.
@@ -406,10 +414,7 @@ const SearchJobs = memo(() => {
         let added = false;
         for (const row of data) {
           const name = row.workplace_name?.trim();
-          if (name && row.employer_id && !companyNameToIdRef.current.has(name)) {
-            companyNameToIdRef.current.set(name, row.employer_id);
-            added = true;
-          }
+          if (name && row.employer_id && addCompanyId(name, row.employer_id)) added = true;
         }
         if (added) setCompanyMapVersion((v) => v + 1);
       });
@@ -419,8 +424,7 @@ const SearchJobs = memo(() => {
     if (selectedCompanies.length === 0) return undefined;
     const ids: string[] = [];
     for (const name of selectedCompanies) {
-      const id = companyNameToIdRef.current.get(name);
-      if (id) ids.push(id);
+      companyNameToIdRef.current.get(name)?.forEach((id) => { if (!ids.includes(id)) ids.push(id); });
     }
     return ids.length > 0 ? ids : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -478,9 +482,7 @@ const SearchJobs = memo(() => {
   // Uppdatera namn→id-mapping så att framtida company-val kan filtreras i DB
   useEffect(() => {
     for (const j of jobs) {
-      if (j.company_name && j.employer_id && !companyNameToIdRef.current.has(j.company_name)) {
-        companyNameToIdRef.current.set(j.company_name, j.employer_id);
-      }
+      if (j.company_name && j.employer_id && addCompanyId(j.company_name, j.employer_id)) setCompanyMapVersion((v) => v + 1);
     }
   }, [jobs]);
 
@@ -540,10 +542,7 @@ const SearchJobs = memo(() => {
     let added = false;
     for (const j of jobs) {
       const name = companyNameForJob(j);
-      if (name && j.employer_id && companyNameToIdRef.current.get(name) !== j.employer_id) {
-        companyNameToIdRef.current.set(name, j.employer_id);
-        added = true;
-      }
+      if (name && j.employer_id && addCompanyId(name, j.employer_id)) added = true;
     }
     if (added) setCompanyMapVersion((v) => v + 1);
   }, [jobs, companyNameForJob]);
