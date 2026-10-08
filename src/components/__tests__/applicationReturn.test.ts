@@ -20,6 +20,10 @@ describe('confirmed application return', () => {
     expect(job).toContain('window.clearTimeout(returnTimer)');
   });
   it('reserves success geometry and respects reduced motion', () => {
+    expect(job).not.toContain('mobile ? 900 : 1500');
+    expect(job).toContain('mobile ? 0 : 1500');
+    expect(wizard).toContain('justApplied && preserveSubmissionLayout');
+    expect(wizard).toContain('!hasAlreadyApplied || retainSubmittedControls');
     expect(wizard).toContain("justApplied ? ' invisible inline-flex items-center justify-center' : ' hidden'");
     expect(wizard).toContain('(!hasAlreadyApplied || justApplied) && profileSelector');
     expect(job).toContain('(prefers-reduced-motion: reduce)');

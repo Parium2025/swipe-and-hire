@@ -261,14 +261,15 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     const mobile = window.matchMedia('(max-width: 1023px)').matches;
     const fade = mobile && asOverlay && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let returnTimer = 0;
-    const successTimer = window.setTimeout(() => {
-      if (fade) {
-        setApplicationReturnFading(true);
-        returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), 360);
-      } else {
-        navigate(applicationReturnPath, { replace: true });
-      }
-    }, mobile ? 900 : 1500);
+    // Mobilöverlägget lämnar direkt från den inskickade granskningsvyn.
+    // Scrollläget och formulärets geometri behålls tills hela vyn är utanför skärmen.
+    if (fade) {
+      setApplicationReturnFading(true);
+      returnTimer = window.setTimeout(() => navigate(applicationReturnPath, { replace: true }), 360);
+    }
+    const successTimer = !fade ? window.setTimeout(() => {
+      navigate(applicationReturnPath, { replace: true });
+    }, mobile ? 0 : 1500) : 0;
     return () => {
       window.clearTimeout(successTimer);
       window.clearTimeout(returnTimer);
@@ -1087,6 +1088,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       canSubmit={canSubmitApplication}
                       hasAlreadyApplied={alreadyAppliedForUi}
                       justApplied={justApplied}
+                      preserveSubmissionLayout={asOverlay && window.matchMedia('(max-width: 1023px)').matches}
                       profileSelector={applicationProfileSelector}
                     />
                   </div>
