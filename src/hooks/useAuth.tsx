@@ -1701,7 +1701,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.warn('Supabase signOut failed:', serverErr);
         }
         try {
-          clearSessionToken();
+          clearSessionToken(true);
           authStorage.clear();
         } catch {}
         // Extra säkerhetsnät: om ett sent svar hann skriva tillbaka ett token
@@ -1720,7 +1720,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearEmployerCountsMirror();
       try { queryClient.clear(); } catch {}
       clearQuerySnapshots();
-      clearSessionToken();
+      clearSessionToken(true);
       authStorage.clear();
       clearLocalState();
       isSigningOutRef.current = false;
@@ -2872,7 +2872,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Flag to prevent onAuthStateChange from showing a duplicate toast
     isSessionKickRef.current = true;
     
-    clearSessionToken();
+    clearSessionToken(true);
     clearAllAppCaches();
     
     // 🎬 Same premium fade animation as manual logout
