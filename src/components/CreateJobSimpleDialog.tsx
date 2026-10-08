@@ -883,6 +883,9 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
           queryClient.invalidateQueries({ queryKey: ['job-templates', user?.id] });
           // Also clear local cache to bypass early return
           queryClient.removeQueries({ queryKey: ['job-templates', user?.id] });
+          if (user?.id) {
+            try { window.localStorage.removeItem(`parium-job-templates:${user.id}`); } catch { /* ignore */ }
+          }
           await fetchTemplates();
           setTemplateToEdit(null);
           toast({
@@ -937,7 +940,14 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
                   
                   if (error) throw error;
                   
-                  setTemplates(prev => prev.filter(t => t.id !== templateToDelete.id));
+                  setTemplates(prev => {
+                    const next = prev.filter(t => t.id !== templateToDelete.id);
+                    if (user?.id) {
+                      queryClient.setQueryData(['job-templates', user.id], next);
+                      writeCachedJobTemplates(user.id, next as any);
+                    }
+                    return next;
+                  });
                   
                   if (selectedTemplate?.id === templateToDelete.id) {
                     setSelectedTemplate(null);
