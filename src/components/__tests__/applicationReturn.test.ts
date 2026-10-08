@@ -27,7 +27,8 @@ describe('confirmed application return', () => {
     expect(wizard).toContain("justApplied ? ' invisible inline-flex items-center justify-center' : ' hidden'");
     expect(wizard).toContain('(!hasAlreadyApplied || justApplied) && profileSelector');
     expect(job).toContain('(prefers-reduced-motion: reduce)');
-    expect(job).toContain("transform 360ms cubic-bezier(0.32, 0.72, 0.24, 1)");
+    expect(job).toContain("transform ${applicationReturnMs}ms cubic-bezier(0.32, 0.72, 0.24, 1)");
+    expect(job).toContain('Math.min(420, Math.max(320, distance * 0.45))');
     expect(job).toContain("'translate3d(0, 100%, 0)'");
     expect(wizard).toContain("hasAlreadyApplied && !justApplied ? ' hidden' : ''");
     expect(wizard).toContain("justApplied ? ' pointer-events-none' : ''");
