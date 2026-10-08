@@ -14,7 +14,7 @@ const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
 let currentRole: AuthSplashRole | null = null;
 const TRANSITION_GATE_ID = 'parium-auth-transition-gate';
-const AUTH_CHROME_COLOR = '#062B5E';
+const AUTH_CHROME_COLOR = '#00193D';
 
 const removeGateElement = () => {
   if (typeof document === 'undefined') return;

@@ -1,8 +1,8 @@
 const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#00193D';
 const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
-// Auth-sidans gradient är ljusare än app-blå — samplat från sidans nederkant.
-const AUTH_CHROME_COLOR = '#062B5E';
+// Auth edges, transition cover and app chrome share one solid sampling color.
+const AUTH_CHROME_COLOR = PARIUM_CHROME_COLOR;
 const THEME_COLOR_ID = 'parium-theme-color';
 export const BROWSER_CHROME_COLOR_EVENT = 'parium:browser-chrome-color';
 
