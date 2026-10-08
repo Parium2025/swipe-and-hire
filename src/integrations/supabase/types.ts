@@ -5042,6 +5042,10 @@ export type Database = {
           source: string
         }[]
       }
+      my_company_review_ids: {
+        Args: { _review_ids: string[] }
+        Returns: string[]
+      }
       my_company_review_message_ids: {
         Args: { _review_ids: string[] }
         Returns: string[]
