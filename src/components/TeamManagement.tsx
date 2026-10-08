@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchCachedOrgMemberProfiles, invalidateOrgMemberProfiles } from '@/lib/orgMemberProfiles';
 import { toast } from '@/hooks/use-toast';
 import { Users, UserPlus, Trash2, Crown, Loader2, Mail } from 'lucide-react';
 import { TruncatedText } from '@/components/ui/truncated-text';
@@ -127,10 +128,9 @@ const TeamManagement = () => {
       setOrganizationId(orgData);
       
       // E-post är inte läsbar direkt i `profiles` — hämta hela teamet via den
-      // säkra RPC:n som redan är scopead till anroparens organisation.
-      const { data: memberRows, error } = await supabase.rpc('get_my_organization_member_profiles');
-
-      if (error) throw error;
+      // säkra RPC:n som redan är scopead till anroparens organisation,
+      // genom den delade kontocachen.
+      const memberRows = await fetchCachedOrgMemberProfiles(user.id);
 
       const members = (memberRows || []).map((row) => ({
         user_id: row.user_id,
@@ -296,6 +296,7 @@ const TeamManagement = () => {
         description: "Teammedlemmen har tagits bort."
       });
       
+      invalidateOrgMemberProfiles(user?.id);
       void fetchTeamMembers(true);
     } catch (error) {
       setTeamMembers(previousMembers);
@@ -340,6 +341,7 @@ const TeamManagement = () => {
         description: `Rollen har ändrats till ${ROLE_LABELS[newRole]}.`
       });
       
+      invalidateOrgMemberProfiles(user?.id);
       void fetchTeamMembers(true);
     } catch (error) {
       setTeamMembers(previousMembers);
