@@ -652,6 +652,13 @@
       "when": 1791486430866,
       "tag": "0092_canonical_company_owner_for_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1791486846505,
+      "tag": "0093_reviews_admin_only_replies_and_no_self_review",
+      "breakpoints": true
     }
   ]
 }

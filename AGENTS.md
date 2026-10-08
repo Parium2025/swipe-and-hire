@@ -9,17 +9,15 @@
 - Standalone owns safe areas; Safari top overlay is video-only. Blue/loading shells share edge paint and solid roots; bfcache clears video exit. Fixed-px splash prevents jumps.
 - Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
-- Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
 - Review branding reads the trimmed public-profile RPC under its own cache key; profile rows stay private; colleagues see only current profile images via `can_view_colleague_profile_image`.
 - Upgrade portraits only after decode to prevent initials flashing.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over local events, keep cached report data account-scoped.
 - Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
 - Discard delayed account fetches after switch/sign-out to prevent overwriting the new cache.
 - Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks.
-- Skeletons use account/list totals.
+- Skeletons use account/list totals; autofill retains field surfaces.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
-- Company identity is shared; invitees inherit it and skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
-- Autofill retains field surfaces.
+- Company identity is shared and resolves via `company_owner_id` (reviews, ratings, search cards); admins alone reply via `reply_to_company_review` (no UPDATE policy); members can't self-review; invitees inherit identity and skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
 - Auth is isolated per tab; device limits are two per account; cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping; preserve loop/reload/boot guards and tests.
 - The landing-video route alone owns browser chrome color `#626262` and its bounded chrome-reload guard (max two per 10 s per tab); never change other routes with it.
@@ -35,7 +33,7 @@
 - Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fetched since last app resume or checked for that job; "applied" is final.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
-- Tooltips over clipped text open only on measured overflow (TruncatedTooltip/TruncatedMenuItem/TruncatedText); never an unconditional Tooltip or native title on truncated text.
+- Tooltips on clipped text open only on measured overflow (Truncated* components), never unconditionally.
 <!-- LOVABLE:BEGIN -->
 - Job-seeker header controls follow the underlying KeepAlive page key, not an overlay URL, to prevent search-icon flashes during job-detail transitions.
 <!-- LOVABLE:END -->

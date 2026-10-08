@@ -29,6 +29,7 @@ import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 import { getCompanyInitials } from '@/lib/companyInitials';
 import { useCompanyReviewsCache } from '@/hooks/useCompanyReviewsCache';
 import { getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -67,6 +68,9 @@ interface CompanyReview {
 const CompanyReviews = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { isAdmin: isOrgAdmin } = useIsOrgAdmin();
+  // Endast bolagets admin svarar på recensioner; rekryterare ser svaren.
+  const canReply = !profile?.organization_id || isOrgAdmin;
   const queryClient = useQueryClient();
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState('');
@@ -479,8 +483,8 @@ const CompanyReviews = () => {
                   {review.employer_reply && editingReplyId !== review.id && (
                     <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium text-white">Ditt svar</p>
-                        <div className="flex items-center gap-1">
+                        <p className="text-sm font-medium text-white">{canReply ? 'Ditt svar' : 'Bolagets svar'}</p>
+                        {canReply && <div className="flex items-center gap-1">
                           <button
                             type="button"
                             onClick={() => startReply(review)}
@@ -498,7 +502,7 @@ const CompanyReviews = () => {
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
-                        </div>
+                        </div>}
                       </div>
                       <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
                         {review.employer_reply}
@@ -512,7 +516,7 @@ const CompanyReviews = () => {
                   )}
 
                   {/* Svara / redigera svar */}
-                  {editingReplyId === review.id ? (
+                  {canReply && editingReplyId === review.id ? (
                     <div className="mt-3 space-y-2">
                       <Textarea
                         value={replyDraft}
@@ -550,7 +554,7 @@ const CompanyReviews = () => {
                         </Button>
                       </div>
                     </div>
-                  ) : !review.employer_reply && (
+                  ) : canReply && !review.employer_reply && (
                     <div className="mt-2">
                       <button
                         type="button"
