@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { navigateAcrossChromeColor } from '@/lib/browserChrome';
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -1935,6 +1936,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
   return (
     <>
     <AudienceSEO audience={audience} />
+    <ChromeMatchedBackground variant="audience" />
     {/* `no-chrome-pad`: global CSS lägger annars en TRANSPARENT ::after-spacer
         (68px) sist i scrollytan — den lät gradient/glöd skymta under footern
         på iPad. Vi använder en egen opak bottenplatta i stället. */}
