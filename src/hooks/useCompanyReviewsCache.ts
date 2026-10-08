@@ -198,25 +198,30 @@ export function useCompanyReviewsCache(companyId: string | null) {
   // 📡 REALTIME: Prenumerera på recensionsändringar för detta företag
   useEffect(() => {
     if (!companyId) return;
-
-    const channel = createRealtimeChannel(`company-reviews-${companyId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'company_reviews',
-          filter: `company_id=eq.${companyId}`,
-        },
-        () => {
-          // Invalidera cache och hämta färsk data
-          queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', companyId] });
-        }
-      )
-      .subscribe();
+    let channel: ReturnType<typeof createRealtimeChannel> | null = null;
+    let cancelled = false;
+    void resolveCompanyOwnerId(companyId).then((ownerId) => {
+      if (cancelled) return;
+      channel = createRealtimeChannel(`company-reviews-${companyId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'company_reviews',
+            filter: `company_id=eq.${ownerId}`,
+          },
+          () => {
+            // Invalidera cache och hämta färsk data
+            queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', companyId] });
+          }
+        )
+        .subscribe();
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [companyId, queryClient]);
 
