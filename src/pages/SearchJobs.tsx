@@ -578,16 +578,10 @@ const SearchJobs = memo(() => {
     const seen = new Set<string>();
     const out: string[] = [];
     for (const job of jobs.slice(0, warmWindowSize)) {
-      const raw = (job as any).company_logo_url as string | undefined;
-      if (!raw || seen.has(raw)) continue;
-      seen.add(raw);
-      if (raw.startsWith('http')) {
-        const resolved = resolveStorageImageUrl(raw, 'company-logos', COMPANY_LOGO_TRANSFORM);
-        if (resolved) out.push(resolved);
-      } else {
-        const { data } = supabase.storage.from('company-logos').getPublicUrl(raw, { transform: COMPANY_LOGO_TRANSFORM });
-        if (data?.publicUrl) out.push(data.publicUrl);
-      }
+      const url = buildCardImageUrl(job.company_logo_url, 'company-logos', getImageVersion(job), { width: 64, height: 64, quality: 80, resize: 'contain' });
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      out.push(url);
     }
     return out;
   }, [jobs, warmWindowSize]);

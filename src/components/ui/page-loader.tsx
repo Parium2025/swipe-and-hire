@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import logoRings from '@/assets/parium-logo-rings.png';
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 
 /**
  * Global laddningsindikator för route-/lazy-laddning.
@@ -33,13 +34,14 @@ export const PageLoader = ({
 
   return (
     <div
-      className={`${fullscreen ? 'min-h-screen' : 'h-full w-full'} bg-parium-gradient flex items-center justify-center`}
+      className={`${fullscreen ? 'min-h-screen' : 'h-full w-full bg-parium-gradient'} relative isolate flex items-center justify-center`}
       role="status"
       aria-live="polite"
       aria-busy="true"
     >
+      {fullscreen && <ChromeMatchedBackground />}
       <div
-        className={`flex flex-col items-center gap-5 transition-opacity duration-700 ${
+        className={`relative z-10 flex flex-col items-center gap-5 transition-opacity duration-700 ${
           visible ? 'opacity-100' : 'opacity-0'
         }`}
       >
