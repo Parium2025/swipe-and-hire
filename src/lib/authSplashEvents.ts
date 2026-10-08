@@ -49,6 +49,8 @@ const mountImmediateGate = () => {
     // då kvar i browserfältet tills nästa fulla sidladdning.
     document.documentElement.style.setProperty('background-color', AUTH_CHROME_COLOR, 'important');
     document.body.style.setProperty('background-color', AUTH_CHROME_COLOR, 'important');
+    document.documentElement.style.setProperty('background-image', 'none', 'important');
+    document.body.style.setProperty('background-image', 'none', 'important');
     if (document.getElementById(TRANSITION_GATE_ID)) return;
     const gate = document.createElement('div');
     gate.id = TRANSITION_GATE_ID;

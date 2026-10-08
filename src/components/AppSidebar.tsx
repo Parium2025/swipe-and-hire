@@ -463,7 +463,7 @@ export function AppSidebar() {
         <SidebarSeparator className="bg-white/20 mx-4" />
 
         {/* Logout Button */}
-        <div className="mt-auto p-4">
+        <div className="sidebar-logout-spacing mt-auto p-4">
           <Button
             onClick={signOut}
             variant="glass"
