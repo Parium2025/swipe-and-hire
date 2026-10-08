@@ -27,6 +27,7 @@ import { useVisualViewportBounds } from '@/hooks/useVisualViewportBounds';
 interface JobSeekerLayoutProps {
   children: ReactNode;
   overlay?: ReactNode;
+  activePagePath?: string;
 }
 
 // Logo that acts as sidebar trigger — same visual as desktop PariumLogoButton
@@ -98,10 +99,13 @@ const MobileProfileAvatar = () => {
   );
 };
 
-const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
+const JobSeekerLayout = memo(({ children, overlay, activePagePath }: JobSeekerLayoutProps) => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  // Annonsöverlägget ändrar URL, men söksidan ligger kvar under det.
+  const pagePath = activePagePath ?? location.pathname;
+  const isSearchPage = pagePath === '/search-jobs' || pagePath === '/index';
   const queryClient = useQueryClient();
   const device = useDevice();
   // Chattens fullhöjdsläge släpps först när vybytet är klart (annars klipps chatten).
@@ -212,8 +216,8 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
 
             <div className="relative z-10 min-w-0 flex items-center justify-self-end gap-1 sm:gap-2">
 
-              {/* Search button - hidden on /search-jobs */}
-              {location.pathname !== '/search-jobs' && (
+              {/* Hidden throughout search, including its job overlay and return. */}
+              {!isSearchPage && (
                 <button
                   onClick={() => navigate('/search-jobs')}
                   className="flex items-center justify-center h-9 w-9 rounded-full text-white hover:bg-white/10 transition-colors"

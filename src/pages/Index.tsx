@@ -861,7 +861,7 @@ const Index = () => {
     };
 
     return (
-      <JobSeekerLayout overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}>
+      <JobSeekerLayout activePagePath={activeKeepKey} overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}>
         <KeepAlive
           activeKey={activeKeepKey}
           render={(key) => renderSidebarContent(key)}
