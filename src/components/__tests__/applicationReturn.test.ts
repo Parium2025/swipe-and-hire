@@ -3,6 +3,11 @@ import { readFileSync } from 'node:fs';
 describe('confirmed application return', () => {
   const job = readFileSync('src/pages/JobView.tsx', 'utf8');
   const wizard = readFileSync('src/components/ApplicationQuestionsWizard.tsx', 'utf8');
+  it('starts a separate detail view for each job in both account layouts', () => {
+    const index = readFileSync('src/pages/Index.tsx', 'utf8');
+    expect(index.match(/<JobView key=\{location.pathname\} asOverlay \/>/g)).toHaveLength(2);
+    expect(index).not.toContain('<JobView asOverlay />');
+  });
   it('preserves the index search alias instead of mounting a new search page', () => {
     expect(job).toContain("applicationBackground === '/index' ? '/index' : '/search-jobs'");
     expect(job).toContain('navigate(applicationReturnPath, { replace: true })');

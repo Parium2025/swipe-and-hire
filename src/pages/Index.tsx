@@ -861,7 +861,7 @@ const Index = () => {
     };
 
     return (
-      <JobSeekerLayout activePagePath={activeKeepKey} overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}>
+      <JobSeekerLayout activePagePath={activeKeepKey} overlay={isJobViewOverlay ? <JobView key={location.pathname} asOverlay /> : undefined}>
         <KeepAlive
           activeKey={activeKeepKey}
           render={(key) => renderSidebarContent(key)}
@@ -948,7 +948,7 @@ const Index = () => {
     const employerKeepKey = isJobViewOverlay ? lastEmployerPathRef.current : location.pathname;
     return (
       <EmployerLayout
-        overlay={isJobViewOverlay ? <JobView asOverlay /> : undefined}
+        overlay={isJobViewOverlay ? <JobView key={location.pathname} asOverlay /> : undefined}
       >
         <KeepAlive
           activeKey={employerKeepKey}
