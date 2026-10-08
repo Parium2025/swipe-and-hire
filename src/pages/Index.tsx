@@ -15,6 +15,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/AppSidebar";
 import EmployerLayout from "@/components/EmployerLayout";
 import JobSeekerLayout from "@/components/JobSeekerLayout";
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 import Dashboard from '@/components/Dashboard';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import EmployerHome from '@/components/EmployerHome';
@@ -629,7 +630,7 @@ const Index = () => {
   const onboardingPending = (() => {
     try { return !!localStorage.getItem('parium-onboarding-pending'); } catch { return false; }
   })();
-  const plainBg = <div className="min-h-screen bg-gradient-parium" />;
+  const plainBg = <div className="relative min-h-screen"><ChromeMatchedBackground /></div>;
 
   // Vid en kall återladdning ska appytan finnas från första React-bildrutan.
   // Tidigare ritades bara en tom blå yta under session- och profilhämtningen.

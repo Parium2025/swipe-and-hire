@@ -16,7 +16,7 @@
 .chrome-matched-background::before {
   top: 0;
   height: calc(env(safe-area-inset-top, 0px) + 140px);
-  background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), transparent 100%);
+  background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) env(safe-area-inset-top, 0px), transparent 100%);
 }
 .chrome-matched-background::after {
   bottom: 0;

@@ -35,6 +35,10 @@ function persistable(query: Query): boolean {
   const first = query.queryKey[0];
   // Auth-/sessionsnära nycklar sparas aldrig.
   if (typeof first === 'string' && /session|auth|token|signed-url/i.test(first)) return false;
+  // The shared applied-status query deliberately uses a Set for fast row lookup.
+  if (first === 'applied-job-ids') {
+    return query.queryKey[1] === activeUserId && query.state.data instanceof Set && [...query.state.data].every((id) => typeof id === 'string');
+  }
   return isPlainJson(query.state.data);
 }
 
@@ -47,7 +51,10 @@ function writeSnapshot(qc: QueryClient) {
     const queries = [];
     // Senast uppdaterade först så det viktigaste får plats.
     const sorted = [...state.queries].sort((a, b) => b.state.dataUpdatedAt - a.state.dataUpdatedAt);
-    for (const q of sorted) {
+    for (const original of sorted) {
+      const q = original.queryKey[0] === 'applied-job-ids'
+        ? { ...original, state: { ...original.state, data: [...original.state.data as Set<string>] } }
+        : original;
       let size: number;
       try { size = JSON.stringify(q.state.data).length; } catch { continue; }
       if (size > MAX_QUERY_CHARS || total + size > MAX_TOTAL_CHARS) continue;
@@ -103,13 +110,26 @@ export function restoreQuerySnapshot(qc: QueryClient, userId: string | null | un
     const raw = localStorage.getItem(PREFIX + userId);
     if (!raw) return;
     const parsed = JSON.parse(raw);
-    if (!parsed?.state || Date.now() - (parsed.t ?? 0) > MAX_AGE_MS) {
+    if (!parsed || typeof parsed !== 'object' || !parsed.state ||
+        !Array.isArray(parsed.state.queries) || typeof parsed.t !== 'number' ||
+        Date.now() - parsed.t > MAX_AGE_MS) {
       localStorage.removeItem(PREFIX + userId);
       return;
     }
     const cache = qc.getQueryCache();
     // Fyll bara luckor — färskare data i minnet vinner alltid.
-    const queries = (parsed.state.queries ?? []).filter((q: any) => !cache.get(q.queryHash)?.state.data);
+    const queries = parsed.state.queries.filter((q: any) => {
+      if (!q || typeof q !== 'object' || !Array.isArray(q.queryKey) ||
+          typeof q.queryHash !== 'string' || !q.state || typeof q.state !== 'object') return false;
+      if (q.queryKey[0] === 'applied-job-ids') {
+        return q.queryKey[1] === userId && Array.isArray(q.state.data) &&
+          q.state.data.every((id: unknown) => typeof id === 'string') &&
+          cache.get(q.queryHash)?.state.data === undefined;
+      }
+      return cache.get(q.queryHash)?.state.data === undefined;
+    }).map((q: any) => q.queryKey[0] === 'applied-job-ids'
+      ? { ...q, state: { ...q.state, data: new Set<string>(q.state.data) } }
+      : q);
     hydrate(qc, { mutations: [], queries });
     if (queries.length === 0) restoredUserId = null;
     for (const q of queries) restoredHashes.add(q.queryHash);
