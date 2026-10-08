@@ -631,6 +631,13 @@
       "when": 1791485298494,
       "tag": "0089_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1791485804779,
+      "tag": "0090_sync_job_workplace_name_on_company_rename",
+      "breakpoints": true
     }
   ]
 }
