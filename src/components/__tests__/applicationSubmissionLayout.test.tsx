@@ -6,6 +6,18 @@ vi.mock('@/components/TruncatedText', () => ({ TruncatedText: ({ text }: { text:
 vi.mock('@/components/ui/truncated-text', () => ({ TruncatedText: ({ text }: { text: string }) => <span>{text}</span> }));
 
 describe('mobile submitted review layout', () => {
+  it('uses equal 16px upper and panel-bottom spacing with a full-strength confirmed state', () => {
+    render(<ApplicationQuestionsWizard
+      questions={[{ id: 'q1', question_text: 'Har du erfarenhet?', question_type: 'yes_no', is_required: true, order_index: 0 }]}
+      answers={{ q1: 'yes' }} onAnswerChange={vi.fn()} onSubmit={vi.fn()}
+      isSubmitting={false} canSubmit hasAlreadyApplied
+    />);
+    const confirmed = screen.getByRole('button', { name: 'Redan sökt' });
+    expect(confirmed).toBeDisabled();
+    expect(confirmed).toHaveClass('disabled:opacity-100');
+    expect(confirmed.parentElement).toHaveClass('pt-4');
+    expect(confirmed).toHaveClass('![box-shadow:var(--shadow-application-confirmed)]');
+  });
   it('retains the same footer nodes after confirmation and prevents a second submission', () => {
     const onSubmit = vi.fn();
     const props = {

@@ -1,5 +1,5 @@
 import { fetchMyProfile } from '@/lib/myProfile';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,8 +28,8 @@ import { JobPostingContent, JobViewFooter } from '@/components/jobview';
 import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
 import { CompanyLogoAvatar } from '@/components/jobview/CompanyLogoAvatar';
 import { getCompanyInitials } from '@/lib/companyInitials';
-import { useJobPrefetchCache } from '@/hooks/useJobPrefetchCache';
-import { getLastResumeAt, isFetchedSinceResume } from '@/lib/appResume';
+import { APP_RESUME_EVENT, isFetchedSinceResume } from '@/lib/appResume';
+import { safeReadJsonCache } from '@/lib/safeStorage';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchPrefetchCompanyProfiles, prewarmCompanyReviews } from '@/hooks/useCompanyReviewsCache';
@@ -108,7 +108,7 @@ const getSchemaEmploymentType = (employmentType: string | null | undefined) => {
 };
 
 // Module-level cache: survives component remounts during viewport resizes
-const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean; at?: number }>();
+const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean; answers?: Record<string, any>; statusChecked: boolean; at: number }>();
 // Annonsdata från före senaste uppvaknandet (sidladdning eller återkomst till
 // appen) visas aldrig som första bild — då kan en gammal version blixtra förbi.
 // Under en aktiv session hålls listan live av realtime och får användas direkt.
@@ -167,8 +167,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { user, isCompanyUser, userRole, loading: authLoading } = useAuth();
   const isEmployerRole = (role?: string | null) => role === 'employer' || role === 'company_admin' || role === 'recruiter';
   const [isEmployer, setIsEmployer] = useState(() => isCompanyUser() || isEmployerRole(userRole?.role));
-  const { getPrefetchedJob } = useJobPrefetchCache();
   const queryClient = useQueryClient();
+  const cacheKey = `${user?.id ?? 'public'}:${jobId}`;
+  const draftKey = `job-answers-draft-${user?.id ?? 'public'}-${jobId}`;
+  const requestGeneration = useRef(0);
+  const activeScope = useRef(cacheKey);
+  activeScope.current = cacheKey;
+  const resumeScroll = useRef<number | null>(null);
   const prefetchCompanyProfiles = useBatchPrefetchCompanyProfiles();
   // Profilval för ansökan — samma källa och regler som swipe-flödet.
   const {
@@ -212,18 +217,12 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   
   // Try module cache first, then React Query prefetch cache from search results
-  const cached = jobId ? freshJobCacheEntry(jobId) : undefined;
-  const prefetched = !cached && jobId ? getPrefetchedJob(jobId, getLastResumeAt()) : undefined;
+  const cached = jobId ? freshJobCacheEntry(cacheKey) : undefined;
   
   // Build initial job from prefetch data if available (partial — no profiles join)
-  const initialJob: JobPosting | null = cached?.job ?? (prefetched ? {
-    ...prefetched,
-    description: prefetched.description || '',
-    location: prefetched.location || '',
-    workplace_name: prefetched.workplace_name || prefetched.company_name,
-    company_logo_url: prefetched.company_logo_url,
-    overlay_text_color: prefetched.overlay_text_color,
-  } as JobPosting : null);
+  // Only a complete, server-verified detail may paint before this fetch.
+  // Search prefetch timestamps can describe re-seeded old list data.
+  const initialJob: JobPosting | null = cached?.job ?? null;
 
   const [job, setJob] = useState<JobPosting | null>(initialJob);
   const [loading, setLoading] = useState(!initialJob);
@@ -231,16 +230,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const hasLoadedOnce = useRef(!!initialJob);
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>(() => {
-    try {
-      const saved = localStorage.getItem(`job-answers-draft-${jobId}`);
-      return saved ? JSON.parse(saved) : {};
-    } catch { return {}; }
+    return cached?.answers ?? safeReadJsonCache<Record<string, any>>(draftKey,
+      (value): value is Record<string, any> => !!value && typeof value === 'object' && !Array.isArray(value)) ?? {};
   });
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(() => {
-    if (typeof navigationImageState.initialHeroImageUrl === 'string' && navigationImageState.initialHeroImageUrl) {
-      return navigationImageState.initialHeroImageUrl;
-    }
     // Den fullständiga annonsvyn använder alltid annonsens datorbild, även på
     // mobil. Mobilbilden är reserverad för Swipe Mode och mobila jobbkort.
     const rawImg = initialJob?.job_image_desktop_url || initialJob?.job_image_url;
@@ -253,9 +247,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return appendVersionToUrl(resolveJobImageUrl(rawImg), (initialJob as any)?.image_updated_at ?? (initialJob as any)?.updated_at);
   });
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
-    if (typeof navigationImageState.initialCompanyLogoUrl === 'string' && navigationImageState.initialCompanyLogoUrl) {
-      return navigationImageState.initialCompanyLogoUrl;
-    }
     const rawLogo = initialJob?.company_logo_url || initialJob?.profiles?.company_logo_url;
     const resolvedLogo = resolveCompanyLogoUrl(rawLogo);
     return resolvedLogo ? (imageCache.getCachedUrl(resolvedLogo) || resolvedLogo) : null;
@@ -290,7 +281,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       window.clearTimeout(returnTimer);
     };
   }, [justApplied, asOverlay, applicationReturnPath, navigate]);
-  const [applicationStatusChecked, setApplicationStatusChecked] = useState(Boolean(cached) || navigationImageState.hasApplied === true);
+  const [applicationStatusCheckedAt, setApplicationStatusCheckedAt] = useState(cached?.statusChecked ? cached.at : 0);
+  const setApplicationStatusChecked = (checked: boolean) => setApplicationStatusCheckedAt(checked ? Date.now() : 0);
+  const applicationStatusChecked = isFetchedSinceResume(applicationStatusCheckedAt);
   const { data: appliedJobIds = new Set<string>(), isFetchedAfterMount: appliedJobIdsFetchedNow, dataUpdatedAt: appliedJobIdsUpdatedAt } = useAppliedJobIds();
   const alreadyAppliedForUi = hasAlreadyApplied || navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
   // "Inte sökt" visas bara när det är bekräftat för just den här annonsen:
@@ -322,7 +315,41 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     // can return "not found" for expired/applied/saved jobs that require
     // a user-scoped RLS policy (Applicants/Saved/Org members).
     if (authLoading) return;
-    fetchJob();
+    void fetchJob();
+    return () => { requestGeneration.current += 1; };
+  }, [jobId, authLoading, user?.id]);
+
+  useLayoutEffect(() => {
+    if (!loading && resumeScroll.current !== null && contentRef.current) {
+      contentRef.current.scrollTop = resumeScroll.current;
+      resumeScroll.current = null;
+    }
+  }, [loading]);
+
+  // Realtime can miss events while Safari suspends the page. An open detail
+  // must revalidate itself, not wait for the search page's idle background sync.
+  useEffect(() => {
+    if (!jobId || authLoading) return;
+    const refresh = () => {
+      if (document.visibilityState === 'hidden') return;
+      resumeScroll.current = contentRef.current?.scrollTop ?? resumeScroll.current;
+      _jobCache.delete(cacheKey);
+      setApplicationStatusChecked(false);
+      setLoading(true);
+      void fetchJob();
+    };
+    const visible = () => { if (document.visibilityState === 'visible') refresh(); };
+    const restored = (event: PageTransitionEvent) => { if (event.persisted) refresh(); };
+    document.addEventListener('visibilitychange', visible);
+    window.addEventListener(APP_RESUME_EVENT, refresh);
+    window.addEventListener('online', refresh);
+    window.addEventListener('pageshow', restored);
+    return () => {
+      document.removeEventListener('visibilitychange', visible);
+      window.removeEventListener(APP_RESUME_EVENT, refresh);
+      window.removeEventListener('online', refresh);
+      window.removeEventListener('pageshow', restored);
+    };
   }, [jobId, authLoading, user?.id]);
 
   // Förvärm företagsrutan: profil + första sidan omdömen hämtas i idle så
@@ -356,7 +383,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     if (!jobId) return;
     // Invalidera cache och hämta om vid förändring
     const refetch = () => {
-      if (jobId) _jobCache.delete(jobId);
+      _jobCache.delete(cacheKey);
       fetchJob();
     };
     const channel = createRealtimeChannel(`job-view-live-${jobId}`)
@@ -374,9 +401,13 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [jobId]);
+  }, [jobId, user?.id, authLoading]);
 
-  const fetchJob = async (retryCount = 0) => {
+  const fetchJob = async (retryCount = 0, generation = ++requestGeneration.current) => {
+    if (!jobId || authLoading) return;
+    const requestedAt = Date.now();
+    const isCurrent = () => activeScope.current === cacheKey && requestGeneration.current === generation;
+    if (!isCurrent()) return;
     try {
       // 🚇 SINGLE TUNNEL: workplace_name + company_logo_url come straight from job_postings
       // (kept in sync via DB trigger sync_company_name_to_jobs).
@@ -394,18 +425,19 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         supabase
           .from('job_questions')
           .select('*')
-          .eq('job_id', jobId!)
+          .eq('job_id', jobId)
           .order('order_index'),
         user
           ? supabase
               .from('job_applications')
               .select('id, custom_answers, questions_snapshot')
-              .eq('job_id', jobId!)
+              .eq('job_id', jobId)
               .eq('applicant_id', user.id)
               .limit(1)
               .maybeSingle()
           : Promise.resolve({ data: null, error: null }),
       ]);
+      if (!isCurrent()) return;
 
       let data = jobResult.data as any;
 
@@ -413,7 +445,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         // If auth-related error, retry once after a short delay
         if (retryCount < 2 && (jobResult.error.message?.includes('JWT') || jobResult.error.code === 'PGRST301')) {
           console.log('JobView: Auth not ready, retrying in 1s...');
-          setTimeout(() => fetchJob(retryCount + 1), 1000);
+          setTimeout(() => { if (isCurrent()) void fetchJob(retryCount + 1, generation); }, 1000);
           return;
         }
         // 🔓 Utan giltig session har rollen `anon` ingen SELECT på job_postings
@@ -421,6 +453,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         // att visa "Jobbet hittades inte".
         if (jobResult.error.code === '42501') {
           const { data: publicData } = await supabase.rpc('get_public_job' as any, { p_job_id: jobId });
+          if (!isCurrent()) return;
           const publicJob = (publicData as any)?.job;
           if (publicJob) {
             data = publicJob;
@@ -441,9 +474,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         return;
       }
 
+      if (user && questionsResult.error) throw questionsResult.error;
+      if (user && applicationResult.error) throw applicationResult.error;
       const currentQuestions = (!questionsResult.error && questionsResult.data) ? questionsResult.data as JobQuestion[] : [];
       const appliedFromSharedState = navigationImageState.hasApplied === true || (jobId ? appliedJobIds.has(jobId) : false);
-      const applied = appliedFromSharedState || !!applicationResult.data;
+      const applied = hasAlreadyApplied || appliedFromSharedState || !!applicationResult.data;
 
       // 📸 Snapshot: om användaren redan har sökt visar vi de frusna frågorna
       // som fanns när de skickade in — inte de aktuella (som kan ha ändrats).
@@ -451,17 +486,17 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         | { id: string; custom_answers?: unknown; questions_snapshot?: unknown }
         | null;
       const snapshot = appRow?.questions_snapshot;
-      const questions = (applied && Array.isArray(snapshot) && snapshot.length > 0)
+      const questions = (applied && Array.isArray(snapshot))
         ? (snapshot as JobQuestion[])
         : currentQuestions;
 
       if (jobId) {
-        _jobCache.set(jobId, { job: data, questions, applied, at: Date.now() });
+        _jobCache.set(cacheKey, { job: data, questions, applied, answers: appRow?.custom_answers as Record<string, any> | undefined, statusChecked: !applicationResult.error, at: requestedAt });
       }
 
       setJob(data);
       setJobQuestions(questions);
-      setHasAlreadyApplied(applied);
+      setHasAlreadyApplied(previous => previous || applied);
       setApplicationStatusChecked(!user || !applicationResult.error || appliedFromSharedState);
 
       // If already applied, load saved answers from the application
@@ -477,6 +512,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       // Den fullständiga annonsvyn ska vara konsekvent mellan skärmstorlekar:
       // datorbild först, mobilbild endast som reserv.
       const rawImageUrl = data.job_image_desktop_url || data.job_image_url;
+      if (!rawImageUrl) { setImageUrl(null); setCanonicalImageUrl(null); }
       if (rawImageUrl) {
         const resolved = appendVersionToUrl(resolveJobImageUrl(rawImageUrl), (data as any)?.image_updated_at ?? (data as any)?.updated_at);
         if (resolved) {
@@ -491,9 +527,9 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
           }
         } else if (rawImageUrl) {
           convertToSignedUrl(rawImageUrl, 'job-applications', 3600).then(signed => {
-            if (signed) {
+            if (signed && isCurrent()) {
               setCanonicalImageUrl(signed);
-              setImageUrl(prev => prev || signed);
+                setImageUrl(signed);
               imageCache.loadImage(signed).catch(() => {});
             }
           }).catch(() => {});
@@ -502,24 +538,25 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       // Prefetch company logo (from job_postings — single tunnel)
       const rawLogo = typeof (data as any).company_logo_url === 'string'
-        ? (data as any).company_logo_url.trim().split('?')[0]
+        ? (data as any).company_logo_url.trim()
         : null;
       if (rawLogo) {
         const resolvedLogo = resolveCompanyLogoUrl(rawLogo) || rawLogo;
         const cachedLogoBlob = imageCache.getCachedUrl(resolvedLogo);
         // Only set src if not yet rendered — prevents the logo from flashing/re-fetching on revisit
-        setCompanyLogoUrl(prev => prev || cachedLogoBlob || resolvedLogo);
+        setCompanyLogoUrl(cachedLogoBlob || resolvedLogo);
         if (!cachedLogoBlob) {
           // Warm cache silently; do NOT swap to blob URL afterwards (would trigger <img> reload)
           imageCache.loadImage(resolvedLogo).catch(() => {});
         }
-      }
+      } else { setCompanyLogoUrl(null); }
     } catch (error: any) {
+      if (!isCurrent()) return;
       console.error('JobView fetch error:', error);
       // Retry once on network/auth errors
       if (retryCount < 2) {
         console.log(`JobView: Retrying fetch (attempt ${retryCount + 1})...`);
-        setTimeout(() => fetchJob(retryCount + 1), 1500);
+        setTimeout(() => { if (isCurrent()) void fetchJob(retryCount + 1, generation); }, 1500);
         return;
       }
       toast({
@@ -527,6 +564,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         description: 'Kunde inte hämta jobbet. Försök ladda om sidan.',
         variant: 'destructive',
       });
+      setJob(null);
+      hasLoadedOnce.current = true;
       setLoading(false);
     }
   };
@@ -534,7 +573,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const handleAnswerChange = (questionId: string, value: any) => {
     setAnswers(prev => {
       const next = { ...prev, [questionId]: value };
-      try { localStorage.setItem(`job-answers-draft-${jobId}`, JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(draftKey, JSON.stringify(next)); } catch {}
       return next;
     });
   };
@@ -572,6 +611,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   };
 
   const handleApplicationSubmit = async () => {
+    if (!jobId) return;
     if (alreadyAppliedForUi) {
       setHasAlreadyApplied(true);
       toast({ title: 'Redan sökt', description: 'Du har redan skickat en ansökan för den här tjänsten.' });
@@ -610,7 +650,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         const { data: existingApplication } = await supabase
           .from('job_applications')
           .select('id')
-          .eq('job_id', jobId!)
+          .eq('job_id', jobId)
           .eq('applicant_id', user.id)
           .limit(1)
           .maybeSingle();
@@ -741,8 +781,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         const appliedKey = ['applied-job-ids', user.id];
         await queryClient.cancelQueries({ queryKey: appliedKey });
         queryClient.setQueryData<Set<string>>(appliedKey, previous => new Set([...(previous ?? []), jobId]));
-        const cachedJob = _jobCache.get(jobId);
-        if (cachedJob) _jobCache.set(jobId, { ...cachedJob, applied: true });
+        const cachedJob = _jobCache.get(cacheKey);
+        if (cachedJob) _jobCache.set(cacheKey, { ...cachedJob, applied: true, answers });
       }
       queryClient.invalidateQueries({ queryKey: ['my-applications', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-applications-count'] });
@@ -755,10 +795,11 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         route: '/my-applications',
       });
 
+      requestGeneration.current += 1;
       setJustApplied(true);
       setHasAlreadyApplied(true);
       setApplicationStatusChecked(true);
-      try { localStorage.removeItem(`job-answers-draft-${jobId}`); } catch {}
+      try { localStorage.removeItem(draftKey); } catch {}
       void celebrate({ intensity: 'big' }).catch(() => { /* Firandet påverkar aldrig en skickad ansökan. */ });
     } catch (error: any) {
       const raw = String(error?.message || '');
@@ -1129,7 +1170,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       {alreadyAppliedForUi ? (
                         <Button
                           disabled
-                          className="px-8 rounded-full bg-green-500 text-white cursor-not-allowed"
+                          variant="applicationConfirmed"
+                          className="px-8"
                         >
                           <CheckCircle className="mr-1.5 h-4 w-4" />
                           {justApplied ? 'Nyss sökt' : 'Redan sökt'}

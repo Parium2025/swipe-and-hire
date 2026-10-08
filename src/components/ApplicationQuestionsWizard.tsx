@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Send, CheckCircle, X, Minus, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { TruncatedText as SmartTruncatedText } from '@/components/ui/truncated-text';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -500,7 +501,7 @@ export function ApplicationQuestionsWizard({
       {/* Navigation - all buttons always rendered, visibility via CSS to prevent flash */}
       <div
         ref={navRef}
-        className="flex items-center justify-center gap-3 pt-2"
+        className={`flex items-center justify-center gap-3 ${hasAlreadyApplied && isSubmitStep && !justApplied && !previewMode ? 'pt-4' : 'pt-2'}`}
         onMouseDown={handleContainerMouseDown}
         onTouchStart={handleContainerTouchStart}
       >
@@ -536,17 +537,18 @@ export function ApplicationQuestionsWizard({
         </button>
 
         {/* Redan sökt button - only visible on submit step when already applied */}
-        <button
+        <Button
           type="button"
           disabled
+          variant="applicationConfirmed"
           className={
-            'rounded-full bg-green-500 text-white px-6 py-2 text-sm shadow-lg shadow-green-500/30 cursor-default focus:outline-none focus:ring-0 focus-visible:ring-0' +
+            'h-auto gap-0 px-6 py-2 text-sm' +
             (buttonIsSubmitStep && hasAlreadyApplied && !previewMode && !retainSubmittedControls ? ' inline-flex items-center justify-center' : ' hidden')
           }
         >
           <CheckCircle className="mr-1.5 h-4 w-4" />
           {justApplied ? 'Nyss sökt' : 'Redan sökt'}
-        </button>
+        </Button>
 
         {/* Skicka ansökan button - only visible on submit step when not already applied */}
         <button

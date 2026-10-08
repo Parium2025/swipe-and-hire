@@ -41,7 +41,7 @@ describe('application status freshness', () => {
     const sync = readFileSync('src/hooks/useJobSeekerBackgroundSync.ts', 'utf8');
     expect(job).toContain('appliedJobIdsFetchedNow && isFetchedSinceResume(appliedJobIdsUpdatedAt)');
     expect(job).not.toContain('|| appliedJobIdsFetched ||');
-    expect(job).toContain('freshJobCacheEntry(jobId)');
+    expect(job).toContain('freshJobCacheEntry(cacheKey)');
     expect(sync).not.toContain("setQueryData(['applied-job-ids'");
   });
 });
