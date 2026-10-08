@@ -126,5 +126,27 @@ describe('TruncatedText på touchskärm', () => {
     expect(trigger.getAttribute('data-state')).toMatch(/open/);
     expect(parentClick).not.toHaveBeenCalled();
   });
+
+  // Dashboard-korten (nyheter/karriärtips) har ingen egen tryckåtgärd på
+  // touch — där ska ett kort tryck öppna tooltipen direkt, utan att vänta
+  // på ett 500 ms långtryck.
+  it('öppnar tooltipen vid ett kort tryck när touchTooltipOnLongPress är av', async () => {
+    vi.resetModules();
+    vi.useFakeTimers();
+    const { TruncatedText } = await import('@/components/TruncatedText');
+    render(<TruncatedText text="Nordnet rekryterar ny Sverigechef" alwaysShowTooltip touchTooltipOnLongPress={false} />);
+    const trigger = screen.getByText('Nordnet rekryterar ny Sverigechef');
+
+    await act(async () => {
+      fireEvent.touchStart(trigger);
+      fireEvent.pointerDown(trigger, { pointerType: 'touch' });
+      vi.advanceTimersByTime(100);
+      fireEvent.touchEnd(trigger);
+      fireEvent.pointerUp(trigger, { pointerType: 'touch' });
+      fireEvent.click(trigger);
+    });
+
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Nordnet rekryterar ny Sverigechef');
+  });
 });
 
