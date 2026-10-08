@@ -174,7 +174,30 @@ const JobSeekerLayout = memo(({ children, overlay }: JobSeekerLayoutProps) => {
         style={{
           background: 'linear-gradient(135deg, hsl(215 100% 12%) 0%, hsl(215 85% 25%) 50%, hsl(215 100% 12%) 100%)',
         }}
-      />
+      >
+        {/* Tak-/golv-melt: toningens hörn uppe till höger och nere till vänster
+            (#062C61) var ljusare än chrome-remsans platta #00193D, vilket gav
+            ett svagt färgsteg mot Safaris topp-/bottenfält. Overlays gör över-
+            och underkanten till exakt chrome-färgen (samma CSS-variabel som
+            remsorna läser) som sedan tonar ut i diagonaltoningen. Rent måleri —
+            ingen layoutpåverkan, ligger bakom allt innehåll. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0"
+          style={{
+            height: 140,
+            background: 'linear-gradient(to bottom, var(--active-browser-chrome-color, #00193D), color-mix(in srgb, var(--active-browser-chrome-color, #00193D) 0%, transparent))',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0"
+          style={{
+            height: 120,
+            background: 'linear-gradient(to top, var(--active-browser-chrome-color, #00193D), color-mix(in srgb, var(--active-browser-chrome-color, #00193D) 0%, transparent))',
+          }}
+        />
+      </div>
       
       <div
         data-mobile-app-shell="true"
