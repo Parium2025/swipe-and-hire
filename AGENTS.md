@@ -22,7 +22,7 @@
 - Autofill retains field surfaces.
 - Auth is isolated per tab; device limits are two per account; cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping; preserve loop/reload/boot guards and tests.
-- The landing-video route alone owns browser chrome color `#626262` and its bounded chrome-reload guard (max two per 10 s per tab); never change other routes with it.
+- Routes share chrome color; equal-color navigation stays in-document to avoid video restarts; retain bounded reload guards for future color differences.
 - Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows; one internal thread per colleague.
 - Candidate activity queries and cache are account-scoped (user+applicant key), warmed by the page and refreshed for current author profiles: instant cold-start logs and live avatars without leaks.
 - The notification bell alone owns its account-scoped cache and refresh; keep last-known state through daily returns and avoid a second silent preloader, because competing writes hide older unread items.
