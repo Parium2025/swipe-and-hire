@@ -525,6 +525,18 @@ const SearchJobs = memo(() => {
   });
   const companyNameForJob = useCallback((job: { employer_id?: string | null; company_name?: string | null }) =>
     (job.employer_id && employerCompanyNames?.[job.employer_id]) || job.company_name?.trim() || '', [employerCompanyNames]);
+  // Bolagsnamnet pekar alltid på samma arbetsgivare, oavsett arbetsplatsnamn.
+  useEffect(() => {
+    let added = false;
+    for (const j of jobs) {
+      const name = companyNameForJob(j);
+      if (name && j.employer_id && companyNameToIdRef.current.get(name) !== j.employer_id) {
+        companyNameToIdRef.current.set(name, j.employer_id);
+        added = true;
+      }
+    }
+    if (added) setCompanyMapVersion((v) => v + 1);
+  }, [jobs, companyNameForJob]);
 
   // Prefetch reviews AND profiles when jobs load — DEFERRED tills efter mount
   // så det inte konkurrerar med sidebar-stängningsanimationen om main-tråden.
@@ -660,7 +672,7 @@ const SearchJobs = memo(() => {
     // Fallback: om vi har valda företag som ännu saknar id-mapping,
     // filtrera på namn så användaren inte ser fel jobb under första rendern.
     if (selectedCompanies.length > 0 && (!selectedEmployerIds || selectedEmployerIds.length < selectedCompanies.length)) {
-      result = result.filter(j => selectedCompanies.includes(j.company_name));
+      result = result.filter(j => selectedCompanies.includes(j.company_name) || selectedCompanies.includes(companyNameForJob(j)));
     }
 
     // 🆕 Lönefilter: exakt string-matchning mot job_postings.salary_transparency.
@@ -684,7 +696,7 @@ const SearchJobs = memo(() => {
     }
 
     return result;
-  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryRange]);
+  }, [jobs, sortBy, selectedCompanies, selectedEmployerIds, salaryRange, companyNameForJob]);
 
   // Cacha det faktiska, färdigfiltrerade resultatantalet — även 0 och 1.
   // Skriv aldrig under laddning, eftersom `jobs` då kan vara ett tillfälligt
@@ -845,14 +857,14 @@ const SearchJobs = memo(() => {
     // samma recensioner på två kort som ser ut som olika företag.
     const byCompany = new Map<string, { id: string; name: string; logo?: string; jobCount: number; avgRating?: number; reviewCount: number; selectedNames: string[] }>();
     selectedCompanies.forEach(companyName => {
-      const match = jobs.find(job => job.company_name === companyName);
+      const match = jobs.find(job => companyNameForJob(job) === companyName || job.company_name === companyName);
       const company = match ? companyNameForJob(match) : companyName;
       const existing = byCompany.get(company);
       if (existing) { existing.selectedNames.push(companyName); return; }
       byCompany.set(company, { id: match?.employer_id || '', name: company, logo: match?.company_logo_url, jobCount: 0, avgRating: match?.company_avg_rating, reviewCount: match?.company_review_count || 0, selectedNames: [companyName] });
     });
     byCompany.forEach(data => {
-      data.jobCount = jobs.filter(job => data.selectedNames.includes(job.company_name)).length;
+      data.jobCount = jobs.filter(job => data.selectedNames.includes(job.company_name) || data.selectedNames.includes(companyNameForJob(job))).length;
     });
     return Array.from(byCompany.values());
   }, [jobs, selectedCompanies, companyNameForJob]);
@@ -903,7 +915,7 @@ const SearchJobs = memo(() => {
 
   // jobs from useOptimizedJobSearch already filters expired — use directly
   const activeJobCount = useMemo(() => filteredAndSortedJobs.length, [filteredAndSortedJobs]);
-  const uniqueCompanyCount = useMemo(() => new Set(filteredAndSortedJobs.map(j => j.company_name)).size, [filteredAndSortedJobs]);
+  const uniqueCompanyCount = useMemo(() => new Set(filteredAndSortedJobs.map(j => j.employer_id || j.company_name)).size, [filteredAndSortedJobs]);
   const newThisWeekCount = useMemo(() => {
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return filteredAndSortedJobs.filter(j => new Date(j.created_at).getTime() > weekAgo).length;
@@ -1040,7 +1052,7 @@ const SearchJobs = memo(() => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px]">
-              {[...new Set(jobs.map(j => j.company_name).filter(Boolean))].sort().map((name, index, arr) => (
+              {[...new Set(jobs.map(j => companyNameForJob(j)).filter(Boolean))].sort().map((name, index, arr) => (
                 <React.Fragment key={name}>
                   <div className="relative">
                     <DropdownMenuItem
