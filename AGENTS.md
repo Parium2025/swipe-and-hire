@@ -6,7 +6,7 @@
 - Keep the structured interview invitation locked and separate from editable automations.
 - Mobile shells stay `100dvh`; keyboard-heavy pages and long employer text areas scroll inside bounded height; browser chrome never covers content.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; blur when the iOS keyboard closes.
-- Standalone owns safe-area offsets; Safari top overlay is video-only. Blue shells use ChromeMatchedBackground for matching edges; splash uses fixed pixel sizes to avoid text jumps.
+- Standalone owns safe areas; Safari top overlay is video-only. Blue shells match edges; auth roots stay solid; audience loading paint matches its shell. Fixed-px splash prevents jumps.
 - Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
 - Review replies only use `reply_to_company_review`; never add a direct UPDATE policy.
