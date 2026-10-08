@@ -25,7 +25,7 @@ const draftKeyFor = (userId?: string | null) =>
   userId ? `${DRAFT_KEY_PREFIX}_${userId}` : null;
 
 const EmployerProfile = () => {
-  const { profile, updateProfile, user, userRole, loading: authLoading } = useAuth();
+  const { profile, updateProfile, user, userRole, loading: authLoading, preloadedAvatarUrl } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges, registerAutosaveFlush } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -68,7 +68,14 @@ const EmployerProfile = () => {
   const localChangesRef = useRef(false);
 
   // Konvertera storage path till signerad URL för visning
-  const profileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
+  const signedProfileImageUrl = useMediaUrl(formData.profile_image_url, 'profile-image');
+  // Samma sparade bild som toppfältet redan visar: använd den förladdade
+  // länken tills sidans egen signerade länk är klar, så mitten aldrig visar
+  // initialer när bilden finns.
+  const profileImageUrl = signedProfileImageUrl
+    || (formData.profile_image_url && formData.profile_image_url === profile?.profile_image_url
+      ? preloadedAvatarUrl || null
+      : null);
 
   const draftKey = draftKeyFor(user?.id);
 
