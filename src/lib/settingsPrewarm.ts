@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { safeSetItem } from '@/lib/safeStorage';
 import { writeCachedOutreachStudio } from '@/lib/outreachStudioCache';
+import { fetchCachedOrgMemberProfiles } from '@/lib/orgMemberProfiles';
 import type { OutreachAutomation, OutreachDispatchLog, OutreachTemplate } from '@/lib/outreach';
 
 /**
@@ -69,10 +70,14 @@ async function prewarmTeam(userId: string): Promise<void> {
 
   if (orgError || !organizationId) return;
 
-  // E-post kan inte läsas direkt ur `profiles` — samma säkra RPC som TeamManagement.
-  const { data: memberRows, error: membersError } = await supabase.rpc('get_my_organization_member_profiles');
-
-  if (membersError) return;
+  // E-post kan inte läsas direkt ur `profiles` — samma säkra RPC som TeamManagement,
+  // via den delade kontocachen.
+  let memberRows;
+  try {
+    memberRows = await fetchCachedOrgMemberProfiles(userId);
+  } catch {
+    return;
+  }
 
   const members = (memberRows ?? []).map((row) => ({
     user_id: row.user_id,

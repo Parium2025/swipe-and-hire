@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { fetchCachedOrgMemberProfiles } from '@/lib/orgMemberProfiles';
 
 export interface TeamCandidateInfo {
   applicant_id: string;
@@ -62,9 +63,9 @@ export function useTeamCandidateInfo(applications: Array<{ id: string; applicant
       const appToApplicant = Object.fromEntries(applications.map(a => [a.id, a.applicant_id]));
       const lookupApplicantIds = [...new Set(applications.map(a => a.applicant_id).filter(Boolean))];
 
-      // Samma auktoriserade medlemslista som för övriga organisationsvyer.
-      const { data: members, error: memberError } = await supabase.rpc('get_my_organization_member_profiles');
-      if (memberError) throw memberError;
+      // Samma auktoriserade medlemslista som för övriga organisationsvyer,
+      // via den delade kontocachen så att listan inte hämtas om i onödan.
+      const members = await fetchCachedOrgMemberProfiles(user.id);
       const ownMembership = members?.find(m => m.user_id === user.id && m.is_active);
       const memberIds = ownMembership?.organization_id
         ? [...new Set((members ?? []).filter(m => m.is_active && m.organization_id === ownMembership.organization_id).map(m => m.user_id))]

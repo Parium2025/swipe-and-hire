@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { rpc, select } = vi.hoisted(() => ({ rpc: vi.fn(), select: vi.fn() }));
+const { rpc, select, getSession } = vi.hoisted(() => ({ rpc: vi.fn(), select: vi.fn(), getSession: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     rpc,
     from: () => ({ select }),
+    auth: { getSession },
   },
 }));
 
 import { getOrganizationMemberIds, getOrganizationReviewOwnerId } from '@/lib/organizationMembers';
+import { invalidateOrgMemberProfiles } from '@/lib/orgMemberProfiles';
 
 const org = 'org-a';
 const members = [
@@ -21,12 +23,20 @@ const members = [
 describe('organization member scope', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    invalidateOrgMemberProfiles('user-1');
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'user-1' } } } });
     rpc.mockResolvedValue({ data: members, error: null });
   });
 
   it('loads active organization members through the authorized RPC, not user_roles RLS', async () => {
     expect(await getOrganizationMemberIds(org)).toEqual(['owner', 'recruiter']);
     expect(rpc).toHaveBeenCalledWith('get_my_organization_member_profiles');
+  });
+
+  it('serves repeat lookups from the shared per-account cache', async () => {
+    await getOrganizationMemberIds(org);
+    await getOrganizationMemberIds(org);
+    expect(rpc).toHaveBeenCalledTimes(1);
   });
 
   it('finds the existing review owner among this organization’s admins only', async () => {
