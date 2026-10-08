@@ -16,7 +16,7 @@ describe('mobile submitted review layout', () => {
     expect(confirmed).toBeDisabled();
     expect(confirmed).toHaveClass('disabled:opacity-100');
     expect(confirmed.parentElement).toHaveClass('pt-4');
-    expect(confirmed).toHaveClass('shadow-[var(--shadow-application-confirmed)]');
+    expect(confirmed).toHaveClass('![box-shadow:var(--shadow-application-confirmed)]');
   });
   it('retains the same footer nodes after confirmation and prevents a second submission', () => {
     const onSubmit = vi.fn();

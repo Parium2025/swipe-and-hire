@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        applicationConfirmed: "rounded-full bg-[hsl(var(--application-confirmed))] text-success-foreground shadow-[var(--shadow-application-confirmed)] cursor-default disabled:opacity-100",
+        applicationConfirmed: "rounded-full bg-[hsl(var(--application-confirmed))] text-success-foreground ![box-shadow:var(--shadow-application-confirmed)] cursor-default disabled:opacity-100",
         default: "rounded-md bg-primary text-primary-foreground md:hover:bg-primary/90 active:scale-[0.97] active:bg-primary/80",
         destructive:
           "rounded-md bg-destructive text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg md:hover:scale-[1.02] active:scale-[0.97] active:bg-destructive/90",
