@@ -925,7 +925,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         contain: 'layout paint style',
         pointerEvents: justApplied ? 'none' : undefined,
         transform: applicationReturnFading ? 'translate3d(0, 100%, 0)' : pullY > 0 ? `translate3d(0, ${pullY}px, 0)` : undefined,
-        transition: applicationReturnFading ? 'transform 360ms cubic-bezier(0.32, 0.72, 0.24, 1)' : pullActiveRef.current
+        transition: applicationReturnFading ? `transform ${applicationReturnMs}ms cubic-bezier(0.32, 0.72, 0.24, 1)` : pullActiveRef.current
           ? 'none'
           : isDismissing
             ? 'transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1)'
