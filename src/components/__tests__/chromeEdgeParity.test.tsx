@@ -13,13 +13,23 @@ describe('Blue screen edge parity', () => {
     expect(container.querySelector('[data-chrome-edge-blend="audience"]')?.classList.contains('fixed')).toBe(true);
     expect(container.querySelector('[data-chrome-edge-blend="video"]')?.classList.contains('absolute')).toBe(true);
     const css = readFileSync('src/index.css', 'utf8');
-    expect(css).toContain('.chrome-matched-background::before,\n.chrome-edge-blend::before');
-    expect(css).toContain('.chrome-matched-background::after,\n.chrome-edge-blend::after');
+    expect(css).toContain('.chrome-matched-background::before,\n.chrome-matched-background::after,\n.chrome-edge-blend::before,\n.chrome-edge-blend::after');
     expect(css).toContain('--parium-chrome-color: #00193D');
     expect(css).toContain('--active-browser-chrome-color: var(--parium-chrome-color)');
     expect(css).toContain('html[data-audience-chrome] body::before { background: var(--active-browser-chrome-color); }');
     expect(readFileSync('src/pages/AudienceLanding.tsx', 'utf8')).toContain('<ChromeEdgeBlend />');
     expect(readFileSync('src/components/landing/LandingHero.tsx', 'utf8')).toContain('<ChromeEdgeBlend video />');
+  });
+  it('keeps audience and video strips flat — no fade — and hard-stops the shell at the strip edge', () => {
+    const css = readFileSync('src/index.css', 'utf8');
+    // Flat solid strip, no linear-gradient in the edge-blend blocks
+    expect(css).toContain('.chrome-edge-blend::before {\n  top: 0;\n  height: calc(env(safe-area-inset-top, 0px) + 22px);\n  background: var(--active-browser-chrome-color);');
+    expect(css).toContain('.chrome-edge-blend::after {\n  bottom: 0;\n  height: calc(env(safe-area-inset-bottom, 0px) + 14px);\n  background: var(--active-browser-chrome-color);');
+    expect(css).not.toMatch(/\.chrome-edge-blend::(before|after)\s*\{[^}]*linear-gradient/s);
+    // Audience shell starts flat at the chrome color, then hard-steps to the design gradient
+    expect(css).toContain('--gradient-audience-shell: linear-gradient(180deg, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-top, 0px) + 22px), hsl(215 80% 22%) calc(env(safe-area-inset-top, 0px) + 22px), hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%)');
+    // Route loading paint has no fade layers
+    expect(css).toContain('.audience-route-paint {\n  background: var(--gradient-audience-shell);\n}');
   });
   it('uses the active chrome color on both login/logout splash covers', () => {
     const html = readFileSync('index.html', 'utf8');
