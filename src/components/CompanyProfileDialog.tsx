@@ -32,6 +32,7 @@ import { useCompanyReviewsCache } from "@/hooks/useCompanyReviewsCache";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { TruncatedText } from "@/components/TruncatedText";
 import { resolveCompanyLogoUrl } from "@/lib/companyLogoUrl";
+import { ReviewThread } from "@/components/ReviewThread";
 
 interface CompanyProfileDialogProps {
   open: boolean;
@@ -84,6 +85,19 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   // Use cached reviews for instant load (endast för inloggade)
   const { reviews: cachedReviews, avgRating, reviewCount, refetch: refetchReviews } = useCompanyReviewsCache(open && user ? companyId : null);
+  // Vilka av recensionerna är mina (avgörs i databasen, även för anonyma).
+  const reviewIdsForMine = (cachedReviews ?? []).filter((r) => r.employer_reply).map((r) => r.id);
+  const { data: myReviewIdList = [] } = useQuery({
+    queryKey: ['my-company-review-ids', user?.id ?? 'anon', reviewIdsForMine.join(',')],
+    enabled: !!user && reviewIdsForMine.length > 0,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('my_company_review_ids', { _review_ids: reviewIdsForMine });
+      if (error) throw error;
+      return (data ?? []) as unknown as string[];
+    },
+  });
+  const myReviewIds = React.useMemo(() => new Set(myReviewIdList), [myReviewIdList]);
 
   // Use React Query for company profile with prefetched data
   const { data: company, isLoading: loading, isError: companyError, refetch: refetchCompany } = useQuery<CompanyProfile | null>({
@@ -650,6 +664,13 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                               {review.employer_reply}
                             </p>
                           </div>
+                        )}
+                        {review.employer_reply && (
+                          <ReviewThread
+                            reviewId={review.id}
+                            canPost={myReviewIds.has(review.id)}
+                            viewer={myReviewIds.has(review.id) ? 'reviewer' : null}
+                          />
                         )}
                       </div>
                     ))

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { ReviewThread } from '@/components/ReviewThread';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -515,6 +516,9 @@ const CompanyReviews = () => {
                         </p>
                       )}
                     </div>
+                  )}
+                  {review.employer_reply && editingReplyId !== review.id && (
+                    <ReviewThread reviewId={review.id} canPost={canReply} viewer="company" />
                   )}
 
                   {/* Svara / redigera svar */}
