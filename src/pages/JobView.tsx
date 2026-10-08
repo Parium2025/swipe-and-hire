@@ -28,7 +28,7 @@ import { JobPostingContent, JobViewFooter } from '@/components/jobview';
 import { JobViewSkeleton } from '@/components/jobview/JobViewSkeleton';
 import { CompanyLogoAvatar } from '@/components/jobview/CompanyLogoAvatar';
 import { getCompanyInitials } from '@/lib/companyInitials';
-import { APP_RESUME_EVENT, getLastResumeAt, isFetchedSinceResume } from '@/lib/appResume';
+import { APP_RESUME_EVENT, isFetchedSinceResume } from '@/lib/appResume';
 import { safeReadJsonCache } from '@/lib/safeStorage';
 import { useAppliedJobIds } from '@/hooks/useAppliedJobIds';
 import { useQueryClient } from '@tanstack/react-query';
@@ -338,11 +338,14 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
       setLoading(true);
       void fetchJob();
     };
+    const visible = () => { if (document.visibilityState === 'visible') refresh(); };
     const restored = (event: PageTransitionEvent) => { if (event.persisted) refresh(); };
+    document.addEventListener('visibilitychange', visible);
     window.addEventListener(APP_RESUME_EVENT, refresh);
     window.addEventListener('online', refresh);
     window.addEventListener('pageshow', restored);
     return () => {
+      document.removeEventListener('visibilitychange', visible);
       window.removeEventListener(APP_RESUME_EVENT, refresh);
       window.removeEventListener('online', refresh);
       window.removeEventListener('pageshow', restored);
@@ -483,7 +486,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         | { id: string; custom_answers?: unknown; questions_snapshot?: unknown }
         | null;
       const snapshot = appRow?.questions_snapshot;
-      const questions = (applied && Array.isArray(snapshot) && snapshot.length > 0)
+      const questions = (applied && Array.isArray(snapshot))
         ? (snapshot as JobQuestion[])
         : currentQuestions;
 
@@ -493,7 +496,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       setJob(data);
       setJobQuestions(questions);
-      setHasAlreadyApplied(applied);
+      setHasAlreadyApplied(previous => previous || applied);
       setApplicationStatusChecked(!user || !applicationResult.error || appliedFromSharedState);
 
       // If already applied, load saved answers from the application
@@ -791,6 +794,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         route: '/my-applications',
       });
 
+      requestGeneration.current += 1;
       setJustApplied(true);
       setHasAlreadyApplied(true);
       setApplicationStatusChecked(true);
