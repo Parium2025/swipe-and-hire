@@ -45,6 +45,23 @@ describe('Blue screen edge parity', () => {
     expect(container.firstElementChild?.getAttribute('data-chrome-matched-background')).toBe('auth');
   });
 
+  it('matches cold reload paint and fades immediately below the safe area', () => {
+    const css = readFileSync('src/index.css', 'utf8');
+    const topEdge = css.split('.chrome-matched-background::before {')[1].split('}')[0];
+    expect(topEdge).toContain('var(--active-browser-chrome-color) env(safe-area-inset-top, 0px)');
+    expect(topEdge).not.toContain('+ 22px');
+    expect(readFileSync('src/pages/Index.tsx', 'utf8')).toContain('const plainBg = <div className="relative min-h-screen"><ChromeMatchedBackground /></div>');
+    expect(readFileSync('src/components/ui/page-loader.tsx', 'utf8')).toContain('{fullscreen && <ChromeMatchedBackground />}');
+  });
+
+  it('uses the same card transform for rendering and cache warming', () => {
+    for (const name of ['MobileJobCard', 'ReadOnlyMobileJobCard']) {
+      expect(readFileSync(`src/components/${name}.tsx`, 'utf8')).toContain("useCardImage(cardImageSource, 'job-images', imageVersion, JOB_CARD_TRANSFORM)");
+    }
+    const search = readFileSync('src/pages/SearchJobs.tsx', 'utf8');
+    expect(search).toContain("buildCardImageUrl(job.company_logo_url, 'company-logos', getImageVersion(job)");
+  });
+
   it('keeps static and React splash text independent of root font changes', () => {
     const html = readFileSync('index.html', 'utf8');
     const css = readFileSync('src/index.css', 'utf8');
