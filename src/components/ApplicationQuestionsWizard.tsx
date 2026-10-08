@@ -364,7 +364,7 @@ export function ApplicationQuestionsWizard({
       )}
 
       {/* Step dots progress indicator - hidden when already applied (locked view) */}
-      <div className={'flex items-center justify-center gap-1.5 min-h-9 py-1 shrink-0' + (hasAlreadyApplied ? (justApplied ? ' invisible' : ' hidden') : '')}>
+      <div className={'flex items-center justify-center gap-1.5 min-h-9 py-1 shrink-0' + (hasAlreadyApplied && !justApplied ? ' hidden' : '')}>
 
         {Array.from({ length: totalSteps }).map((_, i) => (
           <button
@@ -487,7 +487,7 @@ export function ApplicationQuestionsWizard({
                 })}
               </div>
 
-              {(!hasAlreadyApplied || justApplied) && profileSelector && <div className={`mt-3 mb-4 px-1${justApplied ? ' invisible' : ''}`}>{profileSelector}</div>}
+              {(!hasAlreadyApplied || justApplied) && profileSelector && <div className={`mt-3 mb-4 px-1${justApplied ? ' pointer-events-none' : ''}`} aria-disabled={justApplied || undefined}>{profileSelector}</div>}
 
             </div>
           ) : null}
