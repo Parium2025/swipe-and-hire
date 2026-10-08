@@ -25,6 +25,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { JobTemplate } from '@/types/jobWizard';
 import { cn } from '@/lib/utils';
 import { useTapToPreview } from '@/hooks/useTapToPreview';
+import { readCachedJobTemplates, writeCachedJobTemplates } from '@/lib/jobTemplatesPrewarm';
 
 
 interface CreateJobSimpleDialogProps {
@@ -236,55 +237,52 @@ const CreateJobSimpleDialog = ({ onJobCreated, triggerRef, triggerClassName }: C
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
+    const userId = user.id;
 
-    try {
-      // Try to get from cache first (prefetched in EmployerLayout)
-      const cached = queryClient.getQueryData(['job-templates', user.id]) as JobTemplate[] | undefined;
-      
-      if (cached) {
-        setTemplates(cached);
-        const defaultTemplate = cached.find(t => t.is_default);
-        if (defaultTemplate && !jobTitle) {
-          setSelectedTemplate(defaultTemplate);
-          setJobTitle(defaultTemplate.title);
-        }
-        setLoadingTemplates(false);
-        return;
+    const applyTemplates = (list: JobTemplate[]) => {
+      setTemplates(list);
+      const defaultTemplate = list.find(t => t.is_default);
+      if (defaultTemplate && !jobTitle) {
+        setSelectedTemplate(prev => prev ?? defaultTemplate);
+        setJobTitle(prev => prev || defaultTemplate.title);
       }
+    };
 
-      // Fallback to fetching if not in cache
+    // 1) Visa direkt: minnescache eller kontospecifik localStorage (kallstart).
+    const memory = queryClient.getQueryData(['job-templates', userId]) as JobTemplate[] | undefined;
+    const persisted = memory ? null : (readCachedJobTemplates(userId) as unknown as JobTemplate[] | null);
+    const instant = memory ?? persisted;
+    if (instant) {
+      applyTemplates(instant);
+      setLoadingTemplates(false);
+      if (!memory) queryClient.setQueryData(['job-templates', userId], instant);
+    }
+
+    // 2) Uppdatera alltid tyst i bakgrunden (stale-while-revalidate).
+    try {
       const { data, error } = await supabase
         .from('job_templates')
         .select('*')
-        .eq('employer_id', user.id)
+        .eq('employer_id', userId)
         .order('is_default', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
-        // Utloggning/sessionsbyte pågår: ingen behörighet är förväntat, visa inget fel.
         if ((error as { code?: string }).code === '42501') return;
-        toast({
-          title: "Fel vid hämtning av mallar",
-          description: error.message,
-          variant: "destructive"
-        });
+        if (!instant) {
+          toast({ title: "Fel vid hämtning av mallar", description: error.message, variant: "destructive" });
+        }
         return;
       }
 
-      setTemplates((data as any) || []);
-      
-      // Set default template if available and no title is set
-      const defaultTemplate = data?.find(t => t.is_default);
-      if (defaultTemplate && !jobTitle) {
-        setSelectedTemplate(defaultTemplate as any);
-        setJobTitle(defaultTemplate.title);
+      const fresh = ((data as any) || []) as JobTemplate[];
+      queryClient.setQueryData(['job-templates', userId], fresh);
+      writeCachedJobTemplates(userId, fresh as any);
+      applyTemplates(fresh);
+    } catch {
+      if (!instant) {
+        toast({ title: "Ett fel uppstod", description: "Kunde inte hämta jobbmallar.", variant: "destructive" });
       }
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte hämta jobbmallar.",
-        variant: "destructive"
-      });
     } finally {
       setLoadingTemplates(false);
     }
