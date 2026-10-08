@@ -124,14 +124,18 @@ export const EmployerNewsCard = memo(({ isPaused, setIsPaused }: EmployerNewsCar
                 onClick={!IS_TOUCH_ONLY ? openArticle : undefined}
                 className={`w-full flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide ${currentNews.source_url ? 'cursor-pointer group' : ''}`}
               >
+                {/* Kortet har ingen egen tryckåtgärd på touch (artikeln öppnas
+                    via "Läs mer"), så ett kort tryck får öppna tooltipen direkt. */}
                 <TruncatedText
                   alwaysShowTooltip={IS_TOUCH_ONLY}
+                  touchTooltipOnLongPress={false}
                   lines={2}
                   text={currentNews.title}
                   className="text-sm font-semibold text-white leading-5 mb-0.5"
                 />
                 <TruncatedText
                   alwaysShowTooltip={IS_TOUCH_ONLY}
+                  touchTooltipOnLongPress={false}
                   lines={2}
                   text={currentNews.summary || currentNews.title}
                   className="text-sm leading-5 text-white"
