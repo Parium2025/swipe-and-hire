@@ -45,19 +45,14 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
                 <h3 className="text-base font-semibold text-white mt-1 min-w-0 break-words [overflow-wrap:anywhere] line-clamp-2">
                   {company.name} - {company.jobCount} aktiv{company.jobCount !== 1 ? 'a' : 't'} jobb
                 </h3>
-                <div className="flex items-center gap-1 text-sm text-white flex-wrap">
-                  <span>Se företagsprofil och recensioner</span>
-                  {company.avgRating && company.reviewCount > 0 && (
-                    <>
-                      <span className="text-white/40">·</span>
-                      <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
-                        {company.avgRating.toFixed(1)}
-                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                        ({company.reviewCount})
-                      </span>
-                    </>
-                  )}
-                </div>
+                <p className="text-sm text-white">Se företagsprofil och recensioner</p>
+                {company.avgRating && company.reviewCount > 0 && (
+                  <div className="mt-0.5 inline-flex items-center gap-0.5 whitespace-nowrap text-sm text-white">
+                    {company.avgRating.toFixed(1)}
+                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                    ({company.reviewCount})
+                  </div>
+                )}
               </div>
               <ChevronDown className="h-5 w-5 text-white -rotate-90 flex-shrink-0" />
             </div>
