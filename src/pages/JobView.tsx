@@ -689,11 +689,6 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
 
       if (error) throw error;
 
-      // Markera "Nyss sökt" FÖRE cacheuppdateringen nedan. Annars hinner listans
-      // "sökt"-markering rendera "Redan sökt" en bildruta — profilvalet fälls
-      // ihop, sidan blir kortare och hela annonsen hoppar.
-      setJustApplied(true);
-
       // Send confirmation email
       const applicantEmail = user?.email || profile?.email;
       if (applicantEmail) {
