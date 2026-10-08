@@ -1,6 +1,6 @@
-const LANDING_CHROME_COLOR = '#626262';
 const PARIUM_CHROME_COLOR = '#00193D';
-const AUDIENCE_LANDING_CHROME_COLOR = '#001F3D';
+const LANDING_CHROME_COLOR = PARIUM_CHROME_COLOR;
+const AUDIENCE_LANDING_CHROME_COLOR = PARIUM_CHROME_COLOR;
 // Auth edges, transition cover and app chrome share one solid sampling color.
 const AUTH_CHROME_COLOR = PARIUM_CHROME_COLOR;
 const THEME_COLOR_ID = 'parium-theme-color';
@@ -26,7 +26,8 @@ export const needsFullPageChromeNavigation = () => {
 
 export const navigateAcrossChromeColor = (target: string, spaNavigate: () => void) => {
   cancelPendingRouteWrites();
-  if (needsFullPageChromeNavigation()) {
+  const targetPath = new URL(target, window.location.origin).pathname;
+  if (needsFullPageChromeNavigation() && getChromeColor(window.location.pathname) !== getChromeColor(targetPath)) {
     window.location.assign(target);
     return;
   }
