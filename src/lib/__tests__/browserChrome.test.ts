@@ -31,7 +31,7 @@ describe('browserChrome', () => {
     const authTags = themeColorTags();
     expect(authTags).toHaveLength(1);
     expect(authTags[0]).toBe(landingTags[0]);
-    expect(authTags[0]?.content).toBe('#062B5E');
+    expect(authTags[0]?.content).toBe('#00193D');
   });
 
   it('synkar målgruppssidornas toppfärg till blått', () => {
@@ -67,10 +67,10 @@ describe('browserChrome', () => {
     syncBrowserChrome('/auth');
     vi.advanceTimersByTime(20);
 
-    expect(themeColorTags().every((tag) => tag.content === '#062B5E')).toBe(true);
+    expect(themeColorTags().every((tag) => tag.content === '#00193D')).toBe(true);
     expect(
       document.documentElement.style.getPropertyValue('--active-browser-chrome-color')
-    ).toBe('#062B5E');
+    ).toBe('#00193D');
   });
 
   it('tillåter högst två chrome-omladdningar per tidsfönster så den aldrig loopar', () => {

@@ -195,7 +195,16 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 }
 
 // Minimal loading fallback - just gradient background, no spinner
-const LazyFallback = () => <PageLoader />;
+const LazyFallback = () => {
+  const { pathname } = useLocation();
+  if (pathname === '/jobbsokare' || pathname === '/arbetsgivare') {
+    return <div aria-hidden="true" className="fixed inset-0 audience-route-paint" />;
+  }
+  if (pathname === '/auth') {
+    return <div aria-hidden="true" className="fixed inset-0 chrome-matched-background chrome-matched-background--auth" />;
+  }
+  return <PageLoader />;
+};
 
 const LIGHTWEIGHT_ROUTES = ['/', '/auth', '/jobbsokare', '/arbetsgivare', '/om-oss', '/integritetspolicy', '/dpa', '/unsubscribe'];
 const isPublicLightweightPath = (pathname: string) =>

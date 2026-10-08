@@ -1951,7 +1951,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         scrollBehavior: 'auto',
 
         backgroundImage:
-          'linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%)',
+          'var(--gradient-audience-shell)',
         backgroundAttachment: 'scroll',
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',

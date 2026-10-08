@@ -24,6 +24,11 @@
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
 }
 .chrome-bottom-separator { box-shadow: 0 -1px 0 hsl(var(--chrome-edge-line)); }
+.audience-route-paint { background: var(--gradient-audience-shell); }
+html[data-audience-chrome], html[data-audience-chrome] body {
+  background-image: var(--gradient-audience-shell) !important;
+}
+html[data-audience-chrome] body::before { background: var(--gradient-audience-shell); }
 .auth-splash-tagline {
   font-size: 20px;
   line-height: 1.4;
@@ -250,6 +255,7 @@ All colors MUST be HSL.
     --chrome-edge-line: 0 0% 100% / 0.28;
     --gradient-app-shell: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 85% 25%) 50%, hsl(var(--primary)) 100%);
     --gradient-auth-shell: radial-gradient(1200px 700px at 12% -10%, hsl(215 85% 28% / 0.55), transparent 60%), radial-gradient(900px 600px at 100% 110%, hsl(215 85% 22% / 0.45), transparent 65%), linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(215 85% 22%) 50%, hsl(var(--primary)) 100%);
+    --gradient-audience-shell: linear-gradient(180deg, hsl(215 80% 22%) 0%, hsl(var(--primary)) 65svh, hsl(var(--primary)) 100%);
 
     /* Parium Light Blue (från loggans ringar) */
     --secondary: 200 100% 60%;

@@ -52,9 +52,10 @@
           var isLandingVideoRoute = path === '/' || path === '';
           var isAudienceLandingRoute = path === '/jobbsokare' || path === '/arbetsgivare';
           var isAuthRoute = path === '/auth';
+          document.documentElement.toggleAttribute('data-audience-chrome', isAudienceLandingRoute);
           var chromeColor = isLandingVideoRoute
             ? '#626262'
-            : (isAudienceLandingRoute ? '#001F3D' : (isAuthRoute ? '#062B5E' : '#00193D'));
+            : (isAudienceLandingRoute ? '#001F3D' : '#00193D');
           document.documentElement.classList.toggle('landing-video-chrome', isLandingVideoRoute);
           document.documentElement.classList.toggle('parium-app-chrome', !isLandingVideoRoute);
           // Inline body/html-färg så iOS Safari samplar rätt färg vid first paint.
@@ -73,9 +74,12 @@
           // och vår BottomChromeStrip är grå. Sätts INNAN body parsas så att
           // Safari aldrig hinner sampla fel färg.
           document.write(
-            '<style id="parium-initial-chrome-bg">html,body{background-color:' +
+            '<style id="parium-initial-chrome-bg">' +
+            (isAudienceLandingRoute ? ':root{--gradient-audience-shell:linear-gradient(180deg,hsl(215 80% 22%) 0%,hsl(215 100% 12%) 65svh,hsl(215 100% 12%) 100%)}' : '') +
+            'html,body{background-color:' +
             chromeColor + ' !important;' +
-            (isLandingVideoRoute ? 'background-image:none !important;' : '') +
+            (isLandingVideoRoute || isAuthRoute ? 'background-image:none !important;' : '') +
+            (isAudienceLandingRoute ? 'background-image:var(--gradient-audience-shell) !important;' : '') +
             '}</style>'
           );
           document.addEventListener('DOMContentLoaded', function() {
@@ -86,7 +90,7 @@
             // icke-landningssidor) kan ta över när React har mounted.
             // På landningssidan låter vi den ligga kvar — body.landing-video-chrome
             // har samma färg så det blir ingen visuell skillnad.
-            if (!isLandingVideoRoute) {
+            if (!isLandingVideoRoute && !isAuthRoute) {
               var initial = document.getElementById('parium-initial-chrome-bg');
               if (initial) initial.remove();
             }
