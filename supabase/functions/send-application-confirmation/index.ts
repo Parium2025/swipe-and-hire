@@ -37,7 +37,8 @@ const handler = async (req: Request): Promise<Response> => {
     const { applicant_email, applicant_first_name, job_title, company_name, application_id }: ApplicationConfirmationRequest = await req.json();
 
     // Prevent using this endpoint to send confirmation to arbitrary addresses.
-    if (!isServiceRole && callerEmail && applicant_email && applicant_email.toLowerCase() !== callerEmail) {
+    // Callers without a verified email can never pick a recipient.
+    if (!isServiceRole && (!callerEmail || !applicant_email || applicant_email.toLowerCase() !== callerEmail.toLowerCase())) {
       return new Response(JSON.stringify({ error: "Recipient must match caller" }), {
         status: 403,
         headers: { "Content-Type": "application/json", ...corsHeaders },

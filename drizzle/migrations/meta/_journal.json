@@ -610,6 +610,13 @@
       "when": 1791429668506,
       "tag": "0086_index_outreach_dispatch_logs_created_at",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1791432308034,
+      "tag": "0087_search_my_candidates_require_current_access",
+      "breakpoints": true
     }
   ]
 }
