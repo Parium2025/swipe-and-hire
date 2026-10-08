@@ -142,14 +142,15 @@ export const CareerTipsCard = memo(({ isPaused, setIsPaused }: CareerTipsCardPro
                 onClick={() => currentTip.source_url && window.open(currentTip.source_url, '_blank', 'noopener,noreferrer')}
                 className={`w-full flex flex-col min-h-0 overflow-y-auto scrollbar-hide ${currentTip.source_url ? 'cursor-pointer group' : ''}`}
               >
+                {/* Tooltipen öppnas endast när texten faktiskt är trunkerad
+                    (samma regel som i nyhetskortet och resten av appen).
+                    Kort tryck öppnar artikeln, långtryck visar hela texten. */}
                 <TruncatedText
-                  alwaysShowTooltip={IS_TOUCH_ONLY}
                   lines={2}
                   text={currentTip.title}
                   className="text-sm font-semibold text-white leading-5 mb-0.5"
                 />
                 <TruncatedText
-                  alwaysShowTooltip={IS_TOUCH_ONLY}
                   lines={2}
                   text={currentTip.summary || currentTip.title}
                   className="text-sm leading-5 text-white"
