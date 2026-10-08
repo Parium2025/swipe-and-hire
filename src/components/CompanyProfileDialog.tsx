@@ -1,3 +1,4 @@
+import { resolveCompanyOwnerIds } from '@/lib/companyOwner';
 import * as React from "react";
 import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DialogContentNoFocus } from "@/components/ui/dialog-no-focus";
@@ -123,6 +124,19 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       getCurrentUser();
     }
   }, [open, companyId]);
+
+  // Eget bolag avgörs på bolagsnivå: alla i organisationen räknas som bolaget.
+  const { data: isOwnProfile = false } = useQuery({
+    queryKey: ['is-own-company', currentUserId, companyId],
+    queryFn: async () => {
+      if (!currentUserId || !companyId) return false;
+      if (currentUserId === companyId) return true;
+      const owners = await resolveCompanyOwnerIds([currentUserId, companyId]);
+      return owners.get(currentUserId) === owners.get(companyId);
+    },
+    enabled: open && !!currentUserId && !!companyId,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Real-time lyssning för företagsprofil - invalidate query cache
   React.useEffect(() => {
@@ -303,7 +317,6 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   const averageRating = avgRating?.toFixed(1) || "0";
 
-  const isOwnProfile = currentUserId === companyId;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
