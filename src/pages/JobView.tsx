@@ -107,7 +107,16 @@ const getSchemaEmploymentType = (employmentType: string | null | undefined) => {
 };
 
 // Module-level cache: survives component remounts during viewport resizes
-const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean }>();
+const _jobCache = new Map<string, { job: JobPosting; questions: JobQuestion[]; applied: boolean; at?: number }>();
+// Annonsdata äldre än så här visas aldrig som första bild — efter återkomst till
+// appen kan annonsen ha ändrats, och en gammal version får inte blixtra förbi.
+const JOB_SNAPSHOT_MAX_AGE_MS = 60_000;
+const freshJobCacheEntry = (id: string) => {
+  const entry = _jobCache.get(id);
+  if (!entry) return undefined;
+  if (!entry.at || Date.now() - entry.at > JOB_SNAPSHOT_MAX_AGE_MS) { _jobCache.delete(id); return undefined; }
+  return entry;
+};
 const SKIP_SEARCH_ENTER_EFFECTS_KEY = 'parium-skip-search-jobs-enter-effects';
 // Transforms imported from @/lib/imageTransforms — single source of truth.
 
@@ -202,8 +211,8 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   const { isJobSaved, toggleSaveJob } = useSavedJobs();
   
   // Try module cache first, then React Query prefetch cache from search results
-  const cached = jobId ? _jobCache.get(jobId) : undefined;
-  const prefetched = !cached && jobId ? getPrefetchedJob(jobId) : undefined;
+  const cached = jobId ? freshJobCacheEntry(jobId) : undefined;
+  const prefetched = !cached && jobId ? getPrefetchedJob(jobId, JOB_SNAPSHOT_MAX_AGE_MS) : undefined;
   
   // Build initial job from prefetch data if available (partial — no profiles join)
   const initialJob: JobPosting | null = cached?.job ?? (prefetched ? {
@@ -441,7 +450,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
         : currentQuestions;
 
       if (jobId) {
-        _jobCache.set(jobId, { job: data, questions, applied });
+        _jobCache.set(jobId, { job: data, questions, applied, at: Date.now() });
       }
 
       setJob(data);

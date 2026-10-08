@@ -11,12 +11,12 @@ import type { SearchJob } from '@/hooks/useOptimizedJobSearch';
 
 export const JOB_PREFETCH_KEY = 'job-prefetch';
 
-const hotJobPrefetchCache = new Map<string, SearchJob>();
+const hotJobPrefetchCache = new Map<string, { job: SearchJob; at: number }>();
 const MAX_HOT_PREFETCH_JOBS = 120;
 
 const rememberHotJob = (job: SearchJob) => {
   hotJobPrefetchCache.delete(job.id);
-  hotJobPrefetchCache.set(job.id, job);
+  hotJobPrefetchCache.set(job.id, { job, at: Date.now() });
   while (hotJobPrefetchCache.size > MAX_HOT_PREFETCH_JOBS) {
     const oldestKey = hotJobPrefetchCache.keys().next().value;
     if (!oldestKey) break;
@@ -72,8 +72,14 @@ export function useJobPrefetchCache() {
   }, [queryClient]);
 
   /** Read a single prefetched job (returns undefined if not cached) */
-  const getPrefetchedJob = useCallback((jobId: string): SearchJob | undefined => {
-    return queryClient.getQueryData<SearchJob>([JOB_PREFETCH_KEY, jobId]) ?? hotJobPrefetchCache.get(jobId);
+  // maxAgeMs: äldre data (t.ex. återställd efter några timmar) returneras inte.
+  const getPrefetchedJob = useCallback((jobId: string, maxAgeMs = Infinity): SearchJob | undefined => {
+    const now = Date.now();
+    const state = queryClient.getQueryState<SearchJob>([JOB_PREFETCH_KEY, jobId]);
+    if (state?.data && now - state.dataUpdatedAt <= maxAgeMs) return state.data;
+    const hot = hotJobPrefetchCache.get(jobId);
+    if (hot && now - hot.at <= maxAgeMs) return hot.job;
+    return undefined;
   }, [queryClient]);
 
   return { seedJobsFromSearch, getPrefetchedJob };
