@@ -8,6 +8,22 @@ import ChromeMatchedBackground from '../ChromeMatchedBackground';
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('Blue screen edge parity', () => {
+  it('uses the active chrome color on both login/logout splash covers', () => {
+    const html = readFileSync('index.html', 'utf8');
+    const react = readFileSync('src/components/AuthSplashScreen.tsx', 'utf8');
+    const gate = readFileSync('src/lib/authSplashEvents.ts', 'utf8');
+    expect(html).toContain('background: var(--active-browser-chrome-color, #00193D)');
+    expect(react).toContain("background: 'var(--active-browser-chrome-color)'");
+    expect(gate.match(/setProperty\('background-image', 'none', 'important'\)/g)).toHaveLength(2);
+  });
+
+  it('reserves the bottom strip before the logout button padding on touch phones', () => {
+    const sidebar = readFileSync('src/components/AppSidebar.tsx', 'utf8');
+    const css = readFileSync('src/index.css', 'utf8');
+    expect(sidebar).toContain('sidebar-logout-spacing p-4');
+    expect(css).toContain('[data-mobile="true"] .sidebar-logout-spacing');
+    expect(css).toContain('padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + 14px)');
+  });
   it.each(['/auth', '/home', '/my-candidates'])('adds the bottom line on %s without resizing the strip', (path) => {
     vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
     const { container } = render(<MemoryRouter initialEntries={[path]}><BottomChromeStrip /></MemoryRouter>);

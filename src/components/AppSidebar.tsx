@@ -460,10 +460,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-white/20 mx-4" />
-
         {/* Logout Button */}
-        <div className="mt-auto p-4">
+        <div className="mt-auto">
+        <SidebarSeparator className="bg-white/20 mx-4" />
+        <div className="sidebar-logout-spacing p-4">
           <Button
             onClick={signOut}
             variant="glass"
@@ -476,6 +476,7 @@ export function AppSidebar() {
             <LogOut className="h-4 w-4" />
             {!collapsed && <span>Logga ut</span>}
           </Button>
+        </div>
         </div>
       </SidebarContent>
     </Sidebar>

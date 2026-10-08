@@ -233,7 +233,7 @@ export function AuthSplashScreen() {
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingTop: 'clamp(calc(env(safe-area-inset-top, 0px) + 24px), 5vw, 50px)',
-        background: 'hsl(215, 100%, 12%)',
+        background: 'var(--active-browser-chrome-color)',
         // Background is ALWAYS fully opaque — we never fade the shell itself,
         // only the inner content. This eliminates the "blink through" effect
         // where the app beneath was visible during a semi-transparent fade.

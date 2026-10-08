@@ -24,6 +24,15 @@
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
 }
 .chrome-bottom-separator { box-shadow: 0 -1px 0 hsl(var(--chrome-edge-line)); }
+@media (max-width: 767px) and (any-pointer: coarse) {
+  [data-mobile="true"] [data-sidebar="content"] {
+    min-height: 100% !important;
+  }
+  [data-mobile="true"] .sidebar-logout-spacing {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + 14px);
+    flex-shrink: 0;
+  }
+}
 .audience-route-paint { background: var(--gradient-audience-shell); }
 html[data-audience-chrome], html[data-audience-chrome] body {
   background-image: var(--gradient-audience-shell) !important;
