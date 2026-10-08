@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LandingNav, { type LandingNavLink } from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { navigateAcrossChromeColor } from '@/lib/browserChrome';
+import ChromeMatchedBackground from '@/components/ChromeMatchedBackground';
 
 
 import WaveDivider from '@/components/landing/WaveDivider';
@@ -1968,6 +1969,7 @@ const AudienceLanding = ({ audience }: AudienceLandingProps) => {
         <AnimatedBackground showBubbles={true} showGlow={false} />
       </div>
       <FixedPhoneLayer variant={audience === 'job_seeker' ? 'video' : 'spline'} />
+      <ChromeMatchedBackground variant="audience" />
       <div className="relative z-10 min-h-full">
         <LandingNav onLoginClick={handleLogin} links={navLinks} />
 

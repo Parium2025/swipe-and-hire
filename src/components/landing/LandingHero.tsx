@@ -152,6 +152,13 @@ const AudienceCard = ({
 const LandingHero = ({ scrollContainerRef: _scrollContainerRef }: LandingHeroProps) => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<AudienceRole | null>(null);
+  useEffect(() => {
+    const restoreVideo = (event: PageTransitionEvent) => {
+      if (event.persisted) setSelectedRole(null);
+    };
+    window.addEventListener('pageshow', restoreVideo);
+    return () => window.removeEventListener('pageshow', restoreVideo);
+  }, []);
 
   // Premium-prefetch: när huvudtråden är ledig, ladda tunga audience-assets
   // (Spline-scen + runtime + gallery-modul + content) för BÅDA rollerna i
