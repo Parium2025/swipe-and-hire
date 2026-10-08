@@ -39,3 +39,4 @@
 <!-- LOVABLE:BEGIN -->
 - Job-seeker header controls follow the underlying KeepAlive page key, not an overlay URL, to prevent search-icon flashes during job-detail transitions.
 <!-- LOVABLE:END -->
+- Company identity resolves through `company_owner_id` (organization's founding admin): reviews, ratings, search cards and own-company checks use it; only org admins reply to reviews, and members cannot review their own company.
