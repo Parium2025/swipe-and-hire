@@ -603,7 +603,7 @@ const Profile = () => {
   // "Anpassa din bild" / ny uppladdning inte syns i UI förrän man sparat.
   const coverImagePathChangedLocally = !!coverImageUrl && coverImageUrl !== ((profile as any)?.cover_image_url || '');
   const signedProfileImageUrl = effectiveProfileImagePath
-    ? (profileImageUrl ? fallbackProfileImageUrl : (preloadedAvatarUrl || fallbackProfileImageUrl))
+    ? (profileImageUrl && profileImageUrl !== ((profile as any)?.profile_image_url || '') ? fallbackProfileImageUrl : (fallbackProfileImageUrl || preloadedAvatarUrl))
     : null;
   const signedCoverUrl = effectiveCoverImagePath
     ? (coverImagePathChangedLocally ? fallbackCoverUrl : (preloadedCoverUrl || fallbackCoverUrl))
