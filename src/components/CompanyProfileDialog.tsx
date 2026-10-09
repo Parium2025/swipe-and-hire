@@ -388,7 +388,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
             <div className="space-y-3 mb-6">
               <h3 className="font-semibold text-lg text-white">Översikt</h3>
               {company.company_description ? (
-                <p className="text-white leading-relaxed">
+                <p className="text-white leading-relaxed whitespace-pre-line [overflow-wrap:anywhere]">
                   {company.company_description}
                 </p>
               ) : (
