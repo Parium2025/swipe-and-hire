@@ -24,7 +24,11 @@ const ERRORS: Record<string, string> = {
  * skriva — tråden är aldrig en dialog med recensenten. Behörigheten avgörs
  * alltid i databasen.
  */
-export function ReviewThread({ reviewId, canPost }: { reviewId: string; canPost: boolean }) {
+export function ReviewThread({ reviewId, canPost, companyName }: { reviewId: string; canPost: boolean; companyName?: string }) {
+  const label = companyName?.trim() ? `Svar från ${companyName.trim()}` : 'Svar från företaget';
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -71,16 +75,52 @@ export function ReviewThread({ reviewId, canPost }: { reviewId: string; canPost:
     return true;
   };
 
+  const saveEdit = async () => {
+    const body = editDraft.trim();
+    if (!editId || !body || savingEdit) return;
+    setSavingEdit(true);
+    const { error } = await supabase.rpc('edit_company_review_message', { _message_id: editId, _body: body });
+    setSavingEdit(false);
+    if (error) {
+      const code = Object.keys(ERRORS).find((k) => error.message.includes(k));
+      toast({ title: 'Kunde inte spara svaret', description: code ? ERRORS[code] : 'Försök igen om en stund.', variant: 'destructive' });
+      return;
+    }
+    setEditId(null);
+    setEditDraft('');
+    void qc.invalidateQueries({ queryKey: key });
+  };
+
   if (!messages.length && !canPost) return null;
 
   return (
-    <div className="mt-2 ml-3 pl-3 space-y-2">
-      {messages.map((m) => (
+    <div className="mt-3 ml-3 space-y-3">
+      {messages.map((m) => editId === m.id ? (
+        <div key={m.id} className="space-y-2">
+          <Textarea
+            value={editDraft}
+            onChange={(e) => setEditDraft(e.target.value)}
+            maxLength={1000}
+            autoResize={false}
+            className="h-[100px] min-h-[100px] max-h-[100px] overflow-y-auto bg-white/5 border-white/10 text-white text-base md:text-sm resize-none placeholder:text-white/40"
+          />
+          <div className="flex justify-end">
+            <span className="text-[11px] tabular-nums text-white">{editDraft.length.toLocaleString('sv-SE')} / 1 000 tecken</span>
+          </div>
+          <div className="mx-auto grid w-full max-w-[280px] grid-cols-2 items-center gap-3 pt-1">
+            <Button type="button" variant="glass" size="sm" onClick={() => { setEditId(null); setEditDraft(''); }} disabled={savingEdit} className="h-11 w-full min-w-0 rounded-full px-3">Avbryt</Button>
+            <Button type="button" variant="glassGreen" size="sm" onClick={saveEdit} disabled={savingEdit || !editDraft.trim()} className="h-11 w-full min-w-0 rounded-full px-3">
+              {savingEdit && <Loader2 className="h-4 w-4 animate-spin" />}
+              Skicka svar
+            </Button>
+          </div>
+        </div>
+      ) : (
         <div key={m.id} className="border-l-2 border-white/20 pl-3 space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-white">Svar från företaget</p>
+            <p className="text-sm font-medium text-white [overflow-wrap:anywhere]">{label}</p>
             {canPost || data?.mine.has(m.id)
-              ? <ReviewReplyActions onDelete={() => remove(m.id)} />
+              ? <ReviewReplyActions onEdit={() => { setEditId(m.id); setEditDraft(m.body); setOpen(false); }} onDelete={() => remove(m.id)} />
               : <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
           </div>
           <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">{m.body}</p>
@@ -109,7 +149,7 @@ export function ReviewThread({ reviewId, canPost }: { reviewId: string; canPost:
           </div>
         </div>
       ) : (
-        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)} className="text-pure-white px-2 h-8"><Reply />Fortsätt tråden</Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)} className="text-pure-white -ml-2 px-2 h-8"><Reply />Fortsätt tråden</Button>
       ))}
     </div>
   );

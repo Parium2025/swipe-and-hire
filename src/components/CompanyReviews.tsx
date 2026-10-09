@@ -474,7 +474,7 @@ const CompanyReviews = () => {
                   {review.employer_reply && editingReplyId !== review.id && (
                     <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium text-pure-white">Svar från företaget</p>
+                        <p className="text-sm font-medium text-pure-white">{company?.company_name?.trim() ? `Svar från ${company.company_name.trim()}` : 'Svar från företaget'}</p>
                         {canReply && <ReviewReplyActions onEdit={() => startReply(review)} onDelete={() => saveReply(review.id, '')} removesThread disabled={savingReplyId === review.id} />}
                       </div>
                       <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
@@ -488,7 +488,7 @@ const CompanyReviews = () => {
                     </div>
                   )}
                   {review.employer_reply && editingReplyId !== review.id && (
-                    <ReviewThread reviewId={review.id} canPost={canReply} />
+                    <ReviewThread reviewId={review.id} canPost={canReply} companyName={company.company_name} />
                   )}
 
                   {/* Svara / redigera svar */}
