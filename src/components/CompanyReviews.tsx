@@ -537,14 +537,14 @@ const CompanyReviews = () => {
                         </Button>
                         <Button
                           type="button"
-                          variant="glass"
+                          variant="glassGreen"
                           size="sm"
                           onClick={() => saveReply(review.id, replyDraft)}
                           disabled={savingReplyId === review.id || !replyDraft.trim()}
                           className="h-11 w-full min-w-0 rounded-full px-3"
                         >
                           {savingReplyId === review.id && <Loader2 className="h-4 w-4 animate-spin" />}
-                          Spara svar
+                          Skicka svar
                         </Button>
                       </div>
                     </div>
