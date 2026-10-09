@@ -2180,6 +2180,27 @@ All colors MUST be HSL.
   @apply bg-slate-900/85 backdrop-blur-xl border border-white/20 shadow-lg;
 }
 
+/* Both company views frost the same viewport-sized shell, not a second
+   gradient stretched to the dialog's (changing) content height. */
+.company-profile-surface {
+  background-color: hsl(var(--pure-white) / 0.05);
+  backdrop-filter: blur(4px);
+  border-color: hsl(var(--pure-white) / 0.1);
+}
+.company-profile-backdrop {
+  background: var(--gradient-parium);
+}
+@media (min-width: 1024px) {
+  .company-profile-backdrop { background: var(--gradient-parium-desktop); }
+}
+
+/* cmdk's active search result is not an applied company filter. */
+@media (hover: none), (pointer: coarse) {
+  .company-result-option[data-company-selected="false"] {
+    background-color: transparent !important;
+  }
+}
+
 /* Glass dropdown: positioned absolute dropdown variant */
 .glass-dropdown {
   @apply absolute z-50 glass-panel rounded-md mt-1;
