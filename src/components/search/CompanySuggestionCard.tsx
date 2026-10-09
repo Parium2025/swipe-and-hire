@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Building2, ChevronDown, Star, X } from 'lucide-react';
 import { getCompanyInitials } from '@/lib/companyInitials';
+import { usePreparedCompanyLogo } from '@/hooks/usePreparedCompanyLogo';
 
 interface CompanySuggestionCardProps {
   company: {
@@ -25,6 +26,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
   onRemove,
   pending = false,
 }: CompanySuggestionCardProps) {
+  const logoUrl = usePreparedCompanyLogo(company.logo);
   return (
     <div className="relative">
       <button
@@ -36,7 +38,7 @@ export const CompanySuggestionCard = memo(function CompanySuggestionCard({
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
               {pending ? <div className="h-12 w-12 flex-shrink-0 rounded-full bg-white/15 animate-pulse" /> : <Avatar className="h-12 w-12 flex-shrink-0">
-                <AvatarImage src={company.logo || ''} alt={company.name} />
+                <AvatarImage src={logoUrl || ''} alt={company.name} />
                 <AvatarFallback fallbackType="company" className="bg-white/20 text-white text-lg font-bold" delayMs={150}>
                   {getCompanyInitials(company.name)}
                 </AvatarFallback>
