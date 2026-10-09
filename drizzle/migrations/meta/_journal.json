@@ -722,6 +722,13 @@
       "when": 1791573159104,
       "tag": "0102_one_review_per_author_company",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1791573558899,
+      "tag": "0103_allow_three_reviews_per_company",
+      "breakpoints": true
     }
   ]
 }
