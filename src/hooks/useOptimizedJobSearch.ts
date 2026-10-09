@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
-import { COMPANY_LOGO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms';
 import { useAuth } from '@/hooks/useAuth';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 import { getTimeRemaining } from '@/lib/date';
