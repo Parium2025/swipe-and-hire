@@ -526,12 +526,30 @@ const SearchJobs = memo(() => {
     enabled: !!user && companyIds.length > 0,
     staleTime: 5 * 60 * 1000,
   });
-  const { data: companyOwnerIds } = useQuery({
-    queryKey: ['company-owner-ids', [...companyIds].sort().join(',')],
-    queryFn: async () => Object.fromEntries(await resolveCompanyOwnerIds(companyIds)) as Record<string, string>,
+  // Ägarkopplingen sparas per konto så att räknaren aldrig visar kollegors
+  // konton som separata bolag under kallstart (t.ex. "2 företag" → "1").
+  const ownerCacheKey = user ? `parium-company-owner-ids:${user.id}` : null;
+  const readOwnerCache = useCallback((): Record<string, string> => {
+    if (!ownerCacheKey) return {};
+    try { const v = JSON.parse(localStorage.getItem(ownerCacheKey) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; }
+  }, [ownerCacheKey]);
+  const cachedOwnerIds = useMemo(() => {
+    const all = readOwnerCache();
+    if (!companyIds.length || !companyIds.every((id) => typeof all[id] === 'string')) return undefined;
+    return Object.fromEntries(companyIds.map((id) => [id, all[id]])) as Record<string, string>;
+  }, [readOwnerCache, companyIds]);
+  const { data: companyOwnerIds, isFetched: companyOwnersFetched } = useQuery({
+    queryKey: ['company-owner-ids', user?.id ?? 'anon', [...companyIds].sort().join(',')],
+    queryFn: async () => {
+      const map = Object.fromEntries(await resolveCompanyOwnerIds(companyIds)) as Record<string, string>;
+      if (ownerCacheKey) { try { localStorage.setItem(ownerCacheKey, JSON.stringify({ ...readOwnerCache(), ...map })); } catch { /* full storage */ } }
+      return map;
+    },
+    placeholderData: cachedOwnerIds,
     enabled: !!user && companyIds.length > 0,
     staleTime: 5 * 60 * 1000,
   });
+  const companyOwnersReady = companyIds.length === 0 || !!cachedOwnerIds || companyOwnersFetched;
   // Ett bolag = en nyckel: kollegors annonser hamnar under bolagets ägarkonto.
   const companyKeyForJob = useCallback((job: { employer_id?: string | null }) =>
     (job.employer_id && (companyOwnerIds?.[job.employer_id] ?? job.employer_id)) || '', [companyOwnerIds]);
@@ -934,9 +952,9 @@ const SearchJobs = memo(() => {
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Aktiva jobb', value: activeJobCount, loading: false, isLoading: isSearchResultsLoading, cacheKey: 'search_active_jobs' },
-    { icon: Building, title: 'Unika företag', value: uniqueCompanyCount, loading: false, isLoading: isSearchResultsLoading, cacheKey: 'search_unique_companies' },
+    { icon: Building, title: 'Unika företag', value: uniqueCompanyCount, loading: false, isLoading: isSearchResultsLoading || !companyOwnersReady, cacheKey: 'search_unique_companies' },
     { icon: TrendingUp, title: 'Nya denna vecka', value: newThisWeekCount, loading: false, isLoading: isSearchResultsLoading, cacheKey: 'search_new_this_week' },
-  ], [activeJobCount, uniqueCompanyCount, newThisWeekCount, isSearchResultsLoading]);
+  ], [activeJobCount, uniqueCompanyCount, newThisWeekCount, isSearchResultsLoading, companyOwnersReady]);
 
   const handleClearAllFilters = useCallback(() => {
     setSelectedPostalCode('');
