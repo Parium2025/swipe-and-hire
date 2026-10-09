@@ -4619,6 +4619,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      edit_company_review_message: {
+        Args: { _body: string; _message_id: string }
+        Returns: boolean
+      }
       employer_owns_job: { Args: { p_job_id: string }; Returns: boolean }
       employer_owns_job_for_question: {
         Args: { p_job_id: string }
