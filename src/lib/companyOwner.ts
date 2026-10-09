@@ -12,11 +12,11 @@ export async function resolveCompanyOwnerIds(ids: string[]): Promise<Map<string,
   const missing = unique.filter((id) => !ownerCache.has(id));
   if (missing.length > 0) {
     const { data, error } = await supabase.rpc('resolve_company_owner_ids', { p_user_ids: missing });
-    if (!error) {
-      (data || []).forEach((row: { user_id: string; owner_id: string }) => {
-        if (row.user_id && row.owner_id) ownerCache.set(row.user_id, row.owner_id);
-      });
-    }
+    if (error) throw error;
+    (data || []).forEach((row: { user_id: string; owner_id: string }) => {
+      if (row.user_id && row.owner_id) ownerCache.set(row.user_id, row.owner_id);
+    });
+    if (missing.some((id) => !ownerCache.has(id))) throw new Error('Företagskopplingen kunde inte hämtas.');
   }
   return new Map(unique.map((id) => [id, ownerCache.get(id) ?? id]));
 }

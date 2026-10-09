@@ -1,5 +1,5 @@
 import { memo, useMemo, useEffect } from 'react';
-import { safeSetItem } from '@/lib/safeStorage';
+import { safeReadJsonCache, safeSetItem } from '@/lib/safeStorage';
 import { Send, Calendar, Heart, MessageSquare, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,11 +18,9 @@ const statsCacheKey = (userId?: string | null) =>
 const readCachedStats = (userId?: string | null): Record<string, number> => {
   const key = statsCacheKey(userId);
   if (!key) return {};
-  try {
-    const raw = localStorage.getItem(key);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-  } catch { return {}; }
+  return safeReadJsonCache<Record<string, number>>(key, (v): v is Record<string, number> =>
+    !!v && typeof v === 'object' && !Array.isArray(v)
+    && Object.values(v).every((n) => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0)) ?? {};
 };
 
 const writeCachedStats = (userId: string | null | undefined, key: string, value: number) => {
@@ -79,7 +77,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
     placeholderData: cachedDash,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
-    refetchOnMount: true,
+    refetchOnMount: 'always',
   });
 
   const applicationsCount = dashStats?.applications ?? 0;
@@ -92,7 +90,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const conversationsCtx = useConversationsContext();
   const unreadMessagesCount =
     conversationsCtx && !conversationsCtx.isLoading ? conversationsCtx.totalUnreadCount : dashStats?.unread_messages ?? 0;
-  useEffect(() => { writeCachedStats(userId, 'messages', unreadMessagesCount); }, [userId, unreadMessagesCount]);
+  useEffect(() => {
+    if (conversationsCtx && !conversationsCtx.isLoading) writeCachedStats(userId, 'messages', unreadMessagesCount);
+  }, [userId, unreadMessagesCount, conversationsCtx?.isLoading]);
 
   // Single consolidated realtime channel – alla lyssnare är användarfiltrerade
   // på servern, och händelser koalesceras så en burst ger EN omhämtning.
@@ -103,7 +103,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       if (timer) return;
       timer = setTimeout(() => {
         timer = null;
-        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats'] });
+        queryClient.invalidateQueries({ queryKey: ['jobseeker-dashboard-stats', user.id], exact: true });
       }, 1200);
     };
     const statsChannel = createRealtimeChannel(`jobseeker-stats-${user.id}`)
