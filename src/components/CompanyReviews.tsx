@@ -488,7 +488,7 @@ const CompanyReviews = () => {
                     </div>
                   )}
                   {review.employer_reply && editingReplyId !== review.id && (
-                    <ReviewThread reviewId={review.id} canPost={canReply} viewer="company" />
+                    <ReviewThread reviewId={review.id} canPost={canReply} />
                   )}
 
                   {/* Svara / redigera svar */}
