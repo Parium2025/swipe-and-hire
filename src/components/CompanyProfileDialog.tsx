@@ -255,11 +255,11 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
         });
 
       if (error) {
-        // Hantera duplicatfel
-        if (error.code === '23505') {
+        // Hantera maxgräns (tre recensioner per företag)
+        if (error.code === '23505' || error.code === '23514') {
           toast({
-            title: "Du har redan recenserat",
-            description: "Du kan bara lämna en recension per företag.",
+            title: "Maxgräns nådd",
+            description: "Du kan lämna högst tre recensioner per företag.",
             variant: "destructive",
           });
           return;
