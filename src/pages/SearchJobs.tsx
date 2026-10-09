@@ -898,6 +898,36 @@ const SearchJobs = memo(() => {
     return Array.from(byCompany.values());
   }, [jobs, selectedCompanies, companyNameForJob, companyKeyForJob]);
 
+  // Valda företag återställs före jobben. Utan sparat kort syntes då initialer,
+  // "0 aktiva jobb" och inget betyg tills jobben landat. Senast kompletta kort
+  // sparas per konto och visas direkt; saknas det visas ett laddningskort.
+  const companyCardCacheKey = user ? `parium-company-cards:${user.id}` : null;
+  const cardsComplete = selectedCompaniesData.length > 0 && selectedCompaniesData.every((c) => c.id && c.jobCount > 0);
+  useEffect(() => {
+    if (!companyCardCacheKey || !cardsComplete) return;
+    try {
+      const prev = JSON.parse(localStorage.getItem(companyCardCacheKey) || '{}') as Record<string, unknown>;
+      selectedCompaniesData.forEach((c) => c.selectedNames.forEach((n) => { prev[n] = c; }));
+      localStorage.setItem(companyCardCacheKey, JSON.stringify(prev));
+    } catch { /* full storage */ }
+  }, [companyCardCacheKey, cardsComplete, selectedCompaniesData]);
+  const companyCardsLoading = selectedCompanies.length > 0 && (!initialLoadDone || isSearchResultsLoading || !companyOwnersReady) && !cardsComplete;
+  const displayedCompanyCards = useMemo(() => {
+    if (!companyCardsLoading) return selectedCompaniesData.map((c) => ({ data: c, pending: false }));
+    let cache: Record<string, typeof selectedCompaniesData[number]> = {};
+    try { cache = companyCardCacheKey ? JSON.parse(localStorage.getItem(companyCardCacheKey) || '{}') : {}; } catch { cache = {}; }
+    const seen = new Set<string>();
+    return selectedCompanies.flatMap((name) => {
+      const c = cache[name];
+      if (c && typeof c === 'object' && c.id) {
+        if (seen.has(c.id)) return [];
+        seen.add(c.id);
+        return [{ data: { ...c, selectedNames: selectedCompanies.filter((n) => cache[n]?.id === c.id) }, pending: false }];
+      }
+      return [{ data: { id: '', name, jobCount: 0, reviewCount: 0, selectedNames: [name] }, pending: true }];
+    });
+  }, [companyCardsLoading, selectedCompaniesData, selectedCompanies, companyCardCacheKey]);
+
   useEffect(() => {
     try {
       sessionStorage.setItem(SEARCH_JOBS_PAGE_KEY, String(page));
@@ -1050,10 +1080,11 @@ const SearchJobs = memo(() => {
           }}
         />
       )}
-      {selectedCompaniesData.map(companyData => (
+      {displayedCompanyCards.map(({ data: companyData, pending }) => (
         <CompanySuggestionCard
           key={companyData.name}
           company={companyData}
+          pending={pending}
           onOpenProfile={(id) => {
             setSelectedCompanyId(id);
             setCompanyDialogOpen(true);
