@@ -1346,14 +1346,18 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     };
     // Efter en stund i bakgrunden kan realtime ha missat ändringar: hämta om listan
     // så att annonsvyn får färsk data att visa direkt.
-    const onResume = () => { pendingWhileHiddenRef.current = false; scheduleSearchInvalidate(); };
+    const onResume = () => {
+      pendingWhileHiddenRef.current = false;
+      scheduleSearchInvalidate();
+      void queryClient.invalidateQueries({ queryKey: ['company-reviews-batch'] });
+    };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener(APP_RESUME_EVENT, onResume);
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener(APP_RESUME_EVENT, onResume);
     };
-  }, [scheduleSearchInvalidate]);
+  }, [scheduleSearchInvalidate, queryClient]);
 
   useEffect(() => () => {
     if (invalidateTimerRef.current) clearTimeout(invalidateTimerRef.current);

@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatsCarousel } from './StatsCarousel';
 import { useProfileViewStats } from '@/hooks/useProfileViewStats';
 import type { StatData } from './StatsCarousel';
+import { APP_RESUME_EVENT } from '@/lib/appResume';
 
 // Nyckeln är kontobunden. Utan användar-id kunde nästa person som loggade in
 // på samma dator se föregående användares siffror innan servern svarat.
@@ -122,10 +123,14 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       if (document.visibilityState === 'visible') invalidateStats();
     };
     document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener(APP_RESUME_EVENT, invalidateStats);
+    window.addEventListener('online', invalidateStats);
     return () => {
       if (timer) clearTimeout(timer);
       supabase.removeChannel(statsChannel);
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener(APP_RESUME_EVENT, invalidateStats);
+      window.removeEventListener('online', invalidateStats);
     };
   }, [user?.id, queryClient]);
 
