@@ -1077,7 +1077,7 @@ const SearchJobs = memo(() => {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 text-white text-sm font-medium px-3 py-2 rounded-full bg-white/5 border border-white/10 active:scale-[0.97] touch-manipulation max-w-[200px]">
                 <Building className="h-4 w-4 text-white flex-shrink-0" />
-                <span className="truncate">{selectedCompanies.length > 0 ? `${selectedCompanies.length} företag` : `${uniqueCompanyCount} företag`}</span>
+                <span className="truncate">{selectedCompanies.length > 0 ? `${selectedCompanies.length} företag` : (companyOwnersReady ? `${uniqueCompanyCount} företag` : <span className="inline-block h-3.5 w-14 rounded bg-white/15 animate-pulse align-middle" aria-label="Laddar företag" />)}</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px]">
