@@ -13,7 +13,9 @@ import {
 import { AlertDialogContentNoFocus } from '@/components/ui/alert-dialog-no-focus';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandInput, CommandList, CommandEmpty, CommandItem } from '@/components/ui/command';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { resolveCompanyOwnerIds } from '@/lib/companyOwner';
 import { companyCardsReady, readCompanyCardCache, readCompanyOwnerCache } from '@/lib/companyCardCache';
@@ -357,6 +359,7 @@ const SearchJobs = memo(() => {
   
   // Company suggestion state
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
+  const [companyMenuSearch, setCompanyMenuSearch] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
   // Sidnumrerad lista: 18 jobb per sida, sidan minns mellan besök i samma session.
@@ -1104,20 +1107,26 @@ const SearchJobs = memo(() => {
           <span className="flex items-center gap-1.5 text-white text-sm font-medium px-3 py-2 rounded-full bg-white/5 border border-white/10">
             <Briefcase className="h-4 w-4 text-white" />{activeJobCount} jobb
           </span>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 text-white text-sm font-medium px-3 py-2 rounded-full bg-white/5 border border-white/10 active:scale-[0.97] touch-manipulation max-w-[200px]">
-                <Building className="h-4 w-4 text-white flex-shrink-0" />
+          <Popover onOpenChange={() => setCompanyMenuSearch('')}>
+            <PopoverTrigger asChild>
+              <Button variant="outlineNeutral" aria-label="Filtrera på företag" className="h-auto min-h-11 gap-1.5 text-pure-white text-sm font-medium px-3 py-2 rounded-full bg-pure-white/5 border-pure-white/10 touch-manipulation max-w-[200px]">
+                <Building className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">{companyOwnersReady ? `${uniqueCompanyCount} företag` : <span className="inline-block h-3.5 w-14 rounded bg-white/15 animate-pulse align-middle" aria-label="Laddar företag" />}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px]">
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent aria-label="Företag i sökresultatet" align="center" collisionPadding={12} className="glass-panel p-0 rounded-md text-pure-white w-[280px] max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-hidden">
+              <Command filter={(value, search) => {
+                const normalize = (text: string) => text.toLocaleLowerCase('sv').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return normalize(value).includes(normalize(search.trim())) ? 1 : 0;
+              }}>
+              <CommandInput value={companyMenuSearch} onValueChange={setCompanyMenuSearch} placeholder="Sök företag..." aria-label="Sök företag i resultatet" className="text-base" />
+              <CommandList className="max-h-[min(300px,calc(var(--radix-popover-content-available-height)-64px))] overscroll-contain">
+              <CommandEmpty>Inga företag matchar sökningen.</CommandEmpty>
               {[...new Set(jobs.map(j => companyNameForJob(j)).filter(Boolean))].sort().map((name, index, arr) => (
                 <React.Fragment key={name}>
                   <div className="relative">
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.preventDefault();
+                    <CommandItem value={name}
+                      onSelect={() => {
                         handleCompanyTap(
                           name,
                           companyTextRefs.current[name] ?? null,
@@ -1126,26 +1135,26 @@ const SearchJobs = memo(() => {
                           )
                         );
                       }}
-                      onSelect={(e) => e.preventDefault()}
                       className={cn(
                         "text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white",
                         selectedCompanies.includes(name) && "bg-white/10"
                       )}
                     >
-                      <span ref={(el) => { companyTextRefs.current[name] = el; }} className="truncate">{name}</span>
-                      {selectedCompanies.includes(name) && <span className="ml-auto text-white/60">✓</span>}
-                    </DropdownMenuItem>
+                       <span ref={(el) => { companyTextRefs.current[name] = el; }} className="min-w-0 break-words [overflow-wrap:anywhere]">{name}</span>
+                      {selectedCompanies.includes(name) && <span className="ml-auto shrink-0 text-pure-white" aria-label="Valt">✓</span>}
+                    </CommandItem>
                     {isCompanyPreview(name) && (
                       <div className="absolute left-2 right-2 -top-1 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
                         {name}
                       </div>
                     )}
                   </div>
-                  {index < arr.length - 1 && <DropdownMenuSeparator className="bg-white/20" />}
                 </React.Fragment>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
           {selectedCompanies.length > 1 && (
             <button
               onClick={() => setSelectedCompanies([])}
