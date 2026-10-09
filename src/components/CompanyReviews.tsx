@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ReviewThread } from '@/components/ReviewThread';
+import { ReviewReplyActions } from '@/components/ReviewReplyActions';
 import { ReportContentButton } from '@/components/ReportContentButton';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -22,9 +23,7 @@ import {
   Twitter,
   Instagram,
   ExternalLink,
-  Reply,
-  Pencil,
-  Trash2
+  Reply
 } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
@@ -93,16 +92,18 @@ const CompanyReviews = () => {
       setReplyDraft('');
       queryClient.invalidateQueries({ queryKey: ['company-reviews-cached', reviewOwnerId] });
       toast({
-        title: reply.trim() ? "Svar sparat" : "Svar borttaget",
+        title: reply.trim() ? "Svar skickat" : "Svar borttaget",
         description: reply.trim() ? "Ditt svar visas nu under recensionen." : "Svaret har tagits bort.",
       });
+      return true;
     } catch (e) {
       console.error('Error saving review reply:', e);
       toast({
         title: "Fel",
-        description: "Kunde inte spara svaret. Försök igen.",
+        description: "Kunde inte uppdatera svaret. Försök igen.",
         variant: "destructive",
       });
+      return false;
     } finally {
       setSavingReplyId(null);
     }
@@ -473,32 +474,14 @@ const CompanyReviews = () => {
                   {review.employer_reply && editingReplyId !== review.id && (
                     <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium text-white">{canReply ? 'Ditt svar' : 'Bolagets svar'}</p>
-                        {canReply && <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => startReply(review)}
-                            className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors"
-                            aria-label="Ändra svar"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => saveReply(review.id, '')}
-                            disabled={savingReplyId === review.id}
-                            className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors disabled:opacity-60"
-                            aria-label="Ta bort svar"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>}
+                        <p className="text-sm font-medium text-pure-white">Svar från företaget</p>
+                        {canReply && <ReviewReplyActions onEdit={() => startReply(review)} onDelete={() => saveReply(review.id, '')} removesThread disabled={savingReplyId === review.id} />}
                       </div>
                       <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
                         {review.employer_reply}
                       </p>
                       {review.employer_reply_at && (
-                        <p className="text-xs text-white/60">
+                        <p className="text-xs text-pure-white">
                           {new Date(review.employer_reply_at).toLocaleDateString("sv-SE")}
                         </p>
                       )}
