@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { resolveCompanyOwnerIds } from '@/lib/companyOwner';
+import { companyCardsReady, readCompanyCardCache, readCompanyOwnerCache } from '@/lib/companyCardCache';
 import { supabase } from '@/integrations/supabase/client';
 import { appendVersionToUrl } from '@/lib/versionedMediaUrl';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -439,7 +440,7 @@ const SearchJobs = memo(() => {
   }, [timeFilter]);
 
   // Use the new optimized job search hook with full-text search
-  const { jobs: searchJobs, isLoading, error: searchError, refetch: refetchSearch, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
+  const { jobs: searchJobs, isLoading, companyReviewsReady, error: searchError, refetch: refetchSearch, fetchNextPage, hasNextPage, isFetchingNextPage } = useOptimizedJobSearch({
     searchQuery: debouncedSearch,
     city: selectedCity,
     employmentTypes: selectedEmploymentTypes,
@@ -511,8 +512,8 @@ const SearchJobs = memo(() => {
   // Annonsens arbetsplatsnamn är fritt per annons och kan vara ett gammalt namn.
   // Recensioner och betyg tillhör alltid arbetsgivarens bolag — därför grupperas
   // företagskorten på bolagets aktuella namn, aldrig på arbetsplatsnamnet.
-  const { data: employerCompanyNames } = useQuery({
-    queryKey: ['employer-company-names', [...companyIds].sort().join(',')],
+  const { data: employerCompanyNames, isSuccess: companyNamesFetched } = useQuery({
+    queryKey: ['employer-company-names', user?.id, [...companyIds].sort().join(',')],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_employer_public_profiles', { target_user_ids: companyIds });
       if (error) throw error;
@@ -529,20 +530,19 @@ const SearchJobs = memo(() => {
   // Ägarkopplingen sparas per konto så att räknaren aldrig visar kollegors
   // konton som separata bolag under kallstart (t.ex. "2 företag" → "1").
   const ownerCacheKey = user ? `parium-company-owner-ids:${user.id}` : null;
-  const readOwnerCache = useCallback((): Record<string, string> => {
-    if (!ownerCacheKey) return {};
-    try { const v = JSON.parse(localStorage.getItem(ownerCacheKey) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; }
-  }, [ownerCacheKey]);
+  const activeCardAccount = useRef(user?.id);
+  activeCardAccount.current = user?.id;
+  const readOwnerCache = useCallback(() => readCompanyOwnerCache(ownerCacheKey), [ownerCacheKey]);
   const cachedOwnerIds = useMemo(() => {
     const all = readOwnerCache();
     if (!companyIds.length || !companyIds.every((id) => typeof all[id] === 'string')) return undefined;
     return Object.fromEntries(companyIds.map((id) => [id, all[id]])) as Record<string, string>;
   }, [readOwnerCache, companyIds]);
-  const { data: companyOwnerIds, isFetched: companyOwnersFetched } = useQuery({
+  const { data: companyOwnerIds, isSuccess: companyOwnersFetched } = useQuery({
     queryKey: ['company-owner-ids', user?.id ?? 'anon', [...companyIds].sort().join(',')],
     queryFn: async () => {
       const map = Object.fromEntries(await resolveCompanyOwnerIds(companyIds)) as Record<string, string>;
-      if (ownerCacheKey) { try { localStorage.setItem(ownerCacheKey, JSON.stringify({ ...readOwnerCache(), ...map })); } catch { /* full storage */ } }
+      if (ownerCacheKey && activeCardAccount.current === user?.id) { try { localStorage.setItem(ownerCacheKey, JSON.stringify({ ...readOwnerCache(), ...map })); } catch { /* full storage */ } }
       return map;
     },
     placeholderData: cachedOwnerIds,
@@ -550,6 +550,7 @@ const SearchJobs = memo(() => {
     staleTime: 5 * 60 * 1000,
   });
   const companyOwnersReady = companyIds.length === 0 || !!cachedOwnerIds || companyOwnersFetched;
+  const companyDataReady = companyCardsReady(isSearchResultsLoading, companyOwnersReady, companyIds.length === 0 || companyNamesFetched, companyReviewsReady);
   // Ett bolag = en nyckel: kollegors annonser hamnar under bolagets ägarkonto.
   const companyKeyForJob = useCallback((job: { employer_id?: string | null }) =>
     (job.employer_id && (companyOwnerIds?.[job.employer_id] ?? job.employer_id)) || '', [companyOwnerIds]);
@@ -841,7 +842,7 @@ const SearchJobs = memo(() => {
     // och vi inte är mitt i en sökning
     if (!debouncedSearch.trim() || debouncedSearch.length < 2) return null;
     if (debouncedSearch !== searchInput) return null; // Debounce pågår - visa inget
-    if (isSearchResultsLoading) return null; // Fortfarande laddar - visa inget
+    if (!companyDataReady) return null; // Vänta på bolagskoppling och betyg.
     
     const searchLower = debouncedSearch.toLowerCase().trim();
     
@@ -876,7 +877,7 @@ const SearchJobs = memo(() => {
     // Return first matching company
     const matches = Array.from(uniqueCompanies.values());
     return matches.length > 0 ? matches[0] : null;
-  }, [jobs, debouncedSearch, searchInput, isSearchResultsLoading, companyNameForJob, companyKeyForJob]);
+  }, [jobs, debouncedSearch, searchInput, companyDataReady, companyNameForJob, companyKeyForJob]);
 
   // Company data for dropdown-selected company filters
   const selectedCompaniesData = useMemo(() => {
@@ -901,21 +902,20 @@ const SearchJobs = memo(() => {
   // Valda företag återställs före jobben. Utan sparat kort syntes då initialer,
   // "0 aktiva jobb" och inget betyg tills jobben landat. Senast kompletta kort
   // sparas per konto och visas direkt; saknas det visas ett laddningskort.
-  const companyCardCacheKey = user ? `parium-company-cards:${user.id}` : null;
-  const cardsComplete = selectedCompaniesData.length > 0 && selectedCompaniesData.every((c) => c.id && c.jobCount > 0);
+  const companyCardCacheKey = user ? `parium-company-cards:v2:${user.id}` : null;
+  const cardsComplete = companyDataReady && selectedCompaniesData.length > 0 && selectedCompaniesData.every((c) => c.id);
   useEffect(() => {
     if (!companyCardCacheKey || !cardsComplete) return;
     try {
-      const prev = JSON.parse(localStorage.getItem(companyCardCacheKey) || '{}') as Record<string, unknown>;
+      const prev = readCompanyCardCache(companyCardCacheKey);
       selectedCompaniesData.forEach((c) => c.selectedNames.forEach((n) => { prev[n] = c; }));
       localStorage.setItem(companyCardCacheKey, JSON.stringify(prev));
     } catch { /* full storage */ }
   }, [companyCardCacheKey, cardsComplete, selectedCompaniesData]);
-  const companyCardsLoading = selectedCompanies.length > 0 && (!initialLoadDone || isSearchResultsLoading || !companyOwnersReady) && !cardsComplete;
+  const companyCardsLoading = selectedCompanies.length > 0 && !companyDataReady;
   const displayedCompanyCards = useMemo(() => {
     if (!companyCardsLoading) return selectedCompaniesData.map((c) => ({ data: c, pending: false }));
-    let cache: Record<string, typeof selectedCompaniesData[number]> = {};
-    try { cache = companyCardCacheKey ? JSON.parse(localStorage.getItem(companyCardCacheKey) || '{}') : {}; } catch { cache = {}; }
+    const cache = readCompanyCardCache(companyCardCacheKey);
     const seen = new Set<string>();
     return selectedCompanies.flatMap((name) => {
       const c = cache[name];
@@ -1108,7 +1108,7 @@ const SearchJobs = memo(() => {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 text-white text-sm font-medium px-3 py-2 rounded-full bg-white/5 border border-white/10 active:scale-[0.97] touch-manipulation max-w-[200px]">
                 <Building className="h-4 w-4 text-white flex-shrink-0" />
-                <span className="truncate">{selectedCompanies.length > 0 ? `${selectedCompanies.length} företag` : (companyOwnersReady ? `${uniqueCompanyCount} företag` : <span className="inline-block h-3.5 w-14 rounded bg-white/15 animate-pulse align-middle" aria-label="Laddar företag" />)}</span>
+                <span className="truncate">{companyOwnersReady ? `${uniqueCompanyCount} företag` : <span className="inline-block h-3.5 w-14 rounded bg-white/15 animate-pulse align-middle" aria-label="Laddar företag" />}</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="bottom" avoidCollisions={false} className="bg-slate-900 border border-white/20 rounded-md shadow-lg text-white min-w-[200px] max-w-[280px]">

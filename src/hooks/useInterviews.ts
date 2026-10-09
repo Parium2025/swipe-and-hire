@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createRealtimeChannel } from '@/lib/realtimeChannel';
 import { useAuth } from '@/hooks/useAuth';
 import { getIsOnline } from '@/lib/connectivityManager';
+import { APP_RESUME_EVENT } from '@/lib/appResume';
 
 export interface Interview {
   id: string;
@@ -380,6 +381,11 @@ export const useCandidateInterviews = () => {
     if (!user?.id) return;
 
     const instanceId = crypto.randomUUID();
+    const refresh = () => { void queryClient.invalidateQueries({ queryKey: ['candidate-interviews', user.id], exact: true }); };
+    const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) refresh(); };
+    window.addEventListener(APP_RESUME_EVENT, refresh);
+    window.addEventListener('online', refresh);
+    window.addEventListener('pageshow', onPageShow);
     const channel = createRealtimeChannel(`candidate-interviews-ui-${user.id}-${instanceId}`)
       .on(
         'postgres_changes',
@@ -397,6 +403,9 @@ export const useCandidateInterviews = () => {
 
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener(APP_RESUME_EVENT, refresh);
+      window.removeEventListener('online', refresh);
+      window.removeEventListener('pageshow', onPageShow);
     };
   }, [user?.id, queryClient]);
 
@@ -426,7 +435,7 @@ export const useCandidateInterviews = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['candidate-interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['candidate-interviews', user?.id], exact: true });
     },
   });
 

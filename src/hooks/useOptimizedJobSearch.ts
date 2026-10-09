@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { buildCardImageUrl } from '@/hooks/useCardImage';
-import { COMPANY_LOGO_TRANSFORM, getImageVersion } from '@/lib/imageTransforms';
 import { useAuth } from '@/hooks/useAuth';
 import { createBulletproofChannel } from '@/lib/bulletproofChannel';
 import { getTimeRemaining } from '@/lib/date';
@@ -13,6 +12,7 @@ import { safeSetItem } from '@/lib/safeStorage';
 import { imageCache } from '@/lib/imageCache';
 import { readThroughCache, clearPersistentCacheByPrefix } from '@/lib/performanceGuards';
 import { measurePerformance } from '@/lib/realtimePerformance';
+import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 
 // 🔥 Offline-cache: senaste lyckade sökresultat per query-nyckel.
 // Används som fallback när nätverket är borta så att jobbkort fortfarande
@@ -70,12 +70,7 @@ function normalizeLogoUrl(job: SearchJob): string | null {
   if (!raw || typeof raw !== 'string') return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  return buildCardImageUrl(
-    trimmed,
-    'company-logos',
-    getImageVersion(job),
-    COMPANY_LOGO_TRANSFORM,
-  );
+  return resolveCompanyLogoUrl(trimmed);
 }
 
 /**
@@ -1267,7 +1262,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   // 🔥 SCALE: useLiveJobBranding togs bort — RPC:n search_jobs returnerar redan
   // workplace_name + company_logo_url + alla branding-fält. Realtime-listenern
   // nedan håller datan färsk om en arbetsgivare byter logo eller namn.
-  const { data: reviewsData = {} } = useCompanyReviews(employerIds, !!user);
+  const { data: reviewsData = {}, isSuccess: reviewsFetched } = useCompanyReviews(employerIds, !!user);
 
   const enrichedJobs = useMemo(() => {
     const jobs = rawJobs
@@ -1350,14 +1345,18 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
     };
     // Efter en stund i bakgrunden kan realtime ha missat ändringar: hämta om listan
     // så att annonsvyn får färsk data att visa direkt.
-    const onResume = () => { pendingWhileHiddenRef.current = false; scheduleSearchInvalidate(); };
+    const onResume = () => {
+      pendingWhileHiddenRef.current = false;
+      scheduleSearchInvalidate();
+      void queryClient.invalidateQueries({ queryKey: ['company-reviews-batch'] });
+    };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener(APP_RESUME_EVENT, onResume);
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener(APP_RESUME_EVENT, onResume);
     };
-  }, [scheduleSearchInvalidate]);
+  }, [scheduleSearchInvalidate, queryClient]);
 
   useEffect(() => () => {
     if (invalidateTimerRef.current) clearTimeout(invalidateTimerRef.current);
@@ -1513,6 +1512,7 @@ export function useOptimizedJobSearch(options: UseOptimizedJobSearchOptions) {
   return {
     jobs: enrichedJobs,
     isLoading,
+    companyReviewsReady: employerIds.length === 0 || reviewsFetched,
     error,
     refetch,
     totalCount: enrichedJobs.length,

@@ -35,5 +35,7 @@
 - Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
 - Tooltips on clipped text open only on measured overflow (Truncated* components), never unconditionally.
 <!-- LOVABLE:BEGIN -->
+- Company search cards require successful jobs, canonical identity, names and review totals; persist validated complete cards per account and never interpret failed identity lookup as separate colleague companies.
+- Candidate interviews revalidate silently on resume, reconnect and bfcache; suggestion-logo warmers use the rendered URL resolver to avoid cache misses.
 - Job-seeker header controls follow the underlying KeepAlive page key, not an overlay URL, to prevent search-icon flashes during job-detail transitions.
 <!-- LOVABLE:END -->
