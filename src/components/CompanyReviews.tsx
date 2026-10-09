@@ -276,7 +276,7 @@ const CompanyReviews = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border border-white/20 rounded-lg p-6">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-4 min-w-0">
