@@ -35,7 +35,7 @@ import { TrendingUp, Briefcase, Building } from 'lucide-react';
 import { SwipeFullscreen } from '@/components/SwipeFullscreen';
 import { useSwipeActions } from '@/hooks/useSwipeActions';
 import { useIsMobile } from '@/hooks/use-mobile'; // kept for swipe mode layout
-import { useSwipeCapable } from '@/hooks/useInputCapability';
+import { useSwipeCapable, useInputCapability } from '@/hooks/useInputCapability';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { CardErrorBoundary } from '@/components/ui/card-error-boundary';
@@ -209,6 +209,9 @@ const SearchJobs = memo(() => {
   const [saveSearchDialogOpen, setSaveSearchDialogOpen] = useState(false);
   // Svepläget finns ENDAST på rena touch-enheter — aldrig när en mus/pekplatta finns.
   const isTouchCapable = useSwipeCapable();
+  // Ren pekskärm: företagsmenyn får inte markera sökfältet av sig själv,
+  // annars skjuter den virtuella tangentbordet upp och täcker företagslistan.
+  const isTouchOnlyInput = useInputCapability() === 'touch';
   const isMobile = useIsMobile();
   const [swipeModeActive, setSwipeModeActive] = useState(() => {
     try { return sessionStorage.getItem('parium-swipe-mode') === 'true'; } catch { return false; }
@@ -1114,7 +1117,7 @@ const SearchJobs = memo(() => {
                 <span className="truncate">{companyOwnersReady ? `${uniqueCompanyCount} företag` : <span className="inline-block h-3.5 w-14 rounded bg-white/15 animate-pulse align-middle" aria-label="Laddar företag" />}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent aria-label="Företag i sökresultatet" align="center" collisionPadding={12} className="glass-panel p-0 rounded-md text-pure-white w-[280px] max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-hidden">
+            <PopoverContent aria-label="Företag i sökresultatet" align="center" collisionPadding={12} onOpenAutoFocus={(event) => { if (isTouchOnlyInput) event.preventDefault(); }} className="glass-panel p-0 rounded-md text-pure-white w-[280px] max-w-[calc(100vw-24px)] max-h-[var(--radix-popover-content-available-height)] overflow-hidden">
               <Command filter={(value, search) => {
                 const normalize = (text: string) => text.toLocaleLowerCase('sv').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 return normalize(value).includes(normalize(search.trim())) ? 1 : 0;
