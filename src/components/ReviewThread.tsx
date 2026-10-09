@@ -79,10 +79,9 @@ export function ReviewThread({ reviewId, canPost }: { reviewId: string; canPost:
         <div key={m.id} className="border-l-2 border-white/20 pl-3 space-y-1">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium text-white">Svar från företaget</p>
-            {!data?.mine.has(m.id) && <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
-            {data?.mine.has(m.id) && (
-              <ReviewReplyActions onDelete={() => remove(m.id)} />
-            )}
+            {canPost || data?.mine.has(m.id)
+              ? <ReviewReplyActions onDelete={() => remove(m.id)} />
+              : <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
           </div>
           <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">{m.body}</p>
           <p className="text-xs text-pure-white">{new Date(m.created_at).toLocaleDateString('sv-SE')}</p>
@@ -101,10 +100,10 @@ export function ReviewThread({ reviewId, canPost }: { reviewId: string; canPost:
           <div className="flex justify-end">
             <span className="text-[11px] tabular-nums text-white">{draft.length.toLocaleString('sv-SE')} / 1 000 tecken</span>
           </div>
-          <div className="flex items-center justify-end gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={() => { setOpen(false); setDraft(''); }} disabled={sending} className="text-white">Avbryt</Button>
-            <Button type="button" variant="glassGreen" size="sm" onClick={send} disabled={sending || !draft.trim()}>
-              {sending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+          <div className="mx-auto grid w-full max-w-[280px] grid-cols-2 items-center gap-3 pt-1">
+            <Button type="button" variant="glass" size="sm" onClick={() => { setOpen(false); setDraft(''); }} disabled={sending} className="h-11 w-full min-w-0 rounded-full px-3">Avbryt</Button>
+            <Button type="button" variant="glassGreen" size="sm" onClick={send} disabled={sending || !draft.trim()} className="h-11 w-full min-w-0 rounded-full px-3">
+              {sending && <Loader2 className="h-4 w-4 animate-spin" />}
               Skicka svar
             </Button>
           </div>
