@@ -172,9 +172,6 @@ export const useInterviews = () => {
 
     return () => {
       supabase.removeChannel(channel);
-      window.removeEventListener(APP_RESUME_EVENT, refresh);
-      window.removeEventListener('online', refresh);
-      window.removeEventListener('pageshow', onPageShow);
     };
   }, [user?.id, queryClient]);
 
@@ -406,6 +403,9 @@ export const useCandidateInterviews = () => {
 
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener(APP_RESUME_EVENT, refresh);
+      window.removeEventListener('online', refresh);
+      window.removeEventListener('pageshow', onPageShow);
     };
   }, [user?.id, queryClient]);
 
