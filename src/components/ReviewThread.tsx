@@ -108,7 +108,7 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => { setOpen(false); setDraft(''); }} disabled={sending} className="text-white">Avbryt</Button>
-            <Button type="button" size="sm" onClick={send} disabled={sending || !draft.trim()} className="bg-white/10 hover:bg-white/15 border border-white/10 text-white">
+            <Button type="button" variant="glassGreen" size="sm" onClick={send} disabled={sending || !draft.trim()}>
               {sending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
               Skicka svar
             </Button>
