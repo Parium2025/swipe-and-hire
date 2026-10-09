@@ -277,7 +277,7 @@ const CompanyReviews = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+      <div className="company-profile-surface border rounded-lg p-6">
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-4 min-w-0">

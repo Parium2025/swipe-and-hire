@@ -1126,7 +1126,8 @@ const SearchJobs = memo(() => {
               <CommandList className="max-h-[min(300px,calc(var(--radix-popover-content-available-height)-64px))] overscroll-contain">
               <CommandEmpty>Inga företag matchar sökningen.</CommandEmpty>
               {[...new Set(jobs.map(j => companyNameForJob(j)).filter(Boolean))].sort().map((name) => (
-                    <CommandItem key={name} value={name}
+                     <CommandItem key={name} value={name}
+                       data-company-selected={selectedCompanies.includes(name)}
                       onSelect={() => {
                         handleCompanyTap(
                           name,
@@ -1137,8 +1138,8 @@ const SearchJobs = memo(() => {
                         );
                       }}
                       className={cn(
-                        "text-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-white/10 active:bg-white/10 focus:bg-white/10 focus:text-white",
-                        selectedCompanies.includes(name) && "bg-white/10"
+                         "company-result-option text-pure-white py-2.5 px-3 text-sm touch-manipulation [@media(hover:hover)]:hover:bg-pure-white/10 active:bg-pure-white/10 focus:bg-pure-white/10 focus:text-pure-white",
+                         selectedCompanies.includes(name) && "bg-pure-white/10"
                       )}
                     >
                        <span ref={(el) => { companyTextRefs.current[name] = el; }} className="min-w-0 break-words [overflow-wrap:anywhere]">{name}</span>

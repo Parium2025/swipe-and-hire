@@ -13,8 +13,8 @@
 - Upgrade portraits only after decode to prevent initials flashing.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over local events, keep cached report data account-scoped.
 - Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
-- Discard delayed account fetches after switch/sign-out to prevent overwriting the new cache.
-- Warm employer candidate media and job cards with the exact rendered transform and account-scoped cache key; otherwise prefetch misses or leaks.
+- Discard delayed fetches after account switch/sign-out to protect the new cache.
+- Warm employer media with rendered transforms and account-scoped keys to avoid misses/leaks.
 - Skeletons use account/list totals; autofill retains field surfaces.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
 - Company identity is shared and resolves via `company_owner_id` (reviews, ratings, search cards); admins alone reply via `reply_to_company_review` (no UPDATE policy); members can't self-review; invitees inherit identity and skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
@@ -23,7 +23,7 @@
 - The landing-video route alone owns browser chrome color `#626262` and its bounded chrome-reload guard (max two per 10 s per tab); never change other routes with it.
 - Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows; one internal thread per colleague.
 - Candidate activity cache is account-scoped (user+applicant), page-warmed and refreshed for current authors: instant logs, live avatars, no leaks.
-- The notification bell alone owns its account-scoped cache and refresh; keep last-known state through daily returns and avoid a second silent preloader, because competing writes hide older unread items.
+- The bell alone owns account-scoped cache/refresh; retain last-known state through daily returns; competing preloaders hide older unread items.
 - Aggregate employer question filters for active org members in an authenticated definer function; role-table visibility alone hides colleagues' questions from recruiters.
 - Sync candidate membership, list caches and server counts across mutations and realtime so icons and totals agree; candidate moves go to the account-scoped bell, not toasts.
 - Stage menus and stage creation read/write the active candidate list's stage settings; default stage keys repeat across lists.
@@ -32,8 +32,11 @@
 - Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes.
 - Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fetched since last app resume or checked for that job; "applied" is final.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
-- Email lookup uses the service-only indexed RPC plus exact Auth retrieval; scanning all users risks signup/resend timeouts.
-- Tooltips on clipped text open only on measured overflow (Truncated* components), never unconditionally.
+- Email lookup uses service-only indexed RPC and exact Auth retrieval; no user scans.
+- Tooltips open only on measured overflow.
+- Company views share frost over viewport paint; dialog-height gradients shift shades.
+- Touch company rows highlight applied filters, not cmdk's active result.
+- Login removes its opaque cover after destination paint; logout and recovery guards stay unchanged.
 <!-- LOVABLE:BEGIN -->
 - Company search cards require successful jobs, canonical identity, names and review totals; persist validated complete cards per account and never interpret failed identity lookup as separate colleague companies.
 - Candidate interviews revalidate silently on resume, reconnect and bfcache; suggestion-logo warmers use the rendered URL resolver to avoid cache misses.
