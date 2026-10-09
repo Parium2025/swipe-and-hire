@@ -276,30 +276,38 @@ const CompanyReviews = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+      <div className="bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border border-white/20 rounded-lg p-6">
         {/* Header med Logo och Namn */}
         <div className="mb-6">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 bg-transparent shrink-0">
+          <div className="flex items-center gap-4 min-w-0">
+            <Avatar className="h-16 w-16 shrink-0 ring-2 ring-white/15 shadow-lg shadow-black/30">
               <AvatarImage
                 src={resolveCompanyLogoUrl(company.company_logo_url) || ''}
                 alt={company.company_name}
                 loading="eager"
                 decoding="async"
               />
-              <AvatarFallback fallbackType="company" className="bg-transparent text-white font-semibold" delayMs={150}>
+              <AvatarFallback fallbackType="company" className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
                 {getCompanyInitials(company.company_name)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <TruncatedText
                 text={company.company_name}
-                className="text-xl font-semibold text-white line-clamp-2 tracking-tight"
+                className="text-2xl font-semibold text-white leading-tight line-clamp-2 tracking-tight"
               />
-              <div className="flex items-center gap-2 mt-0.5">
-                <Star className="h-3.5 w-3.5 fill-[#FFC44D] text-[#FFC44D] shrink-0" />
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`h-4 w-4 ${star <= Math.round(Number(averageRating) || 0) ? 'fill-yellow-400 text-yellow-400' : 'fill-transparent text-white/40 stroke-white/40 stroke-[1.5]'}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-white font-medium">{averageRating}</span>
                 <span className="text-sm text-white">
-                  {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
+                  ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                 </span>
               </div>
             </div>
@@ -308,8 +316,8 @@ const CompanyReviews = () => {
 
         {/* Översikt */}
         <div className="space-y-3 mb-6">
-          <h3 className="font-semibold text-base text-white">Översikt</h3>
-          <p className="text-sm text-white whitespace-pre-line">
+          <h3 className="font-semibold text-lg text-white">Översikt</h3>
+          <p className="text-white leading-relaxed whitespace-pre-line [overflow-wrap:anywhere]">
             {company.company_description || "Ingen beskrivning tillgänglig."}
           </p>
         </div>
@@ -317,20 +325,22 @@ const CompanyReviews = () => {
         <Separator className="my-6 bg-white/10" />
 
         {/* Företagsinformation */}
-        <div className="space-y-3 mb-6">
-          <h3 className="font-semibold text-base text-white">Företagsinformation</h3>
-          
+        <div className="space-y-4 mb-6">
+          <h3 className="font-semibold text-lg text-white">Företagsinformation</h3>
+
           <div className="grid gap-2.5">
             {company.website && (
-              <div className="flex items-center gap-2.5">
-                <Globe className="h-4 w-4 text-white flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-white">Webbplats</p>
-                  <a 
-                    href={company.website.startsWith('http') ? company.website : `https://${company.website}`} 
-                    target="_blank" 
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                  <Globe className="h-[18px] w-[18px] text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-white uppercase tracking-wide">Webbplats</p>
+                  <a
+                    href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-white hover:underline"
+                    className="text-sm text-white hover:underline truncate block"
                   >
                     {company.website}
                   </a>
@@ -338,35 +348,21 @@ const CompanyReviews = () => {
               </div>
             )}
 
-            {company.industry && (
-              <div className="flex items-center gap-2.5">
-                <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-white">Bransch</p>
-                  <p className="text-sm text-white">{company.industry}</p>
+            {([
+              [company.industry, Briefcase, 'Bransch'],
+              [company.employee_count, Users, 'Företagsstorlek'],
+              [company.address, MapPin, 'Huvudkontor'],
+            ] as const).map(([value, Icon, label]) => value ? (
+              <div key={label} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                  <Icon className="h-[18px] w-[18px] text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-white uppercase tracking-wide">{label}</p>
+                  <p className="text-sm text-white">{value}</p>
                 </div>
               </div>
-            )}
-
-            {company.employee_count && (
-              <div className="flex items-center gap-2.5">
-                <Users className="h-4 w-4 text-white flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-white">Företagsstorlek</p>
-                  <p className="text-sm text-white">{company.employee_count}</p>
-                </div>
-              </div>
-            )}
-
-            {company.address && (
-              <div className="flex items-center gap-2.5">
-                <MapPin className="h-4 w-4 text-white flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-white">Huvudkontor</p>
-                  <p className="text-sm text-white">{company.address}</p>
-                </div>
-              </div>
-            )}
+            ) : null)}
           </div>
         </div>
 
