@@ -1122,10 +1122,8 @@ const SearchJobs = memo(() => {
               <CommandInput value={companyMenuSearch} onValueChange={setCompanyMenuSearch} placeholder="Sök företag..." aria-label="Sök företag i resultatet" className="text-base" />
               <CommandList className="max-h-[min(300px,calc(var(--radix-popover-content-available-height)-64px))] overscroll-contain">
               <CommandEmpty>Inga företag matchar sökningen.</CommandEmpty>
-              {[...new Set(jobs.map(j => companyNameForJob(j)).filter(Boolean))].sort().map((name, index, arr) => (
-                <React.Fragment key={name}>
-                  <div className="relative">
-                    <CommandItem value={name}
+              {[...new Set(jobs.map(j => companyNameForJob(j)).filter(Boolean))].sort().map((name) => (
+                    <CommandItem key={name} value={name}
                       onSelect={() => {
                         handleCompanyTap(
                           name,
@@ -1143,13 +1141,6 @@ const SearchJobs = memo(() => {
                        <span ref={(el) => { companyTextRefs.current[name] = el; }} className="min-w-0 break-words [overflow-wrap:anywhere]">{name}</span>
                       {selectedCompanies.includes(name) && <span className="ml-auto shrink-0 text-pure-white" aria-label="Valt">✓</span>}
                     </CommandItem>
-                    {isCompanyPreview(name) && (
-                      <div className="absolute left-2 right-2 -top-1 -translate-y-full z-[60] px-3 py-2 rounded-lg bg-slate-900/95 border border-white/20 shadow-2xl text-sm text-white leading-relaxed whitespace-pre-wrap break-words animate-in fade-in-0 zoom-in-95 duration-150 pointer-events-none">
-                        {name}
-                      </div>
-                    )}
-                  </div>
-                </React.Fragment>
               ))}
               </CommandList>
               </Command>
