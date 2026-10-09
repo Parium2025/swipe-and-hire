@@ -154,13 +154,19 @@ export function AuthSplashScreen() {
       setIsFadingOut(true);
       setDotsFading(true);
       
-      // Background stays OPAQUE the whole time. When the content is fully
-      // invisible we remove the shell in a single frame — no fade of the
-      // background layer, so the app beneath never bleeds through.
-      // När innehållet är borta är målsidan redan färdigmålad under oss —
-      // då tonar vi ut själva bakgrunden mjukt i stället för ett hårt klipp
-      // från mörk splash till sidans ljusare bakgrund (den upplevda "blixten").
+      // Login hands off an opaque cover after the destination paint exists.
+      // Fading the cover mixed the loading and final backgrounds on Safari.
+      // Keep the existing logout timing and all bounded recovery guards.
       finishTimer = setTimeout(() => {
+        if (isLoginTransition) {
+          isVisibleRef.current = false;
+          setIsVisible(false);
+          setIsFadingOut(false);
+          setDotsFading(false);
+          setShellFading(false);
+          authSplashEvents.hide();
+          return;
+        }
         setShellFading(true);
         finishTimer = setTimeout(() => {
           isVisibleRef.current = false;
@@ -182,9 +188,10 @@ export function AuthSplashScreen() {
     const waitForLoginRouteToPaint = () => {
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : startPath;
       const routeHasLeftAuth = !isAuthPath(currentPath);
+      const destinationPaintExists = document.querySelector('[data-chrome-matched-background]') !== null;
       const hitSafetyCap = Date.now() - startedAt >= AUTH_TO_APP_MAX_COVER_MS;
 
-      if (routeHasLeftAuth) {
+      if (routeHasLeftAuth && destinationPaintExists) {
         setDotsFading(true);
         routePollTimer = setTimeout(finishAfterPaint, 80);
         return;
@@ -224,6 +231,7 @@ export function AuthSplashScreen() {
   
   return (
     <div
+      data-auth-splash-cover="true"
       style={{
         position: 'fixed',
         inset: 0,

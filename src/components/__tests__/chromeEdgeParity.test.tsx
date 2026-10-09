@@ -92,6 +92,13 @@ describe('Blue screen edge parity', () => {
 });
 import { isSignInTransition } from '@/lib/browserChrome';
 describe('sign-in never reloads the document', () => {
+  it('hands off login without fading two different background paints together', () => {
+    const splash = readFileSync('src/components/AuthSplashScreen.tsx', 'utf8');
+    expect(splash).toContain('if (routeHasLeftAuth && destinationPaintExists)');
+    expect(splash).toContain("document.querySelector('[data-chrome-matched-background]')");
+    expect(splash).toMatch(/if \(isLoginTransition\) \{\s*isVisibleRef.current = false;[\s\S]*?authSplashEvents.hide\(\);\s*return;\s*\}\s*setShellFading\(true\)/);
+    expect(splash).toContain('const AUTH_TO_APP_MAX_COVER_MS = 2400;');
+  });
   it('treats /auth → app as a sign-in transition', () => {
     expect(isSignInTransition('/auth', '/home')).toBe(true);
     expect(isSignInTransition('/auth', '/search-jobs')).toBe(true);
