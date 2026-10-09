@@ -20,10 +20,11 @@ const ERRORS: Record<string, string> = {
 };
 
 /**
- * Tråd under bolagets svar. Bara recensenten och bolagets admin kan skriva;
- * alla inloggade läser. Behörigheten avgörs alltid i databasen.
+ * Företagets uppföljande svar under sitt huvudsvar. Bara bolagets admin kan
+ * skriva — tråden är aldrig en dialog med recensenten. Behörigheten avgörs
+ * alltid i databasen.
  */
-export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; canPost: boolean; viewer: 'company' | 'reviewer' | null }) {
+export function ReviewThread({ reviewId, canPost }: { reviewId: string; canPost: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -38,7 +39,7 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
     staleTime: 30_000,
     queryFn: async () => {
       const [{ data: msgs, error }, { data: mine }] = await Promise.all([
-        supabase.from('company_review_messages').select('id, review_id, author_kind, body, created_at').eq('review_id', reviewId).order('created_at'),
+        supabase.from('company_review_messages').select('id, review_id, author_kind, body, created_at').eq('review_id', reviewId).eq('author_kind', 'company').order('created_at'),
         supabase.rpc('my_company_review_message_ids', { _review_ids: [reviewId] }),
       ]);
       if (error) throw error;
@@ -70,12 +71,6 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
     return true;
   };
 
-  const label = (m: Message) => {
-    if (data?.mine.has(m.id)) return 'Du';
-    if (m.author_kind === 'company') return viewer === 'company' ? 'Bolaget (kollega)' : 'Bolaget';
-    return 'Recensenten';
-  };
-
   if (!messages.length && !canPost) return null;
 
   return (
@@ -83,7 +78,7 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
       {messages.map((m) => (
         <div key={m.id} className="border-l-2 border-white/20 pl-3 space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-white">{label(m)}</p>
+            <p className="text-sm font-medium text-white">Svar från företaget</p>
             {!data?.mine.has(m.id) && <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
             {data?.mine.has(m.id) && (
               <ReviewReplyActions onDelete={() => remove(m.id)} />
@@ -98,7 +93,7 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={viewer === 'company' ? 'Skriv ett svar till jobbsökaren…' : 'Skriv ett svar till bolaget…'}
+            placeholder="Skriv ett svar till jobbsökaren…"
             maxLength={1000}
             autoResize={false}
             className="h-[100px] min-h-[100px] max-h-[100px] overflow-y-auto bg-white/5 border-white/10 text-white text-base md:text-sm resize-none placeholder:text-white/40"
