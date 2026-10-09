@@ -330,22 +330,21 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
   // must revalidate itself, not wait for the search page's idle background sync.
   useEffect(() => {
     if (!jobId || authLoading) return;
+    // Short app switches (< 30 s, see appResume.ts) never trigger a refresh.
+    // Revalidation is silent when content is already shown: no skeleton swap.
     const refresh = () => {
       if (document.visibilityState === 'hidden') return;
       resumeScroll.current = contentRef.current?.scrollTop ?? resumeScroll.current;
       _jobCache.delete(cacheKey);
       setApplicationStatusChecked(false);
-      setLoading(true);
+      if (!hasLoadedOnce.current) setLoading(true);
       void fetchJob();
     };
-    const visible = () => { if (document.visibilityState === 'visible') refresh(); };
     const restored = (event: PageTransitionEvent) => { if (event.persisted) refresh(); };
-    document.addEventListener('visibilitychange', visible);
     window.addEventListener(APP_RESUME_EVENT, refresh);
     window.addEventListener('online', refresh);
     window.addEventListener('pageshow', restored);
     return () => {
-      document.removeEventListener('visibilitychange', visible);
       window.removeEventListener(APP_RESUME_EVENT, refresh);
       window.removeEventListener('online', refresh);
       window.removeEventListener('pageshow', restored);
@@ -1151,6 +1150,7 @@ const JobView = ({ asOverlay = false }: JobViewProps = {}) => {
                       justApplied={justApplied}
                       preserveSubmissionLayout={asOverlay && window.matchMedia('(max-width: 1023px)').matches}
                       profileSelector={applicationProfileSelector}
+                      stepMemoryKey={`${user?.id ?? 'anon'}:${jobId}`}
                     />
                   </div>
                 )}

@@ -5,7 +5,9 @@ const source = readFileSync('src/pages/JobView.tsx', 'utf8');
 
 describe('job detail freshness safeguards', () => {
   it('revalidates open details on visible return, reconnect and bfcache restoration', () => {
-    expect(source).toContain("document.addEventListener('visibilitychange', visible)");
+    expect(source).not.toContain("document.addEventListener('visibilitychange', visible)");
+    expect(source).toContain('if (!hasLoadedOnce.current) setLoading(true);');
+    expect(source).toContain('stepMemoryKey=');
     expect(source).toContain('window.addEventListener(APP_RESUME_EVENT, refresh)');
     expect(source).toContain("window.addEventListener('online', refresh)");
     expect(source).toContain('if (event.persisted) refresh()');

@@ -29,7 +29,13 @@ interface ApplicationQuestionsWizardProps {
   /** Wizard-preview: keep the real controls interactive while submit remains hidden. */
   interactivePreview?: boolean;
   profileSelector?: React.ReactNode;
+  /** Keeps the current step when the wizard remounts (e.g. after a background refresh). */
+  stepMemoryKey?: string;
 }
+
+// Session-memory of wizard position, so a silent revalidation never sends the
+// job seeker back to question 1.
+const wizardStepMemory = new Map<string, { step: number; reachedReview: boolean }>();
 
 export function ApplicationQuestionsWizard({
   questions,
@@ -44,11 +50,22 @@ export function ApplicationQuestionsWizard({
   previewMode = false,
   interactivePreview = false,
   profileSelector,
+  stepMemoryKey,
 }: ApplicationQuestionsWizardProps) {
+  const remembered = stepMemoryKey && !previewMode ? wizardStepMemory.get(stepMemoryKey) : undefined;
   // If already applied, start directly on the review step
-  const [currentStep, setCurrentStep] = useState(hasAlreadyApplied && !previewMode ? questions.length : 0);
+  const [currentStep, setCurrentStep] = useState(
+    hasAlreadyApplied && !previewMode
+      ? questions.length
+      : remembered ? Math.min(remembered.step, questions.length) : 0,
+  );
   const [navigatedBack, setNavigatedBack] = useState(false);
-  const [hasReachedReview, setHasReachedReview] = useState(hasAlreadyApplied && !previewMode);
+  const [hasReachedReview, setHasReachedReview] = useState((hasAlreadyApplied && !previewMode) || !!remembered?.reachedReview);
+  useEffect(() => {
+    if (stepMemoryKey && !previewMode) {
+      wizardStepMemory.set(stepMemoryKey, { step: currentStep, reachedReview: hasReachedReview });
+    }
+  }, [stepMemoryKey, previewMode, currentStep, hasReachedReview]);
   const totalSteps = previewMode ? questions.length : questions.length + 1;
   
   const isLastQuestion = currentStep === questions.length - 1;
