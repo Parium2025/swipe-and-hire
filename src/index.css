@@ -325,6 +325,7 @@ All colors MUST be HSL.
 
     /* Pure colors tokens */
     --pure-white: 0 0% 100%;
+    --rating-star: 47.9 95.8% 53.1%;
 
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));

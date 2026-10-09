@@ -338,45 +338,21 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
       <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 bg-white/5 backdrop-blur-sm border-white/10 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
           <div className="p-6 text-white">
-            <DialogHeader className="mb-6">
-              <div className="flex items-center gap-4 min-w-0">
-                <Avatar className="h-16 w-16 shrink-0 ring-2 ring-white/15 shadow-lg shadow-black/30">
+            <DialogHeader className="mb-6 text-left sm:text-left">
+              <div className="flex items-center gap-4 min-w-0 pr-8">
+                <Avatar className="h-12 w-12 shrink-0">
                   <AvatarImage src={resolveCompanyLogoUrl(company.company_logo_url) || ''} alt={company.company_name} />
-                  <AvatarFallback fallbackType="company" className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
+                  <AvatarFallback fallbackType="company" className="bg-pure-white/20 text-pure-white text-lg font-bold" delayMs={150}>
                     {getCompanyInitials(company.company_name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0 flex-1 pr-8">
-                  <DialogTitle asChild>
-                    <TruncatedText
-                      text={company.company_name}
-                      tooltipSide="bottom"
-                      className="text-2xl font-semibold text-white leading-tight tracking-tight line-clamp-2"
-                    />
-                  </DialogTitle>
+                <div className="min-w-0 flex-1">
+                  <DialogTitle className="text-xl font-semibold text-pure-white leading-tight tracking-normal [overflow-wrap:anywhere]">{company.company_name}</DialogTitle>
                   {user && (
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <div className="flex items-center gap-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => {
-                          const rating = avgRating || 0;
-                          const filled = star <= Math.round(rating);
-                          return (
-                            <Star
-                              key={star}
-                              className={`h-4 w-4 ${
-                                filled
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "fill-transparent text-white/40 stroke-white/40 stroke-[1.5]"
-                              }`}
-                            />
-                          );
-                        })}
-                      </div>
-                      <span className="text-sm text-white font-medium">
-                        {averageRating}
-                      </span>
-                      <span className="text-sm text-white">
-                        ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
+                    <div className="flex items-start gap-2 mt-1.5 text-sm text-pure-white tracking-normal">
+                      <Star aria-hidden="true" className="h-4 w-4 shrink-0 mt-0.5 fill-rating-star text-rating-star" />
+                      <span className="min-w-0 [overflow-wrap:anywhere]">
+                        {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                       </span>
                     </div>
                   )}

@@ -280,34 +280,23 @@ const CompanyReviews = () => {
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-4 min-w-0">
-            <Avatar className="h-16 w-16 shrink-0 ring-2 ring-white/15 shadow-lg shadow-black/30">
+            <Avatar className="h-12 w-12 shrink-0">
               <AvatarImage
                 src={resolveCompanyLogoUrl(company.company_logo_url) || ''}
                 alt={company.company_name}
                 loading="eager"
                 decoding="async"
               />
-              <AvatarFallback fallbackType="company" className="bg-white/20 text-white text-xl font-bold" delayMs={150}>
+              <AvatarFallback fallbackType="company" className="bg-pure-white/20 text-pure-white text-lg font-bold" delayMs={150}>
                 {getCompanyInitials(company.company_name)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <TruncatedText
-                text={company.company_name}
-                className="text-2xl font-semibold text-white leading-tight line-clamp-2 tracking-tight"
-              />
-              <div className="flex items-center gap-2 mt-1.5">
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-4 w-4 ${star <= Math.round(Number(averageRating) || 0) ? 'fill-yellow-400 text-yellow-400' : 'fill-transparent text-white/40 stroke-white/40 stroke-[1.5]'}`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-white font-medium">{averageRating}</span>
-                <span className="text-sm text-white">
-                  ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
+              <h2 className="text-xl font-semibold text-pure-white leading-tight tracking-normal [overflow-wrap:anywhere]">{company.company_name}</h2>
+              <div className="flex items-start gap-2 mt-1.5 text-sm text-pure-white tracking-normal">
+                <Star aria-hidden="true" className="h-4 w-4 shrink-0 mt-0.5 fill-rating-star text-rating-star" />
+                <span className="min-w-0 [overflow-wrap:anywhere]">
+                  {averageRating} ({reviewCount} {reviewCount === 1 ? 'recension' : 'recensioner'})
                 </span>
               </div>
             </div>
