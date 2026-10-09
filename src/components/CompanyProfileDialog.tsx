@@ -646,6 +646,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                             <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
                               {review.employer_reply}
                             </p>
+                            {review.employer_reply_at && <p className="text-xs text-pure-white">{new Date(review.employer_reply_at).toLocaleDateString('sv-SE')}</p>}
                           </div>
                         )}
                         {review.employer_reply && (

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Reply } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ReportContentButton } from '@/components/ReportContentButton';
+import { ReviewReplyActions } from '@/components/ReviewReplyActions';
 
 type Message = { id: string; review_id: string; author_kind: 'reviewer' | 'company'; body: string; created_at: string };
 
@@ -64,8 +65,9 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
 
   const remove = async (id: string) => {
     const { error } = await supabase.rpc('delete_company_review_message', { _message_id: id });
-    if (error) { toast({ title: 'Kunde inte ta bort svaret', description: 'Försök igen om en stund.', variant: 'destructive' }); return; }
+    if (error) { toast({ title: 'Kunde inte ta bort svaret', description: 'Försök igen om en stund.', variant: 'destructive' }); return false; }
     void qc.invalidateQueries({ queryKey: key });
+    return true;
   };
 
   const label = (m: Message) => {
@@ -84,13 +86,11 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
             <p className="text-sm font-medium text-white">{label(m)}</p>
             {!data?.mine.has(m.id) && <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
             {data?.mine.has(m.id) && (
-              <button type="button" onClick={() => remove(m.id)} className="p-1.5 rounded-md text-white hover:bg-white/10 transition-colors" aria-label="Ta bort svar">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              <ReviewReplyActions onDelete={() => remove(m.id)} />
             )}
           </div>
           <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">{m.body}</p>
-          <p className="text-xs text-white/60">{new Date(m.created_at).toLocaleDateString('sv-SE')}</p>
+          <p className="text-xs text-pure-white">{new Date(m.created_at).toLocaleDateString('sv-SE')}</p>
         </div>
       ))}
       {canPost && (open ? (
@@ -115,7 +115,7 @@ export function ReviewThread({ reviewId, canPost, viewer }: { reviewId: string; 
           </div>
         </div>
       ) : (
-        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)} className="text-white px-2 h-8">Svara</Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)} className="text-pure-white px-2 h-8"><Reply />Fortsätt tråden</Button>
       ))}
     </div>
   );
