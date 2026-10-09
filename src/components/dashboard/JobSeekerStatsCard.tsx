@@ -45,7 +45,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const queryClient = useQueryClient();
   const userId = user?.id;
   const { stats: viewStats, isLoading: viewsLoading } = useProfileViewStats();
-  const profileViewsCount = viewStats.unique_viewers_30d;
+  const profileViewsCount = viewsLoading ? (readCachedStats(userId).profile_views ?? 0) : viewStats.unique_viewers_30d;
   useEffect(() => { if (!viewsLoading) writeCachedStats(userId, 'profile_views', profileViewsCount); }, [userId, profileViewsCount, viewsLoading]);
 
   // Senast kända siffror för just det här kontot visas direkt vid kallstart
