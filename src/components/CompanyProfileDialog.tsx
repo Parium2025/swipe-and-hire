@@ -291,7 +291,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContentNoFocus className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
+        <DialogContentNoFocus className="max-w-2xl max-h-[90vh] bg-white/5 backdrop-blur-sm border-white/10 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
           <div className="flex items-center justify-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -303,7 +303,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   if (!company) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContentNoFocus className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
+        <DialogContentNoFocus className="max-w-2xl max-h-[90vh] bg-white/5 backdrop-blur-sm border-white/10 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
           <div className="flex flex-col items-center justify-center p-8 text-white">
             <Building2 className="h-16 w-16 mb-4 text-white" />
             {/* Ett hämtningsfel får aldrig se ut som ett företag utan profil. */}
@@ -335,7 +335,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
+      <DialogContentNoFocus className="max-w-2xl max-h-[90vh] p-0 bg-white/5 backdrop-blur-sm border-white/10 [&>button.absolute]:h-8 [&>button.absolute]:w-8 [&>button.absolute>svg]:h-4 [&>button.absolute>svg]:w-4">
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
           <div className="p-6 text-white">
             <DialogHeader className="mb-6">
@@ -516,7 +516,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-6 bg-white/10" />
 
             {/* Kommentarer / Recensioner — endast synliga för inloggade */}
             {user && (
@@ -635,7 +635,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                   className={`h-4 w-4 ${
                                     i < (review.rating || 0)
                                       ? "fill-yellow-400 text-yellow-400"
-                                      : "fill-transparent text-white stroke-white stroke-[1.5]"
+                                      : "fill-transparent text-white/40 stroke-white/40 stroke-[1.5]"
                                   }`}
                                 />
                               ))}

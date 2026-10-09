@@ -173,8 +173,8 @@ const CompanyReviews = () => {
             key={star}
             className={`h-4 w-4 ${
               star <= rating
-                ? 'fill-[#FFC44D] text-[#FFC44D]'
-                : 'text-white/40'
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'fill-transparent text-white/40 stroke-white/40 stroke-[1.5]'
             }`}
           />
         ))}
@@ -276,7 +276,7 @@ const CompanyReviews = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border border-white/20 rounded-lg p-6">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-4 min-w-0">
