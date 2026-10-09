@@ -635,7 +635,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                   className={`h-4 w-4 ${
                                     i < (review.rating || 0)
                                       ? "fill-yellow-400 text-yellow-400"
-                                      : "fill-transparent text-white stroke-white stroke-[1.5]"
+                                      : "fill-transparent text-white/40 stroke-white/40 stroke-[1.5]"
                                   }`}
                                 />
                               ))}

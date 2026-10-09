@@ -173,8 +173,8 @@ const CompanyReviews = () => {
             key={star}
             className={`h-4 w-4 ${
               star <= rating
-                ? 'fill-[#FFC44D] text-[#FFC44D]'
-                : 'text-white/40'
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'fill-transparent text-white/40 stroke-white/40 stroke-[1.5]'
             }`}
           />
         ))}
