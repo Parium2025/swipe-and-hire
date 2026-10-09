@@ -524,25 +524,26 @@ const CompanyReviews = () => {
                           {replyDraft.length.toLocaleString('sv-SE')} / 1 000 tecken
                         </span>
                       </div>
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="mx-auto grid w-full max-w-[280px] grid-cols-2 items-center gap-3 pt-1">
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="glass"
                           size="sm"
                           onClick={() => { setEditingReplyId(null); setReplyDraft(''); }}
                           disabled={savingReplyId === review.id}
-                          className="text-white"
+                          className="h-11 w-full min-w-0 rounded-full px-3"
                         >
                           Avbryt
                         </Button>
                         <Button
                           type="button"
+                          variant="glass"
                           size="sm"
                           onClick={() => saveReply(review.id, replyDraft)}
                           disabled={savingReplyId === review.id || !replyDraft.trim()}
-                          className="bg-white/10 hover:bg-white/15 border border-white/10 text-white"
+                          className="h-11 w-full min-w-0 rounded-full px-3"
                         >
-                          {savingReplyId === review.id && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                          {savingReplyId === review.id && <Loader2 className="h-4 w-4 animate-spin" />}
                           Spara svar
                         </Button>
                       </div>
