@@ -39,11 +39,12 @@ export function useJobSeekerPagePrewarm() {
       }
     };
 
+    // Intervjukortet syns direkt på startsidan efter inloggning — det hämtas
+    // därför omedelbart, inte i idle bakom de andra listorna.
+    void warm(['candidate-interviews', userId], () => fetchCandidateInterviewsForUser(userId));
+
     const run = async () => {
       await warm(['my-applications', userId], () => fetchMyApplicationsForUser(userId));
-      // Intervjusektionen ligger ÖVANFÖR ansökningarna — utan förvärmning
-      // puttas listan nedåt när intervjuerna landar (upplevs som en blixt).
-      await warm(['candidate-interviews', userId], () => fetchCandidateInterviewsForUser(userId));
       await warm(['saved-jobs', userId], () => fetchSavedJobsForUser(userId));
       await warm(['skipped-jobs', userId], () => fetchSkippedJobsForUser(userId));
     };
