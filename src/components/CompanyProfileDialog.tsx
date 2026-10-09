@@ -640,7 +640,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                         {review.employer_reply && (
                           <div className="mt-3 ml-3 border-l-2 border-white/20 pl-3 space-y-1">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-medium text-white">Svar från företaget</p>
+                              <p className="text-sm font-medium text-white">{company?.company_name?.trim() ? `Svar från ${company.company_name.trim()}` : 'Svar från företaget'}</p>
                               <ReportContentButton target="company_reply" reviewId={review.id} />
                             </div>
                             <p className="text-sm text-white whitespace-pre-line [overflow-wrap:anywhere]">
@@ -650,7 +650,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                           </div>
                         )}
                         {review.employer_reply && (
-                          <ReviewThread reviewId={review.id} canPost={false} />
+                          <ReviewThread reviewId={review.id} canPost={false} companyName={company.company_name} />
                         )}
                       </div>
                     ))
