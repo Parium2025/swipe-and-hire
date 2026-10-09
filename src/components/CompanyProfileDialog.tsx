@@ -516,7 +516,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-6 bg-white/10" />
 
             {/* Kommentarer / Recensioner — endast synliga för inloggade */}
             {user && (
