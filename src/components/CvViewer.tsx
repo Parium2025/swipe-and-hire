@@ -78,9 +78,11 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, s
     setLoading(true);
     (async () => {
       try {
+        // Kortlivad länk (60 s): PDF:en hämtas direkt, så indragen behörighet
+        // stänger åtkomsten nästan omedelbart.
         const signed = isStoragePath
-          ? await createSignedUrl('job-applications', src, 86400, fileName)
-          : await convertToSignedUrl(src, 'job-applications', 86400, fileName);
+          ? await createSignedUrl('job-applications', src, 60, fileName)
+          : await convertToSignedUrl(src, 'job-applications', 60, fileName);
         if (mounted) setResolvedUrl(signed || src);
       } catch (e: any) {
         if (mounted) {
