@@ -46,7 +46,16 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
   const userId = user?.id;
   const { stats: viewStats, isLoading: viewsLoading } = useProfileViewStats();
   const profileViewsCount = viewStats.unique_viewers_30d;
-  useEffect(() => { writeCachedStats(userId, 'profile_views', profileViewsCount); }, [userId, profileViewsCount]);
+  useEffect(() => { if (!viewsLoading) writeCachedStats(userId, 'profile_views', profileViewsCount); }, [userId, profileViewsCount, viewsLoading]);
+
+  // Senast kända siffror för just det här kontot visas direkt vid kallstart
+  // och ersätts tyst när servern svarat.
+  const cachedDash = useMemo(() => {
+    const c = readCachedStats(userId);
+    if (!['applications', 'interviews', 'saved', 'messages'].every((k) => typeof c[k] === 'number')) return undefined;
+    return { applications: c.applications, interviews: c.interviews, saved_jobs: c.saved, unread_messages: c.messages };
+  }, [userId]);
+  const cachedViews = useMemo(() => typeof readCachedStats(userId).profile_views === 'number', [userId]);
 
   const { data: dashStats, isSuccess } = useQuery({
     queryKey: ['jobseeker-dashboard-stats', user?.id],
@@ -67,6 +76,7 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       return stats;
     },
     enabled: !!user?.id,
+    placeholderData: cachedDash,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: true,
@@ -132,9 +142,9 @@ export const JobSeekerStatsCard = memo(({ isPaused, setIsPaused }: JobSeekerStat
       stats={statsArray}
       isPaused={isPaused}
       setIsPaused={setIsPaused}
-      dataReady={isSuccess}
-      hasCachedData={false}
-      countsReady={isSuccess && !viewsLoading}
+      dataReady={isSuccess || !!cachedDash}
+      hasCachedData={!!cachedDash}
+      countsReady={(isSuccess || !!cachedDash) && (!viewsLoading || cachedViews)}
     />
   );
 });
