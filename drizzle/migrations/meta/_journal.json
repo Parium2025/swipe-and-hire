@@ -715,6 +715,13 @@
       "when": 1791572986900,
       "tag": "0101_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1791573159104,
+      "tag": "0102_one_review_per_author_company",
+      "breakpoints": true
     }
   ]
 }
