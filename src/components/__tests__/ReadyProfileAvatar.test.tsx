@@ -69,6 +69,18 @@ describe('ready header portrait', () => {
     expect(screen.queryByRole('img')).toBeNull();
   });
 
+  it('stays clickable with a neutral icon when no image source can be resolved', () => {
+    vi.stubGlobal('Image', DeferredImage);
+    const onClick = vi.fn();
+    const { container } = render(<ReadyProfileAvatar src={null} accountId="a" profileReady onClick={onClick} />);
+    const button = screen.getByRole('button', { name: 'Min profil' });
+    expect(button).not.toBeDisabled();
+    expect(container.querySelector('[data-profile-avatar-skeleton]')).toBeNull();
+    expect(screen.queryByRole('img')).toBeNull();
+    fireEvent.click(button);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it('does not reuse failed loading for the same URL on a different account', async () => {
     vi.stubGlobal('Image', DeferredImage);
     const { rerender } = render(<ReadyProfileAvatar src="same" accountId="a" profileReady onClick={() => {}} />);

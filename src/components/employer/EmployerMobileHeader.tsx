@@ -82,13 +82,12 @@ export const EmployerMobileProfileAvatar = memo(() => {
     'profile-image'
   );
   const avatarUrl = preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackUrl || null;
-  const expectsImage = !!(profile?.profile_image_url || profile?.cover_image_url);
 
   return (
     <ReadyProfileAvatar
       src={avatarUrl}
       accountId={user?.id}
-      profileReady={!!user && profile?.user_id === user.id && (!expectsImage || !!avatarUrl)}
+      profileReady={!!user && profile?.user_id === user.id}
       onClick={() => navigate('/employer-profile')}
     />
   );

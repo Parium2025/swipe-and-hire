@@ -117,7 +117,9 @@ function JobSeekerTopNav() {
   );
   const avatarSource = preloadedCoverUrl || fallbackCoverImageUrl || preloadedAvatarUrl || fallbackProfileImageUrl || null;
   const { shown: avatarUrl, loading: avatarPending } = useReadyProfileImage(
-    avatarSource, user?.id, !!user && profile?.user_id === user.id && (!(profile.cover_image_url || profile.profile_image_url) || !!avatarSource)
+    // Kräv inte avatarSource: om bilden är borttagen/ojömlig ska knappen ändå
+    // bli klickbar (neutral ikon), inte fastna som evig skeleton.
+    avatarSource, user?.id, !!user && profile?.user_id === user.id
   );
   const videoUrl = preloadedVideoUrl ?? null;
   const coverUrl = avatarUrl;
