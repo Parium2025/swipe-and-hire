@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import { CheckCircle2, AlertTriangle, Info, XCircle, Loader2 } from "lucide-react";
 import { toastArchive } from "@/lib/toastArchive";
-import { authSplashEvents } from "@/lib/authSplashEvents";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -119,13 +118,6 @@ const IconShell = ({
 };
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  // Start the visible entrance after login/logout cover releases, not behind it.
-  // Sonner retains queued notices while its presenter is unmounted.
-  const authCoverVisible = React.useSyncExternalStore(
-    authSplashEvents.subscribe,
-    authSplashEvents.isVisible,
-    () => false,
-  );
   const [mounted, setMounted] = React.useState(false);
   // Notiserna ligger alltid högst upp i mitten — samma plats på alla enheter.
   // På större skärmar fälls stapeln ut så att man ser vad som står i varje
@@ -165,13 +157,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
     return () => document.removeEventListener("pointerup", onPointerUp, true);
   }, []);
 
-  if (!mounted || authCoverVisible) return null;
+  if (!mounted) return null;
 
   return createPortal(
     <Sonner
       theme="dark"
       className="toaster group"
-      style={{ zIndex: 99999 }}
+      // Keep notice entrance visible above the auth cover in both roles.
+      style={{ zIndex: 2147483647 }}
       position="top-center"
       duration={4200}
       closeButton
