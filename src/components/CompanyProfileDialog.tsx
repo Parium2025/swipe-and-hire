@@ -650,7 +650,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                           </div>
                         )}
                         {review.employer_reply && (
-                          <ReviewThread reviewId={review.id} canPost={false} companyName={company.company_name} />
+                          <ReviewThread reviewId={review.id} canPost={false} companyName={company.company_name} isReviewer={!!user && review.user_id === user.id} reviewerName={review.is_anonymous ? undefined : [review.profiles?.first_name, review.profiles?.last_name?.[0] ? `${review.profiles.last_name[0]}.` : ''].filter(Boolean).join(' ')} />
                         )}
                       </div>
                     ))
