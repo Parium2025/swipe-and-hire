@@ -155,15 +155,13 @@ export function AuthSplashScreen() {
     const finish = () => {
       if (exitStarted) return;
       exitStarted = true;
-      setIsFadingIn(false);
-      setIsFadingOut(true);
-      setDotsFading(true);
-      
+
       // Login hands off an opaque cover after the destination paint exists.
-      // Fading the cover mixed the loading and final backgrounds on Safari.
-      // Keep the existing logout timing and all bounded recovery guards.
-      finishTimer = setTimeout(() => {
-        if (isLoginTransition) {
+      // Fading the cover mixed the loading and final backgrounds on Safari,
+      // and fading only the logo first left a few frames of empty solid blue
+      // (the visible "mini-flash"). Swap straight from logo to the painted app,
+      // like a native launch screen. Logout timing and recovery guards remain.
+      if (isLoginTransition) {
           isVisibleRef.current = false;
           setIsVisible(false);
           setIsFadingOut(false);
@@ -171,7 +169,12 @@ export function AuthSplashScreen() {
           setShellFading(false);
           authSplashEvents.hide();
           return;
-        }
+      }
+
+      setIsFadingIn(false);
+      setIsFadingOut(true);
+      setDotsFading(true);
+      finishTimer = setTimeout(() => {
         setShellFading(true);
         finishTimer = setTimeout(() => {
           isVisibleRef.current = false;
