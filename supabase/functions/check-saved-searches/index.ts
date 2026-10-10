@@ -183,73 +183,64 @@ serve(async (req) => {
       const cityLower = (workplace_city || '').toLowerCase();
       const municipalityLower = (workplace_municipality || '').toLowerCase();
       const countyValue = workplace_county || '';
+      // Fält som en fritextsökning får träffa: titel, yrke, kategori, ort,
+      // kommun, län och arbetsplats. Varje sökord måste träffa (AND), så
+      // "lager göteborg" kräver både lagerjobb och Göteborg – inte antingen.
+      const textHay = [
+        titleLower, (job.occupation || '').toLowerCase(), (category || '').toLowerCase(),
+        cityLower, municipalityLower, countyValue.toLowerCase(),
+        (job.workplace_name || '').toLowerCase(),
+      ];
 
-      // Fetch subcategories column via select above (added below)
-      const matched: Array<{ id: string; user_id: string }> = [];
+      const matched: Array<{ id: string; user_id: string; name: string }> = [];
 
       for (const search of batch) {
         let matches = true;
 
-        // Text search — expandera med synonymer/typos så "budbil" matchar "chaufför"
-        if (search.search_query && search.search_query !== '') {
-          const terms = expandQueryTerms(search.search_query);
-          if (!anyTermMatches(terms, [titleLower, cityLower, municipalityLower])) {
-            matches = false;
-          }
+        if (search.search_query && search.search_query.trim() !== '') {
+          if (!allTokensMatch(search.search_query, textHay)) matches = false;
         }
 
-        // Subcategories: minst en subkategori-term ska matcha titel/kategori/beskrivning
+        // Subkategorier: minst en ska träffa titel, yrke eller kategori
         if (matches && Array.isArray(search.subcategories) && search.subcategories.length > 0) {
           const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
-          if (!anyTermMatches(subTerms, [titleLower, (category || '').toLowerCase()])) {
+          if (!anyTermMatches(subTerms, [titleLower, (job.occupation || '').toLowerCase(), (category || '').toLowerCase()])) {
             matches = false;
           }
         }
 
-        // City filter
-        if (matches && search.city && search.city !== '') {
-          const sc = search.city.toLowerCase();
-          if (!cityLower.includes(sc) && !municipalityLower.includes(sc)) {
+        // Ort: å/ä/ö- och skiftlägesokänslig, träffar ort eller kommun
+        if (matches && search.city && search.city.trim() !== '') {
+          const sc = normToken(search.city.trim());
+          if (!normToken(cityLower).includes(sc) && !normToken(municipalityLower).includes(sc)) {
             matches = false;
           }
         }
 
-        // County filter
+        // Län: tolerant mot "Västra Götalands län" vs "Västra Götaland"
         if (matches && search.county && search.county !== '') {
-          if (countyValue !== search.county) {
-            matches = false;
-          }
+          if (normCounty(countyValue) !== normCounty(search.county)) matches = false;
         }
 
-        // Employment type filter
         if (matches && search.employment_types && search.employment_types.length > 0) {
-          if (!employment_type || !search.employment_types.includes(employment_type)) {
-            matches = false;
-          }
+          const et = normToken(employment_type || '');
+          if (!et || !search.employment_types.some((t: string) => normToken(t) === et)) matches = false;
         }
 
-        // Category filter
         if (matches && search.category && search.category !== '') {
-          if (category !== search.category) {
-            matches = false;
-          }
+          if (normToken(category || '') !== normToken(search.category)) matches = false;
         }
 
-        // Salary filters
         if (matches && search.salary_min != null) {
-          if (salary_max != null && salary_max < search.salary_min) {
-            matches = false;
-          }
+          if (salary_max != null && salary_max < search.salary_min) matches = false;
         }
         if (matches && search.salary_max != null) {
-          if (salary_min != null && salary_min > search.salary_max) {
-            matches = false;
-          }
+          if (salary_min != null && salary_min > search.salary_max) matches = false;
         }
 
         if (matches) {
           totalMatches++;
-          matched.push({ id: search.id, user_id: search.user_id });
+          matched.push({ id: search.id, user_id: search.user_id, name: search.name || '' });
         }
       }
 
