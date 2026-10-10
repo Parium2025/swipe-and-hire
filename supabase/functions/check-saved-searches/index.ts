@@ -14,6 +14,7 @@ const PUSH_PER_MINUTE = 2000;
 /** Längsta utspridning – ingen väntar mer än så här på sin notis. */
 const MAX_SPREAD_MINUTES = 15;
 import { expandSearchToken, levenshtein } from '../_shared/jobSearchLexicon.ts';
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts';
 
 // ─────────────────────────────────────────────────────────────
 // Synonym/typo-expansion (spegel av useOptimizedJobSearch).
@@ -391,6 +392,90 @@ serve(async (req) => {
     );
   }
 });
+
+type Match = { id: string; user_id: string; name: string };
+const MAX_EMAILS_PER_JOB = 1000;
+
+async function prefsFor(supabase: any, userIds: string[]) {
+  const { data } = await supabase
+    .from('notification_preferences')
+    .select('user_id, in_app_enabled, email_enabled')
+    .eq('notification_type', 'saved_search_match')
+    .in('user_id', userIds);
+  return new Map<string, { in_app_enabled: boolean | null; email_enabled: boolean | null }>(
+    (data || []).map((p: any) => [p.user_id, p]),
+  );
+}
+
+/** En notis i appen per användare och annons — styrs av reglaget "I appen". */
+async function insertInAppNotifications(
+  supabase: any, matched: Match[], job: { job_id: string; title: string; workplace_city: string | null },
+) {
+  const byUser = new Map<string, Match>();
+  for (const m of matched) if (!byUser.has(m.user_id)) byUser.set(m.user_id, m);
+  const userIds = [...byUser.keys()];
+  if (!userIds.length) return;
+  const prefs = await prefsFor(supabase, userIds);
+  const { data: existing } = await supabase
+    .from('notifications').select('user_id')
+    .eq('type', 'saved_search_match').eq('metadata->>job_id', job.job_id).in('user_id', userIds);
+  const already = new Set((existing || []).map((r: any) => r.user_id));
+  const rows = userIds
+    .filter((u) => prefs.get(u)?.in_app_enabled !== false && !already.has(u))
+    .map((u) => ({
+      user_id: u,
+      type: 'saved_search_match',
+      title: 'Nytt jobb för din sökning',
+      body: `${job.title}${job.workplace_city ? ` – ${job.workplace_city}` : ''}.`,
+      metadata: { job_id: job.job_id, search_id: byUser.get(u)!.id, route: '/job-view/' + job.job_id },
+    }));
+  for (let i = 0; i < rows.length; i += 500) {
+    const { error } = await supabase.from('notifications').insert(rows.slice(i, i + 500));
+    if (error) console.error('[check-saved-searches] in-app insert failed:', error.message);
+  }
+}
+
+/** Mejl: max ett per användare och annons, max tre bevakningsmejl per dygn. */
+async function sendMatchEmails(
+  supabase: any, matched: Match[], emailedUsers: Set<string>,
+  job: { job_id: string; title: string; workplace_city: string | null; workplace_name: string | null },
+): Promise<number> {
+  const byUser = new Map<string, Match>();
+  for (const m of matched) if (!emailedUsers.has(m.user_id) && !byUser.has(m.user_id)) byUser.set(m.user_id, m);
+  const userIds = [...byUser.keys()].slice(0, Math.max(0, MAX_EMAILS_PER_JOB - emailedUsers.size));
+  if (!userIds.length) return 0;
+  const prefs = await prefsFor(supabase, userIds);
+  const wanted = userIds.filter((u) => prefs.get(u)?.email_enabled !== false);
+  if (!wanted.length) return 0;
+  const { data: profiles } = await supabase
+    .from('profiles').select('user_id, email, first_name').in('user_id', wanted);
+  let sent = 0;
+  for (const p of profiles || []) {
+    if (!p.email) continue;
+    emailedUsers.add(p.user_id);
+    const { data: allowed } = await supabase.rpc('consume_rate_limit', {
+      _key: `saved-search-email:${p.user_id}`, _limit: 3, _window_seconds: 86400,
+    });
+    if (allowed !== true) continue;
+    try {
+      const r = await sendLoggedTemplateEmail('saved-search-match', p.email, {
+        idempotencyKey: `saved-search:${job.job_id}:${p.user_id}`,
+        templateData: {
+          first_name: p.first_name || undefined,
+          job_title: job.title,
+          company_name: job.workplace_name || undefined,
+          location: job.workplace_city || undefined,
+          search_name: byUser.get(p.user_id)!.name || undefined,
+          job_url: `https://parium.se/job-view/${job.job_id}`,
+        },
+      });
+      if (r.sent) sent++;
+    } catch (e) {
+      console.error('[check-saved-searches] email failed:', e instanceof Error ? e.message : e);
+    }
+  }
+  return sent;
+}
 
 /**
  * Legacy full-scan mode (for cron-based checks)
