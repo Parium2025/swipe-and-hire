@@ -2460,36 +2460,9 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   [data-sonner-toast].parium-toast-repeat { animation: none; }
 }
 
-/* Notisernas in-/utgång. In = fjädrande "pling": notisen glider in och
-   landar med en lätt, studsig översvängning (samma känsla som iOS-notiser).
-   Ut = kort och bestämd så att den känns direkt när man trycker bort den. */
-[data-sonner-toast] {
-  transition-property: transform, opacity, height, box-shadow !important;
-  transition-duration: 560ms !important;
-  transition-timing-function: cubic-bezier(0.34, 1.4, 0.5, 1) !important;
-  will-change: transform, opacity;
-}
-/* Startläge: glid in från ovanför skärmkanten med tydlig inzoomning, samma
-   på alla skärmstorlekar — på mobil blev glidsträckan annars bara några
-   pixlar. Skalan från 0.82 ger det lilla "plinget" när den landar. */
-[data-sonner-toaster][data-y-position="top"] [data-sonner-toast][data-mounted="false"] {
-  --y: translateY(calc(-100% - 28px - env(safe-area-inset-top, 0px))) scale(0.82);
-  opacity: 0;
-}
-[data-sonner-toast][data-removed="true"] {
-  transition-duration: 220ms !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 1, 1) !important;
-}
-/* Tryck: kortet sjunker in en aning innan det försvinner — taktil respons. */
-[data-sonner-toast]:active {
-  transform: scale(0.975) !important;
-  transition-duration: 90ms !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-sonner-toast],
-  [data-sonner-toast][data-removed="true"] { transition-duration: 120ms !important; }
-  [data-sonner-toast]:active { transform: none !important; }
-}
+/* Notisernas in-/utgång: Sonners egen rörelse används oförändrad på alla
+   skärmar (samma som på datorn). Egna transition-/transform-regler krockade
+   med Sonners stapling och gav ryckig landning på mobil. */
 
 /* Klockans räknare: landar med en kort fjäder i stället för att bara dyka upp. */
 @keyframes parium-badge-pop {
