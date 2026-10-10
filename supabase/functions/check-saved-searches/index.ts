@@ -340,6 +340,10 @@ serve(async (req) => {
         if (queueError) {
           console.error('[check-saved-searches] Failed to queue push notifications:', queueError);
         }
+
+        emailsSent += await sendMatchEmails(supabase, matched, emailedUsers, {
+          job_id, title, workplace_city, workplace_name: job.workplace_name,
+        });
       }
 
       // If we got less than BATCH_SIZE, we've reached the end
