@@ -15,14 +15,14 @@
   left: 0;
   right: 0;
 }
-.chrome-matched-background::before,
-.company-profile-backdrop::before {
+.company-profile-backdrop::before,
+.chrome-matched-background::before {
   top: 0;
   height: calc(env(safe-area-inset-top, 0px) + 140px);
   background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) env(safe-area-inset-top, 0px), transparent 100%);
 }
-.chrome-matched-background::after,
-.company-profile-backdrop::after {
+.company-profile-backdrop::after,
+.chrome-matched-background::after {
   bottom: 0;
   height: calc(env(safe-area-inset-bottom, 0px) + 120px);
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
