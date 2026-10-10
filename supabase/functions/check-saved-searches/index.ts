@@ -99,6 +99,26 @@ function anyTermMatches(terms: string[], haystacks: string[]): boolean {
   return false;
 }
 
+/** Ord som inte bär betydelse i en sökning ("jobb i göteborg"). */
+const STOPWORDS = new Set(['i', 'pa', 'och', 'jobb', 'tjanst', 'tjanster', 'som', 'inom', 'med', 'for', 'av', 'till']);
+
+/**
+ * Varje meningsbärande sökord (eller dess synonym/rättstavning) måste
+ * förekomma i något fält. Ord om 2+ tecken räknas; stoppord ignoreras.
+ */
+function allTokensMatch(raw: string, haystacks: string[]): boolean {
+  const tokens = raw.trim().toLowerCase().split(/[\s,]+/)
+    .filter((t) => t.length >= 2 && !STOPWORDS.has(normToken(t)));
+  if (tokens.length === 0) return true;
+  const normHay = haystacks.map((h) => normToken(h || ''));
+  return tokens.every((t) => {
+    const terms = expandQueryTerms(t).map(normToken).filter(Boolean);
+    return terms.some((term) => normHay.some((h) => h.includes(term)));
+  });
+}
+
+const normCounty = (c: string) => normToken(c || '').replace(/s? lan$/, '').trim();
+
 interface NewJobPayload {
   job_id: string;
   title: string;
