@@ -7,18 +7,22 @@
 .chrome-matched-background--auth { background: var(--gradient-auth-shell); }
 .chrome-matched-background--standard { background: var(--gradient-parium); }
 .chrome-matched-background::before,
-.chrome-matched-background::after {
+.chrome-matched-background::after,
+.company-profile-backdrop::before,
+.company-profile-backdrop::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
 }
-.chrome-matched-background::before {
+.chrome-matched-background::before,
+.company-profile-backdrop::before {
   top: 0;
   height: calc(env(safe-area-inset-top, 0px) + 140px);
   background: linear-gradient(to bottom, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) env(safe-area-inset-top, 0px), transparent 100%);
 }
-.chrome-matched-background::after {
+.chrome-matched-background::after,
+.company-profile-backdrop::after {
   bottom: 0;
   height: calc(env(safe-area-inset-bottom, 0px) + 120px);
   background: linear-gradient(to top, var(--active-browser-chrome-color) 0px, var(--active-browser-chrome-color) calc(env(safe-area-inset-bottom, 0px) + 14px), transparent 100%);
@@ -2191,7 +2195,7 @@ All colors MUST be HSL.
   background: var(--gradient-parium);
 }
 @media (min-width: 1024px) {
-  .company-profile-backdrop { background: var(--gradient-parium-desktop); }
+  .company-profile-backdrop { background: var(--gradient-app-shell); }
 }
 
 /* cmdk's active search result is not an applied company filter. */
