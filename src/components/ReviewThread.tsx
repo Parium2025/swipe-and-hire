@@ -20,11 +20,12 @@ const ERRORS: Record<string, string> = {
 };
 
 /**
- * Företagets uppföljande svar under sitt huvudsvar. Bara bolagets admin kan
- * skriva — tråden är aldrig en dialog med recensenten. Behörigheten avgörs
- * alltid i databasen.
+ * Tråd under bolagets svar. Bara recensenten och bolagets admin kan skriva;
+ * behörigheten avgörs alltid i databasen.
  */
-export function ReviewThread({ reviewId, canPost, companyName }: { reviewId: string; canPost: boolean; companyName?: string }) {
+export function ReviewThread({ reviewId, canPost, companyName, isReviewer = false, reviewerName }: { reviewId: string; canPost: boolean; companyName?: string; isReviewer?: boolean; reviewerName?: string }) {
+  const canWrite = canPost || isReviewer;
+  const reviewerLabel = reviewerName?.trim() ? `Svar från ${reviewerName.trim()}` : 'Svar från recensenten';
   const label = companyName?.trim() ? `Svar från ${companyName.trim()}` : 'Svar från företaget';
   const [editId, setEditId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
@@ -43,7 +44,7 @@ export function ReviewThread({ reviewId, canPost, companyName }: { reviewId: str
     staleTime: 30_000,
     queryFn: async () => {
       const [{ data: msgs, error }, { data: mine }] = await Promise.all([
-        supabase.from('company_review_messages').select('id, review_id, author_kind, body, created_at').eq('review_id', reviewId).eq('author_kind', 'company').order('created_at'),
+        supabase.from('company_review_messages').select('id, review_id, author_kind, body, created_at').eq('review_id', reviewId).order('created_at'),
         supabase.rpc('my_company_review_message_ids', { _review_ids: [reviewId] }),
       ]);
       if (error) throw error;
@@ -91,7 +92,7 @@ export function ReviewThread({ reviewId, canPost, companyName }: { reviewId: str
     void qc.invalidateQueries({ queryKey: key });
   };
 
-  if (!messages.length && !canPost) return null;
+  if (!messages.length && !canWrite) return null;
 
   return (
     <div className="mt-3 ml-3 space-y-3">
@@ -118,8 +119,8 @@ export function ReviewThread({ reviewId, canPost, companyName }: { reviewId: str
       ) : (
         <div key={m.id} className="border-l-2 border-white/20 pl-3 space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-white [overflow-wrap:anywhere]">{label}</p>
-            {canPost || data?.mine.has(m.id)
+            <p className="text-sm font-medium text-white [overflow-wrap:anywhere]">{m.author_kind === 'reviewer' ? reviewerLabel : label}</p>
+            {(canPost && m.author_kind === 'company') || data?.mine.has(m.id)
               ? <ReviewReplyActions onEdit={() => { setEditId(m.id); setEditDraft(m.body); setOpen(false); }} onDelete={() => remove(m.id)} />
               : <ReportContentButton target="message" reviewId={reviewId} messageId={m.id} />}
           </div>
@@ -127,12 +128,12 @@ export function ReviewThread({ reviewId, canPost, companyName }: { reviewId: str
           <p className="text-xs text-pure-white">{new Date(m.created_at).toLocaleDateString('sv-SE')}</p>
         </div>
       ))}
-      {canPost && (open ? (
+      {canWrite && (open ? (
         <div className="space-y-2">
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Skriv ett svar till jobbsökaren…"
+            placeholder={canPost ? 'Skriv ett svar till jobbsökaren…' : 'Skriv ett svar till företaget…'}
             maxLength={1000}
             autoResize={false}
             className="h-[100px] min-h-[100px] max-h-[100px] overflow-y-auto bg-white/5 border-white/10 text-white text-base md:text-sm resize-none placeholder:text-white/40"
