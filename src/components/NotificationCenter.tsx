@@ -602,19 +602,35 @@ function NotificationCenter({ variant = 'round' }: { variant?: 'round' | 'rect' 
     if (nextOpen) void refetch();
   };
 
-  // Close on outside click
+  // Ett tryck utanför panelen stänger den enbart — trycket får aldrig
+  // nå knappen/länken under (t.ex. "Läs mer").
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (
-        panelRef.current && !panelRef.current.contains(e.target as Node) &&
-        triggerRef.current && !triggerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
+    const isOutside = (target: EventTarget | null) =>
+      !!panelRef.current && !panelRef.current.contains(target as Node) &&
+      !!triggerRef.current && !triggerRef.current.contains(target as Node);
+    let swallowUntil = 0;
+    const swallowClick = (e: MouseEvent) => {
+      if (Date.now() > swallowUntil) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      swallowUntil = 0;
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const handler = (e: PointerEvent) => {
+      if (!isOutside(e.target)) return;
+      swallowUntil = Date.now() + 700;
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+    };
+    document.addEventListener('pointerdown', handler, true);
+    document.addEventListener('click', swallowClick, true);
+    return () => {
+      document.removeEventListener('pointerdown', handler, true);
+      // Låt klickslukaren leva kvar under det korta fönstret efter stängning.
+      window.setTimeout(() => document.removeEventListener('click', swallowClick, true), 750);
+    };
   }, [open]);
 
   const handleNavigate = (route: string) => {

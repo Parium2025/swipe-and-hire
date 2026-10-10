@@ -245,10 +245,6 @@ export function SavedSearchesDropdown({
               </button>
             </div>
           )}
-
-          {totalNewMatches === 0 && (
-            <div className="h-2 border-t border-white/10 bg-white/[0.03]" aria-hidden="true" />
-          )}
         </PopoverContent>
       </Popover>
 
