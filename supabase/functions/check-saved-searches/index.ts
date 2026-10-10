@@ -13,6 +13,7 @@ const BATCH_SIZE = 500;
 const PUSH_PER_MINUTE = 2000;
 /** Längsta utspridning – ingen väntar mer än så här på sin notis. */
 const MAX_SPREAD_MINUTES = 15;
+import { expandSearchToken, levenshtein } from '../_shared/jobSearchLexicon.ts';
 
 // ─────────────────────────────────────────────────────────────
 // Synonym/typo-expansion (spegel av useOptimizedJobSearch).
@@ -78,55 +79,74 @@ const normToken = (t: string): string =>
   t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o');
 
-/** Expandera en söksträng till en lista med alternativa termer att söka på. */
-function expandQueryTerms(raw: string): string[] {
-  const trimmed = (raw || '').trim().toLowerCase();
-  if (!trimmed) return [];
-  const out = new Set<string>([trimmed]);
-  const tokens = trimmed.split(/\s+/);
-  for (const t of tokens) {
-    if (t.length < 2) continue;
-    out.add(t);
-    const norm = normToken(t);
-    if (TITLE_SYNONYMS[norm]) out.add(TITLE_SYNONYMS[norm].toLowerCase());
-    if (TYPO_CORRECTIONS[norm]) out.add(TYPO_CORRECTIONS[norm].toLowerCase());
-    if (norm.length > 4 && norm.endsWith('s')) {
-      const s = norm.slice(0, -1);
-      if (TITLE_SYNONYMS[s]) out.add(TITLE_SYNONYMS[s].toLowerCase());
-      if (TYPO_CORRECTIONS[s]) out.add(TYPO_CORRECTIONS[s].toLowerCase());
-    }
+/**
+ * Expandera ett sökord med SAMMA motor som sökrutan i appen
+ * (gemensam ordlista: stavfel, böjningar, synonymkluster, Levenshtein)
+ * plus bevakningens egna vardagsord.
+ */
+function expandToken(t: string): string[] {
+  const out = new Set(expandSearchToken(t));
+  const norm = normToken(t);
+  for (const k of [norm, norm.endsWith('s') ? norm.slice(0, -1) : '']) {
+    const syn = k && TITLE_SYNONYMS[k];
+    if (syn) expandSearchToken(syn).forEach((x) => out.add(x));
+    const typo = k && TYPO_CORRECTIONS[k];
+    if (typo) expandSearchToken(typo).forEach((x) => out.add(x));
   }
-  return Array.from(out);
+  return [...out];
 }
 
-/** Returnerar true om något av termerna finns i något av haystack-fälten. */
-function anyTermMatches(terms: string[], haystacks: string[]): boolean {
-  if (terms.length === 0) return true;
-  const normHay = haystacks.map((h) => normToken(h || ''));
-  for (const term of terms) {
-    const normTerm = normToken(term);
-    if (!normTerm) continue;
-    if (normHay.some((h) => h.includes(normTerm))) return true;
+function expandQueryTerms(raw: string): string[] {
+  const out = new Set<string>();
+  for (const t of (raw || '').trim().split(/\s+/)) {
+    if (t.length >= 2) expandToken(t).forEach((x) => out.add(x));
+  }
+  const whole = normToken((raw || '').trim()).replace(/\s+/g, '');
+  if (whole) out.add(whole);
+  return [...out];
+}
+
+/** Ord i haystack (för stavfelstolerans på ordnivå). */
+const wordsOf = (h: string) => h.split(/[\s,\-/()&+.]+/).filter((w) => w.length >= 3);
+
+function termHits(term: string, normHay: string[]): boolean {
+  if (normHay.some((h) => h.includes(term) || h.replace(/\s+/g, '').includes(term))) return true;
+  // Stavfel i annonsen eller sökningen: ett ords avstånd (två för långa ord).
+  if (term.length >= 5) {
+    const max = term.length >= 8 ? 2 : 1;
+    return normHay.some((h) => wordsOf(h).some((w) => levenshtein(w, term, max) <= max));
   }
   return false;
 }
 
-/** Ord som inte bär betydelse i en sökning ("jobb i göteborg"). */
-const STOPWORDS = new Set(['i', 'pa', 'och', 'jobb', 'tjanst', 'tjanster', 'som', 'inom', 'med', 'for', 'av', 'till']);
+function anyTermMatches(terms: string[], haystacks: string[]): boolean {
+  if (terms.length === 0) return true;
+  const normHay = haystacks.map((h) => normToken(h || ''));
+  return terms.some((term) => { const n = normToken(term); return !!n && termHits(n, normHay); });
+}
+
+const STOPWORDS = new Set(['i', 'pa', 'vid', 'och', 'eller', 'jobb', 'tjanst', 'tjanster', 'som', 'inom', 'med', 'for', 'av', 'till', 'en', 'ett', 'den', 'det']);
 
 /**
- * Varje meningsbärande sökord (eller dess synonym/rättstavning) måste
- * förekomma i något fält. Ord om 2+ tecken räknas; stoppord ignoreras.
+ * Varje meningsbärande sökord (eller synonym/rättstavning/sammansättning med
+ * nästa ord) måste förekomma i något fält.
  */
 function allTokensMatch(raw: string, haystacks: string[]): boolean {
   const tokens = raw.trim().toLowerCase().split(/[\s,]+/)
     .filter((t) => t.length >= 2 && !STOPWORDS.has(normToken(t)));
   if (tokens.length === 0) return true;
   const normHay = haystacks.map((h) => normToken(h || ''));
-  return tokens.every((t) => {
-    const terms = expandQueryTerms(t).map(normToken).filter(Boolean);
-    return terms.some((term) => normHay.some((h) => h.includes(term)));
-  });
+  for (let i = 0; i < tokens.length; i++) {
+    if (expandToken(tokens[i]).some((term) => termHits(term, normHay))) continue;
+    // Sammansättning: "lager arbetare" → "lagerarbetare" täcker båda orden.
+    const next = tokens[i + 1];
+    if (next) {
+      const compound = normToken(tokens[i] + next);
+      if (expandToken(compound).some((term) => termHits(term, normHay))) { i++; continue; }
+    }
+    return false;
+  }
+  return true;
 }
 
 const normCounty = (c: string) => normToken(c || '').replace(/s? lan$/, '').trim();
