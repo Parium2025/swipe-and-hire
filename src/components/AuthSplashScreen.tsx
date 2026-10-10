@@ -10,6 +10,10 @@ import { fetchPriority } from '@/lib/fetchPriority';
 const APP_TO_AUTH_COVER_MS = 620;
 const AUTH_TO_APP_MIN_COVER_MS = 920;
 const AUTH_TO_APP_MAX_COVER_MS = 2400;
+// Yttersta nödbroms: inloggningens egna tidsgränser (2 × 12 s + profil 10 s)
+// släpper alltid täckningen tidigare. Detta tak får aldrig nås i normalfall,
+// men gör att skärmen aldrig kan fastna för gott.
+const AUTH_COVER_ABSOLUTE_MAX_MS = 40000;
 const CONTENT_FADE_OUT_MS = 220;
 const SHELL_FADE_OUT_MS = 240;
 
@@ -77,7 +81,8 @@ export function AuthSplashScreen() {
     }
 
     wasTriggeredRef.current = true;
-    cycleStartPathRef.current = typeof window !== 'undefined' ? window.location.pathname : '/auth';
+    cycleStartPathRef.current = authSplashEvents.getCycleStartPath()
+      ?? (typeof window !== 'undefined' ? window.location.pathname : '/auth');
 
     // Lås taglinen för hela splash-cykeln. Rollen kan uppdateras i bakgrunden
     // under login, men texten får inte byta mitt i animationen och skapa blink.
@@ -150,15 +155,13 @@ export function AuthSplashScreen() {
     const finish = () => {
       if (exitStarted) return;
       exitStarted = true;
-      setIsFadingIn(false);
-      setIsFadingOut(true);
-      setDotsFading(true);
-      
+
       // Login hands off an opaque cover after the destination paint exists.
-      // Fading the cover mixed the loading and final backgrounds on Safari.
-      // Keep the existing logout timing and all bounded recovery guards.
-      finishTimer = setTimeout(() => {
-        if (isLoginTransition) {
+      // Fading the cover mixed the loading and final backgrounds on Safari,
+      // and fading only the logo first left a few frames of empty solid blue
+      // (the visible "mini-flash"). Swap straight from logo to the painted app,
+      // like a native launch screen. Logout timing and recovery guards remain.
+      if (isLoginTransition) {
           isVisibleRef.current = false;
           setIsVisible(false);
           setIsFadingOut(false);
@@ -166,7 +169,12 @@ export function AuthSplashScreen() {
           setShellFading(false);
           authSplashEvents.hide();
           return;
-        }
+      }
+
+      setIsFadingIn(false);
+      setIsFadingOut(true);
+      setDotsFading(true);
+      finishTimer = setTimeout(() => {
         setShellFading(true);
         finishTimer = setTimeout(() => {
           isVisibleRef.current = false;
@@ -200,6 +208,11 @@ export function AuthSplashScreen() {
       // Pending auth keeps the same cover; its existing error handler releases it.
       // The route-loading cap must never expose the empty auth background.
       if (hitSafetyCap && routeHasLeftAuth) {
+        finish();
+        return;
+      }
+
+      if (Date.now() - startedAt >= AUTH_COVER_ABSOLUTE_MAX_MS) {
         finish();
         return;
       }

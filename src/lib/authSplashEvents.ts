@@ -13,6 +13,10 @@ import { primeBrowserChrome, syncBrowserChrome } from '@/lib/browserChrome';
 const listeners = new Set<SplashListener>();
 let currentlyVisible = false;
 let currentRole: AuthSplashRole | null = null;
+// Sökvägen när skalet visades. Fångas synkront i show(): vid logout hinner
+// <Navigate to="/auth"> byta URL innan splash-komponentens effekt körs, och då
+// misstogs utloggningen för en inloggning som väntade för evigt.
+let cycleStartPath: string | null = null;
 const TRANSITION_GATE_ID = 'parium-auth-transition-gate';
 const AUTH_CHROME_COLOR = '#00193D';
 
@@ -162,6 +166,7 @@ export const authSplashEvents = {
   show(role?: string | null) {
     persistSplashRole(role);
     if (currentlyVisible) return;
+    cycleStartPath = typeof window !== 'undefined' ? window.location.pathname : null;
     // Vid logout ligger URL:en kvar på den skyddade rutten under första
     // click-framen. Förbered auth-färgen innan Safari hinner sampla den gamla
     // sidans nederkant. Login startar redan på /auth och synkas av rutten.
@@ -201,6 +206,11 @@ export const authSplashEvents = {
    */
   isVisible(): boolean {
     return currentlyVisible;
+  },
+
+  /** Sökvägen där aktuell splash-cykel startade (null om okänd). */
+  getCycleStartPath(): string | null {
+    return cycleStartPath;
   },
 
   /**

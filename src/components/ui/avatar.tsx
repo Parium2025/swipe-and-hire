@@ -123,7 +123,9 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
         alt={alt || ''}
         onLoad={handleLoad}
         onError={handleError}
-        className={cn("aspect-square h-full w-full object-cover", className)}
+        // Absolut placering: medan bilden laddas (dold) får den inte ta upp
+        // platsen och knuffa ut initialerna — då blev cirkeln helt tom.
+        className={cn("absolute inset-0 aspect-square h-full w-full object-cover", className)}
         data-state={status}
         loading="eager"
         decoding="async"

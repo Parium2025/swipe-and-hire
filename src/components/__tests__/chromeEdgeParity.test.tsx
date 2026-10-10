@@ -97,7 +97,14 @@ describe('sign-in never reloads the document', () => {
     expect(splash).toContain('if (routeHasLeftAuth && destinationPaintExists)');
     expect(splash).toContain('[data-chrome-matched-background]:not([data-chrome-matched-background="auth"])');
     expect(splash).toContain('if (hitSafetyCap && routeHasLeftAuth)');
-    expect(splash).toMatch(/if \(isLoginTransition\) \{\s*isVisibleRef.current = false;[\s\S]*?authSplashEvents.hide\(\);\s*return;\s*\}\s*setShellFading\(true\)/);
+    // Login: direkt byte från logga till målvyn — ingen tom blå mellanbild.
+    expect(splash).toMatch(/if \(isLoginTransition\) \{\s*isVisibleRef.current = false;[\s\S]*?authSplashEvents.hide\(\);\s*return;\s*\}\s*setIsFadingIn\(false\);\s*setIsFadingOut\(true\)/);
+    // Utloggning: startvägen fångas synkront i show(), annars hinner
+    // <Navigate to="/auth"> byta URL och skalet fastnar som en "inloggning".
+    expect(splash).toContain('authSplashEvents.getCycleStartPath()');
+    const events = readFileSync('src/lib/authSplashEvents.ts', 'utf8');
+    expect(events).toMatch(/if \(currentlyVisible\) return;\s*cycleStartPath = typeof window/);
+    expect(splash).toContain('AUTH_COVER_ABSOLUTE_MAX_MS');
     expect(splash).toContain('const AUTH_TO_APP_MAX_COVER_MS = 2400;');
   });
   it('treats /auth → app as a sign-in transition', () => {
