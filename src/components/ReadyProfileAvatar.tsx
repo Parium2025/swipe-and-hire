@@ -47,9 +47,9 @@ export function ReadyProfileAvatar({ src, accountId, profileReady, onClick }: {
       aria-busy={loading}
       aria-label="Min profil"
     >
-      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted ring-2 ring-border">
+      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-glass-surface ring-2 ring-foreground/20">
         {loading ? (
-          <span data-profile-avatar-skeleton className="h-full w-full animate-pulse bg-muted motion-reduce:animate-none" aria-hidden="true" />
+          <span data-profile-avatar-skeleton className="h-full w-full animate-pulse bg-glass-surface motion-reduce:animate-none" aria-hidden="true" />
         ) : shown ? (
           <img src={shown} alt="Profil" className="h-full w-full object-cover" decoding="sync" loading="eager" onError={() => { setImage(null); setFailed(src); }} />
         ) : (
