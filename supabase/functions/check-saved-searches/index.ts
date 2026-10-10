@@ -364,112 +364,64 @@ serve(async (req) => {
  * Legacy full-scan mode (for cron-based checks)
  */
 async function fullScan(supabase: any) {
-  console.log('[check-saved-searches] Running full scan (cron mode) - recounting active matches...');
+  console.log('[check-saved-searches] Full scan – recounting with the shared match rule...');
+
+  // Aktiva annonser senaste 60 dagarna räcker: räknaren gäller bara annonser
+  // som kommit sedan senaste notisen, och utgångna räknas bort.
+  const since = new Date(Date.now() - 60 * 86400_000).toISOString();
+  const jobs: Array<JobCtx & { created_at: string }> = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from('job_postings')
+      .select('title, occupation, category, workplace_city, workplace_municipality, workplace_county, workplace_name, employment_type, salary_min, salary_max, created_at, expires_at')
+      .eq('is_active', true).is('deleted_at', null).gt('created_at', since)
+      .order('id', { ascending: true }).range(from, from + 999);
+    if (error) throw error;
+    const nowIso = new Date().toISOString();
+    for (const r of data || []) {
+      if (r.expires_at && r.expires_at < nowIso) continue;
+      jobs.push({
+        title: r.title, occupation: r.occupation, category: r.category, city: r.workplace_city,
+        municipality: r.workplace_municipality, county: r.workplace_county, workplace_name: r.workplace_name,
+        employment_type: r.employment_type, salary_min: r.salary_min, salary_max: r.salary_max, created_at: r.created_at,
+      });
+    }
+    if (!data || data.length < 1000 || jobs.length >= 20000) break;
+  }
 
   let offset = 0;
   let totalUpdates = 0;
-
   while (true) {
-    // Sorterad sidindelning – annars kan bevakningar hoppas över mellan sidorna.
-    // Hämta bara de kolumner räkningen behöver i stället för hela raden.
     const { data: searches, error } = await supabase
       .from('saved_searches')
-      .select('id, search_query, city, county, employment_types, category, salary_min, salary_max, new_matches_count, last_notified_at, last_checked_at')
+      .select('id, search_query, city, county, employment_types, category, subcategories, salary_min, salary_max, new_matches_count, last_notified_at, last_checked_at, created_at')
       .order('id', { ascending: true })
       .range(offset, offset + BATCH_SIZE - 1);
-
     if (error || !searches || searches.length === 0) break;
 
-    // SKALA: räkningarna kördes en i taget och varje bevakning skrevs separat.
-    // Nu körs räkningarna några i taget och alla oförändrade bevakningar får
-    // sin tidsstämpel i ETT anrop. Samma resultat, bråkdelen av tiden.
-    const countOne = async (search: any): Promise<{ id: string; count: number }> => {
-      const sinceDate = search.last_notified_at || search.last_checked_at;
-
-      let query = supabase
-        .from('job_postings')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .gt('created_at', sinceDate);
-
-      if (search.search_query) {
-        // SÄKERHET: rensa tecken som annars kan ändra filteruttrycket.
-        const safeQuery = String(search.search_query).replace(/[,()"*\\]/g, ' ').trim();
-        if (safeQuery) {
-          query = query.or(`title.ilike.%${safeQuery}%,workplace_city.ilike.%${safeQuery}%`);
-        }
-      }
-      if (search.city) {
-        // SÄKERHET: samma rensning som för sökfrågan — staden kommer från
-        // användarinmatning och får inte kunna ändra filteruttrycket.
-        const safeCity = String(search.city).replace(/[,()"*\\]/g, ' ').trim();
-        if (safeCity) {
-          query = query.or(`workplace_city.ilike.%${safeCity}%,workplace_municipality.ilike.%${safeCity}%`);
-        }
-      }
-      if (search.county) {
-        query = query.eq('workplace_county', search.county);
-      }
-      if (search.employment_types?.length > 0) {
-        query = query.in('employment_type', search.employment_types);
-      }
-      if (search.category) {
-        query = query.eq('category', search.category);
-      }
-      if (search.salary_min != null) {
-        query = query.or(`salary_max.gte.${search.salary_min},salary_max.is.null`);
-      }
-      if (search.salary_max != null) {
-        query = query.or(`salary_min.lte.${search.salary_max},salary_min.is.null`);
-      }
-
-      const { count } = await query;
-      return { id: search.id, count: count || 0 };
-    };
-
     const unchanged: string[] = [];
-    const CONCURRENCY = 10;
-
-    for (let i = 0; i < searches.length; i += CONCURRENCY) {
-      const slice = searches.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(slice.map(countOne));
-
-      await Promise.all(
-        results.map(async (res, idx) => {
-          const search = slice[idx];
-          // SET the count (not accumulate) — this ensures expired/deleted jobs
-          // are no longer counted, fixing stale badge notifications
-          if (res.count !== (search.new_matches_count || 0)) {
-            totalUpdates++;
-            await supabase
-              .from('saved_searches')
-              .update({
-                new_matches_count: res.count,
-                last_checked_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', search.id);
-          } else {
-            unchanged.push(search.id);
-          }
-        })
-      );
+    const nowIso = new Date().toISOString();
+    for (const search of searches) {
+      const sinceDate = search.last_notified_at || search.last_checked_at || search.created_at;
+      let count = 0;
+      for (const j of jobs) if (j.created_at > sinceDate && matchesSearch(search, j)) count++;
+      if (count !== (search.new_matches_count || 0)) {
+        totalUpdates++;
+        await supabase.from('saved_searches')
+          .update({ new_matches_count: count, last_checked_at: nowIso, updated_at: nowIso })
+          .eq('id', search.id);
+      } else {
+        unchanged.push(search.id);
+      }
     }
-
     if (unchanged.length > 0) {
-      await supabase
-        .from('saved_searches')
-        .update({ last_checked_at: new Date().toISOString() })
-        .in('id', unchanged);
+      await supabase.from('saved_searches').update({ last_checked_at: nowIso }).in('id', unchanged);
     }
-
     if (searches.length < BATCH_SIZE) break;
     offset += BATCH_SIZE;
   }
 
   console.log(`[check-saved-searches] Full scan done. ${totalUpdates} searches recounted.`);
-
   return new Response(
     JSON.stringify({ success: true, mode: 'full_scan', updatedSearches: totalUpdates }),
     { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
