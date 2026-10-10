@@ -36,7 +36,7 @@
 - Tooltips open only on measured overflow.
 - Company views share frost over viewport paint; dialog-height gradients shift shades.
 - Touch company rows highlight applied filters, not cmdk's active result.
-- Login covers pending auth until destination paint or error; logout and recovery guards stay unchanged.
+- Splash start path set in show(); login swaps at app paint. Providers keep one tree in/out (no remount).
 <!-- LOVABLE:BEGIN -->
 - Company search cards require successful jobs, canonical identity, names and review totals; persist validated complete cards per account and never interpret failed identity lookup as separate colleague companies.
 - Candidate interviews revalidate silently on resume, reconnect and bfcache; suggestion-logo warmers use the rendered URL resolver to avoid cache misses.
