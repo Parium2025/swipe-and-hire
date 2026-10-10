@@ -2460,18 +2460,20 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   [data-sonner-toast].parium-toast-repeat { animation: none; }
 }
 
-/* Notisernas in-/utgång: iOS-kurvan. In = mjuk landning med tyngd,
-   ut = kort och bestämd så att den känns direkt när man trycker bort den. */
+/* Notisernas in-/utgång. In = fjädrande "pling": notisen glider in och
+   landar med en lätt, studsig översvängning (samma känsla som iOS-notiser).
+   Ut = kort och bestämd så att den känns direkt när man trycker bort den. */
 [data-sonner-toast] {
   transition-property: transform, opacity, height, box-shadow !important;
-  transition-duration: 520ms !important;
-  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1) !important;
+  transition-duration: 560ms !important;
+  transition-timing-function: cubic-bezier(0.34, 1.4, 0.5, 1) !important;
   will-change: transform, opacity;
 }
-/* Startläge: glid in från ovanför skärmkanten med lätt skala, samma på alla
-   skärmstorlekar — på mobil blev glidsträckan annars bara några pixlar. */
+/* Startläge: glid in från ovanför skärmkanten med tydlig inzoomning, samma
+   på alla skärmstorlekar — på mobil blev glidsträckan annars bara några
+   pixlar. Skalan från 0.82 ger det lilla "plinget" när den landar. */
 [data-sonner-toaster][data-y-position="top"] [data-sonner-toast][data-mounted="false"] {
-  --y: translateY(calc(-100% - 28px - env(safe-area-inset-top, 0px))) scale(0.96);
+  --y: translateY(calc(-100% - 28px - env(safe-area-inset-top, 0px))) scale(0.82);
   opacity: 0;
 }
 [data-sonner-toast][data-removed="true"] {
