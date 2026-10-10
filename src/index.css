@@ -2460,9 +2460,25 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   [data-sonner-toast].parium-toast-repeat { animation: none; }
 }
 
-/* Notisernas in-/utgång: Sonners egen rörelse används oförändrad på alla
-   skärmar (samma som på datorn). Egna transition-/transform-regler krockade
-   med Sonners stapling och gav ryckig landning på mobil. */
+/* Notisernas entré: Sonners egen entré bygger på en CSS-övergång som kräver
+   att startläget hinner målas. På mobil (tryck + tung tråd) hoppas den bildrutan
+   ofta över och notisen dök bara upp på plats. En keyframe-animation startar
+   alltid när notisen läggs in. Den använder fristående translate/scale, som
+   staplas ovanpå Sonners egen transform utan att krocka med staplingen.
+   Sonners startläge neutraliseras så att rörelsen inte körs dubbelt. */
+@keyframes parium-toast-in {
+  0%   { translate: 0 calc(-100% - 24px - env(safe-area-inset-top, 0px)); scale: 0.9; opacity: 0; }
+  55%  { translate: 0 6px; scale: 1.015; opacity: 1; }
+  78%  { translate: 0 -2px; scale: 0.997; }
+  100% { translate: 0 0; scale: 1; opacity: 1; }
+}
+[data-sonner-toaster] [data-sonner-toast][data-mounted="false"]:not([data-removed="true"]) {
+  --y: translateY(0);
+  opacity: 1;
+}
+[data-sonner-toaster] [data-sonner-toast] {
+  animation: parium-toast-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 /* Klockans räknare: landar med en kort fjäder i stället för att bara dyka upp. */
 @keyframes parium-badge-pop {
