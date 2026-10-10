@@ -103,6 +103,8 @@ function JobSeekerTopNav() {
   
   const [jobsOpen, setJobsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  // Trasig bildlänk ska aldrig ge en evig laddningspuls i toppmenyn.
+  const [triggerImageFailed, setTriggerImageFailed] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
@@ -376,9 +378,13 @@ function JobSeekerTopNav() {
                 {/* Trigger always shows cover image (no play icon) - video playback is only in dropdown */}
                 {(hasVideo && (coverUrl || avatarUrl)) || avatarUrl ? (
                   <Avatar className="h-6 w-6 ring-2 ring-white/20 relative z-10">
-                    <AvatarImage src={coverUrl || avatarUrl || ''} alt={getUserDisplayName()} />
+                    <AvatarImage
+                      src={coverUrl || avatarUrl || ''}
+                      alt={getUserDisplayName()}
+                      onLoadingStatusChange={(s) => setTriggerImageFailed(s === 'error')}
+                    />
                     <AvatarFallback className="bg-white/20 text-white text-xs font-semibold">
-                      <span className="h-full w-full animate-pulse bg-glass-surface motion-reduce:animate-none" aria-hidden="true" />
+                      <span className={`h-full w-full bg-glass-surface ${triggerImageFailed ? '' : 'animate-pulse motion-reduce:animate-none'}`} aria-hidden="true" />
                     </AvatarFallback>
                   </Avatar>
                 ) : profile && !avatarPending ? (
