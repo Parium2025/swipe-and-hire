@@ -188,7 +188,7 @@ export function AuthSplashScreen() {
     const waitForLoginRouteToPaint = () => {
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : startPath;
       const routeHasLeftAuth = !isAuthPath(currentPath);
-      const destinationPaintExists = document.querySelector('[data-chrome-matched-background]') !== null;
+      const destinationPaintExists = document.querySelector('[data-chrome-matched-background]:not([data-chrome-matched-background="auth"])') !== null;
       const hitSafetyCap = Date.now() - startedAt >= AUTH_TO_APP_MAX_COVER_MS;
 
       if (routeHasLeftAuth && destinationPaintExists) {
@@ -197,7 +197,9 @@ export function AuthSplashScreen() {
         return;
       }
 
-      if (hitSafetyCap) {
+      // Pending auth keeps the same cover; its existing error handler releases it.
+      // The route-loading cap must never expose the empty auth background.
+      if (hitSafetyCap && routeHasLeftAuth) {
         finish();
         return;
       }
