@@ -36,7 +36,7 @@
 - Tooltips open only on measured overflow.
 - Company views share frost over viewport paint; dialog-height gradients shift shades.
 - Touch company rows highlight applied filters, not cmdk's active result.
-- Login removes its opaque cover after destination paint; logout and recovery guards stay unchanged.
+- Login covers pending auth until destination paint or error; logout and recovery guards stay unchanged.
 <!-- LOVABLE:BEGIN -->
 - Company search cards require successful jobs, canonical identity, names and review totals; persist validated complete cards per account and never interpret failed identity lookup as separate colleague companies.
 - Candidate interviews revalidate silently on resume, reconnect and bfcache; suggestion-logo warmers use the rendered URL resolver to avoid cache misses.

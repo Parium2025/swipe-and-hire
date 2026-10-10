@@ -95,7 +95,8 @@ describe('sign-in never reloads the document', () => {
   it('hands off login without fading two different background paints together', () => {
     const splash = readFileSync('src/components/AuthSplashScreen.tsx', 'utf8');
     expect(splash).toContain('if (routeHasLeftAuth && destinationPaintExists)');
-    expect(splash).toContain("document.querySelector('[data-chrome-matched-background]')");
+    expect(splash).toContain('[data-chrome-matched-background]:not([data-chrome-matched-background="auth"])');
+    expect(splash).toContain('if (hitSafetyCap && routeHasLeftAuth)');
     expect(splash).toMatch(/if \(isLoginTransition\) \{\s*isVisibleRef.current = false;[\s\S]*?authSplashEvents.hide\(\);\s*return;\s*\}\s*setShellFading\(true\)/);
     expect(splash).toContain('const AUTH_TO_APP_MAX_COVER_MS = 2400;');
   });
