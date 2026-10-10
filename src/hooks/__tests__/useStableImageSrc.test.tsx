@@ -28,4 +28,15 @@ describe('stable image decode gate', () => {
     await act(async () => pending[1]?.reject());
     expect(result.current).toBe('first');
   });
+  it('discards delayed images from the previous account', async () => {
+    vi.stubGlobal('Image', PendingImage);
+    const { result, rerender } = renderHook(({ url, scope }) => useStableImageSrc(url, scope), {
+      initialProps: { url: 'first', scope: 'a' },
+    });
+    await act(async () => pending[0]?.resolve());
+    rerender({ url: 'second', scope: 'b' });
+    expect(result.current).toBeNull();
+    await act(async () => pending[1]?.resolve());
+    expect(result.current).toBe('second');
+  });
 });

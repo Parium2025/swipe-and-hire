@@ -107,13 +107,19 @@ function JobSeekerTopNav() {
   const [supportOpen, setSupportOpen] = useState(false);
 
   // Avatar/Video state - fallback uses useMediaUrl for safety
+  const fallbackCoverImageUrl = useMediaUrl(
+    !preloadedCoverUrl ? profile?.cover_image_url : null,
+    'cover-image'
+  );
   const fallbackProfileImageUrl = useMediaUrl(
     (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null, 
     'profile-image'
   );
-  const avatarUrl = useStableImageSrc(preloadedAvatarUrl || preloadedCoverUrl || fallbackProfileImageUrl || null);
+  const avatarSource = preloadedCoverUrl || fallbackCoverImageUrl || preloadedAvatarUrl || fallbackProfileImageUrl || null;
+  const avatarUrl = useStableImageSrc(avatarSource, user?.id);
+  const avatarPending = !profile || (!!(profile.cover_image_url || profile.profile_image_url || avatarSource) && !avatarUrl);
   const videoUrl = preloadedVideoUrl ?? null;
-  const coverUrl = preloadedCoverUrl || null;
+  const coverUrl = avatarUrl;
   const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
 
   const { isPlatformAdmin } = useIsPlatformAdmin();
@@ -199,6 +205,8 @@ function JobSeekerTopNav() {
           <DropdownMenu open={jobsOpen} onOpenChange={setJobsOpen}>
             <DropdownMenuTrigger asChild>
               <button
+                disabled={avatarPending}
+                aria-busy={avatarPending}
                 className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
@@ -370,11 +378,11 @@ function JobSeekerTopNav() {
                 {(hasVideo && (coverUrl || avatarUrl)) || avatarUrl ? (
                   <Avatar className="h-6 w-6 ring-2 ring-white/20 relative z-10">
                     <AvatarImage src={coverUrl || avatarUrl || ''} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
-                      {getUserInitials()}
+                    <AvatarFallback className="bg-white/20 text-white text-xs font-semibold">
+                      <span className="h-full w-full animate-pulse bg-glass-surface motion-reduce:animate-none" aria-hidden="true" />
                     </AvatarFallback>
                   </Avatar>
-                ) : profile ? (
+                ) : profile && !avatarPending ? (
                   <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20 relative z-10">
                     {getUserInitials()}
                   </div>
