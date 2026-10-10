@@ -68,7 +68,6 @@ const MobileProfileAvatar = () => {
   // Behåll den redan visade bilden tills en ny signerad länk är avkodad, så
   // att ikonen aldrig töms när källan byts från reserv- till förladdad länk.
   const avatarUrl = preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackAvatarUrl || null;
-  const expectsImage = !!(profile?.cover_image_url || profile?.profile_image_url);
 
   return (
     <ReadyProfileAvatar
