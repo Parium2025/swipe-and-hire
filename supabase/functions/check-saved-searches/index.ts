@@ -119,6 +119,48 @@ function allTokensMatch(raw: string, haystacks: string[]): boolean {
 
 const normCounty = (c: string) => normToken(c || '').replace(/s? lan$/, '').trim();
 
+export interface JobCtx {
+  title: string | null; occupation: string | null; category: string | null;
+  city: string | null; municipality: string | null; county: string | null;
+  workplace_name: string | null; employment_type: string | null;
+  salary_min: number | null; salary_max: number | null;
+}
+
+/**
+ * EN gemensam matchningsregel för både liveträffar och omräkning, så att
+ * räknaren och notiserna alltid är överens.
+ */
+export function matchesSearch(search: any, j: JobCtx): boolean {
+  const title = (j.title || '').toLowerCase();
+  const occ = (j.occupation || '').toLowerCase();
+  const cat = (j.category || '').toLowerCase();
+  const city = (j.city || '').toLowerCase();
+  const muni = (j.municipality || '').toLowerCase();
+  const county = j.county || '';
+  // Varje sökord måste träffa (AND): "lager göteborg" kräver båda.
+  if (search.search_query && String(search.search_query).trim() !== '') {
+    if (!allTokensMatch(search.search_query, [title, occ, cat, city, muni, county.toLowerCase(), (j.workplace_name || '').toLowerCase()])) return false;
+  }
+  if (Array.isArray(search.subcategories) && search.subcategories.length > 0) {
+    const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
+    if (!anyTermMatches(subTerms, [title, occ, cat])) return false;
+  }
+  if (search.city && String(search.city).trim() !== '') {
+    const sc = normToken(String(search.city).trim());
+    if (!normToken(city).includes(sc) && !normToken(muni).includes(sc)) return false;
+  }
+  if (search.county && search.county !== '' && normCounty(county) !== normCounty(search.county)) return false;
+  if (Array.isArray(search.employment_types) && search.employment_types.length > 0) {
+    const et = normToken(j.employment_type || '');
+    if (!et || !search.employment_types.some((t: string) => normToken(t) === et)) return false;
+  }
+  if (search.category && search.category !== '' && normToken(j.category || '') !== normToken(search.category)) return false;
+  if (search.salary_min != null && j.salary_max != null && j.salary_max < search.salary_min) return false;
+  if (search.salary_max != null && j.salary_min != null && j.salary_min > search.salary_max) return false;
+  return true;
+}
+
+
 interface NewJobPayload {
   job_id: string;
   title: string;
@@ -216,66 +258,15 @@ serve(async (req) => {
       if (!batch || batch.length === 0) break;
 
       totalChecked += batch.length;
-      const titleLower = (title || '').toLowerCase();
-      const cityLower = (workplace_city || '').toLowerCase();
-      const municipalityLower = (workplace_municipality || '').toLowerCase();
-      const countyValue = workplace_county || '';
-      // Fält som en fritextsökning får träffa: titel, yrke, kategori, ort,
-      // kommun, län och arbetsplats. Varje sökord måste träffa (AND), så
-      // "lager göteborg" kräver både lagerjobb och Göteborg – inte antingen.
-      const textHay = [
-        titleLower, (job.occupation || '').toLowerCase(), (category || '').toLowerCase(),
-        cityLower, municipalityLower, countyValue.toLowerCase(),
-        (job.workplace_name || '').toLowerCase(),
-      ];
+      const ctx: JobCtx = {
+        title, occupation: job.occupation, category, city: workplace_city,
+        municipality: workplace_municipality ?? null, county: workplace_county,
+        workplace_name: job.workplace_name, employment_type, salary_min, salary_max,
+      };
 
       const matched: Array<{ id: string; user_id: string; name: string }> = [];
-
       for (const search of batch) {
-        let matches = true;
-
-        if (search.search_query && search.search_query.trim() !== '') {
-          if (!allTokensMatch(search.search_query, textHay)) matches = false;
-        }
-
-        // Subkategorier: minst en ska träffa titel, yrke eller kategori
-        if (matches && Array.isArray(search.subcategories) && search.subcategories.length > 0) {
-          const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
-          if (!anyTermMatches(subTerms, [titleLower, (job.occupation || '').toLowerCase(), (category || '').toLowerCase()])) {
-            matches = false;
-          }
-        }
-
-        // Ort: å/ä/ö- och skiftlägesokänslig, träffar ort eller kommun
-        if (matches && search.city && search.city.trim() !== '') {
-          const sc = normToken(search.city.trim());
-          if (!normToken(cityLower).includes(sc) && !normToken(municipalityLower).includes(sc)) {
-            matches = false;
-          }
-        }
-
-        // Län: tolerant mot "Västra Götalands län" vs "Västra Götaland"
-        if (matches && search.county && search.county !== '') {
-          if (normCounty(countyValue) !== normCounty(search.county)) matches = false;
-        }
-
-        if (matches && search.employment_types && search.employment_types.length > 0) {
-          const et = normToken(employment_type || '');
-          if (!et || !search.employment_types.some((t: string) => normToken(t) === et)) matches = false;
-        }
-
-        if (matches && search.category && search.category !== '') {
-          if (normToken(category || '') !== normToken(search.category)) matches = false;
-        }
-
-        if (matches && search.salary_min != null) {
-          if (salary_max != null && salary_max < search.salary_min) matches = false;
-        }
-        if (matches && search.salary_max != null) {
-          if (salary_min != null && salary_min > search.salary_max) matches = false;
-        }
-
-        if (matches) {
+        if (matchesSearch(search, ctx)) {
           totalMatches++;
           matched.push({ id: search.id, user_id: search.user_id, name: search.name || '' });
         }
@@ -319,7 +310,7 @@ serve(async (req) => {
           );
           return {
             recipient_id: m.user_id,
-            title: '🔔 Nytt jobb för din sökning!',
+            title: 'Nytt jobb för din sökning',
             body: `${title} - ${workplace_city || 'Okänd plats'}`,
             notification_type: 'saved_search_match',
             // Samma annons + samma bevakning ska aldrig ge två notiser.
@@ -340,6 +331,8 @@ serve(async (req) => {
         if (queueError) {
           console.error('[check-saved-searches] Failed to queue push notifications:', queueError);
         }
+
+        await insertInAppNotifications(supabase, matched, { job_id, title, workplace_city });
 
         emailsSent += await sendMatchEmails(supabase, matched, emailedUsers, {
           job_id, title, workplace_city, workplace_name: job.workplace_name,
