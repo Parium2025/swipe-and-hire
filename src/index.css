@@ -2463,6 +2463,12 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
   transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1) !important;
   will-change: transform, opacity;
 }
+/* Startläge: glid in från ovanför skärmkanten med lätt skala, samma på alla
+   skärmstorlekar — på mobil blev glidsträckan annars bara några pixlar. */
+[data-sonner-toaster][data-y-position="top"] [data-sonner-toast][data-mounted="false"] {
+  --y: translateY(calc(-100% - 28px - env(safe-area-inset-top, 0px))) scale(0.96);
+  opacity: 0;
+}
 [data-sonner-toast][data-removed="true"] {
   transition-duration: 220ms !important;
   transition-timing-function: cubic-bezier(0.4, 0, 1, 1) !important;

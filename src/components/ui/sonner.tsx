@@ -176,6 +176,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
           ? "calc(env(safe-area-inset-top, 0px) + 14px)"
           : "calc(env(safe-area-inset-top, 0px) + 20px)"
       }
+      // Sonner byter till en egen mobiloffset (16px, utan säkerhetsmarginal)
+      // under 600px — då hamnade notisen klämd under notchen på mobil.
+      mobileOffset={{
+        top: "calc(env(safe-area-inset-top, 0px) + 14px)",
+        left: "12px",
+        right: "12px",
+      }}
       // Fäll ut stapeln på desktop så att ingen notis göms bakom en annan.
       expand={!isCompact}
       gap={isCompact ? 10 : 12}
