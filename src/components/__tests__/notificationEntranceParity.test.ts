@@ -7,5 +7,9 @@ describe('shared notification entrance', () => {
     expect(toaster).toContain('style={{ zIndex: 2147483647 }}');
     expect(toaster).toContain('if (!mounted) return null;');
     expect(toaster).not.toContain("role === 'employer'");
+    const splash = readFileSync('src/components/AuthSplashScreen.tsx', 'utf8');
+    expect(splash).toContain('zIndex: 2147483646');
+    const nav = readFileSync('src/components/JobSeekerTopNav.tsx', 'utf8');
+    expect(nav).toContain('<CountBadge count={totalNewMatches}');
   });
 });
