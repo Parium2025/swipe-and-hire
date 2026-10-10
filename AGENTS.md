@@ -10,7 +10,7 @@
 - Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
 - Review branding reads the trimmed public-profile RPC under its own cache key; profile rows stay private; colleagues see only current profile images via `can_view_colleague_profile_image`.
-- Upgrade portraits only after decode to prevent initials flashing.
+- Decode portraits before display; mobile headers share account-scoped skeleton/click gates to prevent initials flashes.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over local events, keep cached report data account-scoped.
 - Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
 - Discard delayed fetches after account switch/sign-out to protect the new cache.
@@ -20,7 +20,7 @@
 - Company identity is shared and resolves via `company_owner_id` (reviews, ratings, search cards); admins alone reply via `reply_to_company_review` (no UPDATE policy); members can't self-review; invitees inherit identity and skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
 - Auth is isolated per tab; device limits are two per account; cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping; preserve loop/reload/boot guards and tests.
-- The landing-video route alone owns browser chrome color `#626262` and its bounded chrome-reload guard (max two per 10 s per tab); never change other routes with it.
+- Only landing video owns chrome `#626262` and its reload guard (max two per 10 s/tab); never apply to other routes.
 - Chat: native scroll, page/virtualize at 300/80; subscribe to typing only on visible rows; one internal thread per colleague.
 - Candidate activity cache is account-scoped (user+applicant), page-warmed and refreshed for current authors: instant logs, live avatars, no leaks.
 - The bell alone owns account-scoped cache/refresh; retain last-known state through daily returns; competing preloaders hide older unread items.

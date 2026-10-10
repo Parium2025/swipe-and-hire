@@ -8,8 +8,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { useStableImageSrc } from '@/hooks/useStableImageSrc';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ReadyProfileAvatar } from '@/components/ReadyProfileAvatar';
 import { Search, Bell } from 'lucide-react';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import NotificationCenter from '@/components/NotificationCenter';
@@ -54,7 +53,7 @@ const LogoSidebarTrigger = () => {
 
 // Mobile profile avatar - navigates to /profile on tap
 const MobileProfileAvatar = () => {
-  const { profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
   const fallbackCoverUrl = useMediaUrl(
     !preloadedCoverUrl ? profile?.cover_image_url : null,
@@ -68,37 +67,16 @@ const MobileProfileAvatar = () => {
   // efter sparning, och endast falla tillbaka till den separata profilbilden.
   // Behåll den redan visade bilden tills en ny signerad länk är avkodad, så
   // att ikonen aldrig töms när källan byts från reserv- till förladdad länk.
-  const avatarUrl = useStableImageSrc(preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackAvatarUrl || null);
-  
-  const initials = (() => {
-    const f = profile?.first_name || '';
-    const l = profile?.last_name || '';
-    if (f && l) return (f[0] + l[0]).toUpperCase();
-    if (f) return f.substring(0, 2).toUpperCase();
-    return 'JS';
-  })();
+  const avatarUrl = preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackAvatarUrl || null;
+  const expectsImage = !!(profile?.cover_image_url || profile?.profile_image_url);
 
   return (
-    <button
+    <ReadyProfileAvatar
+      src={avatarUrl}
+      accountId={user?.id}
+      profileReady={!!profile && (!expectsImage || !!avatarUrl)}
       onClick={() => navigate('/profile')}
-      className="flex items-center justify-center"
-      aria-label="Min profil"
-    >
-      {avatarUrl ? (
-        <Avatar className="h-8 w-8 ring-2 ring-white/20">
-          <AvatarImage src={avatarUrl} alt="Profil" />
-          <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-      ) : profile ? (
-        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20">
-          {initials}
-        </div>
-      ) : (
-        <div className="h-8 w-8 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20" />
-      )}
-    </button>
+    />
   );
 };
 
