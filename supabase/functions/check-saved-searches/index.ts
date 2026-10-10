@@ -174,11 +174,28 @@ serve(async (req) => {
     // ──────────────────────────────────────────────
     console.log(`[check-saved-searches] Matching job "${title}" (${job_id}) against saved searches...`);
 
+    // Hämta yrke och arbetsplats (finns inte i triggerns nyttolast) och
+    // bekräfta att annonsen fortfarande är aktiv innan något skickas.
+    const { data: jobRow } = await supabase
+      .from('job_postings')
+      .select('occupation, workplace_name, is_active, deleted_at')
+      .eq('id', job_id)
+      .maybeSingle();
+    if (!jobRow || jobRow.is_active === false || jobRow.deleted_at) {
+      return new Response(JSON.stringify({ success: true, skipped: 'inactive' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const job = jobRow as { occupation: string | null; workplace_name: string | null };
+
     let offset = 0;
     let totalMatches = 0;
     let totalChecked = 0;
+    let emailsSent = 0;
     // Räknas upp över ALLA satser så utspridningen blir jämn för hela annonsen.
     let queuedSoFar = 0;
+    // En användare får bara ett mejl per annons även om flera bevakningar träffar.
+    const emailedUsers = new Set<string>();
 
     while (true) {
       // Utan uttrycklig sortering kan databasen ge tillbaka raderna i olika
