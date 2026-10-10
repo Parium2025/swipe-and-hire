@@ -301,11 +301,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
-  const [preloadedCompanyLogoUrl, setPreloadedCompanyLogoUrl] = useState<string | null>(() => {
-    try {
-      return typeof window !== 'undefined' && hasOwnCachedProfile() ? sessionStorage.getItem(COMPANY_LOGO_CACHE_KEY) : null;
-    } catch { return null; }
-  });
+  // An unscoped legacy logo must never precede the current account's profile.
+  const [preloadedCompanyLogoUrl, setPreloadedCompanyLogoUrl] = useState<string | null>(null);
   const [preloadedEmployerCandidates, setPreloadedEmployerCandidates] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_CANDIDATES_CACHE_KEY) : null;

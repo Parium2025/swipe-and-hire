@@ -22,6 +22,8 @@ export function useReadyProfileImage(src: string | null, accountId: string | und
   return {
     shown: current && result?.ready ? src : null,
     loading: !accountId || !profileReady || (!!src && !current),
-    invalidate: () => setResult(null),
+    invalidate: () => {
+      if (accountId && src) setResult({ accountId, src, ready: false });
+    },
   };
 }
