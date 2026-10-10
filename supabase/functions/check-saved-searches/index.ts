@@ -39,6 +39,18 @@ const TITLE_SYNONYMS: Record<string, string> = {
   truckforare: 'truckförare', lager: 'lagerarbetare', plockare: 'lagerarbetare',
   reception: 'receptionist', admin: 'administratör', sekreterare: 'administratör',
   vaktare: 'väktare', ordningsvakt: 'väktare', parkering: 'parkeringsvakt',
+  terminal: 'lagerarbetare', logistik: 'lagerarbetare', orderplock: 'lagerarbetare',
+  truck: 'truckförare', distribution: 'chaufför', lastbil: 'lastbilschaufför',
+  restaurang: 'kock', kok: 'köksbiträde', bartender: 'servitör', cafe: 'barista',
+  vard: 'undersköterska', omsorg: 'undersköterska', hemtjanst: 'undersköterska',
+  barnskotare: 'barnskötare', forskola: 'barnskötare', skola: 'lärare', pedagog: 'lärare',
+  ekonomi: 'ekonom', redovisning: 'redovisningsekonom', lon: 'löneadministratör',
+  hr: 'hr-specialist', rekrytering: 'rekryterare', kundservice: 'kundtjänst',
+  support: 'kundtjänst', it: 'utvecklare', systemutvecklare: 'utvecklare',
+  mekaniker: 'fordonstekniker', bilmekaniker: 'fordonstekniker', svetsare: 'svetsare',
+  montor: 'montör', industri: 'operatör', produktion: 'operatör', fabrik: 'operatör',
+  stadning: 'lokalvårdare', fastighet: 'fastighetsskötare', vaktmastare: 'fastighetsskötare',
+  elektriker: 'elektriker', el: 'elektriker', snickeri: 'snickare', marketing: 'marknadsförare',
 };
 
 const TYPO_CORRECTIONS: Record<string, string> = {
@@ -118,6 +130,48 @@ function allTokensMatch(raw: string, haystacks: string[]): boolean {
 }
 
 const normCounty = (c: string) => normToken(c || '').replace(/s? lan$/, '').trim();
+
+export interface JobCtx {
+  title: string | null; occupation: string | null; category: string | null;
+  city: string | null; municipality: string | null; county: string | null;
+  workplace_name: string | null; employment_type: string | null;
+  salary_min: number | null; salary_max: number | null;
+}
+
+/**
+ * EN gemensam matchningsregel för både liveträffar och omräkning, så att
+ * räknaren och notiserna alltid är överens.
+ */
+export function matchesSearch(search: any, j: JobCtx): boolean {
+  const title = (j.title || '').toLowerCase();
+  const occ = (j.occupation || '').toLowerCase();
+  const cat = (j.category || '').toLowerCase();
+  const city = (j.city || '').toLowerCase();
+  const muni = (j.municipality || '').toLowerCase();
+  const county = j.county || '';
+  // Varje sökord måste träffa (AND): "lager göteborg" kräver båda.
+  if (search.search_query && String(search.search_query).trim() !== '') {
+    if (!allTokensMatch(search.search_query, [title, occ, cat, city, muni, county.toLowerCase(), (j.workplace_name || '').toLowerCase()])) return false;
+  }
+  if (Array.isArray(search.subcategories) && search.subcategories.length > 0) {
+    const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
+    if (!anyTermMatches(subTerms, [title, occ, cat])) return false;
+  }
+  if (search.city && String(search.city).trim() !== '') {
+    const sc = normToken(String(search.city).trim());
+    if (!normToken(city).includes(sc) && !normToken(muni).includes(sc)) return false;
+  }
+  if (search.county && search.county !== '' && normCounty(county) !== normCounty(search.county)) return false;
+  if (Array.isArray(search.employment_types) && search.employment_types.length > 0) {
+    const et = normToken(j.employment_type || '');
+    if (!et || !search.employment_types.some((t: string) => normToken(t) === et)) return false;
+  }
+  if (search.category && search.category !== '' && normToken(j.category || '') !== normToken(search.category)) return false;
+  if (search.salary_min != null && j.salary_max != null && j.salary_max < search.salary_min) return false;
+  if (search.salary_max != null && j.salary_min != null && j.salary_min > search.salary_max) return false;
+  return true;
+}
+
 
 interface NewJobPayload {
   job_id: string;
@@ -216,66 +270,15 @@ serve(async (req) => {
       if (!batch || batch.length === 0) break;
 
       totalChecked += batch.length;
-      const titleLower = (title || '').toLowerCase();
-      const cityLower = (workplace_city || '').toLowerCase();
-      const municipalityLower = (workplace_municipality || '').toLowerCase();
-      const countyValue = workplace_county || '';
-      // Fält som en fritextsökning får träffa: titel, yrke, kategori, ort,
-      // kommun, län och arbetsplats. Varje sökord måste träffa (AND), så
-      // "lager göteborg" kräver både lagerjobb och Göteborg – inte antingen.
-      const textHay = [
-        titleLower, (job.occupation || '').toLowerCase(), (category || '').toLowerCase(),
-        cityLower, municipalityLower, countyValue.toLowerCase(),
-        (job.workplace_name || '').toLowerCase(),
-      ];
+      const ctx: JobCtx = {
+        title, occupation: job.occupation, category, city: workplace_city,
+        municipality: workplace_municipality ?? null, county: workplace_county,
+        workplace_name: job.workplace_name, employment_type, salary_min, salary_max,
+      };
 
       const matched: Array<{ id: string; user_id: string; name: string }> = [];
-
       for (const search of batch) {
-        let matches = true;
-
-        if (search.search_query && search.search_query.trim() !== '') {
-          if (!allTokensMatch(search.search_query, textHay)) matches = false;
-        }
-
-        // Subkategorier: minst en ska träffa titel, yrke eller kategori
-        if (matches && Array.isArray(search.subcategories) && search.subcategories.length > 0) {
-          const subTerms = search.subcategories.flatMap((s: string) => expandQueryTerms(s));
-          if (!anyTermMatches(subTerms, [titleLower, (job.occupation || '').toLowerCase(), (category || '').toLowerCase()])) {
-            matches = false;
-          }
-        }
-
-        // Ort: å/ä/ö- och skiftlägesokänslig, träffar ort eller kommun
-        if (matches && search.city && search.city.trim() !== '') {
-          const sc = normToken(search.city.trim());
-          if (!normToken(cityLower).includes(sc) && !normToken(municipalityLower).includes(sc)) {
-            matches = false;
-          }
-        }
-
-        // Län: tolerant mot "Västra Götalands län" vs "Västra Götaland"
-        if (matches && search.county && search.county !== '') {
-          if (normCounty(countyValue) !== normCounty(search.county)) matches = false;
-        }
-
-        if (matches && search.employment_types && search.employment_types.length > 0) {
-          const et = normToken(employment_type || '');
-          if (!et || !search.employment_types.some((t: string) => normToken(t) === et)) matches = false;
-        }
-
-        if (matches && search.category && search.category !== '') {
-          if (normToken(category || '') !== normToken(search.category)) matches = false;
-        }
-
-        if (matches && search.salary_min != null) {
-          if (salary_max != null && salary_max < search.salary_min) matches = false;
-        }
-        if (matches && search.salary_max != null) {
-          if (salary_min != null && salary_min > search.salary_max) matches = false;
-        }
-
-        if (matches) {
+        if (matchesSearch(search, ctx)) {
           totalMatches++;
           matched.push({ id: search.id, user_id: search.user_id, name: search.name || '' });
         }
@@ -319,7 +322,7 @@ serve(async (req) => {
           );
           return {
             recipient_id: m.user_id,
-            title: '🔔 Nytt jobb för din sökning!',
+            title: 'Nytt jobb för din sökning',
             body: `${title} - ${workplace_city || 'Okänd plats'}`,
             notification_type: 'saved_search_match',
             // Samma annons + samma bevakning ska aldrig ge två notiser.
@@ -340,6 +343,8 @@ serve(async (req) => {
         if (queueError) {
           console.error('[check-saved-searches] Failed to queue push notifications:', queueError);
         }
+
+        await insertInAppNotifications(supabase, matched, { job_id, title, workplace_city });
 
         emailsSent += await sendMatchEmails(supabase, matched, emailedUsers, {
           job_id, title, workplace_city, workplace_name: job.workplace_name,
@@ -371,112 +376,64 @@ serve(async (req) => {
  * Legacy full-scan mode (for cron-based checks)
  */
 async function fullScan(supabase: any) {
-  console.log('[check-saved-searches] Running full scan (cron mode) - recounting active matches...');
+  console.log('[check-saved-searches] Full scan – recounting with the shared match rule...');
+
+  // Aktiva annonser senaste 60 dagarna räcker: räknaren gäller bara annonser
+  // som kommit sedan senaste notisen, och utgångna räknas bort.
+  const since = new Date(Date.now() - 60 * 86400_000).toISOString();
+  const jobs: Array<JobCtx & { created_at: string }> = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from('job_postings')
+      .select('title, occupation, category, workplace_city, workplace_municipality, workplace_county, workplace_name, employment_type, salary_min, salary_max, created_at, expires_at')
+      .eq('is_active', true).is('deleted_at', null).gt('created_at', since)
+      .order('id', { ascending: true }).range(from, from + 999);
+    if (error) throw error;
+    const nowIso = new Date().toISOString();
+    for (const r of data || []) {
+      if (r.expires_at && r.expires_at < nowIso) continue;
+      jobs.push({
+        title: r.title, occupation: r.occupation, category: r.category, city: r.workplace_city,
+        municipality: r.workplace_municipality, county: r.workplace_county, workplace_name: r.workplace_name,
+        employment_type: r.employment_type, salary_min: r.salary_min, salary_max: r.salary_max, created_at: r.created_at,
+      });
+    }
+    if (!data || data.length < 1000 || jobs.length >= 20000) break;
+  }
 
   let offset = 0;
   let totalUpdates = 0;
-
   while (true) {
-    // Sorterad sidindelning – annars kan bevakningar hoppas över mellan sidorna.
-    // Hämta bara de kolumner räkningen behöver i stället för hela raden.
     const { data: searches, error } = await supabase
       .from('saved_searches')
-      .select('id, search_query, city, county, employment_types, category, salary_min, salary_max, new_matches_count, last_notified_at, last_checked_at')
+      .select('id, search_query, city, county, employment_types, category, subcategories, salary_min, salary_max, new_matches_count, last_notified_at, last_checked_at, created_at')
       .order('id', { ascending: true })
       .range(offset, offset + BATCH_SIZE - 1);
-
     if (error || !searches || searches.length === 0) break;
 
-    // SKALA: räkningarna kördes en i taget och varje bevakning skrevs separat.
-    // Nu körs räkningarna några i taget och alla oförändrade bevakningar får
-    // sin tidsstämpel i ETT anrop. Samma resultat, bråkdelen av tiden.
-    const countOne = async (search: any): Promise<{ id: string; count: number }> => {
-      const sinceDate = search.last_notified_at || search.last_checked_at;
-
-      let query = supabase
-        .from('job_postings')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .gt('created_at', sinceDate);
-
-      if (search.search_query) {
-        // SÄKERHET: rensa tecken som annars kan ändra filteruttrycket.
-        const safeQuery = String(search.search_query).replace(/[,()"*\\]/g, ' ').trim();
-        if (safeQuery) {
-          query = query.or(`title.ilike.%${safeQuery}%,workplace_city.ilike.%${safeQuery}%`);
-        }
-      }
-      if (search.city) {
-        // SÄKERHET: samma rensning som för sökfrågan — staden kommer från
-        // användarinmatning och får inte kunna ändra filteruttrycket.
-        const safeCity = String(search.city).replace(/[,()"*\\]/g, ' ').trim();
-        if (safeCity) {
-          query = query.or(`workplace_city.ilike.%${safeCity}%,workplace_municipality.ilike.%${safeCity}%`);
-        }
-      }
-      if (search.county) {
-        query = query.eq('workplace_county', search.county);
-      }
-      if (search.employment_types?.length > 0) {
-        query = query.in('employment_type', search.employment_types);
-      }
-      if (search.category) {
-        query = query.eq('category', search.category);
-      }
-      if (search.salary_min != null) {
-        query = query.or(`salary_max.gte.${search.salary_min},salary_max.is.null`);
-      }
-      if (search.salary_max != null) {
-        query = query.or(`salary_min.lte.${search.salary_max},salary_min.is.null`);
-      }
-
-      const { count } = await query;
-      return { id: search.id, count: count || 0 };
-    };
-
     const unchanged: string[] = [];
-    const CONCURRENCY = 10;
-
-    for (let i = 0; i < searches.length; i += CONCURRENCY) {
-      const slice = searches.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(slice.map(countOne));
-
-      await Promise.all(
-        results.map(async (res, idx) => {
-          const search = slice[idx];
-          // SET the count (not accumulate) — this ensures expired/deleted jobs
-          // are no longer counted, fixing stale badge notifications
-          if (res.count !== (search.new_matches_count || 0)) {
-            totalUpdates++;
-            await supabase
-              .from('saved_searches')
-              .update({
-                new_matches_count: res.count,
-                last_checked_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', search.id);
-          } else {
-            unchanged.push(search.id);
-          }
-        })
-      );
+    const nowIso = new Date().toISOString();
+    for (const search of searches) {
+      const sinceDate = search.last_notified_at || search.last_checked_at || search.created_at;
+      let count = 0;
+      for (const j of jobs) if (j.created_at > sinceDate && matchesSearch(search, j)) count++;
+      if (count !== (search.new_matches_count || 0)) {
+        totalUpdates++;
+        await supabase.from('saved_searches')
+          .update({ new_matches_count: count, last_checked_at: nowIso, updated_at: nowIso })
+          .eq('id', search.id);
+      } else {
+        unchanged.push(search.id);
+      }
     }
-
     if (unchanged.length > 0) {
-      await supabase
-        .from('saved_searches')
-        .update({ last_checked_at: new Date().toISOString() })
-        .in('id', unchanged);
+      await supabase.from('saved_searches').update({ last_checked_at: nowIso }).in('id', unchanged);
     }
-
     if (searches.length < BATCH_SIZE) break;
     offset += BATCH_SIZE;
   }
 
   console.log(`[check-saved-searches] Full scan done. ${totalUpdates} searches recounted.`);
-
   return new Response(
     JSON.stringify({ success: true, mode: 'full_scan', updatedSearches: totalUpdates }),
     { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
