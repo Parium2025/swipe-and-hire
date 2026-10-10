@@ -88,7 +88,7 @@ export const EmployerMobileProfileAvatar = memo(() => {
     <ReadyProfileAvatar
       src={avatarUrl}
       accountId={user?.id}
-      profileReady={!!user && profile?.user_id === user.id && (!expectsImage || !!avatarUrl)}
+      profileReady={!!user && profile?.user_id === user.id}
       onClick={() => navigate('/employer-profile')}
     />
   );

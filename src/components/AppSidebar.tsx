@@ -95,7 +95,9 @@ export function AppSidebar() {
   const fallbackAvatar = useMediaUrl(!preloadedAvatarUrl ? profile?.profile_image_url : null, 'profile-image');
   const avatarSource = preloadedCoverUrl || fallbackCover || preloadedAvatarUrl || fallbackAvatar || null;
   const { shown: avatarUrl, loading: avatarPending } = useReadyProfileImage(
-    avatarSource, user?.id, !!user && profile?.user_id === user.id && (!(profile.cover_image_url || profile.profile_image_url) || !!avatarSource)
+    // Kräv inte avatarSource: om bilden är borttagen/ojömlig ska knappen ändå
+    // bli klickbar (neutral ikon), inte fastna som evig skeleton.
+    avatarSource, user?.id, !!user && profile?.user_id === user.id
   );
   const videoUrl = profile?.user_id === user?.id ? preloadedVideoUrl : null;
   const coverUrl = avatarUrl;
