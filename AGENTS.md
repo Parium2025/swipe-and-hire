@@ -7,7 +7,7 @@
 - Mobile shells stay `100dvh`; keyboard-heavy pages and long employer text areas scroll inside bounded height; browser chrome never covers content.
 - Mobile inputs use 16px and native Safari focus; no pointer focus or delayed scrolling; blur when the iOS keyboard closes.
 - Standalone owns safe areas; Safari top overlay is video-only. Blue/loading shells share edge paint and solid roots; bfcache clears video exit. Fixed-px splash prevents jumps.
-- Welcome: atomic first-save-wins; invoker trigger blocks direct completion/reset; replay writes nothing; account checks close stale guides without reload; later edits remain allowed.
+- Welcome: atomic first-save-wins; invoker guards completion/reset; replay writes nothing; stale guides close without reload; edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
 - Review branding reads the trimmed public-profile RPC under its own cache key; profile rows stay private; colleagues see only current profile images via `can_view_colleague_profile_image`.
 - Decode portraits before display; mobile headers share account-scoped skeleton/click gates to prevent initials flashes.
@@ -17,7 +17,7 @@
 - Warm employer media with rendered transforms and account-scoped keys to avoid misses/leaks.
 - Skeletons use account/list totals; autofill retains field surfaces.
 - Org roles are admin/recruiter only; recruiters cannot change company-wide settings, templates, automations, billing or team administration.
-- Company identity is shared and resolves via `company_owner_id` (reviews, ratings, search cards); admins alone reply via `reply_to_company_review` (no UPDATE policy); members can't self-review; invitees inherit identity and skip setup; chat updates live. Atomic accept/provision share a profile lock against duplicates/partial setup.
+- Company identity uses `company_owner_id`; only admins reply via `reply_to_company_review`, no UPDATE policy/self-reviews. Invitees inherit identity, skip setup; chat is live. Atomic accept/provision share a profile lock.
 - Auth is isolated per tab; device limits are two per account; cross-tab auth events never replace another tab's account or reload it.
 - Automatic boot recovery may reload once only; persistent failures settle on a stable error state instead of looping; preserve loop/reload/boot guards and tests.
 - Only landing video owns chrome `#626262` and its reload guard (max two per 10 s/tab); never apply to other routes.
@@ -30,13 +30,14 @@
 - Rating writes update the shared organization-rating cache optimistically and refetch on app return; the shared latest rating outranks the row's own and realtime can drop in the background.
 - Touch profile actions reuse row handlers and membership; text tooltips use cancellable holds, and stage menus clear previews.
 - Employer job rows fetch `job_questions(count)` in the shared select; bump the jobs cache key when it changes.
-- Restore the account-scoped query snapshot synchronously at auth init and refetch silently to skip skeletons; badges keep confirmed totals until fresh. Job view never shows cached ads or "not applied" unless fetched since last app resume or checked for that job; "applied" is final.
+- Restore account query snapshots at auth init; silently refetch; retain confirmed totals. Job views require post-resume ads/status or a job-specific check; applied is final.
 - Job-closed outreach comes only from the enqueue_outreach_dispatch trigger, unique per publish round; a sweeper would bypass its exclusions.
 - Email lookup uses service-only indexed RPC and exact Auth retrieval; no user scans.
 - Tooltips open only on measured overflow.
 - Company views share frost over viewport paint; dialog-height gradients shift shades.
 - Touch company rows highlight applied filters, not cmdk's active result.
 - Splash start path set in show(); login swaps at app paint. Providers keep one tree in/out (no remount).
+- Never server-logout minted test sessions lacking a real session ID: even local scope revokes production sessions. Use isolated test accounts or intercept logout requests.
 <!-- LOVABLE:BEGIN -->
 - Company search cards require successful jobs, canonical identity, names and review totals; persist validated complete cards per account and never interpret failed identity lookup as separate colleague companies.
 - Candidate interviews revalidate silently on resume, reconnect and bfcache; suggestion-logo warmers use the rendered URL resolver to avoid cache misses.
