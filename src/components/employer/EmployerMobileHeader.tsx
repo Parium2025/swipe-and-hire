@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from '@/hooks/useAuth';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import { useStableImageSrc } from '@/hooks/useStableImageSrc';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ReadyProfileAvatar } from '@/components/ReadyProfileAvatar';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
 import { resolveCompanyLogoUrl } from '@/lib/companyLogoUrl';
 
@@ -72,43 +71,22 @@ EmployerLogoSidebarTrigger.displayName = 'EmployerLogoSidebarTrigger';
 
 /** Mobile profile avatar for employer — mirrors job seeker structure exactly */
 export const EmployerMobileProfileAvatar = memo(() => {
-  const { profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
+  const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
   const fallbackUrl = useMediaUrl(
     (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null,
     'profile-image'
   );
-  const avatarUrl = useStableImageSrc(preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null);
-  
-  const initials = (() => {
-    const f = profile?.first_name || '';
-    const l = profile?.last_name || '';
-    if (f && l) return (f[0] + l[0]).toUpperCase();
-    if (f) return f.substring(0, 2).toUpperCase();
-    return 'AG';
-  })();
+  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null;
+  const expectsImage = !!(profile?.profile_image_url || profile?.cover_image_url);
 
   return (
-    <button
+    <ReadyProfileAvatar
+      src={avatarUrl}
+      accountId={user?.id}
+      profileReady={!!profile && (!expectsImage || !!avatarUrl)}
       onClick={() => navigate('/employer-profile')}
-      className="flex items-center justify-center"
-      aria-label="Min profil"
-    >
-      {avatarUrl ? (
-        <Avatar className="h-8 w-8 ring-2 ring-white/20">
-          <AvatarImage src={avatarUrl} alt="Profil" />
-          <AvatarFallback className="bg-white/20 text-white text-xs font-semibold" delayMs={150}>
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-      ) : profile ? (
-        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20">
-          {initials}
-        </div>
-      ) : (
-        <div className="h-8 w-8 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20" />
-      )}
-    </button>
+    />
   );
 });
 
