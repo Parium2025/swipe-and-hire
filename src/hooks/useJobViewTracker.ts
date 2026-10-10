@@ -58,27 +58,39 @@ export function useJobViewTracker({
   }, [contentRef, scrollThreshold, tryRecord]);
 
   useEffect(() => {
-    const element = contentRef.current;
-    if (!element || !jobId || !userId) return;
+    if (!jobId || !userId) return;
 
     hasRecordedView.current = false;
     hasReachedScrollThreshold.current = false;
     pageLoadTime.current = Date.now();
 
-    const initialCheck = setTimeout(checkScrollPosition, 500);
-    element.addEventListener('scroll', checkScrollPosition, { passive: true });
+    // The content element often mounts after a loading state, so the ref is
+    // null on the first run. Attach as soon as it appears instead of giving up.
+    let attached: HTMLElement | null = null;
+    const attach = () => {
+      const element = contentRef.current;
+      if (element === attached) return;
+      attached?.removeEventListener('scroll', checkScrollPosition);
+      attached = element;
+      element?.addEventListener('scroll', checkScrollPosition, { passive: true });
+    };
 
-    // Periodic check for short content
+    attach();
+    const initialCheck = setTimeout(() => { attach(); checkScrollPosition(); }, 500);
     const timeCheck = setInterval(() => {
-      if (!hasRecordedView.current) checkScrollPosition();
+      attach();
+      if (!hasRecordedView.current) {
+        checkScrollPosition();
+        tryRecord();
+      }
     }, 1000);
 
     return () => {
       clearTimeout(initialCheck);
       clearInterval(timeCheck);
-      element.removeEventListener('scroll', checkScrollPosition);
+      attached?.removeEventListener('scroll', checkScrollPosition);
     };
-  }, [jobId, userId, contentRef, checkScrollPosition]);
+  }, [jobId, userId, contentRef, checkScrollPosition, tryRecord]);
 
   return { hasRecordedView: hasRecordedView.current };
 }
