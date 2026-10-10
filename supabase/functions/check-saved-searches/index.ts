@@ -39,6 +39,18 @@ const TITLE_SYNONYMS: Record<string, string> = {
   truckforare: 'truckförare', lager: 'lagerarbetare', plockare: 'lagerarbetare',
   reception: 'receptionist', admin: 'administratör', sekreterare: 'administratör',
   vaktare: 'väktare', ordningsvakt: 'väktare', parkering: 'parkeringsvakt',
+  terminal: 'lagerarbetare', logistik: 'lagerarbetare', orderplock: 'lagerarbetare',
+  truck: 'truckförare', distribution: 'chaufför', lastbil: 'lastbilschaufför',
+  restaurang: 'kock', kok: 'köksbiträde', bartender: 'servitör', cafe: 'barista',
+  vard: 'undersköterska', omsorg: 'undersköterska', hemtjanst: 'undersköterska',
+  barnskotare: 'barnskötare', forskola: 'barnskötare', skola: 'lärare', pedagog: 'lärare',
+  ekonomi: 'ekonom', redovisning: 'redovisningsekonom', lon: 'löneadministratör',
+  hr: 'hr-specialist', rekrytering: 'rekryterare', kundservice: 'kundtjänst',
+  support: 'kundtjänst', it: 'utvecklare', systemutvecklare: 'utvecklare',
+  mekaniker: 'fordonstekniker', bilmekaniker: 'fordonstekniker', svetsare: 'svetsare',
+  montor: 'montör', industri: 'operatör', produktion: 'operatör', fabrik: 'operatör',
+  stadning: 'lokalvårdare', fastighet: 'fastighetsskötare', vaktmastare: 'fastighetsskötare',
+  elektriker: 'elektriker', el: 'elektriker', snickeri: 'snickare', marketing: 'marknadsförare',
 };
 
 const TYPO_CORRECTIONS: Record<string, string> = {
