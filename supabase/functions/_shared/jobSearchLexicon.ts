@@ -372,7 +372,9 @@ const NORM_CLUSTER: Map<string, string[]> = (() => {
       }
     }
     const members = [...forms].filter((f) => f.length >= 2 && !SEARCH_STOP_WORDS.has(f));
-    for (const f of members) if (!m.has(f)) m.set(f, members);
+    // Ett ord kan höra till flera kluster ("lager" → lagerarbetare och truck):
+    // slå ihop alla så att inget närliggande yrke tappas.
+    for (const f of members) m.set(f, m.has(f) ? [...new Set([...m.get(f)!, ...members])] : members);
   }
   return m;
 })();
