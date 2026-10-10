@@ -214,56 +214,9 @@ export function EmployerSidebar() {
     sessionStorage.setItem('previousPath', currentPath);
   }, [location.pathname]);
   
-  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
-    // Prioritera preloaded URL från AuthProvider
-    if (preloadedCompanyLogoUrl) return preloadedCompanyLogoUrl;
-    
-    const fromProfile = profileCompanyLogoUrl;
-    // Only use cache if profile hasn't explicitly set logo to empty
-    if (fromProfile === '' || fromProfile === null) {
-      // Profile explicitly has no logo - don't use cache
-      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch { /* ignore sessionStorage failures */ }
-      return null;
-    }
-    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
-    const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
-    return resolveCompanyLogoUrl(raw);
-  });
-  const [logoLoaded, setLogoLoaded] = useState(false);
-  const [logoError, setLogoError] = useState(false);
-
-  // Keep last known logo; don't reset state unless value actually changes
-  useEffect(() => {
-    // Prioritera preloaded URL från AuthProvider
-    if (preloadedCompanyLogoUrl && preloadedCompanyLogoUrl !== companyLogoUrl) {
-      setCompanyLogoUrl(preloadedCompanyLogoUrl);
-      return;
-    }
-    
-    const raw = profileCompanyLogoUrl;
-    if (typeof raw === 'string' && raw.trim() !== '') {
-      try {
-          const publicUrl = resolveCompanyLogoUrl(raw);
-        setCompanyLogoUrl((prev) => {
-          if (prev === publicUrl) return prev; // no change → avoid flicker
-          setLogoLoaded(false);
-          setLogoError(false);
-          if (publicUrl) {
-            try { sessionStorage.setItem(LOGO_CACHE_KEY, publicUrl); } catch { /* ignore sessionStorage failures */ }
-          }
-          return publicUrl;
-        });
-      } catch (error) {
-        console.error('Failed to parse company logo:', error);
-      }
-    } else if (raw === '' || raw === null) {
-      setCompanyLogoUrl(null);
-      setLogoLoaded(false);
-      setLogoError(false);
-      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch { /* ignore sessionStorage failures */ }
-    }
-    // if undefined, keep previous URL while profile is re-fetching
-  }, [profileCompanyLogoUrl, preloadedCompanyLogoUrl, companyLogoUrl]);
+  const companyLogoUrl = user && profile?.user_id === user.id
+    ? preloadedCompanyLogoUrl || resolveCompanyLogoUrl(profileCompanyLogoUrl)
+    : null;
 
   // Stäng drawern efter båda valen i dialogen för osparade ändringar,
   // identiskt med jobbsökarens sidebar.

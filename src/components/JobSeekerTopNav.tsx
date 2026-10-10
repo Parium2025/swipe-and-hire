@@ -6,7 +6,7 @@ import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
-import { useStableImageSrc } from "@/hooks/useStableImageSrc";
+import { useReadyProfileImage } from "@/hooks/useReadyProfileImage";
 import { CountBadge } from "@/components/ui/count-badge";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -103,8 +103,6 @@ function JobSeekerTopNav() {
   
   const [jobsOpen, setJobsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  // Trasig bildlänk ska aldrig ge en evig laddningspuls i toppmenyn.
-  const [triggerImageFailed, setTriggerImageFailed] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
@@ -118,8 +116,9 @@ function JobSeekerTopNav() {
     'profile-image'
   );
   const avatarSource = preloadedCoverUrl || fallbackCoverImageUrl || preloadedAvatarUrl || fallbackProfileImageUrl || null;
-  const avatarUrl = useStableImageSrc(avatarSource, user?.id);
-  const avatarPending = !profile || (!!(profile.cover_image_url || profile.profile_image_url || avatarSource) && !avatarUrl);
+  const { shown: avatarUrl, loading: avatarPending } = useReadyProfileImage(
+    avatarSource, user?.id, !!user && profile?.user_id === user.id && (!(profile.cover_image_url || profile.profile_image_url) || !!avatarSource)
+  );
   const videoUrl = preloadedVideoUrl ?? null;
   const coverUrl = avatarUrl;
   const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
@@ -207,7 +206,6 @@ function JobSeekerTopNav() {
           <DropdownMenu open={jobsOpen} onOpenChange={setJobsOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                aria-busy={avatarPending}
                 className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
@@ -368,6 +366,9 @@ function JobSeekerTopNav() {
           <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
             <DropdownMenuTrigger asChild>
               <button
+                disabled={avatarPending}
+                aria-busy={avatarPending}
+                aria-label="Min profil"
                 className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
                 <span 
@@ -381,15 +382,14 @@ function JobSeekerTopNav() {
                     <AvatarImage
                       src={coverUrl || avatarUrl || ''}
                       alt={getUserDisplayName()}
-                      onLoadingStatusChange={(s) => setTriggerImageFailed(s === 'error')}
                     />
                     <AvatarFallback className="bg-white/20 text-white text-xs font-semibold">
-                      <span className={`h-full w-full bg-glass-surface ${triggerImageFailed ? '' : 'animate-pulse motion-reduce:animate-none'}`} aria-hidden="true" />
+                      <User className="h-3 w-3" aria-hidden="true" />
                     </AvatarFallback>
                   </Avatar>
                 ) : profile && !avatarPending ? (
                   <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white ring-2 ring-white/20 relative z-10">
-                    {getUserInitials()}
+                    <User className="h-3 w-3" aria-hidden="true" />
                   </div>
                 ) : (
                   <div className="h-6 w-6 rounded-full bg-white/10 animate-pulse ring-2 ring-white/20 relative z-10" />
@@ -414,12 +414,12 @@ function JobSeekerTopNav() {
                   <Avatar className="h-10 w-10 ring-2 ring-white/20">
                     <AvatarImage src={avatarUrl || ''} alt={getUserDisplayName()} />
                     <AvatarFallback className="bg-white/20 text-white text-sm font-semibold" delayMs={150}>
-                      {getUserInitials()}
+                      <User className="h-3 w-3" aria-hidden="true" />
                     </AvatarFallback>
                   </Avatar>
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold text-white ring-2 ring-white/20">
-                    {getUserInitials()}
+                    <User className="h-3 w-3" aria-hidden="true" />
                   </div>
                 )}
               <div className="min-w-0">

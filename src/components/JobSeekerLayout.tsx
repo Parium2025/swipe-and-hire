@@ -74,7 +74,7 @@ const MobileProfileAvatar = () => {
     <ReadyProfileAvatar
       src={avatarUrl}
       accountId={user?.id}
-      profileReady={!!profile && (!expectsImage || !!avatarUrl)}
+      profileReady={!!user && profile?.user_id === user.id && (!expectsImage || !!avatarUrl)}
       onClick={() => navigate('/profile')}
     />
   );
