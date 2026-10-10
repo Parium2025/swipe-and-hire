@@ -235,7 +235,7 @@ export function AuthSplashScreen() {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 2147483647,
+        zIndex: 2147483646,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

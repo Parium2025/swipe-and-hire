@@ -214,9 +214,7 @@ function JobSeekerTopNav() {
                 <span className="relative z-10">
                   <ChevronDown className="h-3 w-3 text-white" />
                   {totalNewMatches > 0 && (
-                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-lg shadow-red-500/30 z-20">
-                      {totalNewMatches > 9 ? '9+' : totalNewMatches}
-                    </span>
+                    <CountBadge count={totalNewMatches} className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20" />
                   )}
                 </span>
               </button>
@@ -237,9 +235,7 @@ function JobSeekerTopNav() {
                     {showNewMatchBadge ? (
                       <span className="flex items-center gap-1.5">
                         {count !== null && <span className="text-white text-xs">({count})</span>}
-                        <span className="min-w-[16px] h-[16px] rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white text-[9px] font-semibold flex items-center justify-center shadow-sm">
-                          {totalNewMatches > 9 ? '9+' : totalNewMatches}
-                        </span>
+                        <CountBadge count={totalNewMatches} />
                       </span>
                     ) : (
                       count !== null && <span className="text-white text-xs">({count})</span>

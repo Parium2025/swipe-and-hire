@@ -163,7 +163,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme="dark"
       className="toaster group"
-      style={{ zIndex: 99999 }}
+      // Keep notice entrance visible above the auth cover in both roles.
+      style={{ zIndex: 2147483647 }}
       position="top-center"
       duration={4200}
       closeButton
