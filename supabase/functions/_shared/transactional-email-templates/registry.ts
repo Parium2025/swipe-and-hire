@@ -15,6 +15,7 @@ import { template as outreachMessage } from './outreach-message.tsx'
 import { template as accountInactivityWarning } from './account-inactivity-warning.tsx'
 import { template as teamInvitation } from './team-invitation.tsx'
 import { template as activityDigest } from './activity-digest.tsx'
+import { template as savedSearchMatch } from './saved-search-match.tsx'
 
 export interface TemplateEntry {
   component: (props: any) => React.ReactElement
@@ -40,4 +41,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'account-inactivity-warning': accountInactivityWarning,
   'team-invitation': teamInvitation,
   'activity-digest': activityDigest,
+  'saved-search-match': savedSearchMatch,
 }
