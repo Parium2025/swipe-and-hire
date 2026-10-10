@@ -205,7 +205,6 @@ function JobSeekerTopNav() {
           <DropdownMenu open={jobsOpen} onOpenChange={setJobsOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                disabled={avatarPending}
                 aria-busy={avatarPending}
                 className="relative flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-white group"
               >
