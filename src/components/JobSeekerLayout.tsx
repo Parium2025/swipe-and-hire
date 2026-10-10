@@ -8,6 +8,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useStableImageSrc } from '@/hooks/useStableImageSrc';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Bell } from 'lucide-react';
 import pariumLogoRings from '@/assets/parium-logo-rings.png';
@@ -65,7 +66,9 @@ const MobileProfileAvatar = () => {
   );
   // Profilkortet visar videons cover. Toppikonen ska följa samma bild direkt
   // efter sparning, och endast falla tillbaka till den separata profilbilden.
-  const avatarUrl = preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackAvatarUrl || null;
+  // Behåll den redan visade bilden tills en ny signerad länk är avkodad, så
+  // att ikonen aldrig töms när källan byts från reserv- till förladdad länk.
+  const avatarUrl = useStableImageSrc(preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackAvatarUrl || null);
   
   const initials = (() => {
     const f = profile?.first_name || '';
