@@ -530,9 +530,9 @@ const SavedJobs = () => {
                     <h3 className="text-lg font-medium text-white mb-2">
                       {statusFilter === 'active' ? 'Inga aktiva sparade jobb' : statusFilter === 'expired' ? 'Inga utgångna sparade jobb' : 'Inga sparade jobb'}
                     </h3>
-                    <p className="text-white text-sm">
-                      {statusFilter === 'all' ? 'Tryck på hjärtat på en annons för att spara den här.' : 'Byt filter ovan för att se dina övriga sparade jobb.'}
-                    </p>
+                    {statusFilter === 'all' && (
+                      <p className="text-white text-sm">Tryck på hjärtat på en annons för att spara den här.</p>
+                    )}
                   </CardContent>
                 </Card>
               ) : (
