@@ -12,6 +12,7 @@
 
 import { jobSearchSynonyms } from '@/lib/smartSearch';
 import { findOccupationAliases } from '@/lib/occupationAliases';
+import { expandSearchToken } from '../../supabase/functions/_shared/jobSearchLexicon.ts';
 
 // ─────────────────────────────────────────────────────────────────
 // Normalisering: ta bort diakriter + svenska bokstäver → ASCII.
@@ -134,6 +135,8 @@ const matchSingleTerm = (term: string, haystack: string): number => {
 const tokenAlternatives = (token: string): string[] => {
   const out = new Set<string>([token]);
   for (const syn of expandWithSynonyms(token)) out.add(syn);
+  // Samma ordlista som sökrutan i jobbsöket: stavfel, böjningar och synonymkluster.
+  for (const term of expandSearchToken(token)) out.add(term);
   for (const canonical of findOccupationAliases(token)) {
     out.add(normalizeText(canonical));
   }

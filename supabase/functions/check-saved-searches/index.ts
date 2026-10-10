@@ -13,6 +13,8 @@ const BATCH_SIZE = 500;
 const PUSH_PER_MINUTE = 2000;
 /** Längsta utspridning – ingen väntar mer än så här på sin notis. */
 const MAX_SPREAD_MINUTES = 15;
+import { expandSearchToken, levenshtein } from '../_shared/jobSearchLexicon.ts';
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged-email.ts';
 
 // ─────────────────────────────────────────────────────────────
 // Synonym/typo-expansion (spegel av useOptimizedJobSearch).
@@ -78,55 +80,74 @@ const normToken = (t: string): string =>
   t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o');
 
-/** Expandera en söksträng till en lista med alternativa termer att söka på. */
-function expandQueryTerms(raw: string): string[] {
-  const trimmed = (raw || '').trim().toLowerCase();
-  if (!trimmed) return [];
-  const out = new Set<string>([trimmed]);
-  const tokens = trimmed.split(/\s+/);
-  for (const t of tokens) {
-    if (t.length < 2) continue;
-    out.add(t);
-    const norm = normToken(t);
-    if (TITLE_SYNONYMS[norm]) out.add(TITLE_SYNONYMS[norm].toLowerCase());
-    if (TYPO_CORRECTIONS[norm]) out.add(TYPO_CORRECTIONS[norm].toLowerCase());
-    if (norm.length > 4 && norm.endsWith('s')) {
-      const s = norm.slice(0, -1);
-      if (TITLE_SYNONYMS[s]) out.add(TITLE_SYNONYMS[s].toLowerCase());
-      if (TYPO_CORRECTIONS[s]) out.add(TYPO_CORRECTIONS[s].toLowerCase());
-    }
+/**
+ * Expandera ett sökord med SAMMA motor som sökrutan i appen
+ * (gemensam ordlista: stavfel, böjningar, synonymkluster, Levenshtein)
+ * plus bevakningens egna vardagsord.
+ */
+function expandToken(t: string): string[] {
+  const out = new Set(expandSearchToken(t));
+  const norm = normToken(t);
+  for (const k of [norm, norm.endsWith('s') ? norm.slice(0, -1) : '']) {
+    const syn = k && TITLE_SYNONYMS[k];
+    if (syn) expandSearchToken(syn).forEach((x) => out.add(x));
+    const typo = k && TYPO_CORRECTIONS[k];
+    if (typo) expandSearchToken(typo).forEach((x) => out.add(x));
   }
-  return Array.from(out);
+  return [...out];
 }
 
-/** Returnerar true om något av termerna finns i något av haystack-fälten. */
-function anyTermMatches(terms: string[], haystacks: string[]): boolean {
-  if (terms.length === 0) return true;
-  const normHay = haystacks.map((h) => normToken(h || ''));
-  for (const term of terms) {
-    const normTerm = normToken(term);
-    if (!normTerm) continue;
-    if (normHay.some((h) => h.includes(normTerm))) return true;
+function expandQueryTerms(raw: string): string[] {
+  const out = new Set<string>();
+  for (const t of (raw || '').trim().split(/\s+/)) {
+    if (t.length >= 2) expandToken(t).forEach((x) => out.add(x));
+  }
+  const whole = normToken((raw || '').trim()).replace(/\s+/g, '');
+  if (whole) out.add(whole);
+  return [...out];
+}
+
+/** Ord i haystack (för stavfelstolerans på ordnivå). */
+const wordsOf = (h: string) => h.split(/[\s,\-/()&+.]+/).filter((w) => w.length >= 3);
+
+function termHits(term: string, normHay: string[]): boolean {
+  if (normHay.some((h) => h.includes(term) || h.replace(/\s+/g, '').includes(term))) return true;
+  // Stavfel i annonsen eller sökningen: ett ords avstånd (två för långa ord).
+  if (term.length >= 5) {
+    const max = term.length >= 8 ? 2 : 1;
+    return normHay.some((h) => wordsOf(h).some((w) => levenshtein(w, term, max) <= max));
   }
   return false;
 }
 
-/** Ord som inte bär betydelse i en sökning ("jobb i göteborg"). */
-const STOPWORDS = new Set(['i', 'pa', 'och', 'jobb', 'tjanst', 'tjanster', 'som', 'inom', 'med', 'for', 'av', 'till']);
+function anyTermMatches(terms: string[], haystacks: string[]): boolean {
+  if (terms.length === 0) return true;
+  const normHay = haystacks.map((h) => normToken(h || ''));
+  return terms.some((term) => { const n = normToken(term); return !!n && termHits(n, normHay); });
+}
+
+const STOPWORDS = new Set(['i', 'pa', 'vid', 'och', 'eller', 'jobb', 'tjanst', 'tjanster', 'som', 'inom', 'med', 'for', 'av', 'till', 'en', 'ett', 'den', 'det']);
 
 /**
- * Varje meningsbärande sökord (eller dess synonym/rättstavning) måste
- * förekomma i något fält. Ord om 2+ tecken räknas; stoppord ignoreras.
+ * Varje meningsbärande sökord (eller synonym/rättstavning/sammansättning med
+ * nästa ord) måste förekomma i något fält.
  */
 function allTokensMatch(raw: string, haystacks: string[]): boolean {
   const tokens = raw.trim().toLowerCase().split(/[\s,]+/)
     .filter((t) => t.length >= 2 && !STOPWORDS.has(normToken(t)));
   if (tokens.length === 0) return true;
   const normHay = haystacks.map((h) => normToken(h || ''));
-  return tokens.every((t) => {
-    const terms = expandQueryTerms(t).map(normToken).filter(Boolean);
-    return terms.some((term) => normHay.some((h) => h.includes(term)));
-  });
+  for (let i = 0; i < tokens.length; i++) {
+    if (expandToken(tokens[i]).some((term) => termHits(term, normHay))) continue;
+    // Sammansättning: "lager arbetare" → "lagerarbetare" täcker båda orden.
+    const next = tokens[i + 1];
+    if (next) {
+      const compound = normToken(tokens[i] + next);
+      if (expandToken(compound).some((term) => termHits(term, normHay))) { i++; continue; }
+    }
+    return false;
+  }
+  return true;
 }
 
 const normCounty = (c: string) => normToken(c || '').replace(/s? lan$/, '').trim();
@@ -371,6 +392,90 @@ serve(async (req) => {
     );
   }
 });
+
+type Match = { id: string; user_id: string; name: string };
+const MAX_EMAILS_PER_JOB = 1000;
+
+async function prefsFor(supabase: any, userIds: string[]) {
+  const { data } = await supabase
+    .from('notification_preferences')
+    .select('user_id, in_app_enabled, email_enabled')
+    .eq('notification_type', 'saved_search_match')
+    .in('user_id', userIds);
+  return new Map<string, { in_app_enabled: boolean | null; email_enabled: boolean | null }>(
+    (data || []).map((p: any) => [p.user_id, p]),
+  );
+}
+
+/** En notis i appen per användare och annons — styrs av reglaget "I appen". */
+async function insertInAppNotifications(
+  supabase: any, matched: Match[], job: { job_id: string; title: string; workplace_city: string | null },
+) {
+  const byUser = new Map<string, Match>();
+  for (const m of matched) if (!byUser.has(m.user_id)) byUser.set(m.user_id, m);
+  const userIds = [...byUser.keys()];
+  if (!userIds.length) return;
+  const prefs = await prefsFor(supabase, userIds);
+  const { data: existing } = await supabase
+    .from('notifications').select('user_id')
+    .eq('type', 'saved_search_match').eq('metadata->>job_id', job.job_id).in('user_id', userIds);
+  const already = new Set((existing || []).map((r: any) => r.user_id));
+  const rows = userIds
+    .filter((u) => prefs.get(u)?.in_app_enabled !== false && !already.has(u))
+    .map((u) => ({
+      user_id: u,
+      type: 'saved_search_match',
+      title: 'Nytt jobb för din sökning',
+      body: `${job.title}${job.workplace_city ? ` – ${job.workplace_city}` : ''}.`,
+      metadata: { job_id: job.job_id, search_id: byUser.get(u)!.id, route: '/job-view/' + job.job_id },
+    }));
+  for (let i = 0; i < rows.length; i += 500) {
+    const { error } = await supabase.from('notifications').insert(rows.slice(i, i + 500));
+    if (error) console.error('[check-saved-searches] in-app insert failed:', error.message);
+  }
+}
+
+/** Mejl: max ett per användare och annons, max tre bevakningsmejl per dygn. */
+async function sendMatchEmails(
+  supabase: any, matched: Match[], emailedUsers: Set<string>,
+  job: { job_id: string; title: string; workplace_city: string | null; workplace_name: string | null },
+): Promise<number> {
+  const byUser = new Map<string, Match>();
+  for (const m of matched) if (!emailedUsers.has(m.user_id) && !byUser.has(m.user_id)) byUser.set(m.user_id, m);
+  const userIds = [...byUser.keys()].slice(0, Math.max(0, MAX_EMAILS_PER_JOB - emailedUsers.size));
+  if (!userIds.length) return 0;
+  const prefs = await prefsFor(supabase, userIds);
+  const wanted = userIds.filter((u) => prefs.get(u)?.email_enabled !== false);
+  if (!wanted.length) return 0;
+  const { data: profiles } = await supabase
+    .from('profiles').select('user_id, email, first_name').in('user_id', wanted);
+  let sent = 0;
+  for (const p of profiles || []) {
+    if (!p.email) continue;
+    emailedUsers.add(p.user_id);
+    const { data: allowed } = await supabase.rpc('consume_rate_limit', {
+      _key: `saved-search-email:${p.user_id}`, _limit: 3, _window_seconds: 86400,
+    });
+    if (allowed !== true) continue;
+    try {
+      const r = await sendLoggedTemplateEmail('saved-search-match', p.email, {
+        idempotencyKey: `saved-search:${job.job_id}:${p.user_id}`,
+        templateData: {
+          first_name: p.first_name || undefined,
+          job_title: job.title,
+          company_name: job.workplace_name || undefined,
+          location: job.workplace_city || undefined,
+          search_name: byUser.get(p.user_id)!.name || undefined,
+          job_url: `https://parium.se/job-view/${job.job_id}`,
+        },
+      });
+      if (r.sent) sent++;
+    } catch (e) {
+      console.error('[check-saved-searches] email failed:', e instanceof Error ? e.message : e);
+    }
+  }
+  return sent;
+}
 
 /**
  * Legacy full-scan mode (for cron-based checks)
