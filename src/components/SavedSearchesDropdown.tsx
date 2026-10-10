@@ -119,7 +119,7 @@ export function SavedSearchesDropdown({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[min(calc(100vw-2rem),360px)] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20"
+          className="w-[min(calc(100vw-2rem),360px)] p-0 bg-slate-900/95 backdrop-blur-xl border-white/20 rounded-xl overflow-hidden flex flex-col max-h-[calc(var(--radix-popover-content-available-height,100dvh)-16px)]"
           align="center"
           side="bottom"
           sideOffset={8}
@@ -135,9 +135,8 @@ export function SavedSearchesDropdown({
           <TooltipProvider delayDuration={0} skipDelayDuration={0}>
           <div
             className={cn(
-              shouldScrollSavedSearches
-                ? "max-h-[50vh] overflow-y-auto overscroll-contain"
-                : ""
+              "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+              shouldScrollSavedSearches && "max-h-[50vh]"
             )}
           >
             {savedSearches.map((search) => {

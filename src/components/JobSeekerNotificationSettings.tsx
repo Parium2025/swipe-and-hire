@@ -33,8 +33,8 @@ const JOBSEEKER_ROWS: NotificationRow[] = [
   {
     type: 'saved_search_match',
     label: 'Nya jobb i dina sökningar',
-    description: 'När nya jobb stämmer med dina sparade sökningar.',
-    channels: ['in_app', 'push'],
+    description: 'När nya jobb stämmer med dina sparade sökningar. Som mest tre mejl per dygn.',
+    channels: ['in_app', 'push', 'email'],
   },
   {
     type: 'saved_job_expiring',
