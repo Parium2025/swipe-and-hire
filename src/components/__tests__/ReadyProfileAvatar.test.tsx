@@ -32,13 +32,14 @@ describe('ready header portrait', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('retains decoded media during renewal but never across accounts', async () => {
+  it('shows skeleton for a replacement and discards delayed previous-account media', async () => {
     vi.stubGlobal('Image', DeferredImage);
     const onClick = vi.fn();
     const { rerender } = render(<ReadyProfileAvatar src="first" accountId="a" profileReady onClick={onClick} />);
     await act(async () => pending[0]?.resolve());
     rerender(<ReadyProfileAvatar src="second" accountId="a" profileReady onClick={onClick} />);
-    expect(screen.getByRole('img')).toHaveAttribute('src', 'first');
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Min profil' })).toBeDisabled();
     rerender(<ReadyProfileAvatar src="third" accountId="b" profileReady onClick={onClick} />);
     expect(screen.queryByRole('img')).toBeNull();
     await act(async () => pending[1]?.resolve());
@@ -53,5 +54,28 @@ describe('ready header portrait', () => {
     await act(async () => pending[0]?.reject());
     expect(screen.getByRole('button', { name: 'Min profil' })).not.toBeDisabled();
     expect(screen.queryByRole('img')).toBeNull();
+  });
+
+  it('never decodes or displays media while account profile is unknown', async () => {
+    vi.stubGlobal('Image', DeferredImage);
+    const { rerender } = render(<ReadyProfileAvatar src="cached" accountId="a" profileReady={false} onClick={() => {}} />);
+    expect(pending).toHaveLength(0);
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Min profil' })).toBeDisabled();
+    rerender(<ReadyProfileAvatar src="current" accountId="a" profileReady onClick={() => {}} />);
+    await act(async () => pending[0]?.resolve());
+    expect(screen.getByRole('img')).toHaveAttribute('src', 'current');
+    rerender(<ReadyProfileAvatar src="current" accountId="a" profileReady={false} onClick={() => {}} />);
+    expect(screen.queryByRole('img')).toBeNull();
+  });
+
+  it('does not reuse failed loading for the same URL on a different account', async () => {
+    vi.stubGlobal('Image', DeferredImage);
+    const { rerender } = render(<ReadyProfileAvatar src="same" accountId="a" profileReady onClick={() => {}} />);
+    await act(async () => pending[0]?.reject());
+    rerender(<ReadyProfileAvatar src="same" accountId="b" profileReady onClick={() => {}} />);
+    expect(screen.getByRole('button', { name: 'Min profil' })).toBeDisabled();
+    await act(async () => pending[1]?.resolve());
+    expect(screen.getByRole('img')).toHaveAttribute('src', 'same');
   });
 });

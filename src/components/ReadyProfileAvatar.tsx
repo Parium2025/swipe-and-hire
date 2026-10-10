@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useReadyProfileImage } from '@/hooks/useReadyProfileImage';
 import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -9,33 +9,7 @@ export function ReadyProfileAvatar({ src, accountId, profileReady, onClick }: {
   profileReady: boolean;
   onClick: () => void;
 }) {
-  const [image, setImage] = useState<{ accountId: string; src: string } | null>(null);
-  const [failed, setFailed] = useState<string | null>(null);
-
-  useEffect(() => {
-    setFailed(null);
-    if (!src || !accountId) {
-      setImage(null);
-      return;
-    }
-    let cancelled = false;
-    const probe = new Image();
-    const fail = () => { if (!cancelled) setFailed(src); };
-    const ready = () => {
-      if (!cancelled && probe.naturalWidth > 0) setImage({ accountId, src });
-    };
-    probe.onerror = fail;
-    probe.onload = () => {
-      if (typeof probe.decode !== 'function') ready();
-    };
-    probe.src = src;
-    if (typeof probe.decode === 'function') probe.decode().then(ready).catch(fail);
-    else if (probe.complete) probe.naturalWidth > 0 ? ready() : fail();
-    return () => { cancelled = true; probe.onload = null; probe.onerror = null; };
-  }, [src, accountId]);
-
-  const shown = src && image?.accountId === accountId ? image.src : null;
-  const loading = !profileReady || (!!src && !shown && failed !== src);
+  const { shown, loading, invalidate } = useReadyProfileImage(src, accountId, profileReady);
 
   return (
     <Button
@@ -51,7 +25,7 @@ export function ReadyProfileAvatar({ src, accountId, profileReady, onClick }: {
         {loading ? (
           <span data-profile-avatar-skeleton className="h-full w-full animate-pulse bg-glass-surface motion-reduce:animate-none" aria-hidden="true" />
         ) : shown ? (
-          <img src={shown} alt="Profil" className="h-full w-full object-cover" decoding="sync" loading="eager" onError={() => { setImage(null); setFailed(src); }} />
+          <img src={shown} alt="Profil" className="h-full w-full object-cover" decoding="sync" loading="eager" onError={invalidate} />
         ) : (
           <User className="h-4 w-4 text-foreground" aria-hidden="true" />
         )}

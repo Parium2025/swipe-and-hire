@@ -73,18 +73,22 @@ EmployerLogoSidebarTrigger.displayName = 'EmployerLogoSidebarTrigger';
 export const EmployerMobileProfileAvatar = memo(() => {
   const { user, profile, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
+  const fallbackCoverUrl = useMediaUrl(
+    !preloadedCoverUrl ? profile?.cover_image_url : null,
+    'cover-image'
+  );
   const fallbackUrl = useMediaUrl(
     (!preloadedAvatarUrl && !preloadedCoverUrl) ? profile?.profile_image_url : null,
     'profile-image'
   );
-  const avatarUrl = preloadedAvatarUrl || preloadedCoverUrl || fallbackUrl || null;
+  const avatarUrl = preloadedCoverUrl || fallbackCoverUrl || preloadedAvatarUrl || fallbackUrl || null;
   const expectsImage = !!(profile?.profile_image_url || profile?.cover_image_url);
 
   return (
     <ReadyProfileAvatar
       src={avatarUrl}
       accountId={user?.id}
-      profileReady={!!profile && (!expectsImage || !!avatarUrl)}
+      profileReady={!!user && profile?.user_id === user.id && (!expectsImage || !!avatarUrl)}
       onClick={() => navigate('/employer-profile')}
     />
   );

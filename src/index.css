@@ -2449,35 +2449,33 @@ html[data-glass="static"] [data-landing-scroll-root] .landing-feature-card {
 /* Notis som upprepas: en kort, diskret puls signalerar att räknaren ökat
    i stället för att en ny identisk ruta staplas ovanpå. */
 @keyframes parium-toast-repeat-pulse {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.018); }
-  100% { transform: scale(1); }
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.7; }
 }
-[data-sonner-toast].parium-toast-repeat {
+[data-sonner-toast].parium-toast-repeat [data-title] {
   animation: parium-toast-repeat-pulse 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-sonner-toast].parium-toast-repeat { animation: none; }
+  [data-sonner-toast].parium-toast-repeat [data-title] { animation: none; }
 }
 
-/* Notisernas entré: Sonners egen entré bygger på en CSS-övergång som kräver
-   att startläget hinner målas. På mobil (tryck + tung tråd) hoppas den bildrutan
-   ofta över och notisen dök bara upp på plats. En keyframe-animation startar
-   alltid när notisen läggs in. Den använder fristående translate/scale, som
-   staplas ovanpå Sonners egen transform utan att krocka med staplingen.
-   Sonners startläge neutraliseras så att rörelsen inte körs dubbelt. */
+/* One transform owner during entrance, then hand stacking/swiping back to
+   Sonner. Avoid individual translate/scale and forward-filled opacity: these
+   can conflict with Safari compositing and Sonner's removal states. */
 @keyframes parium-toast-in {
-  0%   { translate: 0 calc(-100% - 24px - env(safe-area-inset-top, 0px)); scale: 0.9; opacity: 0; }
-  55%  { translate: 0 6px; scale: 1.015; opacity: 1; }
-  78%  { translate: 0 -2px; scale: 0.997; }
-  100% { translate: 0 0; scale: 1; opacity: 1; }
+  from { transform: translateY(calc(-100% - 24px - env(safe-area-inset-top, 0px))); }
+  to { transform: var(--y); }
 }
 [data-sonner-toaster] [data-sonner-toast][data-mounted="false"]:not([data-removed="true"]) {
   --y: translateY(0);
   opacity: 1;
 }
-[data-sonner-toaster] [data-sonner-toast] {
-  animation: parium-toast-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+[data-sonner-toaster] [data-sonner-toast]:not([data-removed="true"]):not([data-swiping="true"]):not([data-swipe-out="true"]) {
+  animation: parium-toast-in 480ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toaster] [data-sonner-toast] { animation: none; }
 }
 
 /* Klockans räknare: landar med en kort fjäder i stället för att bara dyka upp. */

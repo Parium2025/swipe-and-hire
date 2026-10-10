@@ -12,4 +12,17 @@ describe('shared notification entrance', () => {
     const nav = readFileSync('src/components/JobSeekerTopNav.tsx', 'utf8');
     expect(nav).toContain('<CountBadge count={totalNewMatches}');
   });
+
+  it('uses a single non-forward-filled transform entrance without overriding removed toasts', () => {
+    const css = readFileSync('src/index.css', 'utf8');
+    const entrance = css.slice(css.indexOf('@keyframes parium-toast-in'), css.indexOf('/* Klockans räknare'));
+    expect(entrance).toContain('transform: var(--y)');
+    expect(entrance).toContain('480ms cubic-bezier(0.4, 0, 0.2, 1) backwards');
+    expect(entrance).toContain(':not([data-removed="true"])');
+    expect(entrance).toContain(':not([data-swiping="true"])');
+    expect(entrance).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(entrance).not.toContain('translate:');
+    expect(entrance).not.toContain(' both');
+    expect(css).toContain('[data-sonner-toast].parium-toast-repeat [data-title]');
+  });
 });

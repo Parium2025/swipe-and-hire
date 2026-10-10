@@ -10,7 +10,7 @@
 - Welcome: atomic first-save-wins; invoker guards completion/reset; replay writes nothing; stale guides close without reload; edits remain allowed.
 - Store uncropped originals with crops and reopen them for edits; media remove/restore guards synchronously against stale rapid taps.
 - Review branding reads the trimmed public-profile RPC under its own cache key; profile rows stay private; colleagues see only current profile images via `can_view_colleague_profile_image`.
-- Decode portraits before display; mobile headers share account-scoped skeleton/click gates to prevent initials flashes.
+- Header/sidebar portraits gate decoded current source/account; unknown media shows skeleton, not initials.
 - Reports: refresh team portraits on authorized profile-change signals, scope snapshots to user and organization, trust server job counts over local events, keep cached report data account-scoped.
 - Resolve colleague history/ratings via authorized org-member RPC; list ratings stay account-scoped: user_roles SELECT exposes only caller; RLS cannot set display priority.
 - Discard delayed fetches after account switch/sign-out to protect the new cache.
@@ -36,7 +36,7 @@
 - Tooltips open only on measured overflow.
 - Company views share frost over viewport paint; dialog-height gradients shift shades.
 - Touch company rows highlight applied filters, not cmdk's active result.
-- Splash start path set in show(); login swaps at app paint. Providers keep one tree in/out (no remount).
+- Splash path set in show(); swap at app paint, no provider remount. Toast entrance owns transform briefly; Sonner handles stacking/removal.
 - Never server-logout minted test sessions lacking a real session ID: even local scope revokes production sessions. Use isolated test accounts or intercept logout requests.
 <!-- LOVABLE:BEGIN -->
 - Company search cards require successful jobs, canonical identity, names and review totals; persist validated complete cards per account and never interpret failed identity lookup as separate colleague companies.

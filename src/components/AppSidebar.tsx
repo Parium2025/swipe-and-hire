@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { navigateAfterSidebarClose } from "@/lib/navigateAfterSidebarClose";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { useReadyProfileImage } from "@/hooks/useReadyProfileImage";
 import { useIsPlatformAdmin } from "@/hooks/useIsPlatformAdmin";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useSidebarRoutePrefetch } from "@/hooks/useSidebarRoutePrefetch";
@@ -89,40 +91,15 @@ export function AppSidebar() {
   }, [isMobile, prefetchRoute]);
 
   // Samma bild som profilkortet: cover först, separat profilbild som fallback.
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
-    return preloadedCoverUrl || profile?.cover_image_url || preloadedAvatarUrl || profile?.profile_image_url || null;
-  });
-  // Använd preloadedVideoUrl från AuthProvider (sessionStorage-cachad precis som arbetsgivarsidan)
-  const [videoUrl, setVideoUrl] = useState<string | null>(() => preloadedVideoUrl ?? null);
-  const [coverUrl, setCoverUrl] = useState<string | null>(() => preloadedCoverUrl || profile?.cover_image_url || null);
-  const [avatarLoaded, setAvatarLoaded] = useState(false);
-  const [avatarError, setAvatarError] = useState(false);
-  
-  // hasVideo: true om antingen DB har video_url ELLER vi har en preloaded video URL
-  // Detta säkerställer att videon visas även om preloading är asynkron
-  const hasVideo = !!(profile?.video_url || preloadedVideoUrl || videoUrl);
-  
-  // Håll avatar i synk med preloader/profile, med cover som fallback
-  useEffect(() => {
-    const newAvatarUrl = preloadedCoverUrl || profile?.cover_image_url || preloadedAvatarUrl || profile?.profile_image_url || null;
-    if (newAvatarUrl !== avatarUrl) {
-      setAvatarUrl(newAvatarUrl);
-    }
-  }, [preloadedAvatarUrl, preloadedCoverUrl, profile?.profile_image_url, profile?.cover_image_url]);
-
-  useEffect(() => {
-    const newCoverUrl = preloadedCoverUrl || profile?.cover_image_url || null;
-    if (newCoverUrl !== coverUrl) {
-      setCoverUrl(newCoverUrl);
-    }
-  }, [preloadedCoverUrl, profile?.cover_image_url]);
-  
-  // Synka videoUrl från preloadedVideoUrl (uppdateras asynkront efter login)
-  useEffect(() => {
-    if (preloadedVideoUrl && preloadedVideoUrl !== videoUrl) {
-      setVideoUrl(preloadedVideoUrl);
-    }
-  }, [preloadedVideoUrl]);
+  const fallbackCover = useMediaUrl(!preloadedCoverUrl ? profile?.cover_image_url : null, 'cover-image');
+  const fallbackAvatar = useMediaUrl(!preloadedAvatarUrl ? profile?.profile_image_url : null, 'profile-image');
+  const avatarSource = preloadedCoverUrl || fallbackCover || preloadedAvatarUrl || fallbackAvatar || null;
+  const { shown: avatarUrl, loading: avatarPending } = useReadyProfileImage(
+    avatarSource, user?.id, !!user && profile?.user_id === user.id && (!(profile.cover_image_url || profile.profile_image_url) || !!avatarSource)
+  );
+  const videoUrl = profile?.user_id === user?.id ? preloadedVideoUrl : null;
+  const coverUrl = avatarUrl;
+  const hasVideo = !!profile?.video_url && !!videoUrl;
 
   const { isPlatformAdmin } = useIsPlatformAdmin();
 
@@ -193,8 +170,6 @@ export function AppSidebar() {
   const profileImages = useMemo(() => {
     const images: string[] = [];
     if (avatarUrl) images.push(avatarUrl);
-    if (profile?.cover_image_url) images.push(profile.cover_image_url);
-    if (profile?.profile_image_url) images.push(profile.profile_image_url);
     return images;
   }, [avatarUrl, profile?.cover_image_url, profile?.profile_image_url]);
 
@@ -213,7 +188,7 @@ export function AppSidebar() {
         {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
         <div className={`shrink-0 p-4 ${collapsed ? 'hidden' : ''}`}>
           <div className="flex items-center gap-3">
-            {!profile ? (
+            {avatarPending ? (
               /* Skeleton while profile loads */
               <>
                 <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse shrink-0" />
@@ -237,14 +212,10 @@ export function AppSidebar() {
                 <AvatarImage 
                   src={avatarUrl || ''} 
                   alt="Profilbild" 
-                  onError={() => {
-                    setAvatarError(true);
-                    setAvatarUrl(null);
-                  }}
-                  onLoad={() => setAvatarLoaded(true)}
+
                 />
                 <AvatarFallback className="bg-white/20 text-white font-semibold" delayMs={150}>
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                  <User className="h-4 w-4" aria-hidden="true" />
                 </AvatarFallback>
               </Avatar>
             )}

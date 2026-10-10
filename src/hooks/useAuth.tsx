@@ -301,11 +301,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return cached ? parseInt(cached, 10) : 0;
     } catch { return 0; }
   });
-  const [preloadedCompanyLogoUrl, setPreloadedCompanyLogoUrl] = useState<string | null>(() => {
-    try {
-      return typeof window !== 'undefined' ? sessionStorage.getItem(COMPANY_LOGO_CACHE_KEY) : null;
-    } catch { return null; }
-  });
+  // An unscoped legacy logo must never precede the current account's profile.
+  const [preloadedCompanyLogoUrl, setPreloadedCompanyLogoUrl] = useState<string | null>(null);
   const [preloadedEmployerCandidates, setPreloadedEmployerCandidates] = useState<number>(() => {
     try {
       const cached = typeof window !== 'undefined' ? sessionStorage.getItem(EMPLOYER_CANDIDATES_CACHE_KEY) : null;
@@ -701,7 +698,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setPreloadedAvatarUrl(null);
             setPreloadedCoverUrl(null);
             setPreloadedVideoUrl(null);
+            setPreloadedCompanyLogoUrl(null);
             try {
+              sessionStorage.removeItem(COMPANY_LOGO_CACHE_KEY);
               localStorage.removeItem(AVATAR_CACHE_KEY);
               localStorage.removeItem(COVER_CACHE_KEY);
               localStorage.removeItem(VIDEO_CACHE_KEY);
@@ -775,7 +774,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setPreloadedAvatarUrl(null);
           setPreloadedCoverUrl(null);
           setPreloadedVideoUrl(null);
+          setPreloadedCompanyLogoUrl(null);
           try {
+            sessionStorage.removeItem(COMPANY_LOGO_CACHE_KEY);
             localStorage.removeItem(AVATAR_CACHE_KEY);
             localStorage.removeItem(COVER_CACHE_KEY);
             localStorage.removeItem(VIDEO_CACHE_KEY);
@@ -1001,7 +1002,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Sätt URLs för sidebar + spara i sessionStorage för omedelbar visning
             setPreloadedAvatarUrl(avatarUrl || coverUrl || null);
             setPreloadedCoverUrl(coverUrl || null);
-            if (companyLogoUrl) setPreloadedCompanyLogoUrl(companyLogoUrl);
+            setPreloadedCompanyLogoUrl(companyLogoUrl || null);
             
             // Spara till sessionStorage (som arbetsgivarsidan)
             try {
@@ -1010,6 +1011,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (coverUrl) localStorage.setItem(COVER_CACHE_KEY, coverUrl);
               else localStorage.removeItem(COVER_CACHE_KEY);
               if (companyLogoUrl) sessionStorage.setItem(COMPANY_LOGO_CACHE_KEY, companyLogoUrl);
+              else sessionStorage.removeItem(COMPANY_LOGO_CACHE_KEY);
             } catch {}
             
             // Markera som klar (släpp inloggning)
